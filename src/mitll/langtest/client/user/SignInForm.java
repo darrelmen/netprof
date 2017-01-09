@@ -203,6 +203,8 @@ public class SignInForm extends UserDialog implements SignIn {
     if (loginUser != null) {
       if (loginUser.isValid()) {
         logger.info("login user " + loginUser.getID() + " is valid");
+        logger.info("login user " + loginUser.getPermissions() );
+        logger.info("login user " + loginUser.getRealGender() );
       } else {
         logger.info("login user " + loginUser.getID() + " is NOT valid");
 

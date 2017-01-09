@@ -167,7 +167,7 @@ public interface UserService extends RemoteService {
 
   void forgetProject();
 
-
+/*
 
   @Deprecated
   void update(User user, int changingUser);
@@ -185,5 +185,6 @@ public interface UserService extends RemoteService {
   Map<User.Kind, Integer> getCounts();
 
   @Deprecated
+  */
   Map<User.Kind, Collection<MiniUser>> getKindToUser();
 }

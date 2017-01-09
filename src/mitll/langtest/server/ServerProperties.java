@@ -36,6 +36,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gwt.user.client.DOM;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
@@ -89,7 +90,6 @@ public class ServerProperties {
   private static final String USE_MYSQL = "useMYSQL";
   private static final String USE_H_2 = "useH2";
   private static final String USE_POSTGRE_SQL = "usePostgreSQL";
-  private static final String USE_ORM = "useORM";
   private static final String TYPE_ORDER = "typeOrder";
   private static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
@@ -104,8 +104,12 @@ public class ServerProperties {
   public static final String CONFIG = "config";
   public static final String CONFIG_JSON = "config.json";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
+  @Deprecated
   private static final String NP_SERVER = "np.ll.mit.edu";
-
+  private static final String DOMINO_SERVER = "domino.url";
+  private static final String DOMINO_SERVER_DEFAULT = "http://ltea-data2-dev:8080/domino-ltea/";
+  private static final String HELP = "help";
+  private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -223,7 +227,7 @@ public class ServerProperties {
         readProperties(dateFromManifest);
 
         getAffiliations(configDir);
-        logger.info("aff " + affliations);
+//        logger.info("aff " + affliations);
 
         this.configFileFullPath = configFileFullPath;
         return configFileFullPath;
@@ -800,6 +804,14 @@ public class ServerProperties {
    */
   public String getAppURL() {
     return props.getProperty(APP_URL, "https://np.ll.mit.edu/netProf");
+  }
+
+  public String getDominoURL() {
+    return props.getProperty(DOMINO_SERVER, DOMINO_SERVER_DEFAULT);
+  }
+
+  public String getHelp() {
+    return props.getProperty(DOMINO_SERVER, DOMINO_SERVER_DEFAULT);
   }
 
   public boolean shouldRecalcStudentAudio() {

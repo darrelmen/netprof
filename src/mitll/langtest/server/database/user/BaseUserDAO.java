@@ -184,7 +184,7 @@ public abstract class BaseUserDAO extends DAO {
    */
   private int addUserAndGetID(SignUpUser user) {
     return addUser(user.getAge(),
-        user.isMale() ? MALE : FEMALE,
+        user.getRealGender(),// ? MALE : FEMALE,
         0,
         user.getIp(),
         "",
@@ -207,7 +207,7 @@ public abstract class BaseUserDAO extends DAO {
 
   abstract User getUserByID(String id);
 
-  abstract void updateUser(int id, User.Kind kind, String emailH, String email);
+  //abstract void updateUser(int id, User.Kind kind, String emailH, String email);
 
   abstract User getUserWhere(int userid);
 
@@ -256,7 +256,7 @@ public abstract class BaseUserDAO extends DAO {
    */
   private int addShellUser(String defectDetector, String first, String last, User.Kind kind) {
     return addUser(89,
-        MALE,
+        MiniUser.Gender.Unspecified,
         0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
         kind,
         "",
@@ -294,7 +294,7 @@ public abstract class BaseUserDAO extends DAO {
    * @see #addUserAndGetID
    */
   abstract int addUser(int age,
-                       String gender,
+                       MiniUser.Gender gender,
                        int experience,
                        String userAgent,
                        String trueIP,
@@ -312,5 +312,6 @@ public abstract class BaseUserDAO extends DAO {
                        String device,
                        String first,
                        String last,
-                       String url, String affiliation);
+                       String url,
+                       String affiliation);
 }

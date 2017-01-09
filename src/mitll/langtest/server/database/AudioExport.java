@@ -621,7 +621,12 @@ public class AudioExport {
       builder.append(id);
       name = folder + builder.toString();
     }
-    copyAudio(zOut, namesSoFar, name, speed == null ? "" : speed, audioConversion, latestContext, id,
+    copyAudio(zOut,
+        namesSoFar,
+        name,
+        speed == null ? "" : speed,
+        audioConversion,
+        latestContext, id,
         getTrackInfo(ex, latestContext, language));
   }
 
@@ -651,10 +656,11 @@ public class AudioExport {
    */
   private void writeFolderContentsSimple(ZipOutputStream zOut,
                                          Collection<CommonExercise> toWrite,
-                                         String installPath, String language) throws Exception {
+                                         String installPath,
+                                         String language) throws Exception {
     long then = System.currentTimeMillis();
     AudioConversion audioConversion = new AudioConversion(props);
-    logger.debug("writing " + toWrite.size());
+    logger.debug("writeFolderContentsSimple writing " + toWrite.size());
     int c = 0;
     int d = 0;
     for (CommonExercise ex : toWrite) {
@@ -662,7 +668,7 @@ public class AudioExport {
         try {
           AudioAttribute audio = ex.getRegularSpeed();
           String artist = audio.getUser().getUserID();
-          copyAudioSimple(zOut, installPath, audioConversion, ex.getRefAudio(),
+          copyAudioSimple(zOut, audioConversion, installPath, ex.getRefAudio(),
               new TrackInfo(ex.getForeignLanguage(), artist, ex.getEnglish(), language));
         } catch (IOException e) {
           //logger.debug("skipping duplicate " +e);
@@ -758,7 +764,7 @@ public class AudioExport {
    * @see #writeFolderContents
    * @see #copyContextAudio
    */
-  private void copyAudio(ZipOutputStream zOut,
+  private boolean copyAudio(ZipOutputStream zOut,
                          Set<String> names,
                          String parent,
                          String speed,
@@ -769,8 +775,8 @@ public class AudioExport {
     String audioRef = attribute.getActualPath();
     String baseAudioDir = audioRef.startsWith(ServerProperties.BEST_AUDIO) ? props.getAudioBaseDir() : props.getMediaDir();
 //    logger.debug("\tcopyAudio for ex id " +exid + " writing audio under context path " + baseAudioDir + " at " + audioRef);
-    String author = attribute.getUser().getUserID();
-    String s = audioConversion.ensureWriteMP3(audioRef, baseAudioDir, false, trackInfo);
+    //String author = attribute.getUser().getUserID();
+    String s = audioConversion.ensureWriteMP3(baseAudioDir, audioRef, false, trackInfo);
 
     File mp3 = new File(s);
     if (mp3.exists()) {
@@ -787,21 +793,24 @@ public class AudioExport {
       //logger.debug("copyContextAudio : mp3 name is " + name);
       if (add) {
         addZipEntry(zOut, mp3, name);
+        return true;
       } else {
         logger.info("skip duplicate " + name);
+        return false;
       }
     } else {
       String absolutePath = mp3.getAbsolutePath();
       if (!absolutePath.endsWith(AudioConversion.FILE_MISSING)) {
         logger.error("\tcopyAudio Didn't write " + absolutePath + " for " + exid);
       }
+      return false;
     }
   }
 
   /**
    * @param zOut
-   * @param realContextPath
    * @param audioConversion
+   * @param realContextPath
    * @param audioRef
    * @param trackInfo
    * @return
@@ -809,11 +818,11 @@ public class AudioExport {
    * @see #writeFolderContentsSimple
    */
   private void copyAudioSimple(ZipOutputStream zOut,
-                               String realContextPath,
                                AudioConversion audioConversion,
+                               String realContextPath,
                                String audioRef,
                                TrackInfo trackInfo) throws IOException {
-    String filePath = audioConversion.ensureWriteMP3(audioRef, realContextPath, false, trackInfo);
+    String filePath = audioConversion.ensureWriteMP3(realContextPath, audioRef, false, trackInfo);
     File mp3 = new File(filePath);
     if (mp3.exists()) {
       String name = audioRef.replaceAll(".wav", ".mp3");

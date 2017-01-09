@@ -72,7 +72,7 @@ public class PropertyHandler {
   private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 120;//185;//85;
 
   // property file property names
-  //private static final String ENABLE_ALL_USERS = "enableAllUsers";
+
   private static final String GRADING_PROP = "grading";
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
@@ -124,10 +124,13 @@ public class PropertyHandler {
   //  private static final String SHOW_WELCOME = "showWelcome";
 //  private static final String NO_MODEL = "noModel";
   private static final String PREFERRED_VOICES = "preferredVoices";
+  private static final String DOMINO_SERVER = "domino.url";
+  private static final String DOMINO_SERVER_DEFAULT = "http://ltea-data2-dev:8080/domino-ltea/";
+  private static final String HELP = "help";
+  private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
 
   private boolean analysis = false;
   private boolean canPracticeContext = false;
-//  private boolean enableAllUsers;
   private boolean isAMAS;
   private boolean usePhoneToDisplay;
 
@@ -137,36 +140,10 @@ public class PropertyHandler {
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
 
-  /**
-   * TODO : don't do this in two places!
-   */
-  private static final List<String> SITE_LIST = Arrays.asList(
-      "Dari",
-      "Egyptian",
-      "English",
-      "Farsi",
-      "German",
-      "Iraqi",
-      "Japanese",
-      "Korean",
-      "Levantine",
-      "Mandarin",
-      "MandarinTraditional",
-      "MSA",
-      "Pashto1",
-      "Pashto2",
-      "Pashto3",
-      "Russian",
-      "Spanish",
-      "Sudanese",
-      "Tagalog",
-      "Urdu");
-
-  //  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-  // private boolean beta;
   private String fontFamily = "";
   private String modelDir;
   private int afterStopDelayMillis = DEFAULT_AFTER_STOP_DELAY_MILLIS;
+  private String dominoURL = DOMINO_SERVER_DEFAULT,helpMessage = HELP_DEFAULT;
 
   /**
    * @return
@@ -188,12 +165,6 @@ public class PropertyHandler {
   public Set<Long> getPreferredVoices() {
     return preferredVoices;
   }
-
-/*
-  public boolean enableAllUsers() {
-    return enableAllUsers;
-  }
-*/
 
   public boolean shouldUsePhoneToDisplay() {
     return usePhoneToDisplay;
@@ -238,8 +209,6 @@ public class PropertyHandler {
     return modelDir;
   }
 
-//  @Deprecated  public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
-
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
@@ -277,11 +246,9 @@ public class PropertyHandler {
   private String appTitle = null;
 
   private boolean rightAlignContent;
-//  private LOGIN_TYPE loginType = LOGIN_TYPE.STUDENT;
 
   private boolean showFlashcardAnswer = true;
   private boolean allowPlusInURL;
-  // private boolean noModel = false;
 
   private static final String RESPONSE_TYPE = "responseType";
   private static final String SPEECH = "Speech";
@@ -339,6 +306,8 @@ public class PropertyHandler {
       else if (key.equals(TALKS_TO_DOMINO)) talksToDomino = getBoolean(value);
       else if (key.equals(PRACTICE_CONTEXT)) canPracticeContext = getBoolean(value);
       else if (key.equals(FONT_FAMILY)) fontFamily = value;
+      else if (key.equals(DOMINO_SERVER)) dominoURL = value;
+      else if (key.equals(HELP)) helpMessage = value;
       else if (key.equals("scoringModel")) modelDir = value;
       else if (key.equals("afterStopDelayMillis")) {
         afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
@@ -349,13 +318,7 @@ public class PropertyHandler {
         usePhoneToDisplay = getBoolean(value);
       } else if (key.equals(PREFERRED_VOICES)) {
         getPreferredVoices(value);
-      } /*else if (key.equals(LOGIN_TYPE_PARAM)) {
-        try {
-          loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-          logger.warning("unknown value for " + key + " : " + value);
-        }
-      }*/
+      }
     }
 
     if (appTitle == null) {
@@ -723,68 +686,13 @@ public class PropertyHandler {
     return false;
   }
 
-  /**
-   * TODO : Consider rewording for other customers...
-   *
-   * @return
-   * @see UserPassLogin#getLoginInfo
-   */
+  public String getDominoURL() {
+    return dominoURL;
+  }
+
   public String getHelpMessage() {
-/*    return
-        "If you are a first-time user of this site, or an existing user of an earlier version of Classroom " +
-            "(either as a student, teacher, or audio recorder), you will need to use the " +
-            "\"" +
-            SIGN_UP +
-            "\" box to add a password and an email address to your account. " +
-            "Your email is only used if you ever forget your password.<br/>" +
-            "<br/>" +
-            "If you are a teacher assigned to record <u>course material</u> - check the box next to " +
-            "‘<i>assigned reference audio recorder</i>.’" +
-            " Once you have submitted this form, LTEA personnel will approve your account. " +
-            "You will receive an email once it's approved. " +
-            "You will not be able to access Classroom until approval is granted. " +
-            "Students do not need approval to access the site.<br/>" +
-            "<br/>" +
-            "<b>Students and Teachers</b>: After you register, use the ’Login’ box to access the site. <br/>" +
-            //"Teachers who are not <i>audio recorders</i>: After you register, use the ’Login’ box to access the site. <br/>" +
-            "<b>Teachers who are <i>audio recorders</i></b>: After you register and get approval, use the ‘Login’ box to access the site. <br/><br/>" +
-            "The site will remember your login information on this computer for up to one year. " +
-            "You will need to login with your username and password again if you access Classroom from a different machine.<br/>";*/
-    return "If you are a first-time user of this site, or an existing user of an earlier version of NetProF " +
-        "(either as a student, teacher, or audio recorder), you will need to use the \"Sign Up\" box to add a" +
-        " password and an email address to your account. Your email is only used if you ever forget your" +
-        " password.<br/>" +
-        "<br/>" +
-        "If you are a teacher assigned to record <u>course material</u> - " +
-        "check the box next to ‘<i>assigned reference audio recorder</i>.’" +
-        " Once you have submitted this form, LTEA personnel will approve your account. " +
-        "You will receive an email once it's approved. " +
-        "You will not be able to access the NetProF site until approval is granted. " +
-        "Students do not need approval to access the site.<br/>" +
-        "<br/>" +
-        "<b>Students and Teachers</b>: After you register, use the ‘Login’ box to access the site. <br/>" +
-        "<b>Teachers who are <i>audio recorders</i></b>: After you register and get approval, use the ‘Login’ box to access the site. <br/>" +
-        "<br/>" +
-        "The site will remember your login information on this computer for up to one year. " +
-        "You will need to login with your username and password again if you access NetProF from a different machine.";
+    return helpMessage;
   }
-
-
-  /**
-   * TODO : Consider rewording for other customers...
-   *
-   * @return
-   * @seex UserPassLogin#getRecordAudioPopover
-   */
-/*
-  public String getRecordAudioPopoverText() {
-    return "Click here if you have been assigned to record reference audio or do quality control.<br/>" +
-        "After you click sign up, " +
-        "LTEA personnel will approve your account.<br/>" +
-        "You will receive an email once it's approved.<br/>" +
-        "You will not be able to access NetProF until approval is granted.";
-  }
-*/
 
 /*  public String getAMASHelpMessage() {
     return

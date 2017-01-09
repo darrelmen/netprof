@@ -233,7 +233,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         }
       }*/
 
-      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, trackInfo);
+      String s = audioConversion.ensureWriteMP3(parent, wavFile, false, trackInfo);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
       if (isMissing) {
         logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + trackInfo);

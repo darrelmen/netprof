@@ -117,22 +117,23 @@ public interface UserServiceAsync {
 
   void forgetProject(AsyncCallback<Void> async);
 
-  void getCounts(AsyncCallback<Map<User.Kind, Integer>> async);
+/*  void getCounts(AsyncCallback<Map<User.Kind, Integer>> async);
 
   void getInvitationCounts(User.Kind requestRole, AsyncCallback<Map<String, Integer>> async);
 
-  void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
 
   void update(User user, int changingUser, AsyncCallback<Void> async);
 
   void getPending(User.Kind requestRole, AsyncCallback<Collection<Invitation>> async);
 
-  void invite(String url, Invitation invite, AsyncCallback<Void> async);
+  void invite(String url, Invitation invite, AsyncCallback<Void> async);*/
+
+  void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
 
   void getUserByID(String id, AsyncCallback<User> async);
 
   /**
-   * @see UserManager#getPermissionsAndSetUser()
+   * @see UserManager#getPermissionsAndSetUser
    * @param async
    */
   void getUserFromSession(AsyncCallback<User> async);
