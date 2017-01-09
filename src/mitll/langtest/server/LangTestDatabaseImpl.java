@@ -259,8 +259,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       // logger.info("examined text and found it to be " + direction);
     }
 
-    return new SlimProject(project.id(), project.name(), project.language(),
-        project.countrycode(), project.course(), project.displayorder(),
+    return new SlimProject(project.id(),
+        project.name(),
+        project.language(),
+        project.countrycode(),
+        project.course(),
+        project.status(),
+        project.displayorder(),
         hasModel,
         isRTL);
   }

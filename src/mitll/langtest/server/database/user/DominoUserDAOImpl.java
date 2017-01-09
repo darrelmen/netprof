@@ -46,6 +46,13 @@ import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
+import org.apache.ignite.Ignite;
+import org.apache.ignite.Ignition;
+import org.apache.ignite.configuration.DeploymentMode;
+import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.logger.slf4j.Slf4jLogger;
+import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
+import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
@@ -116,7 +123,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       String appName = dominoProps.getAppName();
       logger.info("DominoUserDAOImpl app name is " + appName);
 
-      delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, null/*ignite*/);
+      Ignite ignite = null;
+      if (dominoProps.isCacheEnabled()) {
+        ignite = getIgnite();
+        if (ignite != null) {
+          ignite.configuration().setGridLogger(new Slf4jLogger());
+        }
+
+        logger.info("cache - ignite!");
+       // newContext.setAttribute(IGNITE, ignite);
+      }
+      delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, ignite);
       myDelegate = makeMyServiceDelegate(dominoProps.getUserServiceProperties(), m, pool, serializer);
 
       dominoAdminUser = delegate.getAdminUser();
@@ -125,6 +142,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
   }
 
+  private Ignite getIgnite() {
+    TcpDiscoverySpi spi = new TcpDiscoverySpi();
+    TcpDiscoveryVmIpFinder ipFinder = new TcpDiscoveryVmIpFinder();
+    ipFinder.setAddresses(Arrays.asList("127.0.0.1"));
+    spi.setIpFinder(ipFinder);
+    IgniteConfiguration cfg = new IgniteConfiguration();
+    cfg.setDeploymentMode(DeploymentMode.PRIVATE);
+    // Override default discovery SPI.
+    cfg.setDiscoverySpi(spi);
+
+    return Ignition.start(cfg);
+  }
   /*
   public static final MongoUserServiceDelegate makeServiceDelegate(ServerProperties props,
                                                                    Mailer mailer,
@@ -993,6 +1022,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     miniUserCache = null;
   }
 
+  /**
+   * TODO: try to avoid?
+   * @return
+   */
   private List<DBUser> getAll() {
     long then = System.currentTimeMillis();
     logger.warn("getAll calling get all users");
