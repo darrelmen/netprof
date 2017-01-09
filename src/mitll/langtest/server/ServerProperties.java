@@ -220,7 +220,6 @@ public class ServerProperties {
   }
 
 
-
   /**
    * @return
    * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
@@ -456,7 +455,10 @@ public class ServerProperties {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
-  public String getProperty(String prop) { return props.getProperty(prop); }
+  public String getProperty(String prop) {
+    return props.getProperty(prop);
+  }
+
   /**
    * if true, use old school (hydec)
    * OR if there is no webservice port specified
@@ -668,12 +670,13 @@ public class ServerProperties {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO(IAudioDAO, int)
    * @return
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO(IAudioDAO, int)
    */
   public boolean doAudioFileExistsCheck() {
     return getDefaultFalse(CHECK_AUDIO_FILE_EXISTS);
   }
+
   public boolean doAudioFileExistsCheckDev() {
     return getDefaultFalse(CHECK_AUDIO_FILE_EXISTS_DEV);
   }
@@ -778,6 +781,7 @@ public class ServerProperties {
 
   /**
    * Not what you want probably...
+   *
    * @return
    * @deprecated
    */
@@ -789,9 +793,13 @@ public class ServerProperties {
     return getDefaultTrue("shouldRecalcStudentAudio");
   }
 
+  public boolean hasModel() {
+    return getCurrentModel() != null;
+  }
+
   public String getCurrentModel() {
     String models_dir = getProperty("MODELS_DIR");
-    return models_dir != null? models_dir.replaceAll("models.", ""): "";
+    return models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
 
   public boolean shouldRecalcDNR() {

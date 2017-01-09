@@ -24,7 +24,8 @@ class CreateProject {
    * @return
    * @see CopyToPostgres#copyOneConfig
    */
-  int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName, String course, int displayOrder,
+  int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName, String course,
+                               int displayOrder,
                                boolean isDev) {
     IProjectDAO projectDAO = db.getProjectDAO();
     String oldLanguage = getOldLanguage(db);
@@ -74,7 +75,8 @@ class CreateProject {
 
     if (language.equals("msa")) language = "MSA";
 
-    int byName = projectDAO.add(dominoUserDAO.getBeforeLoginUser(),
+    int byName = projectDAO.add(
+        dominoUserDAO.getBeforeLoginUser(),
         name,
         language,
         course,

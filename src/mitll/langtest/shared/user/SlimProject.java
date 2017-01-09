@@ -46,6 +46,7 @@ public class SlimProject implements IsSerializable {
   private String language;
   private String course;
   private String countryCode;
+  private String status;
   private int displayOrder;
   private boolean hasModel;
   private boolean isRTL;
@@ -65,13 +66,19 @@ public class SlimProject implements IsSerializable {
    * @param isRTL
    * @see mitll.langtest.server.LangTestDatabaseImpl#getProjectInfo(SlickProject)
    */
-  public SlimProject(int projectid, String name, String language, String countryCode,
-                     String course, int displayOrder, boolean hasModel, boolean isRTL) {
+  public SlimProject(int projectid,
+                     String name,
+                     String language,
+                     String countryCode,
+                     String course,
+                     String status,
+                     int displayOrder, boolean hasModel, boolean isRTL) {
     this.name = name;
     this.language = language;
     this.projectid = projectid;
     this.countryCode = countryCode;
     this.course = course;
+    this.status = status;
     this.displayOrder = displayOrder;
     this.hasModel = hasModel;
     this.isRTL = isRTL;
@@ -130,10 +137,6 @@ public class SlimProject implements IsSerializable {
     return children;
   }
 
-  public String toString() {
-    return "Project #" + projectid + " " + name + " " + language + " num children " + children.size();
-  }
-
   public int getDisplayOrder() {
     return displayOrder;
   }
@@ -144,5 +147,14 @@ public class SlimProject implements IsSerializable {
 
   public boolean isRTL() {
     return isRTL;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public String toString() {
+    return "Project #" + projectid + " " + name + " " + language + " " + status +
+        " num children " + children.size();
   }
 }
