@@ -51,14 +51,13 @@ public class SignUpUser implements IsSerializable {
   private String last;
   private String ip;
   private String url;
+  private String affiliation;
 
   public SignUpUser() {
   }
 
   /**
-   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    * @param userID
-   * @paramx passwordH
    * @param emailH
    * @param email
    * @param kind
@@ -70,6 +69,8 @@ public class SignUpUser implements IsSerializable {
    * @param first
    * @param last
    * @param url
+   * @paramx passwordH
+   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   public SignUpUser(String userID,
                     String passwordH,
@@ -82,10 +83,11 @@ public class SignUpUser implements IsSerializable {
                     String device,
                     String ip,
                     String first,
-                    String last, String url) {
+                    String last, String url,
+                    String affiliation) {
     this.userID = userID;
     this.passwordH = passwordH;
-   // this.freeTextPassword = freeTextPassword;
+    // this.freeTextPassword = freeTextPassword;
     this.emailH = emailH;
     this.email = email;
     this.kind = kind;
@@ -97,6 +99,7 @@ public class SignUpUser implements IsSerializable {
     this.first = first;
     this.last = last;
     this.url = url;
+    this.affiliation = affiliation;
   }
 
   public String getUserID() {
@@ -108,15 +111,14 @@ public class SignUpUser implements IsSerializable {
   }
 
   /**
-   * @deprecated
    * @return
+   * @deprecated
    */
 /*
   public String getFreeTextPassword() {
     return freeTextPassword;
   }
 */
-
   public String getEmailH() {
     return emailH;
   }
@@ -174,5 +176,9 @@ public class SignUpUser implements IsSerializable {
 
   public String getUrl() {
     return url;
+  }
+
+  public String getAffiliation() {
+    return affiliation;
   }
 }
