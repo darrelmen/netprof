@@ -56,21 +56,22 @@ class RegistrationInfo extends BasicDialog {
   private static final String DIALECT = "Dialect";
 
   private final FormField ageEntryGroup;
-  private final FormField dialectGroup;
-  private final RadioButton male   = new RadioButton(GENDER_GROUP, "Male");
+  private FormField dialectGroup;
+  private final RadioButton male = new RadioButton(GENDER_GROUP, "Male");
   private final RadioButton female = new RadioButton(GENDER_GROUP, "Female");
   private final Panel genders;
   private static final Boolean ADD_AGE = true;
 
-  RegistrationInfo(ComplexWidget toAddTo) {
+  RegistrationInfo(ComplexWidget toAddTo, boolean includeDialect) {
     genders = new HorizontalPanel();
     genders.add(male);
+    male.addStyleName("topFiveMargin");
+
     female.addStyleName("leftFiveMargin");
     genders.add(female);
     genders.addStyleName("leftTenMargin");
-
-    male.addStyleName("topFiveMargin");
     female.addStyleName("topFiveMargin");
+
     toAddTo.add(genders);
     //  ageEntryGroup = addDecoratedControlFormFieldWithPlaceholder(toAddTo, false, 2, 2, YOUR_AGE);
 
@@ -81,16 +82,21 @@ class RegistrationInfo extends BasicDialog {
     } else {
       ageEntryGroup = new FormField(new TextBox(), new ControlGroup(), 0);
     }
-    dialectGroup = getDialect(toAddTo);
+
+    if (includeDialect) {
+      dialectGroup = getDialect(toAddTo);
+    }
   }
 
   public void setVisible(boolean visible) {
     genders.setVisible(visible);
     ageEntryGroup.setVisible(visible);
-    dialectGroup.setVisible(visible);
+    if (dialectGroup != null) dialectGroup.setVisible(visible);
   }
 
-  public boolean isVisible() { return genders.isVisible(); }
+  public boolean isVisible() {
+    return genders.isVisible();
+  }
 
   void hideAge() {
     ageEntryGroup.setVisible(false);
@@ -108,9 +114,15 @@ class RegistrationInfo extends BasicDialog {
     return dialectGroup;
   }
 
+  public boolean checkValid() {
+    boolean valid = checkValidGender();
+    if (!valid) return valid;
+    else return checkMissingAge();
+  }
+
   /**
    * @return
-   * @see mitll.langtest.client.user.UserPassLogin#getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
+   * @see #grabFocus
    */
   boolean checkValidGender() {
     boolean valid = male.getValue() || female.getValue();
@@ -139,5 +151,27 @@ class RegistrationInfo extends BasicDialog {
 
   public RadioButton getFemale() {
     return female;
+  }
+
+  public void grabFocus() {
+    if (checkValidGender()) {
+      checkMissingAge();
+    }
+  }
+
+  private boolean checkMissingAge() {
+    if (ageEntryGroup.isEmpty()) {
+      ageEntryGroup.box.setFocus(true);
+      markErrorBlur(ageEntryGroup, "Add info", "Please enter your age.", Placement.TOP);
+      return false;
+    } else {
+      try {
+        Integer.parseInt(ageEntryGroup.getSafeText());
+        return true;
+      } catch (NumberFormatException e) {
+        markErrorBlur(ageEntryGroup, "Try again", "Please enter a valid age.", Placement.TOP);
+        return false;
+      }
+    }
   }
 }

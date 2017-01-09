@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
@@ -666,7 +665,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           device,
           resetKey,
           //  "",
-          rs.getTimestamp(TIMESTAMP).getTime());
+          rs.getTimestamp(TIMESTAMP).getTime(), "OTHER");
 
       users.add(newUser);
 
