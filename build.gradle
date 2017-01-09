@@ -179,6 +179,7 @@ war {
 
     // somehow the domino tests jars are getting in if I don't do this
     rootSpec.exclude("**/*tests.jar")
+    rootSpec.exclude("**/log4j2-test.xml")
 
     // from 'war/bin'
     from ('war/config/netProf') {
