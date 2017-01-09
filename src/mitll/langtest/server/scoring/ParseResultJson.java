@@ -116,7 +116,7 @@ public class ParseResultJson {
 
     if (imageTypeMapMap.isEmpty()) logger.warn("json " + json + " produced empty events map");
     else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
-      if (warn++ < 10) logger.warn("no words for " + json);
+      if (warn++ < 2) logger.warn("parseJsonString no words for " + json);
       // throw new Exception();
     }
     return imageTypeMapMap;
