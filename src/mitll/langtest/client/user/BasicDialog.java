@@ -203,7 +203,9 @@ public class BasicDialog {
 
   protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
-    userGroup.add(new ControlLabel(label));
+    if (!label.isEmpty()) {
+      userGroup.add(new ControlLabel(label));
+    }
     widget.addStyleName("leftFiveMargin");
     userGroup.add(widget);
 
@@ -275,7 +277,7 @@ public class BasicDialog {
 
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
-    setupPopoverBlur(dialect, header, message, right, new MyPopover(false), dialectGroup);
+    setupPopoverBlur(dialect, header, message, right, new MyPopover(), dialectGroup);
   }
 
 /*
@@ -365,7 +367,7 @@ public class BasicDialog {
     // if (DEBUG) logger.info("markError on '" + dialect.getElement().getExID() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
-    return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover(showOnlyOnce));
+    return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover());
   }
 
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message, Placement placement) {
@@ -379,7 +381,7 @@ public class BasicDialog {
   }
 
   protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, boolean isHTML) {
-    final MyPopover popover = new MyPopover(false);
+    final MyPopover popover = new MyPopover();
 
     return setupPopover(w, heading, message, placement, delayMillis, popover, isHTML);
   }
@@ -541,10 +543,7 @@ public class BasicDialog {
   static class MyPopover extends Popover {
     public MyPopover() {
     }
-    public MyPopover(boolean showOnlyOnce) {
-    }
     public void dontFireAgain() {
-    //  if (DEBUG) logger.info(this + " dontFireAgain ...");
       hide();
       setTrigger(Trigger.MANUAL);
       reconfigure();

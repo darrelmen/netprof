@@ -494,7 +494,7 @@ public class RestUserManagement {
             SignUpUser user2 = new SignUpUser(user,"",
 //                passwordH,
                 emailH, email,
-                User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "", appURL);
+                User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "", appURL,"OTHER");
 //            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
 //                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
             user1 = getUserManagement().addUser(user2);
@@ -509,7 +509,7 @@ public class RestUserManagement {
               "",
               //            passwordH,
               emailH, email,
-              User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "", appURL);
+              User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "", appURL,"OTHER");
           user1 = getUserManagement().addUser(user2);
         }
 

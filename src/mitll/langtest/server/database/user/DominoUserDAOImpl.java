@@ -357,7 +357,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      String device,
                      String first,
                      String last,
-                     String url) {
+                     String url,
+                     String affiliation) {
     // Timestamp now = new Timestamp(System.currentTimeMillis());
     // getConvertedPermissions(permissions, now);
 
@@ -366,7 +367,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         first,
         last,
         email,
-        DEFAULT_AFFILIATION,
+        affiliation,
         gender.equalsIgnoreCase("male") ? DMALE : DFEMALE,
         Collections.singleton(kind.getRole()),
         getGroup()

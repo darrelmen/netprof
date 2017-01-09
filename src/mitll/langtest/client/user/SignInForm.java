@@ -567,7 +567,7 @@ public class SignInForm extends UserDialog implements SignIn {
       public void onSuccess(Boolean result) {
         String heading = result ? CHECK_EMAIL : "Unknown email";
         String message = result ? PLEASE_CHECK_YOUR_EMAIL : userField.box.getText() + " doesn't have that email. Check for a typo?";
-        setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover(false) {
+        setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover() {
           boolean isFirst = true;
 
           @Override
@@ -578,8 +578,6 @@ public class SignInForm extends UserDialog implements SignIn {
             } else {
               resetEmailPopup.hide(); // TODO : ugly - somehow hide is called twice
             }
-            //System.out.println("got hide !" + new Date()
-            //);
           }
         }, false);
       }
@@ -588,7 +586,7 @@ public class SignInForm extends UserDialog implements SignIn {
 
   /**
    * @return
-   * @see UserPassLogin#UserPassLogin(PropertyHandler, UserManager, EventRegistration)
+   * @see UserPassLogin#UserPassLogin
    */
   @Override
   public boolean clickSendEmail() {

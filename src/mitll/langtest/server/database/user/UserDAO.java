@@ -40,8 +40,20 @@ import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -112,7 +124,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
                      User.Kind kind,
                      //String freeTextPassword,
                      //String passwordH,
-                     String emailH, String email, String device, String first, String last, String url) {
+                     String emailH, String email, String device, String first, String last, String url, String aff) {
     //if (passwordH == null) new Exception().printStackTrace();
     try {
       // there are much better ways of doing this...
@@ -702,9 +714,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @see AudioDAO#getUserIDsMatchingGender
    * @param getMale
    * @return
+   * @see AudioDAO#getUserIDsMatchingGender
    */
   Set<Long> getUserIDsMatchingGender(boolean getMale) {
     return getUserIDs("SELECT " + ID + " FROM " + USERS + " WHERE " + GENDER + " = " + (getMale ? 0 : 1));
@@ -836,7 +848,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   @Override
   public boolean forgotPassword(String user
       , String url
-  //    ,                              String emailForLegacy
+                                //    ,                              String emailForLegacy
   ) {
     return false;
   }
