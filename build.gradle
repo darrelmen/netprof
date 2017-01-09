@@ -115,12 +115,14 @@ dependencies {
 }
 
 // Add a test dependency only when the full composite project is checked out.
+/*
 if (project.rootProject != project) {
     dependencies {
         //testCompile project(':domino-shared').sourceSets.test.output
         testCompile project(path: ':domino-shared', configuration: 'testArtifacts')
     }
 }
+*/
 
 sourceSets {
     main {
@@ -175,6 +177,9 @@ gwt {
 war {
     archiveName "netprof.war"
 
+    // somehow the domino tests jars are getting in if I don't do this
+    rootSpec.exclude("**/*tests.jar")
+
     // from 'war/bin'
     from ('war/config/netProf') {
         into 'config/netProf'
@@ -204,7 +209,6 @@ war {
         into 'WEB-INF/classes'
     }
 
-    exclude ('**/**-tests.jar')
 }
 
 // ***************************** Publishing **************************************
