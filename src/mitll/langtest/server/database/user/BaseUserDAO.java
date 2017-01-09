@@ -108,7 +108,6 @@ public abstract class BaseUserDAO extends DAO {
     super(database);
     admins = database.getServerProps().getAdmins();
     language = database.getServerProps().getLanguage();
-    //enableAllUsers = database.getServerProps().enableAllUsers();
   }
 
   /**
@@ -202,7 +201,8 @@ public abstract class BaseUserDAO extends DAO {
         user.getEmail(),
         user.getDevice(),
         user.getFirst(), user.getLast(),
-        user.getUrl());
+        user.getUrl(),
+        user.getAffiliation());
   }
 
   abstract User getUserByID(String id);
@@ -247,12 +247,12 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   /**
-   * @see #getOrAdd
    * @param defectDetector
    * @param first
    * @param last
    * @param kind
    * @return
+   * @see #getOrAdd
    */
   private int addShellUser(String defectDetector, String first, String last, User.Kind kind) {
     return addUser(89,
@@ -264,7 +264,7 @@ public abstract class BaseUserDAO extends DAO {
         "",
         first,
         last,
-        "");
+        "","MIT-LL");
   }
 
   abstract int getIdForUserID(String id);
@@ -312,5 +312,5 @@ public abstract class BaseUserDAO extends DAO {
                        String device,
                        String first,
                        String last,
-                       String url);
+                       String url, String affiliation);
 }
