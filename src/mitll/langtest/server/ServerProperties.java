@@ -32,13 +32,19 @@
 
 package mitll.langtest.server;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.user.User;
+import org.apache.commons.collections.ArrayStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -94,11 +100,6 @@ public class ServerProperties {
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
   private static final String NP_SERVER = "np.ll.mit.edu";
 
-
-  /**
-   * I.e. the hydra web service for ASR
-   */
-//  private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -156,6 +157,8 @@ public class ServerProperties {
   private String fontFamily;
   private String fontFaceURL;
   private final Map<String, String> phoneToDisplay = new HashMap<>();
+  private List<Affiliation> affliations = new ArrayList<>();
+
 /*
   private int sleepBetweenDecodes;
   private long trimBeforeAndAfter;
@@ -193,6 +196,8 @@ public class ServerProperties {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile, getDateFromManifest(servletContext));
     readPhonemeMap(configDir);
+
+
   }
 
   /**
@@ -210,6 +215,10 @@ public class ServerProperties {
         props.load(new FileInputStream(configFileFullPath));
         emailList = new EmailList(props);
         readProperties(dateFromManifest);
+
+        getAffiliations(configDir);
+        logger.info("aff " + affliations);
+
         this.configFileFullPath = configFileFullPath;
         return configFileFullPath;
       } catch (IOException e) {
@@ -217,6 +226,36 @@ public class ServerProperties {
       }
     }
     return "";
+  }
+
+  private void getAffiliations(String configDir) throws FileNotFoundException {
+    File file = new File(configDir, "config.json");
+    if (file.exists()) {
+      JsonParser parser = new JsonParser();
+      JsonObject parse = parser.parse(new FileReader(file)).getAsJsonObject();
+      JsonArray config = parse.getAsJsonArray("config");
+
+      logger.info("Got " + config);
+      for (JsonElement elem : config) {
+        logger.info("Got " + elem);
+
+        JsonObject asJsonObject = elem.getAsJsonObject();
+        if (asJsonObject.has("affliations")) {
+          logger.info("Got " + asJsonObject);
+          JsonElement affiliations1 = asJsonObject.get("affliations");
+          logger.info("\tGot " + affiliations1);
+
+          JsonArray affiliations = affiliations1.getAsJsonArray();
+          for (JsonElement aff : affiliations) {
+            JsonObject asJsonObject1 = aff.getAsJsonObject();
+            String abbreviation = asJsonObject1.get("abbreviation").getAsString();
+            String displayName = asJsonObject1.get("displayName").getAsString();
+            affliations.add(new Affiliation(asJsonObject1.get("_id").getAsInt(), abbreviation, displayName));
+            logger.info(" " + abbreviation + " " + displayName);
+          }
+        }
+      }
+    }
   }
 
 
@@ -303,11 +342,6 @@ public class ServerProperties {
     return getDefaultTrue(SKIP_SEMICOLONS);
   }
 
-/*  @Deprecated
-  public boolean isNoModel() {
-    return getDefaultFalse(NO_MODEL);
-  }*/
-
   boolean removeExercisesWithMissingAudio() {
     return getDefaultTrue(REMOVE_EXERCISES_WITH_MISSING_AUDIO);
   }
@@ -343,11 +377,6 @@ public class ServerProperties {
   }
 
 /*
-  public int getAudioOffset() {
-    return getIntProperty(AUDIO_OFFSET);
-  }
-*/
-
   private int getIntProperty(String audioOffset) {
     try {
       return Integer.parseInt(props.getProperty(audioOffset));
@@ -355,6 +384,7 @@ public class ServerProperties {
       return 0;
     }
   }
+*/
 
   private int getIntPropertyDef(String audioOffset, String defaultValue) {
     try {
@@ -726,28 +756,6 @@ public class ServerProperties {
     return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
   }
 
-/*  public String getDatabaseType() {
-    return props.getProperty("databaseType", "postgresql");
-  }
-
-  public String getDatabaseHost() {
-    return props.getProperty("databaseHost", "localhost");
-  }
-
-  public int getDatabasePort()    { return getIntPropertyDef("databasePort", "5432"); }
-
-  public String getDatabaseName() {
-    return props.getProperty("databaseName", "netprof");
-  }
-
-  public String getDatabaseUser() {
-    return props.getProperty("databaseUser", "postgres");
-  }
-
-  public String getDatabasePassword() {
-    return props.getProperty("databasePassword", "pgadmin");
-  }*/
-
   public String getDBConfig() {
     return props.getProperty(DB_CONFIG, POSTGRES_HYDRA);
   }
@@ -767,6 +775,10 @@ public class ServerProperties {
     return props;
   }
 
+  /**
+   * @return
+   * @see
+   */
   public String getNPServer() {
     return props.getProperty("SERVER_NAME", NP_SERVER);
   }
@@ -776,7 +788,7 @@ public class ServerProperties {
   }
 
   public String getAppTitle() {
-    return props.getProperty(APP_TITLE, "NetProF");
+    return props.getProperty(APP_TITLE, "netprof");
   }
 
   /**
@@ -804,5 +816,9 @@ public class ServerProperties {
 
   public boolean shouldRecalcDNR() {
     return getDefaultTrue("shouldRecalcDNROnAudio");
+  }
+
+  public List<Affiliation> getAffliations() {
+    return affliations;
   }
 }

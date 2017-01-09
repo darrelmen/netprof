@@ -195,7 +195,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       projectInfos = getNestedProjectInfo();
     }
 
-    return new StartupInfo(serverProps.getProperties(), projectInfos, startupMessage);
+    return new StartupInfo(serverProps.getProperties(), projectInfos, startupMessage, serverProps.getAffliations());
   }
 
   /**
