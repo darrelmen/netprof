@@ -73,10 +73,7 @@ import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 
@@ -575,7 +572,7 @@ public class InitialUI implements UILifecycle {
     // are we here to show the login screen?
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
-  //    logger.info("showLogin user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
+      //    logger.info("showLogin user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
       showLogin(eventRegistration);
       return true;
     }
@@ -767,8 +764,25 @@ public class InitialUI implements UILifecycle {
     clearContent();
     addBreadcrumbs();
     List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
+
     logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
-    showProjectChoices(projects, level);
+    showProjectChoices(getVisibleProjects(projects), level);
+  }
+
+  private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
+    List<SlimProject> filtered = new ArrayList<>();
+    Collection<User.Permission> permissions = controller.getPermissions();
+    boolean canRecord = permissions.contains(User.Permission.RECORD_AUDIO) ||
+        permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.DEVELOP_CONTENT);
+
+    for (SlimProject project : projects) {
+      if (project.getStatus().equalsIgnoreCase("Development")) {
+        if (canRecord) {
+          filtered.add(project);
+        }
+      } else filtered.add(project);
+    }
+    return filtered;
   }
 
   /**

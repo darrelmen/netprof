@@ -114,10 +114,17 @@ class RegistrationInfo extends BasicDialog {
     return dialectGroup;
   }
 
+  /**
+   * If it's invisible, it's valid.
+   *
+   * @return
+   */
   public boolean checkValid() {
-    boolean valid = checkValidGender();
-    if (!valid) return valid;
-    else return checkMissingAge();
+    if (isVisible()) {
+      boolean valid = checkValidGender();
+      if (!valid) return valid;
+      else return checkMissingAge();
+    } else return true;
   }
 
   /**

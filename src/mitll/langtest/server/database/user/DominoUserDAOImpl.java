@@ -788,7 +788,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       } catch (IllegalArgumentException e) {
         User.Kind kindByName = getKindByName(firstRole);
         if (kindByName == null) {
-          logger.error("getUserKind no user for " + firstRole);
+          if (!firstRole.startsWith("ILR")) {
+            logger.error("getUserKind no user for " + firstRole);
+          }
           kind = User.Kind.STUDENT;
         } else {
           kind = kindByName;
