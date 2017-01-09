@@ -52,7 +52,7 @@ public class ExerciseSorter extends SimpleSorter {
   private Map<String, Integer> phoneToCount;
 
   /**
-   * @see LangTestDatabaseImpl#sortExercises(String, List)
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    * @param typeOrder
    */
   public ExerciseSorter(Collection<String> typeOrder) { super(typeOrder); }

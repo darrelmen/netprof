@@ -70,7 +70,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   *
    * @param projid
    * @return
    */
@@ -78,20 +77,23 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   public Collection<AudioAttribute> getAudioAttributesByProject(int projid) {
     List<SlickAudio> all = dao.getAll(projid);
     logger.info("Getting mini users");
-    Map<Integer, MiniUser> miniUsers = userDAO.getMiniUsers();
-    logger.info("getAudioAttributesByProject " + projid + " " + all.size() + " users " + miniUsers.size());
-    return toAudioAttribute(all, miniUsers);
+   // Map<Integer, MiniUser> miniUsers = userDAO.getMiniUsers();
+    logger.info("getAudioAttributesByProject " + projid +
+        " " + all.size()
+        //+        " users " + miniUsers.size()
+    );
+    return toAudioAttribute(all);
   }
 
   @Override
   public AudioAttribute addOrUpdate(int userid, int exerciseID, int projid, AudioType audioType, String audioRef,
                                     long timestamp, long durationInMillis, String transcript, float dnr) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
-    Map<Integer, MiniUser> mini = new HashMap<>();
-    mini.put(userid, miniUser);
+//    Map<Integer, MiniUser> mini = new HashMap<>();
+//    mini.put(userid, miniUser);
     return toAudioAttribute(
         dao.addOrUpdate(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript, dnr),
-        mini);
+        miniUser);
   }
 
   /**
@@ -232,9 +234,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
-    Map<Integer, MiniUser> idToMini = userDAO.getMiniUsers();
+    //Map<Integer, MiniUser> idToMini = userDAO.getMiniUsers();
+    Map<Integer, MiniUser> idToMini = new HashMap<>();
+
     for (SlickAudio s : all) {
-      copy.add(toAudioAttribute(s, idToMini));
+      copy.add(getAudioAttribute(s, idToMini));
     }
     return copy;
   }
@@ -245,15 +249,15 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * Actual audio path is where we find it on the server... potentially different from where it was originally recorded...
    *
    * @param s
-   * @param idToMini
+   * @param miniUser
    * @return
-   * @see #toAudioAttribute(List, Map)
+   * @see #toAudioAttribute(List)
    */
-  private AudioAttribute toAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini) {
-    MiniUser miniUser = idToMini.get(s.userid());
+  private AudioAttribute toAudioAttribute(SlickAudio s, MiniUser miniUser){//Map<Integer, MiniUser> idToMini2) {
+   // MiniUser miniUser = idToMini.get(s.userid());
 
     if (miniUser == null && spew++ < 20) {
-      logger.error("toAudioAttribute : no user for " + s.userid() + " in " + idToMini.size() + " entries");
+      logger.error("toAudioAttribute : no user for " + s.userid());
     }
 
     String audiotype = s.audiotype();
@@ -321,21 +325,27 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
+   * @paramx idToMini
    * @param all
-   * @param idToMini
    * @return
    * @see #getAudioAttributesByProject(int)
    */
-  private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all, Map<Integer, MiniUser> idToMini) {
+  private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
     if (all.isEmpty()) {
       logger.warn("toAudioAttribute table has " + dao.getNumRows());
     }
+    Map<Integer, MiniUser> idToMini = new HashMap<>();
     for (SlickAudio s : all) {
-//      logger.info("got " + s);
-      copy.add(toAudioAttribute(s, idToMini));
+      copy.add(getAudioAttribute(s, idToMini));
     }
     return copy;
+  }
+
+  private AudioAttribute getAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini) {
+    MiniUser miniUser = idToMini.computeIfAbsent(s.userid(), k -> userDAO.getMiniUser(s.userid()));
+    //      logger.info("got " + s);
+    return toAudioAttribute(s, miniUser);
   }
 
   public void addBulk(List<SlickAudio> bulk) {
