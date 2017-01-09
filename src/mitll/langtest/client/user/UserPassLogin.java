@@ -53,6 +53,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.shared.StartupInfo;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -85,7 +86,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private static final int BULLET_MARGIN = 25;
   private static final String PLEASE_CHECK = "Please check";
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
- // private static final String ENTER_YOUR_EMAIL = "Please check your email to get your username.";
+  // private static final String ENTER_YOUR_EMAIL = "Please check your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String HELP = "Help";
 
@@ -105,10 +106,11 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
    */
   public UserPassLogin(PropertyHandler props,
                        UserManager userManager,
-                       EventRegistration eventRegistration) {
+                       EventRegistration eventRegistration,
+                       StartupInfo startupInfo) {
     super(props);
 
-    signUpForm = new SignUpForm(props, userManager, eventRegistration, this);
+    signUpForm = new SignUpForm(props, userManager, eventRegistration, this, startupInfo);
     signInForm = new SignInForm(props, userManager, eventRegistration, this, signUpForm);
 
     boolean willShow = false;// checkWelcome();

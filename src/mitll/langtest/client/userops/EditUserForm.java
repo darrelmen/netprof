@@ -64,7 +64,7 @@ class EditUserForm extends SignUpForm {
                UserPassDialog userPassLogin,
                User toEdit,
                UserOps userOps) {
-    super(props, userManager, eventRegistration, userPassLogin);
+    super(props, userManager, eventRegistration, userPassLogin,null);
     setMarkFieldsWithLabels(true);
     //setRolesHeader("Current user role");
     this.toEdit = toEdit;

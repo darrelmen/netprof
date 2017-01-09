@@ -33,6 +33,7 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.user.SlimProject;
 
 import java.util.List;
@@ -48,6 +49,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class StartupInfo implements IsSerializable {
+  private  List<Affiliation> affiliations;
   private Map<String, String> properties;
   private List<SlimProject> projects;
   private String message = "";
@@ -61,10 +63,12 @@ public class StartupInfo implements IsSerializable {
    */
   public StartupInfo(Map<String, String> properties,
                      List<SlimProject> projects,
-                     String message) {
+                     String message,
+                     List<Affiliation> affiliations) {
     this.properties = properties;
     this.projects = projects;
     this.message = message;
+    this.affiliations = affiliations;
 
   }
 
@@ -78,5 +82,9 @@ public class StartupInfo implements IsSerializable {
 
   public String getMessage() {
     return message;
+  }
+
+  public List<Affiliation> getAffiliations() {
+    return affiliations;
   }
 }
