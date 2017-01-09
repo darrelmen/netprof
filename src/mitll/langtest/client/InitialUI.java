@@ -586,7 +586,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void showLogin(EventRegistration eventRegistration) {
-    contentRow.add(new UserPassLogin(props, userManager, eventRegistration).getContent());
+    contentRow.add(new UserPassLogin(props, userManager, eventRegistration, lifecycleSupport.getStartupInfo()).getContent());
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     banner.setCogVisible(false);

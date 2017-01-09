@@ -303,7 +303,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param emailR - email encoded by rot13
    * @param url    - remove me???
    * @return
-   * @see mitll.langtest.client.InitialUI#handleCDToken
+   * @seex mitll.langtest.client.InitialUI#handleCDToken
    * @deprecated don't do this anymore - just in domino
    */
   public String enableCDUser(String token, String emailR, String url) {
@@ -374,7 +374,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     if (result) {
       User userByID = db.getUserDAO().getUserByID(userId);
       if (userByID != null) {
-        setSessionUser(getCurrentSession(), userByID);
+        HttpSession currentSession = getCurrentSession();
+        if (currentSession == null) currentSession = createSession();
+        setSessionUser(currentSession, userByID);
       }
       return userByID;
     } else {

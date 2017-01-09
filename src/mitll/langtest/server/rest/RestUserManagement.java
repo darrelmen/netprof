@@ -448,6 +448,7 @@ public class RestUserManagement {
                       String device,
                       JSONObject jsonObject) {
     String user = request.getHeader(USER);
+   // String project = request.getHeader("projid");
     //  String passwordH = request.getHeader(PASSWORD_H);
 /*
     String freeTextPassword = request.getHeader(FREE_TEXT_PASSWORD);
