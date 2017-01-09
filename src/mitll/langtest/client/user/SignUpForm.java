@@ -47,6 +47,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
@@ -130,11 +131,13 @@ public class SignUpForm extends UserDialog implements SignUp {
   public SignUpForm(PropertyHandler props,
                     UserManager userManager,
                     EventRegistration eventRegistration,
-                    UserPassDialog userPassLogin) {
+                    UserPassDialog userPassLogin,
+                    StartupInfo startupInfo) {
     super(props);
     this.userManager = userManager;
     this.eventRegistration = eventRegistration;
     this.userPassLogin = userPassLogin;
+    logger.info("got "+startupInfo.getAffiliations());
   }
 
   public SignUpForm setSignUpButtonTitle(String title) {
