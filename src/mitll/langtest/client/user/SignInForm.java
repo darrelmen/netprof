@@ -70,18 +70,12 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String USERNAME = "Username";
   private static final String SIGN_IN = "Log In";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer userField id.";
-  // private static final String PLEASE_WAIT = "Please wait";
   private static final String FORGOT_PASSWORD = "Forgot password?";
   private static final String ENTER_A_USER_NAME = "Enter a user name.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
-
- // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
-  //  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Reset your password.";
-  // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
   private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
-//  private static final String PLEASE_CHECK = "Please check";
   private static final int EMAIL_POPUP_DELAY = 4000;
 
   private FormField userField;
@@ -171,17 +165,16 @@ public class SignInForm extends UserDialog implements SignIn {
     userField.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        logger.info("makeSignInUserName : got blur ");
+        //logger.info("makeSignInUserName : got blur ");
         final String text = userField.getSafeText();
 
         if (!text.isEmpty()) {
           eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + text + "'");
-          logger.info("\tchecking makeSignInUserName " + text);
+          //logger.info("\tchecking makeSignInUserName " + text);
           service.getUserByID(text, new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
               logger.warning("\tgot FAILURE on userExists " + text);
-
             }
 
             @Override
@@ -207,6 +200,10 @@ public class SignInForm extends UserDialog implements SignIn {
         logger.info("login user " + loginUser.getRealGender() );
       } else {
         logger.info("login user " + loginUser.getID() + " is NOT valid");
+        logger.info("login user " + loginUser.getID() + " perms " + loginUser.getPermissions());
+        logger.info("login user " + loginUser.getID() + " gender " + loginUser.getRealGender());
+        logger.info("login user " + loginUser.getID() + " email " + loginUser.getEmail());
+        logger.info("login user " + loginUser.getID() + " email hash " + loginUser.getEmailHash());
 
         eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + loginUser.toStringShort());
         copyInfoToSignUp(loginUser.getUserID(), loginUser);
