@@ -826,7 +826,7 @@ public class RefResultDecoder {
 
       if (absoluteFile.exists()) {
         String author = attribute.getUser().getUserID();
-        audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), false,
+        audioConversion.ensureWriteMP3(pathHelper.getInstallPath(), audioRef, false,
             new TrackInfo(title, author, comment, language));
       }
     }
@@ -876,7 +876,7 @@ public class RefResultDecoder {
           count++;
 
           String author = attribute.getUser().getUserID();
-          audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), trimInfo.didTrim(),
+          audioConversion.ensureWriteMP3(pathHelper.getInstallPath(), audioRef, trimInfo.didTrim(),
               new TrackInfo(title, author, comment, language));
         }
       } else {

@@ -500,16 +500,16 @@ public class AudioConversion {
   }
 
   /**
-   * @param pathToWav
    * @param realContextPath
+   * @param pathToWav
    * @param overwrite
    * @param trackInfo
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#ensureMP3
+   * @see mitll.langtest.server.DatabaseServlet#ensureMP3
    */
-  public String ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite, TrackInfo trackInfo) {
+  public String ensureWriteMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo) {
     if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
-    return writeMP3(pathToWav, realContextPath, overwrite, trackInfo);
+    return writeMP3(realContextPath, pathToWav, overwrite, trackInfo);
   }
 
 //  public String ensureWriteMP3Easy(String pathToWav, boolean overwrite, String title, String author) {
@@ -518,20 +518,23 @@ public class AudioConversion {
 //  }
 
   private int spew2 = 0;
+  private int spew3 = 0;
 
   /**
-   * @param pathToWav
    * @param realContextPath
+   * @param pathToWav
    * @param overwrite
    * @param trackInfo
    * @return
    * @see #ensureWriteMP3
    */
-  private String writeMP3(String pathToWav, String realContextPath, boolean overwrite, TrackInfo trackInfo) {
+  private String writeMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo) {
     File absolutePathToWav = new File(pathToWav); // LAZY - what should it be?
     if (!absolutePathToWav.exists()) {
-      logger.info("can't find " + absolutePathToWav.getAbsolutePath());
-      absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
+      if (spew3++ < 100) {
+        logger.info("writeMP3 can't find " + absolutePathToWav.getAbsolutePath() + " trying under " + realContextPath);
+      }
+      absolutePathToWav = getAbsoluteFile(realContextPath, pathToWav);
     }
     return writeMP3Easy(absolutePathToWav, overwrite, trackInfo);
   }
@@ -633,15 +636,15 @@ public class AudioConversion {
     }
   }
 
-  private File getAbsoluteFile(String filePath, String realContextPath) {
-    return getAbsolute(filePath, realContextPath);
+  private File getAbsoluteFile(String realContextPath, String filePath) {
+    return getAbsolute(realContextPath, filePath);
   }
 
-  public boolean exists(String filePath, String realContextPath) {
-    return getAbsoluteFile(filePath, realContextPath).exists();
+  public boolean exists(String realContextPath, String filePath) {
+    return getAbsoluteFile(realContextPath, filePath).exists();
   }
 
-  private File getAbsolute(String filePath, String realContextPath) {
+  private File getAbsolute(String realContextPath, String filePath) {
     return new File(realContextPath, filePath);
   }
 

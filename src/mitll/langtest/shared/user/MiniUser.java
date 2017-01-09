@@ -32,6 +32,7 @@
 
 package mitll.langtest.shared.user;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.exercise.HasID;
 
@@ -40,10 +41,27 @@ public class MiniUser implements HasID, Comparable<HasID> {
   protected String last = "";
   private int id;
   private int age;
+
   private boolean isMale;
+  private Gender realGender = Gender.Unspecified;
+
   private String userID;
   private boolean isAdmin;
   protected long timestamp;
+
+  public Gender getRealGender() {
+    return realGender;
+  }
+
+  public void setRealGender(Gender realGender) {
+    this.realGender = realGender;
+  }
+
+  public enum Gender implements IsSerializable {
+    Unspecified,
+    Male,
+    Female
+  }
 
   public MiniUser() {
   } // for serialization

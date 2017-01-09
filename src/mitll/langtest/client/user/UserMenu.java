@@ -75,6 +75,10 @@ public class UserMenu {
   public List<Banner.LinkAndTitle> getCogMenuChoices() {
     List<Banner.LinkAndTitle> choices = new ArrayList<>();
     choices.add(new Banner.LinkAndTitle("Users", new UsersClickHandler(), true));
+    Banner.LinkAndTitle e = new Banner.LinkAndTitle("Manage Users", null, true);
+    e.setLinkURL(props.getDominoURL());
+    choices.add(e);
+
     String nameForAnswer = props.getNameForAnswer() + "s";
     choices.add(new Banner.LinkAndTitle(
         nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), new ResultsClickHandler(), true));
@@ -92,7 +96,18 @@ public class UserMenu {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
+        public void onSuccess() {
+          new UserTable(props, userManager.isAdmin()).showUsers(userService);
+        }
+      });
+    }
+  }
+  private class ManageUsersClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
         public void onSuccess() {
           new UserTable(props, userManager.isAdmin()).showUsers(userService);
         }
