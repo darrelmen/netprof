@@ -1179,6 +1179,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       dbUser.setEmail(toUpdate.getEmail());
       dbUser.setFirstName(toUpdate.getFirst());
       dbUser.setLastName(toUpdate.getLast());
+      dbUser.setAffiliation(toUpdate.getAffiliation());
+      MiniUser.Gender realGender = toUpdate.getRealGender();
+
+      mitll.hlt.domino.shared.model.user.User.Gender gender = mitll.hlt.domino.shared.model.user.User.Gender.valueOf(realGender.name());
+      dbUser.setGender(gender);
       delegate.updateUser(adminUser, getClientUserDetail(dbUser));
     }
   }
