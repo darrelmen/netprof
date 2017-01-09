@@ -41,6 +41,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
@@ -428,6 +429,8 @@ public class RestUserManagement {
   }
 
   /**
+   * TODO:  This mainly to support appen?
+   *
    * TODO : pass in the project id from the iOS app.
    * TODOx : pass in the freetext password from the iOS app.
    * <p>
@@ -494,7 +497,9 @@ public class RestUserManagement {
             SignUpUser user2 = new SignUpUser(user,"",
 //                passwordH,
                 emailH, email,
-                User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "", appURL,"OTHER");
+                User.Kind.CONTENT_DEVELOPER,
+                male, male?MiniUser.Gender.Male:MiniUser.Gender.Female,
+                age1, dialect, deviceType, device, "", "", appURL,"OTHER");
 //            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
 //                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
             user1 = getUserManagement().addUser(user2);
@@ -504,12 +509,11 @@ public class RestUserManagement {
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-
           SignUpUser user2 = new SignUpUser(user,
               "",
               //            passwordH,
               emailH, email,
-              User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "", appURL,"OTHER");
+              User.Kind.CONTENT_DEVELOPER, true, MiniUser.Gender.Unspecified, 89, dialect, deviceType, device, "", "", appURL,"OTHER");
           user1 = getUserManagement().addUser(user2);
         }
 

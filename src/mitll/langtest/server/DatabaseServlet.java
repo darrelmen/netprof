@@ -86,20 +86,19 @@ public class DatabaseServlet extends HttpServlet {
 
   private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, TrackInfo trackInfo) {
     if (wavFile != null) {
-      //  String parent = pathHelper.getInstallPath();
-      String parent = serverProps.getMediaDir();
-
-      //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
+      //  String mediaDir = pathHelper.getInstallPath();
+      String mediaDir = serverProps.getMediaDir();
+      //logger.debug("ensureMP3 : wav " + wavFile + " under " + mediaDir);
 
       AudioConversion audioConversion = new AudioConversion(serverProps);
-      if (!audioConversion.exists(wavFile, parent)) {
-        logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
-        parent = configDir;
+      if (!audioConversion.exists(mediaDir, wavFile)) {
+        logger.warn("ensureMP3 can't find " + wavFile + " under " + mediaDir + " trying config... ");
+        mediaDir = configDir;
       }
-      if (!audioConversion.exists(wavFile, parent)) {
-        logger.error("huh? can't find " + wavFile + " under " + parent);
+      if (!audioConversion.exists(mediaDir, wavFile)) {
+        logger.error("ensureMP3 huh? can't find " + wavFile + " under " + mediaDir);
       }
-      String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, trackInfo);
+      String filePath = audioConversion.ensureWriteMP3(mediaDir, wavFile, false, trackInfo);
       return new File(filePath).exists();
     } else {
       return false;

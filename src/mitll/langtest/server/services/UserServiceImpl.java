@@ -57,28 +57,6 @@ import static mitll.langtest.server.database.security.IUserSecurityManager.USER_
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
   private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
-  /**
-   * The key to get/set the id of the user stored in the session
-   */
-  //private static final String USER_SESSION_ATT = IUserSecurityManager.USER_SESSION_ATT;
-
-  /**
-   * The key to get/set the request attribute that holds the
-   * user looked up by the security filter.
-   */
-//  private static final String USER_REQUEST_ATT = UserSecurityManager.USER_REQUEST_ATT;
-
-/*  private String rot13(String val) {
-    StringBuilder builder = new StringBuilder();
-    for (char c : val.toCharArray()) {
-      if (c >= 'a' && c <= 'm') c += 13;
-      else if (c >= 'A' && c <= 'M') c += 13;
-      else if (c >= 'n' && c <= 'z') c -= 13;
-      else if (c >= 'N' && c <= 'Z') c -= 13;
-      builder.append(c);
-    }
-    return builder.toString();
-  }*/
 
   /**
    * TODO record additional session info in database.
@@ -231,11 +209,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
         userByID.setLast(user.getLast());
+        userByID.setMale(user.isMale());
+        userByID.setRealGender(user.isMale() ? MiniUser.Gender.Male : MiniUser.Gender.Female);
+
         db.getUserDAO().update(userByID);
         return new LoginResult(userByID, LoginResult.ResultType.Updated);
       }
-//      setSessionUser(createSession(), userByID);
-
     } else {
       User newUser = userManagement.addUser(getThreadLocalRequest(), user);
 
@@ -243,7 +222,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         logger.error("addUser somehow couldn't add " + user.getUserID());
         return new LoginResult(null, LoginResult.ResultType.Failed);
       } else {
-        //      setSessionUser(createSession(), newUser);
         return new LoginResult(newUser, LoginResult.ResultType.Added);
       }
     }
@@ -281,21 +259,13 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * @param user
    * @return true if there's a user with this email
-   * @paramx url            IGNORED - remove me!
-   * @paramx emailForLegacy
    * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
-  public boolean resetPassword(String user
-                               //    , String url, String emailForLegacy
-  ) {
+  public boolean resetPassword(String user) {
     String baseURL = getBaseURL();
     logger.debug("resetPassword for " + user + " " + baseURL);
-
     // Use Domino call to do reset password
-    return db.getUserDAO().forgotPassword(user, baseURL
-        //, emailForLegacy
-    );
-    //   return getEmailHelper().resetPassword(user, userEmail, url);
+    return db.getUserDAO().forgotPassword(user, baseURL);
   }
 
   /**
@@ -490,44 +460,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public void update(User toUpdate, int changingUser) {
     db.getUserDAO().update(toUpdate);
 
-/*    Collection<User.Permission> included = toUpdate.getPermissions();
-
-    IUserPermissionDAO userPermissionDAO = db.getUserPermissionDAO();
-    int updatedUserID = toUpdate.getID();
-    Collection<SlickUserPermission> currentGranted = userPermissionDAO.grantedForUser(updatedUserID);
-
-    logger.info("current perms for " + updatedUserID + " " + currentGranted);
-    // deny all current permissions not included in update set
-    List<User.Permission> currentPerms = new ArrayList<>();
-    for (SlickUserPermission perm : currentGranted) {
-      User.Permission current = User.Permission.valueOf(perm.name());
-      currentPerms.add(current);
-      if (!included.contains(current)) {
-        logger.info("\t deny " + perm +
-            " for " + updatedUserID + " " + currentGranted);
-        userPermissionDAO.deny(perm.id(), changingUser);
-      }
-    }
-    // all perms in update - current = what we need to insert at granted
-    included.removeAll(currentPerms);
-
-    Timestamp now = new Timestamp(System.currentTimeMillis());
-    for (User.Permission perm : included) {
-      logger.info("\tgrant " + perm + " for " + updatedUserID);
-      userPermissionDAO.insert(new SlickUserPermission(-1,
-          updatedUserID,
-          changingUser,
-          perm.name(),
-          now,
-          User.PermissionStatus.GRANTED.name(),
-          now,
-          changingUser
-      ));
-    }*/
   }
 
   @Deprecated
-  @Override
   public Collection<Invitation> getPending(User.Kind requestRole) {
 /*    List<Invitation> visible = new ArrayList<>();
     Collection<SlickInvite> pending = db.getInviteDAO().getPending();
@@ -557,7 +492,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    *
    * @param invite
    */
-  @Override
   public void invite(String url,
                      Invitation invite) {
 /*    int inviteID = db.getInviteDAO().add(new SlickInvite(-1,

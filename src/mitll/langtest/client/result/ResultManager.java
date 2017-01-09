@@ -87,7 +87,7 @@ public class ResultManager extends PagerTable {
   private static final String YES = "Yes";
   private static final String NO = "No";
 
-  private static final int PAGE_SIZE = 9;
+  private static final int PAGE_SIZE = 8;
   private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";

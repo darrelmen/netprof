@@ -42,6 +42,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.i18n.server.testing.Gender;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -52,8 +53,10 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
+import scala.tools.cmd.gen.AnyVals;
 
 import java.util.Collection;
 import java.util.List;
@@ -61,6 +64,7 @@ import java.util.logging.Logger;
 
 public class SignUpForm extends UserDialog implements SignUp {
   public static final String I_M_SORRY = "I'm sorry";
+  public static final String CHOOSE_AFFILIATION = " -- Choose Affiliation -- ";
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   public static final int BOGUS_AGE = 99;
@@ -96,7 +100,6 @@ public class SignUpForm extends UserDialog implements SignUp {
   private final EventRegistration eventRegistration;
 
   protected Button signUp;
-  //  private CheckBox contentDevCheckbox;
   private UserPassDialog userPassLogin;
   private static final String CURRENT_USERS = "Please update your name and email.";
   private String signUpTitle = SIGN_UP;
@@ -153,8 +156,23 @@ public class SignUpForm extends UserDialog implements SignUp {
 
     firstName.setText(candidate.getFirst());
     lastName.setText(candidate.getLast());
-    if (isValidEmail(candidate.getEmail())) {
-      signUpEmail.setText(candidate.getEmail());
+    String email = candidate.getEmail();
+    if (isValidEmail(email)) {
+      signUpEmail.setText(email);
+    }
+    String affiliation = candidate.getAffiliation();
+    if (affiliation == null || affiliation.isEmpty()) {
+
+    } else {
+      int i = 0;
+      boolean found = false;
+      for (Affiliation affiliation1 : affiliations) {
+        if (affiliation1.getAbb().equals(affiliation)) {
+          found = true;
+          break;
+        } else i++;
+      }
+      affBox.setSelectedIndex(found ? i + 1 : 0);
     }
 
     boolean b = askForDemographic(candidate);
@@ -164,10 +182,19 @@ public class SignUpForm extends UserDialog implements SignUp {
     FormField firstFocus =
         firstName.isEmpty() ?
             firstName :
-            lastName.isEmpty() ? lastName : signUpEmail;
+            lastName.isEmpty() ? lastName :
+                email.isEmpty() ? signUpEmail : null;
 
-    setFocusOn(firstFocus.getWidget());
-    markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
+    if (b) {
+      if (firstFocus == null) {
+
+      }
+    }
+
+    if (firstFocus != null) {
+      setFocusOn(firstFocus.getWidget());
+      markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
+    }
   }
 
   /**
@@ -243,7 +270,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     affBox.setWidth(SIGN_UP_WIDTH + 30);
     affBox.addStyleName("leftTenMargin");
 
-    affBox.addItem(" -- Choose Affiliation -- ");
+    affBox.addItem(CHOOSE_AFFILIATION);
     for (Affiliation value : affiliations) {
       affBox.addItem(value.getDisp());
     }
@@ -253,7 +280,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
       }
     });
-    affBox.getElement().getStyle().setWidth(276, Style.Unit.PX  );
+    affBox.getElement().getStyle().setWidth(276, Style.Unit.PX);
     //affBox.removeStyleName("select");
 
     addControlGroupEntrySimple(fieldset,
@@ -367,22 +394,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     return User.getSelfChoiceRoles();
   }
 
-/*  private RadioButton addRoleChoice(Panel roles, final User.Kind student) {
-    RadioButton studentChoice = new RadioButton("ROLE_CHOICE", student.getName());
-    studentChoice.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        selectedRole = student;
-//        logger.info("selected role is now "+ selectedRole);
-        registrationInfo.setVisible(false);
-        //      contentDevCheckbox.setVisible(false);
-        //     contentDevCheckbox.setValue(false);
-      }
-    });
-    roles.add(studentChoice);
-    return studentChoice;
-  }*/
-
   private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
     signUpUser = getFormField(fieldset, false, MIN_LENGTH_USER_ID, USERNAME_WIDTH, USERNAME);
     final TextBoxBase userBox = signUpUser.box;
@@ -441,32 +452,6 @@ public class SignUpForm extends UserDialog implements SignUp {
         eventRegistration.logEvent(userBox, "SignUp_" + username + "Box", "N/A", "focus in " + username + " field in sign up form");
       }
     });
-
-    /*userBox.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        logger.info("check on " + signUpUser.getSafeText());
-        service.getUserByID(signUpUser.getSafeText(), new AsyncCallback<User>() {
-          @Override
-          public void onFailure(Throwable caught) {
-
-          }
-
-          @Override
-          public void onSuccess(User result) {
-            if (result == null || result.isValid()) {
-              logger.info("valid " + signUpUser.getSafeText());
-
-           //   signUpPassword.setVisible(false);
-            } else if (!result.isValid()) {
-              logger.info("NOT valid " + signUpUser.getSafeText());
-
-              signUpPassword.setVisible(true);
-            }
-          }
-        });
-      }
-    });*/
   }
 
   private void styleBox(UIObject userBox) {
@@ -648,6 +633,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         selectedRole, //always student
 
         isMale(),  // don't really know the gender, so guess male...?
+        getRealGender(),
         getAge(),
         getDialect(),
 
@@ -656,7 +642,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         firstName.getSafeText(),
         lastName.getSafeText(),
         trimURL(Window.Location.getHref()),
-        affiliations.get(affBox.getSelectedIndex()-1).getAbb());
+        affiliations.get(affBox.getSelectedIndex() - 1).getAbb());
 
     service.addUser(
         newUser,
@@ -706,7 +692,6 @@ public class SignUpForm extends UserDialog implements SignUp {
                   pleaseCheck.setVisible(true);
                 } else {
                   eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser) +
-                      //    " but waiting for approval from Tamas."
                       "but gotta check email for next step..."
                   );
                   //  markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
@@ -726,6 +711,13 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   protected boolean isMale() {
     return !registrationInfo.isVisible() || registrationInfo.isMale();
+  }
+
+  protected MiniUser.Gender getRealGender() {
+    return !registrationInfo.isVisible() ?
+        MiniUser.Gender.Unspecified : registrationInfo.isMale() ?
+        MiniUser.Gender.Male :
+        MiniUser.Gender.Female;
   }
 
   protected int getAge() {
