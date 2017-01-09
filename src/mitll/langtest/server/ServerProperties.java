@@ -97,6 +97,12 @@ public class ServerProperties {
   public static final String DB_CONFIG = "dbConfig";
   public static final String POSTGRES_HYDRA = "postgresHydra";
   public static final String POSTGRES = "postgres";
+  public static final String AFFLIATIONS = "affliations";
+  public static final String ABBREVIATION = "abbreviation";
+  public static final String DISPLAY_NAME = "displayName";
+  public static final String ID = "_id";
+  public static final String CONFIG = "config";
+  public static final String CONFIG_JSON = "config.json";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
   private static final String NP_SERVER = "np.ll.mit.edu";
 
@@ -229,29 +235,24 @@ public class ServerProperties {
   }
 
   private void getAffiliations(String configDir) throws FileNotFoundException {
-    File file = new File(configDir, "config.json");
+    File file = new File(configDir, CONFIG_JSON);
     if (file.exists()) {
       JsonParser parser = new JsonParser();
       JsonObject parse = parser.parse(new FileReader(file)).getAsJsonObject();
-      JsonArray config = parse.getAsJsonArray("config");
+      JsonArray config = parse.getAsJsonArray(CONFIG);
 
-      logger.info("Got " + config);
       for (JsonElement elem : config) {
-        logger.info("Got " + elem);
 
         JsonObject asJsonObject = elem.getAsJsonObject();
-        if (asJsonObject.has("affliations")) {
-          logger.info("Got " + asJsonObject);
-          JsonElement affiliations1 = asJsonObject.get("affliations");
-          logger.info("\tGot " + affiliations1);
+        if (asJsonObject.has(AFFLIATIONS)) {
+          JsonElement affiliations1 = asJsonObject.get(AFFLIATIONS);
 
           JsonArray affiliations = affiliations1.getAsJsonArray();
           for (JsonElement aff : affiliations) {
             JsonObject asJsonObject1 = aff.getAsJsonObject();
-            String abbreviation = asJsonObject1.get("abbreviation").getAsString();
-            String displayName = asJsonObject1.get("displayName").getAsString();
-            affliations.add(new Affiliation(asJsonObject1.get("_id").getAsInt(), abbreviation, displayName));
-            logger.info(" " + abbreviation + " " + displayName);
+            String abbreviation = asJsonObject1.get(ABBREVIATION).getAsString();
+            String displayName = asJsonObject1.get(DISPLAY_NAME).getAsString();
+            affliations.add(new Affiliation(asJsonObject1.get(ID).getAsInt(), abbreviation, displayName));
           }
         }
       }
