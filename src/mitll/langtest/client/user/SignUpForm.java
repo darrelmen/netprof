@@ -79,7 +79,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private TextBoxBase userBox;
   private TextBoxBase emailBox;
-  private Heading demoHeader;
+  //private Heading demoHeader;
 
   private FormField firstName;
   private FormField lastName;
@@ -153,21 +153,13 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
     String affiliation = candidate.getAffiliation();
     if (affiliation == null || affiliation.isEmpty()) {
-
+      logger.info("no affiliation?");
     } else {
-      int i = 0;
-      boolean found = false;
-      for (Affiliation affiliation1 : affiliations) {
-        if (affiliation1.getAbb().equals(affiliation)) {
-          found = true;
-          break;
-        } else i++;
-      }
-      affBox.setSelectedIndex(found ? i + 1 : 0);
+      setAffBox(affiliation);
     }
 
     boolean b = askForDemographic(candidate);
-    demoHeader.setVisible(b);
+   // demoHeader.setVisible(b);
     registrationInfo.setVisible(b);
 
     FormField firstFocus =
@@ -178,7 +170,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
     if (b) {
       if (firstFocus == null) {
-
+        registrationInfo.grabFocus();
       }
     }
 
@@ -186,6 +178,20 @@ public class SignUpForm extends UserDialog implements SignUp {
       setFocusOn(firstFocus.getWidget());
       markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
     }
+  }
+
+  private void setAffBox(String affiliation) {
+    int i = 0;
+    boolean found = false;
+
+    for (Affiliation affiliation1 : affiliations) {
+      String abb = affiliation1.getAbb();
+      if (abb.equals(affiliation)) {
+        found = true;
+        break;
+      } else i++;
+    }
+    affBox.setSelectedIndex(found ? i + 1 : 0);
   }
 
   /**
@@ -276,9 +282,11 @@ public class SignUpForm extends UserDialog implements SignUp {
     addControlGroupEntrySimple(fieldset,
         "", affBox).setWidth(SIGN_UP_WIDTH);
 
-    demoHeader = getHeader("Demographic Info");
+/*    demoHeader = getHeader("Demographic Info");
     demoHeader.setVisible(false);
-    fieldset.add(demoHeader);
+    fieldset.add(demoHeader);*/
+
+
     makeRegistrationInfo(fieldset);
     registrationInfo.setVisible(false);
 
@@ -451,7 +459,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @param fieldset collect demographic info (age, gender, dialect) only if it's missing and they have the right permission
    */
   private void makeRegistrationInfo(Fieldset fieldset) {
-    registrationInfo = new RegistrationInfo(fieldset);
+    registrationInfo = new RegistrationInfo(fieldset, false);
 
     final TextBoxBase ageBox = registrationInfo.getAgeEntryGroup().box;
     ageBox.addFocusHandler(new FocusHandler() {
@@ -471,12 +479,15 @@ public class SignUpForm extends UserDialog implements SignUp {
     });
 
 //    registrationInfo.hideAge();
-    registrationInfo.getDialectGroup().box.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        userPassLogin.clearSignInHasFocus();
-      }
-    });
+    FormField dialectGroup = registrationInfo.getDialectGroup();
+    if (dialectGroup != null) {
+      dialectGroup.box.addFocusHandler(new FocusHandler() {
+        @Override
+        public void onFocus(FocusEvent event) {
+          userPassLogin.clearSignInHasFocus();
+        }
+      });
+    }
     registrationInfo.getMale().addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -592,6 +603,8 @@ public class SignUpForm extends UserDialog implements SignUp {
       eventRegistration.logEvent(affBox, "Affiliation_ListBox", "N/A", "didn't make choice");
       markErrorBlur(affBox, "Please choose an affiliation.", Placement.RIGHT);
       return false;
+    } else if (!registrationInfo.checkValid()) {
+      return false;
     } else {
       return true;
     }
@@ -625,7 +638,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         isMale(),  // don't really know the gender, so guess male...?
         getRealGender(),
         getAge(),
-        getDialect(),
+        "", // TODO : not getting dialect for now
 
         "browser",
         "",
@@ -671,7 +684,6 @@ public class SignUpForm extends UserDialog implements SignUp {
             } else {
               User theUser = result.getLoggedInUser();
 
-
               if (resultType == LoginResult.ResultType.Updated) {
                 // shift focus to sign in.
                 userPassLogin.setSignInPasswordFocus();
@@ -695,9 +707,9 @@ public class SignUpForm extends UserDialog implements SignUp {
         });
   }
 
-  private String getDialect() {
+/*  private String getDialect() {
     return registrationInfo.isVisible() ? registrationInfo.getDialectGroup().getSafeText() : "unk";
-  }
+  }*/
 
   private boolean isMale() {
     return !registrationInfo.isVisible() || registrationInfo.isMale();
