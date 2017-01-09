@@ -63,7 +63,7 @@ public class SimpleSorter extends ExerciseComparator {
    * @param toSort
    * @param recordedLast
    * @return
-   * @see LangTestDatabaseImpl#sortExercises(String, List)
+   * @see LangTestDatabaseImpl#sortExercises
    */
   public void getSortedByUnitThenAlpha(List<? extends CommonShell> toSort, final boolean recordedLast) {
     if (typeOrder.isEmpty()) {

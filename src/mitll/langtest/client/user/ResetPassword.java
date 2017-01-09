@@ -190,18 +190,6 @@ public class ResetPassword extends UserDialog {
     return changePassword;
   }
 
-/*  private String rot13(String val) {
-    StringBuilder builder = new StringBuilder();
-    for (char c : val.toCharArray()) {
-      if (c >= 'a' && c <= 'm') c += 13;
-      else if (c >= 'A' && c <= 'M') c += 13;
-      else if (c >= 'n' && c <= 'z') c -= 13;
-      else if (c >= 'N' && c <= 'Z') c -= 13;
-      builder.append(c);
-    }
-    return builder.toString();
-  }*/
-
   /**
    * @param firstPassword
    * @param secondPassword for confirmation
@@ -268,8 +256,8 @@ public class ResetPassword extends UserDialog {
 
   private void reloadPage(User user) {
     String newURL = trimURL(Window.Location.getHref());
+    userManager.rememberUser(user);
     Window.Location.replace(newURL);
-    userManager.storeUser(user);
 
     //    Timer t = new Timer() {
 //      @Override

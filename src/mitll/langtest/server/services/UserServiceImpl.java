@@ -166,7 +166,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     IUserSessionDAO userSessionDAO = db.getUserSessionDAO();
     // logger.info("num user sessions before " + userSessionDAO.getNumRows());
 
-    userSessionDAO.add(new SlickUserSession(-1, id1, id, "","", new Timestamp(System.currentTimeMillis())));
+    userSessionDAO.add(new SlickUserSession(-1, id1, id, "", "", new Timestamp(System.currentTimeMillis())));
 
     // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
 
@@ -210,9 +210,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * Updates existing user if they are missing info.
-   *
+   * <p>
    * If user exists already with complete info, then someone is already using this userid
-   *
+   * <p>
    * I don't think we want to mess with the session until they've logged in with a password!
    *
    * @param url
@@ -227,8 +227,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     if (userByID != null) {
       if (userByID.isValid()) {
         return new LoginResult(userByID, LoginResult.ResultType.Exists);
-      }
-      else {
+      } else {
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
         userByID.setLast(user.getLast());
@@ -244,7 +243,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         logger.error("addUser somehow couldn't add " + user.getUserID());
         return new LoginResult(null, LoginResult.ResultType.Failed);
       } else {
-  //      setSessionUser(createSession(), newUser);
+        //      setSessionUser(createSession(), newUser);
         return new LoginResult(newUser, LoginResult.ResultType.Added);
       }
     }
@@ -281,13 +280,13 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @param user
+   * @return true if there's a user with this email
    * @paramx url            IGNORED - remove me!
    * @paramx emailForLegacy
-   * @return true if there's a user with this email
    * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
   public boolean resetPassword(String user
-  //    , String url, String emailForLegacy
+                               //    , String url, String emailForLegacy
   ) {
     String baseURL = getBaseURL();
     logger.debug("resetPassword for " + user + " " + baseURL);
@@ -373,7 +372,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL());
 
     if (result) {
-      return db.getUserDAO().getUserByID(userId);
+      User userByID = db.getUserDAO().getUserByID(userId);
+      if (userByID != null) {
+        setSessionUser(getCurrentSession(), userByID);
+      }
+      return userByID;
     } else {
       //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> result);
       return null;
@@ -438,7 +441,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public boolean forgotUsername(String emailH, String email) {
     String userChosenIDIfValid = db.getUserDAO().isValidEmail(email);
-    getEmailHelper().getUserNameEmail(email,  getBaseURL(), userChosenIDIfValid);
+    getEmailHelper().getUserNameEmail(email, getBaseURL(), userChosenIDIfValid);
     return userChosenIDIfValid != null;
   }
 
