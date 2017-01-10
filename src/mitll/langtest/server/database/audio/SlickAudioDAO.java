@@ -162,7 +162,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
                         Set<Integer> uniqueIDs,
                         Map<Integer, String> exToTranscript,
                         Set<Integer> idsOfRecordedExercises) {
-    return dao.getCountForGender(userIds, audioSpeed, uniqueIDs);
+    Set<Integer> countForGender1 = dao.getCountForGender(userIds, audioSpeed, uniqueIDs,exToTranscript,true);
+    Set<Integer> countForGender = countForGender1;
+    idsOfRecordedExercises.addAll(countForGender);
+    return countForGender.size();
   }
 
   @Override
