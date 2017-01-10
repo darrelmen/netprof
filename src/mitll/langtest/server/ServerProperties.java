@@ -168,13 +168,10 @@ public class ServerProperties {
   private String fontFaceURL;
   private final Map<String, String> phoneToDisplay = new HashMap<>();
   private List<Affiliation> affliations = new ArrayList<>();
-
-/*
-  private int sleepBetweenDecodes;
-  private long trimBeforeAndAfter;
-  private long trimBefore;
-  private long trimAfter;
-*/
+  private String releaseVers = "Unknown";
+  private String buildUser = "Unknown";
+  private String buildVers = "Unknown";
+  private String buildDate = "Unknown";
 
   public static List<String> CORE_PROPERTIES = Arrays.asList(
       ServerProperties.MODELS_DIR,
@@ -183,6 +180,32 @@ public class ServerProperties {
       "webserviceHostPort"
   );
   private String configFileFullPath;
+
+  public ServerProperties() {}
+
+  public ServerProperties(Properties props,
+                          String releaseVers,
+                          String buildUser,
+                          String buildVers,
+                          String buildDate,
+                          File configDir) {
+    this.props = props;
+    this.releaseVers = releaseVers;
+    this.buildUser = buildUser;
+    this.buildVers = buildVers;
+    this.buildDate = buildDate;
+
+    try {
+      useProperties(configDir, buildDate);
+
+      props.put("releaseVers", releaseVers);
+      props.put("buildUser", buildUser);
+      props.put("buildVers", buildVers);
+      props.put("buildDate", buildDate);
+    } catch (FileNotFoundException e) {
+      logger.error("ServerProperties looking in " + configDir + " :" + e, e);
+    }
+  }
 
   /**
    * @param servletContext
@@ -206,8 +229,6 @@ public class ServerProperties {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile, getDateFromManifest(servletContext));
     readPhonemeMap(configDir);
-
-
   }
 
   /**
@@ -215,30 +236,38 @@ public class ServerProperties {
    * @param configFile
    * @param dateFromManifest
    */
-  private String readProps(String configDir, String configFile, String dateFromManifest) {
+  private void readProps(String configDir, String configFile, String dateFromManifest) {
     String configFileFullPath = configDir + File.separator + configFile;
     if (!new File(configFileFullPath).exists()) {
       logger.error("couldn't find config file " + new File(configFileFullPath));
     } else {
       try {
         props = new Properties();
-        props.load(new FileInputStream(configFileFullPath));
-        emailList = new EmailList(props);
-        readProperties(dateFromManifest);
-
-        getAffiliations(configDir);
+        FileInputStream inStream = new FileInputStream(configFileFullPath);
+        props.load(inStream);
+        useProperties(new File(configDir), dateFromManifest);
 //        logger.info("aff " + affliations);
 
         this.configFileFullPath = configFileFullPath;
-        return configFileFullPath;
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
     }
-    return "";
   }
 
-  private void getAffiliations(String configDir) throws FileNotFoundException {
+  private void useProperties(File configDir, String dateFromManifest) throws FileNotFoundException {
+    emailList = new EmailList(props);
+    readProperties(dateFromManifest);
+    getAffiliations(configDir);
+  }
+
+  /**
+   * Read json file.
+   *
+   * @param configDir
+   * @throws FileNotFoundException
+   */
+  private void getAffiliations(File configDir) throws FileNotFoundException {
     File file = new File(configDir, CONFIG_JSON);
     if (file.exists()) {
       JsonParser parser = new JsonParser();
@@ -439,11 +468,12 @@ public class ServerProperties {
    * @param dateFromManifest
    * @see
    */
-  private void readProperties(String dateFromManifest) {
-    if (dateFromManifest != null && dateFromManifest.length() > 0) {
-      props.setProperty("releaseDate", dateFromManifest);
-    }
+  public void readProperties(String dateFromManifest) {
+    setReleaseDate(dateFromManifest);
+    readProperties();
+  }
 
+  private void readProperties() {
     quietAudioOK = getDefaultFalse(QUIET_AUDIO_OK);
 
     try {
@@ -457,6 +487,7 @@ public class ServerProperties {
       }
     }
 
+    // TODO TODO : read this from project!
     String property = props.getProperty(PREFERRED_VOICES);
     if (property != null) {
       for (String userid : property.split(",")) {
@@ -479,6 +510,12 @@ public class ServerProperties {
       props.setProperty(FONT_FAMILY, getFontFamily());
       logger.info(FONT_FAMILY +
           "=" + getFontFamily() + " : " + props.getProperty(FONT_FAMILY));
+    }
+  }
+
+  private void setReleaseDate(String dateFromManifest) {
+    if (dateFromManifest != null && dateFromManifest.length() > 0) {
+      props.setProperty("releaseDate", dateFromManifest);
     }
   }
 

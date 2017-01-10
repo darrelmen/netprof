@@ -274,4 +274,5 @@ public interface IUserDAO extends IDAO {
    */
   void update(User toUpdate);
 
+  void cleanUp();
 }

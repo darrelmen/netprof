@@ -49,12 +49,13 @@ import java.util.jar.Manifest;
 /**
  * Created by go22670 on 1/9/17.
  */
-public class ServerInitializationManager {
+public class ServerInitializationManagerNetProf {
   private static Logger log = LogManager.getLogger();
 
   public static final String appName = "netprof";
 
-  public static final String DEFAULT_PROPERTY_HOME = "/opt/"+appName;
+  public static final String DEFAULT_PROPERTY_HOME =
+      File.separator + "opt" + File.separator + appName + File.separator + "config";
 
   /**
    * The name of the config file attribute optionally passed in as -D.
@@ -79,39 +80,45 @@ public class ServerInitializationManager {
 /*
   */
 /**
-   * The name of the mongo pool in the context.
-   *//*
+ * The name of the mongo pool in the context.
+ *//*
 
   public static final String MONGO_ATT_NAME = "mongo-client";
 
   */
 /**
-   * The name of the document service in the context.
-   *//*
+ * The name of the document service in the context.
+ *//*
 
   public static final String USER_SVC = "user-service";
 
   */
 /**
-   * The name of the cache manager in the context.
-   *//*
+ * The name of the cache manager in the context.
+ *//*
 
   public static final String IGNITE = "ignite";
 
   */
-/**
+
+  /**
    * The name of the JSON serializer in the context.
    *//*
 
   public static final String JSON_SERIALIZER = "j-serializer";
 */
-
   public ServerProperties getServerProps(ServletContext newContext) {
     DateFormatter.init(new GWTDateFormatter());
 
     log.info("Starting initialization");
-    InputStream in = findServerProperties(newContext);
-    ServerProperties props = getServerProperties(in, newContext);
+    ServerProperties props = null;
+    try {
+      InputStream in = findServerProperties(newContext);
+      props = getServerProperties(in, newContext);
+    } catch (Exception e) {
+      log.error("trying to read props - got " + e, e);
+      props = new ServerProperties();
+    }
     return props;
   }
 
@@ -283,8 +290,9 @@ public class ServerInitializationManager {
   }
 
   private File configDir = null;
+
   private InputStream openPropertiesFileStream(String configFileName) {
-    InputStream in = ServerInitializationManager.class.getClassLoader().getResourceAsStream(configFileName);
+    InputStream in = ServerInitializationManagerNetProf.class.getClassLoader().getResourceAsStream(configFileName);
     log.info("Attempted to get input stream for " + configFileName +
         " as resource. Result: " + in);
     if (in == null) {

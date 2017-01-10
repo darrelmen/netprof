@@ -60,6 +60,7 @@ import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.ServletContext;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -96,6 +97,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private mitll.hlt.domino.shared.model.user.User adminUser;
   private mitll.hlt.domino.shared.model.user.User dominoImportUser;
   private DBUser dominoAdminUser;
+  private Ignite ignite = null;
 
   /**
    * @param database
@@ -123,7 +125,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       String appName = dominoProps.getAppName();
       logger.info("DominoUserDAOImpl app name is " + appName);
 
-      Ignite ignite = null;
+      ignite = null;
       if (dominoProps.isCacheEnabled()) {
         ignite = getIgnite();
         if (ignite != null) {
@@ -131,7 +133,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         }
 
         logger.info("cache - ignite!");
-       // newContext.setAttribute(IGNITE, ignite);
+        // newContext.setAttribute(IGNITE, ignite);
       }
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, ignite);
       myDelegate = makeMyServiceDelegate(dominoProps.getUserServiceProperties(), m, pool, serializer);
@@ -139,6 +141,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       dominoAdminUser = delegate.getAdminUser();
     } else {
       logger.error("couldn't connect to user service");
+    }
+  }
+
+  @Override
+  public void cleanUp() {
+    if (pool != null) {
+      pool.closeConnection();
+    }
+    if (ignite != null) {
+      ignite.close();
     }
   }
 
@@ -632,7 +644,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     Group secondary = getGroupOrMake(projectName);
 
     Set<String> roleAbbreviations = Collections.singleton(user.getUserKind().getRole());
-   // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
+    // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
         user.getUserID(),
@@ -873,6 +885,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * TODO: try to avoid?
+   *
    * @return
    */
   private List<DBUser> getAll() {
@@ -1169,7 +1182,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   *  user updates happen in domino UI...
+   * user updates happen in domino UI...
    *
    * @param toUpdate
    */

@@ -61,7 +61,8 @@ public class PathHelper {
 
   private String realContextPathTest;
   private final ServletContext context;
-  private String configDir;
+  //  private String configDir;
+  private String installDir;
   private ServerProperties properties;
 
   public PathHelper(ServletContext context) {
@@ -238,14 +239,18 @@ public class PathHelper {
     }
     return imageOutdir;
   }
+/*
 
   public void setConfigDir(String configDir) {
     this.configDir = configDir;
   }
+*/
 
+/*
   public String getConfigDir() {
     return configDir;
   }
+*/
 
   public void setProperties(ServerProperties properties) {
     this.properties = properties;
