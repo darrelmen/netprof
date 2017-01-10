@@ -41,8 +41,8 @@ test {
 }
 
 license {
-        skipExistingHeaders true
-        ignoreFailures true
+    skipExistingHeaders true
+    ignoreFailures true
 }
 
 repositories {
@@ -57,7 +57,7 @@ evaluationDependsOn(':imagewriter')
 
 dependencies {
     compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT') { changing = true }
-    compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT'){changing = true}
+    compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT') { changing = true }
 
     compile 'com.google.gwt:gwt-user:2.8.0'
     compile 'com.google.gwt:gwt-servlet:2.8.0'
@@ -85,7 +85,7 @@ dependencies {
     compile project(':npdata')
     compile project(':imagewriter')
 
-   // compile 'org.apache.poi:poi:3.15'
+    // compile 'org.apache.poi:poi:3.15'
     compile 'net.sf.uadetector:uadetector-core:0.9.22'
     compile 'net.sf.uadetector:uadetector-resources:2013.04'
 
@@ -182,13 +182,13 @@ war {
     rootSpec.exclude("**/log4j2-test.xml")
 
     // from 'war/bin'
-    from ('war/config/netProf') {
+    from('war/config/netProf') {
         into 'config/netProf'
     }
-    from ('war/scoring/bin.linux64') {
+    from('war/scoring/bin.linux64') {
         into 'scoring/bin.linux64'
     }
-    from ('war/scoring/configurations') {
+    from('war/scoring/configurations') {
         into 'scoring/configurations'
     }
     from 'war/amas.css'
@@ -205,12 +205,27 @@ war {
 
     webXml = file('war/WEB-INF/web.xml')
 
-    from ('src') {
+    from('src') {
         include '**/log*'
         into 'WEB-INF/classes'
     }
-
 }
+
+//task makeInstallation(type: Zip) {
+//    from('war/config/netProf') {
+//        into 'config'
+//    }
+//}
+
+task makeInstallation(type: Zip) {
+    from ('war/config/netProf') {
+        into 'config'
+    }
+}
+
+println myZip.archiveName
+println relativePath(myZip.destinationDir)
+println relativePath(myZip.archivePath)
 
 // ***************************** Publishing **************************************
 publishing {
