@@ -44,7 +44,6 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
@@ -164,7 +163,7 @@ public class DominoUserTest extends BaseTest {
     logger.info("counts " + userDAO + " " + userDAO.getUsers().size());
 
     spanish.populateProjects();
-    spanish.setInstallPath("", "", "");
+    spanish.setInstallPath("", "");
 
     Project project = spanish.getProject(2);
 
@@ -216,7 +215,7 @@ public class DominoUserTest extends BaseTest {
 
     spanish.populateProjects();
 
-    spanish.setInstallPath("", "", "");
+    spanish.setInstallPath("", "");
 
     Project project = spanish.getProject(english);
 

@@ -161,7 +161,7 @@ public class ProjectTest extends BaseTest {
     logger.info("counts " + userDAO + " " + userDAO.getUsers().size());
 
     spanish.populateProjects();
-    spanish.setInstallPath("", "", "");
+    spanish.setInstallPath("", "");
 
     Project project = spanish.getProject(2);
 
@@ -213,7 +213,7 @@ public class ProjectTest extends BaseTest {
 
     spanish.populateProjects();
 
-    spanish.setInstallPath("", "", "");
+    spanish.setInstallPath("", "");
 
     Project project = spanish.getProject(english);
 
