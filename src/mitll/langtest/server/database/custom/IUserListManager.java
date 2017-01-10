@@ -48,6 +48,7 @@ import mitll.npdata.dao.DBConnection;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface IUserListManager {
   int REVIEW_MAGIC_ID  = -100;
@@ -68,13 +69,16 @@ public interface IUserListManager {
 
   UserList createFavorites(int userid, int projid);
 
-  UserList<CommonShell> getCommentedList(Collection<String> typeOrder);
-  UserList<CommonShell> getAttentionList(Collection<String> typeOrder);
-  UserList<CommonShell> getDefectList(Collection<String> typeOrder);
+  UserList<CommonShell> getCommentedList(Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids);
 
-  UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder);
-  UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder);
-  UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder);
+  UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder, Set<Integer> ids);
+
+  UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonExercise> getUserListByIDExercises(long id, int projid, Collection<String> typeOrder, Set<Integer> ids);
 
   Collection<Integer> getDefectExercises();
 
@@ -92,8 +96,6 @@ public interface IUserListManager {
 
   CommonExercise duplicate(CommonExercise userExercise);
 
-  UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder);
-  UserList<CommonExercise> getUserListByIDExercises(long id, Collection<String> typeOrder);
 
   void addVisitor(long userListID, long user);
 

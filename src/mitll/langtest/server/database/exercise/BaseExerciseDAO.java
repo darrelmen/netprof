@@ -106,6 +106,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     return getRawExercises().size();
   }
 
+  public Set<Integer> getIDs() { return idToExercise.keySet(); }
+
   /**
    * @return
    * @see DatabaseImpl#getExercises(int)

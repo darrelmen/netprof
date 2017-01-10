@@ -82,6 +82,7 @@ public abstract class BaseAudioDAO extends DAO {
   private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
   private static final String TRANSLITERATION = "transliteration";
   private static final boolean DEBUG_ATTACH = false;
+  private static final int WARN_DURATION = 30;
   // public static final String BEST_AUDIO = "bestAudio";
 
   protected final IUserDAO userDAO;
@@ -108,10 +109,9 @@ public abstract class BaseAudioDAO extends DAO {
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
 
-    logger.info("getExToAudio - for " +projid);
+//    logger.info("getExToAudio - for " +projid);
     Collection<AudioAttribute> attributesByProject = getAudioAttributesByProject(projid);
-
-    logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
+  //  logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
 
     for (AudioAttribute audio : attributesByProject) {
       Integer exid = audio.getExid();
@@ -154,7 +154,7 @@ public abstract class BaseAudioDAO extends DAO {
     Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(firstExercise.getID());
     long now = System.currentTimeMillis();
 
-    if (now - then > 20)
+    if (now - then > WARN_DURATION)
       logger.warn("attachAudioToExercise took " + (now - then) + " to get " + audioAttributes.size() + " attributes");
 /*    if (DEBUG) {
       logger.debug("\attachAudio : found " + audioAttributes.size() + " for " + firstExercise.getOldID());
@@ -171,7 +171,7 @@ public abstract class BaseAudioDAO extends DAO {
     boolean attachedAll = attachAudio(firstExercise, audioAttributes, language);
     now = System.currentTimeMillis();
 
-    if (now - then > 20)
+    if (now - then > WARN_DURATION)
       logger.warn("attachAudioToExercise took " + (now - then) + " to attach audio to " + firstExercise.getID());
 
     if (!attachedAll)

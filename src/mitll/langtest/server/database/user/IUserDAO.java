@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
@@ -175,6 +176,9 @@ public interface IUserDAO extends IDAO {
    * @return
    */
   Map<Integer, User> getUserMap(boolean getMale);
+
+  Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all);
+  List<DBUser> getAll();
 
   /**
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)

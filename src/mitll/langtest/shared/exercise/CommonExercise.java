@@ -79,5 +79,6 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
   MutableAudioExercise getMutableAudio();
 
   MutableAnnotationExercise getMutableAnnotation();
+
   CommonAnnotatable getCommonAnnotatable();
 }

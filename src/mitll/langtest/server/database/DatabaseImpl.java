@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
@@ -211,7 +212,7 @@ public class DatabaseImpl implements Database {
             new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify, readOnly) :
             serverProps.usePostgres() ?
                 new PostgreSQLConnection(dbName, logAndNotify) :
-                    null,
+                null,
         configDir, relativeConfigDir, dbName,
         serverProps,
         pathHelper, logAndNotify/*,servletContext*/);
@@ -1520,11 +1521,18 @@ public class DatabaseImpl implements Database {
   }
 
   public UserList<CommonShell> getUserListByID(long listid, int projectid) {
-    return getUserListManager().getUserListByID(listid, getSectionHelper(projectid).getTypeOrder());
+    return getUserListManager().getUserListByID(listid, getSectionHelper(projectid).getTypeOrder(), getIDs(projectid));
   }
 
   public UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid) {
-    return getUserListManager().getUserListByIDExercises(listid, getSectionHelper(projectid).getTypeOrder());
+    return getUserListManager().getUserListByIDExercises(listid,
+        projectid,
+        getSectionHelper(projectid).getTypeOrder(), getIDs(projectid));
+  }
+
+  public Set<Integer> getIDs(int projectid) {
+    ExerciseDAO<CommonExercise> exerciseDAO = getExerciseDAO(projectid);
+    return exerciseDAO == null ? Collections.emptySet() : exerciseDAO.getIDs();
   }
 
   /**
@@ -1630,10 +1638,11 @@ public class DatabaseImpl implements Database {
     logger.info("getMaleFemaleProgress getting exercises -- " + projectid);
     Collection<CommonExercise> exercises = getExercises(projectid);
 
-    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
+    List<DBUser> all = userDAO.getAll();
+    Map<Integer, User> userMapMales = userDAO.getUserMapFromUsers(true, all);
     logger.info("getMaleFemaleProgress getting userMapMales -- " + userMapMales.size());
 
-    Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
+    Map<Integer, User> userMapFemales = userDAO.getUserMapFromUsers(false, all);
     logger.info("getMaleFemaleProgress getting userMapFemales -- " + userMapFemales.size());
 
     float total = exercises.size();
