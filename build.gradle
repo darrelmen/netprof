@@ -99,6 +99,8 @@ dependencies {
     compile name: 'gwt-visualization'
     compile name: 'mira'
 
+    // TODO : get these as artifactory dependencies
+
     compile name: 'pronz_2.11-1.0'
     compile name: 'hydec_2.11-1.0'
     compile name: 'utils_2.11-1.0.0-SNAPSHOT'
@@ -126,9 +128,9 @@ if (project.rootProject != project) {
 
 sourceSets {
     main {
-        java {
-            srcDirs = ['src']
-        }
+//        java {
+//            srcDirs = ['src']
+//        }
         resources {
             srcDirs = ['src/main/resources']
         }
@@ -148,18 +150,18 @@ gwt {
     gwtVersion = '2.8.0'
     modules 'mitll.langtest.LangTest'
 
-    sourceSets {
-        main {
-            java {
-                srcDir 'src'
-            }
-        }
-    }
+//    sourceSets {
+//        main {
+//            java {
+//                srcDir 'src'
+//            }
+//        }
+//    }
 
     logLevel = 'ERROR'
 
     minHeapSize = "512M";
-    maxHeapSize = "3G";
+    maxHeapSize = "4G";
 
     superDev {
         noPrecompile = true
@@ -169,7 +171,6 @@ gwt {
     eclipse {
         addGwtContainer = false // Default set to true
     }
-
     //Specify the deployment Port
     // jettyRunWar.httpPort = 8089
 }
