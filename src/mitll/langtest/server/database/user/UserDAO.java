@@ -845,6 +845,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public void cleanUp() {
+
+  }
+
+  @Override
   public boolean forgotPassword(String user
       , String url
                                 //    ,                              String emailForLegacy
