@@ -100,13 +100,15 @@ public class UnitChapterItemHelper<T extends CommonShell> {
     Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
-    //logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
+    logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
     for (String type : typeOrder) {
       String subtext = exercise.getUnitToValue().get(type);
-      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
-      child.addStyleName("rightFiveMargin");
-      flow.add(child);
+      if (subtext != null && !subtext.isEmpty()) {
+        Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
+        child.addStyleName("rightFiveMargin");
+        flow.add(child);
+      }
     }
     return flow;
   }
