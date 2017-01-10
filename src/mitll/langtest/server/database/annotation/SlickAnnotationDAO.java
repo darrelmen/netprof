@@ -115,7 +115,10 @@ public class SlickAnnotationDAO
     Collection<SlickAnnotation> latestByExerciseID = dao.getLatestByExerciseID(exerciseID);
 
     long now = System.currentTimeMillis();
-    logger.info("took " + (now-then) + " millis to get ex->anno map for " + exerciseID);
+
+    if (now-then >20) {
+      logger.info("getLatestByExerciseID took " + (now - then) + " millis to get ex->anno map for " + exerciseID);
+    }
 
     return getFieldToAnnotationMapSlick(latestByExerciseID);
   }

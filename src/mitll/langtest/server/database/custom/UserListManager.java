@@ -36,6 +36,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.audio.TrackInfo;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
@@ -254,7 +255,7 @@ public class UserListManager implements IUserListManager {
    *
    * @param skipUnset
    * @return
-   * @see #getCommentedList(java.util.Collection)
+   * @see IUserListManager#getCommentedList(Collection, Set)
    */
   @Override
   public Map<Integer, StateCreator> getExerciseToState(boolean skipUnset) {
@@ -266,7 +267,7 @@ public class UserListManager implements IUserListManager {
    *
    * @param shells
    * @see #getReviewList
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    */
   @Override
   public void markState(Collection<? extends CommonShell> shells) {
@@ -434,7 +435,7 @@ public class UserListManager implements IUserListManager {
    * @param userid
    * @param projid
    * @return
-   * @see mitll.langtest.server.database.user.UserManagement#addAndGetUser
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject(int, int)
    */
   @Override
   public UserList createFavorites(int userid, int projid) {
@@ -448,11 +449,12 @@ public class UserListManager implements IUserListManager {
    * annotations - only if the latest is incorrect should the item appear on the comment or defect list.
    *
    * @param typeOrder
+   * @param ids
    * @return
-   * @see LangTestDatabaseImpl#getReviewLists
+   * @see mitll.langtest.server.services.ListServiceImpl#getReviewLists
    */
   @Override
-  public UserList<CommonShell> getCommentedList(Collection<String> typeOrder) {
+  public UserList<CommonShell> getCommentedList(Collection<String> typeOrder, Set<Integer> ids) {
     //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
 
     Collection<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
@@ -464,7 +466,7 @@ public class UserListManager implements IUserListManager {
       incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
     }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
-
+    incorrectAnnotations.retainAll(ids);
     Collection<CommonExercise> include = userExerciseDAO.getByExID(incorrectAnnotations);
     //logger.debug("getCommentedList include " + include.size() + " included ");
 
@@ -474,7 +476,7 @@ public class UserListManager implements IUserListManager {
   }
 
   @Override
-  public UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder) {
+  public UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder, Set<Integer> ids) {
     //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
 
     Collection<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
@@ -486,6 +488,8 @@ public class UserListManager implements IUserListManager {
       incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
     }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
+
+    incorrectAnnotations.retainAll(ids);
 
     Collection<CommonExercise> include = userExerciseDAO.getByExID(incorrectAnnotations);
     //logger.debug("getCommentedList include " + include.size() + " included ");
@@ -496,9 +500,9 @@ public class UserListManager implements IUserListManager {
   }
 
   @Override
-  public UserList<CommonShell> getAttentionList(Collection<String> typeOrder) {
+  public UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids) {
     Set<Integer> defectIds = getAttentionIDs();
-
+    defectIds.retainAll(ids);
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
 
@@ -506,9 +510,9 @@ public class UserListManager implements IUserListManager {
   }
 
   @Override
-  public UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder) {
+  public UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids) {
     Set<Integer> defectIds = getAttentionIDs();
-
+    defectIds.retainAll(ids);
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
 
@@ -533,24 +537,32 @@ public class UserListManager implements IUserListManager {
    * TODO : probably a bad idea to do a massive where in ... ids.
    *
    * @param typeOrder used by sorter to sort first in unit & chapter order
+   * @param ids
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getReviewLists
-   * @see #getUserListByID
+   * @see UserListManager#getUserListByID
    */
   @Override
-  public UserList<CommonShell> getDefectList(Collection<String> typeOrder) {
+  public UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids) {
     Set<Integer> defectIds = getDefectIDs();
-
+    defectIds.retainAll(ids);
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
     return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
   }
 
-  @Override
-  public UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder) {
-    Set<Integer> defectIds = getDefectIDs();
+  /**
+   * @param typeOrder
+   * @param ids
+   * @return
+   * @see #getUserListByIDExercises(long, int, Collection, Set)
+   */
 
+  @Override
+  public UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder, Set<Integer> ids) {
+    Set<Integer> defectIds = getDefectIDs();
+    defectIds.retainAll(ids);
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
@@ -579,9 +591,9 @@ public class UserListManager implements IUserListManager {
    * @param userListID
    * @param typeOrder   used by sorter to sort first in unit & chapter order
    * @return
-   * @see #getAttentionList(java.util.Collection)
-   * @see #getCommentedList(java.util.Collection)
-   * @see #getDefectList(java.util.Collection)
+   * @see IUserListManager#getAttentionList(Collection, Set)
+   * @see IUserListManager#getCommentedList(Collection, Set)
+   * @see IUserListManager#getDefectList(Collection, Set)
    */
   private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
                                               String name, String description,
@@ -700,7 +712,7 @@ public class UserListManager implements IUserListManager {
   /**
    * TODO : do a search over the list fields to find matches
    *
-   * @param search
+   * @param search NOT YET IMPLEMENTED
    * @param userid
    * @param projid
    * @return
@@ -715,8 +727,7 @@ public class UserListManager implements IUserListManager {
    * @param userListID
    * @param userExercise notional until now!
    * @param mediaDir
-   * @seezz #addItemToUserList
-   * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItem
+   * @see mitll.langtest.server.services.AudioServiceImpl#reallyCreateNewItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
@@ -892,8 +903,9 @@ public class UserListManager implements IUserListManager {
                                  String destFileName,
                                  boolean overwrite,
                                  TrackInfo trackInfo) {
-    ServerProperties serverProps = userDAO.getDatabase().getServerProps();
-    Project project = userDAO.getDatabase().getProject(projid);
+    Database database = userDAO.getDatabase();
+    ServerProperties serverProps = database.getServerProps();
+    Project project = database.getProject(projid);
     return new PathWriter(serverProps).getPermanentAudioPath(
         fileRef,
         destFileName,
@@ -914,35 +926,46 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * TODO : consider how to ask for just annotations for a project, instead of getting all of them
+   * and then filtering for just those on the requested project
+   *
    * @param id
    * @param typeOrder
+   * @param ids
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserListName(long, int)
+   * @see
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserListByID
    */
   @Override
-  public UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder) {
+  public UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder, Set<Integer> ids) {
     if (id == -1) {
       logger.error("getUserListByID : huh? asking for id " + id);
       return null;
     }
     return
-        id == REVIEW_MAGIC_ID ? getDefectList(typeOrder) :
-            id == COMMENT_MAGIC_ID ? getCommentedList(typeOrder) :
-                id == ATTN_LL_MAGIC_ID ? getAttentionList(typeOrder) :
+        id == REVIEW_MAGIC_ID ? getDefectList(typeOrder, ids) :
+            id == COMMENT_MAGIC_ID ? getCommentedList(typeOrder, ids) :
+                id == ATTN_LL_MAGIC_ID ? getAttentionList(typeOrder, ids) :
                     userListDAO.getWithExercises(id);
   }
 
+  /**
+   * @param id
+   * @param projid
+   * @param typeOrder @return
+   * @param ids
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserListByIDExercises
+   */
   @Override
-  public UserList<CommonExercise> getUserListByIDExercises(long id, Collection<String> typeOrder) {
+  public UserList<CommonExercise> getUserListByIDExercises(long id, int projid, Collection<String> typeOrder, Set<Integer> ids) {
     if (id == -1) {
       logger.error("getUserListByID : huh? asking for id " + id);
       return null;
     }
     return
-        id == REVIEW_MAGIC_ID ? getDefectListEx(typeOrder) :
-            id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder) :
-                id == ATTN_LL_MAGIC_ID ? getAttentionListEx(typeOrder) :
+        id == REVIEW_MAGIC_ID ? getDefectListEx(typeOrder, ids) :
+            id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder, ids) :
+                id == ATTN_LL_MAGIC_ID ? getAttentionListEx(typeOrder, ids) :
                     userListDAO.getWithExercisesEx(id);
 
   }
@@ -1002,7 +1025,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param exercise
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#addAnnotations
    * @see #markAllFieldsFixed
    */
   @Override
@@ -1022,7 +1045,6 @@ public class UserListManager implements IUserListManager {
    * @param id
    * @param correct
    * @param userid
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
   @Override
@@ -1034,7 +1056,6 @@ public class UserListManager implements IUserListManager {
    * @param exid
    * @param state
    * @param creatorID
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed
    * @see #addAnnotation
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
@@ -1065,7 +1086,7 @@ public class UserListManager implements IUserListManager {
    * @param shell
    * @param state
    * @param creatorID
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState
+   * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
    * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
    */
@@ -1079,7 +1100,7 @@ public class UserListManager implements IUserListManager {
    * @param shell
    * @param state
    * @param creatorID
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState
+   * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
    * @see mitll.langtest.server.database.custom.UserListManager#markState
    */
   @Override
@@ -1091,7 +1112,7 @@ public class UserListManager implements IUserListManager {
   /**
    * @param exerciseID
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState
+   * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
    */
   @Override
   public STATE getCurrentState(int exerciseID) {
@@ -1109,8 +1130,8 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param userExercise
-   * @param userID
-   * @see #markState(String, STATE, long)
+   * @param userid
+   * @see #markState
    */
   private void markAllFieldsFixed(CommonExercise userExercise, int userid) {
     Collection<String> fields = userExercise.getFields();
@@ -1153,7 +1174,7 @@ public class UserListManager implements IUserListManager {
   public boolean deleteItemFromList(long listid, int exid, Collection<String> typeOrder) {
     logger.debug("deleteItemFromList " + listid + " " + exid);
 
-    UserList<?> userListByID = getUserListByID(listid, typeOrder);
+    UserList<?> userListByID = getUserListByID(listid, typeOrder, Collections.emptySet());
     if (userListByID == null) {
       logger.warn("deleteItemFromList huh? no user list with id " + listid);
       return false;
@@ -1170,7 +1191,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByOnlyAudioAnno
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByOnlyAudioAnno
    */
   @Override
   public Collection<Integer> getAudioAnnos() {

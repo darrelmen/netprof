@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.shared.user.MiniUser;
@@ -705,6 +706,16 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   @Override
   public Map<Integer, User> getUserMap(boolean getMale) {
     return getUserMap(getMale, getUsers());
+  }
+
+  @Override
+  public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {
+    return null;
+  }
+
+  @Override
+  public List<DBUser> getAll() {
+    return null;
   }
 
   @Override
