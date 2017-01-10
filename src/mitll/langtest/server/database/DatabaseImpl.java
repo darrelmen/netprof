@@ -1627,10 +1627,15 @@ public class DatabaseImpl implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress(int projectid) {
     IUserDAO userDAO = getUserDAO();
-    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
-    Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
-
+    logger.info("getMaleFemaleProgress getting exercises -- " + projectid);
     Collection<CommonExercise> exercises = getExercises(projectid);
+
+    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
+    logger.info("getMaleFemaleProgress getting userMapMales -- " + userMapMales.size());
+
+    Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
+    logger.info("getMaleFemaleProgress getting userMapFemales -- " + userMapFemales.size());
+
     float total = exercises.size();
     Set<Integer> uniqueIDs = new HashSet<>();
 
@@ -1647,12 +1652,12 @@ public class DatabaseImpl implements Database {
       exToTranscript.put(shell.getID(), shell.getForeignLanguage());
       exToContextTranscript.put(shell.getID(), shell.getContext());
     }
-/*
+
     logger.info("getMaleFemaleProgress found " + total + " total exercises, " +
         uniqueIDs.size() +
         " unique" +
         " males " + userMapMales.size() + " females " + userMapFemales.size());
-*/
+
 
     return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs,
         exToTranscript, exToContextTranscript, context);
