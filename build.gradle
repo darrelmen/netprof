@@ -209,9 +209,9 @@ task makeInstallation(type: Zip) {
     }
 }
 
-println myZip.archiveName
-println relativePath(myZip.destinationDir)
-println relativePath(myZip.archivePath)
+println makeInstallation.archiveName
+println relativePath(makeInstallation.destinationDir)
+println relativePath(makeInstallation.archivePath)
 
 // ***************************** Publishing **************************************
 publishing {
