@@ -41,6 +41,7 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.StartupInfo;
@@ -437,13 +438,32 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see #init()
    */
   private void readProperties(ServletContext servletContext) {
+/*    ServerInitializationManagerNetProf serverInitializationManagerNetProf = new ServerInitializationManagerNetProf();
+    ServerProperties serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
+
+    File configDir = serverInitializationManagerNetProf.getConfigDir();
+
+    this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
+
+   // this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
+    this.configDir = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
+
+    logger.info("relativeConfigDir " + relativeConfigDir);
+    logger.info("configDir " + configDir);
+
+   // pathHelper.setConfigDir(configDir);
+  //  serverProps = new ServerProperties(servletContext, configDir);
+
+    this.serverProps = serverProps;//new ServerProperties(servletContext, configDir);*/
+
+
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-    pathHelper.setConfigDir(configDir);
+   // pathHelper.setConfigDir(configDir);
 
     serverProps = new ServerProperties(servletContext, configDir);
-    //   audioConversion = new AudioConversion(serverProps);
-    db = makeDatabaseImpl(serverProps.getH2Database());
+
+    db = makeDatabaseImpl(this.serverProps.getH2Database());
     shareDB(servletContext);
     securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
 //    shareLoadTesting(servletContext);
@@ -483,18 +503,20 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see LangTestDatabaseImpl#init()
    */
   private void setInstallPath(DatabaseImpl db) {
-    String lessonPlanFile = getLessonPlan();
-    if (lessonPlanFile != null &&
-        !serverProps.getLessonPlan().startsWith("http") &&
-        !new File(lessonPlanFile).exists()) {
-      logger.error("couldn't find lesson plan file " + lessonPlanFile);
-    }
+//    String lessonPlanFile = getLessonPlan();
+//    if (lessonPlanFile != null &&
+//        !serverProps.getLessonPlan().startsWith("http") &&
+//        !new File(lessonPlanFile).exists()) {
+//      logger.error("couldn't find lesson plan file " + lessonPlanFile);
+//    }
 
     String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
     String installPath = pathHelper.getInstallPath();
-    logger.debug("setInstallPath " + installPath + " " + lessonPlanFile + " media " + serverProps.getMediaDir() + " rel media " + mediaDir);
+    logger.debug("setInstallPath " + installPath +
+        //" " + lessonPlanFile + " media " +
+        serverProps.getMediaDir() + " rel media " + mediaDir);
     db.setInstallPath(installPath,
-        lessonPlanFile,
+        null,
         mediaDir);
   }
 
@@ -502,7 +524,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @deprecated - only used (if at all) during import
    * @return
    */
-  private String getLessonPlan() {
+/*  private String getLessonPlan() {
     return serverProps.getLessonPlan() == null ? null : configDir + File.separator + serverProps.getLessonPlan();
-  }
+  }*/
 }

@@ -170,6 +170,7 @@ public class DatabaseImpl implements Database {
   private final LogAndNotify logAndNotify;
 
   private mitll.langtest.server.database.user.UserManagement userManagement = null;
+
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
   private PathHelper pathHelper;
@@ -1234,6 +1235,7 @@ public class DatabaseImpl implements Database {
    */
   public void destroy() {
     try {
+      userDAO.cleanUp();
       if (connection != null) {
         connection.contextDestroyed();
       }

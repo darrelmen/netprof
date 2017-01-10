@@ -161,7 +161,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param rightMargin
    * @param exercise
    * @param exerciseID
-   * @param instance        @paramx exerciseID
+   * @param instance
+   * @paramx exerciseID
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
    */
   protected AudioPanel(ExerciseController controller,
@@ -187,7 +188,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
-    logger.info("AudioPanel " + getElement().getId() + " width " + width);
+    //logger.info("AudioPanel " + getElement().getId() + " width " + width);
     setWidth((width) + "px");
   }
 
