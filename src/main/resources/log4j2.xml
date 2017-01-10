@@ -35,7 +35,7 @@
     <Properties>
         <Property name="log.mailhost">localhost</Property>
         <Property name="log.mailfrom">noreply@dliflc.edu</Property>
-        <Property name="log.mailto">raymond.budd@ll.mit.edu,ray.budd@gmail.com,joseph.aparo@ll.mit.edu</Property>
+        <Property name="log.mailto">raymond.budd@ll.mit.edu,ray.budd@gmail.com,gordon.vidaver@ll.mit.edu</Property>
     </Properties>
     <appenders>
         <!--

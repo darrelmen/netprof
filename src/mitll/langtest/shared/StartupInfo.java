@@ -59,7 +59,7 @@ public class StartupInfo implements IsSerializable {
 
   /**
    * @param properties
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo
    */
   public StartupInfo(Map<String, String> properties,
                      List<SlimProject> projects,

@@ -184,15 +184,17 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     context.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
     addBlurHandler(ul.getID(), context);
 
-    CommonExercise next = newUserExercise.getDirectlyRelated().iterator().next();
-    box.setText(originalContext = next.getForeignLanguage());
-    box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        gotBlur();
-        logBlur("ContextBox = ", box);
-      }
-    });
+    if (newUserExercise.hasContext()) {
+      CommonExercise next = newUserExercise.getDirectlyRelated().iterator().next();
+      box.setText(originalContext = next.getForeignLanguage());
+      box.addBlurHandler(new BlurHandler() {
+        @Override
+        public void onBlur(BlurEvent event) {
+          gotBlur();
+          logBlur("ContextBox = ", box);
+        }
+      });
+    }
 
     useAnnotation(newUserExercise, "context", contextAnno);
     useAnnotation(newUserExercise, "context translation", contextTransAnno);
@@ -213,15 +215,17 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     contextTrans.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
     addBlurHandler(ul.getID(), contextTrans);
 
-    CommonExercise next = newUserExercise.getDirectlyRelated().iterator().next();
-    box1.setText(originalContextTrans = next.getEnglish());
-    box1.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        gotBlur();
-        logBlur("ContextTransBox = ", box1);
-      }
-    });
+    if (newUserExercise.hasContext()) {
+      CommonExercise next = newUserExercise.getDirectlyRelated().iterator().next();
+      box1.setText(originalContextTrans = next.getEnglish());
+      box1.addBlurHandler(new BlurHandler() {
+        @Override
+        public void onBlur(BlurEvent event) {
+          gotBlur();
+          logBlur("ContextTransBox = ", box1);
+        }
+      });
+    }
 
     useAnnotation(newUserExercise, "context translation", contextTransAnno);
   }

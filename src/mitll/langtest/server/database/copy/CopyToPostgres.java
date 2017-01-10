@@ -84,8 +84,8 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
   private static final boolean COPY_EVENTS = true;
   private static final int WARN_MISSING_THRESHOLD = 10;
-  public static final String QUIZLET_PROPERTIES = "quizlet.properties";
-  public static final String DOMINO_PROPERTIES = "domino.properties";
+  private static final String QUIZLET_PROPERTIES = "quizlet.properties";
+  private static final String DOMINO_PROPERTIES = "domino.properties";
 
   private static final boolean DEBUG = false;
 
@@ -104,7 +104,6 @@ public class CopyToPostgres<T extends CommonShell> {
 
   private void dropOneConfig(String config) throws Exception {
     DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null);
-    String language = databaseLight.getLanguage();
     IProjectDAO projectDAO = databaseLight.getProjectDAO();
     List<SlickProject> collect = projectDAO.getAll().stream().filter(p -> p.name().equalsIgnoreCase(config)).collect(Collectors.toList());
 
@@ -184,19 +183,21 @@ public class CopyToPostgres<T extends CommonShell> {
     return cc;
   }
 
-  private void testDrop(String config, boolean inTest) {
+/*  private void testDrop(String config, boolean inTest) {
     DBConnection connection = getConnection(config, inTest);
     connection.dropAll();
-  }
+  }*/
 
+/*
   private static DBConnection getConnection(String config, boolean inTest) {
     File file = getConfigFile(config, null, inTest);
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     return new DBConnection(serverProps.getDBConfig());
   }
+*/
 
-  private static DatabaseImpl getDatabaseLight(String config, boolean inTest) {
+/*  private static DatabaseImpl getDatabaseLight(String config, boolean inTest) {
     File file = getConfigFile(config, null, inTest);
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
@@ -206,7 +207,7 @@ public class CopyToPostgres<T extends CommonShell> {
     database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
     return database;
-  }
+  }*/
 
 
   /**
@@ -219,10 +220,10 @@ public class CopyToPostgres<T extends CommonShell> {
    * @paramx pass
    * @see mitll.langtest.server.database.postgres.PostgresTest#testCopy
    */
-  protected static DatabaseImpl getDatabaseLight(String config,
-                                                 boolean useH2,
-                                                 boolean useLocal,
-                                                 String optPropsFile) {
+  private static DatabaseImpl getDatabaseLight(String config,
+                                               boolean useH2,
+                                               boolean useLocal,
+                                               String optPropsFile) {
     logger.info("getDatabaseLight db " + config + " props " + optPropsFile);
 
     String installPath = ".";//war";
@@ -291,6 +292,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
+   * TODO : only use this method - not one in test
    * @param db
    * @param cc      country code
    * @param optName null OK

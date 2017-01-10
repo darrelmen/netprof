@@ -37,6 +37,7 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -67,4 +68,6 @@ public interface SimpleExerciseDAO<T extends CommonShell> {
   void reload();
 
   List<String> getTypeOrder();
+
+  Set<Integer> getIDs();
 }

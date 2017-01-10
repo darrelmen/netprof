@@ -37,12 +37,14 @@ import mitll.hlt.domino.server.user.*;
 import mitll.hlt.domino.server.util.*;
 import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
+import mitll.hlt.domino.shared.common.ITableColumnEnum;
 import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.copy.UserCopy;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
@@ -131,7 +133,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         }
 
         logger.info("cache - ignite!");
-       // newContext.setAttribute(IGNITE, ignite);
+        // newContext.setAttribute(IGNITE, ignite);
       }
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, ignite);
       myDelegate = makeMyServiceDelegate(dominoProps.getUserServiceProperties(), m, pool, serializer);
@@ -580,17 +582,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return dbUser == null ? null : toUser(dbUser);
   }
 
-  /**
-   * lookup permissions for user
-   *
-   * @return
-   * @paramx xuserByIDAndPass
-   */
-//  private User toUser(mitll.hlt.domino.shared.model.user.User head) {
-//    Collection<User.Permission> grantedForUser = Collections.emptyList();
-//
-//    return toUser(head);
-//  }
   @Override
   public List<User> getUsers() {
     return toUsers(getAll());
@@ -632,7 +623,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     Group secondary = getGroupOrMake(projectName);
 
     Set<String> roleAbbreviations = Collections.singleton(user.getUserKind().getRole());
-   // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
+    // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
         user.getUserID(),
@@ -873,9 +864,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * TODO: try to avoid?
+   *
    * @return
    */
-  private List<DBUser> getAll() {
+  public List<DBUser> getAll() {
     long then = System.currentTimeMillis();
     logger.warn("getAll calling get all users");
     List<DBUser> users = delegate.getUsers(-1, null);
@@ -883,6 +875,23 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
     return users;
   }
+
+/*
+  private List<DBUser> getAllByGender(boolean isMale) {
+    long then = System.currentTimeMillis();
+    logger.warn("getAll calling get all users");
+    Set<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
+
+    UserColumn col = new UserColumn("Gender", true, true, 20, ITableColumnEnum.Alignment.Left);
+    filterDetails.add(new FilterDetail<>(UserColumn.Email, MiniUser.Gender.Male.name(), FilterDetail.Operator.EQ));
+
+    getDbUsers();
+    List<DBUser> users = delegate.getUsers(-1, new FindOptions<>());
+    long now = System.currentTimeMillis();
+    if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
+    return users;
+  }
+*/
 
   public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
     Map<User.Kind, Collection<MiniUser>> kindToUsers = new HashMap<>();
@@ -998,8 +1007,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public Map<Integer, User> getUserMap(boolean getMale) {
+    List<DBUser> all = getAll();
+    return getUserMapFromUsers(getMale, all);
+  }
+
+  public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {
     Map<Integer, User> idToUser = new HashMap<>();
-    getAll()
+    all
         .stream()
         .filter(dbUser ->
             getMale ?
@@ -1169,7 +1183,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   *  user updates happen in domino UI...
+   * user updates happen in domino UI...
    *
    * @param toUpdate
    */
