@@ -207,7 +207,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param userIDs
    * @param audioSpeed
    * @param exToTranscript
-   * @return
+   * @return modifiable set - what's returned from scala isn't
    */
   @Override
   Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs,
@@ -218,16 +218,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     if (checkAudioTranscript) {
       logger.warn("getAudioExercisesForGender should do check audio transcript -");
     }
-// use something like this?
-/*     if (audioTranscript != null) {
-      String tran = exToTranscript.get(trim);
-      if (!checkAudioTranscript || (tran != null && isNoAccentMatch(audioTranscript, tran))) {
-        results.add(trim);
-      }
-    }
-    */
 
-    return dao.getAudioForGender(userIDs, audioSpeed);
+    Set<Integer> audioForGender = dao.getAudioForGender(userIDs, audioSpeed);
+    return new HashSet<>(audioForGender);
   }
 
   @Override
@@ -237,7 +230,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
-    //Map<Integer, MiniUser> idToMini = userDAO.getMiniUsers();
     Map<Integer, MiniUser> idToMini = new HashMap<>();
 
     for (SlickAudio s : all) {

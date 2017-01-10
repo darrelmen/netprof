@@ -104,7 +104,8 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
     try {
       boolean isUserListReq = request.getUserListID() != -1;
-      UserList<CommonExercise> userListByID = isUserListReq ? db.getUserListByIDExercises(request.getUserListID(), getProjectID()) : null;
+      UserList<CommonExercise> userListByID = isUserListReq ?
+          db.getUserListByIDExercises(request.getUserListID(), getProjectID()) : null;
 
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
@@ -740,7 +741,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       // Collection<? extends CommonExercise> exercises
       Collection<T> exercises
   ) {
-    logger.info("getExerciseShells for " + exercises.size());
+//    logger.info("getExerciseShells for " + exercises.size());
     List<CommonShell> ids = new ArrayList<>();
     for (T e : exercises) {
 //      logger.info("got " +e.getOldID() + " mean " + e.getMeaning() + " eng " + e.getEnglish() + " fl " + e.getForeignLanguage());

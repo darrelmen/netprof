@@ -148,16 +148,17 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @Override
   public List<UserList<CommonShell>> getReviewLists() {
     IUserListManager userListManager = getUserListManager();
-    Collection<String> typeOrder = db.getTypeOrder(getProjectID());
-
-    UserList<CommonShell> defectList = userListManager.getDefectList(typeOrder);
+    int projectID = getProjectID();
+    Collection<String> typeOrder = db.getTypeOrder(projectID);
+    Set<Integer> ids = db.getIDs(projectID);
+    UserList<CommonShell> defectList = userListManager.getDefectList(typeOrder, ids);
 
     List<UserList<CommonShell>> lists = new ArrayList<>();
     lists.add(defectList);
 
-    lists.add(userListManager.getCommentedList(typeOrder));
+    lists.add(userListManager.getCommentedList(typeOrder, ids));
     if (!getProject().isNoModel()) {
-      lists.add(userListManager.getAttentionList(typeOrder));
+      lists.add(userListManager.getAttentionList(typeOrder, ids));
     }
     return lists;
   }
@@ -205,7 +206,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     String[] lines = userExerciseText.split("\n");
     if (DEBUG) logger.info("got " + lines.length + " lines");
     List<CommonExercise> newItems = new ArrayList<>();
-    UserList<CommonShell> userListByID = db.getUserListManager().getUserListByID(userListID, Collections.emptyList());
+    UserList<CommonShell> userListByID =
+        db.getUserListManager().getUserListByID(userListID, Collections.emptyList(), Collections.emptySet());
     int n = userListByID.getExercises().size();
     Set<String> currentKnownFL = new HashSet<>();
     for (CommonShell shell : userListByID.getExercises()) currentKnownFL.add(shell.getForeignLanguage());

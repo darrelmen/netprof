@@ -266,7 +266,7 @@ public class UserSecurityManager implements IUserSecurityManager {
   private User lookupUserFromDBSession(HttpServletRequest request)
       throws DominoSessionException {
     String sid = request.getRequestedSessionId();
-    log.info("Lookup user from DB session. SID: {}", sid);
+//    log.info("Lookup user from DB session. SID: {}", sid);
     int userForSession = userSessionDAO.getUserForSession(sid);
     if (userForSession == -1) {
       log.error("no user for session " + sid + " in database?");

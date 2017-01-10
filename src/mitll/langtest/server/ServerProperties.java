@@ -132,6 +132,9 @@ public class ServerProperties {
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
   private static final String CONFIG_FILE = "configFile";
 
+  /**
+   * @deprecated - we need a per-project set
+   */
   private static final String PREFERRED_VOICES = "preferredVoices";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
@@ -206,8 +209,6 @@ public class ServerProperties {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile, getDateFromManifest(servletContext));
     readPhonemeMap(configDir);
-
-
   }
 
   /**
@@ -225,7 +226,6 @@ public class ServerProperties {
         props.load(new FileInputStream(configFileFullPath));
         emailList = new EmailList(props);
         readProperties(dateFromManifest);
-
         getAffiliations(configDir);
 //        logger.info("aff " + affliations);
 
