@@ -32,8 +32,8 @@ public class DominoReaderTest {
     ServerProperties serverProps = new ServerProperties(parent, name);
     database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war", serverProps), false, null, false);
     // logger.debug("made " + database);
-    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
-        serverProps.getMediaDir());
+    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan()
+    );
   }
 
 //  public StartupInfo getProjectStartupInfo() {

@@ -43,8 +43,8 @@ public class BaseTest {
     DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(),
         serverProps, new PathHelper(installPath, serverProps), false, null, false);
 
-    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
-        serverProps.getMediaDir());
+    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan()
+    );
     // database.setDependencies(mediaDir, installPath);
     return database;
   }
@@ -56,7 +56,7 @@ public class BaseTest {
     ServerProperties serverProps = getServerProperties(config, s);
     DatabaseImpl database = getDatabaseVeryLight(config, s, useH2);
     database.setInstallPath(installPath,
-        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan(), serverProps.getMediaDir());
+        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan());
     return database;
   }
 
@@ -111,8 +111,8 @@ public class BaseTest {
         new PathHelper("war", serverProps), false, null, false);
 
     database.setInstallPath(installPath,
-        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan(),
-        serverProps.getMediaDir());
+        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan()
+    );
 
     return database;
   }
@@ -175,7 +175,7 @@ public class BaseTest {
         new DatabaseImpl(connection, parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), null);
     // logger.debug("made " + database);
 
-    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
+    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan());
     database.getExercises(-1);
     return database;
   }
