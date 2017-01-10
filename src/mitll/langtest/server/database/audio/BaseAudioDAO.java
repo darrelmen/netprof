@@ -40,10 +40,13 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioAttributeExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.MutableAudioExercise;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +54,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class BaseAudioDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseAudioDAO.class);
@@ -382,9 +391,13 @@ public abstract class BaseAudioDAO extends DAO {
     Set<Integer> maleSlowSpeed = new HashSet<>();
 
     float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs, exToTranscript, maleReg);
+    logger.info("male fast " +maleFast);
     float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs, exToTranscript, maleSlowSpeed);
+    logger.info("male slow " +maleSlow);
+
     maleReg.retainAll(maleSlowSpeed);
     float male = maleReg.size();
+    logger.info("male total " +male);
 
     Set<Integer> femaleIDs = userMapFemales.keySet();
     femaleIDs = new HashSet<>(femaleIDs);
@@ -394,16 +407,20 @@ public abstract class BaseAudioDAO extends DAO {
     Set<Integer> femaleSlowSpeed = new HashSet<>();
     float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs, exToTranscript, femaleReg);
     float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs, exToTranscript, femaleSlowSpeed);
+    logger.info("female fast " +femaleFast);
+    logger.info("female slow " +femaleSlow);
 
     femaleReg.retainAll(femaleSlowSpeed);
     float female = femaleReg.size();
+    logger.info("female total " +female);
 
     Set<Integer> conReg = new HashSet<>();
     Set<Integer> conSlow = new HashSet<>();
 
     float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript, conReg);
     float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript, conSlow);
-
+    logger.info("cmale fast " +cmale);
+    logger.info("cfemale fast " +cfemale);
     Map<String, Float> report = new HashMap<>();
     report.put(BaseAudioDAO.TOTAL, total);
     report.put(BaseAudioDAO.TOTAL_CONTEXT, totalContext);
