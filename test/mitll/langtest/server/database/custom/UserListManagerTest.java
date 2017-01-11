@@ -5,6 +5,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.user.User;

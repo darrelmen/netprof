@@ -85,7 +85,7 @@ public class BaseTest {
 
     logger.info("getDatabaseLight path " + file.getAbsolutePath());
 
-    ServerProperties serverProps  = getServerProperties(config, propsFile);
+    ServerProperties serverProps = getServerProperties(config, propsFile);
     ServerProperties serverProps2 = getServerProperties("netProf", DOMINO_PROPERTIES);
     String configFileFullPath = serverProps2.getConfigFileFullPath();
     try {
@@ -111,8 +111,7 @@ public class BaseTest {
         new PathHelper("war", serverProps), false, null, false);
 
     database.setInstallPath(installPath,
-        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan()
-    );
+        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan());
 
     return database;
   }
@@ -167,7 +166,7 @@ public class BaseTest {
    * @see ReportAllTest#testReports()
    * @see ReportAllTest#testYTD()
    */
-  protected DatabaseImpl getDatabase(DatabaseConnection connection, String config, String dbName) {
+  protected static DatabaseImpl getDatabase(DatabaseConnection connection, String config, String dbName) {
     File file = getPropertiesFile(config);
     String parent = file.getParent();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
@@ -180,7 +179,7 @@ public class BaseTest {
     return database;
   }
 
-  protected File getPropertiesFile(String config) {
+  protected static File getPropertiesFile(String config) {
     String quizlet = "quizlet";
     if (config.equals("msa")) quizlet = "classroom";
     else if (config.equals("pashto1")) quizlet = "pashtoQuizlet1";

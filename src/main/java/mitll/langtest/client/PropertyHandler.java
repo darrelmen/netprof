@@ -51,7 +51,6 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
-  public static final String NPF_CLASSROOM_URL = "https://np.ll.mit.edu/npfClassroom";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   public static final String CPW_TOKEN = "CPWtoken";
@@ -73,11 +72,13 @@ public class PropertyHandler {
 
   // property file property names
 
+  @Deprecated
   private static final String GRADING_PROP = "grading";
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
   private static final String RELEASE_DATE = "releaseDate";
   private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
+  @Deprecated
   private static final String DEMO_MODE = "demo";
   private static final String RECORD_TIMEOUT = "recordTimeout";
 
@@ -97,14 +98,14 @@ public class PropertyHandler {
   private static final String EXERCISE_TITLE = "exercise_title";
   // private static final String ADMIN_PARAM = "admin";
   private static final String ANALYSIS = "analysis";
+  @Deprecated
   private static final String TURK_PARAM = "turk";
+  @Deprecated
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
-  //  private static final String DLI_LANGUAGE_TESTING = "NetProF";
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
-  private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
@@ -114,9 +115,9 @@ public class PropertyHandler {
   /**
    * @see mitll.langtest.server.mail.EmailHelper#RP
    */
-  private static final String RP = RestUserManagement.RESET_PASSWORD_FROM_EMAIL;//"rp";
-  private static final String CD = "cd";
-  private static final String ER = "er";
+//  private static final String RP = RestUserManagement.RESET_PASSWORD_FROM_EMAIL;//"rp";
+//  private static final String CD = "cd";
+//  private static final String ER = "er";
 
   private static final String CLICK_AND_HOLD = "clickAndHold";
   private static final String SHOW_CONTEXT = "showContext";
@@ -134,7 +135,7 @@ public class PropertyHandler {
   private boolean isAMAS;
   private boolean usePhoneToDisplay;
 
-//  private static final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
+  //  private static final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
@@ -143,7 +144,7 @@ public class PropertyHandler {
   private String fontFamily = "";
   private String modelDir;
   private int afterStopDelayMillis = DEFAULT_AFTER_STOP_DELAY_MILLIS;
-  private String dominoURL = DOMINO_SERVER_DEFAULT,helpMessage = HELP_DEFAULT;
+  private String dominoURL = DOMINO_SERVER_DEFAULT, helpMessage = HELP_DEFAULT;
 
   /**
    * @return
@@ -162,6 +163,7 @@ public class PropertyHandler {
         "8.\tClick OK<br/>";
   }
 
+  @Deprecated
   public Set<Long> getPreferredVoices() {
     return preferredVoices;
   }
@@ -219,17 +221,23 @@ public class PropertyHandler {
    * @see #checkParams
    */
   private String resetPassToken = "";
-  private String cdEnableToken = "", emailRToken = "";
+  private String sendResetPassToken = "";
+  // private String cdEnableToken = "", emailRToken = "";
 
   private final Map<String, String> props;
 
   private boolean grading = false;
   private boolean bkgColorForRef = false;
-  private String exercise_title;
-  private boolean demoMode;
 
-  private boolean showWelcome = false;// default value
+  /**
+   * @deprecated Not super sure this works anymore
+   */
+  private String exercise_title;
+  //private boolean demoMode;
+
+  //private boolean showWelcome = false;// default value
   private boolean logClientMessages = false;
+  @Deprecated
   private int numGradesToCollect = NUM_GRADES_TO_COLLECT_DEFAULT;
   private String nameForItem = "Item";
   private String nameForAnswer = "Recording";
@@ -238,6 +246,7 @@ public class PropertyHandler {
   private String dialog = "";
 
   private String releaseDate;
+  @Deprecated
   private String turkID = "";
 
   private int recordTimeout = DEFAULT_TIMEOUT;
@@ -280,7 +289,7 @@ public class PropertyHandler {
       else if (key.equals(APP_TITLE)) appTitle = value;
       else if (key.equals(RELEASE_DATE)) releaseDate = value;
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
-      else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
+     // else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
         //    else if (key.equals(SHOW_WELCOME)) showWelcome = getBoolean(value);
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
@@ -301,7 +310,7 @@ public class PropertyHandler {
       else if (key.equals(DIALOG)) dialog = value;
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
-   //   else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
+        //   else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(TALKS_TO_DOMINO)) talksToDomino = getBoolean(value);
       else if (key.equals(PRACTICE_CONTEXT)) canPracticeContext = getBoolean(value);
@@ -357,7 +366,7 @@ public class PropertyHandler {
   }
 */
 
-  private void getPreferredVoices(String value) {
+@Deprecated private void getPreferredVoices(String value) {
     for (String userid : value.split(",")) {
       try {
         preferredVoices.add(Long.parseLong(userid));
@@ -407,10 +416,12 @@ public class PropertyHandler {
    * @see #PropertyHandler(java.util.Map)
    */
   private void checkParams() {
-    String isGrading = Window.Location.getParameter(GRADING);
-    String numGrades = Window.Location.getParameter(NUM_GRADES_TO_COLLECT_PARAM);
+    if (Window.Location.getHref().endsWith("reset_password")) {
+      this.sendResetPassToken = "reset_password";
+    }
+
     String bkgColorForRefParam = Window.Location.getParameter(BKG_COLOR_FOR_REF);
-    String demoParam = Window.Location.getParameter(DEMO_MODE);
+    //String demoParam = Window.Location.getParameter(DEMO_MODE);
 
     // supports headstart mode
     String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
@@ -420,16 +431,19 @@ public class PropertyHandler {
       this.exercise_title = DEFAULT_EXERCISE;
     }
 
-    boolean grading = this.isGrading() || (isGrading != null && !isGrading.equals("false"));
-    setGrading(grading);
+    {
+      String isGrading = Window.Location.getParameter(GRADING);
+      boolean grading = this.isGrading() || (isGrading != null && !isGrading.equals("false"));
+      setGrading(grading);
+    }
     // get audio repeats
-    numGradesToCollect = getInt(numGrades, numGradesToCollect, NUM_GRADES_TO_COLLECT);
+    numGradesToCollect = getInt(Window.Location.getParameter(NUM_GRADES_TO_COLLECT_PARAM), numGradesToCollect, NUM_GRADES_TO_COLLECT);
     if (bkgColorForRefParam != null) {
       bkgColorForRef = !bkgColorForRefParam.equals("false");
     }
-    if (demoParam != null) {
-      demoMode = !demoParam.equals("false");
-    }
+//    if (demoParam != null) {
+//      demoMode = !demoParam.equals("false");
+//    }
 
     // 9/7/16 Ray says no admin mode
 //    String adminParam = Window.Location.getParameter(ADMIN_PARAM);
@@ -451,32 +465,36 @@ public class PropertyHandler {
       turkID = turkParam;
     }
 
+/*
     String resetPasswordID = Window.Location.getParameter(RP);
     if (resetPasswordID != null) {
       resetPassToken = resetPasswordID;
     }
+*/
 
     String dominoResetPasswordID = Window.Location.getParameter(CPW_TOKEN);
     if (dominoResetPasswordID != null) {
       resetPassToken = dominoResetPasswordID;
-      logger.info("1 found cpw token '" +resetPassToken+          "'");
+      logger.info("1 found cpw token '" + resetPassToken + "'");
     }
 
     dominoResetPasswordID = Window.Location.getParameter(CPW_TOKEN2);
     if (dominoResetPasswordID != null) {
       resetPassToken = dominoResetPasswordID;
-      logger.info("2 found cpw token '" +resetPassToken+          "'");
+      logger.info("2 found cpw token '" + resetPassToken + "'");
     }
-
+/*
     String cdEnable = Window.Location.getParameter(CD);
     if (cdEnable != null) {
       cdEnableToken = cdEnable;
-    }
+    }*/
 
+/*
     String emailR = Window.Location.getParameter(ER);
     if (emailR != null) {
       emailRToken = emailR;
     }
+*/
 
     if (Window.Location.getParameter(CLICK_AND_HOLD) != null) {
       clickAndHold = !Window.Location.getParameter(CLICK_AND_HOLD).equals("false");
@@ -520,10 +538,12 @@ public class PropertyHandler {
    * @see mitll.langtest.client.LangTest#recordingModeSelect()
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
+  @Deprecated
   private boolean isGrading() {
     return grading;
   }
 
+  @Deprecated
   private void setGrading(boolean v) {
     this.grading = v;
   }
@@ -545,9 +565,10 @@ public class PropertyHandler {
     return appTitle;
   }
 
+/*  @Deprecated
   public boolean isDemoMode() {
     return demoMode;
-  }
+  }*/
 
   public boolean isAdminView() {
     return false;//adminView;
@@ -561,6 +582,7 @@ public class PropertyHandler {
     return canPracticeContext;
   }
 
+  @Deprecated
   public String getTurkID() {
     return turkID;
   }
@@ -602,6 +624,7 @@ public class PropertyHandler {
   }
 
   /**
+   * Not sure if we want have a property - normally we just look at the text.
    * @return
    * @see LangTest#isRightAlignContent()
    */
@@ -625,15 +648,21 @@ public class PropertyHandler {
    * @return
    * @see LangTest#showLogin()
    */
-  String getResetPassToken() { return resetPassToken;  }
+  String getResetPassToken() {
+    return resetPassToken;
+  }
 
+/*
   String getCdEnableToken() {
     return cdEnableToken;
   }
+*/
 
+/*
   String getEmailRToken() {
     return emailRToken;
   }
+*/
 
   public boolean doClickAndHold() {
     return clickAndHold;
@@ -682,7 +711,7 @@ public class PropertyHandler {
     this.responseType = responseType;
   }
 
-  public boolean isOdaMode() {
+  @Deprecated public boolean isOdaMode() {
     return false;
   }
 
@@ -692,6 +721,10 @@ public class PropertyHandler {
 
   public String getHelpMessage() {
     return helpMessage;
+  }
+
+  public String getSendResetPassToken() {
+    return sendResetPassToken;
   }
 
 /*  public String getAMASHelpMessage() {
