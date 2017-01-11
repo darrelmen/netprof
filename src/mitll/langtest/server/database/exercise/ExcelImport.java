@@ -37,14 +37,21 @@ import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import org.apache.log4j.Logger;
+import org.apache.poi.POIXMLProperties;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.internal.PackagePropertiesPart;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.xmlbeans.XmlException;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 /**
@@ -101,18 +108,59 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     // from the tier index property
-    this.unitIndex    = serverProps.getUnitChapterWeek()[0];
+    this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
-    this.weekIndex    = serverProps.getUnitChapterWeek()[2];
+    this.weekIndex = serverProps.getUnitChapterWeek()[2];
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
   protected List<CommonExercise> readExercises() {
     File file = new File(this.file);
     lastModified = file.lastModified();
-    logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " + new Date(lastModified));
+    long excelLastModified = getExcelLastModified(file);
+    lastModified = excelLastModified == 0 ? lastModified : excelLastModified;
 
     return readExercises(file);
+  }
+
+  /**
+   * Ask the excel file for when it was modified
+   * @param file
+   * @return
+   */
+  private long getExcelLastModified(File file) {
+    if (!file.exists()) return 0;
+    try {
+      BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+
+      logger.info("creationTime:     " + attr.creationTime());
+      logger.info("lastAccessTime:   " + attr.lastAccessTime());
+      logger.info("lastModifiedTime: " + attr.lastModifiedTime());
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+    }
+
+    try {
+      OPCPackage pkg = OPCPackage.open(file);
+      POIXMLProperties props = new POIXMLProperties(pkg);
+      PackagePropertiesPart ppropsPart = props.getCoreProperties().getUnderlyingProperties();
+
+      Date created = ppropsPart.getCreatedProperty().getValue();
+      logger.info("creationTime:     " + created);
+
+      Date modified = ppropsPart.getModifiedProperty().getValue();
+      logger.info("lastModifiedTime: " + modified);
+
+      String lastModifiedBy = ppropsPart.getLastModifiedByProperty().getValue();
+
+      logger.info("lastModifiedBy:   " + lastModifiedBy);
+      logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " + new Date(lastModified));
+
+      return modified.getTime();
+    } catch (IOException | OpenXML4JException | XmlException e) {
+      logger.error("got " + e, e);
+    }
+    return 0;
   }
 
   /**
@@ -675,7 +723,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String week = getCell(next, weekIndex);
 
     if (unit.isEmpty() && chapter.isEmpty() && week.isEmpty()) {
-      unit    = "Other";
+      unit = "Other";
       chapter = "Other";
     }
 
@@ -694,8 +742,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     SectionHelper<CommonExercise> sectionHelper = getSectionHelper();
     if (unit.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
-    }
-    else if (unitName != null) {
+    } else if (unitName != null) {
       unit = chapter;
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
     }
@@ -704,7 +751,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         chapter = (unitIndex == -1 ? "" : unit + "-") + chapter; // hack for now to get unique chapters...
       }
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
-    } else if (chapterName != null){
+    } else if (chapterName != null) {
       chapter = unit;
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
 //      logger.info("skip unit '" +unit + "' and chapter '" +chapter+ "'");

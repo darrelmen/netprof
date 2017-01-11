@@ -771,10 +771,33 @@ public class AudioDAO extends DAO {
     Set<String> maleReg = new HashSet<>();
     Set<String> maleSlowSpeed = new HashSet<>();
     float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs, exToTranscript, maleReg);
+
+    Set<String> origMaleReg = new HashSet<>(maleReg);
+    Set<String> regNotSlow = new HashSet<>(origMaleReg);
+
     float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs, exToTranscript, maleSlowSpeed);
 
+    // modify
     maleReg.retainAll(maleSlowSpeed);
     float male = maleReg.size();
+
+    regNotSlow.removeAll(maleSlowSpeed);
+    logger.info("Reg not slow (" +regNotSlow.size()+
+        ") " + regNotSlow);
+    Set<String> slowNotReg = new HashSet<>(maleSlowSpeed);
+    slowNotReg.removeAll(origMaleReg);
+    logger.info("Slow not reg (" +slowNotReg.size()+
+        ")" + slowNotReg);
+
+    HashSet<String> notreg = new HashSet<>(uniqueIDs);
+    notreg.removeAll(origMaleReg);
+    logger.info("not Reg  (" +notreg.size()+
+        ")" + new TreeSet<>(notreg) + " from " + uniqueIDs.size());
+
+    HashSet<String> notslow = new HashSet<>(uniqueIDs);
+    notslow.removeAll(maleSlowSpeed);
+    logger.info("not slow (" +notslow.size()+
+        ")" + new TreeSet<>(notslow) + " from " + uniqueIDs.size());
 
     femaleIDs = new HashSet<>(femaleIDs);
     femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);
@@ -936,34 +959,54 @@ public class AudioDAO extends DAO {
 
       boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
 
+//    logger.info("Sql \n\t" + sql);
+
+      boolean debug = false;
+//      String intersting = "5496";
+
+      int c= 0;
       while (rs.next()) {
+        c++;
         String exid = rs.getString(1);
         String exerciseFL = exToTranscript.get(exid);
 
+//        if (exid.equalsIgnoreCase(intersting)) {
+//          logger.info("ex expected '" + exerciseFL +"'");
+//        }
         if (exerciseFL != null || !checkAudioTranscript) {
           String transcript = rs.getString(2);
-
+//          if (exid.equalsIgnoreCase(intersting)) {
+//            logger.info("transcript " + transcript);
+//          }
           boolean isMatch = !checkAudioTranscript || isNoAccentMatch(transcript, exerciseFL);
           if (isMatch) {
+//            if (!exid.equalsIgnoreCase(exid.trim())) {
+//              logger.error("huh? " +exid);
+//            }
             if (uniqueIDs.contains(exid)) {
+//              if (exid.equalsIgnoreCase(intersting)) {
+//                logger.info("adding  " + exid);
+//              }
               idsOfRecordedExercises.add(exid);
             } else {
 //              idsOfStaleExercises.add(exid);
               logger.debug("getCountForGender skipping stale exid " + exid);
             }
+          } else {
+            if (debug) {
+              logger.info("1) no match for " + exid + " audio '" + trimWhitespace(transcript) + "' vs expected '" + trimWhitespace(exerciseFL) + "'");
+            }
           }
-          //else {
-          //  logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
-          //}
+        } else if (debug) {
+          logger.info("2) stale exercise id : no match for " + exid);
         }
-        //else {
-          //        logger.info("2) stale exercise id : no match for " + exid);
-       // }
       }
       finish(connection, statement, rs, sql);
-//      logger.info("getCountForGender audioSpeed " + audioSpeed +
-//          "\n\tsize\t" + idsOfRecordedExercises.size() +
-//          "  sql:\n\t" + sql);
+      logger.info("getCountForGender audioSpeed " + audioSpeed +
+          "\n\tsize\t" + idsOfRecordedExercises.size() +
+          "\n\trows\t" + c +
+          "\n\tsql:\n\t" + sql);
+
 
 /*
       logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
