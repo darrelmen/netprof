@@ -108,7 +108,7 @@ public class CopyToPostgres<T extends CommonShell> {
     IProjectDAO projectDAO = databaseLight.getProjectDAO();
     List<SlickProject> collect = projectDAO.getAll().stream().filter(p -> p.name().equalsIgnoreCase(config)).collect(Collectors.toList());
 
-    for (SlickProject project:collect) {
+    for (SlickProject project : collect) {
       logger.info("dropping " + project.name());
       projectDAO.delete(project.id());
     }
@@ -119,6 +119,7 @@ public class CopyToPostgres<T extends CommonShell> {
   /**
    * Add brazilian, serbo croatian, french, etc.
    *
+   * TODO : make t
    * @param config
    * @return
    */
@@ -203,8 +204,7 @@ public class CopyToPostgres<T extends CommonShell> {
     serverProps.setH2(true);
     DatabaseImpl database = getDatabaseVeryLight(config, inTest);
     String installPath = getInstallPath(inTest);
-    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
-        serverProps.getMediaDir());
+    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan());
     return database;
   }
 
@@ -257,8 +257,8 @@ public class CopyToPostgres<T extends CommonShell> {
         new PathHelper(installPath, serverProps), false, null, false);
 
     database.setInstallPath(installPath,
-        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan(),
-        serverProps.getMediaDir());
+        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan()
+    );
 
     return database;
   }
@@ -295,7 +295,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param cc      country code
    * @param optName null OK
    * @param isDev
-   * @see #copyOneConfigCommand(String, boolean)
+   * @see #copyOneConfigCommand
    * @see PostgresTest#testCopy
    */
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {

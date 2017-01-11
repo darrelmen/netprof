@@ -37,6 +37,7 @@ import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
@@ -621,7 +622,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * TODO : make sure this works for AMAS?
-   *
+   * <p>
    * Lazy, latchy instantiation of DAOs.
    * Not sure why it really has to be this way.
    * <p>
@@ -631,7 +632,7 @@ public class DatabaseImpl implements Database {
    * @see #setInstallPath(String, String)
    */
   private void makeDAO(String lessonPlanFile) {
-   // logger.info("makeDAO - " + lessonPlanFile);
+    // logger.info("makeDAO - " + lessonPlanFile);
     if (userManagement == null) {
       synchronized (this) {
         boolean isURL = serverProps.getLessonPlan().startsWith("http");
@@ -691,7 +692,7 @@ public class DatabaseImpl implements Database {
    * Here to support import from old individual sites for CopyToPostgres
    *
    * @param lessonPlanFile
-   * @param isURL deprecated
+   * @param isURL          deprecated
    * @see #makeDAO(String)
    */
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
@@ -1424,7 +1425,9 @@ public class DatabaseImpl implements Database {
             getSectionHelper(projectid),
             exercisesForSelectionState,
             language,
-        getAudioDAO(), installPath, configDir, false, options);
+            getAudioDAO(),
+            false,
+            options);
   }
 
   public String getLanguage(CommonExercise ex) {
@@ -1489,9 +1492,15 @@ public class DatabaseImpl implements Database {
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-      new AudioExport(getServerProps()).writeUserListAudio(out, userListByID.getName(), getSectionHelper(projectid),
-          copyAsExercises, language,
-          getAudioDAO(), installPath, configDir, listid == IUserListManager.REVIEW_MAGIC_ID, options);
+      new AudioExport(getServerProps()).writeUserListAudio(
+          out,
+          userListByID.getName(),
+          getSectionHelper(projectid),
+          copyAsExercises,
+          language,
+          getAudioDAO(),
+          listid == IUserListManager.REVIEW_MAGIC_ID,
+          options);
     }
     return language + "_" + userListByID.getName();
   }

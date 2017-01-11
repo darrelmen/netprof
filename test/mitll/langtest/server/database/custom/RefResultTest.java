@@ -2,6 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.Result;

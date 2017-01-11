@@ -543,19 +543,9 @@ public class SignInForm extends UserDialog implements SignIn {
    *
    * @paramx emailEntry - need this since old accounts don't have email with them
    */
-  private void onSendReset(
-    //  TextBox emailEntry
-  ) {
-/*    String userEmail = emailEntry.getText();
-    if (!isValidEmail(userEmail)) {
-      markErrorBlur(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
-      return;
-    }*/
-
+  private void onSendReset() {
     sendEmail.setEnabled(false);
     service.resetPassword(userField.box.getText(),
-        //Window.Location.getHref(),
-        //userEmail,
         new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
