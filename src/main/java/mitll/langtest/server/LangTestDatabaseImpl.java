@@ -503,9 +503,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     logger.debug("setInstallPath " + installPath +
         //" " + lessonPlanFile + " media " +
         serverProps.getMediaDir() + " rel media " + mediaDir);
-    db.setInstallPath(installPath,
-        null,
-        mediaDir);
+    db.setInstallPath(installPath,  mediaDir);
   }
 
   /**
