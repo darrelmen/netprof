@@ -114,6 +114,8 @@ public class ServerInitializationManagerNetProf {
     ServerProperties props = null;
     try {
       InputStream in = findServerProperties(newContext);
+      log.info("\t Starting initialization " + in);
+
       props = getServerProperties(in, newContext);
     } catch (Exception e) {
       log.error("trying to read props - got " + e, e);
@@ -243,42 +245,47 @@ public class ServerInitializationManagerNetProf {
     return getServerProperties(openPropertiesFileStream(configFileName), null);
   }
 
-  public ServerProperties getServerProperties(InputStream propsIS, ServletContext ctx) {
-    log.info("Initializing Properties");
+  private ServerProperties getServerProperties(InputStream propsIS, ServletContext ctx) {
+    log.info("getServerProperties : Initializing Properties");
     Properties props = readPropertiesStream(propsIS);
 
     if (props != null) {
-      log.info("Loaded " + props.size() + " properties");
+      log.info("getServerProperties : Loaded " + props.size() + " properties");
 
       String releaseVers = "Unknown";
       String buildUser = "Unknown";
       String buildVers = "Unknown";
       String buildDate = "Unknown";
 
-      Attributes atts = (ctx != null) ?
-          getManifestAttributes(ctx) : null;
+      Attributes atts = (ctx != null) ? getManifestAttributes(ctx) : null;
       if (atts != null) {
         releaseVers = atts.getValue(Name.SPECIFICATION_VERSION);
         buildVers = atts.getValue(Name.IMPLEMENTATION_VERSION);
         buildUser = atts.getValue("Built-By");
         buildDate = atts.getValue("Built-Date");
       } else {
-        log.warn("Did not load attribute information. Are you running in " +
+        log.warn("getServerProperties Did not load attribute information. Are you running in " +
             "a servlet container? Context:" + ctx);
       }
 
       ServerProperties sProps = new ServerProperties(props, releaseVers,
           buildUser, buildVers, buildDate, configDir);
+
       return sProps;
     }
     return null;
   }
 
+  /**
+   * @param in
+   * @return
+   */
   private Properties readPropertiesStream(InputStream in) {
     try {
       if (in != null) {
         Properties props = new Properties();
         props.load(in);
+        log.debug("readPropertiesStream " + props);
         return props;
       } else {
         log.warn("Could not find " + appName + " config file! Initialization failure! " + in);

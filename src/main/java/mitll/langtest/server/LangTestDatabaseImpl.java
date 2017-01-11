@@ -244,8 +244,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
-   *
-   *
    * @param project
    * @return
    */
@@ -434,21 +432,20 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
 
-   // this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
+    // this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     this.configDir = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
 
     logger.info("readProperties relativeConfigDir " + relativeConfigDir);
-    logger.info("readProperties configDir " + configDir);
+    logger.info("readProperties configDir         " + configDir);
 
-   // pathHelper.setConfigDir(configDir);
-  //  serverProps = new ServerProperties(servletContext, configDir);
+    // pathHelper.setConfigDir(configDir);
+    //  serverProps = new ServerProperties(servletContext, configDir);
 
     this.serverProps = serverProps;//new ServerProperties(servletContext, configDir);
 
     //this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-   // this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-   // pathHelper.setConfigDir(configDir);
-
+    // this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
+    // pathHelper.setConfigDir(configDir);
 //    serverProps = new ServerProperties(servletContext, configDir);
 
     db = makeDatabaseImpl(this.serverProps.getH2Database());
@@ -503,7 +500,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     logger.debug("setInstallPath " + installPath +
         //" " + lessonPlanFile + " media " +
         serverProps.getMediaDir() + " rel media " + mediaDir);
-    db.setInstallPath(installPath,  mediaDir);
+    db.setInstallPath(installPath, mediaDir);
   }
 
   /**

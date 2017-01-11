@@ -133,7 +133,7 @@ sourceSets {
     }
 }
 
-/*gwt {
+gwt {
     gwtVersion = '2.8.0'
     modules 'mitll.langtest.LangTest'
 
@@ -152,7 +152,7 @@ sourceSets {
     }
     //Specify the deployment Port
     // jettyRunWar.httpPort = 8089
-}*/
+}
 
 war {
     archiveName "netprof.war"
@@ -176,10 +176,10 @@ war {
     from 'war/LangTest.html'
 
     // TODO : DONT
-    from 'copy.sh'
+    //   from 'copy.sh'
 
     // TODO : DONT
-    from 'drop.sh'
+//    from 'drop.sh'
 
     from 'src/mitll/langtest/public/NetProf_Manual.pdf'
 
@@ -197,21 +197,21 @@ war {
 //    }
 //}
 
-task makeInstallation(type: Zip) {
-    from ('war/config/netProf') {
+task makeDevInstallation(type: Zip) {
+    from('war/config/netProfDev') {
         into 'config'
     }
-    from ('copy.sh') {
+    from('scripts/copy.sh') {
         into 'scripts'
     }
-    from ('drop.sh') {
+    from('scripts/drop.sh') {
         into 'scripts'
     }
 }
 
-println makeInstallation.archiveName
-println relativePath(makeInstallation.destinationDir)
-println relativePath(makeInstallation.archivePath)
+println makeDevInstallation.archiveName
+println relativePath(makeDevInstallation.destinationDir)
+println relativePath(makeDevInstallation.archivePath)
 
 // ***************************** Publishing **************************************
 publishing {
