@@ -233,7 +233,7 @@ public class PropertyHandler {
    * @deprecated Not super sure this works anymore
    */
   private String exercise_title;
-  //private boolean demoMode;
+  private boolean demoMode;
 
   //private boolean showWelcome = false;// default value
   private boolean logClientMessages = false;
@@ -289,7 +289,7 @@ public class PropertyHandler {
       else if (key.equals(APP_TITLE)) appTitle = value;
       else if (key.equals(RELEASE_DATE)) releaseDate = value;
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
-     // else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
+      else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
         //    else if (key.equals(SHOW_WELCOME)) showWelcome = getBoolean(value);
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
@@ -565,10 +565,10 @@ public class PropertyHandler {
     return appTitle;
   }
 
-/*  @Deprecated
+  @Deprecated
   public boolean isDemoMode() {
     return demoMode;
-  }*/
+  }
 
   public boolean isAdminView() {
     return false;//adminView;

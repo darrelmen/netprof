@@ -75,7 +75,6 @@ public class ListSectionWidget implements SectionWidget {
   }
 
   private int num = 0;
- // private final ButtonToolbar toolbar = new ButtonToolbar();
   private final DivWidget toolbar = new DivWidget();
 
   /**
@@ -106,7 +105,7 @@ public class ListSectionWidget implements SectionWidget {
     this.num = values.size();
 
     //addGridChoices(values, "All");
-    addChoices(values,"All");
+    addChoices(values, "All");
 
     container.add(horizontalPanel);
   }
@@ -118,13 +117,9 @@ public class ListSectionWidget implements SectionWidget {
       public void onClick(ClickEvent event) {
         String currentSelection = getCurrentSelection();
         int i = values.indexOf(currentSelection);
-        if (i > 0) {
-          String item = values.get(i - 1);
-          selectItem(item);
-          gotSelection(item);
-          singleSelectExerciseList.gotSelection();
+        int toUse = (i > 0) ? i - 1 : values.size() - 1;
+        selectAtIndex(toUse, values);
 
-        }
       }
     });
 //    left.addStyleName("rightFiveMargin");
@@ -143,20 +138,24 @@ public class ListSectionWidget implements SectionWidget {
       public void onClick(ClickEvent event) {
         String currentSelection = getCurrentSelection();
         int i = values.indexOf(currentSelection);
-        if (i < values.size() - 1) {
-          String item = values.get(i + 1);
-          logger.info("Selecting " + (i+1) + " " + item);
-          selectItem(item);
-          gotSelection(item);
-          singleSelectExerciseList.gotSelection();
-        }
-        else {
-          logger.info("not selecting next " + i + " " + currentSelection);
-
-        }
+        // if (i < values.size() - 1) {
+        int index = (i < values.size() - 1) ? i + 1 : 0;
+        //  logger.info("Selecting " + (i+1) + " " + item);
+        selectAtIndex(index, values);
+        // }
+        // else {
+        //logger.info("not selecting next " + i + " " + currentSelection);
+        //}
       }
     });
     return right;
+  }
+
+  private void selectAtIndex(int index, List<String> values) {
+    String item = values.get(index);
+    selectItem(item);
+    gotSelection(item);
+    singleSelectExerciseList.gotSelection();
   }
 
   private void addChoices(List<String> values, String initialChoice) {
