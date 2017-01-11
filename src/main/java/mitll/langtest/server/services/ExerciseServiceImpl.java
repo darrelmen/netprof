@@ -104,8 +104,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
     try {
       boolean isUserListReq = request.getUserListID() != -1;
-      UserList<CommonExercise> userListByID = isUserListReq ?
-          db.getUserListByIDExercises(request.getUserListID(), getProjectID()) : null;
+      UserList<CommonExercise> userListByID = isUserListReq ? db.getUserListByIDExercises(request.getUserListID(), getProjectID()) : null;
 
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined

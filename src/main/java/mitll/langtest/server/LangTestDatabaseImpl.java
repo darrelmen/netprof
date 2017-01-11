@@ -60,8 +60,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.CollationKey;
 import java.text.Collator;
@@ -81,10 +79,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   public static final String DATABASE_REFERENCE = "databaseReference";
 
+  /**
+   * @see
+   */
   private String relativeConfigDir;
   private String configDir;
   private String startupMessage = "";
-  private Properties uiProperties;
 
   /**
    * Reco test option lets you run through and score all the reference audio -- if you want to see model performance
@@ -199,8 +199,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       projectInfos = getNestedProjectInfo();
     }
 
-    Map<String, String> properties = serverProps.getPropertyMap(uiProperties);
-    return new StartupInfo(properties, projectInfos, startupMessage, serverProps.getAffliations());
+    return new StartupInfo(serverProps.getProperties(), projectInfos, startupMessage, serverProps.getAffliations());
   }
 
   /**
@@ -407,13 +406,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   @Override
   public void destroy() {
-//    refResultDecoder.setStopDecode(true);
     super.destroy();
     if (db == null) {
       logger.error("DatabaseImpl was never made properly...");
     } else {
+      db.destroy(); // TODO : redundant with h2 shutdown hook?
       db.stopDecode();
-      db.destroy();
     }
   }
 
@@ -432,36 +430,26 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     ServerProperties serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
 
     File configDir = serverInitializationManagerNetProf.getConfigDir();
+    logger.info("readProperties configDir from props " + configDir);
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
 
    // this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     this.configDir = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
 
-    logger.info("relativeConfigDir " + relativeConfigDir);
-    logger.info("configDir " + configDir);
+    logger.info("readProperties relativeConfigDir " + relativeConfigDir);
+    logger.info("readProperties configDir " + configDir);
 
    // pathHelper.setConfigDir(configDir);
   //  serverProps = new ServerProperties(servletContext, configDir);
 
     this.serverProps = serverProps;//new ServerProperties(servletContext, configDir);
-    String uiProps = "ui.properties";
-    File file = new File(configDir, uiProps);
-    if (!file.exists()) {
-      logger.warn("can't find ui properties " +uiProps);
-    }
-    try {
-      this.uiProperties = serverInitializationManagerNetProf.readPropertiesStream(new FileInputStream(file));
-      logger.info("got " + uiProperties.keySet());
-    } catch (FileNotFoundException e) {
-     logger.error("got " +e,e);
-    }
-/*
-    this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-    this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
+
+    //this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
+   // this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
    // pathHelper.setConfigDir(configDir);
 
-    serverProps = new ServerProperties(servletContext, configDir);*/
+//    serverProps = new ServerProperties(servletContext, configDir);
 
     db = makeDatabaseImpl(this.serverProps.getH2Database());
     shareDB(servletContext);
@@ -479,6 +467,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 */
 
+  private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
+    //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
+    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false
+    );
+  }
+
   /**
    * @param servletContext
    * @see #readProperties
@@ -491,26 +485,27 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     servletContext.setAttribute(DATABASE_REFERENCE, db);
   }
 
-  private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
-    //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false
-    );
-  }
-
   /**
    * @param db
    * @return
    * @see LangTestDatabaseImpl#init()
    */
   private void setInstallPath(DatabaseImpl db) {
-   String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
+//    String lessonPlanFile = getLessonPlan();
+//    if (lessonPlanFile != null &&
+//        !serverProps.getLessonPlan().startsWith("http") &&
+//        !new File(lessonPlanFile).exists()) {
+//      logger.error("couldn't find lesson plan file " + lessonPlanFile);
+//    }
+
+    String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
     String installPath = pathHelper.getInstallPath();
     logger.debug("setInstallPath " + installPath +
         //" " + lessonPlanFile + " media " +
         serverProps.getMediaDir() + " rel media " + mediaDir);
     db.setInstallPath(installPath,
-        null
-    );
+        null,
+        mediaDir);
   }
 
   /**

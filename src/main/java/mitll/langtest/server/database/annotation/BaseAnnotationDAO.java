@@ -152,7 +152,7 @@ public abstract class BaseAnnotationDAO extends DAO {
 
   /**
    * @return
-   * @see IUserListManager#getCommentedList(Collection, Set)
+   * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(Collection)
    * @seex mitll.langtest.server.database.custom.UserListManager#getAmmendedStateMap
    */
 /*  public Map<String, Long> getAnnotatedExerciseToCreator() {

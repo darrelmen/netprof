@@ -110,12 +110,6 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
     return getSectionHelper().getTypeOrder();
   }
 
-  @Deprecated
-  @Override
-  public Set<Integer> getIDs() {
-    return null;
-  }
-
   @Override
   public T getExercise(int id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
