@@ -60,14 +60,14 @@ public interface UserServiceAsync {
    * @param asyncCallback
    * @deprecatedx
    */
- // void changePFor(String token, String newHashedPassword, AsyncCallback<Boolean> asyncCallback);
+  // void changePFor(String token, String newHashedPassword, AsyncCallback<Boolean> asyncCallback);
 
   /**
-   * @see ChangePasswordView#changePassword
    * @param userid
    * @param currentHashedPassword
    * @param newHashedPassword
    * @param async
+   * @see ChangePasswordView#changePassword
    */
   void changePasswordWithCurrent(int userid,
                                  String currentHashedPassword,
@@ -76,10 +76,7 @@ public interface UserServiceAsync {
 
   void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<User> async);
 
-  void resetPassword(String userid,
-        //, String url,
-                     //String emailForLegacy,
-                     AsyncCallback<Boolean> asyncCallback);
+  void resetPassword(String userid, AsyncCallback<Boolean> asyncCallback);
 
   void getUsers(AsyncCallback<List<User>> async);
 
@@ -105,11 +102,11 @@ public interface UserServiceAsync {
   void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
   /**
-   * @Deprecated - not doing this anymore...
    * @param cdToken
    * @param emailR
    * @param url
    * @param asyncCallback
+   * @Deprecated - not doing this anymore...
    */
   void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
 
@@ -133,8 +130,8 @@ public interface UserServiceAsync {
   void getUserByID(String id, AsyncCallback<User> async);
 
   /**
-   * @see UserManager#getPermissionsAndSetUser
    * @param async
+   * @see UserManager#getPermissionsAndSetUser
    */
   void getUserFromSession(AsyncCallback<User> async);
 

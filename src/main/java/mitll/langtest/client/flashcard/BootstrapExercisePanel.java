@@ -100,13 +100,13 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
    */
   BootstrapExercisePanel(final T e,
-                                final LangTestDatabaseAsync service,
-                                final ExerciseController controller,
-                                boolean addKeyBinding,
-                                final ControlState controlState,
-                                MySoundFeedback soundFeedback,
-                                SoundFeedback.EndListener endListener,
-                                String instance, ListInterface exerciseList) {
+                         final LangTestDatabaseAsync service,
+                         final ExerciseController controller,
+                         boolean addKeyBinding,
+                         final ControlState controlState,
+                         MySoundFeedback soundFeedback,
+                         SoundFeedback.EndListener endListener,
+                         String instance, ListInterface exerciseList) {
     super(e, service, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
   }
 
@@ -211,7 +211,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, LangTestDatabaseAsync, ExerciseController, Panel)
    */
   private Widget getAnswerAndRecordButtonRow(int exerciseID, LangTestDatabaseAsync service, ExerciseController controller) {
-   // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
+    // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
     RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, service, controller, addKeyBinding, instance);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
@@ -294,7 +294,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private RecordButtonPanel getAnswerWidget(final int exerciseID, LangTestDatabaseAsync service,
                                             ExerciseController controller, final boolean addKeyBinding,
                                             String instance) {
-   // Map<String, Collection<String>> typeToSelection = Collections.emptyMap();
+    // Map<String, Collection<String>> typeToSelection = Collections.emptyMap();
     AudioAnswerListener exercisePanel = this;
     return new FlashcardRecordButtonPanel(exercisePanel, controller, exerciseID, 1) {
       final FlashcardRecordButtonPanel outer = this;
@@ -496,7 +496,6 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       }
     }
   }*/
-
   private String removePunct(String t) {
     return t.replaceAll("/", " ").replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
@@ -513,11 +512,11 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio, String heard) {
     if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score);
-    //  showHeard(heard);
+      //  showHeard(heard);
     }
     showOtherText();
 
-  //  logger.info("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
+    //  logger.info("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
 
     String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
@@ -536,14 +535,14 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       tryAgain();
     }
 
-    if (controller.getProps().isDemoMode()) {
+/*    if (controller.getProps().isDemoMode()) {
       correctPrompt = "Heard: " + result.getDecodeOutput() + "<p>" + correctPrompt;
       Heading recoOutput = getRecoOutput();
       if (recoOutput != null && controlState.isAudioFeedbackOn()) {
         recoOutput.setText(correctPrompt);
         recoOutput.getElement().getStyle().setColor("#000000");
       }
-    }
+    }*/
 
     return correctPrompt;
   }
@@ -599,7 +598,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
    */
   private void goToNextAfter(int delay) {
-    loadNextOnTimer(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : delay);
+    loadNextOnTimer(//controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS :
+        delay);
   }
 
  /* private int getFeedbackLengthProportionalDelay(String feedback) {
@@ -648,7 +648,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
 
     if (correct) {
       // go to next item
-      logger.info("Bootstrap nextAfterDelay " + correct + " : " +CORRECT_DELAY);
+      logger.info("Bootstrap nextAfterDelay " + correct + " : " + CORRECT_DELAY);
       loadNextOnTimer(CORRECT_DELAY);//DELAY_MILLIS);
     } else {
       initRecordButton();

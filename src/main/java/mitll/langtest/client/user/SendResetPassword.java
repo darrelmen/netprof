@@ -36,8 +36,6 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -55,20 +53,10 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/2/14.
  */
-public class ResetPassword extends UserDialog {
+public class SendResetPassword extends UserDialog {
   private final Logger logger = Logger.getLogger("ResetPassword");
 
-  private static final int MIN_PASSWORD = 8; // Consistent with Domino minimums
-
-  private static final String PASSWORD = "Password";
-
-  private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
-  private static final String PLEASE_ENTER_A_LONGER_PASSWORD = "Please enter a longer password";
-  private static final String PLEASE_ENTER_THE_SAME_PASSWORD = "Please enter the same password";
-  private static final String PASSWORD_HAS_BEEN_CHANGED = "Password has been changed";
   private static final String SUCCESS = "Success";
-  private static final String CHANGE_PASSWORD = "Change Password";
-  private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
 
   private final EventRegistration eventRegistration;
   private final KeyPressHelper enterKeyButtonHelper;
@@ -77,9 +65,9 @@ public class ResetPassword extends UserDialog {
   /**
    * @param props
    * @param eventRegistration
-   * @see mitll.langtest.client.InitialUI#handleResetPass
+   * @see
    */
-  public ResetPassword(PropertyHandler props, EventRegistration eventRegistration, UserManager userManager) {
+  public SendResetPassword(PropertyHandler props, EventRegistration eventRegistration, UserManager userManager) {
     super(props);
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(false);
@@ -93,7 +81,7 @@ public class ResetPassword extends UserDialog {
    */
   public Panel getResetPassword(final String token) {
     Panel container = new DivWidget();
-    container.getElement().setId("ResetPassswordContent");
+    container.getElement().setId("SendResetPassswordContent");
 
     DivWidget child = new DivWidget();
     container.add(child);
@@ -121,11 +109,9 @@ public class ResetPassword extends UserDialog {
     final Fieldset fieldset = new Fieldset();
     form.add(fieldset);
 
-    Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
+    Heading w = new Heading(3, "Enter User ID");
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
-
-    // FormField useridField = addControlFormFieldWithPlaceholder(fieldset, false, 4, 35, "User ID");
 
     final TextBox user = new TextBox();
     user.setMaxLength(35);
@@ -134,41 +120,21 @@ public class ResetPassword extends UserDialog {
     user.setText(pendingUserID);
     FormField useridField = getSimpleFormField(fieldset, user, 4);
 
-    final FormField firstPassword = getPasswordField(fieldset, PASSWORD);
-    // final BasicDialog.FormField secondPassword = ;
-    //   addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
-
-    Button changePasswordButton =
-        getChangePasswordButton(
-            token,
-            useridField,
-            firstPassword,
-            getPasswordField(fieldset, "Confirm " + PASSWORD));
+    Button changePasswordButton = getChangePasswordButton(useridField);
 
     fieldset.add(changePasswordButton);
 
     right.add(rightDiv);
 
-    setFocusOn((pendingUserID == null || pendingUserID.isEmpty()) ? useridField.getWidget() : firstPassword.getWidget());
-    //   setFocusOn(useridField.getWidget());
+    setFocusOn(useridField.getWidget());
     return container;
   }
 
-  private FormField getPasswordField(Fieldset fieldset, String hint) {
-    return addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, hint);
-  }
-
   /**
-   * @param token
-   * @param firstPassword  what we use to reset the password
-   * @param secondPassword just so we can make sure the user didn't make a typo
    * @see #getResetPassword
    */
-  private Button getChangePasswordButton(final String token,
-                                         final FormField userID,
-                                         final FormField firstPassword,
-                                         final FormField secondPassword) {
-    final Button changePassword = new Button(CHANGE_PASSWORD);
+  private Button getChangePasswordButton(final FormField userID) {
+    final Button changePassword = new Button("Send Reset Password");
     changePassword.setType(ButtonType.PRIMARY);
 
     // changePassword.setTabIndex(3);
@@ -177,47 +143,26 @@ public class ResetPassword extends UserDialog {
     changePassword.addStyleName("rightFiveMargin");
     changePassword.addStyleName("leftFiveMargin");
 
-    changePassword.addClickHandler(event -> onChangePassword(userID, firstPassword, secondPassword, changePassword, token));
+    changePassword.addClickHandler(event -> onChangePassword(userID, changePassword));
     enterKeyButtonHelper.addKeyHandler(changePassword);
-
     eventRegistration.register(changePassword);
 
     return changePassword;
   }
 
   /**
-   * @param firstPassword
-   * @param secondPassword for confirmation
    * @param changePassword
-   * @param token
    */
   private void onChangePassword(FormField userIDForm,
-                                FormField firstPassword,
-                                FormField secondPassword,
-                                final Button changePassword,
-                                String token) {
-    String newPassword = firstPassword.box.getText();
-    String second = secondPassword.box.getText();
-    if (newPassword.isEmpty()) {
-      markErrorBlur(firstPassword, PLEASE_ENTER_A_PASSWORD);
-    } else if (newPassword.length() < MIN_PASSWORD) {
-      markErrorBlur(firstPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
-    } else if (second.isEmpty()) {
-      markErrorBlur(secondPassword, PLEASE_ENTER_A_PASSWORD);
-    } else if (second.length() < MIN_PASSWORD) {
-      markErrorBlur(secondPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
-    } else if (!second.equals(newPassword)) {
-      markErrorBlur(secondPassword, PLEASE_ENTER_THE_SAME_PASSWORD);
+                                final Button changePassword) {
 
+    if (userIDForm.isEmpty()) {
+      markErrorBlur(userIDForm, "Please enter a user id.");
     } else {
       changePassword.setEnabled(false);
       enterKeyButtonHelper.removeKeyHandler();
 
-//      String hashNewPassword = Md5Hash.getHash(newPassword);
-      // newPassword = rot13(newPassword);
-
-      //    service.changePFor(token, newPassword, new AsyncCallback<Boolean>() {
-      service.changePasswordWithToken(userIDForm.getSafeText(), token, newPassword, new AsyncCallback<User>() {
+      service.resetPassword(userIDForm.getSafeText(), new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
           changePassword.setEnabled(true);
@@ -225,41 +170,31 @@ public class ResetPassword extends UserDialog {
         }
 
         @Override
-        public void onSuccess(User result) {
-          if (result == null) {
-            markErrorBlur(changePassword, "Password has already been changed?");
+        public void onSuccess(Boolean result) {
+          if (!result) {
+            markErrorBlur(userIDForm, "Unknown user.");
             changePassword.setEnabled(true);
           } else {
-
-            markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.LEFT);
-            reloadPageInThreeSeconds(result);
+            markErrorBlur(changePassword, SUCCESS, "Please check your email.", Placement.LEFT);
+            reloadPageInThreeSeconds();
           }
         }
       });
     }
   }
 
-  private void reloadPageInThreeSeconds(final User user) {
+  private void reloadPageInThreeSeconds() {
     Timer t = new Timer() {
       @Override
       public void run() {
-        reloadPage(user);
+        reloadPage();
       }
     };
     t.schedule(2000);
   }
 
-  private void reloadPage(User user) {
+  private void reloadPage() {
     String newURL = trimURL(Window.Location.getHref());
-    userManager.rememberUser(user);
     Window.Location.replace(newURL);
-
-    //    Timer t = new Timer() {
-//      @Override
-//      public void run() {
-//        Window.Location.reload();
-//      }
-//    };
-//    t.schedule(1000);
   }
 }

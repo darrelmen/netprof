@@ -44,6 +44,7 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;

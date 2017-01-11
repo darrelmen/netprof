@@ -954,7 +954,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param precalcResult
    * @param options
    * @return
-   * @see #getASRScoreForAudio(File, Collection, boolean, boolean, boolean)
+   * @see #getASRScoreForAudio
    */
 
   private PretestScore getASRScoreForAudio(int reqid,
@@ -974,7 +974,7 @@ public class AudioFileHelper implements AlignDecode {
         (options.isCanUseCache() ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
     if (testAudioFile == null) {
-      logger.error("getASRScoreForAudio huh? no test audio file for " + sentence);
+      logger.warn("getASRScoreForAudio huh? " +getLanguage()+ " no test audio file for '" + sentence + "'");
       return new PretestScore(); // very defensive
     }
     testAudioFile = mp3Support.dealWithMP3Audio(testAudioFile);

@@ -62,12 +62,7 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.ResetPassword;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.client.user.UserMenu;
-import mitll.langtest.client.user.UserNotification;
-import mitll.langtest.client.user.UserPassLogin;
+import mitll.langtest.client.user.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
@@ -250,7 +245,7 @@ public class InitialUI implements UILifecycle {
     return new HTML(lifecycleSupport.getInfoLine());
   }
 
-
+  @Deprecated
   @Override
   public boolean isRTL() {
     boolean b = controller.getProps().isRightAlignContent();//navigation != null && navigation.isRTL();
@@ -561,14 +556,10 @@ public class InitialUI implements UILifecycle {
       return true;
     }
 
-    // are we here to enable a CD user?
-  /*  final String cdToken = props.getCdEnableToken();
-    if (!cdToken.isEmpty()) {
-      logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
-      handleCDToken(verticalContainer, contentRow, cdToken, props.getEmailRToken());
+    if (!props.getSendResetPassToken().isEmpty()) {
+      handleSendResetPass(verticalContainer, contentRow, eventRegistration, resetPassToken);
       return true;
     }
-*/
     // are we here to show the login screen?
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
@@ -603,27 +594,17 @@ public class InitialUI implements UILifecycle {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
     firstRow.add(new ResetPassword(props, eventRegistration, userManager).getResetPassword(resetPassToken));
     clearPadding(verticalContainer);
+    RootPanel.get().add(verticalContainer);
+    banner.setCogVisible(false);
+  }
 
-/*
-    userService.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Long result) {
-        if (result == null || result < 0) {
-          logger.info("token '" + resetPassToken + "' is stale. Showing normal view");
-          trimURL();
-          populateBelowHeader(verticalContainer);
-        } else {
-          firstRow.add(new ResetPassword(props, eventRegistration).getResetPassword(resetPassToken));
-          clearPadding(verticalContainer);
-        }
-      }
-    });
-*/
-
+  private void handleSendResetPass(final Container verticalContainer,
+                                 final Panel firstRow,
+                                 final EventRegistration eventRegistration,
+                                 final String resetPassToken) {
+    //logger.info("showLogin token '" + resetPassToken + "' for password reset");
+    firstRow.add(new SendResetPassword(props, eventRegistration, userManager).getResetPassword(resetPassToken));
+    clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     banner.setCogVisible(false);
   }

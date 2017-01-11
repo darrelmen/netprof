@@ -66,9 +66,6 @@ public class ChangePasswordView extends Composite {
   private DecoratedFields pass1DF;
   private DecoratedFields pass2DF;
 
-//  private DecoratedFields emailDF;
-//  private CheckBox emailBox;
-
   private User editUser = null;
   private CommonValidation cValidator = new CommonValidation();
   private UIHandler uiHandler;
@@ -76,7 +73,14 @@ public class ChangePasswordView extends Composite {
   private UserState userState;
   private UserServiceAsync userServiceAsync;
 
-  public ChangePasswordView(//SessionHelper sHelper,
+  /**
+   * @see mitll.langtest.client.user.UserMenu.ChangePasswordClickHandler
+   * @param editUser
+   * @param forcePWChange
+   * @param userState
+   * @param userServiceAsync
+   */
+  public ChangePasswordView(
                             User editUser,
                             boolean forcePWChange,
                             UserState userState,
