@@ -1,0 +1,50 @@
+{
+  "config": [
+    {
+      "affliations": [
+        {
+          "_id": 1,
+          "abbreviation": "DLIFLC",
+          "displayName": "DLI Foreign Language Center",
+          "dataType": "affiliation"
+        },
+        {
+          "_id": 2,
+          "abbreviation": "DLI-W",
+          "displayName": "DLI-Washington",
+          "dataType": "affiliation"
+        },
+        {
+          "_id": 3,
+          "abbreviation": "LTD",
+          "displayName": "Language Training Detachment",
+          "dataType": "affiliation"
+        },
+        {
+          "_id": 4,
+          "abbreviation": "MTT",
+          "displayName": "Mobile Training Team",
+          "dataType": "affiliation"
+        },
+        {
+          "_id": 5,
+          "abbreviation": "MIT",
+          "displayName": "Massachusetts Institute of Technology",
+          "dataType": "affiliation"
+        },
+        {
+          "_id": 6,
+          "abbreviation": "MIT-LL",
+          "displayName": "MIT - Lincoln Laboratory",
+          "dataType": "affiliation"
+        },
+        {
+          "_id": 7,
+          "abbreviation": "OTHER",
+          "displayName": "Other",
+          "dataType": "affiliation"
+        }
+      ]
+    }
+  ]
+}
