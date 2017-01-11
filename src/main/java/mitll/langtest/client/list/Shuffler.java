@@ -46,7 +46,11 @@ import java.util.RandomAccess;
 class Shuffler {
   private static final int SHUFFLE_THRESHOLD = 5;
 
-  public static void shuffle(List<?> list) {
+  /**
+   *
+   * @param list
+   */
+  static void shuffle(List<?> list) {
     Random rnd = r;
     if (rnd == null)
       r = rnd = new Random(); // harmless race.

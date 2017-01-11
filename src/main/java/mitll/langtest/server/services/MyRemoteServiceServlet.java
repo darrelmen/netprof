@@ -45,6 +45,7 @@ import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
@@ -114,12 +115,15 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * Note that this will only ever be called once.
    *
    * @param servletContext
-   * @see #init()
+   * @see #init
    */
-  void readProperties(ServletContext servletContext) {
-    String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-    String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-    serverProps = new ServerProperties(servletContext, configDir);
+  private void readProperties(ServletContext servletContext) {
+//    String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
+//    String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
+//    serverProps = new ServerProperties(servletContext, configDir);
+
+    ServerInitializationManagerNetProf serverInitializationManagerNetProf = new ServerInitializationManagerNetProf();
+    serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
   }
 
   protected int getProjectID() {

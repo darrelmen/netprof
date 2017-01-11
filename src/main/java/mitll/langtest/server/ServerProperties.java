@@ -36,6 +36,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.typesafe.config.ConfigFactory;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
@@ -99,8 +100,11 @@ public class ServerProperties {
   public static final String ABBREVIATION = "abbreviation";
   public static final String DISPLAY_NAME = "displayName";
   public static final String ID = "_id";
+
   public static final String CONFIG = "config";
   public static final String CONFIG_JSON = "config.json";
+  public static final String CONFIG_FILE1 = "config.file";
+
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
   @Deprecated
   private static final String NP_SERVER = "np.ll.mit.edu";
@@ -128,7 +132,7 @@ public class ServerProperties {
   //  private static final String NO_MODEL = "noModel";
   private static final String TIER_INDEX = "tierIndex";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
-  private static final String CONFIG_FILE = "configFile";
+//  private static final String CONFIG_FILE = "configFile";
 
   /**
    * @deprecated - we need a per-project set
@@ -182,7 +186,8 @@ public class ServerProperties {
   );
   private String configFileFullPath;
 
-  public ServerProperties() {}
+  public ServerProperties() {
+  }
 
   public ServerProperties(Properties props,
                           String releaseVers,
@@ -199,12 +204,20 @@ public class ServerProperties {
     try {
       useProperties(configDir, buildDate);
 
-      props.put("releaseVers", releaseVers);
-      props.put("buildUser", buildUser);
-      props.put("buildVers", buildVers);
-      props.put("buildDate", buildDate);
+     // logger.debug("props " + props);
+
+      putProp(props, "releaseVers", releaseVers);
+      putProp(props, "buildUser", buildUser);
+      putProp(props, "buildVers", buildVers);
+      putProp(props, "buildDate", buildDate);
     } catch (FileNotFoundException e) {
       logger.error("ServerProperties looking in " + configDir + " :" + e, e);
+    }
+  }
+
+  private void putProp(Properties props, String releaseVers1, String releaseVers) {
+    if (releaseVers != null) {
+      props.put(releaseVers1, releaseVers);
     }
   }
 
@@ -213,23 +226,40 @@ public class ServerProperties {
    * @param configDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
    */
-  public ServerProperties(ServletContext servletContext, String configDir) {
+/*  public ServerProperties(ServletContext servletContext, String configDir) {
     this(servletContext, configDir, servletContext.getInitParameter(CONFIG_FILE));
-  }
+  }*/
 
   /**
+   * Just for IMPORT.
+   *
    * @param configDir
    * @param configFile
    * @seex mitll.langtest.server.database.ImportCourseExamples#makeDatabaseImpl
    */
   public ServerProperties(String configDir, String configFile) {
-    this(null, configDir, configFile);
+//    this(configDir, configFile);
+//  }
+//
+//  private ServerProperties(//ServletContext servletContext,
+//                           String configDir, String configFile) {
+    if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
+    readProps(configDir, configFile, "");//getDateFromManifest(servletContext));
+    readPhonemeMap(configDir);
   }
 
-  private ServerProperties(ServletContext servletContext, String configDir, String configFile) {
-    if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
-    readProps(configDir, configFile, getDateFromManifest(servletContext));
-    readPhonemeMap(configDir);
+  private void setApplicationConf() {
+    String applicationConfPath = "/opt/netprof/config/application.conf";
+    if (props.containsKey(CONFIG_FILE1)) {
+      applicationConfPath = props.getProperty(CONFIG_FILE1);
+    }
+    Properties props = System.getProperties();
+    props.setProperty(CONFIG_FILE1, applicationConfPath);
+
+    logger.info("setting config.file to " + applicationConfPath);
+    logger.info("setting config.file to " + System.getProperties().get(CONFIG_FILE1));
+
+    ConfigFactory.invalidateCaches();
   }
 
   /**
@@ -260,6 +290,7 @@ public class ServerProperties {
     emailList = new EmailList(props);
     readProperties(dateFromManifest);
     getAffiliations(configDir);
+    setApplicationConf();
   }
 
   /**
@@ -297,6 +328,7 @@ public class ServerProperties {
   /**
    * @return
    * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
+   * @deprecated
    */
   public String getH2Database() {
     return props.getProperty(H2_DATABASE, "npf" + props.getProperty(LANGUAGE));
@@ -381,10 +413,6 @@ public class ServerProperties {
     return getDefaultTrue(REMOVE_EXERCISES_WITH_MISSING_AUDIO);
   }
 
-  public boolean enableAllUsers() {
-    return getDefaultFalse(ENABLE_ALL_USERS);
-  }
-
   /**
    * Need per project triggering of repopulate ref result table
    *
@@ -447,8 +475,7 @@ public class ServerProperties {
    * @return
    */
   public Map<String, String> getProperties() {
-    Properties props = this.props;
-    return getPropertyMap(props);
+    return getPropertyMap(this.props);
   }
 
   public Map<String, String> getPropertyMap(Properties props) {
@@ -465,16 +492,15 @@ public class ServerProperties {
    * The config web.xml file.
    * <p>
    * Note that this will only ever be called once.
-   * TODO : remember to set the approvers and approver emails properties for new customers
-   * TODO : also you may want to set the welcome message to OFF
-   * {@link mitll.langtest.client.PropertyHandler#SHOW_WELCOME}
+   * TODOx : remember to set the approvers and approver emails properties for new customers
+   * TODOx : also you may want to set the welcome message to OFF
    * <p>
    * Here's where we can over-ride default values.
    *
    * @param dateFromManifest
    * @see
    */
-  public void readProperties(String dateFromManifest) {
+  private void readProperties(String dateFromManifest) {
     setReleaseDate(dateFromManifest);
     readProperties();
   }
