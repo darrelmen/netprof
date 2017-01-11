@@ -36,7 +36,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gwt.user.client.DOM;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
@@ -45,10 +44,8 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.user.User;
-import org.apache.commons.collections.ArrayStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
 import java.io.*;

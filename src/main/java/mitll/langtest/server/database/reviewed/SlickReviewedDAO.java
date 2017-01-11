@@ -154,11 +154,6 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
     return ids;
   }
 
-  /**
-   * How to just get the ones for a project?
-   * @param skipUnset
-   * @return
-   */
   @Override
   public Map<Integer, StateCreator> getExerciseToState(boolean skipUnset) {
     Map<Integer, StateCreator> exidToState = new HashMap<>();

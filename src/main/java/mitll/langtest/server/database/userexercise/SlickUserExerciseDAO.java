@@ -72,6 +72,7 @@ public class SlickUserExerciseDAO
   private final ExerciseDAOWrapper dao;
   private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
   private Map<Integer, ExercisePhoneInfo> exToPhones;
+  // private final int beforeLoginUser;
   private final IUserDAO userDAO;
 
   /**

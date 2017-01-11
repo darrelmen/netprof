@@ -32,6 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.user.MiniUser;
 
@@ -265,7 +266,7 @@ public class AudioExercise extends ExerciseShell {
    * @param regularSpeed map fast and slow to regular
    * @return
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
-   * @see mitll.langtest.server.database.AudioExport#getAudioAttribute
+   * @see AudioExport#getAudioAttribute
    */
   public AudioAttribute getRecordingsBy(long userID, boolean regularSpeed) {
     List<AudioAttribute> recordingsBy = getRecordingsBy(userID);
@@ -283,7 +284,7 @@ public class AudioExercise extends ExerciseShell {
    * @param userID
    * @param speed
    * @return
-   * @see mitll.langtest.server.database.AudioExport#getAudioAttribute(MiniUser, CommonExercise, boolean, String)
+   * @see AudioExport#getAudioAttribute(MiniUser, CommonExercise, boolean, String)
    */
   public AudioAttribute getRecordingsBy(long userID, String speed) {
     List<AudioAttribute> recordingsBy = getRecordingsBy(userID);

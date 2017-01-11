@@ -32,7 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.server.database.AudioExport;
+import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.util.Collection;
