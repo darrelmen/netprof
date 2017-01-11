@@ -240,7 +240,7 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getAMASExercise
+   * @see mitll.langtest.server.database.DatabaseImpl#getAMASExercise(String)
    * @param id
    * @return
    */
@@ -281,11 +281,6 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
 
   @Override
   public List<String> getTypeOrder() {
-    return null;
-  }
-
-  @Override
-  public Set<Integer> getIDs() {
     return null;
   }
 }

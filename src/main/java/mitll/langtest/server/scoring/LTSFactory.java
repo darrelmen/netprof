@@ -35,7 +35,7 @@ package mitll.langtest.server.scoring;
 import corpus.EmptyLTS;
 import corpus.LTS;
 import corpus.ModernStandardArabicLTS;
-import mitll.langtest.server.database.AudioExport;
+import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

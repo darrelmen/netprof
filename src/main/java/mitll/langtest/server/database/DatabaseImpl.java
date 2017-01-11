@@ -134,7 +134,7 @@ public class DatabaseImpl implements Database {
   private static final boolean ADD_DEFECTS = false;
 
   /**
-   * TODO : what should this be set to?
+   * @see #getContextPractice
    */
   private String installPath;
 
@@ -169,12 +169,20 @@ public class DatabaseImpl implements Database {
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
 
-  private final String configDir;
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
 
   private mitll.langtest.server.database.user.UserManagement userManagement = null;
 
+  /**
+   * @see #writeUserListAudio(OutputStream, long, int, AudioExport.AudioExportOptions)
+   */
+  private final String configDir;
+  /**
+   * Only for AMAS.
+   *
+   * @see #readAMASExercises(String, String, String, boolean)
+   */
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
   private PathHelper pathHelper;
@@ -276,7 +284,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @seex CopyToPostgres#createProjectIfNotExists
-   * @see DatabaseImpl#makeDAO(String)
+   * @see DatabaseImpl#makeDAO(String, String, String)
    * @see DatabaseImpl#DatabaseImpl
    * @see LangTestDatabaseImpl#init
    */
@@ -710,6 +718,15 @@ public class DatabaseImpl implements Database {
     return projectManagement.getProject(projectid);
   }
 
+  /**
+   * A little dusty...
+   *
+   * @param lessonPlanFile
+   * @param mediaDir
+   * @param installPath
+   * @param isURL
+   * @return
+   */
   private int readAMASExercises(String lessonPlanFile, String mediaDir, String installPath, boolean isURL) {
     int numExercises;
     if (isURL) {
@@ -740,15 +757,11 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * Public for testing only...
+   * Dialog practice
    *
-   * @paramx exerciseDAO
-   * @paramx projid
-   * @seex #configureProject
+   * @param contextPracticeFile
+   * @param installPath
    */
-/*  public void setDependencies(ExerciseDAO exerciseDAO, int projid) {
-    exerciseDAO.setDependencies(userExerciseDAO, null *//*addRemoveDAO*//*, audioDAO, projid);
-  }*/
   private void makeContextPractice(String contextPracticeFile, String installPath) {
     if (contextPractice == null && contextPracticeFile != null) {
       synchronized (this) {
@@ -1405,11 +1418,12 @@ public class DatabaseImpl implements Database {
         getExercises(projectid) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
     String language = getLanguage(projectid);
-    new AudioExport(getServerProps()).writeZip(out,
-        typeToSection,
-        getSectionHelper(projectid),
-        exercisesForSelectionState,
-        language,
+    new AudioExport(getServerProps())
+        .writeZip(out,
+            typeToSection,
+            getSectionHelper(projectid),
+            exercisesForSelectionState,
+            language,
         getAudioDAO(), installPath, configDir, false, options);
   }
 

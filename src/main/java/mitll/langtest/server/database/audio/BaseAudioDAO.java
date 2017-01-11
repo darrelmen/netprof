@@ -34,7 +34,7 @@ package mitll.langtest.server.database.audio;
 
 import com.google.common.base.CharMatcher;
 import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.database.AudioExport;
+import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -109,9 +109,10 @@ public abstract class BaseAudioDAO extends DAO {
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
 
-//    logger.info("getExToAudio - for " +projid);
+    logger.info("getExToAudio - for " +projid);
     Collection<AudioAttribute> attributesByProject = getAudioAttributesByProject(projid);
-  //  logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
+
+    logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
 
     for (AudioAttribute audio : attributesByProject) {
       Integer exid = audio.getExid();

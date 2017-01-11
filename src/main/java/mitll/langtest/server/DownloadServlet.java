@@ -32,7 +32,7 @@
 
 package mitll.langtest.server;
 
-import mitll.langtest.server.database.AudioExport;
+import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
@@ -179,7 +179,8 @@ public class DownloadServlet extends DatabaseServlet {
    * @param queryString
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private void writeAudioZip(HttpServletResponse response, DatabaseImpl db, String queryString, int projid, String language) {
+  private void writeAudioZip(HttpServletResponse response, DatabaseImpl db, String queryString,
+                             int projid, String language) {
     // logger.debug("request " +  " query " + queryString);
     String[] split1 = queryString.split("&");
 
@@ -200,12 +201,14 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   /**
+   * Make a zip of audio, typically for a chapter or unit.
    * @param response
    * @param typeToSection
    * @see #doGet
    */
   private void writeZip(HttpServletResponse response,
-                        Map<String, Collection<String>> typeToSection, int projectid,
+                        Map<String, Collection<String>> typeToSection,
+                        int projectid,
                         AudioExport.AudioExportOptions options) {
     try {
       getDatabase().writeZip(response.getOutputStream(), typeToSection, projectid, options);
