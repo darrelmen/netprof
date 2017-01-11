@@ -104,6 +104,7 @@ public class PropertyHandler {
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
+  private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
@@ -113,9 +114,9 @@ public class PropertyHandler {
   /**
    * @see mitll.langtest.server.mail.EmailHelper#RP
    */
-  @Deprecated private static final String RP = RestUserManagement.RESET_PASSWORD_FROM_EMAIL;//"rp";
-  @Deprecated private static final String CD = "cd";
-  @Deprecated private static final String ER = "er";
+  private static final String RP = RestUserManagement.RESET_PASSWORD_FROM_EMAIL;//"rp";
+  private static final String CD = "cd";
+  private static final String ER = "er";
 
   private static final String CLICK_AND_HOLD = "clickAndHold";
   private static final String SHOW_CONTEXT = "showContext";

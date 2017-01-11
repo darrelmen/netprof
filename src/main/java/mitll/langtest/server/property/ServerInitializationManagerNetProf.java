@@ -107,14 +107,6 @@ public class ServerInitializationManagerNetProf {
 
   public static final String JSON_SERIALIZER = "j-serializer";
 */
-
-  private File configDir = null;
-
-  /**
-   *
-   * @param newContext
-   * @return
-   */
   public ServerProperties getServerProps(ServletContext newContext) {
     DateFormatter.init(new GWTDateFormatter());
 
@@ -282,7 +274,7 @@ public class ServerInitializationManagerNetProf {
     return null;
   }
 
-  public Properties readPropertiesStream(InputStream in) {
+  private Properties readPropertiesStream(InputStream in) {
     try {
       if (in != null) {
         Properties props = new Properties();
@@ -297,6 +289,7 @@ public class ServerInitializationManagerNetProf {
     return null;
   }
 
+  private File configDir = null;
 
   private InputStream openPropertiesFileStream(String configFileName) {
     InputStream in = ServerInitializationManagerNetProf.class.getClassLoader().getResourceAsStream(configFileName);

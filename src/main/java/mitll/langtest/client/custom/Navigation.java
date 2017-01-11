@@ -117,9 +117,6 @@ public class Navigation implements RequiresResize, ShowTab {
   public static final String COMMENT = "comment";
   private static final String MARK_DEFECTS = "Mark Defects";
   private static final String PRACTICE_DIALOG = "Practice Dialog";
-  /**
-   * @see #addDefectsTabs
-   */
   private static final String FIX_DEFECTS = "Fix Defects";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";

@@ -55,7 +55,6 @@ import org.apache.logging.log4j.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.Properties;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
@@ -65,7 +64,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   protected ServerProperties serverProps;
   protected IUserSecurityManager securityManager;
   protected PathHelper pathHelper;
-  Properties uiProperties;
 
   /**
    * JUST FOR AMAS and interop with old h2 database...
