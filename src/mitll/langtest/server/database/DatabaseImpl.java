@@ -98,6 +98,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private static final String UNKNOWN = "unknown";
   private static final String SIL = "sil";
   private static final String TRANSLITERATION = "transliteration";
+  public static final String EXAMPLE = "5496";
 
   private String installPath;
   private ExerciseDAO<CommonExercise> exerciseDAO = null;
@@ -1631,10 +1632,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
   public Map<String, Float> getMaleFemaleProgress() {
-    Set<Long> userMapMales = getUserDAO().getUserIDsMatchingGender(true);
+    Set<Long> userMapMales   = getUserDAO().getUserIDsMatchingGender(true);
     Set<Long> userMapFemales = getUserDAO().getUserIDsMatchingGender(false);
 
-//    Collection<CommonExercise> exercises1 = getExercises();
     Collection<? extends CommonShell> exercises = getExercises();
     Map<String, String> exToTranscript = new HashMap<>();
     Map<String, String> exToContextTranscript = new HashMap<>();
@@ -1651,10 +1651,15 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
-      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+      String foreignLanguage = shell.getForeignLanguage();
+//      if (shell.getID().equalsIgnoreCase(EXAMPLE)) {
+//        logger.warn("getMaleFemaleProgress got "+ shell);
+//      }
+      exToTranscript.put(shell.getID(), foreignLanguage);
       exToContextTranscript.put(shell.getID(), shell.getContext());
     }
 
+    //logger.debug("got " + exToTranscript.get(EXAMPLE));
     logger.info("getMaleFemaleProgress found " + total + " total exercises, " +
         uniqueIDs.size() +
         " unique");
