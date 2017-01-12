@@ -85,16 +85,24 @@ public class PathHelper {
   }
 
   /**
-   * NOT FOR AUDIO.
+   * NOT FOR AUDIO????
    *
    * @param filePath
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int, String)
+   * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile
    *
    */
   public File getAbsoluteFile(String filePath) {
-    return getAbsolute(getInstallPath(), filePath);
+ //   String installPath = properties.getAudioBaseDir(); // was install path
+    String installPath = getInstallPath();
+    logger.info("getAbsoluteFile " + installPath + "/" +filePath);
+    File absolute = getAbsolute(installPath, filePath);
+
+    if (!absolute.exists()) {
+      logger.warn("\t getAbsoluteFile doesn't exist: " + absolute.getAbsolutePath());
+    }
+
+    return absolute;
   }
 
 //  public File getAbsoluteAnswerAudioFile(String filePath, String language) {
@@ -225,7 +233,7 @@ public class PathHelper {
 
   /**
    * @return path to image output dir
-   * @see LangTestDatabaseImpl#getImageForAudioFile
+   * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile
    */
   public String getImageOutDir() {
     String imageOutdir = context == null ? IMAGE_OUTDIR : context.getInitParameter(IMAGE_OUTDIR);
@@ -235,12 +243,13 @@ public class PathHelper {
     if (!test.exists()) {
       test = getAbsoluteFile(imageOutdir);
       boolean mkdirs = test.mkdirs();
-      if (mkdirs) logger.debug("getImageOutDir : making dir at : " + test.getAbsolutePath());
+      if (mkdirs) {
+        logger.debug("getImageOutDir : making dir at : " + test.getAbsolutePath());
+      }
     }
     return imageOutdir;
   }
 /*
-
   public void setConfigDir(String configDir) {
     this.configDir = configDir;
   }

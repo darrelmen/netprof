@@ -60,6 +60,7 @@ import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.text.Collator;
@@ -708,13 +709,10 @@ public class AudioFileHelper implements AlignDecode {
             reqid, file, validity, url) :
         new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
   }
+//  private boolean isNoModel() {
+//    return isNoModel;
+//  }
 
-  @Deprecated
-  private boolean isNoModel() {
-    return isNoModel;
-  }
-
-  @Deprecated
   private boolean hasModel() {
     return !isNoModel;
   }
@@ -748,21 +746,11 @@ public class AudioFileHelper implements AlignDecode {
    * @param file
    * @param validity    if audio isn't valid, don't do alignment or decoding
    * @return
-   * @paramx doFlashcard
-   * @paramx canUseCache
-   * @paramx allowAlternates
-   * @paramx useOldSchool
    * @see #getAudioAnswerDecoding
    */
   private AudioAnswer getAudioAnswer(int reqid,
                                      CommonShell commonShell,
                                      String wavPath, File file, AudioCheck.ValidityAndDur validity,
-
-//                                     boolean doFlashcard,
-//                                     boolean canUseCache,
-//                                     boolean allowAlternates,
-//                                     boolean useOldSchool
-
                                      DecoderOptions decoderOptions
   ) {
     String url = pathHelper.ensureForwardSlashes(wavPath);
@@ -770,7 +758,7 @@ public class AudioFileHelper implements AlignDecode {
     return (validity.isValid() && hasModel()) ?
         getAudioAnswer(
             commonShell,
-            reqid, file, validity, url, decoderOptions) ://doFlashcard, canUseCache, allowAlternates, useOldSchool) :
+            reqid, file, validity, url, decoderOptions) :
         new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
   }
 
@@ -1145,16 +1133,23 @@ public class AudioFileHelper implements AlignDecode {
   private void makeASRScoring(Project project) {
     if (webserviceScoring == null) {
       String installPath = pathHelper.getInstallPath();
-      HTKDictionary htkDictionary = null;
-      try {
-        htkDictionary = makeDict(installPath, project.getModelsDir());
-      } catch (Exception e) {
-        logger.error("for now got " + e, e);
-      }
+  //    String installPath = serverProps.getAudioBaseDir();
+      HTKDictionary htkDictionary = readDictionary(project, installPath);
       webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
       oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
     }
     asrScoring = oldschoolScoring;
+  }
+
+  @Nullable
+  private HTKDictionary readDictionary(Project project, String installPath) {
+    HTKDictionary htkDictionary = null;
+    try {
+      htkDictionary = makeDict(installPath, project.getModelsDir());
+    } catch (Exception e) {
+      logger.error("for now got " + e, e);
+    }
+    return htkDictionary;
   }
 
   /**
@@ -1168,7 +1163,7 @@ public class AudioFileHelper implements AlignDecode {
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
       File file = new File(dictFile);
-      logger.info("read " + file.getAbsolutePath());
+      logger.info("makeDict read " + file.getAbsolutePath());
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
@@ -1177,10 +1172,10 @@ public class AudioFileHelper implements AlignDecode {
       }
       return htkDictionary;
     } else {
-      if (isNoModel()) {
-        logger.info("---> makeDict : Can't find dict file at " + dictFile);
-      } else {
+      if (hasModel()) {
         logger.error("\n----->>>> makeDict : Can't find dict file at " + dictFile);
+      } else {
+        logger.info("---> makeDict : Can't find dict file at " + dictFile);
       }
       return new HTKDictionary();
     }

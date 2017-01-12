@@ -111,6 +111,10 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String STUDY_LISTS = "Study Lists";
   private static final String OTHERS_LISTS = "Study Visited Lists";
   private static final String PRACTICE = "Audio Vocabulary Practice";
+
+  /**
+   * @see #addAnalysis
+   */
   private static final String ANALYSIS = "Analysis";
 
   public static final String REVIEW = "review";
@@ -276,10 +280,13 @@ public class Navigation implements RequiresResize, ShowTab {
       addUserMaintenance();
     }*/
 
-    addAnalysis();
+    boolean hasTeacher = userManager.hasPermission(User.Permission.TEACHER_PERM);
+    boolean onlyOnePerm = userManager.getPermissions().size() == 1;
+    if (!onlyOnePerm || !hasTeacher) { // why would a teacher want to see their own analysis?
+      addAnalysis();
+    }
 
-    if (controller.getProps().useAnalysis() ||
-        userManager.hasPermission(User.Permission.TEACHER_PERM)) {
+    if (controller.getProps().useAnalysis() || hasTeacher) {
       addTeacherAnalysis();
     }
 

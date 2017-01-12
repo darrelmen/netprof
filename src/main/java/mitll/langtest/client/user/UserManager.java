@@ -40,6 +40,7 @@ import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.logging.Logger;
 
@@ -506,7 +507,11 @@ public class UserManager {
   }
 
   public boolean hasPermission(User.Permission permission) {
-    return current.getPermissions().contains(permission);
+    return getPermissions().contains(permission);
+  }
+
+  public Collection<User.Permission> getPermissions() {
+    return current.getPermissions();
   }
 
 /*  public void getCounts(Map<User.Kind, Label> kindToLabel) {
