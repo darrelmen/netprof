@@ -128,21 +128,25 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   @Override
-  public LoginResult restoreUserSession()
-      throws DominoSessionException {
-    User dbUser = securityManager.getLoggedInUser(getThreadLocalRequest());
-    boolean isSessionActive = dbUser != null;
-    String uid = (dbUser != null) ? dbUser.getUserID() : null;
-    logger.info(">Session Activity> User session restoration for id " +
-        uid + ((isSessionActive) ? " was successful" : " failed"));
-    // ensure a session is created.
-    if (!isSessionActive) {
-      securityManager.logoutUser(getThreadLocalRequest(), uid, true);
-      logger.info(">Session Activity> Sending Session Not Restored. Return early");
-      return new LoginResult(LoginResult.ResultType.SessionNotRestored);
+  public LoginResult restoreUserSession() {
+    try {
+      User dbUser = securityManager.getLoggedInUser(getThreadLocalRequest());
+      boolean isSessionActive = dbUser != null;
+      String uid = (dbUser != null) ? dbUser.getUserID() : null;
+      logger.info(">Session Activity> User session restoration for id " +
+          uid + ((isSessionActive) ? " was successful" : " failed"));
+      // ensure a session is created.
+      if (!isSessionActive) {
+        securityManager.logoutUser(getThreadLocalRequest(), uid, true);
+        logger.info(">Session Activity> Sending Session Not Restored. Return early");
+        return new LoginResult(LoginResult.ResultType.SessionNotRestored);
+      }
+      logger.info(">Session Activity> Session restoration successful. Checking login status.");
+      return new LoginResult(LoginResult.ResultType.Success);
+    } catch (DominoSessionException e) {
+      logger.info("got "+e,e);
+      return new LoginResult(LoginResult.ResultType.SessionExpired);
     }
-    logger.info(">Session Activity> Session restoration successful. Checking login status.");
-    return new LoginResult(LoginResult.ResultType.Success);
   }
 
 
