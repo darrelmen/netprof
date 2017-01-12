@@ -129,7 +129,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   protected int getProjectID() {
     try {
       User loggedInUser = getSessionUser();
-      if (loggedInUser == null) return -1;
+      if (loggedInUser == null) {
+        logger.warn("getProjectID : no user in session, so we can't get the project id for the user.");
+        return -1;
+      }
       int i = db.getUserProjectDAO().mostRecentByUser(loggedInUser.getID());
       return i;
     } catch (DominoSessionException e) {
@@ -165,6 +168,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       return null;
     }
   }
+
 
   protected int getUserIDFromSession() {
     return securityManager.getUserIDFromRequest(getThreadLocalRequest());

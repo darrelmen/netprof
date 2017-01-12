@@ -61,7 +61,7 @@ public class ForceNocacheFilter implements Filter {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final String requestUri = httpRequest.getRequestURI();
     HttpSession session = httpRequest.getSession(false);
-    String sessionId = "no-session";
+    String sessionId;
     String loginId = "no-user";
     if (session != null) {
       sessionId = session.getId();
