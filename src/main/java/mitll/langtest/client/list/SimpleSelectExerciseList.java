@@ -39,6 +39,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.bootstrap.SectionNodeItemSorter;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -54,9 +55,9 @@ import java.util.logging.Logger;
 public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectionWidget> {
   private final Logger logger = Logger.getLogger("SimpleSelectExerciseList");
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
-  private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
+//  private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
 
-  private final Heading statusHeader = new Heading(4);
+  //  private final Heading statusHeader = new Heading(4);
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
@@ -77,7 +78,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
                                   ExerciseController controller,
                                   String instance,
                                   boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst,false);
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, false);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
@@ -155,19 +156,31 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
       logger.warning("addChoiceRow : huh? types is empty?");
       return;
     }
-    showDefaultStatus();
-    HorizontalPanel widgets = new HorizontalPanel();
-    firstTypeRow = widgets;
-    firstTypeRow.getElement().setId("firstTypeRow");
+    //  showDefaultStatus();
+
+    firstTypeRow = getChoicesRow();
     container.add(firstTypeRow);
-    firstTypeRow.addStyleName("alignTop");
 
-//    logger.info("iter order ");
     rootNodes = new SectionNodeItemSorter().getSortedItems(rootNodes);
-    // for (SectionNode node:rootNodes) logger.info("\t" + node.getType() + " " +node.getName());
+    addChoiceWidgets(rootNodes, types);
+    makeDefaultSelections();
 
-    //int index = 0;
+    firstTypeRow.add(getBottomRow());//downloadHelper.getDownloadButton());
+    //DivWidget bottomRow = getBottomRow();
+    //addBottomText(bottomRow);
+    //container.add(bottomRow);
 
+    pushFirstListBoxSelection();
+  }
+
+  private Panel getChoicesRow() {
+    Panel firstTypeRow = new HorizontalPanel();
+    firstTypeRow.getElement().setId("firstTypeRow");
+    firstTypeRow.addStyleName("alignTop");
+    return firstTypeRow;
+  }
+
+  private void addChoiceWidgets(Collection<SectionNode> rootNodes, List<String> types) {
     ListSectionWidget parent = null;
     int i = 0;
 
@@ -182,16 +195,12 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
       //List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
       List<String> sectionsInType = getLabels(rootNodes);
 
-      //   logger.info("got " + type + " num sections " + sectionsInType.size());
-
-      //   MenuSectionWidget value = new MenuSectionWidget(type, rootNodes, this);
       ListSectionWidget value = new ListSectionWidget(type, rootNodes, this);
       if (parent != null) {
         parent.addChild(value);
       }
       parent = value;
       sectionWidgetContainer.setWidget(type, value);
-
       //   logger.info("for " + type + " : " + sectionsInType);
       value.addChoices(firstTypeRow, type, sectionsInType);
 
@@ -201,14 +210,6 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
       }
       i = 0;
     }
-    makeDefaultSelections();
-
-    DivWidget bottomRow = getBottomRow();
-    addBottomText(bottomRow);
-    container.add(bottomRow);
-
-
-    pushFirstListBoxSelection();
   }
 
   private List<SectionNode> getChildSectionNodes(Collection<SectionNode> rootNodes) {
@@ -237,34 +238,19 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
     pushNewSectionHistoryToken();
   }
 
-//  private DivWidget getBottomRow() {
-//    FlexTable links = downloadHelper.getDownloadLinks();
-//    // else {
-//    //   logger.info("user is not a teacher.");
-//    // }
+  private Widget getBottomRow() {
+    Panel links = downloadHelper.getDownloadButton();
+    links.addStyleName("topMargin");
+    links.addStyleName("leftFiveMargin");
+    return links;
 //    DivWidget bottomRow = new DivWidget();
-//    bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+//    bottomRow.getElement().getStyle().setMarginBottom(18, Style.Unit.PX);
 //    DivWidget left = new DivWidget();
 //    left.addStyleName("floatLeftList");
 //    left.add(links);
 //    bottomRow.add(left);
 //    return bottomRow;
-//  }
-
-  private DivWidget getBottomRow() {
-    Panel links = downloadHelper.getDownloadLinks();
-    // else {
-    //   logger.info("user is not a teacher.");
-    // }
-    DivWidget bottomRow = new DivWidget();
-    bottomRow.getElement().getStyle().setMarginBottom(18, Style.Unit.PX);
-    DivWidget left = new DivWidget();
-    left.addStyleName("floatLeftList");
-    left.add(links);
-    bottomRow.add(left);
-    return bottomRow;
   }
-
 
   private List<String> getLabels(Collection<SectionNode> nodes) {
     List<String> items = new ArrayList<>();
@@ -298,13 +284,12 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
   private void showSelectionState(SelectionState selectionState) {
     // keep the download link info in sync with the selection
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
-
     //  logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
 
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
 
-    if (typeToSection.isEmpty()) {
-      showDefaultStatus();
+/*    if (typeToSection.isEmpty()) {
+   //   showDefaultStatus();
     } else {
       StringBuilder status = new StringBuilder();
       // logger.info("\tshowSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
@@ -324,31 +309,36 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
           status.append(statusForType).append(" and ");
         }
       }
+
       String text = status.toString();
       if (text.length() > 0) text = text.substring(0, text.length() - " and ".length());
       statusHeader.setText(text);
-    }
+    }*/
   }
 
+/*
   private void showDefaultStatus() {
     statusHeader.setText(SHOWING_ALL_ENTRIES);
   }
+*/
 
   /**
    * @param container
    * @see #addChoiceRow
    */
+/*
   private void addBottomText(Panel container) {
     Panel status = getStatusRow();
     container.add(status);
     status.addStyleName("leftFiftyPercentMargin");
   }
-
+*/
 
   /**
    * @return
    * @see #addBottomText
    */
+/*
   private Panel getStatusRow() {
     Panel status = new DivWidget();
     status.getElement().setId("statusRow");
@@ -360,6 +350,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
     statusHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     return status;
   }
+*/
 
   /**
    * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.amas.ExerciseListWrapper)
@@ -369,30 +360,12 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
     showEmptySelection();
   }
 
-
-  /**
-   * @param toShow
-   * @see SimpleSelectExerciseList#gotEmptyExerciseList()
-   * @seex ResponseExerciseList#quizCompleteDisplay
-   */
-/*  void showMessage(String toShow, boolean addStartOver) {
-    createdPanel = new SimplePanel();
-    createdPanel.getElement().setId("placeHolderWhenNoExercises");
-    createdPanel.add(new Heading(3, toShow));
-
-    VerticalPanel vp = new VerticalPanel();
-    vp.add(createdPanel);
-
-    innerContainer.setWidget(vp);
-  }*/
-
   /**
    * @seex #rememberAndLoadFirst(List, CommonExercise, String)
    */
   @Override
   protected void loadFirstExercise(String searchIfAny) {
     // logger.info("loadFirstExercise : ---");
-
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       logger.info("loadFirstExercise : current exercises is empty?");
       gotEmptyExerciseList();
@@ -427,39 +400,4 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
       }
     };
   }
-
-  /**
-   * When we log in we want to check the history in the url and set the current selection state to reflect it.
-   *
-   * @seex AMASInitialUI#configureUIGivenUser()
-   */
-/*  public void restoreListFromHistory() {
-    restoreListFromHistory(History.getToken());
-  }*/
-/*  private void restoreListFromHistory(String token) {
-    try {
-      SelectionState selectionState = getSelectionState(token);
-      if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info(" HistoryExerciseList.onValueChange : restoreListBoxState '" + selectionState + "'");
-      }
-      restoreListBoxState(selectionState);
-      if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info("HistoryExerciseList.onValueChange : selectionState '" + selectionState + "'");
-      }
-
-      // logger.info("gotSelection : got type " + type + " and " + text);
-      int count = getNumSelections();
-      if (count == 3) {
-        //    logger.info("push new token " + getHistoryTokenFromUIState());
-        logger.info("gotSelection count = " + count);
-        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), false, -1);
-      } else {
-        // logger.warning("not enough selections " +count);
-        gotEmptyExerciseList();
-      }
-    } catch (Exception e) {
-      logger.warning("HistoryExerciseList.onValueChange " + token + " badly formed. Got " + e);
-      e.printStackTrace();
-    }
-  }*/
 }

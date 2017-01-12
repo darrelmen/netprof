@@ -255,7 +255,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         logger.error("configuration error - expecting media directory " + mediaDir + " to be directory.");
 
       }
-    } else logger.error("configuration error - expecting a media directory " + mediaDir);
+    } else {
+      logger.error("configuration error - expecting a media directory " + mediaDir);
+    }
 
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
     logger.info("setAudioDAO exToAudio " +exToAudio.size());

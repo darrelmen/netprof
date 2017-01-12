@@ -58,6 +58,7 @@ import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.project.ProjectChoices;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
@@ -80,21 +81,9 @@ import java.util.logging.Logger;
  * @since 2/23/16
  */
 public class InitialUI implements UILifecycle {
-  /**
-   * @see #showProjectChoices(List, int)
-   */
-  private static final String PLEASE_SELECT_A_LANGUAGE = "Please select a language";
-  private static final String PLEASE_SELECT_A_COURSE = "Please select a course";
-  private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
   private final Logger logger = Logger.getLogger("InitialUI");
 
   public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
-
-  /**
-   * Tamas doesn't like scrolling -- try to prevent it on laptops
-   */
-  private static final int ITEMS_IN_ROW = 5;
-//  private static final int LEFT_LIST_WIDTH = 167;
 
   protected static final String LOGIN = "Login";
   private static final String LANGTEST_IMAGES = LangTest.LANGTEST_IMAGES;
@@ -115,12 +104,10 @@ public class InitialUI implements UILifecycle {
   protected final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
   protected final UserFeedback userFeedback;
-  private final UserNotification userNotification;
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
-  private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
   private final Banner banner;
 
@@ -131,6 +118,7 @@ public class InitialUI implements UILifecycle {
   private final BrowserCheck browserCheck = new BrowserCheck();
   private Container verticalContainer;
   private static final boolean DEBUG = false;
+  private final ProjectChoices choices;
 
   /**
    * @param langTest
@@ -143,9 +131,9 @@ public class InitialUI implements UILifecycle {
     this.userManager = userManager;
     this.controller = langTest;
     userFeedback = langTest;
-    this.userNotification = langTest;
     this.userMenu = new UserMenu(langTest, userManager, this);
-    banner = new Banner(props, userService, langTest, langTest);
+    this.choices = new ProjectChoices(langTest, this);
+    banner = new Banner(props);
   }
 
   /**
@@ -159,8 +147,8 @@ public class InitialUI implements UILifecycle {
     this.verticalContainer = verticalContainer;
     // header/title line
     // first row ---------------
-    makeFirstTwoRows(verticalContainer);
-
+    Panel contentRow = makeFirstTwoRows(verticalContainer);
+    choices.setContentRow(contentRow);
     if (!showLogin()) {
       populateBelowHeader(verticalContainer);
     }
@@ -170,7 +158,7 @@ public class InitialUI implements UILifecycle {
   /**
    * @param verticalContainer
    * @return
-   * @see #populateRootPanel()
+   * @see #populateRootPanel
    */
   protected Panel makeFirstTwoRows(Container verticalContainer) {
     // add header row
@@ -426,7 +414,7 @@ public class InitialUI implements UILifecycle {
                 // if (!remove) {
                 //   logger.warning("didn't remove " + projectCrumb);
                 // }
-                showProjectChoices(project.getChildren(), 1);
+                choices.showProject(project);
               }
             });
           } else if (project.getProjectid() == currentProject) {
@@ -451,14 +439,14 @@ public class InitialUI implements UILifecycle {
   private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     String crumbName = project.getName();
     NavLink lang = new NavLink(crumbName);
-    lang.addClickHandler(new ClickHandler() {
+/*    lang.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
         //               breadcrumbs = getBreadcrumbs();
         //              crumbs.clear();
         //            clearStartupInfo();
       }
-    });
+    });*/
     crumbs.add(lang);
     logger.info("getBreadcrumbs adding step for " + lang);
     //return lang;
@@ -490,7 +478,6 @@ public class InitialUI implements UILifecycle {
 
   private void makeNavigation() {
     navigation = new Navigation(service, userManager, controller, userFeedback);
-    banner.setNavigation(navigation);
   }
 
   /**
@@ -506,6 +493,7 @@ public class InitialUI implements UILifecycle {
    * @param currentExerciseVPanel
    * @return
    * @see #populateBelowHeader
+   * @deprecated - we should really test this
    */
   private Container getHeadstart(Panel currentExerciseVPanel) {
     // show fancy lace background image
@@ -599,68 +587,20 @@ public class InitialUI implements UILifecycle {
   }
 
   private void handleSendResetPass(final Container verticalContainer,
-                                 final Panel firstRow,
-                                 final EventRegistration eventRegistration,
-                                 final String resetPassToken) {
+                                   final Panel firstRow,
+                                   final EventRegistration eventRegistration,
+                                   final String resetPassToken) {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
     firstRow.add(new SendResetPassword(props, eventRegistration, userManager).getResetPassword(resetPassToken));
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     banner.setCogVisible(false);
   }
-
-  /**
-   * Reload window after showing content developer has been approved.
-   * <p>
-   * Mainly something Tamas would see.
-   *
-   * @paramx verticalContainer
-   * @paramx firstRow
-   * @paramx cdToken
-   * @paramx emailR
-   * @deprecated
-   */
 /*
-  private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
-    logger.info("enabling token " + cdToken + " for email " + emailR);
-    userService.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(String result) {
-        if (result == null) {
-          logger.info("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
-          trimURL();
-          populateBelowHeader(verticalContainer);
-        } else {
-          firstRow.add(new Heading(2, "OK, content developer <u>" + result + "</u> has been approved."));
-          firstRow.addStyleName("leftFiveMargin");
-          clearPadding(verticalContainer);
-          trimURLAndReload();
-        }
-      }
-    });
-
-    RootPanel.get().add(verticalContainer);
-    banner.setCogVisible(false);
-  }
-*/
-  private void trimURLAndReload() {
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        trimURL();
-        Window.Location.reload();
-      }
-    };
-    t.schedule(3000);
-  }
-
   private void trimURL() {
     Window.Location.replace(trimURL(Window.Location.getHref()));
   }
+*/
 
   private String trimURL(String url) {
     if (url.contains("127.0.0.1")) {
@@ -730,10 +670,15 @@ public class InitialUI implements UILifecycle {
     } else {
       logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
-      showNavigation();
-      navigation.showInitialState();
+      showInitialState();
     }
     showUserPermissions(userID);
+  }
+
+  @Override
+  public void showInitialState() {
+    showNavigation();
+    navigation.showInitialState();
   }
 
   /**
@@ -744,26 +689,10 @@ public class InitialUI implements UILifecycle {
   private void addProjectChoices(int level, SlimProject parent) {
     clearContent();
     addBreadcrumbs();
-    List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
-
-    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
-    showProjectChoices(getVisibleProjects(projects), level);
-  }
-
-  private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
-    List<SlimProject> filtered = new ArrayList<>();
-    Collection<User.Permission> permissions = controller.getPermissions();
-    boolean canRecord = permissions.contains(User.Permission.RECORD_AUDIO) ||
-        permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.DEVELOP_CONTENT);
-
-    for (SlimProject project : projects) {
-      if (project.getStatus().equalsIgnoreCase("Development")) {
-        if (canRecord) {
-          filtered.add(project);
-        }
-      } else filtered.add(project);
-    }
-    return filtered;
+//    List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
+//
+//    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
+    choices.showProjectChoices(level, parent);
   }
 
   /**
@@ -792,130 +721,12 @@ public class InitialUI implements UILifecycle {
     }
   }
 
-  /**
-   * @param result
-   * @param nest
-   * @see #addProjectChoices(int, SlimProject)
-   */
-  private void showProjectChoices(List<SlimProject> result, int nest) {
-    logger.info("showProjectChoices " + result.size() + " : " + nest);
-
-    final Container flags = new Container();
-    final Section section = new Section("section");
-    contentRow.add(section);
-
-    DivWidget header = new DivWidget();
-    header.addStyleName("container");
-    String text = PLEASE_SELECT_A_LANGUAGE;
-    if (nest == 1) {
-      text = PLEASE_SELECT_A_COURSE;
-    }
-
-    if (result.isEmpty()) {
-      text = NO_LANGUAGES_LOADED_YET;
-    }
-    Heading child = new Heading(3, text);
-    header.add(child);
-    child.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
-
-    section.add(header);
-    section.add(flags);
-
-    Panel current = new Thumbnails();
-    flags.add(current);
-    int numInRow = ITEMS_IN_ROW;
-    List<SlimProject> languages = new ArrayList<SlimProject>(result);
-
-    logger.info("addProjectChoices " + languages.size() + " languages");
-
-    Collections.sort(languages, new Comparator<SlimProject>() {
-      @Override
-      public int compare(SlimProject o1, SlimProject o2) {
-        if (nest == 0) {
-
-          return o1.getLanguage().toLowerCase().compareTo(o2.getLanguage().toLowerCase());
-        } else {
-          int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
-          return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
-        }
-      }
-    });
-
-    int size = languages.size();
-    logger.info("addProjectChoices " + size + "-------- nest " + nest);
-    for (int i = 0; i < size; i += numInRow) {
-      int max = i + numInRow;
-      if (max > size) max = size;
-      for (int j = i; j < max; j++) {
-        SlimProject project = languages.get(j);
-        Panel langIcon = getLangIcon(project.getLanguage(), project, nest);
-        current.add(langIcon);
-      }
-
-      current = new Thumbnails();
-      flags.add(current);
-    }
-  }
-
-  /**
-   * @param lang
-   * @param projectForLang
-   * @param nest
-   * @return
-   * @see #showProjectChoices
-   */
-  private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
-    String lang1 = nest == 0 ? lang : projectForLang.getName();
-    return getImageAnchor(lang1, projectForLang);
-  }
-
-  /**
-   * TODO : Consider arbitrarily deep nesting...
-   *
-   * @param name
-   * @param projectForLang
-   * @return
-   * @see #getLangIcon
-   */
-  private Panel getImageAnchor(String name, SlimProject projectForLang) {
-    int nest = 1;
-
-    Thumbnail widgets = new Thumbnail();
-    widgets.setSize(2);
-    final int projid = projectForLang.getProjectid();
-
-    PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
-    button.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        NavLink projectCrumb = new NavLink(name);
-        breadcrumbs.add(projectCrumb);
-        List<SlimProject> children = projectForLang.getChildren();
-        // logger.info("project " + projid + " has " + children);
-        if (children.size() < 2) {
-          //logger.info("onClick select leaf project " + projid + " current user " + userManager.getUser() + " : " + userManager.getUserID());
-          setProjectForUser(projid);
-        } else {
-          logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");
-          projectCrumb.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-              clickOnParentCrumb(projectForLang);
-            }
-          });
-          clearContent();
-          showProjectChoices(children, nest);
-        }
-      }
-    });
-    widgets.add(button);
-    Heading label = new Heading(5, name);
-    if (!projectForLang.getStatus().equalsIgnoreCase("production")) {
-      label.setSubtext(projectForLang.getStatus());
-    }
-    widgets.add(label);
-
-    return widgets;
+  @Override
+  @NotNull
+  public NavLink makeBreadcrumb(String name) {
+    NavLink projectCrumb = new NavLink(name);
+    breadcrumbs.add(projectCrumb);
+    return projectCrumb;
   }
 
   @NotNull
@@ -923,7 +734,8 @@ public class InitialUI implements UILifecycle {
     return new Image("langtest/cc/" + cc + ".png");
   }
 
-  private void clickOnParentCrumb(SlimProject parent) {
+  @Override
+  public void clickOnParentCrumb(SlimProject parent) {
     removeLastCrumb();
     addProjectChoices(1, parent);
   }
@@ -939,52 +751,6 @@ public class InitialUI implements UILifecycle {
       boolean remove = breadcrumbs.remove(i);
       logger.info("remove at " + i + "  " + remove);
     }
-  }
-
-  /**
-   * @param projectid
-   * @see #getImageAnchor(String, SlimProject)
-   */
-  private void setProjectForUser(final int projectid) {
-    projectServiceAsync.exists(projectid, new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
-
-      }
-
-      @Override
-      public void onSuccess(Boolean result) {
-        if (result) {
-          reallySetTheProject(projectid);
-        } else {
-          lifecycleSupport.getStartupInfo();
-        }
-      }
-    });
-
-  }
-
-  private void reallySetTheProject(int projectid) {
-    logger.info("setProjectForUser set project for " + projectid);
-    clearContent();
-    userService.setProject(projectid, new AsyncCallback<User>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-
-      }
-
-      @Override
-      public void onSuccess(User aUser) {
-        if (aUser == null) {
-          logger.warning("huh? no current user? ");
-        } else {
-          userNotification.setProjectStartupInfo(aUser);
-          logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
-          showNavigation();
-          navigation.showInitialState();
-        }
-      }
-    });
   }
 
   /**

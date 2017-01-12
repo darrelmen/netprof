@@ -106,10 +106,6 @@ public interface ExerciseController extends EventRegistration {
 
   boolean isLogClientMessages();
 
-/*
-  User.Kind getUserKind();
-*/
-
   Collection<User.Permission> getPermissions();
 
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);

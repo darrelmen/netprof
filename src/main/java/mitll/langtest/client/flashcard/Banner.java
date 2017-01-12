@@ -69,6 +69,7 @@ import java.util.logging.Logger;
 public class Banner implements RequiresResize {
   private final Logger logger = Logger.getLogger("Banner");
 
+  public static final String ABOUT_NET_PRO_F = "About NetProF";
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
@@ -95,14 +96,10 @@ public class Banner implements RequiresResize {
   private List<NavLink> adminLinks = new ArrayList<>();
 
   /**
-   * @see mitll.langtest.client.InitialUI#InitialUI(LangTest, UserManager)
+   * @see mitll.langtest.client.InitialUI#InitialUI
    */
-  public Banner(PropertyHandler props,
-                UserServiceAsync userServiceAsync,
-                ExerciseController controller,
-                UserNotification userNotification) {
+  public Banner(PropertyHandler props) {
     this.props = props;
-    // this.nameForAnswer = props.getNameForAnswer() + "s";
     HREF = "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
         //   "cc=" + LTEA_DLIFLC_EDU + "&" +
@@ -306,42 +303,6 @@ public class Banner implements RequiresResize {
     return w;
   }
 
-  /**
-   * @return
-   * @paramx users
-   * @paramx results
-   * @paramx monitoring
-   * @see #makeCogMenu
-   */
-/*  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
-    Dropdown w = getDropdown();
-
-    userC = new NavLink("Users");
-    userC.addClickHandler(users);
-    w.add(userC);
-
-    resultsC = new NavLink(nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1));
-    resultsC.addClickHandler(results);
-    w.add(resultsC);
-
-    monitoringC = new NavLink("Monitoring");
-    monitoringC.addClickHandler(monitoring);
-    w.add(monitoringC);
-
-    eventsC = new NavLink("Events");
-    eventsC.addClickHandler(events);
-    w.add(eventsC);
-
-*//*
-    reloadLink = new NavLink("Reload from Domino");
-    if (reload != null) {
-      reloadLink.addClickHandler(reload);
-      w.add(reloadLink);
-    }
-*//*
-
-    return w;
-  }*/
   private Dropdown getDropdown() {
     Dropdown w = new Dropdown();
     w.setRightDropdown(true);
@@ -383,15 +344,15 @@ public class Banner implements RequiresResize {
   }
 
   private NavLink getAbout() {
-    NavLink about = new NavLink("About NetProF");
+    NavLink about = new NavLink(ABOUT_NET_PRO_F);
     about.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
         List<String> strings = java.util.Arrays.asList(
-            "Language",
+           // "Language",
             "Version       ",
             "Release Date  ",
-            "Model Version",
+          //  "Model Version",
             "Recording type");
 
         List<String> values = null;
@@ -401,17 +362,17 @@ public class Banner implements RequiresResize {
           String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
           String model = props.getModelDir().replaceAll("models.", "");
           values = java.util.Arrays.asList(
-              props.getLanguage(),
+           //   props.getLanguage(),
               versionInfo,
               releaseDate,
-              model,
+            //  model,
               recordingInfo
           );
         } catch (Exception e) {
           logger.warning("got " + e);
         }
 
-        new ModalInfoDialog("About NetProF", strings, values, null, null, false, true) {
+        new ModalInfoDialog(ABOUT_NET_PRO_F, strings, values, null, null, false, true) {
           @Override
           protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal, boolean bigger) {
             FlexTable flexTable = super.addContent(messages, values, modal, bigger);
@@ -464,11 +425,5 @@ public class Banner implements RequiresResize {
     if (ratio < MIN_RATIO) ratio = MIN_RATIO;
     if (ratio > MAX_FONT_EM) ratio = MAX_FONT_EM;
     appName.getElement().getStyle().setFontSize(ratio, Style.Unit.EM);
-  }
-
-  @Deprecated
-  public void setNavigation(Navigation navigation) {
-
-//    this.navigation = navigation;
   }
 }

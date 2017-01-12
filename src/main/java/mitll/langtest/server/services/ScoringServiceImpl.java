@@ -195,8 +195,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
             sentence,
             transliteration,
             imageOptions,
-            //    false,
-            //serverProps.useScoreCache(),
             "" + exerciseID,
             cachedResult,
             new DecoderOptions()
