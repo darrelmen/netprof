@@ -445,7 +445,7 @@ public class ProjectManagement implements IProjectManagement {
     //logger.info("setStartupInfo : For user " + userWhere + " projid " + projid);
 
     if (projid == -1) {
-      logger.info("For " + userWhere + " no current project.");
+      logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
     } else {
       if (!idToProject.containsKey(projid)) {
         logger.info("\tsetStartupInfo : populateProjects...");

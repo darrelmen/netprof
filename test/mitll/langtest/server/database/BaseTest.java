@@ -12,6 +12,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import mitll.langtest.server.database.copy.CopyToPostgres;
 import org.apache.logging.log4j.*;
 
 /**
@@ -74,9 +75,10 @@ public class BaseTest {
                                                  boolean useH2,
                                                  boolean useLocal,
                                                  String optPropsFile) {
+    return CopyToPostgres.getDatabaseLight(config,useH2,useLocal,optPropsFile,"war");
+/*    String installPath = "war";
     logger.info("getDatabaseLight db " + config + " props " + optPropsFile);
 
-    String installPath = "war";
     String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
     logger.info("getDatabaseLight db " + config + " props " + propsFile);
@@ -113,7 +115,7 @@ public class BaseTest {
     database.setInstallPath(installPath,
         file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan());
 
-    return database;
+    return database;*/
   }
 
   protected static ServerProperties getServerProperties(String config, String propsFile) {

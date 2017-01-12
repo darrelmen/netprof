@@ -135,4 +135,5 @@ public interface UserServiceAsync {
    */
   void getUserFromSession(AsyncCallback<User> async);
 
+  void restoreUserSession(AsyncCallback<LoginResult> async);
 }

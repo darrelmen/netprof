@@ -195,6 +195,9 @@ public class UserSecurityManager implements IUserSecurityManager {
   }
 
   /**
+   * TODO : what do we do if they come back after an hour and browser has a requested session id but
+   * the server doesn't anymore???
+   *
    * @param request
    * @return
    * @throws DominoSessionException

@@ -58,22 +58,36 @@ public class LTSFactory {
 
   private final Language thisLanguage;
 
+  /**
+   * TODO : are we limited to these?
+   */
   // known languages
   public enum Language {
     ARABIC,
     CROATIAN,
     DARI,
-    EGYPTIAN, ENGLISH,
-    FARSI, FRENCH,
+    EGYPTIAN,
+    ENGLISH,
+    FARSI,
+    FRENCH,
     GERMAN,
     HINDI,
     JAPANESE,
     IRAQI,
-    LEVANTINE, KOREAN, MANDARIN, MSA,
-    PASHTO, PORTUGUESE, RUSSIAN, SERBIAN,
+    LEVANTINE,
+    KOREAN,
+    MANDARIN,
+    MSA,
+    PASHTO,
+    PORTUGUESE,
+    RUSSIAN,
+    SERBIAN,
     SORANI,
     SPANISH,
-    SUDANESE, TAGALOG, TURKISH, URDU
+    SUDANESE,
+    TAGALOG,
+    TURKISH,
+    URDU
   }
 
   private final LTS unknown = new EmptyLTS();
@@ -109,7 +123,7 @@ public class LTSFactory {
           break;
       }
     } catch (ClassNotFoundException e) {
-      logger.error("Couldn't find LTS class '" + className + "'");
+      logger.warn("LTSFactory : Couldn't find LTS class '" + className + "'");
     } catch (InstantiationException e) {
       logger.error("Couldn't make instance of LTS class " + className, e);
     } catch (IllegalAccessException e) {

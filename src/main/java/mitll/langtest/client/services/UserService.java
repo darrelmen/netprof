@@ -36,11 +36,13 @@ import com.github.gwtbootstrap.client.ui.Container;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.hlt.domino.shared.common.RestrictedOperationException;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;
+import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.shared.user.*;
 
 import java.util.Collection;
@@ -50,21 +52,23 @@ import java.util.Map;
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
   /**
-   * @see UserManager#getPermissionsAndSetUser
    * @return
+   * @see UserManager#getPermissionsAndSetUser
    */
   User getUserFromSession();
 
-    /**
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(String, String)
+  /**
    * @param userId
-   * @param attemptedHashedPassword - hashed - don't send clear password
+   * @param attemptedHashedPassword   - hashed - don't send clear password
    * @param attemptedFreeTextPassword
    * @return
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
   LoginResult loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword);
 
   void logout(String login);
+
+  LoginResult restoreUserSession() throws DominoSessionException;
 
   /**
    * @paramz token
@@ -72,23 +76,23 @@ public interface UserService extends RemoteService {
    * @return
    * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    */
- // boolean changePFor(String token, String newHashedPassword);
+  // boolean changePFor(String token, String newHashedPassword);
 
   /**
-   * @see ChangePasswordView#changePassword
    * @param userid
    * @param currentHashedPassword
    * @param newHashedPassword
    * @return
+   * @see ChangePasswordView#changePassword
    */
   boolean changePasswordWithCurrent(int userid, String currentHashedPassword, String newHashedPassword);
 
   /**
-   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    * @param userId
    * @param userKey
    * @param newPassword
    * @return
+   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    */
   User changePasswordWithToken(String userId, String userKey, String newPassword);
 
@@ -100,15 +104,15 @@ public interface UserService extends RemoteService {
    * @see mitll.langtest.client.user.SignInForm#onSendReset
    */
   boolean resetPassword(String userid
-      //, String url
-  //    , String emailForLegacy
+                        //, String url
+                        //    , String emailForLegacy
   );
 
   /**
-   * @deprecated no tokens anymore
    * @param token
    * @return
    * @see InitialUI#handleResetPass(Container, Panel, EventRegistration, String)
+   * @deprecated no tokens anymore
    */
   long getUserIDForToken(String token);
 
@@ -128,13 +132,11 @@ public interface UserService extends RemoteService {
   boolean forgotUsername(String emailH, String email);
 
 
-
-
   /**
-   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    * @param user
    * @param url
    * @return
+   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   LoginResult addUser(SignUpUser user, String url);
 
@@ -153,38 +155,38 @@ public interface UserService extends RemoteService {
    * @param emailR
    * @param url
    * @return
-   * @deprecated not sure if we're doing this anymore
    * @see InitialUI#handleCDToken(Container, Panel, String, String)
+   * @deprecated not sure if we're doing this anymore
    */
   String enableCDUser(String cdToken, String emailR, String url);
 
   /**
-   * @see InitialUI#setProjectForUser(int)
    * @param projectid
    * @return
+   * @see InitialUI#setProjectForUser(int)
    */
   User setProject(int projectid);
 
   void forgetProject();
 
-/*
+  /*
 
-  @Deprecated
-  void update(User user, int changingUser);
+    @Deprecated
+    void update(User user, int changingUser);
 
-  @Deprecated
-  Collection<Invitation> getPending(User.Kind requestRole);
+    @Deprecated
+    Collection<Invitation> getPending(User.Kind requestRole);
 
-  @Deprecated
-  void invite(String url, Invitation invite);
+    @Deprecated
+    void invite(String url, Invitation invite);
 
-  @Deprecated
-  Map<String, Integer> getInvitationCounts(User.Kind requestRole);
+    @Deprecated
+    Map<String, Integer> getInvitationCounts(User.Kind requestRole);
 
-  @Deprecated
-  Map<User.Kind, Integer> getCounts();
+    @Deprecated
+    Map<User.Kind, Integer> getCounts();
 
-  @Deprecated
-  */
+    @Deprecated
+    */
   Map<User.Kind, Collection<MiniUser>> getKindToUser();
 }
