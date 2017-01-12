@@ -154,11 +154,14 @@ public class ServerProperties {
   private static final String CHECK_AUDIO_FILE_EXISTS_DEV = "checkAudioFileExistsDev";
   private static final String CHECK_AUDIO_TRANSCRIPT = "checkAudioTranscript";
 
-  private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netProf/";
+  /**
+   * Note netprof is all lower case.
+   */
+  private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netprof/";
   public static final String BEST_AUDIO = "bestAudio";
   private static final String DEFAULT_BEST_AUDIO = DEFAULT_NETPROF_AUDIO_DIR + BEST_AUDIO;
   public static final String ANSWERS = "answers";
-  private static final String DEFAULT_ANSWERS = DEFAULT_NETPROF_AUDIO_DIR + ANSWERS;
+  //private static final String DEFAULT_ANSWERS = DEFAULT_NETPROF_AUDIO_DIR + ANSWERS;
 
   private Properties props = new Properties();
 
@@ -173,6 +176,7 @@ public class ServerProperties {
   private String fontFaceURL;
   private final Map<String, String> phoneToDisplay = new HashMap<>();
   private List<Affiliation> affliations = new ArrayList<>();
+
   private String releaseVers = "Unknown";
   private String buildUser = "Unknown";
   private String buildVers = "Unknown";
@@ -189,6 +193,15 @@ public class ServerProperties {
   public ServerProperties() {
   }
 
+  /**
+   *
+   * @param props
+   * @param releaseVers
+   * @param buildUser
+   * @param buildVers
+   * @param buildDate
+   * @param configDir
+   */
   public ServerProperties(Properties props,
                           String releaseVers,
                           String buildUser,
@@ -203,7 +216,6 @@ public class ServerProperties {
 
     try {
       useProperties(configDir, buildDate);
-
      // logger.debug("props " + props);
 
       putProp(props, "releaseVers", releaseVers);
@@ -382,15 +394,22 @@ public class ServerProperties {
   }
 
   /**
+   * Relative to install location
    * @return
    * @see LangTestDatabaseImpl#setInstallPath
    */
   public String getMediaDir() {
-    return props.getProperty(MEDIA_DIR, DEFAULT_BEST_AUDIO);
+    String default_best_audio = getAudioBaseDir() + BEST_AUDIO;
+    return props.getProperty(MEDIA_DIR, default_best_audio);
   }
 
+  /**
+   * Relative to install location
+   * @return
+   */
   public String getAnswerDir() {
-    return props.getProperty(ANSWER_DIR, DEFAULT_ANSWERS);
+    String defaultAnswers = getAudioBaseDir() + ANSWERS;
+    return props.getProperty(ANSWER_DIR, defaultAnswers);
   }
 
   public String getAudioBaseDir() {

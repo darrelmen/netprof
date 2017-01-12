@@ -68,6 +68,7 @@ import java.util.logging.Logger;
  * @since 3/5/13
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated - we don't do the wall of buttons anymore
  */
 public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   private final Logger logger = Logger.getLogger("FlexSectionExerciseList");
@@ -274,7 +275,7 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
   }
 
   private DivWidget getBottomRow() {
-    Panel links = downloadHelper.getDownloadLinks();
+    Panel links = downloadHelper.getDownloadButton();
     // else {
     //   logger.info("user is not a teacher.");
     // }
@@ -286,10 +287,6 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
     bottomRow.add(left);
     return bottomRow;
   }
-//
-//  public SelectionState getSelectionState() {
-//    return getSelectionState(getHistoryTokenFromUIState("", ""));
-//  }
 
   /**
    * Label is in column 0

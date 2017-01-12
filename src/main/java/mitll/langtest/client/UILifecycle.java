@@ -32,7 +32,10 @@
 
 package mitll.langtest.client;
 
+import com.github.gwtbootstrap.client.ui.NavLink;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
+import org.jetbrains.annotations.NotNull;
 
 public interface UILifecycle {
   /**
@@ -51,6 +54,13 @@ public interface UILifecycle {
    * @param user
    */
   void gotUser(User user);
+
+  void showInitialState();
+
+  @NotNull
+  NavLink makeBreadcrumb(String name);
+
+  void clickOnParentCrumb(SlimProject parent);
 
   /**
    * @see LangTest#makeFlashContainer()

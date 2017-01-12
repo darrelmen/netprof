@@ -116,9 +116,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               Project project) {
     super(deployPath, properties, langTestDatabase, htkDictionary, project);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
-    alignAudioToScore  = CacheBuilder.newBuilder().maximumSize(1000).build();
+    alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-    ip   = project.getWebserviceIP();
+    ip = project.getWebserviceIP();
     port = project.getWebservicePort();
   }
 
@@ -312,21 +312,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param processDur
    * @param usePhoneToDisplay
    * @return
-   * @paramx imageWidth
-   * @paramx imageHeight
-   * @paramx useScoreForBkgColor
    * @see #scoreRepeatExercise
    */
-//  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight,
-//                                       boolean useScoreForBkgColor,
-//                                       boolean decode, String prefix, String noSuffix,
-//                                       Scores scores,
-//                                       String phoneLab,
-//                                       String wordLab,
-//                                       double duration,
-//                                       int processDur,
-//                                       boolean usePhoneToDisplay,
-//                                       JsonObject jsonObject
   private PretestScore getPretestScore(String imageOutDir,
                                        ImageOptions imageOptions,
 
@@ -334,14 +321,20 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                        String wordLab, double duration, int processDur, boolean usePhoneToDisplay,
                                        JsonObject jsonObject
   ) {
-    int imageWidth = imageOptions.getWidth();
-    int imageHeight = imageOptions.getHeight();
-    boolean useScoreForBkgColor = imageOptions.isUseScoreToColorBkg();
-
-    String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
-    boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
-
     try {
+      boolean useScoreForBkgColor = imageOptions.isUseScoreToColorBkg();
+      String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
+
+      logger.info("getPretestScore write images to" +
+          "\n\tout " + imageOutDir +
+          "\n\tnoSuffix " + noSuffix +
+          "\n\tprefix1 " + prefix1
+      );
+
+      int imageWidth = imageOptions.getWidth();
+      int imageHeight = imageOptions.getHeight();
+
+      boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
       EventAndFileInfo eventAndFileInfo = jsonObject == null ?
           writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
               useScoreForBkgColor,
@@ -351,12 +344,21 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               prefix1, "", decode, false, jsonObject, reallyUsePhone);
       Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
       Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
-      String recoSentence = getRecoSentence(eventAndFileInfo);
 
-      return new PretestScore(scores.hydraScore,
+      logger.info("getPretestScore sTypeToImage" +
+          "\n\tsTypeToImage " + sTypeToImage
+      );
+
+      return new PretestScore(
+          scores.hydraScore,
           getPhoneToScore(scores),
           getWordToScore(scores),
-          sTypeToImage, typeToEndTimes, recoSentence, (float) duration, processDur);
+          sTypeToImage,
+          typeToEndTimes,
+          getRecoSentence(eventAndFileInfo),
+          (float) duration,
+          processDur);
+
     } catch (Exception e) {
       logger.error("Got " + e, e);
       return new PretestScore(-1);

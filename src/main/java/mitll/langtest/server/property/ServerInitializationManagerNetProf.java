@@ -50,63 +50,38 @@ import java.util.jar.Manifest;
  * Created by go22670 on 1/9/17.
  */
 public class ServerInitializationManagerNetProf {
-  private static Logger log = LogManager.getLogger();
+  private static final Logger log = LogManager.getLogger();
 
-  public static final String appName = "netprof";
+  private static final String appName = "netprof";
 
-  public static final String DEFAULT_PROPERTY_HOME =
+  private static final String DEFAULT_PROPERTY_HOME =
       File.separator + "opt" + File.separator + appName + File.separator + "config";
 
   /**
    * The name of the config file attribute optionally passed in as -D.
    */
-  public static final String CONFIG_FILE_ATTR_NM = appName + ".cfg.file";
+  private static final String CONFIG_FILE_ATTR_NM = appName + ".cfg.file";
 
   /**
    * The name of the config home directory attribute from the web.xml or -D.
    */
-  public static final String CONFIG_HOME_ATTR_NM = appName + ".cfg.home";
+  private static final String CONFIG_HOME_ATTR_NM = appName + ".cfg.home";
 
   /**
    * The default properties filename
    */
-  public static final String DEFAULT_PROPS_FN = appName + ".properties";
+  private static final String DEFAULT_PROPS_FN = appName + ".properties";
 
   /**
    * The name of the server properties instance in the context.
    */
-  public static final String PROPS_ATT_NAME = "ds-properties";
-
-/*
-  */
-/**
- * The name of the mongo pool in the context.
- *//*
-
-  public static final String MONGO_ATT_NAME = "mongo-client";
-
-  */
-/**
- * The name of the document service in the context.
- *//*
-
-  public static final String USER_SVC = "user-service";
-
-  */
-/**
- * The name of the cache manager in the context.
- *//*
-
-  public static final String IGNITE = "ignite";
-
-  */
+ // public static final String PROPS_ATT_NAME = "ds-properties";
 
   /**
-   * The name of the JSON serializer in the context.
-   *//*
-
-  public static final String JSON_SERIALIZER = "j-serializer";
-*/
+   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
+   * @param newContext
+   * @return
+   */
   public ServerProperties getServerProps(ServletContext newContext) {
     DateFormatter.init(new GWTDateFormatter());
 
@@ -237,20 +212,27 @@ public class ServerInitializationManagerNetProf {
     return openPropertiesFileStream(fullCFN);
   }
 
+/*
   public ServerProperties getServerProperties() {
     return getServerProperties(findServerProperties(null), null);
   }
-
+*/
+/*
   public ServerProperties getServerProperties(String configFileName) {
     return getServerProperties(openPropertiesFileStream(configFileName), null);
-  }
+  }*/
 
   private ServerProperties getServerProperties(InputStream propsIS, ServletContext ctx) {
     log.info("getServerProperties : Initializing Properties");
     Properties props = readPropertiesStream(propsIS);
 
     if (props != null) {
-      log.info("getServerProperties : Loaded " + props.size() + " properties");
+      if (props.isEmpty()) {
+        log.error("\n\n\ngetServerProperties : huh? server props is empty?\n\n\n");
+      }
+      else {
+        log.debug("getServerProperties : Loaded " + props.size() + " properties");
+      }
 
       String releaseVers = "Unknown";
       String buildUser = "Unknown";
@@ -268,10 +250,7 @@ public class ServerInitializationManagerNetProf {
             "a servlet container? Context:" + ctx);
       }
 
-      ServerProperties sProps = new ServerProperties(props, releaseVers,
-          buildUser, buildVers, buildDate, configDir);
-
-      return sProps;
+      return new ServerProperties(props, releaseVers, buildUser, buildVers, buildDate, configDir);
     }
     return null;
   }
