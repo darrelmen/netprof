@@ -12,6 +12,7 @@ buildscript {
 //        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
         classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
     }
 }
 
@@ -30,6 +31,8 @@ apply from: 'gradle-common/common-java.gradle'
 apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+
 
 mongo {
     port mongoPort
@@ -155,16 +158,15 @@ gwt {
 }
 
 war {
-    archiveName "netprof.war"
-
+//    archiveName "netprof.war"
     // somehow the domino tests jars are getting in if I don't do this
     rootSpec.exclude("**/*tests.jar")
     rootSpec.exclude("**/log4j2-test.xml")
 
     // TODO : don't
-    from('war/config/netProf') {
-        into 'config/netProf'
-    }
+//    from('war/config/netProf') {
+//        into 'config/netProf'
+//    }
     from('war/scoring/bin.linux64') {
         into 'scoring/bin.linux64'
     }
@@ -181,7 +183,8 @@ war {
     // TODO : DONT
 //    from 'drop.sh'
 
-    from 'src/mitll/langtest/public/NetProf_Manual.pdf'
+    from 'war/docs/NetProf_Manual.pdf'
+//    from 'src/mitll/langtest/public/NetProf_Manual.pdf'
 
     webXml = file('war/WEB-INF/web.xml')
 
@@ -191,27 +194,34 @@ war {
     }
 }
 
-//task makeInstallation(type: Zip) {
-//    from('war/config/netProf') {
-//        into 'config'
-//    }
-//}
+// make standalone jar - for some reason it's huge
+shadowJar {
+    zip64 true
+}
 
 task makeDevInstallation(type: Zip) {
     from('war/config/netProfDev') {
         into 'config'
     }
     from('scripts/copy.sh') {
-        into 'scripts'
+        into 'bin'
     }
     from('scripts/drop.sh') {
-        into 'scripts'
+        into 'bin'
     }
 }
 
-println makeDevInstallation.archiveName
-println relativePath(makeDevInstallation.destinationDir)
-println relativePath(makeDevInstallation.archivePath)
+task makeDLIInstallation(type: Zip) {
+    from('war/config/netProfDLI') {
+        into 'config'
+    }
+    from('scripts/copy.sh') {
+        into 'bin'
+    }
+    from('scripts/drop.sh') {
+        into 'bin'
+    }
+}
 
 // ***************************** Publishing **************************************
 publishing {
