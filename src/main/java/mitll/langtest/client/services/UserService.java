@@ -36,14 +36,16 @@ import com.github.gwtbootstrap.client.ui.Container;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.hlt.domino.shared.common.RestrictedOperationException;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.database.security.DominoSessionException;
-import mitll.langtest.shared.user.*;
+import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SignUpUser;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -68,7 +70,7 @@ public interface UserService extends RemoteService {
 
   void logout(String login);
 
-  LoginResult restoreUserSession() throws DominoSessionException;
+  LoginResult restoreUserSession();
 
   /**
    * @paramz token
