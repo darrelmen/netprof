@@ -50,6 +50,7 @@ public class LoginResult implements Serializable {
     PassExpired,
     BadPassword,
     SessionNotRestored,
+    SessionExpired,
   //  MissingEmail,
     MissingInfo,
     Updated,

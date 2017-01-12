@@ -161,7 +161,7 @@ public interface IUserDAO extends IDAO {
    * @see UserServiceImpl#getKindToUser
    * @return
    */
-  @Deprecated  Map<User.Kind,Collection<MiniUser>> getMiniByKind();
+  Map<User.Kind,Collection<MiniUser>> getMiniByKind();
 
   /**
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
