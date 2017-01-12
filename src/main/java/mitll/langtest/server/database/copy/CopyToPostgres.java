@@ -74,7 +74,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -85,7 +84,8 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final boolean COPY_EVENTS = true;
   private static final int WARN_MISSING_THRESHOLD = 10;
   public static final String QUIZLET_PROPERTIES = "quizlet.properties";
-  public static final String DOMINO_PROPERTIES = "domino.properties";
+  //  public static final String NETPROF_PROPERTIES = "domino.properties";
+  public static final String NETPROF_PROPERTIES = "netprof.properties";
 
   private static final boolean DEBUG = false;
 
@@ -94,7 +94,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see #main(String[])
    */
   private void copyOneConfigCommand(String config) throws Exception {
-    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null);
+    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null, ".");
     String language = databaseLight.getLanguage();
     boolean hasModel = databaseLight.getServerProps().hasModel();
     logger.info("loading " + language + " " + hasModel);
@@ -103,7 +103,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private void dropOneConfig(String config) throws Exception {
-    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null);
+    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null, ".");
     String language = databaseLight.getLanguage();
     IProjectDAO projectDAO = databaseLight.getProjectDAO();
     List<SlickProject> collect = projectDAO.getAll().stream().filter(p -> p.name().equalsIgnoreCase(config)).collect(Collectors.toList());
@@ -118,8 +118,9 @@ public class CopyToPostgres<T extends CommonShell> {
 
   /**
    * Add brazilian, serbo croatian, french, etc.
-   *
+   * <p>
    * TODO : make t
+   *
    * @param config
    * @return
    */
@@ -213,35 +214,36 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param config
    * @param useH2
    * @param optPropsFile
+   * @param installPath
    * @return
    * @paramx host
    * @paramx user
    * @paramx pass
    * @see mitll.langtest.server.database.postgres.PostgresTest#testCopy
    */
-  protected static DatabaseImpl getDatabaseLight(String config,
-                                                 boolean useH2,
-                                                 boolean useLocal,
-                                                 String optPropsFile) {
+  public static DatabaseImpl getDatabaseLight(String config,
+                                              boolean useH2,
+                                              boolean useLocal,
+                                              String optPropsFile,
+                                              String installPath) {
     logger.info("getDatabaseLight db " + config + " props " + optPropsFile);
 
-    String installPath = ".";//war";
     String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
     logger.info("getDatabaseLight db " + config + " props " + propsFile);
 
-    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
+    File configFile = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
 
-    logger.info("getDatabaseLight path " + file.getAbsolutePath());
+    logger.info("getDatabaseLight path " + configFile.getAbsolutePath());
 
     ServerProperties serverProps = getServerProperties(config, propsFile, installPath);
-    ServerProperties serverProps2 = getServerProperties("netProf", DOMINO_PROPERTIES, installPath);
-    String configFileFullPath = serverProps2.getConfigFileFullPath();
-    try {
-      serverProps.getProps().load(new FileInputStream(configFileFullPath));
-    } catch (Exception e) {
-      logger.error("can't find " + configFileFullPath);
-    }
+    ServerProperties serverProps2 = getServerProperties(
+        //"netprof",
+        "",
+        NETPROF_PROPERTIES, "/opt/netprof");
+
+    readProps(serverProps, serverProps2);
+
     if (useLocal) {
       serverProps.setLocalPostgres();
     } else {
@@ -250,23 +252,52 @@ public class CopyToPostgres<T extends CommonShell> {
 
     serverProps.setH2(useH2);
 
-    String parent = file.getParentFile().getAbsolutePath();
-    String name = file.getName();
+    String parent = configFile.getParentFile().getAbsolutePath();
+    String name = configFile.getName();
 
     DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
         new PathHelper(installPath, serverProps), false, null, false);
 
     database.setInstallPath(installPath,
-        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan()
+        configFile.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan()
     );
 
     return database;
   }
 
+  private static void readProps(ServerProperties serverProps, ServerProperties serverProps2) {
+    String configFileFullPath = serverProps2.getConfigFileFullPath();
+    try {
+      logger.info("readProps reading from " + configFileFullPath);
+      serverProps.getProps().load(new FileInputStream(configFileFullPath));
+    } catch (Exception e) {
+      logger.error("can't find " + configFileFullPath);
+    }
+  }
+
+  /**
+   * @param config
+   * @param propsFile
+   * @param installPath
+   * @return
+   * @see #getDatabaseLight(String, boolean, boolean, String, String)
+   */
   private static ServerProperties getServerProperties(String config, String propsFile, String installPath) {
     //String war = "war";
-    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
-    return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
+    String configDir = config.isEmpty() ? config : config + File.separator;
+    File file = new File(installPath + File.separator +
+        "config" + File.separator +
+        configDir +
+        propsFile);
+
+    if (!file.exists()) {
+      logger.error("getServerProperties can't find config file " + file.getAbsolutePath());
+      // no recovery!
+      // return new ServerProperties();
+      return null;
+    } else {
+      return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
+    }
   }
 
   private static File getConfigFile(String config, String optPropsFile, boolean inTest) {

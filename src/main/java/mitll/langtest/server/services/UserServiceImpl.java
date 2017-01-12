@@ -33,6 +33,8 @@
 package mitll.langtest.server.services;
 
 import mitll.hlt.domino.server.util.ServletUtil;
+import mitll.hlt.domino.shared.common.RestrictedOperationException;
+import mitll.hlt.domino.shared.model.user.*;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
@@ -43,9 +45,12 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.*;
+import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -122,6 +127,25 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
+  @Override
+  public LoginResult restoreUserSession()
+      throws DominoSessionException {
+    User dbUser = securityManager.getLoggedInUser(getThreadLocalRequest());
+    boolean isSessionActive = dbUser != null;
+    String uid = (dbUser != null) ? dbUser.getUserID() : null;
+    logger.info(">Session Activity> User session restoration for id " +
+        uid + ((isSessionActive) ? " was successful" : " failed"));
+    // ensure a session is created.
+    if (!isSessionActive) {
+      securityManager.logoutUser(getThreadLocalRequest(), uid, true);
+      logger.info(">Session Activity> Sending Session Not Restored. Return early");
+      return new LoginResult(LoginResult.ResultType.SessionNotRestored);
+    }
+    logger.info(">Session Activity> Session restoration successful. Checking login status.");
+    return new LoginResult(LoginResult.ResultType.Success);
+  }
+
+
   /**
    * @param session
    * @param loggedInUser
@@ -131,35 +155,42 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   private void setSessionUser(HttpSession session, User loggedInUser) {
     int id1 = loggedInUser.getID();
     session.setAttribute(USER_SESSION_ATT, id1);
+//      logger.info("acct detail {}", loggedInUser.getAcctDetail());
+    HttpSession session1 = getCurrentSession();
+    String sessionID = session.getId();
+
+    // logger.info("num user sessions before " + userSessionDAO.getNumRows());
+    db.getUserSessionDAO().add(
+        new SlickUserSession(-1, id1, sessionID, "", "", new Timestamp(System.currentTimeMillis())));
+
+    // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
+
+    logger.info("setSessionUser : Adding user to " + sessionID +
+        " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
+        ", session.isNew=" + session1.isNew() +
+        ", created=" + session1.getCreationTime() +
+        ", " + getAttributesFromSession(session));
+    db.setStartupInfo(loggedInUser);
+  }
+
+  @NotNull
+  private String getAttributesFromSession(HttpSession session) {
     StringBuilder atts = new StringBuilder("Atts: [ ");
     Enumeration<String> attEnum = session.getAttributeNames();
     while (attEnum.hasMoreElements()) {
       atts.append(attEnum.nextElement() + ", ");
     }
     atts.append("]");
-//      logger.info("acct detail {}", loggedInUser.getAcctDetail());
-    HttpSession session1 = getCurrentSession();
-    String id = session.getId();
-
-    IUserSessionDAO userSessionDAO = db.getUserSessionDAO();
-    // logger.info("num user sessions before " + userSessionDAO.getNumRows());
-
-    userSessionDAO.add(new SlickUserSession(-1, id1, id, "", "", new Timestamp(System.currentTimeMillis())));
-
-    // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
-
-    logger.info("Adding user to " + id +
-        " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
-        ", session.isNew=" + session1.isNew() +
-        ", created=" + session1.getCreationTime() +
-        ", " + atts.toString());
-    db.setStartupInfo(loggedInUser);
+    return atts.toString();
   }
+
 
   /**
    * true = create a new session
    *
    * @return
+   * @see #changePasswordWithToken(String, String, String)
+   * @see #loginUser
    */
   private HttpSession createSession() {
     return getThreadLocalRequest().getSession(true);
