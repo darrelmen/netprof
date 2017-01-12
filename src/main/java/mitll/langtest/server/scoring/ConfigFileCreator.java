@@ -90,7 +90,7 @@ public class ConfigFileCreator {
    * @param properties
    * @param letterToSoundClass
    * @param scoringDir
-   * @see Scoring#Scoring(String, ServerProperties, LogAndNotify, HTKDictionary, String, String)
+   * @see Scoring#Scoring
    */
   public ConfigFileCreator(Map<String, String> properties, LTS letterToSoundClass, String scoringDir, String modelsDir) {
     this.properties = properties;

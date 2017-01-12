@@ -121,10 +121,15 @@ public abstract class Scoring {
    * @param deployPath
    * @see ASRScoring#ASRScoring
    */
-  Scoring(String deployPath, ServerProperties props, LogAndNotify langTestDatabase, HTKDictionary htkDictionary,
+  Scoring(String deployPath,
+          ServerProperties props,
+          LogAndNotify langTestDatabase, HTKDictionary htkDictionary,
           Project project) {
     this.deployPath = deployPath;
-    this.scoringDir = getScoringDir(deployPath);
+
+    String persistentLocation = props.getAudioBaseDir();
+    this.scoringDir = getScoringDir(persistentLocation);
+
     this.props = props;
     this.langTestDatabase = langTestDatabase;
     this.htkDictionary = htkDictionary;
@@ -159,9 +164,7 @@ public abstract class Scoring {
     return ltsFactory == null ? new EmptyLTS() : ltsFactory.getLTSClass();
   }
 
-  public static String getScoringDir(String deployPath) {
-    return deployPath + File.separator + SCORING;
-  }
+  public static String getScoringDir(String deployPath) { return deployPath + File.separator + SCORING;  }
 
   /**
    * For chinese, maybe later other languages.
@@ -329,7 +332,10 @@ public abstract class Scoring {
    */
   EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
                                           String audioFileNoSuffix, boolean useScoreToColorBkg,
-                                          String prefix, String suffix, boolean decode, boolean useWebservice,
+                                          String prefix,
+                                          String suffix,
+                                          boolean decode,
+                                          boolean useWebservice,
                                           JsonObject object,
                                           boolean usePhoneToDisplay) {
     // logger.debug("writeTranscriptsCached " + object);
@@ -355,6 +361,8 @@ public abstract class Scoring {
         return new EventAndFileInfo();
       }
       imageOutDir = deployPath + File.separator + imageOutDir;
+
+      logger.info("writeTranscriptsCached " + " writing to " + deployPath + " " + imageOutDir);
 
       Collection<ImageType> expectedTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
       return new TranscriptWriter().getEventAndFileInfo(pathname,

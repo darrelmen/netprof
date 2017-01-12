@@ -395,7 +395,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                             String imageType,
                                             ImageOptions imageOptions,
                                             String exerciseID) {
-    if (audioFile.isEmpty()) logger.error("getImageForAudioFile huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
+    if (audioFile.isEmpty())
+      logger.error("getImageForAudioFile huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
 
     SimpleImageWriter imageWriter = new SimpleImageWriter();
 
@@ -406,8 +407,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return new ImageResponse();
     }
     ImageType imageType1 =
-        imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
-            imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
+        imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ?
+            ImageType.WAVEFORM :
+            imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ?
+                ImageType.SPECTROGRAM : null;
     if (imageType1 == null) {
       logger.error("getImageForAudioFile '" + imageType + "' is unknown?");
       return new ImageResponse(); // success = false!
@@ -419,15 +422,19 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     long then = System.currentTimeMillis();
 
+    String imageOutDir = pathHelper.getImageOutDir();
+    File absoluteFile = getAbsoluteFile(imageOutDir);
+
+    logger.info("getImageForAudioFile imageOutDir " + imageOutDir + " " +absoluteFile + " type " + imageType1);
     String absolutePathToImage = imageWriter.writeImage(
         wavAudioFile,
-        getAbsoluteFile(pathHelper.getImageOutDir()).getAbsolutePath(),
+        absoluteFile.getAbsolutePath(),
         imageOptions.getWidth(), imageOptions.getHeight(), imageType1, exerciseID);
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > 100) {
       logger.debug("getImageForAudioFile : got images " +
-         // "(" + width + " x " + height + ")" +
+          // "(" + width + " x " + height + ")" +
           " (" + reqid + ") type " + imageType +
           " for " + wavAudioFile + " took " + diff + " millis");
     }
@@ -449,8 +456,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (duration == 0) {
       logger.error("huh? " + wavAudioFile + " has zero duration???");
     }
-    /*    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
-        " url " + imageURL + " duration " + duration);*/
+    logger.debug("getImageForAudioFile for" +
+        "\n\taudio file " + wavAudioFile +
+        "\n\ttype       " + imageType +
+        "\n\trel path   " + relativeImagePath +
+        "\n\turl        " + imageURL +
+        "\n\tduration   " + duration);
 
     return new ImageResponse(reqid, imageURL, duration);
   }

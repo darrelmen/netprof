@@ -57,20 +57,14 @@ import java.util.logging.Logger;
 
 public class DownloadHelper {
   private final Logger logger = Logger.getLogger("DownloadHelper");
-  //  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
-//  private final EventRegistration eventRegistration;
-
   private final HistoryExerciseList exerciseList;
 
   private SelectionState selectionState;
-//  private final FlexSectionExerciseList exerciseList;
   private Collection<String> typeOrder;
   private Heading selectionStatus;
 
   public DownloadHelper(HistoryExerciseList exerciseList) {
-
-    //  this.eventRegistration = eventRegistration;
     this.exerciseList = exerciseList;
   }
 
@@ -78,7 +72,7 @@ public class DownloadHelper {
    * @return
    * @see FlexSectionExerciseList#getBottomRow
    */
-  public Panel getDownloadLinks() {
+  public Panel getDownloadButton() {
     Button download = new Button("Download", IconType.DOWNLOAD);
     download.setType(ButtonType.PRIMARY);
     selectionState = exerciseList.getSelectionState();
