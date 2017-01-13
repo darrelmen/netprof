@@ -136,19 +136,17 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @return
    */
   protected int getProjectID() {
-    int userIDFromSession = getUserIDFromSessionCheck();
-
+    int userIDFromSession = getUserIDFromSession();
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
       logger.warn("getProjectID : no user in session, so we can't get the project id for the user.");
       return -1;
     }
-    int i = db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
-    return i;
+    return db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
   }
 
   protected Project getProject() {
-    int userIDFromSession = getUserIDFromSessionCheck();
+    int userIDFromSession = getUserIDFromSession();
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
       return null;
@@ -176,8 +174,8 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    *
    * @return
    */
-  private int getUserIDFromSessionCheck() {
-    int userIDFromSession = getUserIDFromSession();
+  int getUserIDFromSession() {
+    int userIDFromSession = getUserIDFromSessionNoCheck();
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
       try {
@@ -197,7 +195,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
   }
 
-  int getUserIDFromSession() {
+  private int getUserIDFromSessionNoCheck() {
     return securityManager.getUserIDFromRequest(getThreadLocalRequest());
   }
 

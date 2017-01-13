@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  * @since May 28, 2013 10:50:11 PM
  */
 public class ChangePasswordView extends Composite {
-  protected static final Logger log = Logger.getLogger(ChangePasswordView.class.getName());
+  private static final Logger log = Logger.getLogger(ChangePasswordView.class.getName());
 
   private DominoSaveableModal modal;
 
@@ -67,11 +67,11 @@ public class ChangePasswordView extends Composite {
   private DecoratedFields pass2DF;
 
   private User editUser = null;
-  private CommonValidation cValidator = new CommonValidation();
+  private final CommonValidation cValidator = new CommonValidation();
   private UIHandler uiHandler;
   private boolean forcePWChange = false;
-  private UserState userState;
-  private UserServiceAsync userServiceAsync;
+  private final UserState userState;
+  private final UserServiceAsync userServiceAsync;
 
   /**
    * @see mitll.langtest.client.user.UserMenu.ChangePasswordClickHandler
@@ -223,18 +223,6 @@ public class ChangePasswordView extends Composite {
     return cPassValid && pass1Valid && pass2Valid;
   }
 
-/*  private String rot13(String val) {
-    StringBuilder builder = new StringBuilder();
-    for (char c : val.toCharArray()) {
-      if (c >= 'a' && c <= 'm') c += 13;
-      else if (c >= 'A' && c <= 'M') c += 13;
-      else if (c >= 'n' && c <= 'z') c -= 13;
-      else if (c >= 'N' && c <= 'Z') c -= 13;
-      builder.append(c);
-    }
-    return builder.toString();
-  }*/
-
   private void changePassword() {
     //	final Modal m = getMsgHelper().makeWaitDialog("Updating password");
     String currPass = (currentPWDF != null) ? (String) currentPWDF.getValue() : null;
@@ -244,7 +232,7 @@ public class ChangePasswordView extends Composite {
 
     String hashNewPass  = newPass;// Md5Hash.getHash(newPass);
     String hashCurrPass = currPass;//Md5Hash.getHash(currPass);
-    userServiceAsync.changePasswordWithCurrent(editUser.getID(),
+    userServiceAsync.changePasswordWithCurrent(
         currPass == null ? "" : hashCurrPass,
         hashNewPass,
         //sendEmail,

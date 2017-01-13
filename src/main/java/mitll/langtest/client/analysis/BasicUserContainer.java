@@ -33,17 +33,17 @@
 package mitll.langtest.client.analysis;
 
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.analysis.UserInfo;
 
-public class BasicUserContainer<T extends MiniUser> extends MemoryItemContainer<T> {
+public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<T> {
   BasicUserContainer(ExerciseController controller,
                      String selectedUserKey,
                      String header) {
-    super(controller,selectedUserKey,header);
+    super(controller, selectedUserKey, header);
   }
 
   public BasicUserContainer(ExerciseController controller, String header) {
-    super(controller,header);
+    super(controller, header);
   }
 
   protected int getNameCompare(T o1, T o2) {

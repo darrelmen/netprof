@@ -48,15 +48,14 @@ import java.util.List;
 @RemoteServiceRelativePath("qc-manager")
 public interface QCService extends RemoteService {
   /**
-   * @see mitll.langtest.client.flashcard.FlashcardPanel#addAnnotation(String, String, String)
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
+   * @see mitll.langtest.client.flashcard.FlashcardPanel#addAnnotation
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation
    * @param exerciseID
    * @param field
    * @param status
    * @param comment
-   * @param userID
    */
-  void addAnnotation(int exerciseID, String field, String status, String comment, int userID);
+  void addAnnotation(int exerciseID, String field, String status, String comment);
 
   // QC State changes
 
@@ -78,17 +77,15 @@ public interface QCService extends RemoteService {
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed(HasID)
    * @param exid
    * @param isCorrect
-   * @param creatorID
    */
-  void markReviewed(int exid, boolean isCorrect, int creatorID);
+  void markReviewed(int exid, boolean isCorrect);
 
   /**
    * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL(ListInterface, HasID)
    * @param exid
    * @param state
-   * @param creatorID
    */
-  void markState(int exid, STATE state, int creatorID);
+  void markState(int exid, STATE state);
 
   /**
    * @see ReviewEditableExercise#confirmThenDeleteItem()
@@ -96,5 +93,4 @@ public interface QCService extends RemoteService {
    * @return
    */
   boolean deleteItem(int exid);
-
 }

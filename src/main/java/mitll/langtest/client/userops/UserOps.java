@@ -222,11 +222,11 @@ public class UserOps implements RequiresResize {
   private DivWidget currentUserForm;
 
   public void reload() {
-    MiniUser currentSelection = opsUserContainer.getNext();
+/*    MiniUser currentSelection = opsUserContainer.getNext();
     if (currentSelection != null) {
       opsUserContainer.storeSelectedUser(currentSelection.getID());
     }
-    showUsers(currentKind, currentContent, currentUserForm);
+    showUsers(currentKind, currentContent, currentUserForm);*/
   }
 
   /**
@@ -336,8 +336,8 @@ public class UserOps implements RequiresResize {
     if (miniUsers == null) miniUsers = new ArrayList<>();
 
     opsUserContainer = getOpsUserContainer(kind, userForm);
-    DivWidget table = opsUserContainer.getTable(miniUsers, "", "");
-    content.add(table);
+ /*   DivWidget table = opsUserContainer.getTable(miniUsers, "", "");
+    content.add(table);*/
     return opsUserContainer;
   }
 

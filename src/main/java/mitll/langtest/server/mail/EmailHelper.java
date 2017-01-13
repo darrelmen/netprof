@@ -57,16 +57,16 @@ import static mitll.langtest.server.rest.RestUserManagement.RESET_PASSWORD_FROM_
 public class EmailHelper {
   private static final Logger logger = LogManager.getLogger(EmailHelper.class);
 
-  @Deprecated  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
+  //@Deprecated  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
   /**
    *
    */
   private static final String CLOSING = "Regards, Administrator";
-  @Deprecated  private static final String GORDON = "Gordon";
+  //@Deprecated  private static final String GORDON = "Gordon";
 
   private static final String RP = RESET_PASSWORD_FROM_EMAIL;//"rp";
-  private static final String CD = "cd";
-  private static final String ER = "er";
+ // private static final String CD = "cd";
+ // private static final String ER = "er";
 
   private static final String PASSWORD_RESET = "Password Reset";
   private static final String RESET_PASSWORD = "Reset Password";
@@ -139,10 +139,9 @@ public class EmailHelper {
 
     String table = (uppercase ? HEX_CHARACTERS_UC : HEX_CHARACTERS);
 
-    for (int i = 0; i < numBytes; i++)
-    {
-      str.append(table.charAt(bytes[i] >>> 4 & 0x0f));
-      str.append(table.charAt(bytes[i] & 0x0f));
+    for (byte aByte : bytes) {
+      str.append(table.charAt(aByte >>> 4 & 0x0f));
+      str.append(table.charAt(aByte & 0x0f));
     }
 
     return str.toString();
@@ -194,6 +193,7 @@ public class EmailHelper {
   }
 
   /**
+   * TODO : - update this for domino
    * @param user
    * @param email
    * @param url
@@ -214,9 +214,10 @@ public class EmailHelper {
       logger.debug("resetPassword for " + user + " sending reset password email.");
       String toHash = user + "_" + System.currentTimeMillis();
       String hash = getHash(toHash);
-      if (!userDAO.updateKey(validUserAndEmail, true, hash)) {
-        logger.error("huh? couldn't add the reset password key to user id = " + validUserAndEmail);
-      }
+
+      //      if (!userDAO.updateKey(validUserAndEmail, true, hash)) {
+//        logger.error("huh? couldn't add the reset password key to user id = " + validUserAndEmail);
+//      }
 
       String message = "Hi " + user + ",<br/><br/>" +
           "Click the link below to reset your password." +
@@ -261,7 +262,7 @@ public class EmailHelper {
    * @param subject
    * @param message
    * @param linkText
-   * @see #sendUserApproval(String, String, String, String)
+   * @seex #sendUserApproval(String, String, String, String)
    * @see #resetPassword(String, String, String)
    * @see #getUserNameEmail
    */
@@ -280,13 +281,13 @@ public class EmailHelper {
   /**
    * We're going to do user management in domino.
    *
-   * @param token
+   * @paramx token
    * @param language
    * @return
    * @seex mitll.langtest.client.LangTest#handleCDToken
    * @see mitll.langtest.server.services.UserServiceImpl#enableCDUser(String, String, String)
    */
-  @Deprecated
+/*  @Deprecated
   public String enableCDUser(String token, String emailR, String url, String language) {
     User userWhereEnabledReq = userDAO.getUserWithEnabledKey(token);
     Integer userID;
@@ -344,8 +345,9 @@ public class EmailHelper {
       }
       return (b ? userID1 : null);
     }
-  }
+  }*/
 
+/*
   private String getApprovalAck(String userID1, String tamas, String language) {
     return "Hi " +
         tamas + ",<br/><br/>" +
@@ -354,6 +356,7 @@ public class EmailHelper {
         "." + "<br/><br/>" +
         CLOSING;
   }
+*/
 
   /**
    * @param url
@@ -363,7 +366,7 @@ public class EmailHelper {
    * @seex #enableCDEmail(String, String, mitll.langtest.shared.user.User)
    * @see #enableCDUser(String, String, String, String)
    */
-  private void sendUserApproval(String url, String email, String userID1, String language) {
+/*  private void sendUserApproval(String url, String email, String userID1, String language) {
     String message = "Hi " + userID1 + ",<br/>" +
         "You have been approved to be a content developer for " + language + "." +
         "<br/>Click on the link below to log in." +
@@ -376,7 +379,7 @@ public class EmailHelper {
         message,
         "Click here to return to the site." // link text
     );
-  }
+  }*/
 
   /**
    * User needs to be approved before account is activated.
@@ -389,6 +392,7 @@ public class EmailHelper {
    * @see mitll.langtest.server.services.UserServiceImpl#addUser
    * @seex mitll.langtest.client.user.UserPassLogin#gotSignUp
    */
+/*
   @Deprecated
   public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport, String language) {
     url = trimURL(url);
@@ -405,7 +409,9 @@ public class EmailHelper {
       sendApprovalEmail(url, email, userID1, hash, message, emails.get(i), mailSupport, language);
     }
   }
+*/
 
+/*
   private void sendApprovalEmail(String url, String email, String userID1, String hash, String message,
                                  String approvalEmailAddress, MailSupport mailSupport, String language) {
     String baseURL = url + "?" +
@@ -436,6 +442,7 @@ public class EmailHelper {
         "<br/><br/>" +
         CLOSING;
   }
+*/
 
   /**
    * So the first part in the url is the desired role, the second is the lookup key for the invitation
@@ -475,7 +482,7 @@ public class EmailHelper {
         Collections.singleton(EmailList.GORDON_VIDAVER));
   }*/
 
-  private String getInvitation(String inviterFullName) {
+/*  private String getInvitation(String inviterFullName) {
     return "Hi," +
         //tamas + "," +
         "<br/><br/>" +
@@ -484,13 +491,13 @@ public class EmailHelper {
         "Click the link to sign up." +
         "<br/><br/>" +
         CLOSING;
-  }
+  }*/
 
   /**
-   * @param email
-   * @param userID1
-   * @param firstName
-   * @param mailSupport
+   * @paramx email
+   * @paramx userID1
+   * @paramx firstName
+   * @paramx mailSupport
    */
 /*  public void sendConfirmationEmail(String email, String userID1, String firstName, MailSupport mailSupport) {
     mailSupport.sendEmail(NP_SERVER, email, NETPROF_HELP_DLIFLC_EDU, "Welcome to NetProF", getUserConfirmationEmail(userID1, firstName));
@@ -517,6 +524,7 @@ public class EmailHelper {
       return url.split("\\?")[0].split("\\#")[0];
     }
   }
+/*
 
   private String rot13(String val) {
     StringBuilder builder = new StringBuilder();
@@ -529,12 +537,13 @@ public class EmailHelper {
     }
     return builder.toString();
   }
+*/
 
   /**
    * @see mitll.langtest.server.services.UserServiceImpl#changePassword(int, String, String)
    * @param userWhereResetKey
    */
-  public void sendChangedPassword(User userWhereResetKey) {
+/*  public void sendChangedPassword(User userWhereResetKey) {
     String email = userWhereResetKey.getEmail();
     if (email != null && !email.isEmpty()) {
       String first = userWhereResetKey.getFirst();
@@ -555,5 +564,5 @@ public class EmailHelper {
           "Click here to return to the site." // link text
       );
     }
-  }
+  }*/
 }

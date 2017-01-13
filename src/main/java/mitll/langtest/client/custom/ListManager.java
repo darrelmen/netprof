@@ -362,14 +362,14 @@ public class ListManager implements RequiresResize {
 
     if (getAll) {
       // logger.info("viewLessons----> getAllPredef optional " + optionalExercise);
-      listService.getUserListsForText("", controller.getUser(),
+      listService.getUserListsForText("",
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + "_All",
               false, true,
               userManager, onlyMine, optionalExercise));
     } else {
       logger.info("viewLessons for user #" + userManager.getUser());
-      listService.getListsForUser(userManager.getUser(), onlyMine,
+      listService.getListsForUser(onlyMine,
           onlyVisited,
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + (onlyMine ? "_Mine" : "_Others"),
@@ -866,7 +866,7 @@ public class ListManager implements RequiresResize {
     anImport.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        listService.reallyCreateNewItems(userManager.getUser(), ul.getID(), sanitize(w.getText()),
+        listService.reallyCreateNewItems(ul.getID(), sanitize(w.getText()),
             new AsyncCallback<Collection<CommonExercise>>() {
               @Override
               public void onFailure(Throwable caught) {

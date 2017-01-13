@@ -76,10 +76,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    */
   UserContainer(ExerciseServiceAsync service,
                 ExerciseController controller,
-                       DivWidget rightSide,
-                       DivWidget overallBottom,
-                       ShowTab learnTab,
-                       String selectedUserKey
+                DivWidget rightSide,
+                DivWidget overallBottom,
+                ShowTab learnTab,
+                String selectedUserKey
   ) {
     super(controller, selectedUserKey, "Student");
     this.rightSide = rightSide;
@@ -287,10 +287,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
   protected void gotClickOnItem(final UserInfo user) {
     super.gotClickOnItem(user);
-    MiniUser user1 = user.getUser();
-    int id = user1.getID();
+    //MiniUser user1 = user.getUser();
+    int id = user.getID();
     overallBottom.clear();
-    AnalysisTab widgets = new AnalysisTab(exerciseServiceAsync, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);
+    AnalysisTab widgets = new AnalysisTab(exerciseServiceAsync, controller, id, learnTab, user.getUserID(), MIN_RECORDINGS, overallBottom);
     rightSide.clear();
     rightSide.add(widgets);
   }

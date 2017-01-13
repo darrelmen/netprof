@@ -374,7 +374,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost) {
-    controller.getQCService().addAnnotation(getLocalExercise().getID(), field, status.toString(), commentToPost, controller.getUser(),
+    controller.getQCService().addAnnotation(getLocalExercise().getID(), field, status.toString(), commentToPost,
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {

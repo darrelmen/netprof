@@ -73,16 +73,6 @@ public interface IUserDAO extends IDAO {
    */
   User addUser(SignUpUser user);
 
-  @Deprecated boolean enableUser(int id);
-
-  /**
-   * @see mitll.langtest.server.services.UserServiceImpl#changeEnabledFor
-   * @param userid
-   * @param enabled
-   * @return
-   */
-  boolean changeEnabled(int userid, boolean enabled);
-
   /**
    * @see mitll.langtest.server.mail.EmailHelper#resetPassword(String, String, String)
    * @see mitll.langtest.server.rest.RestUserManagement#resetPassword(String, String, String)
@@ -178,6 +168,12 @@ public interface IUserDAO extends IDAO {
   Map<Integer, User> getUserMap(boolean getMale);
 
   Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all);
+
+  /**
+   * @deprecated - don't want to do this
+   * @return
+   * @see DatabaseImpl#getMaleFemaleProgress(int)
+   */
   List<DBUser> getAll();
 
   /**
@@ -230,9 +226,7 @@ public interface IUserDAO extends IDAO {
    */
   boolean changePasswordForToken(String userId, String userKey, String newPassword, String url);
 
-  boolean forgotPassword(String user, String url
-  //    , String emailForLegacy
-  );
+  boolean forgotPassword(String user, String url);
 
   /**
    * @see UserServiceImpl#changePFor(String, String)
@@ -240,25 +234,6 @@ public interface IUserDAO extends IDAO {
    * @return
    */
   User getUserWithResetKey(String key);
-
- @Deprecated User getUserWithEnabledKey(String key);
-
-  /**
-   * @see mitll.langtest.server.mail.EmailHelper#resetPassword(String, String, String)
-   * @param userid
-   * @param resetKey
-   * @param key
-   * @return
-   */
-  boolean updateKey(int userid, boolean resetKey, String key);
-
-  /**
-   * @see UserServiceImpl#changePFor(String, String)
-   * @param userid
-   * @param resetKey
-   * @return
-   */
-  boolean clearKey(int userid, boolean resetKey);
 
   /**
    * @see DatabaseImpl#initializeDAOs

@@ -293,7 +293,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    */
   private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
     if (isCourseContent()) {
-      controller.getQCService().markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
+      controller.getQCService().markState(completedExercise.getID(), STATE.ATTN_LL,
           new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -323,7 +323,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     boolean allCorrect = incorrectFields.isEmpty();
     //System.out.println("markReviewed : exercise " + completedExercise.getOldID() + " instance " + instance + " allCorrect " + allCorrect);
 
-    controller.getQCService().markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
+    controller.getQCService().markReviewed(completedExercise.getID(), allCorrect,
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
