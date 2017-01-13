@@ -65,10 +65,34 @@ public class UserSecurityManager implements IUserSecurityManager {
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
 
+  /**
+   * @see
+   * @param userDAO
+   * @param userSessionDAO
+   */
   public UserSecurityManager(IUserDAO userDAO, IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
+
+    //startShiro();
   }
+
+/*  private void startShiro() {
+    log.info("My First Apache Shiro Application");
+
+    try {
+      //1.
+      IniSecurityManagerFactory iniSecurityManagerFactory = new IniSecurityManagerFactory("classpath:shiro.ini");
+
+      //2.
+      SecurityManager instance = iniSecurityManagerFactory.getInstance();
+
+      //3.
+      SecurityUtils.setSecurityManager(instance);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }*/
 
   /**
    * Creates a new session at the end???? why?
@@ -85,6 +109,11 @@ public class UserSecurityManager implements IUserSecurityManager {
   public void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions) {
     long startMS = System.currentTimeMillis();
     HttpSession session = getCurrentSession(request);
+
+/*
+    SecurityUtils.getSubject().logout();
+*/
+
     if (session != null) {
       log.info("Invalidating session {}", session.getId());
       if (userId != null) {
@@ -129,8 +158,17 @@ public class UserSecurityManager implements IUserSecurityManager {
    *
    * @see #getLoggedInUser(HttpServletRequest)
    */
-  private User getLoggedInUser(HttpServletRequest request, String opName, boolean throwOnFail)
+  private User getLoggedInUser(HttpServletRequest request,
+                               String opName,
+                               boolean throwOnFail)
       throws RestrictedOperationException, DominoSessionException {
+/*
+    Subject subject = SecurityUtils.getSubject();
+
+    log.info("subject is " +subject);
+    if (subject != null) {
+      log.info("subject is " + subject.isRemembered());
+    }*/
     User user = lookupUser(request, throwOnFail);
     if (user == null && throwOnFail) {
       throwException(opName, user, null);
@@ -263,7 +301,7 @@ public class UserSecurityManager implements IUserSecurityManager {
    * TODO : consider how to do this.
    *
    * @param request
-   * @return
+   * @return null if there is no user for the session
    * @throws DominoSessionException
    */
   private User lookupUserFromDBSession(HttpServletRequest request)
@@ -273,8 +311,11 @@ public class UserSecurityManager implements IUserSecurityManager {
     int userForSession = userSessionDAO.getUserForSession(sid);
     if (userForSession == -1 && sid != null) {
       log.error("lookupUserFromDBSession no user for session " + sid + " in database?");
+      return null;
     }
-    return rememberUser(userForSession);
+    else {
+      return rememberUser(userForSession);
+    }
   }
 
   /**

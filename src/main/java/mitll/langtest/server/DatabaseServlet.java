@@ -35,10 +35,8 @@ package mitll.langtest.server;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.UserSecurityManager;
-import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,34 +55,22 @@ import java.io.*;
 public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = LogManager.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
-  // private static final String NO = "NO";
-  // not clear this is a big win currently - this enables us to rewrite the mp3s and possibly mark
-  // them with a title
-//  private static final Boolean CHECK_FOR_MP3 = false;
+  private DatabaseImpl db = null;
   protected ServerProperties serverProps;
   private String configDir;
   protected PathHelper pathHelper;
   private IUserSecurityManager securityManager;
 
   /**
-   * @see #ensureMP3s
-   * @param byID
-   * @param pathHelper
-   * @param configDir
-   * @return
-   */
-/*  private boolean ensureMP3(CommonExercise byID, PathHelper pathHelper, String configDir) {
-    return ensureMP3(byID.getRefAudio(), pathHelper, configDir, byID.getForeignLanguage(), "");
-  }*/
-
-  /**
    * @param wavFile
    * @param trackInfo
-   * @see mitll.langtest.server.ScoreServlet#ensureMP3Later(int, String, String)
+   * @see mitll.langtest.server.ScoreServlet#ensureMP3Later
    */
-  void ensureMP3(String wavFile, TrackInfo trackInfo) { ensureMP3(wavFile, pathHelper, configDir, trackInfo);  }
+  void ensureMP3(String wavFile, TrackInfo trackInfo) {
+    ensureMP3(wavFile, configDir, trackInfo);
+  }
 
-  private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, TrackInfo trackInfo) {
+  private boolean ensureMP3(String wavFile, String configDir, TrackInfo trackInfo) {
     if (wavFile != null) {
       //  String mediaDir = pathHelper.getInstallPath();
       String mediaDir = serverProps.getMediaDir();
@@ -128,15 +114,6 @@ public class DatabaseServlet extends HttpServlet {
     return pathHelper.getInstallPath() + File.separator + "config" + File.separator + config;
   }
 
-  /**
-   * @seex mitll.langtest.server.load.LoadTestServlet#getJsonArray(List)
-   * @paramx byID
-   */
-/*
-  protected void ensureMP3s(CommonExercise byID) {
-    ensureMP3(byID, pathHelper, configDir);
-  }
-*/
   protected void writeToFile(InputStream inputStream, File saveFile) throws IOException {
     // opens an output stream for writing file
     copyToOutput(inputStream, new FileOutputStream(saveFile));
@@ -160,15 +137,11 @@ public class DatabaseServlet extends HttpServlet {
    * @see #doGet
    */
   int getProject(HttpServletRequest request) {
-    try {
-      User loggedInUser = securityManager.getLoggedInUser(request);
-      if (loggedInUser == null) return -1;
-      int id = loggedInUser.getID();
-      int i = getMostRecentProjectByUser(id);
-      return i;
-    } catch (DominoSessionException e) {
-      logger.error("Got " + e, e);
+    int userIDFromRequest = securityManager.getUserIDFromRequest(request);
+    if (userIDFromRequest == -1) {
       return -1;
+    } else {
+      return getMostRecentProjectByUser(userIDFromRequest);
     }
   }
 
@@ -181,7 +154,6 @@ public class DatabaseServlet extends HttpServlet {
     return getDatabase().getUserProjectDAO().mostRecentByUser(id);
   }
 
-  private DatabaseImpl db = null;
 
   protected DatabaseImpl getDatabase() {
     if (db == null) {
@@ -197,120 +169,4 @@ public class DatabaseServlet extends HttpServlet {
     return db;
   }
 
-  /**
-   * Make json for an exercise
-   *
-   * Prefer recordings by voices on the preferred list.
-   *
-   * @param exercise
-   * @return
-   */
-/*  protected JSONObject getJsonForExercise(CommonExercise exercise) {
-    JSONObject ex = new JSONObject();
-    ex.put("id", exercise.getOldID());
-    ex.put("fl", exercise.getForeignLanguage());
-    ex.put("tl", exercise.getTransliteration());
-    ex.put("en", exercise.getEnglish());
-    ex.put("ct", exercise.getContext());
-    ex.put("ctr", exercise.getContextTranslation());
-    AudioAttribute latestContext = exercise.getLatestContext(true);
-    //if (latestContext != null) {
-    //  String author = latestContext.getUser().getUserID();
-    //  if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
-   // }
-    ex.put("ctmref", latestContext == null ? NO : latestContext.getAudioRef());
-    latestContext = exercise.getLatestContext(false);
-   // if (latestContext != null) {
-     // String author = latestContext.getUser().getUserID();
-     // if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
-   // }
-    ex.put("ctfref", latestContext == null ? NO : latestContext.getAudioRef());
-    ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudioWithPrefs(serverProps.getPreferredVoices()) : NO);
-
-    addLatestRefs(exercise, ex);
-
-    return ex;
-  }*/
-
-  /**
-   * Male/female reg/slow speed
-   * Prefer voices on the preferred list.
-   *
-   * @param exercise
-   * @param ex
-   * @see #getJsonForExercise
-   */
-/*  private void addLatestRefs(AudioRefExercise exercise, JSONObject ex) {
-    Set<Long> preferredVoices = serverProps.getPreferredVoices();
-
-    String mr = null, ms = null, fr = null, fs = null;
-    long mrt = 0, mst = 0, frt = 0, fst = 0;
-    AudioAttribute mra = null, msa = null, fra = null, fsa = null;
-
-    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-      long timestamp = audioAttribute.getTimestamp();
-      //boolean isPrefVoice = preferredVoices.contains(audioAttribute.getUserid());
-      if (audioAttribute.isMale()) {
-        if (audioAttribute.isRegularSpeed()) {
-          if (timestamp >= mrt) {
-            if (mra == null || !preferredVoices.contains(mra.getUserid())) {
-              mrt = timestamp;
-              mr = audioAttribute.getAudioRef();
-              mra = audioAttribute;
-            }
-          }
-        } else if (audioAttribute.isSlow()) {
-          if (timestamp >= mst) {
-            if (msa == null || !preferredVoices.contains(msa.getUserid())) {
-              mst = timestamp;
-              ms = audioAttribute.getAudioRef();
-              msa = audioAttribute;
-            }
-          }
-        }
-      } else {
-        if (audioAttribute.isRegularSpeed()) {
-          if (timestamp >= frt) {
-            if (fra == null || !preferredVoices.contains(fra.getUserid())) {
-              frt = timestamp;
-              fr = audioAttribute.getAudioRef();
-              fra = audioAttribute;
-            }
-          }
-        } else if (audioAttribute.isSlow()) {
-          if (timestamp >= fst) {
-            if (fsa == null || !preferredVoices.contains(fsa.getUserid())) {
-              fst = timestamp;
-              fs = audioAttribute.getAudioRef();
-              fsa = audioAttribute;
-            }
-          }
-        }
-      }
-    }
-
-    // male regular speed reference audio (m.r.r.)
-    // we want the item text so we can label the mp3 with a title
-    //String foreignLanguage = exercise.getForeignLanguage();
-
-//    if (mr != null) {
-//      if (CHECK_FOR_MP3) ensureMP3(mr, foreignLanguage, author);
-//    }
-    ex.put("mrr", mr == null ? NO : mr);
-
-//    if (ms != null) {
-//      if (CHECK_FOR_MP3) ensureMP3(ms, foreignLanguage, author);
-//    }
-    ex.put("msr", ms == null ? NO : ms);
-
-//    if (fr != null) {
-//      if (CHECK_FOR_MP3) ensureMP3(fr, foreignLanguage, author);
-//    }
-    ex.put("frr", fr == null ? NO : fr);
-
-//    if (fs != null) {
-//      if (CHECK_FOR_MP3) ensureMP3(fs, foreignLanguage, author);
-//    }
-    ex.put("fsr", fs == null ? NO : fs);
-  }*/
 }

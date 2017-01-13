@@ -159,7 +159,7 @@ public class ServerProperties {
    */
   private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netprof/";
   public static final String BEST_AUDIO = "bestAudio";
-  private static final String DEFAULT_BEST_AUDIO = DEFAULT_NETPROF_AUDIO_DIR + BEST_AUDIO;
+ // private static final String DEFAULT_BEST_AUDIO = DEFAULT_NETPROF_AUDIO_DIR + BEST_AUDIO;
   public static final String ANSWERS = "answers";
   //private static final String DEFAULT_ANSWERS = DEFAULT_NETPROF_AUDIO_DIR + ANSWERS;
 

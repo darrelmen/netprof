@@ -50,17 +50,8 @@ public interface UserServiceAsync {
    * @seex UserManager#getPermissionsAndSetUser
    * @seex mitll.langtest.client.user.SignInForm#getPermissionsAndSetUser
    */
-  void loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
-
-  /**
-   * TODO : don't do a token - I guess it should be the userid?
-   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
-   * @param token
-   * @param newHashedPassword
-   * @param asyncCallback
-   * @deprecatedx
-   */
-  // void changePFor(String token, String newHashedPassword, AsyncCallback<Boolean> asyncCallback);
+  void loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword,
+                 AsyncCallback<LoginResult> async);
 
   /**
    * @param userid
@@ -97,33 +88,12 @@ public interface UserServiceAsync {
 
   void forgotUsername(String emailH, String email, AsyncCallback<Boolean> async);
 
-  void getUserIDForToken(String token, AsyncCallback<Long> async);
-
+  @Deprecated
   void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
-
-  /**
-   * @param cdToken
-   * @param emailR
-   * @param url
-   * @param asyncCallback
-   * @Deprecated - not doing this anymore...
-   */
-  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
 
   void setProject(int projectid, AsyncCallback<User> async);
 
   void forgetProject(AsyncCallback<Void> async);
-
-/*  void getCounts(AsyncCallback<Map<User.Kind, Integer>> async);
-
-  void getInvitationCounts(User.Kind requestRole, AsyncCallback<Map<String, Integer>> async);
-
-
-  void update(User user, int changingUser, AsyncCallback<Void> async);
-
-  void getPending(User.Kind requestRole, AsyncCallback<Collection<Invitation>> async);
-
-  void invite(String url, Invitation invite, AsyncCallback<Void> async);*/
 
   void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
 

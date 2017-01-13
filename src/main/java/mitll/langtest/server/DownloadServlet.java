@@ -46,10 +46,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.*;
 
@@ -106,12 +103,22 @@ public class DownloadServlet extends DatabaseServlet {
    * @throws IOException
    */
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+  protected void doGet(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
     DatabaseImpl db = getDatabase();
 
     if (db != null) {
       try {
         int projid = getProject(request);
+
+        if (projid == -1) {
+          logger.warn("no current project for request " );
+          response.setContentType("text/html");
+          response.getOutputStream().write("stale session".getBytes());
+          closeOutputStream(response);
+          return;
+        }
+
         //       logger.info("doGet : current session found projid " + project1);
         String language = getDatabase().getProject(projid).getLanguage();
 
@@ -151,6 +158,10 @@ public class DownloadServlet extends DatabaseServlet {
       }
     }
 
+    closeOutputStream(response);
+  }
+
+  private void closeOutputStream(HttpServletResponse response) {
     try {
       response.getOutputStream().close();
     } catch (IOException e) {

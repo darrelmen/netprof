@@ -39,6 +39,7 @@ public interface IUserSessionDAO extends IDAO {
   void add(SlickUserSession user);
 
   int getUserForSession(String sesssion);
+  int getUserForSV(String s,String v);
 
   void removeSession(String session);
 
