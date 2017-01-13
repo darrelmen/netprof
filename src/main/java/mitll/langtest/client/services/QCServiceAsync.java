@@ -38,11 +38,11 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
 
 public interface QCServiceAsync {
-  void addAnnotation(int exerciseID, String field, String status, String comment, int userID, AsyncCallback<Void> async);
+  void addAnnotation(int exerciseID, String field, String status, String comment, AsyncCallback<Void> async);
 
-  void markReviewed(int id, boolean isCorrect, int creatorID, AsyncCallback<Void> asyncCallback);
+  void markReviewed(int id, boolean isCorrect, AsyncCallback<Void> asyncCallback);
 
-  void markState(int exid, STATE state, int creatorID, AsyncCallback<Void> async);
+  void markState(int exid, STATE state, AsyncCallback<Void> async);
 
   void markAudioDefect(AudioAttribute audioAttribute, HasID exid, AsyncCallback<Void> async);
 

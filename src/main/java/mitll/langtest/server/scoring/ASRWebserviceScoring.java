@@ -348,9 +348,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
       Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 
-      logger.info("getPretestScore sTypeToImage" +
+ /*     logger.info("getPretestScore sTypeToImage" +
           "\n\tsTypeToImage " + sTypeToImage
-      );
+      );*/
 
       return new PretestScore(
           scores.hydraScore,

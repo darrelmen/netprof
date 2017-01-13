@@ -311,7 +311,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
   }
 
   private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost) {
-    controller.getQCService().addAnnotation(exercise.getID(), field, status.toString(), commentToPost, controller.getUser(),
+    controller.getQCService().addAnnotation(exercise.getID(), field, status.toString(), commentToPost,
         new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {

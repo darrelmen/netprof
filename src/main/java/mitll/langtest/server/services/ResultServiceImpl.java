@@ -37,6 +37,7 @@ import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.result.MonitorResult;
+import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,21 +60,25 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    * <p>
    * Filter results by search criteria -- unit->value map (e.g. chapter=5), userid, and foreign language text
    *
-   * @param req      - to echo back -- so that if we get an old request we can discard it
    * @param sortInfo - encoding which fields we want to sort, and ASC/DESC choice
+   * @param req      - to echo back -- so that if we get an old request we can discard it
    * @return
    * @see mitll.langtest.client.result.ResultManager#createProvider(int, com.google.gwt.user.cellview.client.CellTable)
    */
   @Override
-  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid,
-                                   String flText, int req) {
-    List<MonitorResult> results = getResults(unitToValue, userid, flText);
+  public ResultAndTotal getResults(int start, int end,
+                                   String sortInfo,
+                                   Map<String, String> unitToValue,
+                                   String flText,
+                                   int req) {
+    int userIDFromSession = getUserIDFromSession();
+    List<MonitorResult> results = getResults(unitToValue, userIDFromSession, flText);
     if (!results.isEmpty()) {
       Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
       try {
         Collections.sort(results, comparator);
       } catch (Exception e) {
-        logger.error("Doing " + sortInfo + " " + unitToValue + " " + userid + " " + flText + " " + start + "-" + end +
+        logger.error("Doing " + sortInfo + " " + unitToValue + " " + userIDFromSession + " " + flText + " " + start + "-" + end +
             " Got " + e, e);
       }
     }
@@ -199,7 +204,6 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    * Respond to type ahead.
    *
    * @param unitToValue
-   * @param userid
    * @param flText
    * @param which
    * @return
@@ -207,10 +211,10 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    */
   @Override
   public Collection<String> getResultAlternatives(Map<String, String> unitToValue,
-                                                  int userid,
                                                   String flText,
                                                   String which) {
     Collection<MonitorResult> results = getMonitorResults();
+    int userid = getUserIDFromSession();
 
     logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
 

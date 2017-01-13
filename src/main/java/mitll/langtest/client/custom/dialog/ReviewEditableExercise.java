@@ -979,7 +979,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     }
 
 
-    controller.getQCService().markState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
+    controller.getQCService().markState(id, STATE.FIXED, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }

@@ -216,7 +216,7 @@ public class CreateListDialog extends BasicDialog {
     int user = userManager.getUser();
     final String safeText = titleBox.getSafeText();
 
-    listService.addUserList(user,
+    listService.addUserList(
         safeText,
         sanitize(area.getText()),
         classBox.getSafeText(), isPublic, new AsyncCallback<Long>() {

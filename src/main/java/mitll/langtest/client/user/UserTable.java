@@ -32,8 +32,6 @@
 
 package mitll.langtest.client.user;
 
-import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -47,7 +45,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.ListDataProvider;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.table.PagerTable;
@@ -63,7 +60,7 @@ import java.util.List;
  */
 public class UserTable extends PagerTable {
 //  private Logger logger = Logger.getLogger("UserTable");
-  private static final String ENABLED = "Enabled?";
+ // private static final String ENABLED = "Enabled?";
   private static final int ENABLED_WIDTH = 40;
 
   private static final String AGE = "Age";
@@ -311,8 +308,7 @@ public class UserTable extends PagerTable {
     table.addColumnSortHandler(getDeviceSorter(device, list));
 
     if (isAdmin) {
-      addAdminCol(service, table);
-
+   //   addAdminCol(service, table);
 
       TextColumn<User> admin = new TextColumn<User>() {
         @Override
@@ -410,11 +406,11 @@ public class UserTable extends PagerTable {
   }
 
   /**
-   * @param servicex
+   * @paramx servicex
    * @param table
-   * @see UserTable#getTable(List, LangTestDatabaseAsync, Widget)
+   * @seex UserTable#getTable(List, LangTestDatabaseAsync, Widget)
    */
-  private void addAdminCol(final UserServiceAsync service, CellTable<User> table) {
+/*  private void addAdminCol(final UserServiceAsync service, CellTable<User> table) {
     CheckboxCell checkboxCell = new CheckboxCell(true, false);
 
     Column<User, Boolean> checkColumn = new Column<User, Boolean>(checkboxCell) {
@@ -447,7 +443,7 @@ public class UserTable extends PagerTable {
 
     table.addColumn(checkColumn, ENABLED);
     table.setColumnWidth(checkColumn, ENABLED_WIDTH, Style.Unit.PX);
-  }
+  }*/
 
   private void getDateColumn(CellTable<User> table, List<User> list) {
     SafeHtmlCell cell = new SafeHtmlCell();

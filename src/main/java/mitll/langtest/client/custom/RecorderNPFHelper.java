@@ -352,7 +352,6 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
 
     private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost) {
       controller.getQCService().addAnnotation(exercise.getID(), field, status.toString(), commentToPost,
-          controller.getUser(),
           new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {

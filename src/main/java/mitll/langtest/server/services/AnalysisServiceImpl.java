@@ -99,6 +99,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    */
   @Override
   public UserPerformance getPerformanceForUser(int id, int minRecordings) {
+    logger.info("getPerformanceForUser " +id);
     SlickAnalysis slickAnalysis =
         new SlickAnalysis(db,
             db.getPhoneDAO(),

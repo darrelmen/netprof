@@ -45,6 +45,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -70,7 +71,7 @@ public abstract class Analysis extends DAO {
    * @param database
    * @param phoneDAO
    * @see DatabaseImpl#getAnalysis(int)
-   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @see DatabaseImpl#makeDAO
    */
   public Analysis(Database database, IPhoneDAO phoneDAO, Map<Integer, String> exToRef) {
     super(database);
@@ -96,29 +97,18 @@ public abstract class Analysis extends DAO {
       //"WagnerSandy",
       "rbtrbt"));
 
+  /**
+   * @see SlickAnalysis#getUserInfo(IUserDAO, int, int)
+   * @param userDAO
+   * @param best
+   * @return
+   */
   List<UserInfo> getUserInfos(IUserDAO userDAO, Map<Integer, UserInfo> best) {
  //   Map<Integer, User> userMap = userDAO.getUserMap();
     Map<Integer, MiniUser> userMap = userDAO.getMiniUsers();
-    List<UserInfo> userInfos = new ArrayList<>();
-    for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
-      MiniUser user = userMap.get(pair.getKey());
 
-      if (user == null) {
-        logger.warn("huh? no user for " + pair.getKey());
-      } else {
-        boolean isLL = lincoln.contains(user.getUserID());
-        if (!isLL) {
-          pair.getValue().setUser(user);
-          userInfos.add(pair.getValue());
-        }
-      }
-    }
-    Collections.sort(userInfos, new Comparator<UserInfo>() {
-      @Override
-      public int compare(UserInfo o1, UserInfo o2) {
-        return -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
-      }
-    });
+    List<UserInfo> userInfos = getUserInfos(best, userMap);
+    sortUsers(userInfos);
 
     // TODO : choose the initial granularity and set initial and current to those values
     for (UserInfo userInfo : userInfos) {
@@ -139,6 +129,46 @@ public abstract class Analysis extends DAO {
     }
 
     return userInfos;
+  }
+
+  /**
+   *
+   * @param best
+   * @param userMap
+   * @return
+   */
+  @NotNull
+  private List<UserInfo> getUserInfos(Map<Integer, UserInfo> best, Map<Integer, MiniUser> userMap) {
+    List<UserInfo> userInfos = new ArrayList<>();
+
+    for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
+      MiniUser user = userMap.get(pair.getKey());
+
+      if (user == null) {
+        logger.error("getUserInfos huh? no user for " + pair.getKey());
+      } else {
+        String userID = user.getUserID();
+
+        boolean isLL = lincoln.contains(userID);
+        if (!isLL) {
+          UserInfo value = pair.getValue();
+          value.setId(user.getID());
+          value.setUserID(userID);
+//          ((UserInfo) value).setUser(user);
+          userInfos.add(pair.getValue());
+        }
+      }
+    }
+    return userInfos;
+  }
+
+  private void sortUsers(List<UserInfo> userInfos) {
+    Collections.sort(userInfos, new Comparator<UserInfo>() {
+      @Override
+      public int compare(UserInfo o1, UserInfo o2) {
+        return -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+      }
+    });
   }
 
   private List<PhoneSession> chooseGran(Map<Long, List<PhoneSession>> granularityToSessions) {
@@ -190,29 +220,30 @@ public abstract class Analysis extends DAO {
   /**
    * @param id
    * @param projid
-   *@param minRecordings  @return
+   * @param minRecordings
+   * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
   abstract public UserPerformance getPerformanceForUser(long id, int projid, int minRecordings);
 
- // abstract protected Map<Integer, UserInfo> getBest(int minRecordings);
-
-  protected UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
+  UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
     if (values.isEmpty()) {
-      if (DEBUG) logger.debug("no results for " + id);
+      if (DEBUG) logger.debug("getUserPerformance no results for " + id);
       return new UserPerformance();
     } else {
-      if (values.size() > 1) logger.error("only expecting one user for " + id);
+      if (values.size() > 1) logger.error("getUserPerformance only expecting one user for " + id);
       UserInfo next = values.iterator().next();
-      if (DEBUG) logger.debug(" results for " + values.size() + "  first  " + next);
+      if (DEBUG) logger.debug("getUserPerformance results for " + values.size() + "  first  " + next);
       List<BestScore> resultsForQuery = next.getBestScores();
-      if (DEBUG) logger.debug(" resultsForQuery for " + resultsForQuery.size());
+      if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + resultsForQuery.size());
 
       UserPerformance userPerformance = new UserPerformance(id, resultsForQuery);
+      List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
+      logger.debug("getUserPerformance found " + rawBestScores.size() + " scores");
       userPerformance.setGranularityToSessions(
-          new PhoneAnalysis().getGranularityToSessions(userPerformance.getRawBestScores()));
+          new PhoneAnalysis().getGranularityToSessions(rawBestScores));
       return userPerformance;
     }
   }
@@ -220,7 +251,8 @@ public abstract class Analysis extends DAO {
   /**
    * @param id
    * @param projid
-   *@param minRecordings  @return
+   * @param minRecordings
+   * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
   public abstract List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings);
@@ -340,7 +372,7 @@ public abstract class Analysis extends DAO {
 //            logger.warn("skipping " + id);
           } else {
             bestScores.add(lastBest);
-            if (DEBUG) logger.info("Adding " + lastBest);
+            if (DEBUG) logger.info("getBestForQuery Adding " + lastBest);
             seen.add(id);
           }
           //        lastBest.setCount(count);
@@ -384,7 +416,7 @@ public abstract class Analysis extends DAO {
         Long aLong = userToEarliest.get(userID);
         userToUserInfo.put(userID, new UserInfo(value, aLong, userInitialScores));
       } else {
-        if (DEBUG) logger.debug("skipping  " + userID + ": " + value.size());
+        if (DEBUG) logger.debug("getBestForQuery skipping user " + userID + " with just " + value.size() + " scores");
       }
     }
 

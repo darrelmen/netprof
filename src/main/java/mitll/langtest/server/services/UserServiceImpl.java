@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.domino.user.ChangePasswordView;
@@ -229,6 +230,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return db.getInviteDAO().getInvitationCounts(requestRole);
   }
 
+  /**
+   * @see mitll.langtest.client.dliclass.DLIClassOps#showUsers
+   * @return
+   */
   @Override
   public Map<User.Kind, Collection<MiniUser>> getKindToUser() {
     return db.getUserDAO().getMiniByKind();
@@ -241,7 +246,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   public boolean resetPassword(String user) {
     String baseURL = getBaseURL();
-    logger.debug("resetPassword for " + user + " " + baseURL);
+    logger.warn("resetPassword for " + user + " " + baseURL);
     // Use Domino call to do reset password
     return db.getUserDAO().forgotPassword(user, baseURL);
   }
@@ -254,10 +259,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @seex mitll.langtest.client.InitialUI#handleCDToken
    * @deprecated don't do this anymore - just in domino
    */
-  public String enableCDUser(String token, String emailR, String url) {
+/*  public String enableCDUser(String token, String emailR, String url) {
     logger.info("enabling token " + token + " for email " + emailR + " and url " + url);
     return getEmailHelper().enableCDUser(token, emailR, url, getProject().getLanguage());
-  }
+  }*/
 
   /**
    * @param userId
@@ -294,31 +299,31 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * TODOx: consider stronger passwords like in domino.
    *
-   * @param userid
    * @param currentHashedPassword
    * @param newHashedPassword
    * @return
    * @see ChangePasswordView#changePassword
    */
-  public boolean changePasswordWithCurrent(int userid, String currentHashedPassword, String newHashedPassword) {
+  public boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) {
 //    currentHashedPassword = rot13(currentHashedPassword);
 //    newHashedPassword = rot13(newHashedPassword);
-    User userWhereResetKey = db.getUserDAO().getByID(userid);
+    int userIDFromSession = getUserIDFromSession();
+    User userWhereResetKey = db.getUserDAO().getByID(userIDFromSession);
     if (userWhereResetKey == null) {
       return false;
     }
 
-    return (db.getUserDAO().changePasswordWithCurrent(userid, currentHashedPassword, newHashedPassword, getBaseURL()));
+    return (db.getUserDAO().changePasswordWithCurrent(userIDFromSession, currentHashedPassword, newHashedPassword, getBaseURL()));
   }
 
-  @Override
+/*  @Override
   public void changeEnabledFor(int userid, boolean enabled) {
     User userWhere = db.getUserDAO().getUserWhere(userid);
     if (userWhere == null) logger.error("couldn't find " + userid);
     else {
       db.getUserDAO().changeEnabled(userid, enabled);
     }
-  }
+  }*/
 
   /**
    * @param emailH

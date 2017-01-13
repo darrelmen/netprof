@@ -224,7 +224,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
   private void addUserList(int userID, String title, final TextBox textBox) {
 //    logger.info("user " + userID + " adding list " + title);
     boolean isPublic = !controller.getUserState().getCurrent().isStudent();
-    listService.addUserList(userID,
+    listService.addUserList(
         title,
         "",
         "",
@@ -268,7 +268,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
    * @see #wasRevealed()
    */
   private void populateListChoices(final int id, final ExerciseController controller, final DropdownBase w1) {
-    listService.getListsForUser(getUser(), true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }

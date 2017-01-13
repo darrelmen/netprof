@@ -255,7 +255,7 @@ public class ResultManager extends PagerTable {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
         //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
-        resultServiceAsync.getResultAlternatives(getUnitToValue(), getUserID(), getText(), whichField, new AsyncCallback<Collection<String>>() {
+        resultServiceAsync.getResultAlternatives(getUnitToValue(), getText(), whichField, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -535,7 +535,7 @@ public class ResultManager extends PagerTable {
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
      //   logger.info("got " + builder.toString());
 
-        resultServiceAsync.getResults(start, end, builder.toString(), unitToValue, getUserID(), getText(), val,
+        resultServiceAsync.getResults(start, end, builder.toString(), unitToValue, getText(), val,
             new AsyncCallback<ResultAndTotal>() {
           @Override
           public void onFailure(Throwable caught) {

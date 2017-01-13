@@ -35,14 +35,12 @@ package mitll.langtest.client.services;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextArea;
-import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.BasicDialog;
@@ -56,37 +54,36 @@ import java.util.List;
 @RemoteServiceRelativePath("list-manager")
 public interface ListService extends RemoteService {
   /**
-   * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList(BasicDialog.FormField, TextArea, BasicDialog.FormField, boolean)
-   * @param userid
    * @param name
    * @param description
    * @param dliClass
    * @param isPublic
    * @return
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList(BasicDialog.FormField, TextArea, BasicDialog.FormField, boolean)
    */
-  long addUserList(int userid, String name, String description, String dliClass, boolean isPublic);
+  long addUserList(String name, String description, String dliClass, boolean isPublic);
 
   /**
-   * @see mitll.langtest.client.custom.ListManager#setPublic(long, boolean)
    * @param userListID
    * @param isPublic
+   * @see mitll.langtest.client.custom.ListManager#setPublic(long, boolean)
    */
   void setPublicOnList(long userListID, boolean isPublic);
 
   // Deleting lists and exercises from lists
 
   /**
-   * @see mitll.langtest.client.custom.ListManager#deleteList(Button, UserList, boolean)
    * @param id
    * @return
+   * @see mitll.langtest.client.custom.ListManager#deleteList(Button, UserList, boolean)
    */
   boolean deleteList(long id);
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem(String, long, UserList, PagingExerciseList, ReloadableContainer)
    * @param listid
    * @param exid
    * @return
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem(String, long, UserList, PagingExerciseList, ReloadableContainer)
    */
   boolean deleteItemFromList(long listid, int exid);
   /**
@@ -94,42 +91,40 @@ public interface ListService extends RemoteService {
    * @param exid
    * @return
    */
- // boolean deleteItem(String exid);
+  // boolean deleteItem(String exid);
 
   /**
-   * @see mitll.langtest.client.custom.ListManager#addVisitor(UserList)
    * @param userListID
    * @param user
+   * @see mitll.langtest.client.custom.ListManager#addVisitor(UserList)
    */
   void addVisitor(long userListID, int user);
 
   /**
-   * @see mitll.langtest.client.custom.ListManager#viewLessons(Panel, boolean, boolean, boolean, String)
-   * @param userid
    * @param onlyCreated
    * @param visited
    * @return
+   * @see mitll.langtest.client.custom.ListManager#viewLessons
    */
-  Collection<UserList<CommonShell>> getListsForUser(int userid, boolean onlyCreated, boolean visited);
+  Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited);
 
   /**
-   * @see mitll.langtest.client.custom.ListManager#viewLessons(Panel, boolean, boolean, boolean, String)
    * @param search
-   * @param userid
    * @return
+   * @see mitll.langtest.client.custom.ListManager#viewLessons
    */
-  Collection<UserList<CommonShell>> getUserListsForText(String search, int userid);
+  Collection<UserList<CommonShell>> getUserListsForText(String search);
 
   /**
-   * @see mitll.langtest.client.custom.ListManager#viewReview(Panel)
    * @return
+   * @see mitll.langtest.client.custom.ListManager#viewReview(Panel)
    */
   List<UserList<CommonShell>> getReviewLists();
 
   /**
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices(String, ExerciseController, DropdownBase)
    * @param userListID
    * @param exID
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   void addItemToUserList(long userListID, int exID);
 
@@ -144,24 +139,23 @@ public interface ListService extends RemoteService {
 //  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language);
 
   /**
-   * @see mitll.langtest.client.custom.ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
-   * @param creator
    * @param userListID
    * @param userExerciseText
    * @return
+   * @see mitll.langtest.client.custom.ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
    */
-  Collection<CommonExercise> reallyCreateNewItems(int creator,long userListID, String userExerciseText);
+  Collection<CommonExercise> reallyCreateNewItems(long userListID, String userExerciseText);
 
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
    * @param id
    * @return
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
    */
   CommonExercise duplicateExercise(CommonExercise id);
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem(ListInterface, boolean)
    * @param userExercise
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   void editItem(CommonExercise userExercise, boolean keepAudio);
 }
