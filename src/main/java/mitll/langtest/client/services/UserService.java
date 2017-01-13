@@ -32,16 +32,11 @@
 
 package mitll.langtest.client.services;
 
-import com.github.gwtbootstrap.client.ui.Container;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.domino.user.ChangePasswordView;
-import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;
-import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;

@@ -35,7 +35,10 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.user.*;
+import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SignUpUser;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;

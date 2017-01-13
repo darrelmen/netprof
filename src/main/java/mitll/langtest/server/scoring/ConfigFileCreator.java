@@ -32,10 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
-import corpus.HTKDictionary;
 import corpus.LTS;
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.ServerProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

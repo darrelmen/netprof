@@ -46,13 +46,8 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.dialog.ModalInfoDialog;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
-import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.shared.user.User;
 
 import java.util.ArrayList;

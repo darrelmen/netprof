@@ -35,8 +35,6 @@ package mitll.langtest.client.download;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
 
-import java.util.logging.Logger;
-
 /** 
  * DownloadIFrame: Extend the default frame to enable a hidden one time use frame suitable for
  * file download. Once the URL is loaded, this will remove itself form the root panel.

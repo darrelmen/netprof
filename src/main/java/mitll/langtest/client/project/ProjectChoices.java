@@ -15,7 +15,6 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
