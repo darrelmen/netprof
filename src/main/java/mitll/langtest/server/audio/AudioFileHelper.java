@@ -1157,9 +1157,14 @@ public class AudioFileHelper implements AlignDecode {
    * @see #makeASRScoring
    */
   private HTKDictionary makeDict(String installPath, String modelsDir) {
-    logger.info("makeDict : install path is '" + installPath + "' modelsDir " + modelsDir);
+    logger.info("makeDict : install path is '" + installPath + "'\n\tmodelsDir " + modelsDir);
+    String scoringDir = Scoring.getScoringDir(serverProps.getAudioBaseDir());
     String dictFile =
-        new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath), modelsDir).getDictFile();
+        new ConfigFileCreator(serverProps.getProperties(), null, scoringDir, modelsDir).getDictFile();
+
+    logger.info("makeDict :" +
+        "\n\tscoringDir :'" + installPath + "'" +
+        "\n\tdictFile     " + dictFile);
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
       File file = new File(dictFile);

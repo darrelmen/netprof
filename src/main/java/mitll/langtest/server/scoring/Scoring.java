@@ -361,8 +361,7 @@ public abstract class Scoring {
         return new EventAndFileInfo();
       }
       imageOutDir = deployPath + File.separator + imageOutDir;
-
-      logger.info("writeTranscriptsCached " + " writing to " + deployPath + " " + imageOutDir);
+//      logger.info("writeTranscriptsCached " + " writing to " + deployPath + " " + imageOutDir);
 
       Collection<ImageType> expectedTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
       return new TranscriptWriter().getEventAndFileInfo(pathname,

@@ -165,7 +165,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #configureProjects
    */
   private void configureProject(Project project) {
-    logger.info("configureProject " + project);
+   // logger.info("configureProject " + project);
     project.setConfigured(true);
     SlickProject project1 = project.getProject();
     if (project1 == null) logger.info("configureProject : note : no project for " + project);

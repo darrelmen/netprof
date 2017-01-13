@@ -111,6 +111,7 @@ public class RefResultDecoder {
    * @see LangTestDatabaseImpl#init()
    */
   public void doRefDecode(final Collection<CommonExercise> exercises) {
+    if (!serverProps.doAudioChecksInProduction()) return;
     new Thread(new Runnable() {
       @Override
       public void run() {
@@ -133,7 +134,6 @@ public class RefResultDecoder {
         if (serverProps.shouldDoDecode()) {
           logger.warn("doRefDecode shouldDoDecode true");
           sleep(5000);
-
           // TODO : put this back -- !
 //          if (!serverProps.isNoModel()) writeRefDecode(exercises, relativeConfigDir);
         } else {
@@ -146,7 +146,7 @@ public class RefResultDecoder {
 */
         if (db.getServerProps().shouldRecalcStudentAudio()) {
           //  recalcStudentAudio();
-          logger.warn("not doing recalc student audio.");
+          //logger.warn("not doing recalc student audio.");
         }
       }
     }).start();

@@ -36,6 +36,9 @@ import mitll.langtest.client.services.DLIClassService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 @SuppressWarnings("serial")
 public class DLIClassServiceImpl extends MyRemoteServiceServlet implements DLIClassService {
   private static final Logger logger = LogManager.getLogger(DLIClassServiceImpl.class);

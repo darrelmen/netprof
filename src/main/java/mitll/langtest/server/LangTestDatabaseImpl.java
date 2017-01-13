@@ -57,6 +57,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -96,7 +97,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       readProperties(getServletContext());
       pathHelper.setProperties(serverProps);
       setInstallPath(db);
-      //db.populateProjects(false);
+
       if (serverProps.isAMAS()) {
         audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
       }
@@ -146,29 +147,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return super.getSectionHelper();
   }
 
-  /**
-   * <<<<<<< HEAD
-   *
-   * @paramx byID
-   * @paramx parentDir
-   * @seex LoadTesting#getExercise
-   * @seex #makeExerciseListWrapper
-   */
-/*  private void ensureMP3s(CommonExercise byID, String parentDir) {
-    Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
-    for (AudioAttribute audioAttribute : audioAttributes) {
-      if (!ensureMP3(audioAttribute.getAudioRef(), byID.getForeignLanguage(), audioAttribute.getUser().getUserID(), parentDir)) {
-//        if (byID.getOldID().equals("1310")) {
-//          logger.warn("ensureMP3 : can't find " + audioAttribute + " under " + parentDir + " for " + byID);
-//        }
-        audioAttribute.setAudioRef(AudioConversion.FILE_MISSING);
-      }
-    }
-
-//    if (audioAttributes.isEmpty() && byID.getOldID().equals("1310")) {
-//      logger.warn("ensureMP3s : (" + getLanguage() + ") no ref audio for " + byID);
-//    }
-  }*/
   private Collection<CommonExercise> getExercisesForUser() {
     return db.getExercises(getProjectID());
   }
@@ -184,6 +162,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
+   * The very first thing that gets called from the client.
+   *
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    *
    * @return
@@ -288,18 +268,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private IUserListManager getUserListManager() {
     return db.getUserListManager();
   }
-
-  /**
-   * @param exercise
-   * @return
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
-   */
-  //@Override
-/*
-  public CommonExercise duplicateExercise(CommonExercise exercise) {
-    return db.duplicateExercise(exercise);
-  }
-*/
 
   /**
    * @param id
@@ -449,8 +417,10 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 //    serverProps = new ServerProperties(servletContext, configDir);
 
     db = makeDatabaseImpl(this.serverProps.getH2Database());
+    securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
+    db.setUserSecurityManager(securityManager);
+
     shareDB(servletContext);
-    securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
 //    shareLoadTesting(servletContext);
   }
 
@@ -494,20 +464,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 //        !new File(lessonPlanFile).exists()) {
 //      logger.error("couldn't find lesson plan file " + lessonPlanFile);
 //    }
-
-    String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
+  //  String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
     String installPath = pathHelper.getInstallPath();
     logger.debug("setInstallPath " + installPath +
         //" " + lessonPlanFile + " media " +
-        serverProps.getMediaDir() + " rel media " + mediaDir);
-    db.setInstallPath(installPath, mediaDir);
+        serverProps.getMediaDir());// + " rel media " + mediaDir);
+    db.setInstallPath(installPath, "");
   }
-
-  /**
-   * @deprecated - only used (if at all) during import
-   * @return
-   */
-/*  private String getLessonPlan() {
-    return serverProps.getLessonPlan() == null ? null : configDir + File.separator + serverProps.getLessonPlan();
-  }*/
 }

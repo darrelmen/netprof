@@ -43,19 +43,27 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.IUserSecurityManager;
-import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickUserSession;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
+import javax.servlet.http.HttpSession;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Random;
+
+import static mitll.langtest.server.database.security.IUserSecurityManager.USER_SESSION_ATT;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
@@ -71,6 +79,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    */
   @Deprecated
   protected AudioFileHelper audioFileHelper;
+  private Random random = new Random();
 
   @Override
   public void init() {
@@ -96,13 +105,15 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     return db;
   }
 
-  void findSharedDatabase() {
+  private void findSharedDatabase() {
     if (db == null) {
       db = getDatabase();
       if (db == null) {
-        logger.error("no database?");
+        logger.error("findSharedDatabase no database?");
       } else {
-        securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
+        logger.warn("findSharedDatabase getting user security manager");
+        securityManager = db.getUserSecurityManager();
+//        securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
       }
     }
   }
@@ -121,10 +132,14 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     serverProps = new ServerInitializationManagerNetProf().getServerProps(servletContext);
   }
 
+  /**
+   * @return
+   */
   protected int getProjectID() {
-    int userIDFromSession = getUserIDFromSession();
+    int userIDFromSession = getUserIDFromSessionCheck();
 
     if (userIDFromSession == -1) {
+      // it's not in the current session - can we recover it from the remember me cookie?
       logger.warn("getProjectID : no user in session, so we can't get the project id for the user.");
       return -1;
     }
@@ -133,17 +148,81 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   }
 
   protected Project getProject() {
-    int userIDFromSession = getUserIDFromSession();
+    int userIDFromSession = getUserIDFromSessionCheck();
     if (userIDFromSession == -1) {
+      // it's not in the current session - can we recover it from the remember me cookie?
       return null;
     } else {
       return db.getProjectForUser(userIDFromSession);
     }
   }
 
+  /**
+   * Initially, we have no userid in the session, then we log in, and we add the userid
+   * to the session (which is transient) and store a cookie on the client
+   * <p>
+   * So - several cases-
+   * 1) active session, with id (we've logged in recently) - get id from session
+   * 2) session has timed out on server, but client doesn't know it - server has no idea about the session
+   * - we lookup session id in database, and we're ok
+   * - every time we make a new session, we store a new cookie on the client
+   * 3) we're accessing a service on a tomcat instance that doesn't have the session
+   * - lookup session in database
+   * 4) close browser, bring it back up - client has no session, but server did
+   * - use cookie to find userid, and put back on a new session
+   * - ideally only the startup method should know about this case...
+   * 5) if log out, just one session info should be cleared - or all???
+   *  ? what if have two browsers open - logged in in one, logged out in other?
+   *
+   * @return
+   */
+  private int getUserIDFromSessionCheck() {
+    int userIDFromSession = getUserIDFromSession();
+    if (userIDFromSession == -1) {
+      // it's not in the current session - can we recover it from the remember me cookie?
+      try {
+        User sessionUser = getSessionUser();
+        int i = (sessionUser == null) ? -1 : sessionUser.getID();
+
+        if (i == -1) { // OK, try the cookie???
+          logger.error("\t\t\tgetUserIDFromSessionCheck huh? couldn't get user from session or database?");
+        }
+        return i;
+      } catch (DominoSessionException e) {
+        logger.error("got " + e, e);
+      }
+      return -1;
+    } else {
+      return userIDFromSession;
+    }
+  }
+
+  int getUserIDFromSession() {
+    return securityManager.getUserIDFromRequest(getThreadLocalRequest());
+  }
+
   public User getUserFromSession() {
     try {
-      User loggedInUser = securityManager.getLoggedInUser(getThreadLocalRequest());
+      User loggedInUser = getSessionUser();
+/*      if (loggedInUser != null) {
+        // it's not in the current session - can we recover it from the remember me cookie?
+        Cookie[] cookies = getThreadLocalRequest().getCookies();
+        for (Cookie cookie : cookies) {
+          if (cookie.getName().equals("r")) {
+            logger.info("\n\n\n FOUND COOKIE " + cookie.getName());
+            try {
+              LoginResult byCookie = findByCookie(Long.parseLong(cookie.getValue()));
+              if (byCookie.getResultType() == Success) {
+                loggedInUser = byCookie.getLoggedInUser();
+              } else {
+                logger.warn("getUserFromSession couldn't find user by cookie " + cookie);
+              }
+            } catch (NumberFormatException e) {
+              logger.error("getUserFromSession couldn't find cookie with " + cookie.getName() + " " + cookie.getValue());
+            }
+          }
+        }
+      }*/
       if (loggedInUser != null) {
         db.setStartupInfo(loggedInUser);
       }
@@ -154,10 +233,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
   }
 
-  protected int getUserIDFromSession() {
-    return securityManager.getUserIDFromRequest(getThreadLocalRequest());
-  }
-
   /**
    * Get the current user from the session
    *
@@ -165,7 +240,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @throws DominoSessionException
    */
   User getSessionUser() throws DominoSessionException {
-    return securityManager.getLoggedInUser(getThreadLocalRequest());
+    return securityManager.getLoggedInUser(getThreadLocalRequest(), getThreadLocalResponse());
   }
 
   protected String getLanguage() {
@@ -200,6 +275,175 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   protected void sendEmail(String subject, String prefixedMessage) {
     getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
+  }
+
+  @NotNull
+  protected LoginResult getValidLogin(HttpSession session, User loggedInUser) {
+    LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
+    if (!loggedInUser.isValid()) {
+      logger.info("user " + loggedInUser + "\n\tis missing email ");
+      loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
+    } else {
+      setSessionUser(session, loggedInUser);
+    }
+    return loginResult;
+  }
+
+  protected LoginResult getInvalidLoginResult(User loggedInUser) {
+    if (loggedInUser == null) {
+      return new LoginResult(LoginResult.ResultType.Failed);
+    } else {
+      return new LoginResult(loggedInUser, LoginResult.ResultType.BadPassword);
+    }
+  }
+
+/*  public LoginResult findByCookie(long l) {
+    logger.info("l " + l);
+
+    ByteBuffer buffer = ByteBuffer.allocate(8).putLong(l);
+    int x = buffer.getInt(0);
+    int y = buffer.getInt(1);
+
+    logger.info("x " + x);
+    logger.info("y " + y);
+
+    String sha256hex1 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + x);
+    String sha256hex2 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + y);
+
+    logger.info("first  : " + sha256hex1);
+    logger.info("second : " + sha256hex2);
+
+    int userForSV = db.getUserSessionDAO().getUserForSV(sha256hex1, sha256hex2);
+
+    if (userForSV != -1) {
+      User byID = db.getUserDAO().getByID(userForSV);
+
+      if (byID != null) {
+        return getValidLogin(createSession(), byID);
+      } else {
+        return getInvalidLoginResult(byID);
+      }
+    } else {
+      return new LoginResult(null, SessionNotRestored);
+    }
+  }*/
+
+  /**
+   * @param session
+   * @param loggedInUser
+   * @seex #loginUser
+   * @seex #addUser
+   */
+  public long setSessionUser(HttpSession session, User loggedInUser) {
+//    logger.debug("setSessionUser - made session - " + session);
+//    logger.debug("setSessionUser - made user - " + loggedInUser);
+
+    try {
+      int id1 = loggedInUser.getID();
+      session.setAttribute(USER_SESSION_ATT, id1);
+
+      // HttpSession session1 = getCurrentSession();
+      String sessionID = session.getId();
+
+      /*int selector = random.nextInt();
+      int validator = random.nextInt();
+
+      String sha256hex1 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + selector);
+      String sha256hex2 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + validator);
+
+      logger.info("first  : " + sha256hex1);
+      logger.info("second : " + sha256hex2);
+
+//    long l = selector;
+//    l = (l << 32) | validator;
+//
+//    long ll = (((long)selector) << 32) | (validator & 0xffffffffL);
+//    int x = (int)(l >> 32);
+//    int y = (int)l;
+
+      long l = ByteBuffer.allocate(8).putInt(selector).putInt(validator).getLong(0);
+      logger.info("l " + l);
+
+      ByteBuffer buffer = ByteBuffer.allocate(8).putLong(l);
+      int x = buffer.getInt(0);
+      int y = buffer.getInt(1);*/
+
+      db.getUserSessionDAO().add(
+          new SlickUserSession(-1,
+              id1,
+              sessionID,
+              "",
+              "",
+              new Timestamp(System.currentTimeMillis())));
+
+      //session.setAttribute("r", "" + l);
+      // HttpServletResponse threadLocalResponse = getThreadLocalResponse();
+      // logger.info("now - response " + threadLocalResponse);
+
+      //  addCookie(threadLocalResponse, "r", "" + l);
+
+      // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
+
+      logSetSession(session, sessionID);
+
+      db.setStartupInfo(loggedInUser);
+
+      return 1;//l;
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+      return -1;
+    }
+  }
+
+  /**
+   *
+   */
+/*
+  public void addCookie(HttpServletResponse response, String name, String value) {
+    Cookie cookie = new Cookie(name, value);
+    cookie.setPath("/");
+    cookie.setMaxAge(60 * 60 * 24 * 365);
+    cookie.setSecure(true);
+    response.addCookie(cookie);
+  }
+*/
+  private void logSetSession(HttpSession session1, String sessionID) {
+    logger.info("setSessionUser : Adding user to " + sessionID +
+        " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
+        ", session.isNew=" + session1.isNew() +
+        ", created=" + session1.getCreationTime() +
+        ", " + getAttributesFromSession(session1));
+  }
+
+  @NotNull
+  private String getAttributesFromSession(HttpSession session) {
+    StringBuilder atts = new StringBuilder("Atts: [ ");
+    Enumeration<String> attEnum = session.getAttributeNames();
+    while (attEnum.hasMoreElements()) {
+      atts.append(attEnum.nextElement() + ", ");
+    }
+    atts.append("]");
+    return atts.toString();
+  }
+
+  /**
+   * true = create a new session
+   *
+   * @return
+   * @see UserServiceImpl#changePasswordWithToken(String, String, String)
+   * @see UserServiceImpl#loginUser
+   */
+  protected HttpSession createSession() {
+    return getThreadLocalRequest().getSession(true);
+  }
+
+  /**
+   * false = don't create the session
+   *
+   * @return
+   */
+  protected HttpSession getCurrentSession() {
+    return getThreadLocalRequest().getSession(false);
   }
 
   private MailSupport getMailSupport() {
