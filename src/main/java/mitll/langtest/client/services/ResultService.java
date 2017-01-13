@@ -37,8 +37,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.result.ResultManager;
-import mitll.langtest.client.scoring.AudioPanel;
-import mitll.langtest.client.scoring.ScoringAudioPanel;
 import mitll.langtest.shared.ResultAndTotal;
 
 import java.util.Collection;
@@ -49,12 +47,11 @@ public interface ResultService extends RemoteService {
   /**
    * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing(String, TextBox)
    * @param unitToValue
-   * @param userid
    * @param flText
    * @param which
    * @return
    */
-  Collection<String> getResultAlternatives(Map<String, String> unitToValue, int userid, String flText, String which);
+  Collection<String> getResultAlternatives(Map<String, String> unitToValue, String flText, String which);
 
 
   /**
@@ -69,22 +66,10 @@ public interface ResultService extends RemoteService {
    * @param end
    * @param sortInfo
    * @param unitToValue
-   * @param userid
    * @param flText
    * @param req
    * @return
    */
-  ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid,
+  ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue,
                             String flText, int req);
-
-
-  /**
-   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
-   * @param resultID
-   * @param width
-   * @param height
-   * @return
-   */
- // PretestScore getResultASRInfo(int resultID, int width, int height);
-
 }

@@ -57,14 +57,12 @@ public interface UserServiceAsync {
                  AsyncCallback<LoginResult> async);
 
   /**
-   * @param userid
    * @param currentHashedPassword
    * @param newHashedPassword
    * @param async
    * @see ChangePasswordView#changePassword
    */
-  void changePasswordWithCurrent(int userid,
-                                 String currentHashedPassword,
+  void changePasswordWithCurrent(String currentHashedPassword,
                                  String newHashedPassword,
                                  AsyncCallback<Boolean> async);
 
@@ -90,9 +88,6 @@ public interface UserServiceAsync {
       AsyncCallback<LoginResult> async);
 
   void forgotUsername(String emailH, String email, AsyncCallback<Boolean> async);
-
-  @Deprecated
-  void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
   void setProject(int projectid, AsyncCallback<User> async);
 

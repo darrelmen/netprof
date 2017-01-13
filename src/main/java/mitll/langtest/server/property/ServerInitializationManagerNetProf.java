@@ -208,7 +208,7 @@ public class ServerInitializationManagerNetProf {
       cfn = cfn.substring(1, cfn.length()) + ".properties"; // remove initial '/'
     }
     String fullCFN = cfHome + cfn;
-    log.info("Trying to use properties file: " + fullCFN);
+    if (DEBUG) log.info("Trying to use properties file: " + fullCFN);
     return openPropertiesFileStream(fullCFN);
   }
 
@@ -230,7 +230,7 @@ public class ServerInitializationManagerNetProf {
       if (props.isEmpty()) {
         log.error("\n\n\ngetServerProperties : huh? server props is empty?\n\n\n");
       } else {
-        log.debug("getServerProperties : Loaded " + props.size() + " properties");
+        if (DEBUG) log.debug("getServerProperties : Loaded " + props.size() + " properties");
       }
 
       String releaseVers = UNKNOWN;

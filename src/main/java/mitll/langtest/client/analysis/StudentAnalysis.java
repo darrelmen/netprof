@@ -60,7 +60,6 @@ public class StudentAnalysis extends DivWidget {
   private static final int LEFT_MARGIN = MemoryItemContainer.TABLE_WIDTH + 53;
   private static final String STUDENTS = "Students";
   private static final String OR_MORE_RECORDINGS = "5 or more recordings";
-//  private static final int STUDENT_WIDTH = 300;
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
   public StudentAnalysis(final ExerciseServiceAsync vanillaService, final ExerciseController controller,
@@ -88,9 +87,6 @@ public class StudentAnalysis extends DivWidget {
 
         UserContainer userContainer = new UserContainer(vanillaService, controller, rightSide, bottom, showTab, selectedUserKey);
         //DivWidget leftSide = getStudentContainer(userContainer.getTableWithPager(getUserInfos(users)));
-
-//        String title = STUDENTS;
-//        String subtitle = OR_MORE_RECORDINGS;
         DivWidget leftSide = userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS);
 
         DivWidget top = getTop(rightSide, leftSide);
@@ -139,8 +135,9 @@ public class StudentAnalysis extends DivWidget {
   private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
     List<UserInfo> filtered = new ArrayList<UserInfo>();
     for (UserInfo userInfo : users) {
-      MiniUser user = userInfo.getUser();
-      if (user != null && user.getUserID() != null && !user.getUserID().equals("defectDetector")) {
+      String userID = userInfo.getUserID();
+//      MiniUser user = userInfo.getUser();
+      if (userID != null && !userID.equals("defectDetector")) {
         filtered.add(userInfo);
       } else {
         //String userID = user == null ? "" :user.getUserID();

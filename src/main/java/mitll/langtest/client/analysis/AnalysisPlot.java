@@ -132,7 +132,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @param minRecordings
    * @see AnalysisTab#AnalysisTab
    */
-  public AnalysisPlot(ExerciseServiceAsync service, int userid, final String userChosenID, final int minRecordings,
+  public AnalysisPlot(ExerciseServiceAsync service,
+                      int userid,
+                      final String userChosenID, final int minRecordings,
                       SoundManagerAPI soundManagerAPI, Icon playFeedback) {
     getElement().setId("AnalysisPlot");
     int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;

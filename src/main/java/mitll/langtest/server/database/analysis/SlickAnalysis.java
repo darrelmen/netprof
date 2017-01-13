@@ -47,7 +47,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickAnalysis extends Analysis implements IAnalysis {
-  private static final Logger logger = LogManager.getLogger(Analysis.class);
+  private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
   private SlickResultDAO resultDAO;
   private static final boolean DEBUG = true;
 
@@ -66,18 +66,33 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     this.resultDAO = resultDAO;
   }
 
+  /**
+   *
+   * @param userid
+   * @param projid
+   * @param minRecordings
+   * @return
+   */
   @Override
   public UserPerformance getPerformanceForUser(long userid, int projid, int minRecordings) {
     Map<Integer, UserInfo> best = getBestForUser((int) userid, projid, minRecordings);
     return getUserPerformance(userid, best);
   }
 
-  Map<Integer, UserInfo> getBestForUser(int id, int projid, int minRecordings) {
+  private Map<Integer, UserInfo> getBestForUser(int id, int projid, int minRecordings) {
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForUser(id, projid);
-    logger.info("best for " + id + " in " + projid + " were " + perfForUser.size());
+    logger.info("getBestForUser best for " + id + " in " + projid + " were " + perfForUser.size());
     return getBest(perfForUser, minRecordings);
   }
 
+  /**
+   *
+   * @param id
+   * @param projid
+   * @param minRecordings
+   * @return
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getWordScores
+   */
   @Override
   public List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings) {
     Map<Integer, UserInfo> best = getBestForUser((int) id, projid, minRecordings);

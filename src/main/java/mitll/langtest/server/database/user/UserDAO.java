@@ -522,10 +522,10 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @return
    * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
    */
-  @Override
+/*  @Override
   public User getUserWithEnabledKey(String resetKey) {
     return getUserWhere(-1, "SELECT * from users where " + ENABLED_REQ_KEY + "='" + resetKey + "'");
-  }
+  }*/
 
   /**
    * @param userid
@@ -796,7 +796,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @return
    * @see IUserDAO#clearKey(int, boolean)
    */
-  @Override
+/*  @Override
   public boolean updateKey(int userid, boolean resetKey, String key) {
     try {
       Connection connection = getConnection();
@@ -820,18 +820,18 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       database.logEvent("unk", "clearKey user: " + userid + " " + ee.toString(), 0, UNKNOWN);
     }
     return false;
-  }
+  }*/
 
   /**
-   * @param user
-   * @param resetKey
+   * @paramx user
+   * @paramx resetKey
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#changePFor
+   * @seex mitll.langtest.server.services.UserServiceImpl#changePFor
    */
-  @Override
+/*  @Override
   public boolean clearKey(int user, boolean resetKey) {
     return updateKey(user, resetKey, "");
-  }
+  }*/
 
   @Override
   public Map<User.Kind, Integer> getCounts() {
@@ -856,7 +856,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return false;
   }
 
-  @Override
+/*  @Override
   public boolean changeEnabled(int userid, boolean enabled) {
     try {
       Connection connection = getConnection();
@@ -882,13 +882,13 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return false;
   }
 
-  /**
+  *//**
    * @param id
    * @return
    * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
-   */
+   *//*
   @Override
   public boolean enableUser(int id) {
     return changeEnabled(id, true);
-  }
+  }*/
 }

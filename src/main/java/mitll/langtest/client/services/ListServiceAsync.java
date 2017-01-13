@@ -44,16 +44,15 @@ public interface ListServiceAsync {
   /**
    * TODO : add ability to search through list text...
    * @param search
-   * @param userid
    * @param async
    */
-  void getUserListsForText(String search, int userid, AsyncCallback<Collection<UserList<CommonShell>>> async);
+  void getUserListsForText(String search, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
-  void getListsForUser(int userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
+  void getListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
   void addItemToUserList(long userListID, int exID, AsyncCallback<Void> async);
 
-  void addUserList(int userid, String name, String description, String dliClass,
+  void addUserList(String name, String description, String dliClass,
                    boolean isPublic, AsyncCallback<Long> async);
 
   void addVisitor(long userListID, int user, AsyncCallback<Void> asyncCallback);
@@ -63,7 +62,7 @@ public interface ListServiceAsync {
   void setPublicOnList(long userListID, boolean isPublic, AsyncCallback<Void> async);
 
 
-  void reallyCreateNewItems(int creator, long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
+  void reallyCreateNewItems(long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
 
   void editItem(CommonExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 
