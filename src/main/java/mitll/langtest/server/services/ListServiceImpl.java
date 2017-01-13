@@ -50,7 +50,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private static final boolean DEBUG = true;
 
   /**
-   * @param userid
    * @param name
    * @param description
    * @param dliClass
@@ -59,8 +58,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public long addUserList(int userid, String name, String description, String dliClass, boolean isPublic) {
-    return getUserListManager().addUserList(userid, name, description, dliClass, isPublic, getProjectID());
+  public long addUserList(String name, String description, String dliClass, boolean isPublic) {
+    return getUserListManager().addUserList(getUserIDFromSession(), name, description, dliClass, isPublic, getProjectID());
   }
 
   /**
@@ -104,7 +103,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   /**
-   * @param userid
    * @param onlyCreated
    * @param visited
    * @return
@@ -112,20 +110,19 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.ListManager#viewLessons
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean onlyCreated, boolean visited) {
+  public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    return getUserListManager().getListsForUser(userid, onlyCreated, visited, getProjectID());
+    return getUserListManager().getListsForUser(getUserIDFromSession(), onlyCreated, visited, getProjectID());
   }
 
   /**
    * @param search
-   * @param userid
    * @return
    * @see mitll.langtest.client.custom.ListManager#viewLessons
    */
   @Override
-  public Collection<UserList<CommonShell>> getUserListsForText(String search, int userid) {
-    return getUserListManager().getUserListsForText(search, userid, getProjectID());
+  public Collection<UserList<CommonShell>> getUserListsForText(String search) {
+    return getUserListManager().getUserListsForText(search, getUserIDFromSession(), getProjectID());
   }
 
   /**
@@ -202,7 +199,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   @Override
-  public Collection<CommonExercise> reallyCreateNewItems(int creator, long userListID, String userExerciseText) {
+  public Collection<CommonExercise> reallyCreateNewItems(long userListID, String userExerciseText) {
     String[] lines = userExerciseText.split("\n");
     if (DEBUG) logger.info("got " + lines.length + " lines");
     List<CommonExercise> newItems = new ArrayList<>();
@@ -231,7 +228,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
           }
           Exercise newItem =
               new Exercise(-1,
-                  (int) creator,
+                  getUserIDFromSession(),
                   english,
                   getProjectID(),
                   false);

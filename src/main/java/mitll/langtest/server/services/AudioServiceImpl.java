@@ -486,13 +486,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private String getWavAudioFile(String audioFile) {
     if (audioFile.endsWith("." + AudioTag.COMPRESSED_TYPE) || audioFile.endsWith(MP3)) {
       String wavFile = removeSuffix(audioFile) + WAV;
-      logger.info("getWavAudioFile " + audioFile);
+//      logger.info("getWavAudioFile " + audioFile);
       if (new File(wavFile).exists()) {
         return wavFile;
       } else {
         File test = pathHelper.getAbsoluteAudioFile(wavFile);
-        logger.info("getWavAudioFile test " + test.getAbsolutePath());
-
+  //      logger.info("getWavAudioFile test " + test.getAbsolutePath());
         audioFile = test.exists() ? test.getAbsolutePath() : "FILE_MISSING.wav";//getAudioFileHelper().getWavForMP3(audioFile, );
       }
     }

@@ -68,13 +68,12 @@ public interface UserService extends RemoteService {
   LoginResult restoreUserSession();
 
   /**
-   * @param userid
    * @param currentHashedPassword
    * @param newHashedPassword
    * @return
    * @see ChangePasswordView#changePassword
    */
-  boolean changePasswordWithCurrent(int userid, String currentHashedPassword, String newHashedPassword);
+  boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword);
 
   /**
    * @param userId
@@ -92,18 +91,7 @@ public interface UserService extends RemoteService {
    * @return
    * @see mitll.langtest.client.user.SignInForm#onSendReset
    */
-  boolean resetPassword(String userid
-                        //, String url
-                        //    , String emailForLegacy
-  );
-
-
-  /**
-   * @param userid
-   * @param enabled
-   * @see mitll.langtest.client.user.UserTable#addAdminCol
-   */
-  void changeEnabledFor(int userid, boolean enabled);
+  boolean resetPassword(String userid);
 
   /**
    * @param emailH

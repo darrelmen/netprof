@@ -95,9 +95,8 @@ public class PathHelper {
   public File getAbsoluteFile(String filePath) {
  //   String installPath = properties.getAudioBaseDir(); // was install path
     String installPath = getInstallPath();
-    logger.info("getAbsoluteFile " + installPath + "/" +filePath);
+//    logger.info("getAbsoluteFile " + installPath + "/" +filePath);
     File absolute = getAbsolute(installPath, filePath);
-
     if (!absolute.exists()) {
       logger.warn("\t getAbsoluteFile doesn't exist: " + absolute.getAbsolutePath());
     }

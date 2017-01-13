@@ -361,18 +361,6 @@ public class RestUserManagement {
     }
   }
 
-/*  private String rot13(String val) {
-    StringBuilder builder = new StringBuilder();
-    for (char c : val.toCharArray()) {
-      if (c >= 'a' && c <= 'm') c += 13;
-      else if (c >= 'A' && c <= 'M') c += 13;
-      else if (c >= 'n' && c <= 'z') c -= 13;
-      else if (c >= 'N' && c <= 'Z') c -= 13;
-      builder.append(c);
-    }
-    return builder.toString();
-  }*/
-
   /**
    * TODO : remove duplicate code - here and in UserService
    * <p>

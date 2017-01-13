@@ -36,10 +36,12 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.analysis.BasicUserContainer;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
-public class OpsUserContainer extends BasicUserContainer<MiniUser> implements RequiresResize {
+@Deprecated
+public class OpsUserContainer extends BasicUserContainer<UserInfo> implements RequiresResize {
   private static final String FIRST = "First";
   private static final String LAST = "Last";
   private final DivWidget rightSide;

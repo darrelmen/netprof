@@ -52,32 +52,29 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @param field
    * @param status
    * @param comment
-   * @param userID
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation
    */
   @Override
-  public void addAnnotation(int exerciseID, String field, String status, String comment, int userID) {
-    getUserListManager().addAnnotation(exerciseID, field, status, comment, userID);
+  public void addAnnotation(int exerciseID, String field, String status, String comment) {
+    getUserListManager().addAnnotation(exerciseID, field, status, comment, getUserIDFromSession());
   }
 
   /**
    * @param id
    * @param isCorrect
-   * @param creatorID
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
-  public void markReviewed(int id, boolean isCorrect, int creatorID) {
-    getUserListManager().markCorrectness(id, isCorrect, creatorID);
+  public void markReviewed(int id, boolean isCorrect) {
+    getUserListManager().markCorrectness(id, isCorrect, getUserIDFromSession());
   }
 
   /**
    * @param exid
    * @param state
-   * @param creatorID
    * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL
    */
-  public void markState(int exid, STATE state, int creatorID) {
-    getUserListManager().markState(exid, state, creatorID);
+  public void markState(int exid, STATE state) {
+    getUserListManager().markState(exid, state, getUserIDFromSession());
   }
 
   /**
@@ -105,8 +102,6 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
       logger.error("\thuh? before there were " + beforeNumAudio + " but after there were " + afterNumAudio);
     }*/
   }
-
-
 
   /**
    * This supports labeling really old audio for gender.

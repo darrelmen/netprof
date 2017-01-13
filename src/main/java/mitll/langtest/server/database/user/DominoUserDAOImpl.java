@@ -43,6 +43,7 @@ import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
@@ -838,12 +839,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     long now = System.currentTimeMillis();
 
     int userCount = delegate.getUserCount();
-    logger.debug("user count is " + userCount);
+    logger.debug("getMiniUsers user count is " + userCount);
 
     if (miniUserCache == null || (now - lastCache) > 60 * 60 * 1000 || lastCount != userCount) {
       Map<Integer, MiniUser> idToUser = new HashMap<>();
-      for (DBUser s : getAll()) idToUser.put(s.getDocumentDBID(), getMini(s));
+
+      for (DBUser s : getAll()) {
+        idToUser.put(s.getDocumentDBID(), getMini(s));
+      }
+
       miniUserCache = idToUser;
+
       if (!miniUserCache.isEmpty()) {
         lastCache = now;
         long then = System.currentTimeMillis();
@@ -875,6 +881,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * TODO: try to avoid?
    *
    * @return
+   * @deprecated
    */
   public List<DBUser> getAll() {
     long then = System.currentTimeMillis();
@@ -902,6 +909,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 */
 
+  /**
+   * @see UserServiceImpl#getKindToUser
+   * @return
+   * @deprecated
+   */
   public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
     Map<User.Kind, Collection<MiniUser>> kindToUsers = new HashMap<>();
     for (DBUser s : getAll()) {
@@ -983,7 +995,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   @Deprecated
   public User getUserWithResetKey(String resetKey) {
-
     logger.warn("no reset key! " + resetKey);
     return null;//convertOrNull(dao.getByReset(resetKey));
   }
@@ -995,12 +1006,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
    */
+/*
   @Override
   @Deprecated
   public User getUserWithEnabledKey(String resetKey) {
     //return convertOrNull(dao.getByEnabledReq(resetKey));
     return null;
   }
+*/
 
   @Override
   public User getUserWhere(int userid) {
@@ -1101,48 +1114,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * TODO : we can't store reset password keys yet
-   *
-   * @param userid
-   * @param resetKey
-   * @param key
-   * @return
-   * @see mitll.langtest.server.mail.EmailHelper#resetPassword(String, String, String)
-   */
-  @Override
-  @Deprecated
-  public boolean updateKey(int userid, boolean resetKey, String key) {
-    return false;
-//    return dao.updateKey(userid, resetKey, key);
-  }
-
-  /**
-   * TODO : can't store keys for the moment...
-   *
-   * @param user
-   * @param resetKey
-   * @return
-   * @see mitll.langtest.server.rest.RestUserManagement#changePFor
-   */
-  @Override
-  public boolean clearKey(int user, boolean resetKey) {
-//    return dao.updateKey(user, resetKey, "");
-    return false;
-  }
-
-  /**
-   * TODO : how do we do this in domino?
-   *
-   * @param id
-   * @return
-   */
-  @Override
-  public boolean enableUser(int id) {
-    logger.warn("Calling enable user on " + id);
-    return changeEnabled(id, true);
-  }
-
-  /**
    * TODO : Not sure what to put in for urlBase...
    *
    * @param userid
@@ -1159,20 +1130,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       ClientUserDetail clientUserDetail = getClientUserDetail(dbUser);
       delegate.forgotPassword(adminUser, clientUserDetail, "");
     }
-  }
-
-  /**
-   * TODO : this will be done in the Domino user UI.
-   *
-   * @param userid
-   * @param enabled
-   * @return
-   */
-  @Deprecated
-  @Override
-  public boolean changeEnabled(int userid, boolean enabled) {
-//    return dao.changeEnabled(userid, enabled);
-    return false;
   }
 
   /**

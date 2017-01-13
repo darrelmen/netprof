@@ -70,8 +70,7 @@ public class AmasServiceImpl extends MyRemoteServiceServlet implements AmasServi
         correct,
         (float) scoreForAnswer, (float) scoreForAnswer, session, timeSpent);
 
-    Answer answer1 = new Answer(scoreForAnswer, correct, resultID);
-    return answer1;
+    return new Answer(scoreForAnswer, correct, resultID);
   }
 
   /**
@@ -83,8 +82,7 @@ public class AmasServiceImpl extends MyRemoteServiceServlet implements AmasServi
    */
   public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection,
                                               Collection<Integer> exids) {
-    int userID = getUserIDFromSession();
-    return new QuizCorrect(db).getScoresForUser(typeToSection, userID, exids, getProjectID());
+    return new QuizCorrect(db).getScoresForUser(typeToSection, getUserIDFromSession(), exids, getProjectID());
   }
 
   /**

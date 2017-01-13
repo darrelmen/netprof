@@ -34,7 +34,9 @@ package mitll.langtest.shared.analysis;
 
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.user.MiniUser;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,13 +49,14 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/29/15.
  */
-public class UserInfo extends MiniUser {
-  //private MiniUser user;
+public class UserInfo implements HasID {
   private int start;
   private int current;
   private int num;
   private transient List<BestScore> bestScores;
   private long startTime;
+  private int id;
+  private String userID;
 
   public UserInfo() {
   }
@@ -100,30 +103,37 @@ public class UserInfo extends MiniUser {
     return getUser() == null ? "UNK" : getUser().getUserID();
   }*/
 
-  public long getTimestampMillis() { return startTime;  }
+  public long getTimestampMillis() {
+    return startTime;
+  }
 
   /**
-   *
    * @return
    */
+/*
   public MiniUser getUser() {
     return this;
   }
+*/
+
 
   /**
-   * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
    * @param user
+   * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
    */
- public void setUser(MiniUser user) {
-   setFields(user.getID(),user.getAge(),user.isMale(),user.getUserID(),user.isAdmin());
-   setTimestampMillis(user.getTimestampMillis());
-   user.setFirst(user.getFirst());
-   user.setLast(user.getLast());
-  }
+/*  public void setUser(MiniUser user) {
+    setFields(user.getID(), user.getAge(), user.isMale(), user.getUserID(), user.isAdmin());
+    setTimestampMillis(user.getTimestampMillis());
+
+*//*
+    user.setFirst(user.getFirst());
+    user.setLast(user.getLast());
+    *//*
+  }*/
 
   /**
-   * @see UserContainer#getStart
    * @return
+   * @see UserContainer#getStart
    */
   public int getStart() {
     return start;
@@ -153,9 +163,35 @@ public class UserInfo extends MiniUser {
     this.current = current;
   }
 
+  public String getUserID() {
+    return userID;
+  }
+
+  public void setUserID(String userID) {
+    this.userID = userID;
+  }
+
   public String toString() {
-    MiniUser user = getUser();
-    String id = user == null ? "UNK" : "" + user.getID();
-    return id + "/" + getUserID() + " : " + getNum() + " : " + getStart() + " " + getCurrent() + " " + getDiff();
+    //MiniUser user = getUser();
+    return getID() + "/" + getUserID() + " : " + getNum() + " : " + getStart() + " " + getCurrent() + " " + getDiff();
+  }
+
+  @Override
+  public String getOldID() {
+    return null;
+  }
+
+  @Override
+  public int getID() {
+    return id;
+  }
+
+  @Override
+  public int compareTo(@NotNull HasID o) {
+    return Integer.valueOf(id).compareTo(o.getID());
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 }

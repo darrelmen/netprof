@@ -39,13 +39,12 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface ResultServiceAsync {
-  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid, String flText,
+  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, String flText,
                   int req, AsyncCallback<ResultAndTotal> async);
 
   void getNumResults(AsyncCallback<Integer> async);
 
   void getResultAlternatives(Map<String, String> unitToValue,
-                             int userid,
                              String flText,
                              String which,
                              AsyncCallback<Collection<String>> async);
