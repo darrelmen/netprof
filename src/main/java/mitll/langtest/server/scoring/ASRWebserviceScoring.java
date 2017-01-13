@@ -325,11 +325,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       boolean useScoreForBkgColor = imageOptions.isUseScoreToColorBkg();
       String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
 
+/*
       logger.info("getPretestScore write images to" +
           "\n\tout " + imageOutDir +
           "\n\tnoSuffix " + noSuffix +
           "\n\tprefix1 " + prefix1
       );
+*/
 
       int imageWidth = imageOptions.getWidth();
       int imageHeight = imageOptions.getHeight();

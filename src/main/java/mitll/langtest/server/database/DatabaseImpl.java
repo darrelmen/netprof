@@ -72,6 +72,8 @@ import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
+import mitll.langtest.server.database.security.IUserSecurityManager;
+import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.database.user.*;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
@@ -158,8 +160,8 @@ public class DatabaseImpl implements Database {
   private IEventDAO eventDAO;
   private IProjectDAO projectDAO;
   private IUserProjectDAO userProjectDAO;
-  IDLIClassDAO dliClassDAO;
-  IDLIClassJoinDAO dliClassJoinDAO;
+  private IDLIClassDAO dliClassDAO;
+  private IDLIClassJoinDAO dliClassJoinDAO;
 
   private ContextPractice contextPractice;
 
@@ -178,7 +180,7 @@ public class DatabaseImpl implements Database {
   /**
    * @see #writeUserListAudio(OutputStream, long, int, AudioExport.AudioExportOptions)
    */
-  private final String configDir;
+ // private final String configDir;
   /**
    * Only for AMAS.
    *
@@ -190,6 +192,7 @@ public class DatabaseImpl implements Database {
   private IProjectManagement projectManagement;
   private RecordWordAndPhone recordWordAndPhone;
   private IInviteDAO inviteDAO;
+  private IUserSecurityManager userSecurityManager;
 
   /**
    * JUST FOR TESTING
@@ -242,7 +245,7 @@ public class DatabaseImpl implements Database {
     long now;
     this.connection = connection;
     absConfigDir = configDir;
-    this.configDir = relativeConfigDir;
+   // this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
     this.logAndNotify = logAndNotify;
     this.pathHelper = pathHelper;
@@ -285,7 +288,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @seex CopyToPostgres#createProjectIfNotExists
-   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @see DatabaseImpl#makeDAO
    * @see DatabaseImpl#DatabaseImpl
    * @see LangTestDatabaseImpl#init
    */
@@ -702,10 +705,12 @@ public class DatabaseImpl implements Database {
       projectManagement.addSingleProject(new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS));
     } else if (!serverProps.useH2()) {
 //      projectManagement.setExerciseDAOs();
+/*
     } else if (lessonPlanFile.endsWith(".json")) {
       logger.info("got " + lessonPlanFile);
       JSONExerciseDAO jsonExerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
       projectManagement.addSingleProject(jsonExerciseDAO);
+      */
     } else {
       logger.info("makeExerciseDAO reading from excel sheet " + lessonPlanFile);
       projectManagement.addSingleProject(new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS));
@@ -1338,7 +1343,7 @@ public class DatabaseImpl implements Database {
     return getExerciseDAO(projectid).remove(exid);
   }
 
-  int warns = 0;
+  private int warns = 0;
 
   /**
    * TODO : Fix this to get the right project first!
@@ -1708,86 +1713,6 @@ public class DatabaseImpl implements Database {
         exToTranscript, exToContextTranscript, context);
   }
 
-  /**
-   * @param projectid
-   * @return
-   * @see LangTestDatabaseImpl#getMaleFemaleProgress()
-   */
-/*
-  public Map<String, Float> getH2MaleFemaleProgress(int projectid) {
-    IUserDAO userDAO = getUserDAO();
-    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
-    Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
-
-    Collection<CommonExercise> exercises = getExercises(projectid);
-    Map<Integer, String> exToTranscript = new HashMap<>();
-    Map<Integer, String> exToContextTranscript = new HashMap<>();
-    float total = exercises.size();
-    Set<Integer> uniqueIDs = new HashSet<>();
-
-    int context = 0;
-    for (CommonExercise shell : exercises) {
-      if (shell.hasContext()) context++;
-      boolean add = uniqueIDs.add(shell.getID());
-      if (!add) {
-        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
-      }
-      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
-      exToContextTranscript.put(shell.getID(), shell.getContext());
-    }
-
-    logger.info("getMaleFemaleProgress found " + total + " total exercises, " +
-        uniqueIDs.size() +
-        " unique");
-
-
-    return getAudioDAO().getRecordedReport(
-        userMapMales,
-        userMapFemales,
-        total,
-        uniqueIDs,
-        exToTranscript,
-        exToContextTranscript,
-        context);
-  }
-*/
-
-  /**
-   * Look at the exercises to determine which ones have regular, slow, or context audio and broken down
-   * by gender.
-   *
-   * @return
-   * @deprecated
-   */
-/*
-  public Map<String, Float> getMaleFemaleProgressEx() {
-    IUserDAO userDAO = getUserDAO();
-//    Map<Long, User> userMapMales = userDAO.getUserMap(true);
-//    Map<Long, User> userMapFemales = userDAO.getUserMap(false);
-
-    Collection<CommonExercise> exercises1 = getExercises();
-    Collection<? extends CommonShell> exercises = exercises1;
-    float total = exercises.size();
-    //Set<String> uniqueIDs = new HashSet<String>();
-
-    int context = 0;
-    for (CommonShell shell : exercises) {
-      if (shell.getContext() != null &&
-          !shell.getContext().isEmpty()) context++;
-//      boolean add = uniqueIDs.add(shell.getID());
-//      if (!add) {
-//        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
-//      }
-    }
-    logger.info("getH2MaleFemaleProgress found " + total + " total exercises, " +
-        uniqueIDs.size() +
-        " unique" +
-        " males " + userMapMales.size() + " females " + userMapFemales.size());
-
-    return getAudioDAO().getRecordedReportFromExercises(//userMapMales, userMapFemales,
-        total, context, exercises1);
-  }
-  */
   @Override
   public LogAndNotify getLogAndNotify() {
     return logAndNotify;
@@ -1828,9 +1753,11 @@ public class DatabaseImpl implements Database {
     return userSessionDAO;
   }
 
+/*
   public IUserPermissionDAO getUserPermissionDAO() {
     return userPermissionDAO;
   }
+*/
 
   public IInviteDAO getInviteDAO() {
     return inviteDAO;
@@ -1838,5 +1765,13 @@ public class DatabaseImpl implements Database {
 
   public String toString() {
     return "Database : " + this.getClass().toString();
+  }
+
+  public IUserSecurityManager getUserSecurityManager() {
+    return userSecurityManager;
+  }
+
+  public void setUserSecurityManager(IUserSecurityManager userSecurityManager) {
+    this.userSecurityManager = userSecurityManager;
   }
 }

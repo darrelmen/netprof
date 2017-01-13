@@ -68,7 +68,7 @@ abstract class UserDialog extends BasicDialog {
   protected final UserServiceAsync service = GWT.create(UserService.class);
 
   /**
-   * @see SignUpForm#SignUpForm(PropertyHandler, UserManager, EventRegistration, UserPassDialog)
+   * @see SignUpForm#SignUpForm
    * @param props
    */
   UserDialog(PropertyHandler props) { this.props = props;  }
@@ -127,12 +127,10 @@ abstract class UserDialog extends BasicDialog {
    * @param userManager
    * @paramx passwordHash
    * @seex SignInForm#foundExistingUser
-   * @see SignUpForm#gotSignUp(String, String, String, User.Kind)
+   * @see SignUpForm#gotSignUp
    *
    */
-  void storeUser(User result, UserManager userManager
-  //    , String passwordHash
-  ) {
+  void storeUser(User result, UserManager userManager) {
     //logger.info("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
     userManager.storeUser(result

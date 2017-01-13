@@ -43,6 +43,9 @@ import mitll.langtest.shared.exercise.STATE;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 @SuppressWarnings("serial")
 public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
