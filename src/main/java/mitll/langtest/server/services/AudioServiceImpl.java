@@ -49,6 +49,8 @@ import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
 /**
@@ -113,7 +115,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                     boolean doFlashcard,
                                     boolean recordInResults,
                                     boolean addToAudioTable,
-                                    boolean allowAlternates) {
+                                    boolean allowAlternates)  {
+    AudioFileHelper audioFileHelper = getAudioFileHelper();
+    if (audioFileHelper == null) {
+      //throw new DominoSessionException("session expired");
+    }
+
     int exerciseID = audioContext.getExid();
     boolean isExistingExercise = exerciseID > 0;
 
@@ -153,11 +160,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         .setAllowAlternates(allowAlternates);
 
     AudioAnswer audioAnswer = amas ?
-        getAudioFileHelper().writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
-        getAudioFileHelper().writeAudioFile(
+        audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
+        audioFileHelper.writeAudioFile(
             base64EncodedString,
             exercise1,
-            audioContext, recordingInfo,
+            audioContext,
+            recordingInfo,
 
             options);
 
@@ -425,7 +433,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     String imageOutDir = pathHelper.getImageOutDir();
     File absoluteFile = getAbsoluteFile(imageOutDir);
 
-    logger.info("getImageForAudioFile imageOutDir " + imageOutDir + " " +absoluteFile + " type " + imageType1);
+//    logger.info("getImageForAudioFile imageOutDir " + imageOutDir + " " +absoluteFile + " type " + imageType1);
     String absolutePathToImage = imageWriter.writeImage(
         wavAudioFile,
         absoluteFile.getAbsolutePath(),
@@ -456,12 +464,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (duration == 0) {
       logger.error("huh? " + wavAudioFile + " has zero duration???");
     }
+/*
     logger.debug("getImageForAudioFile for" +
         "\n\taudio file " + wavAudioFile +
         "\n\ttype       " + imageType +
         "\n\trel path   " + relativeImagePath +
         "\n\turl        " + imageURL +
         "\n\tduration   " + duration);
+*/
 
     return new ImageResponse(reqid, imageURL, duration);
   }

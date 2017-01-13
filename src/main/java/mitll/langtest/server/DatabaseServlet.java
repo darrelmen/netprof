@@ -160,7 +160,8 @@ public class DatabaseServlet extends HttpServlet {
       Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
       if (databaseReference != null) {
         db = (DatabaseImpl) databaseReference;
-        securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
+        securityManager = db.getUserSecurityManager();
+        //securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
         // logger.debug("found existing database reference " + db + " under " +getServletContext());
       } else {
         logger.error("huh? no existing db reference?");

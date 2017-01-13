@@ -72,10 +72,7 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.services.*;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.client.user.UserNotification;
-import mitll.langtest.client.user.UserState;
+import mitll.langtest.client.user.*;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
@@ -711,7 +708,7 @@ public class LangTest implements
    */
   public void gotUser(User user) {
     setProjectStartupInfo(user);
-//    logger.info("\ngotUser Got startup info " + projectStartupInfo);
+    logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
   }
 
@@ -720,7 +717,7 @@ public class LangTest implements
    * the user changes language/project.
    *
    * @param user
-   * @see InitialUI.ChangePasswordClickHandler#reallySetTheProject(int)
+   * @see UserMenu.ChangePasswordClickHandler#reallySetTheProject(int)
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();

@@ -123,7 +123,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
           new ServerProperties(props, "1.0", "demo", "0", "now");
 
       //
-      // dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, serverProps.getAppTitle());
+      dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, serverProps.getAppTitle());
       String appName = dominoProps.getAppName();
       logger.info("DominoUserDAOImpl app name is " + appName);
 

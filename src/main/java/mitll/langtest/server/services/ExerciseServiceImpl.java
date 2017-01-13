@@ -48,6 +48,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Collator;
@@ -816,6 +818,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     if (serverProps.isAMAS()) { // TODO : HOW TO AVOID CAST???
       return (T) db.getAMASExercise(exid);
     }
+    int projectID = getProjectID();
+
+
     int userID = getUserIDFromSession();
 
     long then = System.currentTimeMillis();
@@ -823,7 +828,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
     long then2 = System.currentTimeMillis();
 
-    int projectID = getProjectID();
     CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 
     long now = System.currentTimeMillis();

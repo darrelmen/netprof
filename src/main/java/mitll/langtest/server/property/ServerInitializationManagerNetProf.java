@@ -54,6 +54,7 @@ public class ServerInitializationManagerNetProf {
 
   private static final String appName = "netprof";
 
+  private static final boolean DEBUG = false;
   private static final String DEFAULT_PROPERTY_HOME =
       File.separator + "opt" + File.separator + appName + File.separator + "config";
 
@@ -71,26 +72,25 @@ public class ServerInitializationManagerNetProf {
    * The default properties filename
    */
   private static final String DEFAULT_PROPS_FN = appName + ".properties";
+  public static final String UNKNOWN1 = "Unknown";
+  public static final String UNKNOWN = UNKNOWN1;
 
   /**
    * The name of the server properties instance in the context.
    */
- // public static final String PROPS_ATT_NAME = "ds-properties";
+  // public static final String PROPS_ATT_NAME = "ds-properties";
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
    * @param newContext
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
    */
   public ServerProperties getServerProps(ServletContext newContext) {
     DateFormatter.init(new GWTDateFormatter());
 
-    log.info("Starting initialization");
     ServerProperties props = null;
     try {
       InputStream in = findServerProperties(newContext);
-      log.info("\t Starting initialization " + in);
-
       props = getServerProperties(in, newContext);
     } catch (Exception e) {
       log.error("trying to read props - got " + e, e);
@@ -119,7 +119,7 @@ public class ServerInitializationManagerNetProf {
    * can't be found.
    */
   private InputStream findServerProperties(ServletContext ctx) {
-    log.info("Determining properties file.");
+    if (DEBUG) log.info("Determining properties file.");
 
     // first try for -Dconfig.file
     String fullCFN = System.getProperty(CONFIG_FILE_ATTR_NM);
@@ -229,15 +229,14 @@ public class ServerInitializationManagerNetProf {
     if (props != null) {
       if (props.isEmpty()) {
         log.error("\n\n\ngetServerProperties : huh? server props is empty?\n\n\n");
-      }
-      else {
+      } else {
         log.debug("getServerProperties : Loaded " + props.size() + " properties");
       }
 
-      String releaseVers = "Unknown";
-      String buildUser = "Unknown";
-      String buildVers = "Unknown";
-      String buildDate = "Unknown";
+      String releaseVers = UNKNOWN;
+      String buildUser = UNKNOWN;
+      String buildVers = UNKNOWN;
+      String buildDate = UNKNOWN;
 
       Attributes atts = (ctx != null) ? getManifestAttributes(ctx) : null;
       if (atts != null) {
@@ -279,7 +278,7 @@ public class ServerInitializationManagerNetProf {
 
   private InputStream openPropertiesFileStream(String configFileName) {
     InputStream in = ServerInitializationManagerNetProf.class.getClassLoader().getResourceAsStream(configFileName);
-    log.info("Attempted to get input stream for " + configFileName +
+    if (DEBUG) log.info("Attempted to get input stream for " + configFileName +
         " as resource. Result: " + in);
     if (in == null) {
       try {
@@ -294,7 +293,7 @@ public class ServerInitializationManagerNetProf {
       }
     }
     if (in == null) {
-      log.warn("Could not open properties file: " + configFileName);
+      if (DEBUG) log.warn("Could not open properties file: " + configFileName);
     }
     return in;
   }
@@ -309,7 +308,7 @@ public class ServerInitializationManagerNetProf {
         log.warn("Error while reading manifest", ex);
       }
     } else {
-      log.warn("Could not find manifest!");
+      if (DEBUG) log.warn("Could not find manifest!");
     }
     return null;
   }
