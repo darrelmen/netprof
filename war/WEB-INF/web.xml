@@ -77,11 +77,7 @@
 
     <context-param>
         <param-name>config</param-name>
-<<<<<<< HEAD
-        <param-value>turkish</param-value>
-=======
         <param-value>spanish</param-value>
->>>>>>> 3527de4fb0307a005a7c188985e92ba2b87c8fd8
     </context-param>
 
     <context-param>
