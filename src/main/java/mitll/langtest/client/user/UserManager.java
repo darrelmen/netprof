@@ -150,7 +150,7 @@ public class UserManager {
    * @see #storeUser
    */
   private void getPermissionsAndSetUser() {
-    if (DEBUG || true) logger.info("UserManager.getPermissionsAndSetUser " +
+    if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser " +
         " asking server for info...");
 
     userServiceAsync.getUserFromSession(new AsyncCallback<User>() {
@@ -257,14 +257,14 @@ public class UserManager {
    * @return
    * @see mitll.langtest.client.LangTest#checkLogin();
    */
-  public boolean isUserExpired() {
+/*  public boolean isUserExpired() {
     String sid = getUserFromStorage();
     //   logger.info("sid from storage "+ sid);
     return (
         sid == null ||
             sid.equals(NO_USER_SET_STRING)) ||
         checkUserExpired(sid);
-  }
+  }*/
 
   private String getUserFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -297,9 +297,9 @@ public class UserManager {
   /**
    * @param sid
    * @return
-   * @see #isUserExpired()
+   * @seex #isUserExpired()
    */
-  private boolean checkUserExpired(String sid) {
+/*  private boolean checkUserExpired(String sid) {
     boolean expired = false;
     if (userExpired(sid)) {
       logger.info("user expired " + sid);
@@ -307,7 +307,7 @@ public class UserManager {
       expired = true;
     }
     return expired;
-  }
+  }*/
 
   /**
    * Need these to be prefixed by app title so if we switch webapps, we don't get weird user ids
@@ -329,14 +329,17 @@ public class UserManager {
     return appTitle + ":" + USER_PENDING_ID;
   }
 
+/*
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
+*/
 
   /**
    * @param sid
    * @see #getUser()
    */
+/*
   private boolean userExpired(String sid) {
     String expires = getExpiresCookie();
     if (expires == null) {
@@ -362,15 +365,16 @@ public class UserManager {
     }
     return false;
   }
+*/
 
   /**
    * @return
    * @see #userExpired(String)
    */
-  private String getExpiresCookie() {
+/*  private String getExpiresCookie() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     return localStorageIfSupported.getItem(getExpires());
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.InitialUI#resetState()
@@ -406,17 +410,17 @@ public class UserManager {
   }
 
   public void rememberUser(User user) {
-    final long DURATION = getUserSessionDuration();
-    long futureMoment = getUserSessionEnd(DURATION);
+   // final long DURATION = getUserSessionDuration();
+    //long futureMoment = getUserSessionEnd(DURATION);
 
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     userChosenID = user.getUserID();
     localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
     //  localStorageIfSupported.setItem(getPassCookie(), passwordHash);
     localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
-    rememberUserSessionEnd(localStorageIfSupported, futureMoment);
+  //  rememberUserSessionEnd(localStorageIfSupported, futureMoment);
     // localStorageIfSupported.setItem(getLoginType(), "" + userType);
-    logger.info("storeUser : user now " + user.getID() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
+    //logger.info("storeUser : user now " + user.getID() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
   }
 
   /**
@@ -450,33 +454,39 @@ public class UserManager {
 
 
   /**
-   * @param futureMoment
+   * @paramx futureMoment
    * @see #userExpired(String)
    */
-  private void rememberUserSessionEnd(long futureMoment) {
+/*  private void rememberUserSessionEnd(long futureMoment) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
     }
-  }
+  }*/
 
   /**
-   * @param localStorageIfSupported
-   * @param futureMoment
+   * @paramx localStorageIfSupported
+   * @paramx futureMoment
    * @see #storeUser
-   * @see #rememberUserSessionEnd(long)
+   * @seex #rememberUserSessionEnd(long)
    */
+/*
   private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
     localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
   }
+*/
 
+/*
   private long getUserSessionEnd() {
     return getUserSessionEnd(getUserSessionDuration());
   }
+*/
 
+/*
   private long getUserSessionEnd(long offset) {
     return System.currentTimeMillis() + offset;
   }
+*/
 
   /**
    * If we have lots of students moving through stations quickly, we want to auto logout once a day, once an hour?
@@ -485,10 +495,10 @@ public class UserManager {
    *
    * @return one year for anonymous
    */
-  private long getUserSessionDuration() {
-    long mult =/* loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 :*/ 4;
+/*  private long getUserSessionDuration() {
+    long mult =*//* loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 :*//* 4;
     return EXPIRATION_HOURS * mult;
-  }
+  }*/
 
   public boolean isMale() {
     return current.isMale();
@@ -513,51 +523,4 @@ public class UserManager {
   public Collection<User.Permission> getPermissions() {
     return current.getPermissions();
   }
-
-/*  public void getCounts(Map<User.Kind, Label> kindToLabel) {
-    userServiceAsync.getCounts(new AsyncCallback<Map<User.Kind, Integer>>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-
-      }
-
-      @Override
-      public void onSuccess(Map<User.Kind, Integer> kindIntegerMap) {
-        logger.info("got back " + kindIntegerMap);
-
-        for (Map.Entry<User.Kind, Label> pair : kindToLabel.entrySet()) {
-          Integer count = kindIntegerMap.get(pair.getKey());
-          if (count != null) {
-            pair.getValue().setText("" + count);
-          } else {
-            pair.getValue().setText("0");
-          }
-        }
-      }
-    });
-  }*/
-
-/*  public void getInvitationCounts(Map<String, Label> kindToLabel) {
-    userServiceAsync.getInvitationCounts(current.getUserKind(),
-        new AsyncCallback<Map<String, Integer>>() {
-          @Override
-          public void onFailure(Throwable throwable) {
-
-          }
-
-          @Override
-          public void onSuccess(Map<String, Integer> kindIntegerMap) {
-            logger.info("got back " + kindIntegerMap);
-
-            for (Map.Entry<String, Label> pair : kindToLabel.entrySet()) {
-              Integer count = kindIntegerMap.get(pair.getKey());
-              if (count != null) {
-                pair.getValue().setText("" + count);
-              } else {
-                pair.getValue().setText("0");
-              }
-            }
-          }
-        });
-  }*/
 }

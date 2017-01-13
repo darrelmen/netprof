@@ -116,7 +116,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               Project project) {
     super(deployPath, properties, langTestDatabase, htkDictionary, project);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
-    alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
+    alignAudioToScore  = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     ip = project.getWebserviceIP();
     port = project.getWebservicePort();

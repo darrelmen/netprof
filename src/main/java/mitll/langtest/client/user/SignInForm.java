@@ -195,15 +195,17 @@ public class SignInForm extends UserDialog implements SignIn {
   private void gotUserExists(User loginUser) {
     if (loginUser != null) {
       if (loginUser.isValid()) {
+/*
         logger.info("login user " + loginUser.getID() + " is valid");
         logger.info("login user " + loginUser.getPermissions() );
         logger.info("login user " + loginUser.getRealGender() );
+*/
       } else {
-        logger.info("login user " + loginUser.getID() + " is NOT valid");
+/*        logger.info("login user " + loginUser.getID() + " is NOT valid");
         logger.info("login user " + loginUser.getID() + " perms " + loginUser.getPermissions());
         logger.info("login user " + loginUser.getID() + " gender " + loginUser.getRealGender());
         logger.info("login user " + loginUser.getID() + " email " + loginUser.getEmail());
-        logger.info("login user " + loginUser.getID() + " email hash " + loginUser.getEmailHash());
+        logger.info("login user " + loginUser.getID() + " email hash " + loginUser.getEmailHash());*/
 
         eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + loginUser.toStringShort());
         copyInfoToSignUp(loginUser.getUserID(), loginUser);
@@ -293,7 +295,8 @@ public class SignInForm extends UserDialog implements SignIn {
 
     signIn.setEnabled(false);
 
-    userManager.getUserService().loginUser(user, hashedPass, freeTextPassword, new AsyncCallback<LoginResult>() {
+    userManager.getUserService().loginUser(user, hashedPass, freeTextPassword,
+        new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
         signIn.setEnabled(true);
@@ -307,6 +310,7 @@ public class SignInForm extends UserDialog implements SignIn {
 
           logger.info("No userField with that name '" + user +
               "' freeTextPassword " + freeTextPassword.length() + " characters - ");
+
           markErrorBlur(password, NO_USER_FOUND);
           signIn.setEnabled(true);
         } else {
@@ -315,7 +319,7 @@ public class SignInForm extends UserDialog implements SignIn {
             markErrorBlur(userField, DEACTIVATED);
             signIn.setEnabled(true);
           } else {
-            logger.info("user is enabled...");
+        //    logger.info("user is enabled...");
             if (result.getResultType() == LoginResult.ResultType.MissingInfo) {
               copyInfoToSignUp(user, loggedInUser);
               signIn.setEnabled(true);

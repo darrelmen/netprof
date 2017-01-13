@@ -466,7 +466,6 @@ public class ProjectManagement implements IProjectManagement {
       }
 
       if (!diff) {
-
       } else {
         //typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
       }
