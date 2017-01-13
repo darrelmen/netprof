@@ -73,14 +73,6 @@ public interface UserService extends RemoteService {
   LoginResult restoreUserSession();
 
   /**
-   * @paramz token
-   * @paramz newHashedPassword
-   * @return
-   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
-   */
-  // boolean changePFor(String token, String newHashedPassword);
-
-  /**
    * @param userid
    * @param currentHashedPassword
    * @param newHashedPassword
@@ -100,8 +92,8 @@ public interface UserService extends RemoteService {
 
   /**
    * @param userid
-   * @param url
-   * @param emailForLegacy
+   * @paramx url
+   * @paramx emailForLegacy
    * @return
    * @see mitll.langtest.client.user.SignInForm#onSendReset
    */
@@ -110,13 +102,6 @@ public interface UserService extends RemoteService {
                         //    , String emailForLegacy
   );
 
-  /**
-   * @param token
-   * @return
-   * @see InitialUI#handleResetPass(Container, Panel, EventRegistration, String)
-   * @deprecated no tokens anymore
-   */
-  long getUserIDForToken(String token);
 
   /**
    * @param userid
@@ -153,42 +138,13 @@ public interface UserService extends RemoteService {
   User getUserByID(String id);
 
   /**
-   * @param cdToken
-   * @param emailR
-   * @param url
-   * @return
-   * @see InitialUI#handleCDToken(Container, Panel, String, String)
-   * @deprecated not sure if we're doing this anymore
-   */
-  String enableCDUser(String cdToken, String emailR, String url);
-
-  /**
    * @param projectid
    * @return
-   * @see InitialUI#setProjectForUser(int)
+   * @seex InitialUI#setProjectForUser
    */
   User setProject(int projectid);
 
   void forgetProject();
 
-  /*
-
-    @Deprecated
-    void update(User user, int changingUser);
-
-    @Deprecated
-    Collection<Invitation> getPending(User.Kind requestRole);
-
-    @Deprecated
-    void invite(String url, Invitation invite);
-
-    @Deprecated
-    Map<String, Integer> getInvitationCounts(User.Kind requestRole);
-
-    @Deprecated
-    Map<User.Kind, Integer> getCounts();
-
-    @Deprecated
-    */
   Map<User.Kind, Collection<MiniUser>> getKindToUser();
 }

@@ -62,8 +62,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   private static final int WARN_DUR = 100;
 
   private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
-
-  //  private static final boolean WARN_MISSING_FILE = true;
   private static final boolean DEBUG = false;
 
   /**
@@ -90,6 +88,11 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    */
   @Override
   public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
+
+    int projectID = getProjectID();
+    if (projectID == -1) {
+
+    }
     if (serverProps.isAMAS()) {
       ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
       return (ExerciseListWrapper<T>) amasExerciseIds; // TODO : how to do this without forcing it.
@@ -97,10 +100,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
     Collection<CommonExercise> exercises;
 
-    logger.debug("getExerciseIds : (" + getLanguage() + ") " +
-        "getting exercise ids for " +
-        //" config " + relativeConfigDir +
-        " request " + request);
+    logger.debug("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
     try {
       boolean isUserListReq = request.getUserListID() != -1;
@@ -115,7 +115,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         int userID = request.getUserID();
         if (!request.getPrefix().isEmpty()) {
           // now do a trie over matches
-          exercises = getExercisesForSearch(request.getPrefix(), userID, exercises, predefExercises);
+          exercises = getExercisesForSearch(request.getPrefix(), exercises, predefExercises);
         }
         exercises = filterExercises(request, exercises);
 
@@ -150,7 +150,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       return new ExerciseListWrapper<T>();
     }
   }
-
 //  private boolean didCheckLTS = false;
 
   /**
@@ -193,7 +192,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     return db.getExercises(getProjectID());
   }
 
-  Collator getCollator() {
+  private Collator getCollator() {
     return getAudioFileHelper().getCollator();
   }
 
@@ -385,7 +384,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     return exerciseListWrapper;
   }
 
-  IUserListManager getUserListManager() {
+  private IUserListManager getUserListManager() {
     return db.getUserListManager();
   }
 
@@ -505,19 +504,20 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @param <T>
    */
   private <T extends CommonShell> void sortExercises(String role, List<T> commonExercises) {
-    new ExerciseSorter(db.getTypeOrder(getProjectID()))
+    int projectID = getProjectID();
+    new ExerciseSorter(db.getTypeOrder(projectID))
         .getSortedByUnitThenAlpha(commonExercises,
             role.equals(AudioType.RECORDER.toString()));
   }
 
-  private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises,
+  private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix,
+                                                                      Collection<T> exercises,
                                                                       boolean predefExercises) {
     ExerciseTrie<T> fullTrie = getProject().getFullTrie();
-    return getExercisesForSearchWithTrie(prefix, userID, exercises, predefExercises, fullTrie);
+    return getExercisesForSearchWithTrie(prefix, exercises, predefExercises, fullTrie);
   }
 
   private <T extends CommonShell> Collection<T> getExercisesForSearchWithTrie(String prefix,
-                                                                              int userID,
                                                                               Collection<T> exercises,
                                                                               boolean predefExercises,
                                                                               ExerciseTrie<T> fullTrie) {
@@ -769,7 +769,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         // now if there's a prefix, filter by prefix match
         if (!request.getPrefix().isEmpty()) {
           // now do a trie over matches
-          exercises = getExercisesForSearchWithTrie(request.getPrefix(), request.getUserID(), exercises, true, amasFullTrie);
+          exercises = getExercisesForSearchWithTrie(request.getPrefix(), exercises, true, amasFullTrie);
         }
         AmasSupport amasSupport = new AmasSupport();
         exercises = amasSupport.filterByUnrecorded(request.getUserID(), exercises, typeToSelection, db.getResultDAO());

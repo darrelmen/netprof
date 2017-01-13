@@ -712,6 +712,11 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  /**
+   *
+   * @param projectid
+   * @return
+   */
   public Project getProject(int projectid) {
     if (projectid == -1) {
       logger.warn("getProject asking for project -1?", new Exception());

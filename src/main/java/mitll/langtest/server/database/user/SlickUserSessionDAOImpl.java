@@ -35,12 +35,14 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserSession;
 import mitll.npdata.dao.user.UserSessionDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.http.HttpSession;
 import java.util.Collection;
 
 public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
@@ -69,19 +71,22 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   /**
    * @param user
    * @return
+   * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser
    */
   @Override
-  public void add(SlickUserSession user) {  dao.add(user);  }
-
-/*  @Override
-  public Collection<String> getByUser(int userid) {
-    return dao.getByUserID(userid);
-  }*/
+  public void add(SlickUserSession user) {
+    dao.add(user);
+  }
 
   @Override
   public int getUserForSession(String sesssion) {
     Collection<Integer> userForSession = dao.getUserForSession(sesssion);
+    return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
+  }
 
+  @Override
+  public int getUserForSV(String sesssion, String v) {
+    Collection<Integer> userForSession = dao.getUserForSV(sesssion, v);
     return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
   }
 
@@ -90,5 +95,7 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     dao.removeSession(session);
   }
 
-  public int getNumRows() { return dao.numRows(); }
+  public int getNumRows() {
+    return dao.numRows();
+  }
 }
