@@ -61,35 +61,36 @@ public interface IUserDAO extends IDAO {
   int getDefectDetector();
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath(int, int, File, String, boolean, String, String)
    * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath(int, int, File, String, boolean, String, String)
    */
-  @Deprecated Database getDatabase();
+  @Deprecated
+  Database getDatabase();
 
   /**
-   * @see UserManagement#addUser(SignUpUser)
    * @param user
    * @return
+   * @see UserManagement#addUser(SignUpUser)
    */
   User addUser(SignUpUser user);
 
   /**
-   * @see mitll.langtest.server.mail.EmailHelper#resetPassword(String, String, String)
-   * @see mitll.langtest.server.rest.RestUserManagement#resetPassword(String, String, String)
    * @param user
    * @param emailH
    * @return
+   * @see mitll.langtest.server.mail.EmailHelper#resetPassword(String, String, String)
+   * @see mitll.langtest.server.rest.RestUserManagement#resetPassword(String, String, String)
    */
   Integer getIDForUserAndEmail(String user, String emailH);
 
   /**
-   * @see UserServiceImpl#loginUser
    * @param userId
    * @param attemptedPassword
    * @param userAgent
    * @param remoteAddr
    * @param sessionID
    * @return
+   * @see UserServiceImpl#loginUser
    */
   User loginUser(String userId,
                  String attemptedPassword,
@@ -100,92 +101,94 @@ public interface IUserDAO extends IDAO {
                  String sessionID);
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
    * @param id
    * @param passwordHash
    * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
    */
   User getStrictUserWithPass(String id, String passwordHash);
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
    * @param id
    * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
    */
   User getUserByID(String id);
 
   /**
    * TODO : replace with user where or rename
-   * @see DatabaseImpl#getUserHistoryForList(int, Collection, int, Collection, Map)
+   *
    * @param id
    * @return
+   * @see DatabaseImpl#getUserHistoryForList(int, Collection, int, Collection, Map)
    */
   User getByID(int id);
 
   /**
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs
    * @param userid
    * @return
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs
    */
   User getUserWhere(int userid);
 
   /**
-   * @see UserManagement#getUsers
    * @return
+   * @see UserManagement#getUsers
    */
   List<User> getUsers();
 
   /**
-   * @see Report#getReport
    * @return
+   * @see Report#getReport
    */
   List<User> getUsersDevices();
 
   /**
-   * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
    * @return
+   * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
+   * @deprecated - don't get all the users
    */
   Map<Integer, MiniUser> getMiniUsers();
 
   /**
-   * @see UserServiceImpl#getKindToUser
    * @return
+   * @see UserServiceImpl#getKindToUser
    */
-  Map<User.Kind,Collection<MiniUser>> getMiniByKind();
+  Map<User.Kind, Collection<MiniUser>> getMiniByKind();
 
   /**
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
    * @param userid
    * @return
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
    */
   MiniUser getMiniUser(int userid);
 
   /**
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)
    * @param getMale
    * @return
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)
    */
   Map<Integer, User> getUserMap(boolean getMale);
 
   Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all);
 
   /**
-   * @deprecated - don't want to do this
    * @return
    * @see DatabaseImpl#getMaleFemaleProgress(int)
+   * @deprecated - don't want to do this
    */
   List<DBUser> getAll();
 
   /**
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)
    * @param getMale
    * @return
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)
    */
   Collection<Integer> getUserIDs(boolean getMale);
 
   /**
-   * @see mitll.langtest.server.database.result.ResultDAO#getUserToResults(AudioType, IUserDAO)
    * @return
+   * @see mitll.langtest.server.database.result.ResultDAO#getUserToResults(AudioType, IUserDAO)
    */
   Map<Integer, User> getUserMap();
 
@@ -197,59 +200,59 @@ public interface IUserDAO extends IDAO {
   String isValidEmail(String emailH);
 
   /**
-   * @see UserServiceImpl#changePassword(int, String, String)
-   * @see mitll.langtest.server.rest.RestUserManagement#changePFor(String, String)
    * @param user
    * @param newHashPassword
    * @param baseURL
    * @return
+   * @see UserServiceImpl#changePassword(int, String, String)
+   * @see mitll.langtest.server.rest.RestUserManagement#changePFor(String, String)
    */
   boolean changePassword(int user, String newHashPassword, String baseURL);
 
   /**
-   * @see UserServiceImpl#changePassword
    * @param user
    * @param currentHashPassword
    * @param newHashPassword
    * @param baseURL
    * @return
+   * @see UserServiceImpl#changePassword
    */
   boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword, String baseURL);
 
   /**
-   * @see
    * @param userId
    * @param userKey
    * @param newPassword
    * @param url
    * @return
+   * @see
    */
   boolean changePasswordForToken(String userId, String userKey, String newPassword, String url);
 
   boolean forgotPassword(String user, String url);
 
   /**
-   * @see UserServiceImpl#changePFor(String, String)
    * @param key
    * @return
+   * @see UserServiceImpl#changePFor(String, String)
    */
   User getUserWithResetKey(String key);
 
   /**
-   * @see DatabaseImpl#initializeDAOs
    * @return
+   * @see DatabaseImpl#initializeDAOs
    */
   int getBeforeLoginUser();
 
   /**
-   * @see UserServiceImpl#getCounts()
    * @return
+   * @see UserServiceImpl#getCounts()
    */
-  Map<User.Kind,Integer> getCounts();
+  Map<User.Kind, Integer> getCounts();
 
   /**
-   * @see UserServiceImpl#update
    * @param toUpdate
+   * @see UserServiceImpl#update
    */
   void update(User toUpdate);
 

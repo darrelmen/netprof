@@ -98,16 +98,13 @@ public abstract class Analysis extends DAO {
       "rbtrbt"));
 
   /**
-   * @see SlickAnalysis#getUserInfo(IUserDAO, int, int)
    * @param userDAO
    * @param best
    * @return
+   * @see SlickAnalysis#getUserInfo(IUserDAO, int, int)
    */
   List<UserInfo> getUserInfos(IUserDAO userDAO, Map<Integer, UserInfo> best) {
- //   Map<Integer, User> userMap = userDAO.getUserMap();
-    Map<Integer, MiniUser> userMap = userDAO.getMiniUsers();
-
-    List<UserInfo> userInfos = getUserInfos(best, userMap);
+    List<UserInfo> userInfos = getUserInfos(best, userDAO);
     sortUsers(userInfos);
 
     // TODO : choose the initial granularity and set initial and current to those values
@@ -118,13 +115,13 @@ public abstract class Analysis extends DAO {
       List<PhoneSession> phoneSessions = chooseGran(granularityToSessions);
       if (!phoneSessions.isEmpty()) {
         PhoneSession first = phoneSessions.get(0);
-        PhoneSession last  = phoneSessions.get(phoneSessions.size() - 1);
+        PhoneSession last = phoneSessions.get(phoneSessions.size() - 1);
         if (phoneSessions.size() > 2 && last.getCount() < 10) {
           last = phoneSessions.get(phoneSessions.size() - 2);
         }
 
-        userInfo.setStart(  (int) Math.round(first.getMean() * 100d));
-        userInfo.setCurrent((int) Math.round( last.getMean() * 100d));
+        userInfo.setStart((int) Math.round(first.getMean() * 100d));
+        userInfo.setCurrent((int) Math.round(last.getMean() * 100d));
       }
     }
 
@@ -132,20 +129,22 @@ public abstract class Analysis extends DAO {
   }
 
   /**
-   *
    * @param best
-   * @param userMap
+   * @paramx userMap
    * @return
    */
   @NotNull
-  private List<UserInfo> getUserInfos(Map<Integer, UserInfo> best, Map<Integer, MiniUser> userMap) {
+  private List<UserInfo> getUserInfos(Map<Integer, UserInfo> best, IUserDAO userDAO
+  ) {
     List<UserInfo> userInfos = new ArrayList<>();
 
+   // Map<Integer, MiniUser> userMap = new HashMap<>();
     for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
-      MiniUser user = userMap.get(pair.getKey());
+      Integer userid = pair.getKey();
+      MiniUser user = userDAO.getMiniUser(userid);// userMap.get(userid);
 
       if (user == null) {
-        logger.error("getUserInfos huh? no user for " + pair.getKey());
+        logger.error("getUserInfos huh? no user for " + userid);
       } else {
         String userID = user.getUserID();
 
@@ -175,34 +174,34 @@ public abstract class Analysis extends DAO {
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);
-   // boolean oneSet = false;
+    // boolean oneSet = false;
     List<PhoneSession> phoneSessions1 = Collections.emptyList();
     for (Long gran : grans) {
       //if (!oneSet) {
-        List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
+      List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
 
-        int size = 0;
-        int total = 0;
-        boolean anyBigger = false;
-        for (PhoneSession session : phoneSessions) {
-          //  logger.info("\t " + gran + " session " + session);
-          size++;
-          total += session.getCount();
-          if (session.getCount() > 50) anyBigger = true;
-        }
-        //       String label = granToLabel.get(gran);
+      int size = 0;
+      int total = 0;
+      boolean anyBigger = false;
+      for (PhoneSession session : phoneSessions) {
+        //  logger.info("\t " + gran + " session " + session);
+        size++;
+        total += session.getCount();
+        if (session.getCount() > 50) anyBigger = true;
+      }
+      //       String label = granToLabel.get(gran);
 //        String seriesInfo = gran + "/" + label;
-        // logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
+      // logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
 
-        if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
+      if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
         //  oneSet = true;
-          phoneSessions1 = granularityToSessions.get(gran);
-          //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
-          break;
-        }
-        //else {
-        //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
-        //}
+        phoneSessions1 = granularityToSessions.get(gran);
+        //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
+        break;
+      }
+      //else {
+      //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
+      //}
       //}
     }
 
@@ -266,10 +265,10 @@ public abstract class Analysis extends DAO {
     } else {
       UserInfo next = values.iterator().next();
       List<BestScore> resultsForQuery = next.getBestScores();
-    //  if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
+      //  if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
 
       List<WordScore> wordScore = getWordScore(resultsForQuery);
-     // if (DEBUG || true) logger.warn("getWordScoresForUser for # " +id +" min " +minRecordings + " wordScore " + wordScore.size());
+      // if (DEBUG || true) logger.warn("getWordScoresForUser for # " +id +" min " +minRecordings + " wordScore " + wordScore.size());
 
       return wordScore;
     }
@@ -284,10 +283,10 @@ public abstract class Analysis extends DAO {
   public abstract PhoneReport getPhonesForUser(long id, int minRecordings, int projid);
 
   /**
-   * @see #getPhonesForUser(long, int)
    * @param userid
    * @param best
    * @return
+   * @see #getPhonesForUser(long, int)
    */
   PhoneReport getPhoneReport(long userid, Map<Integer, UserInfo> best) {
     long then = System.currentTimeMillis();
@@ -295,7 +294,7 @@ public abstract class Analysis extends DAO {
     long now = System.currentTimeMillis();
 
     if (DEBUG)
-      logger.debug( " getPhonesForUser " + userid + " took " + (now - then) + " millis to get " + best.size());
+      logger.debug(" getPhonesForUser " + userid + " took " + (now - then) + " millis to get " + best.size());
 
     if (best.isEmpty()) return new PhoneReport();
 
@@ -327,14 +326,16 @@ public abstract class Analysis extends DAO {
     return phoneReport;
   }
 
-  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) { new PhoneAnalysis().setSessions(phoneToAvgSorted);  }
+  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
+    new PhoneAnalysis().setSessions(phoneToAvgSorted);
+  }
 
   /**
-   * @see SlickAnalysis#getBest(Collection, int)
    * @param minRecordings
    * @param userToBest
-   * @paramx sql
    * @return
+   * @paramx sql
+   * @see SlickAnalysis#getBest(Collection, int)
    */
   protected Map<Integer, UserInfo> getBestForQuery(int minRecordings, Map<Integer, List<BestScore>> userToBest) {
 //    Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement, sql);
