@@ -38,7 +38,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;

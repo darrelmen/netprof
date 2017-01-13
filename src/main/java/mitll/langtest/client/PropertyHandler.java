@@ -34,10 +34,10 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.user.UserPassLogin;
-import mitll.langtest.server.rest.RestUserManagement;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 

@@ -41,17 +41,18 @@ import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static mitll.langtest.shared.user.LoginResult.ResultType.SessionNotRestored;
 
@@ -160,7 +161,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   public void logout(String login) {
     securityManager.logoutUser(getThreadLocalRequest(), login, true);
-    removeCookie(getThreadLocalResponse(), "r");
+    //removeCookie(getThreadLocalResponse(), "r");
   }
 
   /**
@@ -372,63 +373,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param toUpdate
    * @param changingUser
    */
-  public void update(User toUpdate, int changingUser) {
+/*  public void update(User toUpdate, int changingUser) {
     db.getUserDAO().update(toUpdate);
-
-  }
-
-  @Deprecated
-  public Collection<Invitation> getPending(User.Kind requestRole) {
-/*    List<Invitation> visible = new ArrayList<>();
-    Collection<SlickInvite> pending = db.getInviteDAO().getPending();
-    for (SlickInvite invite : pending) {
-      String kind = invite.kind();
-      User.Kind kind1 = User.Kind.valueOf(kind);
-      if (kind1.compareTo(requestRole) < 0) {  // e.g. students below teachers
-        visible.add(toInvitation(invite));
-      }
-    }
-    return visible;*/
-    return Collections.emptyList();
-  }
-
-/*
-  private Invitation toInvitation(SlickInvite invite) {
-    return new Invitation(User.Kind.valueOf(invite.kind()),
-        invite.byuserid(),
-        invite.modified().getTime(),
-        invite.email()
-    );
-  }
-*/
-
-  /**
-   * Invite you to NetProF as a student, or teacher, or program manager, etc.
-   *
-   * @param invite
-   */
-  public void invite(String url,
-                     Invitation invite) {
-/*    int inviteID = db.getInviteDAO().add(new SlickInvite(-1,
-        invite.getKind().toString(),
-        invite.getByuser(),
-        new Timestamp(System.currentTimeMillis()),
-
-        "PENDING", db.getUserDAO().getBeforeLoginUser(),
-        new Timestamp(0),
-
-        invite.getEmail(),
-        ""));
-
-    String inviteKey = getEmailHelper().getHash(invite.getEmail() + "_" + inviteID);
-    db.getInviteDAO().update(inviteID, inviteKey);
-    User inviter = db.getUserDAO().getByID(invite.getByuser());
-
-    // not checking if insert fails -- how could it?
-    getEmailHelper().sendInviteEmail(url,
-        invite.getEmail(),
-        inviter,
-        invite.getKind(), inviteKey, getMailSupport());*/
-
-  }
+  }*/
 }

@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.sorter;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.logging.log4j.LogManager;

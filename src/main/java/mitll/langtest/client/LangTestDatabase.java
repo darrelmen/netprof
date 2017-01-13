@@ -38,18 +38,11 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.scoring.AudioPanel;
-import mitll.langtest.client.user.FormField;
-import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.ImageOptions;
-import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
 import java.util.Map;
