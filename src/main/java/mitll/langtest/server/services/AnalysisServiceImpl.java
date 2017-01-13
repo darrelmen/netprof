@@ -54,12 +54,6 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   private static final Logger logger = LogManager.getLogger(AnalysisServiceImpl.class);
   private static final int MIN_RECORDINGS = 5;
 
-/*  @Override
-  public void init() {
-    findSharedDatabase();
-    readProperties(getServletContext());
-  }*/
-
   /**
    * @param ids
    * @return
