@@ -223,7 +223,7 @@ public class LangTest implements
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
-  public static final String VERSION_INFO = "2.0.0";
+  public static final String VERSION_INFO = "2.0.0.1";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -277,16 +277,21 @@ public class LangTest implements
       public void onSuccess(StartupInfo startupInfo) {
         long now = System.currentTimeMillis();
         rememberStartup(startupInfo);
-        if (isLogClientMessages()) {
+        onModuleLoad2();
+
+        if (isLogClientMessages() && (now-then > 500)) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
           logMessageOnServer(message);
         }
-
-        onModuleLoad2();
       }
     });
   }
 
+  /**
+   * Hopefully we'll never see this.
+   * @param caught
+   * @param then
+   */
   private void onFailure(Throwable caught, long then) {
     if (caught instanceof IncompatibleRemoteServiceException) {
       Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
@@ -318,6 +323,10 @@ public class LangTest implements
     });
   }*/
 
+  /**
+   * @see #askForStartupInfo
+   * @param startupInfo
+   */
   private void rememberStartup(StartupInfo startupInfo) {
     LangTest.this.startupInfo = startupInfo;
     props = new PropertyHandler(startupInfo.getProperties());
@@ -813,17 +822,17 @@ public class LangTest implements
   private void checkLogin() {
     //console("checkLogin");
     //logger.info("checkLogin -- ");
-    userManager.isUserExpired();
+   // userManager.isUserExpired();
     userManager.checkLogin();
   }
 
   /**
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
    */
-  public void checkUser() {
-    if (userManager.isUserExpired()) {
-      checkLogin();
-    }
+@Deprecated  public void checkUser() {
+//    if (userManager.isUserExpired()) {
+//      checkLogin();
+//    }
   }
 
   public boolean showCompleted() {
@@ -834,30 +843,13 @@ public class LangTest implements
     return hasPermission(User.Permission.QUALITY_CONTROL);
   }
 
-/*
-  public User.Kind getUserKind() { return userManager.getU(); }
-*/
-
-//  private final Set<User.Permission> permissions = new HashSet<User.Permission>();
-
-  /**
-   * When we login, we ask for permissions for the user from the server.
-   *
-   * @paramx permission
-   * @paramx on
-   * @see mitll.langtest.client.user.UserManager#gotNewUser
-   */
-/*  public void setPermission(User.Permission permission, boolean on) {
-    if (on) permissions.add(permission);
-    else permissions.remove(permission);
-  }*/
   @Override
   public Collection<User.Permission> getPermissions() {
     return getCurrent().getPermissions();
   }
 
   public boolean hasPermission(User.Permission permission) {
-    logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
+  //  logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
     return getPermissions().contains(permission);
   }
 

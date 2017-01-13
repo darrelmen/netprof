@@ -69,7 +69,8 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   /**
    * JUST FOR AMAS and interop with old h2 database...
    */
-  @Deprecated protected AudioFileHelper audioFileHelper;
+  @Deprecated
+  protected AudioFileHelper audioFileHelper;
 
   @Override
   public void init() {
@@ -100,8 +101,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       db = getDatabase();
       if (db == null) {
         logger.error("no database?");
-      }
-      else {
+      } else {
         securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
       }
     }
@@ -118,41 +118,26 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @see #init
    */
   private void readProperties(ServletContext servletContext) {
-//    String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-//    String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-//    serverProps = new ServerProperties(servletContext, configDir);
-
-    ServerInitializationManagerNetProf serverInitializationManagerNetProf = new ServerInitializationManagerNetProf();
-    serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
+    serverProps = new ServerInitializationManagerNetProf().getServerProps(servletContext);
   }
 
   protected int getProjectID() {
-    try {
-      User loggedInUser = getSessionUser();
-      if (loggedInUser == null) {
-        logger.warn("getProjectID : no user in session, so we can't get the project id for the user.");
-        return -1;
-      }
-      int i = db.getUserProjectDAO().mostRecentByUser(loggedInUser.getID());
-      return i;
-    } catch (DominoSessionException e) {
-      logger.error("Got " + e, e);
+    int userIDFromSession = getUserIDFromSession();
+
+    if (userIDFromSession == -1) {
+      logger.warn("getProjectID : no user in session, so we can't get the project id for the user.");
       return -1;
     }
+    int i = db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
+    return i;
   }
 
   protected Project getProject() {
-    try {
-      User loggedInUser = getSessionUser();
-      if (loggedInUser == null) {
-        return null;
-      }
-      else {
-        return db.getProjectForUser(loggedInUser.getID());
-      }
-    } catch (DominoSessionException e) {
-      logger.error("got " + e, e);
+    int userIDFromSession = getUserIDFromSession();
+    if (userIDFromSession == -1) {
       return null;
+    } else {
+      return db.getProjectForUser(userIDFromSession);
     }
   }
 
@@ -164,11 +149,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       }
       return loggedInUser;
     } catch (DominoSessionException e) {
-      logger.error("Got " + e,e);
+      logger.error("Got " + e, e);
       return null;
     }
   }
-
 
   protected int getUserIDFromSession() {
     return securityManager.getUserIDFromRequest(getThreadLocalRequest());
@@ -176,15 +160,18 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   /**
    * Get the current user from the session
+   *
    * @return
    * @throws DominoSessionException
    */
-  User getSessionUser() throws DominoSessionException { return securityManager.getLoggedInUser(getThreadLocalRequest()); }
+  User getSessionUser() throws DominoSessionException {
+    return securityManager.getLoggedInUser(getThreadLocalRequest());
+  }
 
   protected String getLanguage() {
     Project project = getProject();
     if (project == null) {
-      logger.error("no current project ");
+      logger.error("getLanguage : no current project ");
       return "";
     } else {
       SlickProject project1 = project.getProject();

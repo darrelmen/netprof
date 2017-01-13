@@ -33,14 +33,11 @@
 package mitll.langtest.server.services;
 
 import mitll.hlt.domino.server.util.ServletUtil;
-import mitll.hlt.domino.shared.common.RestrictedOperationException;
-import mitll.hlt.domino.shared.model.user.*;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
-import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
@@ -52,12 +49,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.*;
 
 import static mitll.langtest.server.database.security.IUserSecurityManager.USER_SESSION_ATT;
+import static mitll.langtest.shared.user.LoginResult.ResultType.SessionNotRestored;
 
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
@@ -73,7 +74,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @seex #userExists
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
-  public LoginResult loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword) {
+  public LoginResult loginUser(String userId,
+                               String attemptedHashedPassword,
+                               String attemptedFreeTextPassword) {
     HttpServletRequest request = getThreadLocalRequest();
     String remoteAddr = request.getHeader("X-FORWARDED-FOR");
     if (remoteAddr == null || remoteAddr.isEmpty()) {
@@ -87,9 +90,20 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         //    + " host is secondary " + properties.isSecondaryHost()
     );
 
+    /*
+    UsernamePasswordToken token = new UsernamePasswordToken(userId, attemptedHashedPassword);
+    token.setRememberMe(true);
+    Subject subject = SecurityUtils.getSubject();
+    if (subject != null) {
+      subject.login(token);
+    }
+
+    logger.info("sub " + subject);*/
+
 //    attemptedFreeTextPassword = rot13(attemptedFreeTextPassword);
-    logger.info("userid " + userId + " password '" + attemptedHashedPassword + "'");
+    logger.info("loginUser : userid " + userId + " password '" + attemptedHashedPassword + "'");
 //    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedFreeTextPassword);
+
     User loggedInUser = db.getUserDAO().loginUser(
         userId,
         attemptedFreeTextPassword,
@@ -98,28 +112,38 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         session.getId());
 
     boolean success = loggedInUser != null;
+
+    logActivity(userId, remoteAddr, userAgent, loggedInUser, success);
+
+    if (success) {
+      return getValidLogin(session, loggedInUser);
+    } else {
+      loggedInUser = db.getUserDAO().getUserByID(userId);
+      return getInvalidLoginResult(loggedInUser);
+    }
+  }
+
+  @NotNull
+  private LoginResult getValidLogin(HttpSession session, User loggedInUser) {
+    LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
+    if (!loggedInUser.isValid()) {
+      logger.info("user " + loggedInUser + "\n\tis missing email ");
+      loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
+    } else {
+      setSessionUser(session, loggedInUser);
+    }
+    return loginResult;
+  }
+
+  private void logActivity(String userId, String remoteAddr, String userAgent, User loggedInUser, boolean success) {
     String resultStr = success ? " was successful" : " failed";
     logger.info(">Session Activity> User login for id " + userId + resultStr +
         ". IP: " + remoteAddr +
         ", UA: " + userAgent +
         (success ? ", user: " + loggedInUser.getID() : ""));
-
-    if (success) {
-      LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
-      if (!loggedInUser.isValid()) {
-        logger.info("user " + loggedInUser + "\n\tis missing email ");
-        loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
-      } else {
-        setSessionUser(session, loggedInUser);
-      }
-      return loginResult;
-    } else {
-      loggedInUser = db.getUserDAO().getUserByID(userId);
-      return getLoginResult(loggedInUser);
-    }
   }
 
-  private LoginResult getLoginResult(User loggedInUser) {
+  private LoginResult getInvalidLoginResult(User loggedInUser) {
     if (loggedInUser == null) {
       return new LoginResult(LoginResult.ResultType.Failed);
     } else {
@@ -139,16 +163,48 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       if (!isSessionActive) {
         securityManager.logoutUser(getThreadLocalRequest(), uid, true);
         logger.info(">Session Activity> Sending Session Not Restored. Return early");
-        return new LoginResult(LoginResult.ResultType.SessionNotRestored);
+        return new LoginResult(SessionNotRestored);
       }
       logger.info(">Session Activity> Session restoration successful. Checking login status.");
       return new LoginResult(LoginResult.ResultType.Success);
     } catch (DominoSessionException e) {
-      logger.info("got "+e,e);
+      logger.info("got " + e, e);
       return new LoginResult(LoginResult.ResultType.SessionExpired);
     }
   }
 
+  public LoginResult findByCookie(long l) {
+    logger.info("l " + l);
+
+    ByteBuffer buffer = ByteBuffer.allocate(8).putLong(l);
+    int x = buffer.getInt(0);
+    int y = buffer.getInt(1);
+
+    logger.info("x " + x);
+    logger.info("y " + y);
+
+    String sha256hex1 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + x);
+    String sha256hex2 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + y);
+
+    logger.info("first  : " + sha256hex1);
+    logger.info("second : " + sha256hex2);
+
+    int userForSV = db.getUserSessionDAO().getUserForSV(sha256hex1, sha256hex2);
+
+    if (userForSV != -1) {
+      User byID = db.getUserDAO().getByID(userForSV);
+
+      if (byID != null) {
+        return getValidLogin(createSession(), byID);
+      } else {
+        return getInvalidLoginResult(byID);
+      }
+    } else {
+      return new LoginResult(null, SessionNotRestored);
+    }
+  }
+
+  private Random random = new Random();
 
   /**
    * @param session
@@ -159,22 +215,78 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   private void setSessionUser(HttpSession session, User loggedInUser) {
     int id1 = loggedInUser.getID();
     session.setAttribute(USER_SESSION_ATT, id1);
-//      logger.info("acct detail {}", loggedInUser.getAcctDetail());
+
     HttpSession session1 = getCurrentSession();
     String sessionID = session.getId();
 
-    // logger.info("num user sessions before " + userSessionDAO.getNumRows());
+    int selector = random.nextInt();
+    int validator = random.nextInt();
+
+    String sha256hex1 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + selector);
+    String sha256hex2 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + validator);
+
+    logger.info("first  : " + sha256hex1);
+    logger.info("second : " + sha256hex2);
+
+//    long l = selector;
+//    l = (l << 32) | validator;
+//
+//    long ll = (((long)selector) << 32) | (validator & 0xffffffffL);
+//    int x = (int)(l >> 32);
+//    int y = (int)l;
+
+    long l = ByteBuffer.allocate(8).putInt(selector).putInt(validator).getLong(0);
+    logger.info("l " + l);
+
+    ByteBuffer buffer = ByteBuffer.allocate(8).putLong(l);
+    int x = buffer.getInt(0);
+    int y = buffer.getInt(1);
+
+    if (x != selector) logger.error("diff?");
     db.getUserSessionDAO().add(
-        new SlickUserSession(-1, id1, sessionID, "", "", new Timestamp(System.currentTimeMillis())));
+        new SlickUserSession(-1, id1, sessionID,
+            sha256hex1,
+            sha256hex2,
+            new Timestamp(System.currentTimeMillis())));
+
+    session1.setAttribute("r", "" + l);
+    addCookie(getThreadLocalResponse(), "r", "" + l);
 
     // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
 
+    logSetSession(session, session1, sessionID);
+
+    db.setStartupInfo(loggedInUser);
+  }
+
+  /**
+   *
+   */
+  public static void addCookie(HttpServletResponse response, String name, String value) {
+    Cookie cookie = new Cookie(name, value);
+    cookie.setPath("/");
+    cookie.setMaxAge(60 * 60 * 24 * 365);
+    cookie.setSecure(true);
+    response.addCookie(cookie);
+  }
+
+  /**
+   *
+   */
+  public static void removeCookie(HttpServletResponse response, String name) {
+    Cookie cookie = new Cookie(name, null);
+    cookie.setPath("/");
+    cookie.setMaxAge(0);
+    cookie.setSecure(true);
+    response.addCookie(cookie);
+  }
+
+  private void logSetSession(HttpSession session, HttpSession session1, String sessionID) {
     logger.info("setSessionUser : Adding user to " + sessionID +
         " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
         ", session.isNew=" + session1.isNew() +
         ", created=" + session1.getCreationTime() +
         ", " + getAttributesFromSession(session));
-    db.setStartupInfo(loggedInUser);
   }
 
   @NotNull
@@ -219,6 +331,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   public void logout(String login) {
     securityManager.logoutUser(getThreadLocalRequest(), login, true);
+    removeCookie(getThreadLocalResponse(), "r");
   }
 
   /**
@@ -321,6 +434,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @return
    * @see mitll.langtest.client.LangTest#showLogin()
    */
+/*
   @Override
   public long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWithResetKey(token);
@@ -328,6 +442,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     // logger.info("for token " + token + " got user id " + l);
     return l;
   }
+*/
 
   /**
    * @param userid

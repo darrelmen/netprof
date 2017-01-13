@@ -1136,7 +1136,7 @@ public class AudioFileHelper implements AlignDecode {
   //    String installPath = serverProps.getAudioBaseDir();
       HTKDictionary htkDictionary = readDictionary(project, installPath);
       webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
-      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
+      oldschoolScoring  = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
     }
     asrScoring = oldschoolScoring;
   }
