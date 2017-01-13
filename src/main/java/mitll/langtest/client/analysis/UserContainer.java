@@ -63,6 +63,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private static final int INITIAL_SCORE_WIDTH = 75;
   private static final String DIFF_COL_HEADER = "+/-";
   private static final int MIN_RECORDINGS = 5;
+  public static final String STUDENT = "Student";
 
   private final ShowTab learnTab;
   private final DivWidget rightSide;
@@ -81,13 +82,55 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
                 ShowTab learnTab,
                 String selectedUserKey
   ) {
-    super(controller, selectedUserKey, "Student");
+    super(controller, selectedUserKey, STUDENT);
     this.rightSide = rightSide;
     this.learnTab = learnTab;
     this.exerciseServiceAsync = service;
     this.overallBottom = overallBottom;
   }
 
+
+  @Override
+  protected void addColumnsToTable() {
+    super.addColumnsToTable();
+    Column<UserInfo, SafeHtml> num = getNum();
+    num.setSortable(true);
+    addColumn(num, new TextHeader("#"));
+    table.addColumnSortHandler(getNumSorter(num, getList()));
+    table.setColumnWidth(num, 50 + "px");
+
+    Column<UserInfo, SafeHtml> start = getStart();
+    start.setSortable(true);
+    addColumn(start, new TextHeader("Initial Score"));
+    table.setColumnWidth(start, INITIAL_SCORE_WIDTH + "px");
+
+    table.addColumnSortHandler(getStartSorter(start, getList()));
+
+    Column<UserInfo, SafeHtml> current = getCurrent();
+    current.setSortable(true);
+    addColumn(current, new TextHeader(CURRENT));
+    table.setColumnWidth(current, CURRENT_WIDTH + "px");
+
+    table.addColumnSortHandler(getCurrentSorter(current, getList()));
+
+    Column<UserInfo, SafeHtml> diff = getDiff();
+    diff.setSortable(true);
+    addColumn(diff, new TextHeader(DIFF_COL_HEADER));
+    table.addColumnSortHandler(getDiffSorter(diff, getList()));
+    table.setColumnWidth(diff, DIFF_WIDTH + "px");
+
+    table.getColumnSortList().push(dateCol);
+    table.setWidth("100%", true);
+
+    addTooltip();
+  }
+
+  /**
+   *
+   * @param englishCol
+   * @param dataList
+   * @return
+   */
   private ColumnSortEvent.ListHandler<UserInfo> getNumSorter(Column<UserInfo, SafeHtml> englishCol,
                                                              List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
@@ -182,40 +225,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return columnSortHandler;
   }
 
-  @Override
-  protected void addColumnsToTable() {
-    super.addColumnsToTable();
-    Column<UserInfo, SafeHtml> num = getNum();
-    num.setSortable(true);
-    addColumn(num, new TextHeader("#"));
-    table.addColumnSortHandler(getNumSorter(num, getList()));
-    table.setColumnWidth(num, 50 + "px");
-
-    Column<UserInfo, SafeHtml> start = getStart();
-    start.setSortable(true);
-    addColumn(start, new TextHeader("Initial Score"));
-    table.setColumnWidth(start, INITIAL_SCORE_WIDTH + "px");
-
-    table.addColumnSortHandler(getStartSorter(start, getList()));
-
-    Column<UserInfo, SafeHtml> current = getCurrent();
-    current.setSortable(true);
-    addColumn(current, new TextHeader(CURRENT));
-    table.setColumnWidth(current, CURRENT_WIDTH + "px");
-
-    table.addColumnSortHandler(getCurrentSorter(current, getList()));
-
-    Column<UserInfo, SafeHtml> diff = getDiff();
-    diff.setSortable(true);
-    addColumn(diff, new TextHeader(DIFF_COL_HEADER));
-    table.addColumnSortHandler(getDiffSorter(diff, getList()));
-    table.setColumnWidth(diff, DIFF_WIDTH + "px");
-
-    table.getColumnSortList().push(dateCol);
-    table.setWidth("100%", true);
-
-    addTooltip();
-  }
 
   private Column<UserInfo, SafeHtml> getStart() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
