@@ -42,7 +42,6 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.shared.ExerciseAnnotation;
 
-import java.util.*;
 import java.util.logging.Logger;
 
 

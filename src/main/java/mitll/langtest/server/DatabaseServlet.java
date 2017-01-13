@@ -36,7 +36,6 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.security.IUserSecurityManager;
-import mitll.langtest.server.database.security.UserSecurityManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

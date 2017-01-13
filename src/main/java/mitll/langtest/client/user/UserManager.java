@@ -36,12 +36,10 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.logging.Logger;
 
 /**

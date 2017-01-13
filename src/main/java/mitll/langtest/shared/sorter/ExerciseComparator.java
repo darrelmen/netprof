@@ -37,8 +37,6 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.regex.Pattern;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

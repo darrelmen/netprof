@@ -73,7 +73,6 @@ import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.security.IUserSecurityManager;
-import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.database.user.*;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
