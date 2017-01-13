@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.shared.user.User;
 
 import java.util.logging.Logger;
 

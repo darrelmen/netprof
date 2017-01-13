@@ -33,7 +33,6 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.image.ImageResponse;

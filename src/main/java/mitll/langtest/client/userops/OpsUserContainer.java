@@ -33,27 +33,11 @@
 package mitll.langtest.client.userops;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.dom.client.BrowserEvents;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.analysis.BasicUserContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.UserPassDialog;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-
-import java.util.Comparator;
-import java.util.List;
 
 public class OpsUserContainer extends BasicUserContainer<MiniUser> implements RequiresResize {
   private static final String FIRST = "First";
