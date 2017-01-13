@@ -151,7 +151,7 @@ public class ServerProperties {
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
   private static final String CHECK_AUDIO_FILE_EXISTS = "checkAudioFileExists";
-  private static final String CHECK_AUDIO_FILE_EXISTS_DEV = "checkAudioFileExistsDev";
+  private static final String DO_AUDIO_CHECKS_IN_PRODUCTION = "doAudioChecksInProduction";
   private static final String CHECK_AUDIO_TRANSCRIPT = "checkAudioTranscript";
 
   /**
@@ -268,8 +268,8 @@ public class ServerProperties {
     Properties props = System.getProperties();
     props.setProperty(CONFIG_FILE1, applicationConfPath);
 
-    logger.info("setting config.file to " + applicationConfPath);
-    logger.info("setting config.file to " + System.getProperties().get(CONFIG_FILE1));
+//    logger.info("setting config.file to " + applicationConfPath);
+//    logger.info("setting config.file to " + System.getProperties().get(CONFIG_FILE1));
 
     ConfigFactory.invalidateCaches();
   }
@@ -800,8 +800,8 @@ public class ServerProperties {
     return getDefaultFalse(CHECK_AUDIO_FILE_EXISTS);
   }
 
-  public boolean doAudioFileExistsCheckDev() {
-    return getDefaultFalse(CHECK_AUDIO_FILE_EXISTS_DEV);
+  public boolean doAudioChecksInProduction() {
+    return getDefaultTrue(DO_AUDIO_CHECKS_IN_PRODUCTION);
   }
 
   public void setRTL(boolean isRTL) {

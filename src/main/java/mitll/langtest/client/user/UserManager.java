@@ -61,14 +61,14 @@ import java.util.logging.Logger;
 public class UserManager {
   private final Logger logger = Logger.getLogger("UserManager");
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
 
   private static final int DAY_HOURS = 24;
   private static final long WEEK_HOURS = DAY_HOURS * 7;
 
-  private static final long EXPIRATION_HOURS = 52 * WEEK_HOURS * HOUR_IN_MILLIS;
+ // private static final long EXPIRATION_HOURS = 52 * WEEK_HOURS * HOUR_IN_MILLIS;
 
   private static final int NO_USER_SET = -1;
   private static final String NO_USER_SET_STRING = "" + NO_USER_SET;

@@ -34,7 +34,6 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
-import mitll.langtest.client.scoring.ScoringAudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.DecoderOptions;
@@ -47,6 +46,8 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.Collection;
 
@@ -168,8 +169,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @return
    */
   private PretestScore getPretestScore(int reqid, int resultID, String testAudioFile, String sentence, String transliteration,
-                                       ImageOptions imageOptions, int exerciseID
-      , boolean usePhoneToDisplay
+                                       ImageOptions imageOptions, int exerciseID,
+                                       boolean usePhoneToDisplay
   ) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();

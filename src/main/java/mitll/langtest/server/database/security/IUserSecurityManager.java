@@ -3,7 +3,7 @@ package mitll.langtest.server.database.security;
 import mitll.langtest.shared.user.User;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by go22670 on 12/5/16.
@@ -19,7 +19,15 @@ public interface IUserSecurityManager {
 
   int getUserIDFromRequest(HttpServletRequest request);
 
-  User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException;
+  /**
+   *
+   * @param request
+   * @param response
+   * @return
+   * @throws RestrictedOperationException
+   * @throws DominoSessionException
+   */
+  User getLoggedInUser(HttpServletRequest request, HttpServletResponse response) throws RestrictedOperationException, DominoSessionException;
 
   void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions);
 }

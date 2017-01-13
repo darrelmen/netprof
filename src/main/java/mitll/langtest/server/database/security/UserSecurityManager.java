@@ -32,17 +32,17 @@
 
 package mitll.langtest.server.database.security;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
+import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * UserSecurityManager: Provide top level security management.
@@ -60,19 +60,22 @@ public class UserSecurityManager implements IUserSecurityManager {
   //public static final String USER_REQUEST_ATT = "d-user";
   //private static final Marker TIMING = MarkerManager.getMarker("TIMING");
 
-  private Map<Integer, User> idToSession = new HashMap<>();
+//  private Map<Integer, User> idToSession = new HashMap<>();
 
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
+  MyRemoteServiceServlet userService;
 
   /**
-   * @see
    * @param userDAO
    * @param userSessionDAO
+   * @see
    */
-  public UserSecurityManager(IUserDAO userDAO, IUserSessionDAO userSessionDAO) {
+  public UserSecurityManager(IUserDAO userDAO, IUserSessionDAO userSessionDAO,
+                             MyRemoteServiceServlet userService) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
+    this.userService = userService;
 
     //startShiro();
   }
@@ -109,11 +112,9 @@ public class UserSecurityManager implements IUserSecurityManager {
   public void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions) {
     long startMS = System.currentTimeMillis();
     HttpSession session = getCurrentSession(request);
-
 /*
     SecurityUtils.getSubject().logout();
 */
-
     if (session != null) {
       log.info("Invalidating session {}", session.getId());
       if (userId != null) {
@@ -143,20 +144,22 @@ public class UserSecurityManager implements IUserSecurityManager {
 
   /**
    * @param request
+   * @param response
    * @return
    * @throws RestrictedOperationException
    * @throws DominoSessionException
-   * @see LangTestDatabaseImpl#getProject()
+   * @see MyRemoteServiceServlet#getUserFromSession()
    */
   @Override
-  public User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException {
+  public User getLoggedInUser(HttpServletRequest request, HttpServletResponse response)
+      throws RestrictedOperationException, DominoSessionException {
     return getLoggedInUser(request, "", false);
   }
 
   /**
    * Get the currently logged in user.
    *
-   * @see #getLoggedInUser(HttpServletRequest)
+   * @see IUserSecurityManager#getLoggedInUser(HttpServletRequest, HttpServletResponse)
    */
   private User getLoggedInUser(HttpServletRequest request,
                                String opName,
@@ -179,9 +182,11 @@ public class UserSecurityManager implements IUserSecurityManager {
   /**
    * Check to see if the user's session is active.
    */
+/*
   private boolean isSessionActive(User user) {
     return true;
   }
+*/
 
   /**
    * Get the current user out of the request. This is stored once the
@@ -207,15 +212,32 @@ public class UserSecurityManager implements IUserSecurityManager {
    * @param request The incoming request.
    * @return The user from the data store. Should not be null.
    * @throws DominoSessionException when session is empty or has no user token.
+   * @see #getLoggedInUser(HttpServletRequest, String, boolean)
    */
   private User lookupUser(HttpServletRequest request, boolean throwOnFail)
       throws DominoSessionException {
-    if (request == null) return null;
-    //long startMS = System.currentTimeMillis();
-
+    if (request == null) {
+      log.warn("lookupUser huh? no request???");
+      return null;
+    }
     User sessUser = lookupUserFromHttpSession(request);
     if (sessUser == null) {
       sessUser = lookupUserFromDBSession(request);
+      HttpSession session = request.getSession(false);
+      if (session == null) {
+//        log.debug("lookupUser note - no current session - ");
+        try {
+          session = request.getSession();
+  //        log.debug("lookupUser note - made session - ");
+        } catch (Exception e) {
+          log.error("got " +e,e);
+        }
+      } else {
+      //  log.debug("lookupUser found current session - ");
+      }
+      /*long cookie =*/
+      userService.setSessionUser(session, sessUser);
+     // if (cookie != -1) addCookie(response,"r",""+cookie);
     } else {
       log.info("User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
     }
@@ -231,6 +253,20 @@ public class UserSecurityManager implements IUserSecurityManager {
     }
     return sessUser;
   }
+
+  /**
+   *
+   */
+/*
+  public void addCookie(HttpServletResponse response, String name, String value) {
+    log.info("addCookie " + name);
+    Cookie cookie = new Cookie(name, value);
+    cookie.setPath("/");
+    cookie.setMaxAge(60 * 60 * 24 * 365);
+    cookie.setSecure(true);
+    response.addCookie(cookie);
+  }
+*/
 
   /**
    * TODO : what do we do if they come back after an hour and browser has a requested session id but
@@ -262,9 +298,10 @@ public class UserSecurityManager implements IUserSecurityManager {
                   "result={}",
               session.getId(),
               request.getRequestedSessionId(),
-              request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
+              request.getSession().getCreationTime(),
+              request.getSession().isNew(),
+              uidI);
 
-          //  sessUser = userDAO.getByID(uidI);
           sessUser = rememberUser(uidI);
         }
 //        else {
@@ -284,6 +321,7 @@ public class UserSecurityManager implements IUserSecurityManager {
 
   /**
    * Get the userid from the session.
+   *
    * @param request
    * @return
    */
@@ -291,8 +329,7 @@ public class UserSecurityManager implements IUserSecurityManager {
     HttpSession session = request != null ? getCurrentSession(request) : null;
     if (session != null) {
       return (Integer) session.getAttribute(USER_SESSION_ATT);
-    }
-    else {
+    } else {
       return -1;
     }
   }
@@ -303,17 +340,17 @@ public class UserSecurityManager implements IUserSecurityManager {
    * @param request
    * @return null if there is no user for the session
    * @throws DominoSessionException
+   * @see #lookupUser(HttpServletRequest, boolean)
    */
   private User lookupUserFromDBSession(HttpServletRequest request)
       throws DominoSessionException {
     String sid = request.getRequestedSessionId();
-//    log.info("Lookup user from DB session. SID: {}", sid);
     int userForSession = userSessionDAO.getUserForSession(sid);
+    log.info("lookupUserFromDBSession Lookup user from DB session. SID: {} - {}", sid, userForSession);
     if (userForSession == -1 && sid != null) {
       log.error("lookupUserFromDBSession no user for session " + sid + " in database?");
       return null;
-    }
-    else {
+    } else {
       return rememberUser(userForSession);
     }
   }
@@ -330,14 +367,14 @@ public class UserSecurityManager implements IUserSecurityManager {
       log.error("rememberUser huh? no user with id " + uidI);
       return null;
     } else {
-      rememberIDToUser(uidI, sessUser);
+      //rememberIDToUser(uidI, sessUser);
       return sessUser;
     }
   }
 
-  private synchronized void rememberIDToUser(int id, User user) {
-    idToSession.put(id, user);
-  }
+//  private synchronized void rememberIDToUser(int id, User user) {
+//    idToSession.put(id, user);
+//  }
 
   /**
    * @param id

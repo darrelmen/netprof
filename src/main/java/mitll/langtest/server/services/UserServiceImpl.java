@@ -44,20 +44,15 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickUserSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.nio.ByteBuffer;
-import java.sql.Timestamp;
 import java.util.*;
 
-import static mitll.langtest.server.database.security.IUserSecurityManager.USER_SESSION_ATT;
 import static mitll.langtest.shared.user.LoginResult.ResultType.SessionNotRestored;
 
 @SuppressWarnings("serial")
@@ -123,18 +118,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
-  @NotNull
-  private LoginResult getValidLogin(HttpSession session, User loggedInUser) {
-    LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
-    if (!loggedInUser.isValid()) {
-      logger.info("user " + loggedInUser + "\n\tis missing email ");
-      loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
-    } else {
-      setSessionUser(session, loggedInUser);
-    }
-    return loginResult;
-  }
-
   private void logActivity(String userId, String remoteAddr, String userAgent, User loggedInUser, boolean success) {
     String resultStr = success ? " was successful" : " failed";
     logger.info(">Session Activity> User login for id " + userId + resultStr +
@@ -143,18 +126,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         (success ? ", user: " + loggedInUser.getID() : ""));
   }
 
-  private LoginResult getInvalidLoginResult(User loggedInUser) {
-    if (loggedInUser == null) {
-      return new LoginResult(LoginResult.ResultType.Failed);
-    } else {
-      return new LoginResult(loggedInUser, LoginResult.ResultType.BadPassword);
-    }
-  }
-
   @Override
   public LoginResult restoreUserSession() {
     try {
-      User dbUser = securityManager.getLoggedInUser(getThreadLocalRequest());
+      User dbUser = getSessionUser();
       boolean isSessionActive = dbUser != null;
       String uid = (dbUser != null) ? dbUser.getUserID() : null;
       logger.info(">Session Activity> User session restoration for id " +
@@ -173,153 +148,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
-  public LoginResult findByCookie(long l) {
-    logger.info("l " + l);
 
-    ByteBuffer buffer = ByteBuffer.allocate(8).putLong(l);
-    int x = buffer.getInt(0);
-    int y = buffer.getInt(1);
-
-    logger.info("x " + x);
-    logger.info("y " + y);
-
-    String sha256hex1 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + x);
-    String sha256hex2 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + y);
-
-    logger.info("first  : " + sha256hex1);
-    logger.info("second : " + sha256hex2);
-
-    int userForSV = db.getUserSessionDAO().getUserForSV(sha256hex1, sha256hex2);
-
-    if (userForSV != -1) {
-      User byID = db.getUserDAO().getByID(userForSV);
-
-      if (byID != null) {
-        return getValidLogin(createSession(), byID);
-      } else {
-        return getInvalidLoginResult(byID);
-      }
-    } else {
-      return new LoginResult(null, SessionNotRestored);
-    }
-  }
-
-  private Random random = new Random();
-
-  /**
-   * @param session
-   * @param loggedInUser
-   * @see #loginUser
-   * @see #addUser
-   */
-  private void setSessionUser(HttpSession session, User loggedInUser) {
-    int id1 = loggedInUser.getID();
-    session.setAttribute(USER_SESSION_ATT, id1);
-
-    HttpSession session1 = getCurrentSession();
-    String sessionID = session.getId();
-
-    int selector = random.nextInt();
-    int validator = random.nextInt();
-
-    String sha256hex1 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + selector);
-    String sha256hex2 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + validator);
-
-    logger.info("first  : " + sha256hex1);
-    logger.info("second : " + sha256hex2);
-
-//    long l = selector;
-//    l = (l << 32) | validator;
-//
-//    long ll = (((long)selector) << 32) | (validator & 0xffffffffL);
-//    int x = (int)(l >> 32);
-//    int y = (int)l;
-
-    long l = ByteBuffer.allocate(8).putInt(selector).putInt(validator).getLong(0);
-    logger.info("l " + l);
-
-    ByteBuffer buffer = ByteBuffer.allocate(8).putLong(l);
-    int x = buffer.getInt(0);
-    int y = buffer.getInt(1);
-
-    if (x != selector) logger.error("diff?");
-    db.getUserSessionDAO().add(
-        new SlickUserSession(-1, id1, sessionID,
-            sha256hex1,
-            sha256hex2,
-            new Timestamp(System.currentTimeMillis())));
-
-    session1.setAttribute("r", "" + l);
-    addCookie(getThreadLocalResponse(), "r", "" + l);
-
-    // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
-
-    logSetSession(session, session1, sessionID);
-
-    db.setStartupInfo(loggedInUser);
-  }
-
-  /**
-   *
-   */
-  public static void addCookie(HttpServletResponse response, String name, String value) {
-    Cookie cookie = new Cookie(name, value);
-    cookie.setPath("/");
-    cookie.setMaxAge(60 * 60 * 24 * 365);
-    cookie.setSecure(true);
-    response.addCookie(cookie);
-  }
-
-  /**
-   *
-   */
-  public static void removeCookie(HttpServletResponse response, String name) {
-    Cookie cookie = new Cookie(name, null);
-    cookie.setPath("/");
-    cookie.setMaxAge(0);
-    cookie.setSecure(true);
-    response.addCookie(cookie);
-  }
-
-  private void logSetSession(HttpSession session, HttpSession session1, String sessionID) {
-    logger.info("setSessionUser : Adding user to " + sessionID +
-        " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
-        ", session.isNew=" + session1.isNew() +
-        ", created=" + session1.getCreationTime() +
-        ", " + getAttributesFromSession(session));
-  }
-
-  @NotNull
-  private String getAttributesFromSession(HttpSession session) {
-    StringBuilder atts = new StringBuilder("Atts: [ ");
-    Enumeration<String> attEnum = session.getAttributeNames();
-    while (attEnum.hasMoreElements()) {
-      atts.append(attEnum.nextElement() + ", ");
-    }
-    atts.append("]");
-    return atts.toString();
-  }
-
-
-  /**
-   * true = create a new session
-   *
-   * @return
-   * @see #changePasswordWithToken(String, String, String)
-   * @see #loginUser
-   */
-  private HttpSession createSession() {
-    return getThreadLocalRequest().getSession(true);
-  }
-
-  /**
-   * false = don't create the session
-   *
-   * @return
-   */
-  private HttpSession getCurrentSession() {
-    return getThreadLocalRequest().getSession(false);
-  }
 
   public User getUserByID(String id) {
     return db.getUserDAO().getUserByID(id);
@@ -430,55 +259,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * @param token
-   * @return
-   * @see mitll.langtest.client.LangTest#showLogin()
-   */
-/*
-  @Override
-  public long getUserIDForToken(String token) {
-    User user = db.getUserDAO().getUserWithResetKey(token);
-    long l = (user == null) ? -1 : user.getID();
-    // logger.info("for token " + token + " got user id " + l);
-    return l;
-  }
-*/
-
-  /**
-   * @param userid
-   * @param newHashedPassword
-   * @return
-   * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton
-   */
-/*  @Override
-  public boolean changePFor(String userid, String newHashedPassword) {
-    // hashedPassword = rot13(hashedPassword);
-    User userByID = db.getUserDAO().getUserByID(userid);
-    boolean b = db.getUserDAO().changePassword(userByID.getID(), newHashedPassword);
-
-    if (!b) {
-      logger.error("changePFor : couldn't update user password for user " + userByID);
-    }
-
-    return b;
-
-*//*    User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
-    if (userWhereResetKey != null) {
-      db.getUserDAO().clearKey(userWhereResetKey.getID(), true);
-
-      if (db.getUserDAO().changePassword(userWhereResetKey.getID(), passwordH)) {
-        return true;
-      } else {
-        logger.error("couldn't update user password for user " + userWhereResetKey);
-        return false;
-      }
-    } else {
-
-      return false;
-    }*//*
-  }*/
-
-  /**
    * @param userId
    * @param userKey
    * @param newPassword
@@ -522,27 +302,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public boolean changePasswordWithCurrent(int userid, String currentHashedPassword, String newHashedPassword) {
 //    currentHashedPassword = rot13(currentHashedPassword);
 //    newHashedPassword = rot13(newHashedPassword);
-
     User userWhereResetKey = db.getUserDAO().getByID(userid);
     if (userWhereResetKey == null) {
       return false;
-      // TODOx : fix this to call new domino call
     }
 
-/*    else if (userWhereResetKey.getPasswordHash().equals(currentHashedPassword)) {
-      if (db.getUserDAO().changePassword(userid, newHashedPassword)) {
-        getEmailHelper().sendChangedPassword(userWhereResetKey);
-        return true;
-      } else {
-        logger.error("couldn't update user password for user " + userid);
-        return false;
-      }
-    } else {
-      return false;
-    }*/
-
     return (db.getUserDAO().changePasswordWithCurrent(userid, currentHashedPassword, newHashedPassword, getBaseURL()));
-
   }
 
   @Override
@@ -569,7 +334,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @param projectid
-   * @see mitll.langtest.client.InitialUI#setProjectForUser(int)
+   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
    */
   public User setProject(int projectid) {
     try {
