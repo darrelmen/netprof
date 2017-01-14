@@ -43,6 +43,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
@@ -234,5 +235,17 @@ public class ProjectTest extends BaseTest {
     IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
     projectDAO.delete(6);
     //  projectDAO.delete(14);
+  }
+
+  @Test
+  public void testAnalysis() {
+
+    DatabaseImpl database = getDatabase();
+    database.setInstallPath("war", "");
+    database.populateProjects();
+
+    int projectid = 2;
+    List<UserInfo> userInfo = database.getAnalysis(projectid).getUserInfo(database.getUserDAO(), 5, projectid);
+    for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
   }
 }
