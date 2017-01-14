@@ -201,7 +201,7 @@ shadowJar {
     zip64 true
 }
 
-task makeDevInstallation(type: Jar) {
+task makeDevInstallation(type: Zip) {
     from('war/config/netProfDev') {
         into 'config'
     }
@@ -213,7 +213,7 @@ task makeDevInstallation(type: Jar) {
     }
 }
 
-task makeDLIInstallation(type: Jar) {
+task makeDLIInstallation(type: Zip) {
     from('war/config/netProfDLI') {
         into 'config'
     }
@@ -226,10 +226,12 @@ task makeDLIInstallation(type: Jar) {
     from('scripts/drop.sh') {
         into 'bin'
     }
+
     from('build/libs') {
         include '**/*.jar'
         into 'lib'
     }
+
     from('build/libs') {
         include '**/*.war'
         into 'dist'
