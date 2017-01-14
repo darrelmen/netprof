@@ -33,8 +33,12 @@
 package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -43,25 +47,27 @@ import java.util.List;
  * @since 9/13/14.
  */
 public class AVPScoreReport implements IsSerializable {
-  private List<AVPHistoryForList> avpHistoryForLists;
+  //private List<AVPHistoryForList> avpHistoryForLists;
   private List<ExerciseCorrectAndScore> sortedHistory;
 
   public AVPScoreReport() {}
 
   /**
-   *
-   * @param historyForLists
+   * @see mitll.langtest.server.database.result.UserSessionHistory#getUserHistoryForList(int, User, Collection, int, Collection, Map, IResultDAO)
+   * @paramx historyForLists
    * @param sortedHistory
    */
-  public AVPScoreReport(List<AVPHistoryForList> historyForLists,
+  public AVPScoreReport(//List<AVPHistoryForList> historyForLists,
                         List<ExerciseCorrectAndScore> sortedHistory) {
-    this.avpHistoryForLists = historyForLists;
+  //  this.avpHistoryForLists = historyForLists;
     this.sortedHistory=sortedHistory;
   }
 
+/*
   public List<AVPHistoryForList> getAvpHistoryForLists() {
     return avpHistoryForLists;
   }
+*/
 
   public List<ExerciseCorrectAndScore> getSortedHistory() {
     return sortedHistory;

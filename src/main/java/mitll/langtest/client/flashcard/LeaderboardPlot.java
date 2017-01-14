@@ -57,7 +57,7 @@ class LeaderboardPlot {
   private static final float GRAPH_MAX = 100f;
 
   /**
-   * @see StatsFlashcardFactory.StatsPracticePanel#makeChart(int, int, mitll.langtest.shared.flashcard.AVPHistoryForList)
+   * @see StatsFlashcardFactory.StatsPracticePanel#makeChart
    * @param historyForList
    * @param title
    * @param subtitle

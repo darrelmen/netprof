@@ -424,13 +424,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
         @Override
         public void onSuccess(AVPScoreReport scoreReport) {
-          List<AVPHistoryForList> result = scoreReport.getAvpHistoryForLists();
-          showFeedbackCharts(result, scoreReport.getSortedHistory());
+         // List<AVPHistoryForList> result = scoreReport.getAvpHistoryForLists();
+          showFeedbackCharts(/*result,*/ scoreReport.getSortedHistory());
         }
       });
     }
 
-    private void showFeedbackCharts(List<AVPHistoryForList> result, final List<ExerciseCorrectAndScore> sortedHistory) {
+    private void showFeedbackCharts(/*List<AVPHistoryForList> result,*/ final List<ExerciseCorrectAndScore> sortedHistory) {
       setMainContentVisible(false);
       contentPanel.removeStyleName("centerPractice");
       contentPanel.addStyleName("noWidthCenterPractice");
@@ -439,7 +439,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
-      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
+
+//      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
+
       belowContentDiv.add(container);
     }
 
