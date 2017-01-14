@@ -111,7 +111,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       if (db == null) {
         logger.error("findSharedDatabase no database?");
       } else {
-        logger.warn("findSharedDatabase getting user security manager");
+//        logger.warn("findSharedDatabase getting user security manager");
         securityManager = db.getUserSecurityManager();
 //        securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
       }
