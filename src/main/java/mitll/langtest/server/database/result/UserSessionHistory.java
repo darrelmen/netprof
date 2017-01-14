@@ -63,7 +63,7 @@ public class UserSessionHistory {
     logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
     SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
-    List<Session> sessionsForUserIn2 = sessionsAndScores.getSessions();
+    /*List<Session> sessionsForUserIn2 = sessionsAndScores.getSessions();
 
     //Map<Integer, User> userMap = userDAO.getUserMap();
   // User byID = userDAO.getByID(userid);
@@ -118,15 +118,16 @@ public class UserSessionHistory {
       scores.remove(9);
     }
 
-    sessionAVPHistoryForList2.setScores(scores);
+    sessionAVPHistoryForList2.setScores(scores);*/
 
-    List<AVPHistoryForList> historyForLists = new ArrayList<>();
+/*    List<AVPHistoryForList> historyForLists = new ArrayList<>();
     historyForLists.add(sessionAVPHistoryForList);
-    historyForLists.add(sessionAVPHistoryForList2);
+    historyForLists.add(sessionAVPHistoryForList2);*/
 
 //    logger.debug("returning " + historyForLists);
 //    logger.debug("correct/incorrect history " + sessionsAndScores.sortedResults);
-    return new AVPScoreReport(historyForLists, sessionsAndScores.getSortedResults());
+    return new AVPScoreReport(//historyForLists,
+        sessionsAndScores.getSortedResults());
   }
 
   private int compareTimestamps(Session o1, Session o2) {
