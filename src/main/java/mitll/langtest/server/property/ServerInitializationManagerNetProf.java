@@ -212,18 +212,8 @@ public class ServerInitializationManagerNetProf {
     return openPropertiesFileStream(fullCFN);
   }
 
-/*
-  public ServerProperties getServerProperties() {
-    return getServerProperties(findServerProperties(null), null);
-  }
-*/
-/*
-  public ServerProperties getServerProperties(String configFileName) {
-    return getServerProperties(openPropertiesFileStream(configFileName), null);
-  }*/
-
   private ServerProperties getServerProperties(InputStream propsIS, ServletContext ctx) {
-    log.info("getServerProperties : Initializing Properties");
+    if (DEBUG) log.info("getServerProperties : Initializing Properties");
     Properties props = readPropertiesStream(propsIS);
 
     if (props != null) {
@@ -263,7 +253,7 @@ public class ServerInitializationManagerNetProf {
       if (in != null) {
         Properties props = new Properties();
         props.load(in);
-        log.debug("readPropertiesStream " + props);
+        if (DEBUG) log.debug("readPropertiesStream " + props);
         return props;
       } else {
         log.warn("Could not find " + appName + " config file! Initialization failure! " + in);
@@ -285,7 +275,7 @@ public class ServerInitializationManagerNetProf {
         File file = new File(configFileName);
         configDir = file.getParentFile();
         in = FileUtils.openInputStream(file);
-        log.info("Attempted to get input stream for " + configFileName +
+        if (DEBUG) log.info("Attempted to get input stream for " + configFileName +
             " as file. Result: " + in);
       } catch (Exception ex) {
         log.warn("Exception when opening file " + configFileName, ex);
