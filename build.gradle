@@ -12,6 +12,7 @@ buildscript {
 //        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
         classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
     }
 }
 
@@ -30,6 +31,8 @@ apply from: 'gradle-common/common-java.gradle'
 apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+
 
 mongo {
     port mongoPort
@@ -41,8 +44,8 @@ test {
 }
 
 license {
-        skipExistingHeaders true
-        ignoreFailures true
+    skipExistingHeaders true
+    ignoreFailures true
 }
 
 repositories {
@@ -57,7 +60,7 @@ evaluationDependsOn(':imagewriter')
 
 dependencies {
     compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT') { changing = true }
-    compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT'){changing = true}
+    compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT') { changing = true }
 
     compile 'com.google.gwt:gwt-user:2.8.0'
     compile 'com.google.gwt:gwt-servlet:2.8.0'
@@ -85,7 +88,7 @@ dependencies {
     compile project(':npdata')
     compile project(':imagewriter')
 
-   // compile 'org.apache.poi:poi:3.15'
+    // compile 'org.apache.poi:poi:3.15'
     compile 'net.sf.uadetector:uadetector-core:0.9.22'
     compile 'net.sf.uadetector:uadetector-resources:2013.04'
 
@@ -98,6 +101,8 @@ dependencies {
     // compile group: 'com.google.gwt.google-apis', name: 'gwt-visualization', version: '1.0.2'
     compile name: 'gwt-visualization'
     compile name: 'mira'
+
+    // TODO : get these as artifactory dependencies
 
     compile name: 'pronz_2.11-1.0'
     compile name: 'hydec_2.11-1.0'
@@ -112,23 +117,13 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
     compile group: 'com.google.guava', name: 'guava', version: '20.0'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
-}
 
-// Add a test dependency only when the full composite project is checked out.
-/*
-if (project.rootProject != project) {
-    dependencies {
-        //testCompile project(':domino-shared').sourceSets.test.output
-        testCompile project(path: ':domino-shared', configuration: 'testArtifacts')
-    }
+    compile group: 'org.apache.shiro', name: 'shiro-core', version: '1.3.2'
+    compile group: 'org.apache.shiro', name: 'shiro-web', version: '1.3.2'
 }
-*/
 
 sourceSets {
     main {
-        java {
-            srcDirs = ['src']
-        }
         resources {
             srcDirs = ['src/main/resources']
         }
@@ -148,47 +143,36 @@ gwt {
     gwtVersion = '2.8.0'
     modules 'mitll.langtest.LangTest'
 
-    sourceSets {
-        main {
-            java {
-                srcDir 'src'
-            }
-        }
-    }
-
     logLevel = 'ERROR'
 
     minHeapSize = "512M";
-    maxHeapSize = "3G";
+    maxHeapSize = "4G";
 
     superDev {
         noPrecompile = true
     }
-
     // The following is only needed if you don't use the Google Plugin for Eclipse.
     eclipse {
         addGwtContainer = false // Default set to true
     }
-
-    //Specify the deployment Port
-    // jettyRunWar.httpPort = 8089
 }
 
 war {
-    archiveName "netprof.war"
-
+//    archiveName "netprof.war"
     // somehow the domino tests jars are getting in if I don't do this
     rootSpec.exclude("**/*tests.jar")
     rootSpec.exclude("**/log4j2-test.xml")
 
-    // from 'war/bin'
-    from ('war/config/netProf') {
-        into 'config/netProf'
-    }
-    from ('war/scoring/bin.linux64') {
+    // TODO : don't
+//    from('war/config/netProf') {
+//        into 'config/netProf'
+//    }
+
+    // needed???
+    from('war/scoring/bin.linux64') {
         into 'scoring/bin.linux64'
     }
-    from ('war/scoring/configurations') {
+    from('war/scoring/configurations') {
         into 'scoring/configurations'
     }
     from 'war/amas.css'
@@ -196,21 +180,67 @@ war {
     from 'war/LangTest.html'
 
     // TODO : DONT
-    from 'copy.sh'
+    //   from 'copy.sh'
 
     // TODO : DONT
-    from 'drop.sh'
+//    from 'drop.sh'
 
-    from 'src/mitll/langtest/public/NetProf_Manual.pdf'
+    from 'war/docs/NetProf_Manual.pdf'
+//    from 'src/mitll/langtest/public/NetProf_Manual.pdf'
 
     webXml = file('war/WEB-INF/web.xml')
 
-    from ('src') {
-        include '**/log*'
+    from('src') {
+        include '**/log4j2.xml'
         into 'WEB-INF/classes'
     }
-
 }
+
+// make standalone jar - for some reason it's huge
+shadowJar {
+    zip64 true
+}
+
+task makeDevInstallation(type: Zip) {
+    from('war/config/netProfDev') {
+        into 'config'
+    }
+    from('scripts/copy.sh') {
+        into 'bin'
+    }
+    from('scripts/drop.sh') {
+        into 'bin'
+    }
+}
+
+task makeDLIInstallation(type: Zip) {
+    from('war/config/netProfDLI') {
+        into 'config'
+    }
+    from('scripts/copy.sh') {
+        into 'bin'
+    }
+    from('docs/*') {
+        into 'docs'
+    }
+    from('scripts/drop.sh') {
+        into 'bin'
+    }
+
+    from('build/libs') {
+        include '**/*.jar'
+        into 'lib'
+    }
+
+    from('build/libs') {
+        include '**/*.war'
+        into 'dist'
+    }
+}
+
+shadowJar.dependsOn war
+makeDevInstallation.dependsOn shadowJar
+makeDLIInstallation.dependsOn shadowJar
 
 // ***************************** Publishing **************************************
 publishing {
