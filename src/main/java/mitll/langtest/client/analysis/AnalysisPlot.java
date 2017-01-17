@@ -289,8 +289,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
           @Override
           public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
-            for (CommonShell shell : exerciseListWrapper.getExercises()) {
-              getIdToEx().put(shell.getID(), shell);
+            if (exerciseListWrapper != null && exerciseListWrapper.getExercises() != null) {
+              for (CommonShell shell : exerciseListWrapper.getExercises()) {
+                getIdToEx().put(shell.getID(), shell);
+              }
             }
           }
         });
