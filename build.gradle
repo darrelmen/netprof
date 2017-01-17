@@ -190,7 +190,8 @@ shadowJar {
 }
 
 task makeDevInstallation(type: Jar) {
-    appendix = "installation"
+   // appendix = "installation"
+    baseName = "netprof-installation"
     from('war/config/netProfDev') {
         into 'config'
     }
@@ -220,7 +221,7 @@ task makeDevInstallation(type: Jar) {
 task makeDLIInstallation(type: Jar) {
     //  destinationDir = 'build/libs'
    // appendix = "installation"
-    archiveName = "netprof-installation"
+    baseName = "netprof-installation"
 
     from('war/config/netProfDLI') {
         into 'config'
