@@ -79,7 +79,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    */
   @Deprecated
   protected AudioFileHelper audioFileHelper;
-  private Random random = new Random();
+  //private Random random = new Random();
 
   @Override
   public void init() {
@@ -183,7 +183,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
         int i = (sessionUser == null) ? -1 : sessionUser.getID();
 
         if (i == -1) { // OK, try the cookie???
-          logger.error("\t\t\tgetUserIDFromSessionCheck huh? couldn't get user from session or database?");
+          logger.error("getUserIDFromSession huh? couldn't get user from session or database?");
         }
         return i;
       } catch (DominoSessionException e) {

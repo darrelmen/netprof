@@ -76,7 +76,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public Collection<AudioAttribute> getAudioAttributesByProject(int projid) {
     List<SlickAudio> all = dao.getAll(projid);
-    logger.info("Getting mini users");
+    //logger.info("Getting mini users");
    // Map<Integer, MiniUser> miniUsers = userDAO.getMiniUsers();
     logger.info("getAudioAttributesByProject " + projid +
         " " + all.size()
