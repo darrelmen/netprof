@@ -33,7 +33,7 @@ public class AnalysisAgainTest {
     String dbName = serverProps.getH2Database();
     database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), false, null);
     logger.debug("made " + database);
-    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(), serverProps.getMediaDir());
+    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan());
     database.getExercises(-1);
   }
 
