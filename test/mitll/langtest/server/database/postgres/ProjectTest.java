@@ -235,4 +235,16 @@ public class ProjectTest extends BaseTest {
     projectDAO.delete(6);
     //  projectDAO.delete(14);
   }
+
+  @Test
+  public void testMaleFemale() {
+    DatabaseImpl netProf = getDatabaseVeryLight("netProf", "config.properties", false);
+    netProf.populateProjects();
+    netProf.setInstallPath("", "", "");
+
+    Map<String, Float> maleFemaleProgress = netProf.getMaleFemaleProgress(2);
+
+    logger.info(maleFemaleProgress.toString());
+
+  }
 }
