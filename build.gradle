@@ -189,7 +189,7 @@ shadowJar {
     zip64 true
 }
 
-task makeDevInstallation(type: War) {
+task makeDevInstallation(type: Zip) {
    // appendix = "installation"
     baseName = "netprof-installation"
 
@@ -219,7 +219,7 @@ task makeDevInstallation(type: War) {
     }
 }
 
-task makeDLIInstallation(type: War) {
+task makeDLIInstallation(type: Zip) {
     //  destinationDir = 'build/libs'
    // appendix = "installation"
     baseName = "netprof-installation"
