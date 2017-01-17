@@ -189,7 +189,8 @@ shadowJar {
     zip64 true
 }
 
-task makeDevInstallation(type: Zip) {
+task makeDevInstallation(type: Jar) {
+    appendix = "installation"
     from('war/config/netProfDev') {
         into 'config'
     }
@@ -205,16 +206,21 @@ task makeDevInstallation(type: Zip) {
 
     from('build/libs') {
         include '**/*.jar'
+        exclude '**/*installation*.jar'
         into 'lib'
     }
 
     from('build/libs') {
         include '**/*.war'
+        exclude '**/*installation*.jar'
         into 'dist'
     }
 }
 
-task makeDLIInstallation(type: Zip) {
+task makeDLIInstallation(type: Jar) {
+    //  destinationDir = 'build/libs'
+    appendix = "installation"
+
     from('war/config/netProfDLI') {
         into 'config'
     }
@@ -230,11 +236,13 @@ task makeDLIInstallation(type: Zip) {
 
     from('build/libs') {
         include '**/*.jar'
+        exclude '**/*installation*.jar'
         into 'lib'
     }
 
     from('build/libs') {
         include '**/*.war'
+        exclude '**/*installation*.jar'
         into 'dist'
     }
 }
