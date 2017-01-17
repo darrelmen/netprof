@@ -44,7 +44,8 @@
           "displayName": "Other",
           "dataType": "affiliation"
         }
-      ]
+      ],
+      "help":"Please consult the user manual or send email to netprof-help@dliflc.edu."
     }
   ]
 }
