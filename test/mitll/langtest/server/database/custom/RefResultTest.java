@@ -2,6 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.Result;
@@ -196,7 +197,7 @@ public class RefResultTest {
     String media = parent + File.separator + "media";
     logger.debug("made " + war + " media " + media);
 
-    war.setInstallPath(".", parent + File.separator + war.getServerProps().getLessonPlan(), "media");
+    war.setInstallPath(".", parent + File.separator + war.getServerProps().getLessonPlan());
     Collection<CommonExercise> exercises = war.getExercises(-1);
     return war;
   }

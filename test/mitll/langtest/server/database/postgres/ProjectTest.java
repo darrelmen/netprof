@@ -43,6 +43,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
@@ -161,7 +162,7 @@ public class ProjectTest extends BaseTest {
     logger.info("counts " + userDAO + " " + userDAO.getUsers().size());
 
     spanish.populateProjects();
-    spanish.setInstallPath("", "", "");
+    spanish.setInstallPath("", "");
 
     Project project = spanish.getProject(2);
 
@@ -213,7 +214,7 @@ public class ProjectTest extends BaseTest {
 
     spanish.populateProjects();
 
-    spanish.setInstallPath("", "", "");
+    spanish.setInstallPath("", "");
 
     Project project = spanish.getProject(english);
 
@@ -240,11 +241,22 @@ public class ProjectTest extends BaseTest {
   public void testMaleFemale() {
     DatabaseImpl netProf = getDatabaseVeryLight("netProf", "config.properties", false);
     netProf.populateProjects();
-    netProf.setInstallPath("", "", "");
+    netProf.setInstallPath("", "");
 
     Map<String, Float> maleFemaleProgress = netProf.getMaleFemaleProgress(2);
 
     logger.info(maleFemaleProgress.toString());
 
+  }
+
+  public void testAnalysis() {
+
+    DatabaseImpl database = getDatabase();
+    database.setInstallPath("war", "");
+    database.populateProjects();
+
+    int projectid = 2;
+    List<UserInfo> userInfo = database.getAnalysis(projectid).getUserInfo(database.getUserDAO(), 5, projectid);
+    for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
   }
 }

@@ -240,7 +240,7 @@
     </listener>
 -->
 
-    <context-param>
+<!--    <context-param>
         <param-name>config</param-name>
         <param-value>netProf</param-value>
     </context-param>
@@ -248,5 +248,5 @@
     <context-param>
         <param-name>configFile</param-name>
         <param-value>config.properties</param-value>
-    </context-param>
+    </context-param>-->
 </web-app>
