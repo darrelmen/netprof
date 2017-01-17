@@ -163,11 +163,6 @@ war {
     rootSpec.exclude("**/*tests.jar")
     rootSpec.exclude("**/log4j2-test.xml")
 
-    // TODO : don't
-//    from('war/config/netProf') {
-//        into 'config/netProf'
-//    }
-
     // needed???
     from('war/scoring/bin.linux64') {
         into 'scoring/bin.linux64'
@@ -179,14 +174,7 @@ war {
     from 'war/LangTest.css'
     from 'war/LangTest.html'
 
-    // TODO : DONT
-    //   from 'copy.sh'
-
-    // TODO : DONT
-//    from 'drop.sh'
-
     from 'war/docs/NetProf_Manual.pdf'
-//    from 'src/mitll/langtest/public/NetProf_Manual.pdf'
 
     webXml = file('war/WEB-INF/web.xml')
 
@@ -208,8 +196,21 @@ task makeDevInstallation(type: Zip) {
     from('scripts/copy.sh') {
         into 'bin'
     }
+    from('docs/*') {
+        into 'docs'
+    }
     from('scripts/drop.sh') {
         into 'bin'
+    }
+
+    from('build/libs') {
+        include '**/*.jar'
+        into 'lib'
+    }
+
+    from('build/libs') {
+        include '**/*.war'
+        into 'dist'
     }
 }
 
@@ -243,6 +244,7 @@ makeDevInstallation.dependsOn shadowJar
 makeDLIInstallation.dependsOn shadowJar
 
 // ***************************** Publishing **************************************
+/*
 publishing {
     publications {
         ivyJava(IvyPublication) {
@@ -252,4 +254,4 @@ publishing {
             artifact(war)
         }
     }
-}
+}*/
