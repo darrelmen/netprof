@@ -1,0 +1,280 @@
+/*
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
+ */
+
+package mitll.langtest.server.services;
+
+import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.scoring.AudioPanel;
+import mitll.langtest.client.services.ScoringService;
+import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.server.database.result.Result;
+import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.util.Collection;
+
+@SuppressWarnings("serial")
+public class ScoringServiceImpl extends MyRemoteServiceServlet implements ScoringService {
+  private static final Logger logger = LogManager.getLogger(ScoringServiceImpl.class);
+
+  private static final boolean DEBUG = true;
+
+  /**
+   * NOTE NOTE NOTE : doesn't make sure we have mp3 or ogg file equivalents...
+   * maybe it should?
+   *
+   * @param resultID
+   * @return
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   */
+  @Override
+  public PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions) {
+    PretestScore asrScoreForAudio = null;
+    try {
+      Result result = db.getResultDAO().getResultByID(resultID);
+
+      int exerciseID = result.getExerciseID();
+
+      boolean isAMAS = serverProps.isAMAS();
+      CommonShell exercise;
+      String sentence = "";
+      if (isAMAS) {
+        exercise = db.getAMASExercise(exerciseID);
+        sentence = exercise.getForeignLanguage();
+      } else {
+        CommonExercise exercise1 = db.getExercise(getProjectID(), exerciseID);
+
+        exercise = exercise1;
+
+        if (exercise1 != null) {
+          Collection<CommonExercise> directlyRelated = exercise1.getDirectlyRelated();
+          sentence =
+              result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
+                  directlyRelated.iterator().next().getForeignLanguage() :
+                  exercise.getForeignLanguage();
+        }
+      }
+
+      // maintain backward compatibility - so we can show old recordings of ref audio for the context sentence
+//      String sentence = isAMAS ? exercise.getForeignLanguage() :
+//          (result.getAudioType().isContext()) ?
+//              db.getExercise(exerciseID).getDirectlyRelated().iterator().next().getForeignLanguage() :
+//              exercise.getForeignLanguage();
+
+      if (exercise == null) {
+        logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
+        return new PretestScore();
+      } else {
+        String audioFilePath = result.getAnswer();
+
+        // NOTE : actively avoid doing this -
+        //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
+        //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
+        asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(
+            1,
+            audioFilePath,
+            sentence,
+            exercise.getTransliteration(),
+            imageOptions,//new ImageOptions(width, height, true),
+//            true,  // make transcript images with colored segments
+            //          false, // false = do alignment
+            //        serverProps.useScoreCache(),
+            "" + exerciseID,
+            result,
+            // serverProps.usePhoneToDisplay(), false
+
+
+            new DecoderOptions()
+                .setDoFlashcard(false)
+                .setCanUseCache(serverProps.useScoreCache())
+                .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()));
+      }
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+    }
+
+    return asrScoreForAudio;
+  }
+
+  /**
+   * So first we check and see if we've already done alignment for this audio (if reference audio), and if so, we grab the Result
+   * object out of the result table and use it and it's json to generate the score info and transcript inmages.
+   *
+   * @param reqid
+   * @param resultID
+   * @param testAudioFile
+   * @param sentence
+   * @param exerciseID
+   * @return
+   * @see ASRScoringAudioPanel#scoreAudio
+   */
+  public PretestScore getASRScoreForAudio(int reqid,
+                                          long resultID,
+                                          String testAudioFile,
+                                          String sentence,
+                                          String transliteration,
+
+                                          ImageOptions imageOptions,
+                                          int exerciseID) {
+    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, transliteration, imageOptions, exerciseID, false);
+  }
+
+  /**
+   * Be careful - we lookup audio file by .wav extension
+   *
+   * @param reqid
+   * @param resultID
+   * @param testAudioFile
+   * @param sentence
+   * @param exerciseID
+   * @param usePhoneToDisplay
+   * @return
+   */
+  private PretestScore getPretestScore(int reqid, int resultID, String testAudioFile, String sentence, String transliteration,
+                                       ImageOptions imageOptions, int exerciseID,
+                                       boolean usePhoneToDisplay
+  ) {
+    if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
+    long then = System.currentTimeMillis();
+
+    String[] split = testAudioFile.split(File.separator);
+    String answer = split[split.length - 1];
+    String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
+    Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
+    if (cachedResult != null) {
+      if (DEBUG)
+        logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer +
+            " found previous " + cachedResult.getUniqueID());
+    } else {
+      logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+    }
+
+    boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
+
+    PretestScore asrScoreForAudio =
+        getAudioFileHelper().getASRScoreForAudio(
+            reqid,
+            testAudioFile,
+            sentence,
+            transliteration,
+            imageOptions,
+            "" + exerciseID,
+            cachedResult,
+            new DecoderOptions()
+                .setDoFlashcard(false)
+                .setCanUseCache(serverProps.useScoreCache())
+                .setUsePhoneToDisplay(usePhoneToDisplay1)
+        );
+
+    long timeToRunHydec = System.currentTimeMillis() - then;
+
+    logger.debug("getPretestScore : scoring" +
+        "\n\tfile     " + testAudioFile +
+        "\n\texid     " + exerciseID +
+        "\n\tsentence " + sentence.length() + " characters long" +
+        "\n\tscore    " + asrScoreForAudio.getHydecScore() +
+        "\n\ttook     " + timeToRunHydec + " millis " +
+        "\n\tusePhoneToDisplay " + usePhoneToDisplay1);
+
+    if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
+      db.rememberScore(resultID, asrScoreForAudio, true);
+    }
+    return asrScoreForAudio;
+  }
+
+
+  /**
+   * @param reqid
+   * @param resultID
+   * @param testAudioFile
+   * @param sentence
+   * @param exerciseID
+   * @return
+   * @see ASRScoringAudioPanel#scoreAudio
+   */
+  @Override
+  public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
+                                                  String transliteration,
+                                                  ImageOptions imageOptions, int exerciseID) {
+    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, transliteration, imageOptions, exerciseID, true);
+  }
+
+  @Override
+  public void addRoundTrip(int resultID, int roundTrip) {
+    db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
+  }
+
+
+  /**
+   * A low overhead way of doing alignment.
+   * <p>
+   * Useful for conversational dialogs - Jennifer Melot's project.
+   *
+   * @param base64EncodedString
+   * @param textToAlign
+   * @param identifier
+   * @param reqid
+   * @param device
+   * @return
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
+   */
+  @Override
+  public AudioAnswer getAlignment(String base64EncodedString,
+                                  String textToAlign,
+                                  String transliteration,
+                                  String identifier,
+                                  int reqid, String device) {
+    AudioAnswer audioAnswer = getAudioFileHelper().getAlignment(base64EncodedString, textToAlign, transliteration, identifier, reqid,
+        serverProps.usePhoneToDisplay());
+
+    if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
+      logger.warn("huh? got zero length recording " + identifier);
+      logEvent("audioRecording", "writeAudioFile", identifier, "Writing audio - got zero duration!", -1, "unknown", device);
+    }
+    return audioAnswer;
+  }
+
+  public void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device) {
+    try {
+      db.logEvent(id, widgetType, exid, context, userid, device);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+}

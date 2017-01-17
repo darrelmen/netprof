@@ -53,7 +53,7 @@ public class ReportTest {
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
-    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
+    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan());
     Collection<CommonExercise> exercises = database.getExercises();
   }
 
