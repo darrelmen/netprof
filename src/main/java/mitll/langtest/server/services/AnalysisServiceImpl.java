@@ -47,6 +47,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("serial")
@@ -94,12 +95,14 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   @Override
   public UserPerformance getPerformanceForUser(int id, int minRecordings) {
     logger.info("getPerformanceForUser " +id);
+    int projectID = getProjectID();
+    if (projectID == -1) return new UserPerformance();
     SlickAnalysis slickAnalysis =
         new SlickAnalysis(db,
             db.getPhoneDAO(),
-            db.getExerciseIDToRefAudio(getProjectID()),
+            db.getExerciseIDToRefAudio(projectID),
             (SlickResultDAO) db.getResultDAO());
-    return slickAnalysis.getPerformanceForUser(id, getProjectID(), minRecordings);
+    return slickAnalysis.getPerformanceForUser(id, projectID, minRecordings);
   }
 
   /**
@@ -111,6 +114,8 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   @Override
   public List<WordScore> getWordScores(int id, int minRecordings) {
     int projectID = getProjectID();
+    if (projectID == -1) return new ArrayList<>();
+
     IAnalysis analysis = db.getAnalysis(projectID);
     logger.info("for user " +id + " project is "+ projectID + " and " + analysis);
     List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, projectID, minRecordings);
@@ -121,6 +126,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   @Override
   public PhoneReport getPhoneScores(int id, int minRecordings) {
     int projectID = getProjectID();
+    if (projectID == -1) return new PhoneReport();
     return db.getAnalysis(projectID).getPhonesForUser(id, minRecordings, projectID);
   }
 }

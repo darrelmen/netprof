@@ -930,6 +930,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     } catch (UnknownHostException e) {
       logger.error("Got " + e, e);
     }
+
     sendEmail("slow exercise on " + language, "Getting ex " + id + " on " + language + " took " + diff +
         " millis, threads " + threadInfo + " on " + hostName);
   }

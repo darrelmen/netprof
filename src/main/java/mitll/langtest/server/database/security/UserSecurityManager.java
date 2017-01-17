@@ -235,7 +235,12 @@ public class UserSecurityManager implements IUserSecurityManager {
       //  log.debug("lookupUser found current session - ");
       }
       /*long cookie =*/
-      userService.setSessionUser(session, sessUser);
+      if (sessUser != null) {
+        userService.setSessionUser(session, sessUser);
+      }
+      else {
+        log.debug("no user for session - " + session + " logged out?");
+      }
      // if (cookie != -1) addCookie(response,"r",""+cookie);
     } else {
       log.info("User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
