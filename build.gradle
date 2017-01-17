@@ -219,7 +219,8 @@ task makeDevInstallation(type: Jar) {
 
 task makeDLIInstallation(type: Jar) {
     //  destinationDir = 'build/libs'
-    appendix = "installation"
+   // appendix = "installation"
+    archiveName = "netprof-installation"
 
     from('war/config/netProfDLI') {
         into 'config'
