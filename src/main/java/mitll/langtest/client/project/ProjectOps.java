@@ -39,15 +39,20 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectInfo;
+import mitll.npdata.dao.SlickProject;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProjectOps implements RequiresResize {
   public static final String USERS = "Users";
@@ -81,15 +86,15 @@ public class ProjectOps implements RequiresResize {
     DivWidget content = tabAndContent.getContent();
     content.clear();
 
-
-    DivWidget left  = addDiv(content);
+    DivWidget left = addDiv(content);
 
     left.getElement().setId("productionProjects");
     left.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
 
     DivWidget right = addDiv(content);
-
     DivWidget detail = addDiv(content);
+    detail.getElement().getStyle().setClear(Style.Clear.LEFT);
+    detail.addStyleName("leftFiveMargin");
 
     //  NavLink first = getKinds(left, right, detail);
     right.getElement().setId("projectContent");
@@ -225,7 +230,7 @@ public class ProjectOps implements RequiresResize {
    * @param kind
    * @param content
    * @param userForm
-   * @see
+   * @see #showInitialState
    */
   private void showProjects(//final User.Kind kind,
                             final DivWidget content, DivWidget userForm) {
@@ -238,7 +243,23 @@ public class ProjectOps implements RequiresResize {
 
       @Override
       public void onSuccess(List<ProjectInfo> projectInfos) {
-        requiresResize = showProjectList(content, projectInfos, userForm);
+        //requiresResize =
+
+        HorizontalPanel hp = new HorizontalPanel();
+        DivWidget contentP = new DivWidget();
+        hp.add(contentP);
+        DivWidget content1 = new DivWidget();
+        hp.add(content1);
+        content1.addStyleName("leftFiveMargin");
+        DivWidget content2 = new DivWidget();
+        hp.add(content2);
+        content2.addStyleName("leftFiveMargin");
+
+        showProjectList(contentP, projectInfos, userForm, "Projects", "Production", ProjectStatus.PRODUCTION);
+        showProjectList(content1, projectInfos, userForm, "Projects", "Development", ProjectStatus.DEVELOPMENT);
+        showProjectList(content2, projectInfos, userForm, "Projects", "Retired", ProjectStatus.RETIRED);
+
+        content.add(hp);
 
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           @Override
@@ -252,36 +273,49 @@ public class ProjectOps implements RequiresResize {
 
 
   private RequiresResize requiresResize = null;
-  private ProjectContainer<ProjectInfo> projectContainer;
+//  private ProjectContainer<ProjectInfo> projectContainer;
 
   /**
-   * Show users of this kind.
+   * Show projects of this kind.
    *
-   * @param kind
    * @param content
-   * @param kindCollectionMap
    * @param userForm
+   * @param rowHeader
+   * @param listTitle
    * @return
+   * @paramx kind
+   * @paramx kindCollectionMap
+   * @see #showProjects(DivWidget, DivWidget)
    */
-  private RequiresResize showProjectList(
+  private ProjectContainer<ProjectInfo> showProjectList(
       DivWidget content,
       List<ProjectInfo> projectInfos,
-      DivWidget userForm) {
-    content.clear();
+      DivWidget userForm,
+      String rowHeader,
+      String listTitle,
+      ProjectStatus status) {
+    List<ProjectInfo> filtered = projectInfos.stream()
+        .filter(p -> p.getStatus() == status).collect(Collectors.toList());
 
-    projectContainer = getProjectContainer(userForm);
-    DivWidget table = projectContainer.getTable(projectInfos, "", "");
-
-    Heading production = new Heading(3, "Production");
-    content.add(production);
-    content.add(table);
+    ProjectContainer<ProjectInfo> projectContainer = getProjectContainer(content, filtered, userForm, rowHeader, listTitle);
+  //  this.projectContainer = projectContainer;
     return projectContainer;
   }
 
-  private ProjectContainer<ProjectInfo> getProjectContainer(DivWidget rightSide) {
+  @NotNull
+  private ProjectContainer<ProjectInfo> getProjectContainer(DivWidget content, List<ProjectInfo> projectInfos, DivWidget userForm, String rowHeader, String listTitle) {
+    ProjectContainer<ProjectInfo> projectContainer = getProjectContainer(rowHeader, userForm);
+    Heading production = new Heading(3, listTitle);
+    content.clear();
+    content.add(production);
+    content.add(projectContainer.getTable(projectInfos, "", ""));
+    return projectContainer;
+  }
+
+  private ProjectContainer<ProjectInfo> getProjectContainer(String rowHeader, DivWidget rightSide) {
     return new ProjectContainer<>(
         controller,
-        "Projects",
+        rowHeader,
         rightSide,
         this
     );

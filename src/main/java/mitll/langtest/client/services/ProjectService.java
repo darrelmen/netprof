@@ -42,4 +42,5 @@ import java.util.List;
 public interface ProjectService extends RemoteService {
   List<ProjectInfo> getAll();
   boolean exists(int projectid);
+  void update(ProjectInfo info);
 }

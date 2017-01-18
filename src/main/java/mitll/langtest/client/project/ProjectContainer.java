@@ -171,9 +171,12 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
   }*/
 
   @Override
-  protected void gotClickOnItem(final T user) {
-    super.gotClickOnItem(user);
+  protected void gotClickOnItem(final T project) {
+    super.gotClickOnItem(project);
     rightSide.clear();
+
+    ProjectEditForm projectEditForm = new ProjectEditForm(controller.getProps(), controller);
+    rightSide.add(projectEditForm.getForm(project));
 
 /*    if (!user.isAdmin()) {
       UserServiceAsync userService = controller.getUserService();
