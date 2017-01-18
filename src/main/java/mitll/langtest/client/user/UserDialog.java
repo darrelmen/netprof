@@ -33,17 +33,21 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.User;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created with IntelliJ IDEA.
@@ -54,12 +58,13 @@ import mitll.langtest.shared.user.User;
  * Time: 4:26 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class UserDialog extends BasicDialog {
+public abstract class UserDialog extends BasicDialog {
   static final String VALID_EMAIL = "Please enter a valid email address.";
   static final int USER_ID_MAX_LENGTH = 35;
 
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
+  protected static final String SIGN_UP_WIDTH = "266px";
 
   final PropertyHandler props;
   private KeyPressHelper enterKeyButtonHelper;
@@ -70,7 +75,7 @@ abstract class UserDialog extends BasicDialog {
    * @see SignUpForm#SignUpForm
    * @param props
    */
-  UserDialog(PropertyHandler props) { this.props = props;  }
+  protected UserDialog(PropertyHandler props) { this.props = props;  }
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeEnglishRow
@@ -177,5 +182,31 @@ abstract class UserDialog extends BasicDialog {
     hp.add(okButton);
     vp.add(hp);
     commentPopup.add(vp);
+  }
+
+  protected Panel getTwoPartForm(Heading heading, Fieldset fieldset) {
+    Form form = getUserForm();
+    form.add(heading);
+    form.add(fieldset);
+    return form;
+  }
+
+  @NotNull
+  protected Button getFormButton(String buttonID, String signUpTitle, EventRegistration eventRegistration) {
+    Button signUp = new Button(signUpTitle);
+    signUp.getElement().setId(buttonID);
+    eventRegistration.register(signUp);
+
+    signUp.addStyleName("floatRight");
+    signUp.addStyleName("rightFiveMargin");
+    signUp.addStyleName("leftFiveMargin");
+    signUp.setType(ButtonType.SUCCESS);
+    return signUp;
+  }
+
+  protected void styleBox(UIObject userBox) {
+    userBox.addStyleName("topMargin");
+    userBox.addStyleName("rightFiveMargin");
+    userBox.setWidth(SIGN_UP_WIDTH);
   }
 }

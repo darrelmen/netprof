@@ -48,6 +48,7 @@ import java.util.*;
 
 public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
+  public static final int WARN_THRESH = 100;
   private SlickResultDAO resultDAO;
   private static final boolean DEBUG = true;
 
@@ -67,7 +68,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   /**
-   *
    * @param userid
    * @param projid
    * @param minRecordings
@@ -80,13 +80,20 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   private Map<Integer, UserInfo> getBestForUser(int id, int projid, int minRecordings) {
+    long then = System.currentTimeMillis();
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForUser(id, projid);
+    long now = System.currentTimeMillis();
+
     logger.info("getBestForUser best for " + id + " in " + projid + " were " + perfForUser.size());
+    long diff = now - then;
+    if (diff > WARN_THRESH) {
+      logger.warn("getBestForUser best for " + id + " in " + projid + " took " + diff);
+    }
+
     return getBest(perfForUser, minRecordings);
   }
 
   /**
-   *
    * @param id
    * @param projid
    * @param minRecordings
@@ -95,16 +102,23 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    */
   @Override
   public List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings) {
+    long then = System.currentTimeMillis();
+
     Map<Integer, UserInfo> best = getBestForUser((int) id, projid, minRecordings);
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    if (diff > WARN_THRESH) {
+      logger.warn("getWordScoresForUser for " + id + " in " + projid + " took " + diff);
+    }
     return getWordScores(best);
   }
 
   /**
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores(int, int)
    * @param id
    * @param minRecordings
    * @param projid
    * @return
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores(int, int)
    */
   @Override
   public PhoneReport getPhonesForUser(long id, int minRecordings, int projid) {
@@ -114,6 +128,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   /**
    * TODO : how will this work for users on multiple projects?
+   *
    * @param userDAO
    * @param minRecordings
    * @param projid

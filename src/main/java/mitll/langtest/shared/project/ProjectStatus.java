@@ -30,10 +30,13 @@
  *
  */
 
-package mitll.langtest.server.database.project;
+package mitll.langtest.shared.project;
 
-public enum ProjectStatus {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public enum ProjectStatus implements IsSerializable {
   PRODUCTION,
   DEVELOPMENT,
+  EVALUATION,
   RETIRED
 }
