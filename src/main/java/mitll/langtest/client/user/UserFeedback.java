@@ -43,4 +43,5 @@ package mitll.langtest.client.user;
  */
 public interface UserFeedback {
   void showErrorMessage(String title, String msg);
+  void onFailure(Throwable caught, long then);
 }

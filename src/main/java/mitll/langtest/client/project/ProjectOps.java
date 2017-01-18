@@ -42,6 +42,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import mitll.langtest.client.LifecycleSupport;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -71,16 +72,22 @@ public class ProjectOps implements RequiresResize {
   private DivWidget currentUserForm;
 
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
+  LifecycleSupport lifecycleSupport;
 
   /**
    * @param controller
    * @paramx userManager
-   * @seex Navigation#addUserMaintenance
+   * @see Navigation#addProjectMaintenance()
    */
-  public ProjectOps(ExerciseController controller/*, UserManager userManager*/) {
+  public ProjectOps(ExerciseController controller, LifecycleSupport lifecycleSupport) {
     // setKindToIcon();
     this.controller = controller;
+    this.lifecycleSupport = lifecycleSupport;
     // this.userManager = userManager;
+  }
+
+  public void refreshStartupInfo() {
+    lifecycleSupport.refreshStartupInfo();
   }
 
   /**
@@ -297,9 +304,7 @@ public class ProjectOps implements RequiresResize {
     return content2;
   }
 
-
-  private RequiresResize requiresResize = null;
-//  private ProjectContainer<ProjectInfo> projectContainer;
+  @Deprecated private RequiresResize requiresResize = null;
 
   /**
    * Show projects of this kind.
@@ -330,14 +335,13 @@ public class ProjectOps implements RequiresResize {
     return projectContainer;
   }
 
-  List<ProjectContainer<?>> projectContainers = new ArrayList<>();
+  private List<ProjectContainer<?>> projectContainers = new ArrayList<>();
 
   public void clearOthers(ProjectContainer<?> current) {
-    logger.info("clearOthers of " + current);
+    //logger.info("clearOthers of " + current);
     for (ProjectContainer<?> container : projectContainers) {
       if (current != container) {
-        logger.info("\tclear " + container);
-
+        //  logger.info("\tclear " + container);
         container.clearSelection();
       }
     }
@@ -352,9 +356,7 @@ public class ProjectOps implements RequiresResize {
                                                             boolean selectFirst) {
     ProjectContainer<ProjectInfo> projectContainer =
         getProjectContainer(rowHeader, userForm, selectFirst);
-    // Heading production = new Heading(3, listTitle);
     content.clear();
-    // content.add(production);
     content.add(projectContainer.getTable(projectInfos, listTitle, ""));
     return projectContainer;
   }

@@ -45,12 +45,14 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -250,8 +252,27 @@ public class ProjectManagement implements IProjectManagement {
                                DatabaseImpl db) {
     Project project = new Project(slickProject, pathHelper, serverProps, db, logAndNotify);
     idToProject.put(project.getProject().id(), project);
-    logger.info("populateProjects : " + project + " : " + project.getAudioFileHelper());
+//    logger.info("populateProjects : " + project + " : " + project.getAudioFileHelper());
     setExerciseDAO(project);
+  }
+
+  /**
+   * After changing project status - e.g. to retired - we need to update the SlickProject on the project.
+   * @see mitll.langtest.server.services.ProjectServiceImpl#update
+   */
+  @Override
+  public void refreshProjects() {
+    Collection<SlickProject> all = projectDAO.getAll();
+    Map<Integer, SlickProject> idToSlickProject = new HashMap<>();
+    for (SlickProject project : all) idToSlickProject.put(project.id(), project);
+
+    for (Project project : idToProject.values()) {
+      int id = project.getProject().id();
+      SlickProject update = idToSlickProject.get(id);
+    //  logger.info("Was " + project.getProject());
+      project.setProject(update);
+    //  logger.info("Now " + project.getProject());
+    }
   }
 
   /**
@@ -320,7 +341,11 @@ public class ProjectManagement implements IProjectManagement {
     for (Project project : getProjects()) project.stopDecode();
   }
 
-
+  /**
+   * JUST FOR IMPORT
+   *
+   * @param jsonExerciseDAO
+   */
   @Override
   public void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO) {
     idToProject.put(IMPORT_PROJECT_ID, new Project(jsonExerciseDAO));
@@ -476,34 +501,44 @@ public class ProjectManagement implements IProjectManagement {
 
       Project project = getProject(projid);
 
-      SlickProject project1 = project.getProject();
-      List<String> typeOrder = project.getTypeOrder();
-      //logger.info("project " + projid + " type order " + typeOrder);
-
-      boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
-      boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
-      if (!sound) logger.warn("setStartupInfo : sound missing???");
-      else {
-        typeOrder.add(SlickUserExerciseDAO.SOUND);
-      }
-
-      if (!diff) {
+      if (project.getStatus() == ProjectStatus.RETIRED && !userWhere.isAdmin()) {
+        logger.info("project is retired - so kicking the user back to project choice screen.");
       } else {
-        //typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
-      }
+        SlickProject project1 = project.getProject();
+        List<String> typeOrder = getTypeOrder(project);
 
-      ProjectStartupInfo startupInfo = new ProjectStartupInfo(
-          serverProps.getProperties(),
-          typeOrder,
-          project.getSectionHelper().getSectionNodes(typeOrder),
-          project1.id(),
-          project1.language(),
-          hasModel(project1));
-      logger.info("setStartupInfo : For " + userWhere +
-          "\n\t " + typeOrder +
-          "\n\tSet startup info " + startupInfo);
-      userWhere.setStartupInfo(startupInfo);
+        ProjectStartupInfo startupInfo = new ProjectStartupInfo(
+            serverProps.getProperties(),
+            typeOrder,
+            project.getSectionHelper().getSectionNodes(typeOrder),
+            project1.id(),
+            project1.language(),
+            hasModel(project1));
+        logger.info("setStartupInfo : For " + userWhere +
+            "\n\t " + typeOrder +
+            "\n\tSet startup info " + startupInfo);
+        userWhere.setStartupInfo(startupInfo);
+      }
     }
+  }
+
+  @NotNull
+  private List<String> getTypeOrder(Project project) {
+    List<String> typeOrder = project.getTypeOrder();
+    //logger.info("project " + projid + " type order " + typeOrder);
+
+    boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
+    boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
+    if (!sound) logger.warn("setStartupInfo : sound missing???");
+    else {
+      typeOrder.add(SlickUserExerciseDAO.SOUND);
+    }
+
+    if (!diff) {
+    } else {
+      //typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
+    }
+    return typeOrder;
   }
 
   private boolean hasModel(SlickProject project1) {

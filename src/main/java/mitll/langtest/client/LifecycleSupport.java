@@ -50,7 +50,7 @@ public interface LifecycleSupport extends EventRegistration {
 
   void clearStartupInfo();
 
- // void refreshStartupInfo();
+  void refreshStartupInfo();
 
   ProjectStartupInfo getProjectStartupInfo();
 

@@ -105,9 +105,12 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     Project currentProject = database.getProject(projectInfo.getID());
 
     SlickProject project = currentProject.getProject();
+    Timestamp now = new Timestamp(System.currentTimeMillis());
+    Timestamp created = new Timestamp(projectInfo.getCreated());
     SlickProject changed = new SlickProject(projectInfo.getID(),
         userid,
-        new Timestamp(System.currentTimeMillis()),
+        created,
+        now,
         projectInfo.getName(),
         projectInfo.getLanguage(),
         project.course(),
@@ -232,10 +235,12 @@ public class ProjectDAO extends DAO implements IProjectDAO {
                  String secondType,
                  String countryCode,
                  int displayOrder) {
+    Timestamp created = new Timestamp(modified);
     return dao.insert(new SlickProject(
         -1,
         userid,
-        new Timestamp(modified),
+        created,
+        created,
         name,
         language,
         course,
@@ -247,13 +252,15 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         "", -1, displayOrder));
   }
 
-  @Override
+/*  @Override
   public int addTest(int userid, String name, String language,
                      String firstType, String secondType, String countryCode) {
+    Timestamp created = new Timestamp(System.currentTimeMillis());
     return dao.insert(new SlickProject(
         -1,
         userid,
-        new Timestamp(System.currentTimeMillis()),
+        created,
+        created,
         name,
         language,
         "",
@@ -263,7 +270,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         secondType,
         countryCode,
         "", -1, 0));
-  }
+  }*/
 
   @Override
   public Collection<SlickProject> getAll() {
