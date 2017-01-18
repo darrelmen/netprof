@@ -37,7 +37,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.database.project.ProjectStatus;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.server.database.project.ProjectType;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
