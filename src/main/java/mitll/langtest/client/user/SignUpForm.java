@@ -47,6 +47,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.user.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -98,6 +99,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private final UserManager userManager;
   private ListBox affBox;
   private final List<Affiliation> affiliations;
+  private Heading pleaseCheck;
 
   /**
    * @param props
@@ -159,7 +161,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
 
     boolean b = askForDemographic(candidate);
-   // demoHeader.setVisible(b);
+    // demoHeader.setVisible(b);
     registrationInfo.setVisible(b);
 
     FormField firstFocus =
@@ -202,52 +204,20 @@ public class SignUpForm extends UserDialog implements SignUp {
   public Panel getSignUpForm() {
     Heading heading = new Heading(3, NEW_USER, SIGN_UP_SUBTEXT);
     heading.addStyleName("signUp");
-    Fieldset fields = getFields();
-    fields.add(getSignUpButton(userBox, emailBox));
 
-    pleaseCheck = new Heading(4, PLEASE_CHECK_YOUR_EMAIL);
-    pleaseCheck.getElement().setId("pleaseCheck");
-    fields.add(pleaseCheck);
-    pleaseCheck.setVisible(false);
-    pleaseCheck.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    Fieldset fields = getFields();
+    fields.add(signUp = getSignUpButton(userBox, emailBox));
+    fields.add(pleaseCheck = getPleaseCheck());
 
     return getTwoPartForm(heading, fields);
   }
 
-  private Heading pleaseCheck;
-
-  /**
-   * @return
-   * @paramx user
-   * @seex mitll.langtest.client.userops.OpsUserContainer#populateUserEdit(DivWidget, User)
-   * @deprecated
-   */
-/*  public Panel getSignUpForm(User user) {
-    Fieldset fields = getFields(user);
-    fields.add(getSignUpButton(userBox, emailBox));
-
-    pleaseCheck = new Heading(4, "Please check your email.");
+  private Heading getPleaseCheck() {
+    Heading pleaseCheck = new Heading(4, PLEASE_CHECK_YOUR_EMAIL);
     pleaseCheck.getElement().setId("pleaseCheck");
-    fields.add(pleaseCheck);
-    pleaseCheck.setVisible(true);
-
-    return getTwoPartForm(
-        getHeading(user),
-        fields);
-  }*/
-
-/*  private Heading getHeading(User user) {
-    Heading heading = new Heading(3, "Edit User Fields and Permissions",
-        user.getUserID() + " : " + user.getFirst() + " " + user.getLast());
-    heading.addStyleName("signUp");
-    return heading;
-  }*/
-  private Panel getTwoPartForm(Heading heading, Fieldset fieldset) {
-    Form form = getUserForm();
-    form.add(heading);
-    form.add(fieldset);
-
-    return form;
+    pleaseCheck.setVisible(false);
+    pleaseCheck.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    return pleaseCheck;
   }
 
 
@@ -262,7 +232,20 @@ public class SignUpForm extends UserDialog implements SignUp {
     makeSignUpLastName(fieldset);
     emailBox = makeSignUpEmail(fieldset);
 
-    affBox = new ListBox();
+    addControlGroupEntrySimple(
+        fieldset,
+        "",
+        affBox = getAffBox())
+        .setWidth(SIGN_UP_WIDTH);
+
+    makeRegistrationInfo(fieldset);
+    registrationInfo.setVisible(false);
+
+    return fieldset;
+  }
+
+  private ListBox getAffBox() {
+    ListBox affBox = new ListBox();
     affBox.getElement().setId("Affiliation_Box");
     affBox.setWidth(SIGN_UP_WIDTH + 30);
     affBox.addStyleName("leftTenMargin");
@@ -271,26 +254,14 @@ public class SignUpForm extends UserDialog implements SignUp {
     for (Affiliation value : affiliations) {
       affBox.addItem(value.getDisp());
     }
-    affBox.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-
-      }
-    });
+//    affBox.addFocusHandler(new FocusHandler() {
+//      @Override
+//      public void onFocus(FocusEvent event) {
+//
+//      }
+//    });
     affBox.getElement().getStyle().setWidth(276, Style.Unit.PX);
-
-    addControlGroupEntrySimple(fieldset,
-        "", affBox).setWidth(SIGN_UP_WIDTH);
-
-/*    demoHeader = getHeader("Demographic Info");
-    demoHeader.setVisible(false);
-    fieldset.add(demoHeader);*/
-
-
-    makeRegistrationInfo(fieldset);
-    registrationInfo.setVisible(false);
-
-    return fieldset;
+    return affBox;
   }
 
   private boolean askForDemographic(User user) {
@@ -312,78 +283,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     w1.getElement().getStyle().setMarginBottom(value, Style.Unit.PX);
     return w1;
   }
-
-/*  private Widget getContentDevCheckbox() {
-    SafeHtmlBuilder builder = new SafeHtmlBuilder();
-    builder.appendHtmlConstant(RECORD_REFERENCE_AUDIO);
-    contentDevCheckbox = new CheckBox(builder.toSafeHtml());
-
-    contentDevCheckbox.setVisible(false);
-    contentDevCheckbox.addStyleName("leftTenMargin");
-    contentDevCheckbox.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        //  selectedRole = contentDevCheckbox.getValue() ? User.Kind.CONTENT_DEVELOPER : User.Kind.TEACHER;
-        registrationInfo.setVisible(contentDevCheckbox.getValue());
-      }
-    });
-*//*
-    contentDevCheckbox.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        if (studentOrTeacherPopover != null) {
-          logger.info("hiding student/teacher popover!");
-          studentOrTeacherPopover.hide();
-        }
-      }
-    });
-*//*
-    contentDevCheckbox.getElement().getStyle().setPaddingBottom(10, Style.Unit.PX);
-    if (!props.enableAllUsers()) {
-      getRecordAudioPopover();
-    }
-    return contentDevCheckbox;
-  }*/
-
-  /*private void getRecordAudioPopover() {
-    String html = props.getRecordAudioPopoverText();
-    addPopover(contentDevCheckbox, RECORD_AUDIO_HEADING, html);
-  }
-*/
-
- /* private Panel getRolesChoices(User.Kind currentRole) {
-    Panel vert = new VerticalPanel();
-
-    Collection<User.Kind> roles1 = getRoles();
-
-    if (roles1.size() == 1) {
-      selectedRole = roles1.iterator().next();
-    } else {
-      Panel roles = new HorizontalPanel();
-      roles.addStyleName("leftTenMargin");
-
-      vert.add(roles);
-
-      int c = 0;
-      for (User.Kind role : roles1) {
-        RadioButton roleChoice = addRoleChoice(roles, role);
-        roleToChoice.put(role, roleChoice);
-        roleChoice.addStyleName("leftFiveMargin");
-
-        if (role == currentRole) {
-          roleChoice.setValue(true);
-          selectedRole = role;
-        }
-
-        if (c++ < roles1.size() && c % 2 == 0) {
-          roles = new HorizontalPanel();
-          roles.addStyleName("leftTenMargin");
-          vert.add(roles);
-        }
-      }
-    }
-    return vert;
-  }*/
 
   protected Collection<User.Kind> getRoles() {
     return User.getSelfChoiceRoles();
@@ -449,12 +348,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     });
   }
 
-  private void styleBox(UIObject userBox) {
-    userBox.addStyleName("topMargin");
-    userBox.addStyleName("rightFiveMargin");
-    userBox.setWidth(SIGN_UP_WIDTH);
-  }
-
   /**
    * @param fieldset collect demographic info (age, gender, dialect) only if it's missing and they have the right permission
    */
@@ -510,17 +403,14 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #getSignUpForm
    */
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
-    this.signUp = new Button(signUpTitle);
-    this.signUp.getElement().setId("SignUp");
-    eventRegistration.register(this.signUp);
+    String buttonID = "SignUp";
 
-    this.signUp.addClickHandler(getSignUpClickHandler(userBox, emailBox));
-    this.signUp.addStyleName("floatRight");
-    this.signUp.addStyleName("rightFiveMargin");
-    this.signUp.addStyleName("leftFiveMargin");
-    this.signUp.setType(ButtonType.SUCCESS);
+    String signUpTitle = this.signUpTitle;
+    Button signUp = getFormButton(buttonID, signUpTitle, eventRegistration);
 
-    return this.signUp;
+    signUp.addClickHandler(getSignUpClickHandler(userBox, emailBox));
+
+    return signUp;
   }
 
   private ClickHandler getSignUpClickHandler(final TextBoxBase userBox, final TextBoxBase emailBox) {
