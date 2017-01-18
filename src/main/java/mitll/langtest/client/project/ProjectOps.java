@@ -40,36 +40,42 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
-import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectInfo;
-import mitll.npdata.dao.SlickProject;
+import mitll.langtest.shared.project.ProjectStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class ProjectOps implements RequiresResize {
+  private final Logger logger = Logger.getLogger("ProjectOps");
   public static final String USERS = "Users";
   // private final Logger logger = Logger.getLogger("UserOps");
 //  private final UserManager userManager;
   private final ExerciseController controller;
 
-//  private final Map<User.Kind, Label> kindToLabel = new HashMap<>();
+  //  private final Map<User.Kind, Label> kindToLabel = new HashMap<>();
 //  private final Map<String, Label> inviteToLabel = new HashMap<>();
   // private final Map<User.Kind, IconType> kindToIcon = new HashMap<>();
+//  private User.Kind currentKind;
+  private DivWidget currentContent;
+  private DivWidget currentUserForm;
 
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
   /**
    * @param controller
-   * @param userManager
-   * @see Navigation#addUserMaintenance
+   * @paramx userManager
+   * @seex Navigation#addUserMaintenance
    */
   public ProjectOps(ExerciseController controller/*, UserManager userManager*/) {
     // setKindToIcon();
@@ -91,19 +97,21 @@ public class ProjectOps implements RequiresResize {
     left.getElement().setId("productionProjects");
     left.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
 
-    DivWidget right = addDiv(content);
+    //DivWidget right = addDiv(content);
     DivWidget detail = addDiv(content);
     detail.getElement().getStyle().setClear(Style.Clear.LEFT);
     detail.addStyleName("leftFiveMargin");
 
+    currentContent = left;
+    currentUserForm = detail;
     //  NavLink first = getKinds(left, right, detail);
-    right.getElement().setId("projectContent");
-    right.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
+    //right.getElement().setId("projectContent");
+    //right.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
 //    logger.info("Loaded everything...");
-    showInitialState(left, detail/*, first*/);
+    showInitialState(left, detail);
   }
 
-  private NavLink lastClicked = null;
+  //private NavLink lastClicked = null;
 
   private void showInitialState(final DivWidget left, final DivWidget detail/*, NavLink first*/) {
     // final NavLink toClick = first;
@@ -121,10 +129,10 @@ public class ProjectOps implements RequiresResize {
   }
 
   /**
-   * @param left
-   * @param right
-   * @param detail
    * @return
+   * @paramx left
+   * @paramx right
+   * @paramx detail
    * @see #showProjects
    */
 /*  private NavLink getKinds(DivWidget left, DivWidget right, DivWidget detail) {
@@ -209,27 +217,16 @@ public class ProjectOps implements RequiresResize {
     });
     return students;
   }*/
-
-//  private User.Kind currentKind;
-  private DivWidget currentContent;
-  private DivWidget currentUserForm;
-
   public void reload() {
-/*
-    MiniUser currentSelection = projectContainer.getNext();
-    if (currentSelection != null) {
-      projectContainer.storeSelectedUser(currentSelection.getID());
-    }
-*/
-    showProjects(/*currentKind,*/ currentContent, currentUserForm);
+    showProjects(currentContent, currentUserForm);
   }
 
   /**
    * Talk to the service.
    *
-   * @param kind
    * @param content
    * @param userForm
+   * @paramx kind
    * @see #showInitialState
    */
   private void showProjects(//final User.Kind kind,
@@ -243,22 +240,38 @@ public class ProjectOps implements RequiresResize {
 
       @Override
       public void onSuccess(List<ProjectInfo> projectInfos) {
-        //requiresResize =
+        Panel hp = new HorizontalPanel();
 
-        HorizontalPanel hp = new HorizontalPanel();
-        DivWidget contentP = new DivWidget();
-        hp.add(contentP);
-        DivWidget content1 = new DivWidget();
-        hp.add(content1);
-        content1.addStyleName("leftFiveMargin");
-        DivWidget content2 = new DivWidget();
-        hp.add(content2);
-        content2.addStyleName("leftFiveMargin");
+        projectContainers.clear();
+//        DivWidget contentP = new DivWidget();
+//        hp.add(contentP);
+//
+//        DivWidget content1 = getProjectListContainer(hp);
+//        DivWidget content2 = getProjectListContainer(hp);
+//        DivWidget content3 = getProjectListContainer(hp);
 
-        showProjectList(contentP, projectInfos, userForm, "Projects", "Production", ProjectStatus.PRODUCTION);
-        showProjectList(content1, projectInfos, userForm, "Projects", "Development", ProjectStatus.DEVELOPMENT);
-        showProjectList(content2, projectInfos, userForm, "Projects", "Retired", ProjectStatus.RETIRED);
+        boolean first = true;
+        for (ProjectStatus status : ProjectStatus.values()) {
+          DivWidget contentP;
+          if (first) {
+            contentP = new DivWidget();
+            hp.add(contentP);
+          } else {
+            contentP = getProjectListContainer(hp);
 
+          }
+          showProjects(projectInfos, status, contentP, userForm, first);
+          first = false;
+        }
+/*
+        showProjectList(contentP, projectInfos, userForm, "Projects", "Production", ProjectStatus.PRODUCTION, true);
+
+        showProjects(projectInfos, DEVELOPMENT, content1, userForm);
+        showProjectList(content2, projectInfos, userForm, "Projects", "Evaluation", ProjectStatus.EVALUATION, false);
+        showProjectList(content3, projectInfos, userForm, "Projects", "Retired", ProjectStatus.RETIRED, false);
+*/
+
+        content.clear();
         content.add(hp);
 
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -269,6 +282,19 @@ public class ProjectOps implements RequiresResize {
         });
       }
     });
+  }
+
+  private void showProjects(List<ProjectInfo> projectInfos, ProjectStatus development, DivWidget content1, DivWidget userForm, boolean first) {
+    showProjectList(content1, projectInfos, userForm, "Project",
+        development.name().substring(0, 1).toUpperCase() + development.name().substring(1).toLowerCase(), development, first);
+  }
+
+  @NotNull
+  private DivWidget getProjectListContainer(Panel hp) {
+    DivWidget content2 = new DivWidget();
+    hp.add(content2);
+    content2.addStyleName("leftFiveMargin");
+    return content2;
   }
 
 
@@ -282,6 +308,7 @@ public class ProjectOps implements RequiresResize {
    * @param userForm
    * @param rowHeader
    * @param listTitle
+   * @param selectFirst
    * @return
    * @paramx kind
    * @paramx kindCollectionMap
@@ -293,32 +320,53 @@ public class ProjectOps implements RequiresResize {
       DivWidget userForm,
       String rowHeader,
       String listTitle,
-      ProjectStatus status) {
+      ProjectStatus status, boolean selectFirst) {
     List<ProjectInfo> filtered = projectInfos.stream()
         .filter(p -> p.getStatus() == status).collect(Collectors.toList());
 
-    ProjectContainer<ProjectInfo> projectContainer = getProjectContainer(content, filtered, userForm, rowHeader, listTitle);
-  //  this.projectContainer = projectContainer;
+    ProjectContainer<ProjectInfo> projectContainer = getProjectContainer(content, filtered, userForm, rowHeader, listTitle, selectFirst);
+    //  this.projectContainer = projectContainer;
+    projectContainers.add(projectContainer);
     return projectContainer;
+  }
+
+  List<ProjectContainer<?>> projectContainers = new ArrayList<>();
+
+  public void clearOthers(ProjectContainer<?> current) {
+    logger.info("clearOthers of " + current);
+    for (ProjectContainer<?> container : projectContainers) {
+      if (current != container) {
+        logger.info("\tclear " + container);
+
+        container.clearSelection();
+      }
+    }
   }
 
   @NotNull
-  private ProjectContainer<ProjectInfo> getProjectContainer(DivWidget content, List<ProjectInfo> projectInfos, DivWidget userForm, String rowHeader, String listTitle) {
-    ProjectContainer<ProjectInfo> projectContainer = getProjectContainer(rowHeader, userForm);
-    Heading production = new Heading(3, listTitle);
+  private ProjectContainer<ProjectInfo> getProjectContainer(DivWidget content,
+                                                            List<ProjectInfo> projectInfos,
+                                                            DivWidget userForm,
+                                                            String rowHeader,
+                                                            String listTitle,
+                                                            boolean selectFirst) {
+    ProjectContainer<ProjectInfo> projectContainer =
+        getProjectContainer(rowHeader, userForm, selectFirst);
+    // Heading production = new Heading(3, listTitle);
     content.clear();
-    content.add(production);
-    content.add(projectContainer.getTable(projectInfos, "", ""));
+    // content.add(production);
+    content.add(projectContainer.getTable(projectInfos, listTitle, ""));
     return projectContainer;
   }
 
-  private ProjectContainer<ProjectInfo> getProjectContainer(String rowHeader, DivWidget rightSide) {
+  private ProjectContainer<ProjectInfo> getProjectContainer(String rowHeader, DivWidget rightSide,
+                                                            boolean selectFirst) {
     return new ProjectContainer<>(
         controller,
         rowHeader,
         rightSide,
-        this
-    );
+        this,
+        selectFirst);
   }
 
   @Override

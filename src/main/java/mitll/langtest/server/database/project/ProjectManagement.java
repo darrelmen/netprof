@@ -46,6 +46,7 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
@@ -97,7 +98,7 @@ public class ProjectManagement implements IProjectManagement {
 
   public void rememberProject(int id) {
     SlickProject found = null;
-    for (SlickProject slickProject :projectDAO.getAll()) {
+    for (SlickProject slickProject : projectDAO.getAll()) {
       if (slickProject.id() == id) {
         found = slickProject;
         break;
@@ -108,6 +109,7 @@ public class ProjectManagement implements IProjectManagement {
     }
 
   }
+
   /**
    * Fill in id->project map
    *
@@ -144,6 +146,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * Latchy - would be better to do this when the project is remembered...
    * // TODO : this seems like a bad idea --
+   *
    * @see DatabaseImpl#configureProjects
    */
   @Override
@@ -153,8 +156,7 @@ public class ProjectManagement implements IProjectManagement {
     for (Project project : projects) {
       if (!project.isConfigured()) {
         configureProject(project);
-      }
-      else {
+      } else {
         logger.debug("project already configured " + project.getProject().id());
       }
     }
@@ -164,12 +166,27 @@ public class ProjectManagement implements IProjectManagement {
    * @param project
    * @see #configureProjects
    */
-  private void configureProject(Project project) {
-   // logger.info("configureProject " + project);
+  public void configureProject(Project project) {
+    // logger.info("configureProject " + project);
     project.setConfigured(true);
-    SlickProject project1 = project.getProject();
-    if (project1 == null) logger.info("configureProject : note : no project for " + project);
-    int id = project1 == null ? -1 : project1.id();
+    SlickProject slickProject = project.getProject();
+
+    if (slickProject == null) {
+      logger.info("configureProject : note : no project for " + project);
+    } else {
+      try {
+        if (ProjectStatus.valueOf(slickProject.status()) == ProjectStatus.RETIRED) {
+          logger.info("skipping fully loading project " + project + " since it's retired");
+          return;
+        }
+      } catch (IllegalArgumentException e) {
+        logger.error("couldn't parse status " + slickProject.status() + " expecting one of " + ProjectStatus.values());
+      }
+    }
+
+    // TODO : why would we want to keep going on a project that has no slick project -- if it's new???
+
+    int id = slickProject == null ? -1 : slickProject.id();
     setDependencies(project.getExerciseDAO(), id);
 
     List<CommonExercise> rawExercises = project.getRawExercises();
@@ -179,7 +196,7 @@ public class ProjectManagement implements IProjectManagement {
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), db.getResultDAO(), db.getRefResultDAO(), db.getAudioDAO(),
         db.getPhoneDAO()));
 
-    if (project1 != null) {
+    if (slickProject != null) {
       Map<Integer, String> exerciseIDToRefAudio = db.getExerciseIDToRefAudio(id);
       project.setAnalysis(
           new SlickAnalysis(db,
@@ -193,7 +210,7 @@ public class ProjectManagement implements IProjectManagement {
       logMemory();
 
       Set<Integer> exids = new HashSet<>();
-      for (CommonExercise exercise:rawExercises) exids.add(exercise.getID());
+      for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());
 
 //      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
 //
@@ -201,21 +218,20 @@ public class ProjectManagement implements IProjectManagement {
 //      project.setExToPhone(exToPhonePerProject);
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       logMemory();
-
     }
 
     logMemory();
   }
 
   /**
-   * @see DatabaseImpl#makeDAO
    * @return
+   * @see DatabaseImpl#makeDAO
    */
   public ExerciseDAO<CommonExercise> setDependencies() {
     Project project = idToProject.get(IMPORT_PROJECT_ID);
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
     logger.info("setDependencies " + project + " : " + exerciseDAO);
-    setDependencies(exerciseDAO,-1);
+    setDependencies(exerciseDAO, -1);
 
     return exerciseDAO;
   }
@@ -259,7 +275,6 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * TODO : add mechanism to trigger reload of exercises for a NetProf project from a domino project
-   *
    */
   //@Override
 /*  private void doReload() {
@@ -271,7 +286,6 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
   }*/
-
   private void logMemory() {
     int MB = (1024 * 1024);
     Runtime rt = Runtime.getRuntime();
@@ -291,7 +305,14 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public Project getProjectForUser(int userid) {
-    return getProject(db.getUserProjectDAO().mostRecentByUser(userid));
+    Project project = getProject(db.getUserProjectDAO().mostRecentByUser(userid));
+
+    if (project != null &&
+        project.getStatus() == ProjectStatus.RETIRED) {
+      return null;
+    }
+
+    return project;
   }
 
   @Override
@@ -342,11 +363,11 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @param id
    * @return
+   * @seex #deleteItem(int, int)
+   * @seex #getCustomOrPredefExercise(int, int)
    * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
    * @see DatabaseImpl#getExercise
-   * @seex #deleteItem(int, int)
-   * @seex #getCustomOrPredefExercise(int, int)
    */
   @Override
   public CommonExercise getExercise(int projectid, int id) {
@@ -355,7 +376,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * exercises are in the context of a project
-   *
+   * <p>
    * deals with projects added while webapp is running -
    *
    * @param projectid
@@ -389,6 +410,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * Try to deal with project set changing out from underneath us...
+   *
    * @param projectid
    * @return
    */
@@ -459,7 +481,7 @@ public class ProjectManagement implements IProjectManagement {
       //logger.info("project " + projid + " type order " + typeOrder);
 
       boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
-      boolean diff  = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
+      boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
       if (!sound) logger.warn("setStartupInfo : sound missing???");
       else {
         typeOrder.add(SlickUserExerciseDAO.SOUND);

@@ -50,6 +50,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
@@ -162,7 +163,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   /**
    * The very first thing that gets called from the client.
-   *
+   * <p>
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    *
    * @return
@@ -229,15 +230,18 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private SlimProject getProjectInfo(SlickProject project) {
     boolean hasModel = project.getProp(ServerProperties.MODELS_DIR) != null;
 
-    Collection<CommonExercise> exercises = db.getExercises(project.id());
+    ProjectStatus status = null;
+    try {
+      status = ProjectStatus.valueOf(project.status());
+    } catch (IllegalArgumentException e) {
+      logger.error("got " +e,e);
+      status = ProjectStatus.DEVELOPMENT;
+    }
 
     boolean isRTL = false;
-    if (!exercises.isEmpty()) {
-      CommonExercise next = exercises.iterator().next();
-      HasDirection.Direction direction = WordCountDirectionEstimator.get().estimateDirection(next.getForeignLanguage());
-      // String rtl = properties.get("rtl");
-      isRTL = direction == HasDirection.Direction.RTL;
-      // logger.info("examined text and found it to be " + direction);
+    if (status != ProjectStatus.RETIRED) {
+      Collection<CommonExercise> exercises = db.getExercises(project.id());
+      isRTL = isRTL(exercises);
     }
 
     return new SlimProject(project.id(),
@@ -245,10 +249,22 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
         project.language(),
         project.countrycode(),
         project.course(),
-        project.status(),
+        ProjectStatus.valueOf(project.status()),
         project.displayorder(),
         hasModel,
         isRTL);
+  }
+
+  private boolean isRTL(Collection<? extends CommonShell> exercises) {
+    boolean isRTL = false;
+    if (!exercises.isEmpty()) {
+      CommonShell next = exercises.iterator().next();
+      HasDirection.Direction direction = WordCountDirectionEstimator.get().estimateDirection(next.getForeignLanguage());
+      // String rtl = properties.get("rtl");
+      isRTL = direction == HasDirection.Direction.RTL;
+      // logger.info("examined text and found it to be " + direction);
+    }
+    return isRTL;
   }
 
 
@@ -463,7 +479,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 //        !new File(lessonPlanFile).exists()) {
 //      logger.error("couldn't find lesson plan file " + lessonPlanFile);
 //    }
-  //  String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
+    //  String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
     String installPath = pathHelper.getInstallPath();
     logger.debug("setInstallPath " + installPath +
         //" " + lessonPlanFile + " media " +

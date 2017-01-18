@@ -72,4 +72,6 @@ public interface IProjectManagement {
   Project getFirstProject();
 
   void setStartupInfo(User userWhere, int projid);
+
+  void configureProject(Project project);
 }

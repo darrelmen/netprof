@@ -101,6 +101,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     this.id = id;
   }
 
+  /**
+   * Only for AMAS.
+   * @return
+   */
   public int getNumExercises() {
     return getRawExercises().size();
   }

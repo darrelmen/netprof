@@ -690,6 +690,10 @@ public class DatabaseImpl implements Database {
     projectManagement.configureProjects();
   }
 
+  @Override
+  public void configureProject(Project project) {
+    projectManagement.configureProject(project);
+  }
   /**
    * Here to support import from old individual sites for CopyToPostgres
    *

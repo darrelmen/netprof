@@ -33,29 +33,65 @@
 package mitll.langtest.client.project;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.project.ProjectInfo;
 
+import java.util.Collection;
+import java.util.logging.Logger;
+
 public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer<T> implements RequiresResize {
-  private static final String FIRST = "First";
-  private static final String LAST = "Last";
+  private final Logger logger = Logger.getLogger("ProjectContainer");
+
+  //  private static final String FIRST = "First";
+//  private static final String LAST = "Last";
   private final DivWidget rightSide;
   private final ProjectOps projectOps;
+  private final boolean selectFirst;
+  private final String header;
 
   /**
    * @param controller
    * @param header
    * @param rightSide
+   * @param selectFirst
    * @see ProjectOps#getProjectContainer
    */
-  ProjectContainer(ExerciseController controller, String header, DivWidget rightSide,
-                   ProjectOps projectOps) {
-    super(controller, header);
+  ProjectContainer(ExerciseController controller,
+                   String header,
+                   DivWidget rightSide,
+                   ProjectOps projectOps,
+                   boolean selectFirst) {
+    super(controller, header, 60);
     this.rightSide = rightSide;
-    rightSide.clear();
+    if (rightSide != null) {
+      logger.info("got right side ");
+      rightSide.clear();
+    }
+    else logger.warning("huh? no right side?");
     this.projectOps = projectOps;
+    this.selectFirst = selectFirst;
+    this.header = header;
+  }
+
+  @Override
+  protected void makeInitialSelection(Collection<T> users, T userToSelect) {
+    if (selectFirst) {
+      logger.info("selecting first " + header + " users " + users.size());
+
+      Scheduler.get().scheduleDeferred(() -> {
+            if (!users.isEmpty()) {
+              T next = users.iterator().next();
+              table.getSelectionModel().setSelected(next, true);
+              gotClickOnItem(next);
+            }
+          }
+      );
+    } else {
+      logger.info("not selecting first " + header);
+    }
   }
 
   protected int getPageSize() {
@@ -175,25 +211,13 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
     super.gotClickOnItem(project);
     rightSide.clear();
 
-    ProjectEditForm projectEditForm = new ProjectEditForm(controller.getProps(), controller);
+    ProjectEditForm projectEditForm = new ProjectEditForm(projectOps, controller.getProps(), controller);
     rightSide.add(projectEditForm.getForm(project));
 
-/*    if (!user.isAdmin()) {
-      UserServiceAsync userService = controller.getUserService();
-      userService.getUser(user.getID(), new AsyncCallback<User>() {
-        @Override
-        public void onFailure(Throwable throwable) {
-        }
-
-        @Override
-        public void onSuccess(User user) {
-
-          //populateUserEdit(rightSide, user);
-        }
-      });
-    }*/
+    projectOps.clearOthers(this);
   }
-/*  private void populateUserEdit(DivWidget userDetail, User user) {
+
+  /*  private void populateUserEdit(DivWidget userDetail, User user) {
     EditUserForm signUpForm = new EditUserForm(
         controller.getProps(),
         controller.getUserManager(),

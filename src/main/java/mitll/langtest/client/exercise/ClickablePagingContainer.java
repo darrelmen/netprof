@@ -34,6 +34,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -49,7 +50,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public class ClickablePagingContainer<T extends HasID> extends SimplePagingContainer<T> {
+public abstract class ClickablePagingContainer<T extends HasID> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("ClickablePagingContainer");
 
   private static final boolean DEBUG = false;
@@ -141,8 +142,7 @@ public class ClickablePagingContainer<T extends HasID> extends SimplePagingConta
     if (currentSelection != null) {
       int index = getIndex(currentSelection);
       return getAt((index == getSize() - 1) ? 0 : index + 1);
-    }
-    else {
+    } else {
       return null;
     }
   }
@@ -153,8 +153,9 @@ public class ClickablePagingContainer<T extends HasID> extends SimplePagingConta
     table.setSelectionModel(selectionModel);
   }
 
-  protected void gotClickOnItem(final T e) {
-  }
+  abstract protected void gotClickOnItem(final T e);
+  //{
+  // }
 
   @Override
   public void clear() {
@@ -222,6 +223,14 @@ public class ClickablePagingContainer<T extends HasID> extends SimplePagingConta
 
     scrollToVisible(i);
     table.redraw();
+  }
+
+  public void clearSelection() {
+    SelectionModel<? super T> selectionModel = table.getSelectionModel();
+    T currentSelection = getCurrentSelection();
+    if (currentSelection != null) {
+      selectionModel.setSelected(currentSelection, false);
+    }
   }
 
   /**
