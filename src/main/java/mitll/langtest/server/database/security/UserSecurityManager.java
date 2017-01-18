@@ -58,7 +58,6 @@ public class UserSecurityManager implements IUserSecurityManager {
    */
   //public static final String USER_REQUEST_ATT = "d-user";
   //private static final Marker TIMING = MarkerManager.getMarker("TIMING");
-
 //  private Map<Integer, User> idToSession = new HashMap<>();
 
   private final IUserDAO userDAO;

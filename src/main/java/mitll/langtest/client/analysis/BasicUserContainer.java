@@ -43,7 +43,7 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
   }
 
   public BasicUserContainer(ExerciseController controller, String header) {
-    super(controller, header);
+    super(controller, header, ID_WIDTH);
   }
 
   protected int getNameCompare(T o1, T o2) {

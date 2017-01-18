@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/16/14.
  */
-public class SimplePagingContainer<T> implements RequiresResize {
+public abstract class SimplePagingContainer<T> implements RequiresResize {
   private final Logger logger = Logger.getLogger("SimplePagingContainer");
 
   private static final boolean DEBUG = false;
@@ -146,8 +146,10 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected void addSelectionModel() {
   }
 
-  protected void addColumnsToTable() {
-  }
+  /**
+   * @see #configureTable
+   */
+  abstract protected void addColumnsToTable();
 
   public void flush() {
     dataProvider.flush();
@@ -157,7 +159,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
   /**
    * @param id2
    * @param header
-   * @see PagingContainer#addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable()
    */
   protected void addColumn(Column<T, SafeHtml> id2, Header<?> header) {
     table.addColumn(id2, header);

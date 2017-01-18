@@ -45,6 +45,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,20 +78,20 @@ public class Project {
   private boolean wasConfigured = false;
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#addSingleProject
    * @param exerciseDAO
+   * @see mitll.langtest.server.database.project.ProjectManagement#addSingleProject
    */
   public Project(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
   }
 
   /**
-   * @see DatabaseImpl#rememberProject(int, int)
    * @param project
    * @param pathHelper
    * @param serverProps
    * @param db
    * @param logAndNotify
+   * @see DatabaseImpl#rememberProject(int, int)
    */
   public Project(SlickProject project,
                  PathHelper pathHelper,
@@ -104,7 +105,9 @@ public class Project {
     this.pathHelper = pathHelper;
   }
 
-  public String getLanguage() { return project.language();  }
+  public String getLanguage() {
+    return project.language();
+  }
 
   /**
    * Only public to support deletes...
@@ -137,6 +140,7 @@ public class Project {
 
   /**
    * If we can't get the type order out of the section helper... find it from the project
+   *
    * @return
    */
   public List<String> getTypeOrder() {
@@ -260,5 +264,14 @@ public class Project {
 
   public void setConfigured(boolean wasConfigured) {
     this.wasConfigured = wasConfigured;
+  }
+
+  public ProjectStatus getStatus() {
+    try {
+      return ProjectStatus.valueOf(project.status());
+    } catch (IllegalArgumentException e) {
+      logger.error("Got " + e, e);
+      return null;
+    }
   }
 }

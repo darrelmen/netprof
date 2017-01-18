@@ -222,7 +222,7 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   }
 
   /**
-   * @see #addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable()
    * @return
    */
   private Column<WordAndScore, SafeHtml> getItemColumn() {

@@ -61,7 +61,7 @@ import java.util.logging.Logger;
  * Time: 7:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
+public abstract class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
   private final Logger logger = Logger.getLogger("PagingContainer");
   private static final int MAX_LENGTH_ID = 17;
   private static final int JAPANESE_LENGTH = 9;
@@ -195,7 +195,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
   /**
    * @return
-   * @see #addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable()
    */
   private Column<T, SafeHtml> getEnglishColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {
@@ -277,7 +277,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
   /**
    * @return
-   * @see #addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable()
    */
   private Column<T, SafeHtml> getFLColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {

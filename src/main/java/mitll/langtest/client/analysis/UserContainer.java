@@ -45,7 +45,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.user.MiniUser;
 
 import java.util.Comparator;
 import java.util.List;
@@ -89,7 +88,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     this.overallBottom = overallBottom;
   }
 
-
+  /**
+   * @see SimplePagingContainer#addColumnsToTable
+   */
   @Override
   protected void addColumnsToTable() {
     super.addColumnsToTable();
