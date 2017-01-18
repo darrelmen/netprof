@@ -75,14 +75,15 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public boolean update(ProjectInfo info) {
     int currentUser = getUserIDFromSession();
     Project currentProject = db.getProject(info.getID());
-    boolean wasRetired =false;
+    boolean wasRetired = false;
     if (currentProject != null) {
       wasRetired = currentProject.getStatus() == ProjectStatus.RETIRED;
     }
     boolean update = getProjectDAO().update(currentUser, info);
     if (update && wasRetired) {
-      db.configureProject( db.getProject(info.getID()));
+      db.configureProject(db.getProject(info.getID()));
     }
+    db.getProjectManagement().refreshProjects();
     return update;
   }
 }

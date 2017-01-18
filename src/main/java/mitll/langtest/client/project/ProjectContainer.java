@@ -67,10 +67,12 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
     super(controller, header, 60);
     this.rightSide = rightSide;
     if (rightSide != null) {
-      logger.info("got right side ");
+//      logger.info("got right side ");
       rightSide.clear();
     }
-    else logger.warning("huh? no right side?");
+    else {
+      logger.warning("huh? no right side?");
+    }
     this.projectOps = projectOps;
     this.selectFirst = selectFirst;
     this.header = header;
@@ -79,7 +81,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
   @Override
   protected void makeInitialSelection(Collection<T> users, T userToSelect) {
     if (selectFirst) {
-      logger.info("selecting first " + header + " users " + users.size());
+    //  logger.info("selecting first " + header + " users " + users.size());
 
       Scheduler.get().scheduleDeferred(() -> {
             if (!users.isEmpty()) {
@@ -90,7 +92,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
           }
       );
     } else {
-      logger.info("not selecting first " + header);
+      //logger.info("not selecting first " + header);
     }
   }
 

@@ -48,6 +48,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.LifecycleSupport;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
@@ -152,6 +153,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private final UserManager userManager;
   private final SimpleChapterNPFHelper practiceHelper;
+  private final LifecycleSupport lifecycleSupport;
 
   private DialogViewer dialogWindow;
 
@@ -185,12 +187,16 @@ public class Navigation implements RequiresResize, ShowTab {
    * @paramx predefinedContentList
    * @see mitll.langtest.client.InitialUI#populateBelowHeader
    */
-  public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
-                    final ExerciseController controller, UserFeedback feedback) {
+  public Navigation(final LangTestDatabaseAsync service,
+                    final UserManager userManager,
+                    final ExerciseController controller,
+                    UserFeedback feedback,
+                    LifecycleSupport lifecycleSupport) {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
     this.feedback = feedback;
+    this.lifecycleSupport = lifecycleSupport;
     storage = new KeyStorage(controller);
 
     learnHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(service, feedback, userManager, controller, null,
@@ -533,29 +539,18 @@ public class Navigation implements RequiresResize, ShowTab {
    */
   private void addProjectMaintenance() {
     projects = makeFirstLevelTab(tabPanel, IconType.BOOK, PROJECTS);
-    projects.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTabAndLogEvent(PROJECTS, projects);
-        ProjectOps projectOps = new ProjectOps(controller);
-        projectOps.show(projects);
-//        UserOps userOps = new UserOps(controller, userManager);
-//        userOps.showUsers(users);
-        //projectOps.setResizeable(userOps);
-      }
+    projects.getTab().addClickHandler(event -> {
+      checkAndMaybeClearTabAndLogEvent(PROJECTS, projects);
+      new ProjectOps(controller, lifecycleSupport).show(projects);
     });
   }
 
 
   private void addLearnTab() {
     chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CHAPTERS);
-    chapters.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTabAndLogEvent(CHAPTERS, chapters);
-
-        learnHelper.showNPF(chapters, LEARN);
-      }
+    chapters.getTab().addClickHandler(event -> {
+      checkAndMaybeClearTabAndLogEvent(CHAPTERS, chapters);
+      learnHelper.showNPF(chapters, LEARN);
     });
   }
 
@@ -722,7 +717,7 @@ public class Navigation implements RequiresResize, ShowTab {
 //        userOps.showUsers(users);
 //        users.setResizeable(userOps);
       } else if (clickedTab.equals(PROJECTS)) {
-        ProjectOps ops = new ProjectOps(controller);
+        ProjectOps ops = new ProjectOps(controller, lifecycleSupport);
         ops.show(projects);
         projects.setResizeable(ops);
 //        UserOps userOps = new UserOps(controller, userManager);

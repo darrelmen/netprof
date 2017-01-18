@@ -55,6 +55,8 @@ public interface IProjectManagement {
 
   ExerciseDAO<CommonExercise> setDependencies();
 
+  void refreshProjects();
+
   Project getProjectForUser(int userid);
 
   void stopDecode();

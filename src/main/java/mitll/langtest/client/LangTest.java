@@ -64,6 +64,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
+import mitll.langtest.client.project.ProjectOps;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButton;
@@ -73,11 +74,13 @@ import mitll.langtest.client.services.*;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.*;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
 import java.util.*;
@@ -276,7 +279,7 @@ public class LangTest implements
         rememberStartup(startupInfo);
         onModuleLoad2();
 
-        if (isLogClientMessages() && (now-then > 500)) {
+        if (isLogClientMessages() && (now - then > 500)) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
           logMessageOnServer(message);
         }
@@ -286,10 +289,11 @@ public class LangTest implements
 
   /**
    * Hopefully we'll never see this.
+   *
    * @param caught
    * @param then
    */
-  private void onFailure(Throwable caught, long then) {
+  public void onFailure(Throwable caught, long then) {
     if (caught instanceof IncompatibleRemoteServiceException) {
       Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
           "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
@@ -307,7 +311,11 @@ public class LangTest implements
     }
   }
 
-/*  public void refreshStartupInfo() {
+  /**
+   * after we change state
+   * @see ProjectOps#refreshStartupInfo
+   */
+  public void refreshStartupInfo() {
     service.getStartupInfo(new AsyncCallback<StartupInfo>() {
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
@@ -315,17 +323,16 @@ public class LangTest implements
 
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo);
-        gotUser(userManager.getCurrent());
       }
     });
-  }*/
+  }
 
   /**
-   * @see #askForStartupInfo
    * @param startupInfo
+   * @see #askForStartupInfo
    */
   private void rememberStartup(StartupInfo startupInfo) {
-    LangTest.this.startupInfo = startupInfo;
+    this.startupInfo = startupInfo;
     props = new PropertyHandler(startupInfo.getProperties());
   }
 
@@ -428,7 +435,7 @@ public class LangTest implements
       client.onSuccess(ifPresent);
     } else {
       ImageOptions imageOptions = new ImageOptions(toUse, height, useBkgColorForRef());
-      audioService.getImageForAudioFile(reqid, path, type,imageOptions, exerciseID, new AsyncCallback<ImageResponse>() {
+      audioService.getImageForAudioFile(reqid, path, type, imageOptions, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
        /*   if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
@@ -472,7 +479,7 @@ public class LangTest implements
 
     buttonFactory = new ButtonFactory(service, props, this);
 
-    userManager = new UserManager(this, userService, props);
+    userManager = new UserManager(this,this, userService, props);
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
@@ -516,8 +523,8 @@ public class LangTest implements
   }
 
   /**
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    * @seex mitll.langtest.client.user.UserManager#login
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
   @Override
   public void showLogin() {
@@ -679,7 +686,7 @@ public class LangTest implements
 
   @Override
   public ProjectStartupInfo getProjectStartupInfo() {
-//    logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
+  //  logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
   }
 
@@ -689,7 +696,7 @@ public class LangTest implements
 
   public void clearStartupInfo() {
     this.projectStartupInfo = null;
-//    logger.info("clearStartupInfo   ");
+  //  logger.info("clearStartupInfo   ");
   }
 
   public Collection<String> getTypeOrder() {
@@ -708,7 +715,7 @@ public class LangTest implements
    */
   public void gotUser(User user) {
     setProjectStartupInfo(user);
-    logger.info("\ngotUser Got startup info " + projectStartupInfo);
+    //  logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
   }
 
@@ -717,10 +724,12 @@ public class LangTest implements
    * the user changes language/project.
    *
    * @param user
-   * @see UserMenu.ChangePasswordClickHandler#reallySetTheProject(int)
+   * @see LangTest#gotUser
+   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
+//    logger.info("project startup " + projectStartupInfo);
   }
 
   /**
@@ -819,14 +828,15 @@ public class LangTest implements
   private void checkLogin() {
     //console("checkLogin");
     //logger.info("checkLogin -- ");
-   // userManager.isUserExpired();
+    // userManager.isUserExpired();
     userManager.checkLogin();
   }
 
   /**
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
    */
-@Deprecated  public void checkUser() {
+  @Deprecated
+  public void checkUser() {
 //    if (userManager.isUserExpired()) {
 //      checkLogin();
 //    }
@@ -846,7 +856,7 @@ public class LangTest implements
   }
 
   public boolean hasPermission(User.Permission permission) {
-  //  logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
+    //  logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
     return getPermissions().contains(permission);
   }
 
