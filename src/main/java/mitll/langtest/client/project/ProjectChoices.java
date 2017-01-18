@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ProjectService;
@@ -16,6 +17,7 @@ import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserNotification;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
@@ -36,14 +38,10 @@ public class ProjectChoices {
   private static final String PLEASE_SELECT_A_COURSE = "Please select a course";
   private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
 
-//  public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
-
   /**
    * Tamas doesn't like scrolling -- try to prevent it on laptops
    */
   private static final int ITEMS_IN_ROW = 5;
-//  private static final int LEFT_LIST_WIDTH = 167;
-
   protected static final String LOGIN = "Login";
   private static final int NO_USER_INITIAL = -2;
   private final UILifecycle uiLifecycle;
@@ -59,7 +57,6 @@ public class ProjectChoices {
 
   private final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
-  //private final UserFeedback userFeedback;
   private final UserNotification userNotification;
   protected final PropertyHandler props;
 
@@ -67,9 +64,8 @@ public class ProjectChoices {
   private final UserServiceAsync userService = GWT.create(UserService.class);
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
- // protected Panel headerRow;
- private Panel contentRow;
-  private static final boolean DEBUG = false;
+  private Panel contentRow;
+  //private static final boolean DEBUG = false;
 
   public ProjectChoices(LangTest langTest, UILifecycle uiLifecycle) {
     this.lifecycleSupport = langTest;
@@ -82,8 +78,7 @@ public class ProjectChoices {
 
   public void showProjectChoices(int level, SlimProject parent) {
     List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
-
-    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
+//    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
     showProjectChoices(getVisibleProjects(projects), level);
   }
 
@@ -94,7 +89,7 @@ public class ProjectChoices {
         permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.DEVELOP_CONTENT);
 
     for (SlimProject project : projects) {
-      if (project.getStatus().equalsIgnoreCase("Development")) {
+      if (project.getStatus() != ProjectStatus.PRODUCTION) {
         if (canRecord) {
           filtered.add(project);
         }
@@ -103,8 +98,8 @@ public class ProjectChoices {
     return filtered;
   }
 
-  public void showProject(SlimProject project){
-    showProjectChoices(project.getChildren(),1);
+  public void showProject(SlimProject project) {
+    showProjectChoices(project.getChildren(), 1);
   }
 
   /**
@@ -113,36 +108,52 @@ public class ProjectChoices {
    * @see InitialUI#addProjectChoices
    */
   public void showProjectChoices(List<SlimProject> result, int nest) {
-    logger.info("showProjectChoices " + result.size() + " : " + nest);
+//    logger.info("showProjectChoices " + result.size() + " : " + nest);
 
-    final Container flags = new Container();
     final Section section = new Section("section");
     contentRow.add(section);
 
-    DivWidget header = new DivWidget();
-    header.addStyleName("container");
-    String text = PLEASE_SELECT_A_LANGUAGE;
-    if (nest == 1) {
-      text = PLEASE_SELECT_A_COURSE;
-    }
+    section.add(getHeader(result, nest));
 
-    if (result.isEmpty()) {
-      text = NO_LANGUAGES_LOADED_YET;
-    }
-    Heading child = new Heading(3, text);
-    header.add(child);
-    child.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
+    final Container flags = new Container();
+   // removeWidth(flags);
 
-    section.add(header);
     section.add(flags);
 
+    addFlags(result, nest, flags);
+  }
+
+  private void addFlags(List<SlimProject> result, int nest, Container flags) {
     Panel current = new Thumbnails();
     flags.add(current);
-    int numInRow = ITEMS_IN_ROW;
-    List<SlimProject> languages = new ArrayList<SlimProject>(result);
 
-    logger.info("addProjectChoices " + languages.size() + " languages");
+    List<SlimProject> languages = new ArrayList<>(result);
 
+//    logger.info("addProjectChoices " + languages.size() + " languages");
+
+    sortLanguages(nest, languages);
+
+    int size = languages.size();
+  //  logger.info("addProjectChoices " + size + "-------- nest " + nest);
+    int total = 0;
+    for (int i = 0; i < size; i += ITEMS_IN_ROW) {
+      int max = i + ITEMS_IN_ROW;
+      if (max > size) max = size;
+      for (int j = i; j < max; j++) {
+        SlimProject project = languages.get(j);
+        Panel langIcon = getLangIcon(project.getLanguage(), project, nest);
+        current.add(langIcon);
+        total++;
+      }
+
+      if (total < size) {
+        current = new Thumbnails();
+        flags.add(current);
+      }
+    }
+  }
+
+  private void sortLanguages(final int nest, List<SlimProject> languages) {
     Collections.sort(languages, new Comparator<SlimProject>() {
       @Override
       public int compare(SlimProject o1, SlimProject o2) {
@@ -155,21 +166,37 @@ public class ProjectChoices {
         }
       }
     });
+  }
 
-    int size = languages.size();
-    logger.info("addProjectChoices " + size + "-------- nest " + nest);
-    for (int i = 0; i < size; i += numInRow) {
-      int max = i + numInRow;
-      if (max > size) max = size;
-      for (int j = i; j < max; j++) {
-        SlimProject project = languages.get(j);
-        Panel langIcon = getLangIcon(project.getLanguage(), project, nest);
-        current.add(langIcon);
-      }
-
-      current = new Thumbnails();
-      flags.add(current);
+  /**
+   * TODO : there's excess horizontal space - the container is somehow set to a width of 724???
+   * @param result
+   * @param nest
+   * @return
+   */
+  @NotNull
+  private DivWidget getHeader(List<SlimProject> result, int nest) {
+    DivWidget header = new DivWidget();
+    header.addStyleName("container");
+   // removeWidth(header);
+    String text = PLEASE_SELECT_A_LANGUAGE;
+    if (nest == 1) {
+      text = PLEASE_SELECT_A_COURSE;
     }
+
+    if (result.isEmpty()) {
+      text = NO_LANGUAGES_LOADED_YET;
+    }
+
+    Heading child = new Heading(3, text);
+    child.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
+
+    header.add(child);
+    return header;
+  }
+
+  private void removeWidth(Widget header) {
+    header.getElement().removeAttribute("width");
   }
 
   /**
@@ -224,8 +251,9 @@ public class ProjectChoices {
     });
     widgets.add(button);
     Heading label = new Heading(5, name);
-    if (!projectForLang.getStatus().equalsIgnoreCase("production")) {
-      label.setSubtext(projectForLang.getStatus());
+
+    if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
+      label.setSubtext(projectForLang.getStatus().name());
     }
     widgets.add(label);
 
@@ -261,6 +289,7 @@ public class ProjectChoices {
 
   private void reallySetTheProject(int projectid) {
     logger.info("setProjectForUser set project for " + projectid);
+
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override

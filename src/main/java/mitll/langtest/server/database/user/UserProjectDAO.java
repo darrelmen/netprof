@@ -47,7 +47,9 @@ public class UserProjectDAO implements IUserProjectDAO {
 
   private UserProjectDAOWrapper dao;
 
-  public UserProjectDAO(DBConnection dbConnection) {  dao = new UserProjectDAOWrapper(dbConnection);  }
+  public UserProjectDAO(DBConnection dbConnection) {
+    dao = new UserProjectDAOWrapper(dbConnection);
+  }
 
   public void createTable() {
     dao.createTable();
@@ -59,10 +61,10 @@ public class UserProjectDAO implements IUserProjectDAO {
   }
 
   /**
-   * @see mitll.langtest.server.services.UserServiceImpl#userExists
    * @param userid
    * @param projid
    * @return
+   * @see mitll.langtest.server.services.UserServiceImpl#userExists
    */
   @Override
   public void add(int userid, int projid) {
@@ -86,13 +88,17 @@ public class UserProjectDAO implements IUserProjectDAO {
 
   /**
    * TODO - we seem to hit this too often
+   *
    * @param user
    * @return
    */
   @Override
   public int mostRecentByUser(int user) {
     List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
-    int i = slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
-    return i;
+    if (slickUserProjects.isEmpty()) return -1;
+    else {
+      SlickUserProject next = slickUserProjects.iterator().next();
+      return next.projid();
+     }
   }
 }

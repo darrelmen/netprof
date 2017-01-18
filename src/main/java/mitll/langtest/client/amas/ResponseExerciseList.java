@@ -148,7 +148,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
       }
 
       /**
-       * @see #addColumnsToTable
+       * @see SimplePagingContainer SimplePagingContainer#addColumnsToTable
        * @return
        */
       private Column<AmasExerciseImpl, SafeHtml> getExerciseIdColumn2() {

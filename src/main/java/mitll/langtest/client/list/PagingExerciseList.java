@@ -193,9 +193,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    .setIncorrectFirstOrder(incorrectFirstOrder)
    .setOnlyDefaultAudio(defaultAudioFilter);
    }
+  */
 
-
-   */
   /**
    * @return
    * @see PagingExerciseList#loadExercises
@@ -208,7 +207,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @return
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
-  protected ClickablePagingContainer<T> makePagingContainer() {
+  abstract protected ClickablePagingContainer<T> makePagingContainer();
+/*  {
     final PagingExerciseList<T, U> outer = this;
     pagingContainer =
         new ClickablePagingContainer<T>(controller) {
@@ -218,7 +218,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
           }
         };
     return pagingContainer;
-  }
+  }*/
 
   /**
    * Skip to first not completed or just go to the first item.

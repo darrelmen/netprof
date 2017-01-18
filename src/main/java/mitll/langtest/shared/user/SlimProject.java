@@ -33,6 +33,8 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
 
 import java.util.ArrayList;
@@ -46,7 +48,7 @@ public class SlimProject implements IsSerializable {
   private String language;
   private String course;
   private String countryCode;
-  private String status;
+  private ProjectStatus status;
   private int displayOrder;
   private boolean hasModel;
   private boolean isRTL;
@@ -71,8 +73,10 @@ public class SlimProject implements IsSerializable {
                      String language,
                      String countryCode,
                      String course,
-                     String status,
-                     int displayOrder, boolean hasModel, boolean isRTL) {
+                     ProjectStatus status,
+                     int displayOrder,
+                     boolean hasModel,
+                     boolean isRTL) {
     this.name = name;
     this.language = language;
     this.projectid = projectid;
@@ -149,7 +153,7 @@ public class SlimProject implements IsSerializable {
     return isRTL;
   }
 
-  public String getStatus() {
+  public ProjectStatus getStatus() {
     return status;
   }
 

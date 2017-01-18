@@ -33,6 +33,8 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ProjectService;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import org.apache.logging.log4j.LogManager;
@@ -42,30 +44,45 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
-  //private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
-  // try to use a more modern logger...?
   private static final org.apache.logging.log4j.Logger log = LogManager.getLogger(ProjectServiceImpl.class);
 
   @Override
   public List<ProjectInfo> getAll() {
-    return db.getProjectDAO().getAll()
+    return getProjectDAO().getAll()
         .stream()
         .map(project -> new ProjectInfo(project.id(),
             project.language(),
             project.name(),
             project.course(),
             project.modified().getTime(),
-            ProjectStatus.valueOf(project.status())))
+            ProjectStatus.valueOf(project.status()),
+            project.displayorder(),
+            project.countrycode())
+        )
         .collect(Collectors.toList());
+  }
+
+  private IProjectDAO getProjectDAO() {
+    return db.getProjectDAO();
   }
 
   @Override
   public boolean exists(int projectid) {
-    return db.getProjectDAO().exists(projectid);
+    return getProjectDAO().exists(projectid);
   }
 
   @Override
-  public void update(ProjectInfo info) {
-
+  public boolean update(ProjectInfo info) {
+    int currentUser = getUserIDFromSession();
+    Project currentProject = db.getProject(info.getID());
+    boolean wasRetired =false;
+    if (currentProject != null) {
+      wasRetired = currentProject.getStatus() == ProjectStatus.RETIRED;
+    }
+    boolean update = getProjectDAO().update(currentUser, info);
+    if (update && wasRetired) {
+      db.configureProject( db.getProject(info.getID()));
+    }
+    return update;
   }
 }
