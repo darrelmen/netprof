@@ -78,7 +78,7 @@ public class DominoUserTest extends BaseTest {
         ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es", 0);
   }
 
-  @Test
+/*  @Test
   public void testTestProject() {
     DatabaseImpl database = getDatabase("netProf");
 
@@ -105,7 +105,7 @@ public class DominoUserTest extends BaseTest {
 //      Collection<UserList<CommonShell>> myLists = userListManager.getMyLists(user.getID(), i);
 //      logger.info("lists for " + user + " " + myLists);
 //    }
-  }
+  }*/
 
   @Test
   public void testListProjects() {

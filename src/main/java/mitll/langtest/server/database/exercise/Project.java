@@ -91,7 +91,7 @@ public class Project {
    * @param serverProps
    * @param db
    * @param logAndNotify
-   * @see DatabaseImpl#rememberProject(int, int)
+   * @see DatabaseImpl#rememberProject
    */
   public Project(SlickProject project,
                  PathHelper pathHelper,
@@ -103,6 +103,10 @@ public class Project {
     this.db = db;
     this.serverProps = serverProps;
     this.pathHelper = pathHelper;
+  }
+
+  public void setProject(SlickProject project) {
+    this.project = project;
   }
 
   public String getLanguage() {
