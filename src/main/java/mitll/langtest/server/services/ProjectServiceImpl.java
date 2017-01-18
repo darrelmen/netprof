@@ -34,6 +34,7 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.project.ProjectStatus;
 import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
@@ -53,12 +54,18 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
             project.language(),
             project.name(),
             project.course(),
-            project.modified().getTime()))
+            project.modified().getTime(),
+            ProjectStatus.valueOf(project.status())))
         .collect(Collectors.toList());
   }
 
   @Override
   public boolean exists(int projectid) {
     return db.getProjectDAO().exists(projectid);
+  }
+
+  @Override
+  public void update(ProjectInfo info) {
+
   }
 }

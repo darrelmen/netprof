@@ -41,4 +41,6 @@ public interface ProjectServiceAsync {
   void getAll(AsyncCallback<List<ProjectInfo>> async);
 
   void exists(int projectid, AsyncCallback<Boolean> async);
+
+  void update(ProjectInfo info, AsyncCallback<Void> async);
 }

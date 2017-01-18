@@ -40,6 +40,7 @@ public class ProjectInfo implements HasID, IsSerializable {
   private String name;
   private String language;
   private String course;
+  private ProjectStatus status;
   private int id;
   //private List<ProjectInfo> children = new ArrayList<>();
   private long created;
@@ -50,12 +51,14 @@ public class ProjectInfo implements HasID, IsSerializable {
   /**
    * @see ProjectServiceImpl#getAll
    */
-  public ProjectInfo(int projectid, String language, String name, String course, long created) {
+  public ProjectInfo(int projectid, String language, String name, String course, long created,
+                     ProjectStatus status) {
     this.language = language;
     this.id = projectid;
     this.name = name;
     this.course = course;
     this.created = created;
+    this.status = status;
   }
 
   public String getLanguage() {
@@ -96,5 +99,9 @@ public class ProjectInfo implements HasID, IsSerializable {
 
   public long getCreated() {
     return created;
+  }
+
+  public ProjectStatus getStatus() {
+    return status;
   }
 }
