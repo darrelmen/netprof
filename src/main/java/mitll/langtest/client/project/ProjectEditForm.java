@@ -84,7 +84,7 @@ public class ProjectEditForm extends UserDialog {
 
       @Override
       public void onSuccess(Boolean result) {
-        // TODO : update lists
+        projectOps.refreshStartupInfo();
         projectOps.reload();
       }
     });

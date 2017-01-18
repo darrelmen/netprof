@@ -34,8 +34,8 @@ public class ProjectChoices {
   /**
    * @see #showProjectChoices(List, int)
    */
-  private static final String PLEASE_SELECT_A_LANGUAGE = "Please select a language";
-  private static final String PLEASE_SELECT_A_COURSE = "Please select a course";
+  private static final String PLEASE_SELECT_A_LANGUAGE = "Select a language";
+  private static final String PLEASE_SELECT_A_COURSE = "Select a course";
   private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
 
   /**
@@ -76,12 +76,24 @@ public class ProjectChoices {
     this.uiLifecycle = uiLifecycle;
   }
 
+  /**
+   * @see InitialUI#addProjectChoices
+   * @param level
+   * @param parent
+   */
   public void showProjectChoices(int level, SlimProject parent) {
     List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
 //    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
     showProjectChoices(getVisibleProjects(projects), level);
   }
 
+  /**
+   * Students and teachers can only see production sites.
+   * Admins can see retired sites.
+   * Developers can see development sites.
+   * @param projects
+   * @return
+   */
   private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
     List<SlimProject> filtered = new ArrayList<>();
     Collection<User.Permission> permissions = controller.getPermissions();
@@ -90,7 +102,12 @@ public class ProjectChoices {
 
     for (SlimProject project : projects) {
       if (project.getStatus() != ProjectStatus.PRODUCTION) {
-        if (canRecord) {
+        if (project.getStatus() == ProjectStatus.RETIRED) {
+          boolean admin = controller.getUserManager().isAdmin();
+          if (admin) {
+            filtered.add(project);
+          }
+        } else if (canRecord) {
           filtered.add(project);
         }
       } else filtered.add(project);
@@ -109,14 +126,13 @@ public class ProjectChoices {
    */
   public void showProjectChoices(List<SlimProject> result, int nest) {
 //    logger.info("showProjectChoices " + result.size() + " : " + nest);
-
     final Section section = new Section("section");
     contentRow.add(section);
 
     section.add(getHeader(result, nest));
 
     final Container flags = new Container();
-   // removeWidth(flags);
+    // removeWidth(flags);
 
     section.add(flags);
 
@@ -134,7 +150,7 @@ public class ProjectChoices {
     sortLanguages(nest, languages);
 
     int size = languages.size();
-  //  logger.info("addProjectChoices " + size + "-------- nest " + nest);
+    //  logger.info("addProjectChoices " + size + "-------- nest " + nest);
     int total = 0;
     for (int i = 0; i < size; i += ITEMS_IN_ROW) {
       int max = i + ITEMS_IN_ROW;
@@ -170,6 +186,7 @@ public class ProjectChoices {
 
   /**
    * TODO : there's excess horizontal space - the container is somehow set to a width of 724???
+   *
    * @param result
    * @param nest
    * @return
@@ -178,7 +195,7 @@ public class ProjectChoices {
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
-   // removeWidth(header);
+    // removeWidth(header);
     String text = PLEASE_SELECT_A_LANGUAGE;
     if (nest == 1) {
       text = PLEASE_SELECT_A_COURSE;
@@ -267,7 +284,7 @@ public class ProjectChoices {
 
   /**
    * @param projectid
-   * @see #getImageAnchor(String, SlimProject)
+   * @see #getImageAnchor
    */
   private void setProjectForUser(final int projectid) {
     projectServiceAsync.exists(projectid, new AsyncCallback<Boolean>() {
@@ -287,6 +304,10 @@ public class ProjectChoices {
     });
   }
 
+  /**
+   * @see #setProjectForUser
+   * @param projectid
+   */
   private void reallySetTheProject(int projectid) {
     logger.info("setProjectForUser set project for " + projectid);
 

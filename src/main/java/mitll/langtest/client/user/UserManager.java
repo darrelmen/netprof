@@ -34,6 +34,7 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
@@ -61,12 +62,11 @@ public class UserManager {
 
   private static final boolean DEBUG = true;
 
-  private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
+//  private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
 
   private static final int DAY_HOURS = 24;
-  private static final long WEEK_HOURS = DAY_HOURS * 7;
-
- // private static final long EXPIRATION_HOURS = 52 * WEEK_HOURS * HOUR_IN_MILLIS;
+  //private static final long WEEK_HOURS = DAY_HOURS * 7;
+  // private static final long EXPIRATION_HOURS = 52 * WEEK_HOURS * HOUR_IN_MILLIS;
 
   private static final int NO_USER_SET = -1;
   private static final String NO_USER_SET_STRING = "" + NO_USER_SET;
@@ -77,6 +77,7 @@ public class UserManager {
 
   private final UserServiceAsync userServiceAsync;
   private final UserNotification userNotification;
+  private final UserFeedback userFeedback;
   private long userID = NO_USER_SET;
   private String userChosenID = "";
 
@@ -89,12 +90,13 @@ public class UserManager {
    * @param props
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
-  public UserManager(UserNotification lt, UserServiceAsync userServiceAsync, PropertyHandler props) {
+  public UserManager(UserNotification lt,
+                     UserFeedback userFeedback,
+                     UserServiceAsync userServiceAsync, PropertyHandler props) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
-    // this.props = props;
-    //  this.loginType = props.getLoginType();
     this.appTitle = props.getAppTitle();
+    this.userFeedback = userFeedback;
   }
 
   public UserServiceAsync getUserService() {
@@ -150,11 +152,11 @@ public class UserManager {
   private void getPermissionsAndSetUser() {
     if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser " +
         " asking server for info...");
-
+    final long then = System.currentTimeMillis();
     userServiceAsync.getUserFromSession(new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        userFeedback.onFailure(caught, then);
       }
 
       @Override
@@ -179,30 +181,6 @@ public class UserManager {
         }
       }
     });
-
-    //console("getPermissionsAndSetUser : " + user);
-   /* if (passwordHash == null) passwordHash = "";
-
-    userServiceAsync.loginUser(user, passwordHash, "",
-        //attemptedFreeTextPassword,
-        new AsyncCallback<LoginResult>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
-
-          @Override
-          public void onSuccess(LoginResult result) {
-            if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
-            if (result == null ||
-                result.getResultType() != LoginResult.ResultType.Success
-                ) {
-              clearUser();
-              userNotification.showLogin();
-            } else {
-              gotNewUser(result.getLoggedInUser());
-            }
-          }
-        });*/
   }
 
   /**
@@ -263,7 +241,6 @@ public class UserManager {
             sid.equals(NO_USER_SET_STRING)) ||
         checkUserExpired(sid);
   }*/
-
   private String getUserFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     String userIDCookie = getUserIDCookie();
@@ -384,7 +361,7 @@ public class UserManager {
       // localStorageIfSupported.removeItem(getPassCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
       localStorageIfSupported.removeItem(getUserPendingID());
-    //  logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
+      //  logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
@@ -408,7 +385,7 @@ public class UserManager {
   }
 
   public void rememberUser(User user) {
-   // final long DURATION = getUserSessionDuration();
+    // final long DURATION = getUserSessionDuration();
     //long futureMoment = getUserSessionEnd(DURATION);
 
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -416,7 +393,7 @@ public class UserManager {
     localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
     //  localStorageIfSupported.setItem(getPassCookie(), passwordHash);
     localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
-  //  rememberUserSessionEnd(localStorageIfSupported, futureMoment);
+    //  rememberUserSessionEnd(localStorageIfSupported, futureMoment);
     // localStorageIfSupported.setItem(getLoginType(), "" + userType);
     //logger.info("storeUser : user now " + user.getID() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
   }
@@ -430,19 +407,8 @@ public class UserManager {
    * @see #storeUser
    */
   private void gotNewUser(User result) {
-    // logger.info("UserManager.gotNewUser " + result);
-//    userNotification.getPermissions().clear();
+    logger.info("UserManager.gotNewUser " + result);
     if (result != null) {
-/*      for (User.Permission permission : result.getPermissions()) {
-        boolean valid = true;
-        if (permission == User.Permission.QUALITY_CONTROL ||
-            permission == User.Permission.RECORD_AUDIO) {
-          valid = result.isCD();
-        }
-        if (valid) {
-          userNotification.setPermission(permission, true);
-        }
-      }*/
       this.current = result;
       // logger.info("\tgotNewUser current user " + current);
       userNotification.gotUser(result);
@@ -497,7 +463,6 @@ public class UserManager {
     long mult =*//* loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 :*//* 4;
     return EXPIRATION_HOURS * mult;
   }*/
-
   public boolean isMale() {
     return current.isMale();
   }

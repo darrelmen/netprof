@@ -362,25 +362,13 @@ public class InitialUI implements UILifecycle {
     home.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
-//        logout();
         chooseProjectAgain();
       }
     });
     crumbs.add(home);
-    // logger.info("\tgetBreadcrumbs add home");
 
     User current = userManager.getCurrent();
     if (current != null) {
- /*     NavLink me = new NavLink(current.getUserID());
-      me.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent clickEvent) {
-          chooseProjectAgain();
-        }
-      });
-      crumbs.add(me);*/
-      // logger.info("getBreadcrumbs adding step for current user " + current);
-
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
         int currentProject = startupInfo.getProjectid();
@@ -469,7 +457,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void makeNavigation() {
-    navigation = new Navigation(service, userManager, controller, userFeedback);
+    navigation = new Navigation(service, userManager, controller, userFeedback, lifecycleSupport);
   }
 
   /**
@@ -674,16 +662,13 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see #configureUIGivenUser(long)
-   * @see #chooseProjectAgain()
+   * @see #configureUIGivenUser
+   * @see #chooseProjectAgain
    * @see #clickOnParentCrumb
    */
   private void addProjectChoices(int level, SlimProject parent) {
     clearContent();
     addBreadcrumbs();
-//    List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
-//
-//    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
     choices.showProjectChoices(level, parent);
   }
 

@@ -49,8 +49,8 @@ public interface IProjectDAO extends IDAO {
 
   void delete(int id);
 
-  int addTest(int userid, String name, String language,
-              String firstType, String secondType, String countryCode);
+/*  int addTest(int userid, String name, String language,
+              String firstType, String secondType, String countryCode);*/
 
   /**
    * @return

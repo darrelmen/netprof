@@ -49,7 +49,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class StartupInfo implements IsSerializable {
-  private  List<Affiliation> affiliations;
+  private List<Affiliation> affiliations;
   private Map<String, String> properties;
   private List<SlimProject> projects;
   private String message = "";

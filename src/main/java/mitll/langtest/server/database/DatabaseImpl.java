@@ -179,7 +179,7 @@ public class DatabaseImpl implements Database {
   /**
    * @see #writeUserListAudio(OutputStream, long, int, AudioExport.AudioExportOptions)
    */
- // private final String configDir;
+  // private final String configDir;
   /**
    * Only for AMAS.
    *
@@ -244,7 +244,7 @@ public class DatabaseImpl implements Database {
     long now;
     this.connection = connection;
     absConfigDir = configDir;
-   // this.configDir = relativeConfigDir;
+    // this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
     this.logAndNotify = logAndNotify;
     this.pathHelper = pathHelper;
@@ -259,10 +259,6 @@ public class DatabaseImpl implements Database {
 
     monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
     this.pathHelper = pathHelper;
-//    if (!serverProps.useH2()) {
-//      populateProjects(false);
-//    }
-//    logger.info("made DatabaseImpl : " + this);
   }
 
   private String getOldLanguage(ServerProperties serverProps) {
@@ -568,6 +564,7 @@ public class DatabaseImpl implements Database {
     projectManagement.rememberProject(projectid);
   }
 
+
   /**
    * Make sure there's a favorites list per user per project
    *
@@ -694,6 +691,7 @@ public class DatabaseImpl implements Database {
   public void configureProject(Project project) {
     projectManagement.configureProject(project);
   }
+
   /**
    * Here to support import from old individual sites for CopyToPostgres
    *
@@ -704,9 +702,10 @@ public class DatabaseImpl implements Database {
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
     logger.info("makeExerciseDAO - " + lessonPlanFile + " : use h2 = " + serverProps.useH2());
 
-    if (isURL) {
+    /*if (isURL) {
       projectManagement.addSingleProject(new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS));
-    } else if (!serverProps.useH2()) {
+    } else*/
+    if (!serverProps.useH2()) {
 //      projectManagement.setExerciseDAOs();
 /*
     } else if (lessonPlanFile.endsWith(".json")) {
@@ -721,7 +720,6 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   *
    * @param projectid
    * @return
    */
@@ -1776,5 +1774,9 @@ public class DatabaseImpl implements Database {
 
   public void setUserSecurityManager(IUserSecurityManager userSecurityManager) {
     this.userSecurityManager = userSecurityManager;
+  }
+
+  public IProjectManagement getProjectManagement() {
+    return projectManagement;
   }
 }

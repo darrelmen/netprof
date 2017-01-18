@@ -77,6 +77,7 @@ public class ProjectTest extends BaseTest {
         ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es", 0);
   }
 
+/*
   @Test
   public void testTestProject() {
     DatabaseImpl database = getDatabase("netProf");
@@ -105,6 +106,7 @@ public class ProjectTest extends BaseTest {
 //      logger.info("lists for " + user + " " + myLists);
 //    }
   }
+*/
 
   @Test
   public void testListProjects() {

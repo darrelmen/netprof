@@ -226,13 +226,10 @@ public class User extends MiniUser {
 
   public enum Permission implements IsSerializable {
     TEACHER_PERM("View Student Data"), // gets to see teacher things like student analysis, invite
-    //EDIT_STUDENT("Edit Student Profile"),
-
     QUALITY_CONTROL("Quality Control"),
     RECORD_AUDIO("Record Audio"),
-    DEVELOP_CONTENT("Develop Content"); //? make new projects? edit via domino?
-    //INVITE("Invite New Users"),
-    //EDIT_USER("Edit All User Profiles");
+    DEVELOP_CONTENT("Develop Content"),
+    PROJECT_ADMIN("Project Admin");//? make new projects? edit via domino?
 
     String name;
 
