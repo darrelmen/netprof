@@ -81,7 +81,14 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private static final String SIGNED_UP1 = "Started";
   private static final int STUDENT_WIDTH = 300;
   private String storageKey = "selectedUser";
+  private int idWidth = ID_WIDTH;
 
+  /**
+   * @param controller
+   * @param selectedUserKey
+   * @param header
+   * @see BasicUserContainer#BasicUserContainer
+   */
   MemoryItemContainer(ExerciseController controller,
                       String selectedUserKey,
                       String header) {
@@ -91,11 +98,18 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     this.header = header;
   }
 
-  public MemoryItemContainer(ExerciseController controller, String header) {
+  /**
+   * @param controller
+   * @param header
+   * @param idWidth
+   * @see mitll.langtest.client.project.ProjectContainer#ProjectContainer
+   */
+  public MemoryItemContainer(ExerciseController controller, String header, int idWidth) {
     super(controller);
     this.selectedUserKey = getSelectedUserKey(controller, header);
     this.selectedUser = getSelectedUser(selectedUserKey);
     this.header = header;
+    this.idWidth = idWidth;
   }
 
   public DivWidget getTable(Collection<T> users, String title, String subtitle) {
@@ -147,11 +161,14 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   protected Column<T, SafeHtml> dateCol;
 
+  /**
+   *
+   */
   @Override
   protected void addColumnsToTable() {
     Column<T, SafeHtml> userCol = getItemColumn();
     userCol.setSortable(true);
-    table.setColumnWidth(userCol, ID_WIDTH + "px");
+    table.setColumnWidth(userCol, idWidth + "px");
     addColumn(userCol, new TextHeader(header));
     ColumnSortEvent.ListHandler<T> columnSortHandler = getUserSorter(userCol, getList());
     table.addColumnSortHandler(columnSortHandler);
@@ -198,7 +215,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return tableWithPager;
   }
 
-  private void makeInitialSelection(Collection<T> users, T userToSelect) {
+  protected void makeInitialSelection(Collection<T> users, T userToSelect) {
     final T finalUser = userToSelect;
 
     Scheduler.get().scheduleDeferred(() -> {
@@ -299,7 +316,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   /**
    * @param selectedUserKey
    * @return
-   * @see #MemoryItemContainer(ExerciseController, String)
+   * @see #MemoryItemContainer(ExerciseController, String, int)
    */
   private Long getSelectedUser(String selectedUserKey) {
     if (Storage.isLocalStorageSupported()) {

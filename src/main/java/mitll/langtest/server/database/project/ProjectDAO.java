@@ -34,7 +34,9 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.UserProjectDAO;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
@@ -98,6 +100,36 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return !dao.byID(projid).isEmpty();
   }
 
+  @Override
+  public boolean update(int userid, ProjectInfo projectInfo) {
+    Project currentProject = database.getProject(projectInfo.getID());
+
+    SlickProject project = currentProject.getProject();
+    SlickProject changed = new SlickProject(projectInfo.getID(),
+        userid,
+        new Timestamp(System.currentTimeMillis()),
+        projectInfo.getName(),
+        projectInfo.getLanguage(),
+        project.course(),
+        project.kind(),
+        projectInfo.getStatus().toString(),
+        project.first(),
+        project.second(),
+        project.countrycode(),
+        project.ltsClass(),
+        project.dominoid(),
+        project.displayorder()
+    );
+
+    boolean didChange = dao.update(changed) > 0;
+
+    if (!didChange) {
+      logger.error("didn't update " + projectInfo + " for current " + currentProject);
+    }
+
+    return didChange;
+  }
+
   private SlickProject getDefaultProject() {
     Seq<SlickProject> aDefault = dao.getDefault();
     return aDefault.isEmpty() ? null : aDefault.iterator().next();
@@ -147,6 +179,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
+   * Mainly called from drop.sh or tests
+   * In general we want to retire projects when we don't want them visible.
+   *
    * @param id
    * @seex PostgresTest#testDeleteEnglish
    */
@@ -154,19 +189,19 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     dao.delete(id);
   }
 
-/*  public void dropProject(String name) {
-    Collection<SlickProject> all = getAll();
-    for (SlickProject project : all) {
-      logger.info("found " + project);
-      if (project.language().equalsIgnoreCase("english")) {
-        logger.info("deleting " + project);
-        delete(project.id());
-        break;
-      } else {
-        logger.debug("not deleting " + project);
-      }
+  /**
+   * TODO: Consider keeping an update history.
+   *
+   * @param project
+   * @return
+   */
+  public boolean update(SlickProject project) {
+    int update = dao.update(project);
+    if (update == 0) {
+      logger.error("update : no project with id for " + project);
     }
-  }*/
+    return update > 0;
+  }
 
   /**
    * TODO : consider adding lts class

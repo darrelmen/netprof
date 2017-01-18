@@ -107,7 +107,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   @Override
   protected void addSelectionModel() {
-    selectionModel = new SingleSelectionModel<PhoneAndStats>();
+    selectionModel = new SingleSelectionModel<>();
     table.setSelectionModel(selectionModel);
   }
 

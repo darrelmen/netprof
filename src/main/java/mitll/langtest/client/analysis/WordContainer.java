@@ -335,7 +335,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
 
   /**
    * @return
-   * @see #addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable()
    */
   private Column<WordScore, SafeHtml> getPlayAudio() {
     return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {

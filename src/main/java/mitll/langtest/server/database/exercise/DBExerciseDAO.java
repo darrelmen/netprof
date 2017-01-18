@@ -65,6 +65,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   /**
    * TODO : remove duplicate
+   *
    * @return
    */
   @Override
@@ -76,7 +77,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       String second = project.second();
       if (first != null && !first.isEmpty()) typeOrder.add(first);
       if (second != null && !second.isEmpty()) typeOrder.add(second);
-     // typeOrder = project.getTypeOrder();
+      // typeOrder = project.getTypeOrder();
     }
     return typeOrder;
   }
@@ -106,7 +107,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       int projid = project.id();
       List<CommonExercise> allNonContextExercises = userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper());
-      logger.info("project " + project + " readExercises got " + allNonContextExercises.size() + " predef exercises;");
+      logger.info("readExercises project " + project +
+          " readExercises got " + allNonContextExercises.size() + " predef exercises");
 
       Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated(projid);
 

@@ -34,6 +34,7 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
 
@@ -71,5 +72,7 @@ public interface IProjectDAO extends IDAO {
   int getDefault();
 
   boolean exists(int projid);
+
+  boolean update(int userid,ProjectInfo projectInfo);
   // void dropProject(String name);
 }
