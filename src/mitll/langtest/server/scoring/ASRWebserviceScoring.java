@@ -389,10 +389,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
       if (!word.equals(" ") && !word.isEmpty()) {
         if (htkDictionary.contains(word)) {
-          logger.debug("dict has " +word);
+      //    logger.debug("dict has " +word);
           scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
           for (int i = 0; i < prons.size(); i++) {
-            logger.debug("\tdict has " +word + " " + prons.apply(i));
+        //    logger.debug("\tdict has " +word + " " + prons.apply(i));
             dict += getPronStringForWord(word, prons.apply(i));
           }
         } else {
@@ -424,8 +424,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                 logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
                 logger.info("attempting to fall back to default pronunciation");
                 if (process.length > 0) {
-                  logger.info("adding to dict " + word + " = " + process);
-
+          //        logger.info("adding to dict " + word + " = " + process);
                   dict += getDefaultPronStringForWord(word, process);
                 }
               }
