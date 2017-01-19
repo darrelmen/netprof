@@ -111,11 +111,12 @@ public class Project {
   }
 
   public String getLanguage() {
-    return project.language();
+    return project == null ? "No project yet" : project.language();
   }
 
   /**
    * Only public to support deletes...
+   *
    * @see mitll.langtest.server.services.QCServiceImpl#deleteItem
    */
   public <T extends CommonShell> void buildExerciseTrie() {
@@ -193,8 +194,8 @@ public class Project {
   }
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject
    * @param analysis
+   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject
    */
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
@@ -268,17 +269,17 @@ public class Project {
   }
 
   /**
+   * @return
    * @see ProjectManagement#configureProjects
    * @see ProjectManagement#getExercises
-   * @return
    */
   public boolean isConfigured() {
     return wasConfigured;
   }
 
   /**
-   * @see ProjectManagement#configureProject
    * @param wasConfigured
+   * @see ProjectManagement#configureProject
    */
   public void setConfigured(boolean wasConfigured) {
     this.wasConfigured = wasConfigured;

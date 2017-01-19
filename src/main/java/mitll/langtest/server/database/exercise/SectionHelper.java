@@ -172,7 +172,7 @@ public class SectionHelper<T extends Shell> {
     } else {
       Map<String, Lesson<T>> stringLessonMap = typeToUnitToLesson.get(root);
       if (stringLessonMap == null) {
-        logger.error("no entry for " + root + " in " + typeToUnitToLesson.keySet());
+        logger.warn("getChildren no entry for " + root + " in " + typeToUnitToLesson.keySet());
       } else {
         //logger.debug("for " + root + " got " + stringLessonMap);
         for (Map.Entry<String, Lesson<T>> rootSection : stringLessonMap.entrySet()) {
@@ -197,7 +197,7 @@ public class SectionHelper<T extends Shell> {
 
     Collection<String> children = typeToSections.get(nextType);
     if (children == null) {
-      logger.error("huh? can't find " + nextType + " in " + typeToSections);
+      logger.warn("addChildren huh? can't find " + nextType + " in " + typeToSections);
    //   report();
     } else {
       for (String childSection : children) {

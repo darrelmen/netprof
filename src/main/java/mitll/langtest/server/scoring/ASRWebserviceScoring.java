@@ -63,8 +63,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-//import net.sf.json.JSONObject;
-
 /**
  * Does ASR scoring using hydra.
  * <p>
@@ -117,7 +115,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               Project project) {
     super(deployPath, properties, langTestDatabase, htkDictionary, project);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
-    alignAudioToScore  = CacheBuilder.newBuilder().maximumSize(1000).build();
+    alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     ip = project.getWebserviceIP();
     port = project.getWebservicePort();
@@ -334,10 +332,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       );
 */
 
-      int imageWidth = imageOptions.getWidth();
-      int imageHeight = imageOptions.getHeight();
+    int imageWidth = imageOptions.getWidth();
+    int imageHeight = imageOptions.getHeight();
 
-      boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
+    boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
       EventAndFileInfo eventAndFileInfo = jsonObject == null ?
           writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
               useScoreForBkgColor,
@@ -352,8 +350,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           "\n\tsTypeToImage " + sTypeToImage
       );*/
 
-      return new PretestScore(
-          scores.hydraScore,
+      return new PretestScore(scores.hydraScore,
           getPhoneToScore(scores),
           getWordToScore(scores),
           sTypeToImage,
@@ -372,8 +369,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   ////////////////////////////////
 
   private boolean ltsOutputOk(String[][] process) {
-    return !(process == null || process.length == 0 || process[0].length == 0 ||
-        process[0][0].length() == 0 || (StringUtils.join(process[0], "-")).contains("#"));
+    return !(
+        process == null ||
+            process.length == 0 ||
+            process[0].length == 0 ||
+            process[0][0].length() == 0 ||
+            (StringUtils.join(process[0], "-")).contains("#"));
   }
 
   /**
@@ -689,7 +690,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   /**
    * @param scores
    * @return
-   * @see #getPretestScore(String, ImageOptions, boolean, String, String, Scores, String, String, double, int, boolean, JSONObject)
+   * @see #getPretestScore
    */
   private Map<String, Float> getWordToScore(Scores scores) {
     Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
