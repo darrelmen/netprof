@@ -99,19 +99,25 @@ public class SectionHelper<T extends Shell> {
 
         // TODO : I feel like I did this before...?
         // put sound at end...
-        if (types.contains("Sound")) {
-          types.remove("Sound");
-          types.add("Sound");
-        }
+        putSoundAtEnd(types);
       }
+//      logger.info("getTypeOrder types " + types);
+
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-     // logger.info("getTypeOrder validTypes " + validTypes);
+  //    logger.info("getTypeOrder validTypes " + validTypes);
 
       List<String> valid = new ArrayList<>(predefinedTypeOrder);
       valid.retainAll(validTypes);
       return valid;
+    }
+  }
+
+  private void putSoundAtEnd(List<String> types) {
+    if (types.contains("Sound")) {
+      types.remove("Sound");
+      types.add("Sound");
     }
   }
 
@@ -192,6 +198,7 @@ public class SectionHelper<T extends Shell> {
     Collection<String> children = typeToSections.get(nextType);
     if (children == null) {
       logger.error("huh? can't find " + nextType + " in " + typeToSections);
+   //   report();
     } else {
       for (String childSection : children) {
         SectionNode child = new SectionNode(nextType, childSection);
@@ -299,8 +306,9 @@ public class SectionHelper<T extends Shell> {
 
   /**
    * @param exercise
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromUserListFiltered(Map, UserList)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromUserListFiltered
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
+   * @see BaseExerciseDAO#addNewExercises
    */
   public void addExercise(T exercise) {
     List<SectionHelper.Pair> pairs = new ArrayList<>();

@@ -140,11 +140,21 @@ public class BaseTest {
     String name = file.getName();
     String parent = file.getParentFile().getAbsolutePath();
 
+    ServerProperties serverProps = getProps();
 
-    ServerProperties serverProps = new ServerProperties(parent, name);
     DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
         new PathHelper("war", serverProps), false, null, false);
     return database;
+  }
+
+  protected static ServerProperties getProps() {
+    File file = new File("/opt/netprof/config/netprof.properties");
+    String name = file.getName();
+    String parent = file.getParentFile().getAbsolutePath();
+
+
+    ServerProperties serverProps = new ServerProperties(parent, name);
+    return  serverProps;
   }
 
   protected void finish(Statement statement, ResultSet rs) throws SQLException {

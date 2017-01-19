@@ -123,26 +123,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
   }
 
-  /**
-   * @param request
-   * @param response
-   * @throws ServletException
-   * @throws IOException
-   */
-  @Override
-  protected void service(HttpServletRequest request,
-                         HttpServletResponse response) throws ServletException, IOException {
-    try {
-      super.service(request, response);
-    } catch (ServletException | IOException e) {
-      logAndNotifyServerException(e);
-      throw e;
-    } catch (Exception eee) {
-      logAndNotifyServerException(eee);
-      throw new ServletException("rethrow exception", eee);
-    }
-  }
-
   protected SectionHelper<CommonExercise> getSectionHelper() {
     return super.getSectionHelper();
   }
@@ -389,7 +369,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   public void destroy() {
     super.destroy();
     if (db == null) {
-      logger.error("DatabaseImpl was never made properly...");
+      logger.warn("DatabaseImpl was never made properly...");
     } else {
       db.destroy(); // TODO : redundant with h2 shutdown hook?
       db.stopDecode();

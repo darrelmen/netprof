@@ -166,7 +166,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
     boolean b = db.deleteItem(id, getProjectID());
     if (b) {
       // force rebuild of full trie
-      getProject().buildExerciseTrie(db);
+      getProject().buildExerciseTrie();
     }
     return b;
   }

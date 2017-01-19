@@ -39,6 +39,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -115,9 +116,9 @@ public class Project {
 
   /**
    * Only public to support deletes...
+   * @see mitll.langtest.server.services.QCServiceImpl#deleteItem
    */
-  public <T extends CommonShell> void buildExerciseTrie(DatabaseImpl db) {
-//    logger.info("db " + db + " audioFileHelper " + getAudioFileHelper());
+  public <T extends CommonShell> void buildExerciseTrie() {
     fullTrie = new ExerciseTrie<>(getExercisesForUser(), project.language(), getSmallVocabDecoder());
   }
 
@@ -191,6 +192,10 @@ public class Project {
     return jsonSupport;
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject
+   * @param analysis
+   */
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
     String language = project == null ? "unk" : project.language();
@@ -262,10 +267,19 @@ public class Project {
     return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 
+  /**
+   * @see ProjectManagement#configureProjects
+   * @see ProjectManagement#getExercises
+   * @return
+   */
   public boolean isConfigured() {
     return wasConfigured;
   }
 
+  /**
+   * @see ProjectManagement#configureProject
+   * @param wasConfigured
+   */
   public void setConfigured(boolean wasConfigured) {
     this.wasConfigured = wasConfigured;
   }

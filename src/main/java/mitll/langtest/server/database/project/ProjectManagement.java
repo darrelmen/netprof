@@ -45,7 +45,6 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.User;
@@ -165,13 +164,14 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
+   * only configured if we have a slick project for it... how could we not???
    * @param project
    * @see #configureProjects
    */
   public void configureProject(Project project) {
     // logger.info("configureProject " + project);
-    project.setConfigured(true);
     SlickProject slickProject = project.getProject();
+    project.setConfigured(slickProject != null);
 
     if (slickProject == null) {
       logger.info("configureProject : note : no project for " + project);
@@ -193,7 +193,9 @@ public class ProjectManagement implements IProjectManagement {
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
-      logger.debug("configureProject first exercise is " + rawExercises.iterator().next());
+      logger.debug("configureProject (" + project.getLanguage()+
+          ") " +
+          "first exercise is " + rawExercises.iterator().next());
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), db.getResultDAO(), db.getRefResultDAO(), db.getAudioDAO(),
         db.getPhoneDAO()));
@@ -220,6 +222,9 @@ public class ProjectManagement implements IProjectManagement {
 //      project.setExToPhone(exToPhonePerProject);
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       logMemory();
+    }
+    else {
+      logger.warn("\n\n\nhuh? no slick project for " + project);
     }
 
     logMemory();

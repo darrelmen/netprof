@@ -154,7 +154,7 @@ public class AudioFileHelper implements AlignDecode {
           boolean validForeignPhrase = isInDictOrLTS(exercise);
           if (!validForeignPhrase) {
             if (count < 10) {
-              logger.error("huh? for " + exercise.getID() +
+              logger.warn("huh? for " + exercise.getID() +
                   " " + exercise.getEnglish() + " fl '" + exercise.getForeignLanguage() + "'");
             }
             count++;
@@ -850,7 +850,7 @@ public class AudioFileHelper implements AlignDecode {
 
   private PretestScore getAlignmentScore(CommonShell exercise, String testAudioPath, DecoderOptions options) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), exercise.getTransliteration(),
-        DEFAULT, ""+exercise.getID(), null,
+        DEFAULT, "" + exercise.getID(), null,
         options);
   }
 
@@ -960,7 +960,7 @@ public class AudioFileHelper implements AlignDecode {
         (options.isCanUseCache() ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
     if (testAudioFile == null) {
-      logger.warn("getASRScoreForAudio huh? " +getLanguage()+ " no test audio file for '" + sentence + "'");
+      logger.warn("getASRScoreForAudio huh? " + getLanguage() + " no test audio file for '" + sentence + "'");
       return new PretestScore(); // very defensive
     }
     testAudioFile = mp3Support.dealWithMP3Audio(testAudioFile);
@@ -1131,10 +1131,10 @@ public class AudioFileHelper implements AlignDecode {
   private void makeASRScoring(Project project) {
     if (webserviceScoring == null) {
       String installPath = pathHelper.getInstallPath();
-  //    String installPath = serverProps.getAudioBaseDir();
+      //    String installPath = serverProps.getAudioBaseDir();
       HTKDictionary htkDictionary = readDictionary(project, installPath);
       webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
-      oldschoolScoring  = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
+      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
     }
     asrScoring = oldschoolScoring;
   }
@@ -1176,7 +1176,11 @@ public class AudioFileHelper implements AlignDecode {
       return htkDictionary;
     } else {
       if (hasModel()) {
-        logger.error("\n----->>>> makeDict : Can't find dict file at " + dictFile);
+        if (new File(serverProps.getMediaDir()).exists()) {
+          logger.error("\n----->>>> makeDict : Can't find dict file at " + dictFile);
+        } else {
+          logger.debug("makeDict : NOTE: Can't find dict file at " + dictFile);
+        }
       } else {
         logger.info("---> makeDict : Can't find dict file at " + dictFile);
       }

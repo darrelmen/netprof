@@ -44,7 +44,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class SlickUserPermissionDAOImpl extends DAO implements IUserPermissionDAO {
+public class SlickUserPermissionDAOImpl extends DAO {//} implements IUserPermissionDAO {
   private final UserPermissionDAOWrapper dao;
 
   public SlickUserPermissionDAOImpl(Database database, DBConnection dbConnection) {
@@ -52,7 +52,7 @@ public class SlickUserPermissionDAOImpl extends DAO implements IUserPermissionDA
     this.dao = new UserPermissionDAOWrapper(dbConnection);
   }
 
-  @Override
+ /* @Override
   public String getName() {
     return dao.dao().name();
   }
@@ -106,5 +106,5 @@ public class SlickUserPermissionDAOImpl extends DAO implements IUserPermissionDA
       perms.add(User.Permission.valueOf(perm));
     }
     return perms;
-  }
+  }*/
 }
