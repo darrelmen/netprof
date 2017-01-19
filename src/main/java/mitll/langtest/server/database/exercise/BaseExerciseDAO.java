@@ -259,22 +259,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
       }
     } else {
-      logger.error("configuration error - expecting a media directory " + mediaDir);
+      logger.warn("configuration error? - expecting a media directory " + mediaDir);
     }
 
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
     logger.info("setAudioDAO exToAudio " +exToAudio.size());
     this.attachAudio = new AttachAudio(exToAudio, language, serverProps.shouldCheckAudioTranscript(), serverProps);
-/*
-    this.attachAudio = new AttachAudio(
-        mediaDir,
-        mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
-        serverProps.getAudioOffset(),
-        audioDAO.getExToAudio(),
-        serverProps.shouldCheckAudioTranscript(),
-        serverProps,
-        audioDAO);
-*/
   }
 
   /**

@@ -71,7 +71,8 @@ public class ExerciseToPhone {
       addPhones(phonesForEx, netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT));
       phonesForEx.setNumPhones(exjson.numalignphones());
     }
-    logger.info("getExerciseToPhone took " + (System.currentTimeMillis() - then) + " millis to populate ex->phone map");
+    logger.info("getExerciseToPhone took " + (System.currentTimeMillis() - then) +
+        " millis to populate ex->phone map of size " + exToPhones.size());
 
     return exToPhones;
   }
