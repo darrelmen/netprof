@@ -32,7 +32,7 @@ apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
-
+apply plugin: 'distribution'
 
 mongo {
     port mongoPort
@@ -99,7 +99,10 @@ dependencies {
     compile 'org.moxieapps.gwt:highcharts:1.7.0'
 
     // compile group: 'com.google.gwt.google-apis', name: 'gwt-visualization', version: '1.0.2'
+    // todo consider removing this
     compile name: 'gwt-visualization'
+
+    // just for AMAS support
     compile name: 'mira'
 
     // TODO : get these as artifactory dependencies
@@ -250,9 +253,41 @@ task makeDLIInstallation(type: Zip) {
     }
 }
 
+distributions {
+    main {
+        baseName = 'netprof-installation'
+        contents {
+            from('war/config/netProfDLI') {
+                into 'config'
+            }
+            from('scripts/copy.sh') {
+                into 'bin'
+            }
+            from('docs/*') {
+                into 'docs'
+            }
+            from('scripts/drop.sh') {
+                into 'bin'
+            }
+
+            from('build/libs') {
+                include '**/*.jar'
+                exclude '**/*installation*.jar'
+                into 'lib'
+            }
+
+            from('build/libs') {
+                include '**/*.war'
+                exclude '**/*installation*.jar'
+                into 'dist'
+            }
+        }
+    }
+}
+
 shadowJar.dependsOn war
-makeDevInstallation.dependsOn shadowJar
-makeDLIInstallation.dependsOn shadowJar
+//makeDevInstallation.dependsOn shadowJar
+//makeDLIInstallation.dependsOn shadowJar
 
 // ***************************** Publishing **************************************
 
