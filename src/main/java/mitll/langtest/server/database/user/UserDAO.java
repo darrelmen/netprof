@@ -603,6 +603,12 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return new ArrayList<>();
   }
 
+  /**
+   * @see #getUsers(String)
+   * @param rs
+   * @return
+   * @throws SQLException
+   */
   private List<User> getUsers(ResultSet rs) throws SQLException {
     List<User> users = new ArrayList<>();
 
@@ -610,10 +616,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       String userid = rs.getString("userid"); // userid
 
       Collection<User.Permission> permissions = getPermissions(rs, userid);
-
-//      if (!permissions.isEmpty()) {
-//        logger.info("For " + userid + " : " + permissions);
-//      }
       boolean isAdmin = isAdmin(userid);
       String userKind = rs.getString(KIND);
 
@@ -625,7 +627,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       String device = rs.getString(DEVICE);
 
       if (userKind == null) {
-        logger.warn("user kind for " + id + " " + userID + " is null?");
+        logger.warn("getUsers user kind for " + id + " " + userID + " is null?");
       }
 
       // if the user kind is unmarked, we'll make them a student, we can always change it later.

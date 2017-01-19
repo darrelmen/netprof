@@ -180,7 +180,7 @@ public class SLFFile {
 //      logger.info("tokens " + tokens);
       for (String token : tokens) {
         boolean onLast = ++c == tokens.size();
-  //      logger.info("onLast " + onLast + " c " + c + " " + token + " tokens " + tokens.size());
+        //      logger.info("onLast " + onLast + " c " + c + " " + token + " tokens " + tokens.size());
         String cleanedToken = cleanToken(token);
 
         if (!cleanedToken.isEmpty()) {

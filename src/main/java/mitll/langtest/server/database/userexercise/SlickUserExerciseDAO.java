@@ -263,7 +263,7 @@ public class SlickUserExerciseDAO
     exercise.setRefSentences(translations);
     exercise.setUpdateTime(lastModified);
     exercise.setAltFL(slick.altfl());
-    addPhoneInfo(slick, typeOrder, sectionHelper, id, exercise);
+    boolean added = addPhoneInfo(slick, typeOrder, sectionHelper, id, exercise);
 
     return exercise;
   }
@@ -293,8 +293,7 @@ public class SlickUserExerciseDAO
       //    addExerciseToSectionHelper(sectionHelper, unitToValue, exercise);
       List<SectionHelper.Pair> pairs = getPairs(sectionHelper, unitToValue, exercise);
       if (phones == null) {
-        logger.warn("no phones for " + id);
-
+//        logger.warn("no phones for " + id);
       } else {
         addedPhones = true;
         for (String phone : phones) {

@@ -38,12 +38,17 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.POIXMLProperties;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.internal.PackagePropertiesPart;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.xmlbeans.XmlException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -115,9 +120,50 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   protected List<CommonExercise> readExercises() {
     File file = new File(this.file);
     lastModified = file.lastModified();
-    logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " + new Date(lastModified));
+    long excelLastModified = getExcelLastModified(file);
+    lastModified = excelLastModified == 0 ? lastModified : excelLastModified;
 
     return readExercises(file);
+  }
+
+  /**
+   * Ask the excel file for when it was modified
+   * @param file
+   * @return
+   * @see #readExercises
+   */
+  private long getExcelLastModified(File file) {
+    if (!file.exists()) return 0;
+/*    try {
+      BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+      logger.info("creationTime:     " + attr.creationTime());
+//      logger.info("lastAccessTime:   " + attr.lastAccessTime());
+      logger.info("lastModifiedTime: " + attr.lastModifiedTime());
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+    }*/
+
+    try {
+      OPCPackage pkg = OPCPackage.open(file);
+      POIXMLProperties props = new POIXMLProperties(pkg);
+      PackagePropertiesPart ppropsPart = props.getCoreProperties().getUnderlyingProperties();
+
+      Date created = ppropsPart.getCreatedProperty().getValue();
+      logger.info("creationTime:     " + created);
+
+      Date modified = ppropsPart.getModifiedProperty().getValue();
+      logger.info("lastModifiedTime: " + modified);
+
+      String lastModifiedBy = ppropsPart.getLastModifiedByProperty().getValue();
+
+      logger.info("lastModifiedBy:   " + lastModifiedBy);
+      logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " +modified);
+
+      return modified.getTime();
+    } catch (IOException | OpenXML4JException | XmlException e) {
+      logger.error("got " + e, e);
+    }
+    return 0;
   }
 
   /**
