@@ -145,7 +145,12 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       logger.warn("getProjectID : no user in session, so we can't get the project id for the user.");
       return -1;
     }
-    return db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
+    int i = db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
+    Project project = db.getProject(i);
+    if (project != null) {
+      db.configureProject(project); //check if we should configure it - might be a new project
+    }
+    return i;
   }
 
   protected Project getProject() {
@@ -154,8 +159,12 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       // it's not in the current session - can we recover it from the remember me cookie?
       return null;
     } else {
-      return db.getProjectForUser(userIDFromSession);
+      return getProjectForUser(userIDFromSession);
     }
+  }
+
+  private Project getProjectForUser(int userIDFromSession) {
+    return db.getProjectForUser(userIDFromSession);
   }
 
   /**

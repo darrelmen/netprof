@@ -56,6 +56,7 @@ class CheckLTS {
 
   private final HTKDictionary htkDictionary;
   private final boolean isMandarin;
+
   private static final boolean DEBUG = false;
 
   /**
@@ -96,7 +97,7 @@ class CheckLTS {
 
   private int shown = 0;
 
-  private boolean hasUsableTransliteration(Collection<String> foreignTokens, Collection<String> translitTokens){
+  private boolean hasUsableTransliteration(Collection<String> foreignTokens, Collection<String> translitTokens) {
     return (foreignTokens.size() == translitTokens.size()) || (foreignTokens.size() == 1);
   }
 
@@ -106,12 +107,13 @@ class CheckLTS {
    * @param lts
    * @param foreignLanguagePhrase
    * @return set of oov tokens
-   * @see #checkLTS(String,String)
+   * @see #checkLTS(String, String)
    */
   private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase, String transliteration) {
-    if (htkDictionary.isEmpty() && LTSFactory.isEmpty(lts)) {
+    boolean isEmptyLTS = LTSFactory.isEmpty(lts);
+    if (htkDictionary.isEmpty() && isEmptyLTS) {
       if (shown++ < WARN_LTS_COUNT) {
-        logger.debug("skipping LTS since dict is empty and using the empty LTS : " + lts);
+        logger.debug("checkLTS skipping LTS since dict is empty and using the empty LTS : " + lts);
       }
       return Collections.emptySet();
     }
@@ -119,32 +121,20 @@ class CheckLTS {
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
     Collection<String> translitTokens = smallVocabDecoder.getTokens(transliteration);
-    boolean translitOk = true;
-    if (hasUsableTransliteration(tokens, translitTokens)) {
-      try {
-        int i = 0;
-        for (String translitToken : translitTokens) {
-          String trim = translitToken.trim();
-          String[][] process = lts.process(trim);
-          //if any of the words in the transliteration fails, we won't use the transliteration
-          translitOk &= (!(process == null || process.length == 0 || process[0].length == 0 ||
-              process[0][0].length() == 0 || (StringUtils.join(process[0], "-")).contains("#")));
-        }
-      }
-      catch (Exception e){
-        if (DEBUG)  logger.debug("transliteration not usable in checkLTS with lts "+lts+" and transliteration: "+transliteration);
-        translitOk = false;
-      }
-    } else{
-      translitOk = false;
-    }
+
+    boolean translitOk = isTranslitOk(lts, transliteration, tokens, translitTokens);
 
     String language = isMandarin ? " MANDARIN " : "";
 
-//    logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' lts " + lts + " dict size " + htkDictionary.size());
+    if (DEBUG) {
+      logger.debug("checkLTS '" + language + "'" +
+          "\n\ttokens : '" + tokens + "' lts " + lts +
+          "\n\tdict size " + htkDictionary.size() +
+          "\n\ttranslit OK " + translitOk);
+    }
 
-    Set<String> oov = new HashSet<>();
-    Set<String> inlts = new HashSet<>();
+    Set<String> oov    = new HashSet<>();
+    Set<String> inlts  = new HashSet<>();
     Set<String> indict = new HashSet<>();
     try {
       int i = 0;
@@ -152,35 +142,79 @@ class CheckLTS {
         String trim = token.trim();
         if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
           return oov;
+
         if (isMandarin) {
           String segmentation = smallVocabDecoder.segmentation(trim);
           if (segmentation.isEmpty() && !translitOk) {
             logger.warn("checkLTSOnForeignPhrase: mandarin token : '" + token + "' invalid!");
             oov.add(trim);
           }
-        } else {
-          String[][] process = lts.process(token);
-          if (!translitOk && (process == null || process.length == 0 || process[0].length == 0 ||
-              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && (StringUtils.join(process[0], "-")).contains("#")))) {
+        } else  {
+          String[][] process = (!isEmptyLTS) ? lts.process(token) : null;
+
+          if (DEBUG) {
+            if (process != null) {
+              if (process.length > 0) {
+                logger.info("in dict for " + process[0].length);
+                if (process[0].length > 0) {
+                  logger.info("in dict for " + process[0][0].length());
+                }
+              }
+            }
+          }
+
+
+          // so we've checked with LTS - why first ?
+          // but if it's not in LTS, check in dict
+          if (!translitOk &&
+              !isLegitLTS(process)
+          /*    (process == null || process.length == 0 || process[0].length == 0 ||
+              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && (StringUtils.join(process[0], "-")).contains("#")))
+          */) {
             boolean htkEntry = htkDictionary.contains(token);
-            if (!htkEntry && !htkDictionary.isEmpty()) {
-              if (!(lts instanceof corpus.EmptyLTS)) {
+            if (DEBUG) logger.info("checkLTS in dict for " + token + " = " + htkEntry);
+
+            if (htkEntry // && !htkDictionary.isEmpty()
+                ) {
+              if (process != null) {
+                logger.info("2 checkLTS in dict for " + process.length);
+                if (process.length > 0) {
+                  logger.info("2 in dict for " + process[0].length);
+                  if (process[0].length > 0) {
+                    logger.info("2 in dict for " + process[0][0].length());
+                  }
+                }
+              }
+              // NO : I guess we accept tokens when the dict is empty???
+              indict.add(trim);
+            } else {
+              if (!isEmptyLTS) {
                 logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
                     " : '" + token + "' hash " + token.hashCode() +
                     " is invalid in '" + foreignLanguagePhrase +
                     "' and not in dictionary of size " + htkDictionary.size()
                 );
               }
+              else if (DEBUG) {
+                logger.debug("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
+                    " : '" + token + "' hash " + token.hashCode() +
+                    " is invalid in '" + foreignLanguagePhrase +
+                    "' and not in dictionary of size " + htkDictionary.size()
+                );
+              }
               oov.add(trim);
-            } else {
-              indict.add(trim);
             }
-          } else {
-            //  logger.info("for " + token + " got " + (process.length));
-//            for (String [] first : process) {
-//              for (String  second : first) logger.info("\t" + second);
-//            }
+          } else if (!isEmptyLTS) {
+            if (DEBUG) {
+              logger.info("checkLTS for " + token + " got " + (process.length));
+              for (String[] first : process) {
+                for (String second : first) logger.info("\t" + second);
+              }
+            }
             inlts.add(trim);
+          } else {
+            if (DEBUG) logger.info("checkLTS in dict for " + token + " = " + trim);
+            oov.add(trim);
           }
         }
         i++;
@@ -195,9 +229,39 @@ class CheckLTS {
     } else {
       if (DEBUG) logger.info("for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
     }
-    if (DEBUG)  logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
+    if (DEBUG)
+      logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
 
     return oov;
+  }
+
+  private boolean isTranslitOk(LTS lts, String transliteration, Collection<String> tokens, Collection<String> translitTokens) {
+    boolean isEmptyLTS = LTSFactory.isEmpty(lts);
+    boolean translitOk = true;
+    if (hasUsableTransliteration(tokens, translitTokens) && !isEmptyLTS) {
+      try {
+        int i = 0;
+        for (String translitToken : translitTokens) {
+          String trim = translitToken.trim();
+          String[][] process = lts.process(trim);
+          //if any of the words in the transliteration fails, we won't use the transliteration
+          translitOk &= isLegitLTS(process);
+        }
+      } catch (Exception e) {
+        if (DEBUG) {
+          logger.debug("checkLTS transliteration not usable in checkLTS with lts " + lts + " and transliteration: " + transliteration);
+        }
+        translitOk = false;
+      }
+    } else {
+      translitOk = false;
+    }
+    return translitOk;
+  }
+
+  private boolean isLegitLTS(String[][] process) {
+    return !(process == null || process.length == 0 || process[0].length == 0 ||
+        process[0][0].length() == 0 || (StringUtils.join(process[0], "-")).contains("#"));
   }
 
   //private int multiple = 0;

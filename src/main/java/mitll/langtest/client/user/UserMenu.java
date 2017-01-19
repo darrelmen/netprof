@@ -13,7 +13,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
-import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
@@ -76,7 +75,7 @@ public class UserMenu {
     String nameForAnswer = props.getNameForAnswer() + "s";
     choices.add(new Banner.LinkAndTitle(
         nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), new ResultsClickHandler(), true));
-    choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
+  //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new Banner.LinkAndTitle("Events", new EventsClickHandler(), true));
     choices.add(new Banner.LinkAndTitle("Change Password", new ChangePasswordClickHandler(), false));
     choices.add(new Banner.LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
@@ -173,7 +172,7 @@ public class UserMenu {
       });
     }
   }
-
+/*
   private class MonitoringClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
@@ -186,7 +185,7 @@ public class UserMenu {
         }
       });
     }
-  }
+  }*/
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       uiLifecycle.logout();

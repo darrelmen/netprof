@@ -170,7 +170,6 @@ public class DatabaseImpl implements Database {
    */
   @Deprecated
   private DatabaseConnection connection = null;
-  private MonitoringSupport monitoringSupport;
 
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
@@ -258,7 +257,6 @@ public class DatabaseImpl implements Database {
       logger.info("took " + (now - then) + " millis to initialize DAOs for " + getOldLanguage(serverProps));
     }
 
-    monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
     this.pathHelper = pathHelper;
   }
 
@@ -447,12 +445,7 @@ public class DatabaseImpl implements Database {
    * @seex mitll.langtest.server.database.custom.UserListManagerTest#tearDown
    */
   @Deprecated
-  public void closeConnection() throws SQLException {
-  }
-
-  public MonitoringSupport getMonitoringSupport() {
-    return monitoringSupport;
-  }
+  public void closeConnection() throws SQLException {  }
 
   /**
    * @param installPath
@@ -1028,7 +1021,7 @@ public class DatabaseImpl implements Database {
       next = projectDAO.getFirst();
     }
     if (next == null) {
-      logger.error("no projects???");
+      logger.warn("no projects loaded yet ???");
       return false;
     } else {
       Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, -1);

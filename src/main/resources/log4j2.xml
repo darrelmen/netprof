@@ -143,6 +143,10 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
+        <logger name="mitll.langtest" level="DEBUG">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
         <root level="debug">
             <appender-ref ref="Mail" level="error"/>
         </root>
