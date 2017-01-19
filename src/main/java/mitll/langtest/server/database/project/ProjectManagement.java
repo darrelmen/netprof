@@ -155,20 +155,22 @@ public class ProjectManagement implements IProjectManagement {
     Collection<Project> projects = getProjects();
     logger.info("configureProjects got " + projects.size() + " projects");
     for (Project project : projects) {
-      if (!project.isConfigured()) {
-        configureProject(project);
-      } else {
-        logger.debug("project already configured " + project.getProject().id());
-      }
+      configureProject(project);
     }
   }
 
   /**
    * only configured if we have a slick project for it... how could we not???
+   *
    * @param project
    * @see #configureProjects
    */
   public void configureProject(Project project) {
+    if (project.isConfigured()) {
+      logger.debug("project already configured " + project.getProject().id());
+      return;
+    }
+
     // logger.info("configureProject " + project);
     SlickProject slickProject = project.getProject();
     project.setConfigured(slickProject != null);
@@ -193,9 +195,11 @@ public class ProjectManagement implements IProjectManagement {
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
-      logger.debug("configureProject (" + project.getLanguage()+
+      logger.debug("configureProject (" + project.getLanguage() +
           ") " +
           "first exercise is " + rawExercises.iterator().next());
+    } else {
+
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), db.getResultDAO(), db.getRefResultDAO(), db.getAudioDAO(),
         db.getPhoneDAO()));
@@ -222,8 +226,7 @@ public class ProjectManagement implements IProjectManagement {
 //      project.setExToPhone(exToPhonePerProject);
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       logMemory();
-    }
-    else {
+    } else {
       logger.warn("\n\n\nhuh? no slick project for " + project);
     }
 
@@ -263,6 +266,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * After changing project status - e.g. to retired - we need to update the SlickProject on the project.
+   *
    * @see mitll.langtest.server.services.ProjectServiceImpl#update
    */
   @Override
@@ -274,9 +278,9 @@ public class ProjectManagement implements IProjectManagement {
     for (Project project : idToProject.values()) {
       int id = project.getProject().id();
       SlickProject update = idToSlickProject.get(id);
-    //  logger.info("Was " + project.getProject());
+      //  logger.info("Was " + project.getProject());
       project.setProject(update);
-    //  logger.info("Now " + project.getProject());
+      //  logger.info("Now " + project.getProject());
     }
   }
 

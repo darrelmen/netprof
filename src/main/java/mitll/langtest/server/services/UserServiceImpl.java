@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 import static mitll.langtest.shared.user.LoginResult.ResultType.SessionNotRestored;
 
 @SuppressWarnings("serial")
@@ -74,18 +75,19 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public LoginResult loginUser(String userId,
                                String attemptedHashedPassword,
                                String attemptedFreeTextPassword) {
-    HttpServletRequest request = getThreadLocalRequest();
-    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
-    if (remoteAddr == null || remoteAddr.isEmpty()) {
-      remoteAddr = request.getRemoteAddr();
-    }
-    String userAgent = request.getHeader("User-Agent");
+    try {
+      HttpServletRequest request = getThreadLocalRequest();
+      String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+      if (remoteAddr == null || remoteAddr.isEmpty()) {
+        remoteAddr = request.getRemoteAddr();
+      }
+      String userAgent = request.getHeader("User-Agent");
 
-    // ensure a session is created.
-    HttpSession session = createSession();
-    logger.info("Login session " + session.getId() + " isNew=" + session.isNew()
-        //    + " host is secondary " + properties.isSecondaryHost()
-    );
+      // ensure a session is created.
+      HttpSession session = createSession();
+      logger.info("Login session " + session.getId() + " isNew=" + session.isNew()
+          //    + " host is secondary " + properties.isSecondaryHost()
+      );
 
     /*
     UsernamePasswordToken token = new UsernamePasswordToken(userId, attemptedHashedPassword);
@@ -98,25 +100,30 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     logger.info("sub " + subject);*/
 
 //    attemptedFreeTextPassword = rot13(attemptedFreeTextPassword);
-    logger.info("loginUser : userid " + userId + " password '" + attemptedHashedPassword + "'");
+      logger.info("loginUser : userid " + userId + " password '" + attemptedHashedPassword + "'");
 //    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedFreeTextPassword);
 
-    User loggedInUser = db.getUserDAO().loginUser(
-        userId,
-        attemptedFreeTextPassword,
-        userAgent,
-        remoteAddr,
-        session.getId());
+      User loggedInUser = db.getUserDAO().loginUser(
+          userId,
+          attemptedFreeTextPassword,
+          userAgent,
+          remoteAddr,
+          session.getId());
 
-    boolean success = loggedInUser != null;
+      boolean success = loggedInUser != null;
 
-    logActivity(userId, remoteAddr, userAgent, loggedInUser, success);
+      logActivity(userId, remoteAddr, userAgent, loggedInUser, success);
 
-    if (success) {
-      return getValidLogin(session, loggedInUser);
-    } else {
-      loggedInUser = db.getUserDAO().getUserByID(userId);
-      return getInvalidLoginResult(loggedInUser);
+      if (success) {
+        return getValidLogin(session, loggedInUser);
+      } else {
+        loggedInUser = db.getUserDAO().getUserByID(userId);
+        return getInvalidLoginResult(loggedInUser);
+      }
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+      logAndNotifyServerException(e);
+      return new LoginResult(Failed);
     }
   }
 
@@ -149,8 +156,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       return new LoginResult(LoginResult.ResultType.SessionExpired);
     }
   }
-
-
 
   public User getUserByID(String id) {
     return db.getUserDAO().getUserByID(id);

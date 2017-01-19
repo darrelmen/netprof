@@ -144,7 +144,7 @@ public class UserCopy {
 
     addUserProjectBinding(projid, slickUserProjectDAO, added);
     logger.info("copyUsers after, postgres importUsers " +
-        "num = " + dominoUserDAO.getUsers().size() +
+        //"num = " + dominoUserDAO.getUsers().size() +
         " added " + added.size() +
         " collisions " + collisions +
         " lurker " + lurker
