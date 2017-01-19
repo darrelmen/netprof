@@ -67,7 +67,7 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testDrop() {
-    DBConnection spanish = getConnection("spanish");
+    DBConnection spanish = getConnection();
     spanish.dropAll();
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
     logger.info("after drop " + listOfTables);
@@ -75,7 +75,7 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testListTables() {
-    DBConnection spanish = getConnection("netProf");
+    DBConnection spanish = getConnection();
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
     scala.collection.Iterator<String> iterator = listOfTables.iterator();
     for (; iterator.hasNext();
@@ -87,7 +87,7 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testDropNetProf() {
-    DBConnection spanish = getConnection("netProf");
+    DBConnection spanish = getConnection();
     spanish.dropAll();
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
     logger.info("after drop " + listOfTables);
@@ -95,11 +95,13 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testListAll() {
-    DBConnection spanish = getConnection("netProf");
+    DBConnection spanish = getConnection();
   }
 
   @Test
-  public void testCopySpanish() { testCopy(getSpanish());  }
+  public void testCopySpanish() {
+    testCopy(getSpanish());
+  }
 
   @Test
   public void testCopySerbian() {
@@ -107,7 +109,9 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testCopyHindi() {   copyDev("hindi");  }
+  public void testCopyHindi() {
+    copyDev("hindi");
+  }
 
   @Test
   public void testCopyCroatian() {
@@ -186,7 +190,7 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testIraqi() {
-   copyProd("Iraqi");
+    copyProd("Iraqi");
   }
 
   /**
@@ -587,7 +591,6 @@ public class PostgresTest extends BaseTest {
   public void testProjects() {
     DatabaseImpl spanish = getDatabaseLight("spanish", false);
     SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
-
   }
 
   /**
@@ -600,23 +603,7 @@ public class PostgresTest extends BaseTest {
     logger.info("found " + all.size());
 
     for (SlickProject project : all) logger.info("project" + project);
-
   }
 
-  private static DBConnection getConnection(String config) {
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "config.properties");
-    String parent = file.getParentFile().getAbsolutePath();
-    logger.info("path is " + parent);
-    ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    // logger.info("connect to " + serverProps.getDatabaseHost() + " : " + serverProps.getDatabaseName());
-    logger.info("connect to " + serverProps.getDBConfig());
-/*    return new DBConnection(
-        serverProps.getDatabaseType(),
-        serverProps.getDatabaseHost(),
-        serverProps.getDatabasePort(),
-        serverProps.getDatabaseName(),
-        serverProps.getDatabaseUser(),
-        serverProps.getDatabasePassword());*/
-    return new DBConnection(serverProps.getDBConfig());
-  }
+  private static DBConnection getConnection() {  return new DBConnection(getProps().getDBConfig());  }
 }

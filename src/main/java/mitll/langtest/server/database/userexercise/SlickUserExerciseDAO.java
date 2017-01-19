@@ -36,6 +36,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -59,6 +60,11 @@ public class SlickUserExerciseDAO
     extends BaseUserExerciseDAO
     implements IUserExerciseDAO {
   private static final Logger logger = LogManager.getLogger(SlickUserExerciseDAO.class);
+
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#getTypeOrder
+   * @see #addPhoneInfo(SlickExercise, Collection, SectionHelper, int, Exercise)
+   */
   public static final String SOUND = "Sound";
   public static final String DIFFICULTY = "Difficulty";
 
@@ -262,7 +268,16 @@ public class SlickUserExerciseDAO
     return exercise;
   }
 
-  private void addPhoneInfo(SlickExercise slick, Collection<String> typeOrder,
+  /**
+   * @see #fromSlickToExercise(SlickExercise, Collection, SectionHelper)
+   * @param slick
+   * @param typeOrder
+   * @param sectionHelper
+   * @param id
+   * @param exercise
+   * @return
+   */
+  private boolean addPhoneInfo(SlickExercise slick, Collection<String> typeOrder,
                             SectionHelper<CommonExercise> sectionHelper,
                             int id,
                             Exercise exercise) {
@@ -273,12 +288,15 @@ public class SlickUserExerciseDAO
     //if (phones == null || phones.isEmpty()) logger.warn("no phones for " + id);
     int max = 15;
     int i = 0;
+    boolean addedPhones = false;
     if (slick.ispredef() && !slick.iscontext()) {
       //    addExerciseToSectionHelper(sectionHelper, unitToValue, exercise);
       List<SectionHelper.Pair> pairs = getPairs(sectionHelper, unitToValue, exercise);
       if (phones == null) {
-//        logger.warn("no phones for " + id);
+        logger.warn("no phones for " + id);
+
       } else {
+        addedPhones = true;
         for (String phone : phones) {
           pairs.add(sectionHelper.getPairForExerciseAndLesson(exercise, SOUND, phone));
         }
@@ -303,8 +321,10 @@ public class SlickUserExerciseDAO
       }
 
       sectionHelper.addAssociations(pairs);
+      return addedPhones;
     } else {
       exercise.setUnitToValue(unitToValue);
+      return true;
     }
   }
 

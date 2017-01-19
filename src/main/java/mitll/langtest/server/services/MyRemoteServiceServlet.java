@@ -56,8 +56,11 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Enumeration;
@@ -252,11 +255,20 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
   }
 
+  /**
+   * @see #service(HttpServletRequest, HttpServletResponse)
+   * @param e
+   */
   @Override
   public void logAndNotifyServerException(Exception e) {
     logAndNotifyServerException(e, "");
   }
 
+  /**
+   *
+   * @param e
+   * @param additionalMessage
+   */
   @Override
   public void logAndNotifyServerException(Exception e, String additionalMessage) {
     String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
@@ -267,7 +279,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       String subject = "Server Exception on " + pathHelper.getInstallPath();
       sendEmail(subject, getInfo(prefixedMessage));
 
-      logger.debug(getInfo(prefixedMessage));
+      logger.error(getInfo(prefixedMessage));
+    }
+    else {
+      logger.error("got " + e,e);
     }
   }
 
@@ -468,6 +483,26 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       return msgStr;
     } else {
       return "";
+    }
+  }
+
+  /**
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   */
+  @Override
+  protected void service(HttpServletRequest request,
+                         HttpServletResponse response) throws ServletException, IOException {
+    try {
+      super.service(request, response);
+    } catch (ServletException | IOException e) {
+      logAndNotifyServerException(e);
+      throw e;
+    } catch (Exception eee) {
+      logAndNotifyServerException(eee);
+      throw new ServletException("rethrow exception", eee);
     }
   }
 

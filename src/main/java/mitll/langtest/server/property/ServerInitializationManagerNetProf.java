@@ -156,7 +156,7 @@ public class ServerInitializationManagerNetProf {
 
     // finally use default.
     in = buildConfigNameAndOpenFile(ctx, DEFAULT_PROPERTY_HOME);
-    log.info("Using default properties file!");
+    if (DEBUG) log.info("Using default properties file!");
     return in;
   }
 /*

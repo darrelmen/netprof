@@ -252,7 +252,6 @@ public class ProjectTest extends BaseTest {
   }
 
   public void testAnalysis() {
-
     DatabaseImpl database = getDatabase();
     database.setInstallPath("war", "");
     database.populateProjects();
@@ -261,4 +260,5 @@ public class ProjectTest extends BaseTest {
     List<UserInfo> userInfo = database.getAnalysis(projectid).getUserInfo(database.getUserDAO(), 5, projectid);
     for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
   }
+
 }
