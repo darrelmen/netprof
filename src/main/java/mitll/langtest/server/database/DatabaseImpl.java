@@ -74,6 +74,7 @@ import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.user.*;
+import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
@@ -141,7 +142,7 @@ public class DatabaseImpl implements Database {
   private String installPath;
 
   private IUserDAO userDAO;
-  private IUserPermissionDAO userPermissionDAO;
+ // private IUserPermissionDAO userPermissionDAO;
   private IUserSessionDAO userSessionDAO;
   private IResultDAO resultDAO;
 
@@ -316,7 +317,7 @@ public class DatabaseImpl implements Database {
     eventDAO = new SlickEventImpl(dbConnection);
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
     this.userDAO = new DominoUserDAOImpl(this);
-    userPermissionDAO = new SlickUserPermissionDAOImpl(this, dbConnection);
+  //  userPermissionDAO = new SlickUserPermissionDAOImpl(this, dbConnection);
     //  slickUserDAO.setPermissionDAO(userPermissionDAO);
 
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
@@ -671,7 +672,7 @@ public class DatabaseImpl implements Database {
             configureProjects();
           }
         }
-        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO, userPermissionDAO);
+        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);//, userPermissionDAO);
       }
     }
   }
@@ -683,7 +684,9 @@ public class DatabaseImpl implements Database {
    */
   private void configureProjects() {
     // TODO : this seems like a bad idea --
-    userExerciseDAO.setExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
+    Map<Integer, ExercisePhoneInfo> exerciseToPhone = new ExerciseToPhone().getExerciseToPhone(refresultDAO);
+    logger.info("configureProjects - ex to phone size " + exerciseToPhone.size());
+    userExerciseDAO.setExToPhones(exerciseToPhone);
     projectManagement.configureProjects();
   }
 
@@ -1062,7 +1065,7 @@ public class DatabaseImpl implements Database {
     //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
     List<IDAO> idaos = Arrays.asList(
         //getUserDAO(),
-        userPermissionDAO,
+        //userPermissionDAO,
         getProjectDAO(),
         userExerciseDAO,
         ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),

@@ -72,9 +72,10 @@ public class UserCopy {
     int collisions = 0;
     int lurker = 0;
     List<ClientUserDetail> added = new ArrayList<>();
+    int c= 0;
     for (User toImport : importUsers) {
-
-      int importID = toImport.getID();
+        c++;
+          int importID = toImport.getID();
       String importUserID = toImport.getUserID();
       if (importID != defectDetector && !dominoUserDAO.isDefaultUser(importUserID)) {
 
@@ -82,7 +83,7 @@ public class UserCopy {
           logger.info("copyUsers skipping old user " + toImport + " since they have an empty user name and no recordings");
           lurker++;
         } else {
-          if (DEBUG) logger.info("copyUsers import " + toImport);
+          if (DEBUG) logger.info("copyUsers #" + (c++) + "/" + importUsers.size()+ " : import " + toImport);
 
           User userByID1 = dominoUserDAO.getUserByID(importUserID);
           if (userByID1 != null) { // user exists

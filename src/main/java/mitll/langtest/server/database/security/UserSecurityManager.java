@@ -351,7 +351,7 @@ public class UserSecurityManager implements IUserSecurityManager {
     int userForSession = userSessionDAO.getUserForSession(sid);
     log.info("lookupUserFromDBSession Lookup user from DB session. SID: {} - {}", sid, userForSession);
     if (userForSession == -1 && sid != null) {
-      log.error("lookupUserFromDBSession no user for session " + sid + " in database?");
+      log.warn("lookupUserFromDBSession no user for session " + sid + " in database?");
       return null;
     } else {
       return rememberUser(userForSession);

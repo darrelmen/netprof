@@ -44,11 +44,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import static mitll.langtest.shared.user.User.Kind.STUDENT;
 import static mitll.langtest.shared.user.User.Permission.*;
 
 public class User extends MiniUser {
   public static final String NOT_SET = "NOT_SET";
-  @Deprecated  private int experience;
+  @Deprecated
+  private int experience;
   private String ipaddr;
 
   /**
@@ -65,10 +67,12 @@ public class User extends MiniUser {
   private boolean complete;
   private float completePercent = 0.0f;
   private Kind userKind;
-  @Deprecated  private String nativeLang;
+  @Deprecated
+  private String nativeLang;
   private String dialect;
   private String device;
-  @Deprecated  private String resetKey;
+  @Deprecated
+  private String resetKey;
   private String affiliation;
 
   private Collection<Permission> permissions;
@@ -115,7 +119,7 @@ public class User extends MiniUser {
   }
 
   public static Collection<User.Kind> getVisibleRoles() {
-    return Arrays.asList(Kind.STUDENT, Kind.TEACHER, Kind.AUDIO_RECORDER, Kind.CONTENT_DEVELOPER, Kind.PROJECT_ADMIN, Kind.TEST);
+    return Arrays.asList(STUDENT, Kind.TEACHER, Kind.AUDIO_RECORDER, Kind.CONTENT_DEVELOPER, Kind.PROJECT_ADMIN, Kind.TEST);
   }
 
   /**
@@ -124,7 +128,7 @@ public class User extends MiniUser {
    * @return
    */
   public static Collection<User.Kind> getSelfChoiceRoles() {
-    return Arrays.asList(Kind.STUDENT);//, Kind.TEACHER);
+    return Arrays.asList(STUDENT);//, Kind.TEACHER);
   }
 
   /**
@@ -269,7 +273,7 @@ public class User extends MiniUser {
   public User(int id, int age, int gender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
     this(id, age, gender, experience, ipaddr, password, NOT_SET, NOT_SET, NOT_SET, enabled, false, permissions,
-        Kind.STUDENT,
+        STUDENT,
         "",
         "", "", "", //"",
         System.currentTimeMillis(), "OTHER");
@@ -358,7 +362,7 @@ public class User extends MiniUser {
   }
 
   public boolean isStudent() {
-    return getUserKind().equals(Kind.STUDENT);
+    return getUserKind().equals(STUDENT);
   }
 
   public boolean isTeacher() {
@@ -587,20 +591,22 @@ public class User extends MiniUser {
 
   public String toString() {
     return "user " +
-        "\n\tid" + getID() + "/" + getUserID() +
+        "\n\tid     " + getID() +
+        "\n\tuserid " + getUserID() +
         "\n\t first '" + first +
         "'" +
         "\n\t last  '" + last +
         "'" +
         "\n\tis a    " + getRealGender() +
-        (getAge() < 99 ? "\n\tage     " + getAge() : "") +
+        (getAge() < 99 && getAge() > 0 ? "\n\tage     " + getAge() : "") +
         (isAdmin() ? "\n\tadmin   " + isAdmin() : "") +
         (!isEnabled() ? "\n\tenabled   " + isEnabled() : "") +
 //        "\n\tdialect " + getDialect() +
-        "\n\temailH  " + getEmailHash() +
-        "\n\tpassH   " + getPasswordHash() +
-        "\n\tkind    " + getUserKind() +
-        (getPermissions().isEmpty() ? "" : "\n\tperms   " + getPermissions()) +
+        "\n\temailH " + getEmailHash() +
+        "\n\tpassH  " + getPasswordHash() +
+        (getUserKind() == STUDENT ? "" : "\n\tkind   " + getUserKind()) +
+        (getPermissions().isEmpty() ? "" :
+            "\n\tperms   " + getPermissions()) +
         (getDevice() == null || getDevice().isEmpty() ? "" : "\n\tdevice  " + getDevice()) +
         (resetKey == null || resetKey.isEmpty() ? "" : "\n\treset  '" + resetKey + "'") +
         //" cdenable '" + cdKey + "'" +

@@ -107,6 +107,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     SlickProject project = currentProject.getProject();
     Timestamp now = new Timestamp(System.currentTimeMillis());
     Timestamp created = new Timestamp(projectInfo.getCreated());
+
     SlickProject changed = new SlickProject(projectInfo.getID(),
         userid,
         created,

@@ -233,9 +233,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   }
 
   //  @Override
-  public void logAndNotifyServerException(Exception e) {
+ /* public void logAndNotifyServerException(Exception e) {
     logAndNotifyServerException(e, "");
-  }
+  }*/
 
   /**
    * TODO remove duplicate
@@ -244,7 +244,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @param additionalMessage
    */
 //  @Override
-  public void logAndNotifyServerException(Exception e, String additionalMessage) {
+/*  public void logAndNotifyServerException(Exception e, String additionalMessage) {
     String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
     if (!message1.contains("Broken Pipe")) {
       String prefix = additionalMessage.isEmpty() ? "" : additionalMessage + "\n";
@@ -255,7 +255,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
       logger.debug(getInfo(prefixedMessage));
     }
-  }
+  }*/
 
   /**
    * Copies the exercises....?
