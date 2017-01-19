@@ -138,6 +138,7 @@ public class ServerProperties {
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String DO_DECODE = "dodecode";
   private static final String DO_TRIM = "dotrim";
+  private static final String DO_TRIM_WITH_ALIGNMENT = "doTrimWithAlignment";
 
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
   private static final String ADD_MISSING_INFO = "addMissingInfo";
@@ -322,6 +323,10 @@ public class ServerProperties {
    */
   public boolean shouldTrimAudio() {
     return getDefaultFalse(DO_TRIM);
+  }
+
+  public boolean shouldTrimAudioWithAlignment() {
+    return getDefaultFalse(DO_TRIM_WITH_ALIGNMENT);
   }
 
   public int getAudioOffset() {

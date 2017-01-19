@@ -420,17 +420,20 @@ public abstract class Scoring {
     }
   }
 
+  public boolean validLTS(String fl, String transliteration) {
+    if (fl.isEmpty()) return false;
+    Set<String> strings = checkLTS(fl, transliteration);
+   // logger.info("For " + fl + " got " + strings);
+    return strings.isEmpty();
+  }
+
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.scoring.Scoring#validLTS(String)
+   * @see mitll.langtest.server.scoring.Scoring#validLTS
    */
   Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
     return checkLTSHelper.checkLTS(foreignLanguagePhrase, transliteration);
-  }
-
-  public boolean validLTS(String fl, String transliteration) {
-    return checkLTS(fl, transliteration).isEmpty();
   }
 
   /**

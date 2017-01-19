@@ -209,12 +209,14 @@ import java.util.logging.Logger;
  * - Fixes for audio recording, commenting on audio
  * 1.5.15
  * - Fixes for indicating which audio in fix defects is actually presented, fix for bug #751
+ * 1.5.16
+ * - Fixes for showing ref audio in student analysis, fix for comparing excel spreadsheet modified date with exercise edits, much faster decoding for multi-word phrases, checkLTS bug with Korean
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.5.15";
+  public static final String VERSION_INFO = "1.5.16";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
