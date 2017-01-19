@@ -84,7 +84,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private final Cache<String, Object[]> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
   private final Cache<String, Object[]> alignAudioToScore; // key => (Scores, wordLab, phoneLab)
 
-  private static final boolean SEND_GRAMMER_WITH_ALIGNMENT = false;
+  /**
+   * Tell dcodr what grammar to use - include optional sils between words
+   */
+  private static final boolean SEND_GRAMMER_WITH_ALIGNMENT = true;
+  /**
+   * Add sils between words
+   */
+  private static final boolean ADD_SIL = true;
+  /**
+   * Used in possible trimming
+   */
+  private static final boolean INCLUDE_SELF_SIL_LINK = false;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
@@ -341,8 +352,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   ////////////////////////////////
 
   private boolean ltsOutputOk(String[][] process) {
-    return !(process == null || process.length == 0 || process[0].length == 0 ||
-        process[0][0].length() == 0 || (StringUtils.join(process[0], "-")).contains("#"));
+    return !(
+        process == null ||
+            process.length == 0 ||
+            process[0].length == 0 ||
+            process[0][0].length() == 0 ||
+            (StringUtils.join(process[0], "-")).contains("#"));
   }
 
   /**
@@ -356,7 +371,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return the dictionary for dcodr
    * @see #runHydra
    */
-  private String createHydraDict(String transcript, String transliteration) {
+  public String createHydraDict(String transcript, String transliteration) {
     if (getLTS() == null) {
       logger.warn(this + " : createHydraDict : LTS is null???");
     }
@@ -374,15 +389,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
       if (!word.equals(" ") && !word.isEmpty()) {
         if (htkDictionary.contains(word)) {
+          logger.debug("dict has " +word);
           scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
           for (int i = 0; i < prons.size(); i++) {
+            logger.debug("\tdict has " +word + " " + prons.apply(i));
             dict += getPronStringForWord(word, prons.apply(i));
           }
         } else {
           if (getLTS() == null) {
             logger.warn(this + " " + languageProperty + " : LTS is null???");
           } else {
-
             String word1 = word.toLowerCase();
             String[][] process = getLTS().process(word1);
             if (!ltsOutputOk(process)) {
@@ -408,6 +424,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                 logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
                 logger.info("attempting to fall back to default pronunciation");
                 if (process.length > 0) {
+                  logger.info("adding to dict " + word + " = " + process);
+
                   dict += getDefaultPronStringForWord(word, process);
                 }
               }
@@ -470,7 +488,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private Object[] runHydra(String audioPath, String transcript, String transliteration, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
+  private Object[] runHydra(String audioPath,
+                            String transcript,
+                            String transliteration,
+                            Collection<String> lmSentences,
+                            String tmpDir,
+                            boolean decode,
+                            int end) {
     // reference trans
     String cleaned = slfFile.cleanToken(transcript).trim();
     if (isMandarin) {
@@ -480,12 +504,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     // generate dictionary
     String hydraDict = createHydraDict(cleaned, transliteration);
     String smallLM = "[" +
-        (SEND_GRAMMER_WITH_ALIGNMENT ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), SEND_GRAMMER_WITH_ALIGNMENT, false)[0] : "") +
+        (SEND_GRAMMER_WITH_ALIGNMENT ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK)[0] : "") +
         "]";
 
     // generate SLF file (if decoding)
     if (decode) {
-      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, SEND_GRAMMER_WITH_ALIGNMENT, true);
+      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, ADD_SIL, true, INCLUDE_SELF_SIL_LINK);
       smallLM = "[" + slfOut[0] + "]";
       cleaned = slfFile.cleanToken(slfOut[1]);
     }

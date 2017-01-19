@@ -327,14 +327,13 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
             Map<String, String> unitToValue = exercise.getUnitToValue();
             userExercise.getCombinedMutableUserExercise().setUnitToValue(unitToValue);
 
-            logger.debug("addOverlays refresh exercise for " + userExercise.getID() + " '" + userExercise.getForeignLanguage() +
-                "' vs '" + exercise.getForeignLanguage() +
+            logger.debug("addOverlays refresh exercise for\t" + userExercise.getID() + "\t'" + userExercise.getForeignLanguage() +
+                "' vs\t'" + exercise.getForeignLanguage() +
                 "'");
 
             sectionHelper.refreshExercise(userExercise);
             addOverlay(userExercise);
-//          Collection<CommonExercise> exercisesForSimpleSelectionState = sectionHelper.getExercisesForSimpleSelectionState(unitToValue);
-//          for (CommonExercise exercise:exercisesForSimpleSelectionState) if (exercise.getID().equals(overrideID)) logger.warn("found " + exercise);
+
             override++;
           } else {
             skippedOverride++;

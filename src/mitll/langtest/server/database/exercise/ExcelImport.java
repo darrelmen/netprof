@@ -127,18 +127,18 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * Ask the excel file for when it was modified
    * @param file
    * @return
+   * @see #readExercises
    */
   private long getExcelLastModified(File file) {
     if (!file.exists()) return 0;
-    try {
+/*    try {
       BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-
       logger.info("creationTime:     " + attr.creationTime());
-      logger.info("lastAccessTime:   " + attr.lastAccessTime());
+//      logger.info("lastAccessTime:   " + attr.lastAccessTime());
       logger.info("lastModifiedTime: " + attr.lastModifiedTime());
     } catch (IOException e) {
       logger.error("got " + e, e);
-    }
+    }*/
 
     try {
       OPCPackage pkg = OPCPackage.open(file);
@@ -154,7 +154,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
       String lastModifiedBy = ppropsPart.getLastModifiedByProperty().getValue();
 
       logger.info("lastModifiedBy:   " + lastModifiedBy);
-      logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " + new Date(lastModified));
+      logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " +modified);
 
       return modified.getTime();
     } catch (IOException | OpenXML4JException | XmlException e) {
