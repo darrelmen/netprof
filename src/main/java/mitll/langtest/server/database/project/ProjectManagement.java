@@ -216,7 +216,8 @@ public class ProjectManagement implements IProjectManagement {
           new SlickAnalysis(db,
               db.getPhoneDAO(),
               exerciseIDToRefAudio,
-              (SlickResultDAO) db.getResultDAO())
+              (SlickResultDAO) db.getResultDAO(),
+              project.getLanguage())
       );
       project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
 

@@ -209,25 +209,36 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       scrollIntoView(index, false);
     }
 
-    if (!users.isEmpty()) {
-      makeInitialSelection(users, userToSelect);
-    }
+    makeInitialSelection(users, userToSelect);
     return tableWithPager;
   }
 
+  /**
+   * @param users
+   * @param userToSelect
+   * @see #getTableWithPager
+   */
   protected void makeInitialSelection(Collection<T> users, T userToSelect) {
+    if (users.isEmpty()) {
+      return;
+    }
     final T finalUser = userToSelect;
 
+  //  logger.info("makeInitialSelection make initial selection from " + users.size() + " to select " + userToSelect);
+
     Scheduler.get().scheduleDeferred(() -> {
-          if (selectedUser == null) {
+          if (selectedUser == null || finalUser == null) {
             T next = users.iterator().next();
+    //        logger.info("\t makeInitialSelection make initial selection " + next);
             table.getSelectionModel().setSelected(next, true);
             gotClickOnItem(next);
           } else {
-            if (finalUser != null) {
+//            if (finalUser != null) {
               table.getSelectionModel().setSelected(finalUser, true);
               gotClickOnItem(finalUser);
-            }
+  //          } else {
+    //          logger.warning("makeInitialSelection no initial user?");
+      //      }
           }
         }
     );

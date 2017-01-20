@@ -524,9 +524,18 @@ public class AnalysisPlot extends TimeSeriesPlot {
         });
   }
 
+  /**
+   * On mouse over, show info about the answer.
+   *
+   * @param toolTipData
+   * @param exid
+   * @param commonShell
+   * @return
+   */
   private String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
     String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
     String english = commonShell == null ? "" : commonShell.getEnglish();
+    if (english.equalsIgnoreCase(foreignLanguage) && !commonShell.getMeaning().isEmpty()) english = commonShell.getMeaning();
 
     String seriesName1 = toolTipData.getSeriesName();
 

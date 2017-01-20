@@ -342,19 +342,23 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
       @Override
       public SafeHtml getValue(WordScore shell) {
         CommonShell exercise = getShell(shell.getId());
-        // logger.info("getPlayAudio : Got " + shell.getExID() + "  : " + exercise);
+       // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + shell.getFileRef());
         String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
         return PlayAudioWidget.getAudioTagHTML(shell.getFileRef(), title);
       }
     };
   }
 
+  /**
+   * @see #addColumnsToTable
+   * @return
+   */
   private Column<WordScore, SafeHtml> getPlayNativeAudio() {
     return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(WordScore shell) {
         CommonShell exercise = getShell(shell.getId());
-        // logger.info("getPlayAudio : Got " + shell.getExID() + "  : " + exercise);
+     //   logger.info("getPlayNativeAudio : Got " +  shell.getId() + "  : " + shell.getNativeAudio());
         String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
         if (shell.getNativeAudio() != null) {
           return PlayAudioWidget.getAudioTagHTML(shell.getNativeAudio(), title);
@@ -376,10 +380,9 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
     if (from == 0) {
       heading.setSubtext("");
       addItems(sortedHistory);
-    }
-    else {
-     // logger.info("Starting from " +from + " : " +to);
-     // logger.info("Starting from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
+    } else {
+      // logger.info("Starting from " +from + " : " +to);
+      // logger.info("Starting from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
       heading.setSubtext("Starting " + superShortFormat.format(new Date(from)));
 
       WordScore fromElement = new WordScore();
