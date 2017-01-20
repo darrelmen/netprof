@@ -36,20 +36,17 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface IProjectManagement {
   /**
    * @see DatabaseImpl#populateProjects()
    */
   void populateProjects();
-
-  /**
-   * @see DatabaseImpl#configureProjects
-   */
-//  void configureProjects();
 
   void rememberProject(int id);
 
@@ -71,9 +68,13 @@ public interface IProjectManagement {
 
   Collection<Project> getProjects();
 
+  Collection<Project> getProductionProjects();
+
   Project getFirstProject();
 
   void setStartupInfo(User userWhere, int projid);
 
   void configureProject(Project project);
+
+  List<SlimProject> getNestedProjectInfo();
 }

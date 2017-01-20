@@ -127,7 +127,7 @@ public class MakePhoneReport {
     final Map<String, Float> phoneToScore = new HashMap<>();
     for (Map.Entry<String, List<WordAndScore>> pair : phoneToMinimal.entrySet()) {
       float total = 0;
-      for (WordAndScore example : pair.getValue()) total += example.getScore();
+      for (WordAndScore example : pair.getValue()) total += example.getPronScore();
       total /= pair.getValue().size();
       phoneToScore.put(pair.getKey(), total);
     }

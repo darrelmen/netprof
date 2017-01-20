@@ -399,6 +399,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return dict;
   }
 
+  Set<String> seen = new HashSet<>();
+
   public String getPronunciations(String transcript, String transliteration, boolean justPhones) {
     String dict = "";
     String[] translitTokens = transliteration.toLowerCase().split(" ");
@@ -426,7 +428,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             if (!ltsOutputOk(process)) {
               logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
               if (canUseTransliteration) {
-                logger.info("trying transliteration LTS");
+  //              logger.info("trying transliteration LTS");
 
                 String[][] translitprocess = (transcriptTokens.length == 1) ?
                     getLTS().process(StringUtils.join(translitTokens, "")) :
@@ -446,9 +448,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                   }
                 }
               } else {
-                logger.info("can't use transliteration");
-                logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
-                logger.info("attempting to fall back to default pronunciation");
+//                logger.info("can't use transliteration");
+
+                String key = transcript + "-" + transliteration;
+                if (!seen.contains(key)) {
+                  logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
+                }
+
+                seen.add(key);
+//                logger.info("attempting to fall back to default pronunciation");
                 if (process.length > 0) {
                   dict += getDefaultPronStringForWord(word, process, justPhones);
                 }

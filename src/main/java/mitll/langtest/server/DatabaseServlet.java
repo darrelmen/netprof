@@ -136,6 +136,7 @@ public class DatabaseServlet extends HttpServlet {
    * @see #doGet
    */
   int getProject(HttpServletRequest request) {
+    getDatabase();
     int userIDFromRequest = securityManager.getUserIDFromRequest(request);
     if (userIDFromRequest == -1) {
       return -1;
@@ -153,13 +154,13 @@ public class DatabaseServlet extends HttpServlet {
     return getDatabase().getUserProjectDAO().mostRecentByUser(id);
   }
 
-
   protected DatabaseImpl getDatabase() {
     if (db == null) {
       Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
       if (databaseReference != null) {
         db = (DatabaseImpl) databaseReference;
         securityManager = db.getUserSecurityManager();
+        if (securityManager == null) logger.error("getDatabase huh? no security manager?");
         //securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
         // logger.debug("found existing database reference " + db + " under " +getServletContext());
       } else {

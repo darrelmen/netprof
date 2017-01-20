@@ -1276,7 +1276,7 @@ public class DatabaseImpl implements Database {
       if (connection != null) {
         connection.contextDestroyed();
       }
-      logger.info("closing db connection : " + dbConnection);
+      logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
     } catch (Exception e) {
       logger.error("got " + e, e);

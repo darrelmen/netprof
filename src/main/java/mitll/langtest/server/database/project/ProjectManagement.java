@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.database.project;
 
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -45,8 +47,10 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
@@ -54,6 +58,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ProjectManagement implements IProjectManagement {
   private static final Logger logger = LogManager.getLogger(ProjectManagement.class);
@@ -156,7 +161,7 @@ public class ProjectManagement implements IProjectManagement {
    *
    * @see DatabaseImpl#configureProjects
    */
- // @Override
+  // @Override
   private void configureProjects() {
     Collection<Project> projects = getProjects();
     logger.info("configureProjects got " + projects.size() + " projects");
@@ -205,7 +210,7 @@ public class ProjectManagement implements IProjectManagement {
           ") " +
           "first exercise is " + rawExercises.iterator().next());
     } else {
-
+      logger.warn("no exercises in project? " + project);
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), db.getResultDAO(), db.getRefResultDAO(), db.getAudioDAO(),
         db.getPhoneDAO()));
@@ -227,6 +232,8 @@ public class ProjectManagement implements IProjectManagement {
       Set<Integer> exids = new HashSet<>();
       for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());
 
+      project.setRTL(isRTL(rawExercises));
+
 //      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
 //
 //      Map<Integer, ExercisePhoneInfo> exToPhonePerProject = new ExerciseToPhone().getExToPhonePerProject(exids, jsonResults);
@@ -238,6 +245,24 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     logMemory();
+  }
+
+  /**
+   * Just look at the first exercise.
+   *
+   * @param exercises
+   * @return
+   */
+  private boolean isRTL(Collection<? extends CommonShell> exercises) {
+    boolean isRTL = false;
+    if (!exercises.isEmpty()) {
+      CommonShell next = exercises.iterator().next();
+      HasDirection.Direction direction = WordCountDirectionEstimator.get().estimateDirection(next.getForeignLanguage());
+      // String rtl = properties.get("rtl");
+      isRTL = direction == HasDirection.Direction.RTL;
+      // logger.info("examined text and found it to be " + direction);
+    }
+    return isRTL;
   }
 
   /**
@@ -335,7 +360,6 @@ public class ProjectManagement implements IProjectManagement {
         " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
-  //  @Override
   private Project getProjectOrFirst(int projectid) {
     return projectid == -1 ? getFirstProject() : getProject(projectid);
   }
@@ -493,6 +517,17 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
+  public Collection<Project> getProductionProjects() {
+    List<Project> collect = idToProject
+        .values()
+        .stream()
+        .filter(p -> p.getStatus() == ProjectStatus.PRODUCTION)
+        .collect(Collectors.toList());
+
+    return collect;
+  }
+
+  @Override
   public Project getFirstProject() {
     return getProjects().iterator().next();
   }
@@ -561,4 +596,78 @@ public class ProjectManagement implements IProjectManagement {
     return project1.getProp(ServerProperties.MODELS_DIR) != null;
   }
 
+
+  /**
+   * TODO : consider moving this into user service?
+   * what if later an admin changes it while someone else is looking at it...
+   * <p>
+   * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
+   * on the exercise indicating it needs to be inspected again (we've added new audio).
+   * <p>
+   * Don't return a path to the normalized audio, since this doesn't let the recorder have feedback about how soft
+   * or loud they are : https://gh.ll.mit.edu/DLI-LTEA/Development/issues/601
+   *
+   * @return
+   */
+  public List<SlimProject> getNestedProjectInfo() {
+    List<SlimProject> projectInfos = new ArrayList<>();
+
+    Map<String, List<SlickProject>> langToProject = new TreeMap<>();
+    Collection<SlickProject> all = db.getProjectDAO().getAll();
+//    logger.info("found " + all.size() + " projects");
+    for (SlickProject project : all) {
+      List<SlickProject> slimProjects = langToProject.get(project.language());
+      if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());
+      slimProjects.add(project);
+    }
+//    logger.info("lang->project is " + langToProject);
+    for (String lang : langToProject.keySet()) {
+      List<SlickProject> slickProjects = langToProject.get(lang);
+      SlickProject firstProject = slickProjects.get(0);
+      SlimProject parent = getProjectInfo(firstProject);
+      projectInfos.add(parent);
+
+      if (slickProjects.size() > 1) {
+        for (SlickProject slickProject : slickProjects) {
+          parent.addChild(getProjectInfo(slickProject));
+          //  logger.info("\t add child to " + parent);
+        }
+      }
+    }
+
+    return projectInfos;
+  }
+
+  /**
+   * @param project
+   * @return
+   * @see #getNestedProjectInfo
+   */
+  private SlimProject getProjectInfo(SlickProject project) {
+    boolean hasModel = project.getProp(ServerProperties.MODELS_DIR) != null;
+
+    ProjectStatus status = null;
+    try {
+      status = ProjectStatus.valueOf(project.status());
+    } catch (IllegalArgumentException e) {
+      logger.error("got " +e,e);
+      status = ProjectStatus.DEVELOPMENT;
+    }
+
+    boolean isRTL = false;
+    if (status != ProjectStatus.RETIRED) {
+      Collection<CommonExercise> exercises = db.getExercises(project.id());
+      isRTL =isRTL(exercises);
+    }
+
+    return new SlimProject(project.id(),
+        project.name(),
+        project.language(),
+        project.countrycode(),
+        project.course(),
+        ProjectStatus.valueOf(project.status()),
+        project.displayorder(),
+        hasModel,
+        isRTL);
+  }
 }

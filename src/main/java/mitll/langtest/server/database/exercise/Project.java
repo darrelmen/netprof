@@ -73,7 +73,7 @@ public class Project implements PronunciationLookup {
   private PathHelper pathHelper;
   private DatabaseImpl db;
   private ServerProperties serverProps;
-
+  private boolean isRTL;
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
 
@@ -299,6 +299,14 @@ public class Project implements PronunciationLookup {
       logger.error("Got " + e, e);
       return null;
     }
+  }
+
+  public boolean isRTL() {
+    return isRTL;
+  }
+
+  public void setRTL(boolean RTL) {
+    isRTL = RTL;
   }
 
   public String toString() {

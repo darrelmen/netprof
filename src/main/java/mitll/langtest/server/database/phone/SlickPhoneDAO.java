@@ -104,17 +104,19 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
-   * TODO : fill in!
    *
    * @param userid
    * @param exids
    * @param idToRef
+   * @param language
    * @return
    */
   @Override
-  public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef) {
+  public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef,
+                                       String language) {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises((int) userid, exids);
-    PhoneReport report = getPhoneReport(phoneReportByResult, idToRef, false, true);
+    PhoneReport report = getPhoneReport(phoneReportByResult, idToRef, false, true,
+        language);
     // logger.info("getWorstPhonesJson phone report " + report);
     return new PhoneJSON().getWorstPhonesJson(report);
   }
@@ -123,13 +125,15 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param userid
    * @param ids
    * @param idToRef
+   * @param language
    * @return
    * @throws SQLException
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef) {
+  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef,
+                                              String language) {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult((int) userid, ids);
-    return getPhoneReport(phoneReportByResult, idToRef, true, false);
+    return getPhoneReport(phoneReportByResult, idToRef, true, false, language);
   }
 
   /**
@@ -138,16 +142,17 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param idToRef
    * @param addTranscript       true if going to analysis tab
    * @param sortByLatestExample
+   * @param language
    * @return
    * @throws SQLException
    * @paramx sql
    * @seex #getPhoneReport(String, Map, boolean, boolean)
-   * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map)
+   * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map, String)
    */
-  protected PhoneReport getPhoneReport(Collection<SlickPhoneReport> phoneReportByResult,
-                                       Map<Integer, String> idToRef,
-                                       boolean addTranscript,
-                                       boolean sortByLatestExample) {
+  private PhoneReport getPhoneReport(Collection<SlickPhoneReport> phoneReportByResult,
+                                     Map<Integer, String> idToRef,
+                                     boolean addTranscript,
+                                     boolean sortByLatestExample, String language) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
 
     int currentExercise = -1;
@@ -178,7 +183,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       WordAndScore wordAndScore = getAndRememberWordAndScore(idToRef, phoneToScores, phoneToWordAndScore,
           exid, report.answer(), scoreJson, report.modified(),
           report.wseq(), report.word(),
-          report.rid(), report.phone(), report.pseq(), report.pscore());
+          report.rid(), report.phone(), report.pseq(), report.pscore(), language);
 
       if (addTranscript) {
         addTranscript(stringToMap, scoreJson, wordAndScore);
