@@ -101,7 +101,8 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
         new SlickAnalysis(db,
             db.getPhoneDAO(),
             db.getExerciseIDToRefAudio(projectID),
-            (SlickResultDAO) db.getResultDAO());
+            (SlickResultDAO) db.getResultDAO(),
+            db.getProject(projectID).getLanguage());
     return slickAnalysis.getPerformanceForUser(id, projectID, minRecordings);
   }
 
