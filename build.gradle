@@ -193,7 +193,7 @@ shadowJar {
 }
 
 task makeDevInstallation(type: Zip) {
-   // appendix = "installation"
+    // appendix = "installation"
     baseName = "netprof-installation"
 
     from('war/config/netProfDev') {
@@ -224,7 +224,7 @@ task makeDevInstallation(type: Zip) {
 
 task makeDLIInstallation(type: Zip) {
     //  destinationDir = 'build/libs'
-   // appendix = "installation"
+    // appendix = "installation"
     baseName = "netprof-installation"
 
     from('war/config/netProfDLI') {
@@ -289,21 +289,25 @@ shadowJar.dependsOn war
 //makeDevInstallation.dependsOn shadowJar
 //makeDLIInstallation.dependsOn shadowJar
 
+//artifacts {
+//    archives distZip
+//}
+
 // ***************************** Publishing **************************************
 
 publishing {
     publications {
         ivyJava(IvyPublication) {
             artifact(war)
-          //  artifact(zip)
+            artifact distZip
         }
         mavenJava(MavenPublication) {
             artifact(war)
-//            artifact(zip)
+            artifact distZip
 
         }
         distribution(IvyPublication) {
-
+            artifact distZip
         }
     }
 }
