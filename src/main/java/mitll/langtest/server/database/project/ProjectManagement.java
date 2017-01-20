@@ -142,6 +142,12 @@ public class ProjectManagement implements IProjectManagement {
     for (Project project : getProjects()) {
       logger.info("\tproject " + project);
     }
+
+    ExerciseDAO<CommonExercise> exerciseDAO = getFirstProject().getExerciseDAO();
+    logger.info("using exercise dao from first project " + exerciseDAO);
+    db.getUserExerciseDAO().setExerciseDAO(exerciseDAO);
+
+    configureProjects();
   }
 
   /**
@@ -150,8 +156,8 @@ public class ProjectManagement implements IProjectManagement {
    *
    * @see DatabaseImpl#configureProjects
    */
-  @Override
-  public void configureProjects() {
+ // @Override
+  private void configureProjects() {
     Collection<Project> projects = getProjects();
     logger.info("configureProjects got " + projects.size() + " projects");
     for (Project project : projects) {
@@ -389,7 +395,7 @@ public class ProjectManagement implements IProjectManagement {
         db.getUserListManager(),
         ADD_DEFECTS,
         (SlickUserExerciseDAO) db.getUserExerciseDAO(),
-        project.getProject());
+        project);
     project.setExerciseDAO(dbExerciseDAO);
   }
 
