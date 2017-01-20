@@ -34,11 +34,7 @@ package mitll.langtest.shared.analysis;
 
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.server.database.phone.PhoneDAO;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.scoring.NetPronImageType;
 
-import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,22 +44,25 @@ import java.util.Map;
  * @see mitll.langtest.client.analysis.PhoneExampleContainer
  * @since 10/22/15.
  */
-public class WordAndScore implements Comparable<WordAndScore>, Serializable {
-  private int exid;
-  private int wseq;
-  private int seq;
-  private String word;
-  private float score;
+public class WordAndScore extends WordScore {
+/*  private int exid;
+
+  private float pronScore;
   private long resultID;
   private long timestamp;
   private String answerAudio;
   private String refAudio;
+  private Map<NetPronImageType, List<TranscriptSegment>> transcript;*/
+
+  private int wseq;
+  private int seq;
+  private String word;
   private String scoreJson;
-  private Map<NetPronImageType, List<TranscriptSegment>> transcript;
+
 
   /**
    * @param word
-   * @param score
+   * @param pronScore
    * @param resultID
    * @param wseq        which word in phrase
    * @param seq         which phoneme in phrase (not in word)
@@ -71,20 +70,21 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param refAudio
    * @param scoreJson
    * @param timestamp
-   * @see PhoneDAO#getAndRememberWordAndScore(Map, Map, Map, String, String, String, long, int, String, long, String, int, float)
+   * @see mitll.langtest.server.database.phone.BasePhoneDAO#getAndRememberWordAndScore
    */
-  public WordAndScore(int exid, String word, float score, long resultID, int wseq, int seq, String answerAudio,
+  public WordAndScore(int exid, String word, float pronScore, int resultID, int wseq, int seq, String answerAudio,
                       String refAudio, String scoreJson, long timestamp) {
-    this.exid = exid;
+    super(exid, pronScore, timestamp, resultID, answerAudio, refAudio, null);
+//    this.exid = exid;
     this.word = word;
-    this.score = score;
-    this.resultID = resultID;
+  //  this.pronScore = pronScore;
+    //this.resultID = resultID;
     this.wseq = wseq;
     this.seq = seq;
-    this.answerAudio = answerAudio;
-    this.refAudio = refAudio;
+   // this.answerAudio = answerAudio;
+   // this.refAudio = refAudio;
     this.scoreJson = scoreJson;
-    this.timestamp = timestamp;
+   //  this.timestamp = timestamp;
   }
 
   public WordAndScore() {
@@ -97,16 +97,18 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @return
    */
   @Override
-  public int compareTo(WordAndScore o) {
-    int i = getScore() < o.getScore() ? -1 : getScore() > o.getScore() ? +1 : 0;
+  public int compareTo(WordScore o) {
+    int i = getPronScore() < o.getPronScore() ? -1 : getPronScore() > o.getPronScore() ? +1 : 0;
+
+    WordAndScore realOther = (WordAndScore) o;
     if (i == 0) {
-      i = word.compareTo(o.word);
+      i = word.compareTo(realOther.word);
     }
     if (i == 0) {
-      i = Long.valueOf(resultID).compareTo(o.resultID);
+      i = Long.valueOf(getResultID()).compareTo(realOther.getResultID());
     }
     if (i == 0) {
-      i = Integer.valueOf(wseq).compareTo(o.wseq);
+      i = Integer.valueOf(wseq).compareTo(realOther.wseq);
     }
     return i;
   }
@@ -127,8 +129,8 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @return
    * @see PhoneExampleContainer#getItemColumn()
    */
-  public float getScore() {
-    return score;
+/*  public float getPronScore() {
+    return pronScore;
   }
 
   public long getResultID() {
@@ -141,7 +143,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
 
   public String getRefAudio() {
     return refAudio;
-  }
+  }*/
 
   public String getScoreJson() {
     return scoreJson;
@@ -151,32 +153,32 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param transcript
    * @see PhoneDAO#setTranscript(WordAndScore, Map)
    */
-  public void setTranscript(Map<NetPronImageType, List<TranscriptSegment>> transcript) {
+  /*public void setTranscript(Map<NetPronImageType, List<TranscriptSegment>> transcript) {
     this.transcript = transcript;
   }
-
+*/
   /**
    * @return
    * @see PhoneExampleContainer#getItemColumn
    */
-  public Map<NetPronImageType, List<TranscriptSegment>> getTranscript() {
+  /*public Map<NetPronImageType, List<TranscriptSegment>> getTranscript() {
     return transcript;
   }
-
+*/
   public void clearJSON() {
     scoreJson = "";
   }
 
-  public int getExid() {
+  /*public int getExid() {
     return exid;
   }
 
   public long getTimestamp() {
     return timestamp;
   }
-
+*/
   public String toString() {
-    return exid + " #" + getWseq() + " : " + getWord() + "\ts " + getScore() + "\tres " + getResultID() +
-        "\tanswer " + answerAudio + " ref " + refAudio;
+    return getExid() + " #" + getWseq() + " : " + getWord() + "\ts " + getPronScore() + "\tres " + getResultID() +
+        "\tanswer " + getAnswerAudio() + " ref " + getRefAudio();
   }
 }

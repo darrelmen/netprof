@@ -145,12 +145,13 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param userid
    * @param ids
    * @param idToRef
+   * @param language
    * @return
    * @throws SQLException
    * @see Analysis#getPhonesForUser
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef) {
+  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef, String language) {
     try {
       return getPhoneReport(getResultIDJoinSQL(userid, ids), idToRef, true, false);
     } catch (Exception e) {
@@ -168,11 +169,12 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param userid
    * @param exids
    * @param idToRef
+   * @param language
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
    * @see JsonSupport#getJsonPhoneReport(long, int, Map)
    */
-  public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef) {
+  public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef, String language) {
     PhoneReport phoneReport = getPhoneReport(userid, exids, idToRef);
     logger.info("getWorstPhonesJson phone report " + phoneReport);
     return new PhoneJSON().getWorstPhonesJson(phoneReport);
@@ -203,7 +205,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param sortByLatestExample
    * @return
    * @throws SQLException
-   * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map)
+   * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map, String)
    * @see #getPhoneReport(String, Map, boolean, boolean)
    */
   protected PhoneReport getPhoneReport(String sql,
@@ -264,7 +266,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         WordAndScore wordAndScore = getAndRememberWordAndScore(idToRef, phoneToScores, phoneToWordAndScore,
             Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
             wseq, word,
-            rid, phone, seq, phoneScore);
+            rid, phone, seq, phoneScore, database.getLanguage());
 
         if (addTranscript) {
           addTranscript(stringToMap, scoreJson, wordAndScore);

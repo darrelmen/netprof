@@ -38,6 +38,7 @@ import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.json.JsonExport;
+import mitll.langtest.server.json.ProjectExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -84,6 +85,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String ROUND_TRIP1 = "roundTrip";
   private static final String ROUND_TRIP = ROUND_TRIP1;
   private static final String PHONE_REPORT = "phoneReport";
+  public static final String PROJECTS = "projects";
 
   private static final String ERROR = "ERROR";
   private static final String USER = "user";
@@ -119,6 +121,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
   public static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
   public static final ImageOptions DEFAULT = ImageOptions.getDefault();
+
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -142,6 +145,8 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * Remembers chapters from previous requests...
    *
+   * OK, so we can make a number of requests - mainly for the iOS app.
+   *
    * @param request
    * @param response
    * @throws ServletException
@@ -151,7 +156,22 @@ public class ScoreServlet extends DatabaseServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String queryString = request.getQueryString();
     if (queryString == null) queryString = ""; // how could this happen???
+
     int projectid = getProject(request);
+    if (projectid == -1) {
+      logger.warn("OK - look for project id from url ");
+      String[] projids = queryString.split("projid=");
+      if (projids.length > 1) {
+        String s = projids[1].split("&")[0];
+        try {
+          projectid = Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+          logger.error("can't parse " + s);
+        }
+      }
+    }
+
+    getDatabase();
     String language = getLanguage(projectid);
     if (!queryString.contains(NESTED_CHAPTERS)) { // quiet output for polling from status webapp
       String pathInfo = request.getPathInfo();
@@ -163,9 +183,9 @@ public class ScoreServlet extends DatabaseServlet {
     long then = System.currentTimeMillis();
     configureResponse(response);
 
-   // getAudioFileHelper();
     makeAudioFileHelper();
     JSONObject toReturn = new JSONObject();
+    String jsonString = "";
     //toReturn.put(ERROR, "expecting request");
 
     try {
@@ -201,6 +221,9 @@ public class ScoreServlet extends DatabaseServlet {
       } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
         queryString = removePrefix(queryString, CHAPTER_HISTORY);
         toReturn = getChapterHistory(queryString, toReturn, projectid);
+      } else if (matchesRequest(queryString, PROJECTS)) {
+        queryString = removePrefix(queryString, PROJECTS);
+        jsonString = getProjects(queryString);
       } else if (matchesRequest(queryString, REF_INFO)) {
         queryString = removePrefix(queryString, REF_INFO);
         toReturn = getRefInfo(queryString, toReturn);
@@ -237,10 +260,10 @@ public class ScoreServlet extends DatabaseServlet {
     long now = System.currentTimeMillis();
     long l = now - then;
     if (l > 10) {
-      logger.info("doGet : (" +language + ") took " + l + " millis to do " + request.getQueryString());
+      logger.info("doGet : (" + language + ") took " + l + " millis to do " + request.getQueryString());
     }
     then = now;
-    String x = toReturn.toString();
+    String x = jsonString.isEmpty() ? toReturn.toString() : jsonString;
     now = System.currentTimeMillis();
     l = now - then;
     if (l > 50) {
@@ -269,7 +292,7 @@ public class ScoreServlet extends DatabaseServlet {
     } else {
       String exid = split[1];
       int i = Integer.parseInt(exid);
-      CommonExercise exercise = db.getExercise(-100,i);
+      CommonExercise exercise = db.getExercise(-100, i);
       if (exercise == null) {
         logger.info("removeRefResult can't find '" + exid + "'");
 
@@ -377,7 +400,7 @@ public class ScoreServlet extends DatabaseServlet {
       long then = System.currentTimeMillis();
       long userid = Long.parseLong(user);
 
-      toReturn = db.getJsonPhoneReport(userid, getMostRecentProjectByUser((int)userid), selection);
+      toReturn = db.getJsonPhoneReport(userid, getMostRecentProjectByUser((int) userid), selection);
       long now = System.currentTimeMillis();
       if (now - then > 250) {
         logger.debug("getPhoneReport : user " + user + " selection " + selection +
@@ -389,11 +412,10 @@ public class ScoreServlet extends DatabaseServlet {
     return toReturn;
   }
 
-//  private String getLanguage() {
-//   // getAudioFileHelper();
-//
-//    return serverProps.getLanguage();
-//  }
+  private String getProjects(String queryString) {
+    Collection<Project> productionProjects = db.getProjectManagement().getProductionProjects();
+    return new ProjectExport().toJSON(productionProjects);
+  }
 
   /**
    * @param queryString
@@ -506,9 +528,9 @@ public class ScoreServlet extends DatabaseServlet {
     configureResponse(response);
 
     String requestType = request.getHeader(REQUEST);
-    String deviceType  = request.getHeader(DEVICE_TYPE);
+    String deviceType = request.getHeader(DEVICE_TYPE);
     if (deviceType == null) deviceType = "unk";
-    String device      = request.getHeader(DEVICE);
+    String device = request.getHeader(DEVICE);
     if (device == null) device = "unk";
 
     JSONObject jsonObject = new JSONObject();
@@ -597,9 +619,9 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @param response
    * @param year
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private void configureResponseHTML(HttpServletResponse response, int year) {
     response.setContentType("text/html; charset=UTF-8");
@@ -706,26 +728,26 @@ public class ScoreServlet extends DatabaseServlet {
                                      String requestType,
                                      String deviceType,
                                      String device) throws IOException {
-    String user       = request.getHeader(USER);
+    String user = request.getHeader(USER);
     String exerciseID = request.getHeader("exercise");
-    int i1            = Integer.parseInt(exerciseID);
-    int reqid         = getReqID(request);
-    int project       = getProject(request);
+    int i1 = Integer.parseInt(exerciseID);
+    int reqid = getReqID(request);
+    int project = getProject(request);
 
     logger.debug("getJsonForAudio got" +
-        "\n\trequest "  + requestType +
+        "\n\trequest " + requestType +
         "\n\tfor user " + user +
-        "\n\tproject "  + project+
+        "\n\tproject " + project +
         "\n\texercise " + exerciseID +
-        "\n\treq "      + reqid +
-        "\n\tdevice "   + deviceType + "/" + device);
+        "\n\treq " + reqid +
+        "\n\tdevice " + deviceType + "/" + device);
 
     int userid = userManagement.getUserFromParam(user);
     String wavPath = pathHelper.getAbsoluteToAnswer(db.getProject(project).getLanguage(), i1, 0, userid);
-    File saveFile  = new File(wavPath);// pathHelper.getAbsoluteFile(wavPath);
+    File saveFile = new File(wavPath);// pathHelper.getAbsoluteFile(wavPath);
     new File(saveFile.getParent()).mkdirs();
 
-    boolean allowAlternates   = getAllowAlternates(request);
+    boolean allowAlternates = getAllowAlternates(request);
     boolean usePhoneToDisplay = getUsePhoneToDisplay(request);
 
     writeToFile(request.getInputStream(), saveFile);
@@ -873,7 +895,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     if (pretestScore1.getHydecScore() > 0.25) {
       logger.info("remember score for result " + decodeResultID);
-      db.rememberScore((int)decodeResultID, pretestScore1, isCorrect);
+      db.rememberScore((int) decodeResultID, pretestScore1, isCorrect);
     } else {
       logger.debug("skipping remembering alignment since score was too low " + pretestScore1.getHydecScore());
     }
@@ -917,7 +939,7 @@ public class ScoreServlet extends DatabaseServlet {
           options
       );
     } else {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,exerciseID, wavPath,
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, exerciseID, wavPath,
           exercise.getForeignLanguage(),
           exercise.getTransliteration(),
           options.isUsePhoneToDisplay(),
@@ -942,9 +964,9 @@ public class ScoreServlet extends DatabaseServlet {
    * @param deviceType
    * @param device
    * @param exercise1
+   * @return
    * @paramx doFlashcard
    * @paramx usePhoneToDisplay
-   * @return
    * @see #getJsonForAudio
    */
   private AudioAnswer getAudioAnswerAlign(int reqid, int exerciseID, int user, String wavPath, File saveFile,
@@ -982,9 +1004,9 @@ public class ScoreServlet extends DatabaseServlet {
    * @param file
    * @param deviceType
    * @param device
+   * @return
    * @paramx doFlashcard
    * @paramx allowAlternates
-   * @return
    * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAnswer(int reqid,
@@ -1007,8 +1029,8 @@ public class ScoreServlet extends DatabaseServlet {
     AudioAnswer answer = audioFileHelper.getAnswer(exercise,
         audioContext,
         wavPath, file, deviceType, device, score,
-     //   doFlashcard,
-      //  allowAlternates,
+        //   doFlashcard,
+        //  allowAlternates,
         options);
 
     final String path = answer.getPath();
@@ -1084,7 +1106,7 @@ public class ScoreServlet extends DatabaseServlet {
    * TODO : Latchy.
    *
    * @return
-   * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @see #doGet
    */
   private void makeAudioFileHelper() {
     if (userManagement == null) {
@@ -1164,7 +1186,7 @@ public class ScoreServlet extends DatabaseServlet {
                                            int projid) {
     AudioFileHelper audioFileHelper = getAudioFileHelper(projid);
 
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, ""+exerciseID,
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, "" + exerciseID,
         null,
         new DecoderOptions()
             .setDoFlashcard(false)
@@ -1191,7 +1213,7 @@ public class ScoreServlet extends DatabaseServlet {
                                                   int projid) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
     AudioFileHelper audioFileHelper = getAudioFileHelper(projid);
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, ""+exerciseID, null,
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, "" + exerciseID, null,
         new DecoderOptions()
             .setDoFlashcard(false)
             .setCanUseCache(false)
@@ -1204,7 +1226,10 @@ public class ScoreServlet extends DatabaseServlet {
     jsonObject.put("Date", new Date().toString());
   }
 
-  private Project getProject(int projid) {    return db.getProject(projid);  }
+  private Project getProject(int projid) {
+    return db.getProject(projid);
+  }
+
 
   private static class UserAndSelection {
     private final String[] split1;
@@ -1242,4 +1267,6 @@ public class ScoreServlet extends DatabaseServlet {
       return this;
     }
   }
+
+
 }
