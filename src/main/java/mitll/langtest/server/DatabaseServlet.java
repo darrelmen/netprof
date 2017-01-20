@@ -54,7 +54,7 @@ import java.io.*;
 public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = LogManager.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
-  private DatabaseImpl db = null;
+  protected DatabaseImpl db = null;
   protected ServerProperties serverProps;
   private String configDir;
   protected PathHelper pathHelper;
@@ -162,9 +162,9 @@ public class DatabaseServlet extends HttpServlet {
         securityManager = db.getUserSecurityManager();
         if (securityManager == null) logger.error("getDatabase huh? no security manager?");
         //securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
-        // logger.debug("found existing database reference " + db + " under " +getServletContext());
+         logger.debug("getDatabase found existing database reference " + db + " under " +getServletContext());
       } else {
-        logger.error("huh? no existing db reference?");
+        logger.error("getDatabase huh? no existing db reference?");
       }
     }
     return db;

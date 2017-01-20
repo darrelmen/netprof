@@ -137,8 +137,6 @@ public class ScoreServlet extends DatabaseServlet {
   private long whenCached = -1;
   private long whenCachedEverything = -1;
 
-  private DatabaseImpl db;
-
   private static final String ADD_USER = "addUser";
   private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
 
@@ -613,6 +611,10 @@ public class ScoreServlet extends DatabaseServlet {
     jsonObject.put("OK", "OK");
   }
 
+  /**
+   *
+   * @param response
+   */
   private void configureResponse(HttpServletResponse response) {
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
