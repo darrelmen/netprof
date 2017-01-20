@@ -52,9 +52,6 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.visualization.client.VisualizationUtils;
-import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
-import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.amas.AMASInitialUI;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
@@ -73,14 +70,15 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.services.*;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
-import mitll.langtest.client.user.*;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
+import mitll.langtest.client.user.UserNotification;
+import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.ImageOptions;
-import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
 import java.util.*;
@@ -509,7 +507,7 @@ public class LangTest implements
         showErrorMessage("Configuration Error", startupInfo.getMessage());
       }
 
-      loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
+     // loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
     }
   }
 
@@ -531,6 +529,7 @@ public class LangTest implements
     initialUI.populateRootPanel();
   }
 
+/*
   private void loadVisualizationPackages() {
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
@@ -540,6 +539,7 @@ public class LangTest implements
       }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
   }
+*/
 
   /**
    * Set the page title and favicon.

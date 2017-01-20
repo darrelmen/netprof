@@ -34,6 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.SlickProject;
@@ -47,7 +48,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
   private SlickUserExerciseDAO userExerciseDAO;
   private SlickProject project;
-
+  Project fullProject;
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
    */
@@ -56,11 +57,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       IUserListManager userListManager,
       boolean addDefects,
       SlickUserExerciseDAO userExerciseDAO,
-      SlickProject project
+      Project fullProject
   ) {
-    super(serverProps, userListManager, addDefects, project.language(), project.id());
+    super(serverProps, userListManager, addDefects, fullProject.getProject().language(), fullProject.getProject().id());
     this.userExerciseDAO = userExerciseDAO;
-    this.project = project;
+    this.project = fullProject.getProject();
+    this.fullProject = fullProject;
   }
 
   /**
@@ -106,7 +108,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       List<String> typeOrder = Arrays.asList(project.first(), project.second());
 
       int projid = project.id();
-      List<CommonExercise> allNonContextExercises = userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper());
+
+      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
+          userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
+
+      logger.info("read " + exerciseToPhoneForProject.size() + " for " + projid);
+
+      List<CommonExercise> allNonContextExercises =
+          userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject, fullProject);
       logger.info("readExercises project " + project +
           " readExercises got " + allNonContextExercises.size() + " predef exercises");
 
@@ -114,8 +123,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
 //      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
       Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
+
       Map<Integer, CommonExercise> idToContext =
-          getIDToExercise(userExerciseDAO.getContextByProject(projid, typeOrder, getSectionHelper()));
+          getIDToExercise(userExerciseDAO.getContextByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject, fullProject));
 
       // logger.info(prefix + " idToContext " + idToContext.size());
 

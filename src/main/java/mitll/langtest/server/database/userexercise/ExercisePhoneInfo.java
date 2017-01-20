@@ -32,12 +32,18 @@
 
 package mitll.langtest.server.database.userexercise;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.*;
 
 public class ExercisePhoneInfo {
+  private static final Logger logger = LogManager.getLogger(ExercisePhoneInfo.class);
+
   private int numPhones = 0;
+  /**
+   * Unique set...?
+   */
   private Collection<String> phones = new TreeSet<>();
   private Map<String, ExerciseToPhone.Info> wordToInfo;
 
@@ -45,18 +51,52 @@ public class ExercisePhoneInfo {
     return numPhones;
   }
 
+  public ExercisePhoneInfo() {
+  }
+
+  public ExercisePhoneInfo(String phoneString) {
+    String[] split = phoneString.split("[,;]");
+//    List<String> phones = new ArrayList<>();
+    for (String forWord : split) {
+      String[] split1 = forWord.split(" ");
+      for (String phone : split1) {
+        phone = phone.trim();
+        if (phone.equalsIgnoreCase("sp")) {
+          logger.info("skip " +phone);
+        }
+        else {
+          phones.add(phone);
+          numPhones++;
+        }
+      }
+    }
+ //   logger.info("from " + phoneString + " " + phones);
+
+  }
+
   public Collection<String> getPhones() {
     return phones;
   }
 
+  /**
+   * @param phone
+   * @see ExerciseToPhone#addPhones
+   */
   void addPhones(Collection<String> phone) {
     this.phones.addAll(phone);
   }
 
+  /**
+   * @param num
+   */
   void setNumPhones(int num) {
     numPhones = Math.max(numPhones, num);
   }
 
+  /**
+   * @param wordToInfo
+   * @see ExerciseToPhone#getExerciseToPhoneForProject
+   */
   public void setWordToInfo(Map<String, ExerciseToPhone.Info> wordToInfo) {
     this.wordToInfo = wordToInfo;
   }
