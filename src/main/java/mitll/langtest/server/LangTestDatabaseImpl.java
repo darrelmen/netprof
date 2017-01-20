@@ -362,6 +362,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.debug("hmm... found existing database reference " + databaseReference);
     }
     servletContext.setAttribute(DATABASE_REFERENCE, db);
+    logger.info("shared db " + servletContext.getAttribute(DATABASE_REFERENCE));
   }
 
   /**
