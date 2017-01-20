@@ -49,7 +49,7 @@ public interface IProjectManagement {
   /**
    * @see DatabaseImpl#configureProjects
    */
-  void configureProjects();
+//  void configureProjects();
 
   void rememberProject(int id);
 

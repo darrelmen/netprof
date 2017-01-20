@@ -100,7 +100,7 @@ dependencies {
 
     // compile group: 'com.google.gwt.google-apis', name: 'gwt-visualization', version: '1.0.2'
     // todo consider removing this
-    compile name: 'gwt-visualization'
+//    compile name: 'gwt-visualization'
 
     // just for AMAS support
     compile name: 'mira'
@@ -161,7 +161,7 @@ gwt {
 }
 
 war {
-//    archiveName "netprof.war"
+    archiveName "netprof.war"
     // somehow the domino tests jars are getting in if I don't do this
     rootSpec.exclude("**/*tests.jar")
     rootSpec.exclude("**/log4j2-test.xml")
@@ -300,6 +300,9 @@ publishing {
         mavenJava(MavenPublication) {
             artifact(war)
 //            artifact(zip)
+
+        }
+        distribution(IvyPublication) {
 
         }
     }

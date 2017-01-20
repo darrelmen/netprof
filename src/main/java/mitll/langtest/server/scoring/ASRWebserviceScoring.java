@@ -38,7 +38,6 @@ import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
-import com.google.gwt.json.client.JSONObject;
 import corpus.HTKDictionary;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
@@ -332,10 +331,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       );
 */
 
-    int imageWidth = imageOptions.getWidth();
-    int imageHeight = imageOptions.getHeight();
+      int imageWidth = imageOptions.getWidth();
+      int imageHeight = imageOptions.getHeight();
 
-    boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
+      boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
       EventAndFileInfo eventAndFileInfo = jsonObject == null ?
           writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
               useScoreForBkgColor,
@@ -394,6 +393,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
 
     String dict = "[";
+    dict += getPronunciations(transcript, transliteration, false);
+    dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
+    dict += "]";
+    return dict;
+  }
+
+  public String getPronunciations(String transcript, String transliteration, boolean justPhones) {
+    String dict = "";
     String[] translitTokens = transliteration.toLowerCase().split(" ");
     String[] transcriptTokens = transcript.split(" ");
     boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
@@ -408,7 +415,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         if (htkDictionary.contains(word)) {
           scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
           for (int i = 0; i < prons.size(); i++) {
-            dict += getPronStringForWord(word, prons.apply(i));
+            dict += getPronStringForWord(word, prons.apply(i), justPhones);
           }
         } else {
           if (getLTS() == null) {
@@ -417,34 +424,38 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             String word1 = word.toLowerCase();
             String[][] process = getLTS().process(word1);
             if (!ltsOutputOk(process)) {
-              logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
+              logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
               if (canUseTransliteration) {
                 logger.info("trying transliteration LTS");
-                String[][] translitprocess = (transcriptTokens.length == 1) ? getLTS().process(StringUtils.join(translitTokens, "")) : getLTS().process(translitTokens[index]);
+
+                String[][] translitprocess = (transcriptTokens.length == 1) ?
+                    getLTS().process(StringUtils.join(translitTokens, "")) :
+                    getLTS().process(translitTokens[index]);
+
                 if (ltsOutputOk(translitprocess)) {
                   logger.info("got pronunciation from transliteration");
                   for (String[] pron : translitprocess) {
-                    dict += getPronStringForWord(word, pron);
+                    dict += getPronStringForWord(word, pron, false);
                   }
                 } else {
                   logger.info("transliteration LTS failed");
-                  logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
+                  logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
                   logger.info("attempting to fall back to default pronunciation");
                   if ((translitprocess.length > 0) && (translitprocess[0].length > 1)) {
-                    dict += getDefaultPronStringForWord(word, translitprocess);
+                    dict += getDefaultPronStringForWord(word, translitprocess, justPhones);
                   }
                 }
               } else {
                 logger.info("can't use transliteration");
-                logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
+                logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
                 logger.info("attempting to fall back to default pronunciation");
                 if (process.length > 0) {
-                  dict += getDefaultPronStringForWord(word, process);
+                  dict += getDefaultPronStringForWord(word, process, justPhones);
                 }
               }
             } else {
               for (String[] pron : process) {
-                dict += getPronStringForWord(word, pron);
+                dict += getPronStringForWord(word, pron, justPhones);
               }
             }
           }
@@ -452,8 +463,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
       index += 1;
     }
-    dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
-    dict += "]";
     return dict;
   }
 
@@ -463,26 +472,32 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    *
    * @param word
    * @param apply
+   * @param justPhones
    * @return
    */
-  private String getPronStringForWord(String word, String[] apply) {
-    return word + "," + listToSpaceSepSequence(apply) + " sp" + ";";
+  private String getPronStringForWord(String word, String[] apply, boolean justPhones) {
+    String s = listToSpaceSepSequence(apply);
+    return justPhones ? s + " " : word + "," + s + " sp" + ";";
   }
 
   //last resort, if we can't even use the transliteration to get some kind of pronunciation
-  private String getDefaultPronStringForWord(String word, String[][] apply) {
+  private String getDefaultPronStringForWord(String word, String[][] apply, boolean justPhones) {
     for (String[] pc : apply) {
-      StringBuilder builder = new StringBuilder();
-      for (String p : pc) {
-        if (!p.contains("#"))
-          builder.append(p).append(" ");
-      }
-      String result = builder.toString().trim();
+      String result = getPhones(pc);
       if (result.length() > 0) {
-        return word + "," + result + " sp;";
+        return justPhones ? result + " " : word + "," + result + " sp;";
       }
     }
-    return word + ",  sp;"; //hopefully we never get here...
+    return justPhones ? "" : word + ",  sp;"; //hopefully we never get here...
+  }
+
+  private String getPhones(String[] pc) {
+    StringBuilder builder = new StringBuilder();
+    for (String p : pc) {
+      if (!p.contains("#"))
+        builder.append(p).append(" ");
+    }
+    return builder.toString().trim();
   }
 
   private String listToSpaceSepSequence(String[] pron) {

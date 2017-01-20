@@ -171,8 +171,11 @@ public class DominoUserTest extends BaseTest {
 
     int i = 0;
 
+    /**
+     * TODO : put this back???
+     */
     for (CommonExercise exercise : rawExercises) {
-      ExercisePhoneInfo exercisePhoneInfo = project.getExToPhone().get(exercise.getID());
+      ExercisePhoneInfo exercisePhoneInfo = null;//project.getExToPhone().get(exercise.getID());
       if (exercisePhoneInfo != null) {
         Map<String, ExerciseToPhone.Info> wordToInfo = exercisePhoneInfo.getWordToInfo();
         logger.info("for " + exercise.getID() + " : " + exercise.getForeignLanguage() + " " + wordToInfo);
