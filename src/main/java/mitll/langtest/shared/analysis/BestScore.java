@@ -58,10 +58,12 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
    * @param timestamp
    * @param isFlashcard
    * @param nativeAudio
-   * @see mitll.langtest.server.database.analysis.Analysis#getUserToResults
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserToResults
    */
   public BestScore(int id, float pronScore, long timestamp, int resultID, String json, boolean isiPad,
-                   boolean isFlashcard, String fileRef, String nativeAudio) {
+                   boolean isFlashcard,
+                   String fileRef,
+                   String nativeAudio) {
     super(timestamp, (pronScore < 0) ? 0 : pronScore);
     this.exid = id;
     this.resultID = resultID;
@@ -110,6 +112,10 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
     return isFlashcard;
   }
 
+  /**
+   * @see WordScore#WordScore
+   * @return
+   */
   public String getNativeAudio() {
     return nativeAudio;
   }

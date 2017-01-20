@@ -42,6 +42,7 @@ import mitll.npdata.dao.SlickPerfResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -51,6 +52,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   public static final int WARN_THRESH = 100;
   private SlickResultDAO resultDAO;
   private static final boolean DEBUG = true;
+  String language;
 
   /**
    * @param database
@@ -62,9 +64,11 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   public SlickAnalysis(Database database,
                        IPhoneDAO phoneDAO,
                        Map<Integer, String> exToRef,
-                       SlickResultDAO resultDAO) {
+                       SlickResultDAO resultDAO,
+                       String language) {
     super(database, phoneDAO, exToRef);
     this.resultDAO = resultDAO;
+    this.language = language;
   }
 
   /**
@@ -171,7 +175,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       String type = perf.audiotype();
 
       List<BestScore> results = userToBest.get(userid);
-      if (results == null) userToBest.put(userid, results = new ArrayList<BestScore>());
+      if (results == null) userToBest.put(userid, results = new ArrayList<>());
 
       if (pronScore < 0) logger.warn("huh? got " + pronScore + " for " + exid + " and " + id);
 
@@ -200,7 +204,17 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 //        }
         missing++;
       }
-      BestScore e = new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path),
+
+      boolean isLegacy = path.startsWith("answers");
+      String filePath = isLegacy ?
+          getRelPrefix(language) + path:
+          trimPathForWebPage(path);
+
+   //   logger.info("isLegacy " + isLegacy + " " + path + " : " + filePath);
+
+      BestScore e = new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard,
+          //trimPathForWebPage(path),
+          filePath,
           nativeAudio);
       results.add(e);
     }
@@ -213,5 +227,28 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
 
     return userToBest;
+  }
+
+  /**
+   * Fix the path -  on hydra it's at:
+   *
+   * /opt/netprof/answers/english/answers/plan/1039/1/subject-130
+   *
+   * rel path:
+   *
+   * answers/english/answers/plan/1039/1/subject-130
+   *
+   * @param language
+   * @return
+   */
+  private String getRelPrefix(String language) {
+    String installPath = database.getServerProps().getAnswerDir();
+
+    String s = language.toLowerCase();
+    String prefix = installPath + File.separator + s;
+    int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
+
+    String relPrefix = prefix.substring(netProfDurLength) + File.separator ;
+    return relPrefix;
   }
 }

@@ -408,8 +408,7 @@ public class ServerProperties {
    * @return
    */
   public String getAnswerDir() {
-    String defaultAnswers = getAudioBaseDir() + ANSWERS;
-    return props.getProperty(ANSWER_DIR, defaultAnswers);
+    return props.getProperty(ANSWER_DIR, getAudioBaseDir() + ANSWERS);
   }
 
   public String getAudioBaseDir() {
