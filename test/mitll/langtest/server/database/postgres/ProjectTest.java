@@ -172,8 +172,10 @@ public class ProjectTest extends BaseTest {
 
     int i = 0;
 
+    // TODO : get the exercisePhoneInfo somehow...
+
     for (CommonExercise exercise : rawExercises) {
-      ExercisePhoneInfo exercisePhoneInfo = project.getExToPhone().get(exercise.getID());
+      ExercisePhoneInfo exercisePhoneInfo = null;//project.getExToPhone().get(exercise.getID());
       if (exercisePhoneInfo != null) {
         Map<String, ExerciseToPhone.Info> wordToInfo = exercisePhoneInfo.getWordToInfo();
         logger.info("for " + exercise.getID() + " : " + exercise.getForeignLanguage() + " " + wordToInfo);
@@ -259,6 +261,15 @@ public class ProjectTest extends BaseTest {
     int projectid = 2;
     List<UserInfo> userInfo = database.getAnalysis(projectid).getUserInfo(database.getUserDAO(), 5, projectid);
     for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
+  }
+
+  @Test
+  public void testPhonesLookup() {
+    DatabaseImpl database = getDatabase();
+    database.setInstallPath("war", "");
+    database.populateProjects();
+
+
   }
 
 }

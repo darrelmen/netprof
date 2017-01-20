@@ -57,6 +57,7 @@ import java.util.*;
  */
 public class SectionHelper<T extends Shell> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
+  public static final String SOUND = "Sound";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
@@ -115,7 +116,7 @@ public class SectionHelper<T extends Shell> {
   }
 
   private void putSoundAtEnd(List<String> types) {
-    if (types.contains("Sound")) {
+    if (types.contains(SOUND)) {
       types.remove("Sound");
       types.add("Sound");
     }

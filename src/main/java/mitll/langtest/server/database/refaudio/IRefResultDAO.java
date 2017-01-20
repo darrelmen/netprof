@@ -35,12 +35,14 @@ package mitll.langtest.server.database.refaudio;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface IRefResultDAO extends IDAO {
   boolean removeForExercise(int exid);
@@ -75,8 +77,11 @@ public interface IRefResultDAO extends IDAO {
    */
   List<Result> getResults();
 
-  List<SlickRefResultJson> getJsonResults();
+//  List<SlickRefResultJson> getJsonResults();
+//
+//  List<SlickRefResultJson> getJsonResultsForProject(int projid);
 
+  Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, int, String, String, int, int, boolean, int, boolean)
    * @param exid

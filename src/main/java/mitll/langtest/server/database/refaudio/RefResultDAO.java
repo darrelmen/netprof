@@ -38,6 +38,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.npdata.dao.SlickRefResultJson;
@@ -51,8 +52,6 @@ import java.util.*;
 import static mitll.langtest.server.database.Database.EXID;
 import static mitll.langtest.server.database.result.ResultDAO.MODEL;
 import static mitll.langtest.server.database.result.ResultDAO.MODELUPDATE;
-//import static mitll.langtest.server.database.ResultDAO.MODEL;
-//import static mitll.langtest.server.database.ResultDAO.MODELUPDATE;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -70,7 +69,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
   private static final String REFRESULT = "refresult";
   private static final String SELECT_ALL = "SELECT * FROM " + REFRESULT;
-  public static final String SELECT_PREFIX = SELECT_ALL + " WHERE " + EXID;
+  private static final String SELECT_PREFIX = SELECT_ALL + " WHERE " + EXID;
 
   private static final String DURATION = "duration";
   private static final String CORRECT = "correct";
@@ -316,8 +315,18 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     return new ArrayList<>();
   }
 
-  @Override
+/*  @Override
   public List<SlickRefResultJson> getJsonResults() {
+    return null;
+  }
+
+  @Override
+  public List<SlickRefResultJson> getJsonResultsForProject(int projid) {
+    return null;
+  }*/
+
+  @Override
+  public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
     return null;
   }
 

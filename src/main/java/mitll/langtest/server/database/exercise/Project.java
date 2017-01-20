@@ -56,7 +56,7 @@ import java.util.*;
 /**
  * Has everything associated with a project
  */
-public class Project {
+public class Project implements PronunciationLookup {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
   private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
@@ -73,8 +73,9 @@ public class Project {
   private PathHelper pathHelper;
   private DatabaseImpl db;
   private ServerProperties serverProps;
+
   //private ExerciseTrie<CommonExercise> phoneTrie;
-  private Map<Integer, ExercisePhoneInfo> exToPhone;
+  //private Map<Integer, ExercisePhoneInfo> exToPhone;
 
   private boolean wasConfigured = false;
 
@@ -256,17 +257,23 @@ public class Project {
     return phoneTrie;
   }*/
 
+/*
   public void setExToPhone(Map<Integer, ExercisePhoneInfo> exToPhone) {
     this.exToPhone = exToPhone;
   }
+*/
 
+
+  @Override
+  public String getPronunciations(String transcript, String transliteration) {
+    return hasModel() ? audioFileHelper.getPronunciations(transcript, transliteration) : "";
+  }
+
+/*
   public Map<Integer, ExercisePhoneInfo> getExToPhone() {
     return exToPhone;
   }
-
-  public String toString() {
-    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
-  }
+*/
 
   /**
    * @return
@@ -292,5 +299,9 @@ public class Project {
       logger.error("Got " + e, e);
       return null;
     }
+  }
+
+  public String toString() {
+    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }

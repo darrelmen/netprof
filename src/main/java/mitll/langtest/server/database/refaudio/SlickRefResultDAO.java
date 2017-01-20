@@ -34,7 +34,10 @@ package mitll.langtest.server.database.refaudio;
 
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
+import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.npdata.dao.DBConnection;
@@ -141,10 +144,25 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return results;
   }
 
-  public List<SlickRefResultJson> getJsonResults() {
-  //  logger.info("getJsonResults --- ");
+  private List<SlickRefResultJson> getJsonResults() {
+    //  logger.info("getJsonResults --- ");
     return dao.getAllSlim();
   }
+
+  private List<SlickRefResultJson> getJsonResultsForProject(int projid) {
+    return dao.getAllSlimForProject(projid);
+  }
+
+  /**
+   * @see DBExerciseDAO#readExercises
+   * @param projid
+   * @return
+   */
+  public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
+    List<SlickRefResultJson> jsonResults = getJsonResultsForProject(projid);
+    return new ExerciseToPhone().getExerciseToPhoneForProject(jsonResults);
+  }
+
 
   @Override
   public Result getResult(int exid, String answer) {

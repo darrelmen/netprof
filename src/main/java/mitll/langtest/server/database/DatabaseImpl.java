@@ -643,16 +643,17 @@ public class DatabaseImpl implements Database {
           makeExerciseDAO(lessonPlanFile, isURL);
 
           if (!serverProps.useH2()) {
-            //        userExerciseDAO.setExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
+            //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
             populateProjects();
             //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
             if (projectManagement.getProjects().isEmpty()) {
-              logger.warn("\n\n\nmakeDAO no projects loaded yet...?");
-            } else {
+              logger.warn("\nmakeDAO no projects loaded yet...?");
+            }
+      /*      else {
               ExerciseDAO<CommonExercise> exerciseDAO = projectManagement.getFirstProject().getExerciseDAO();
               logger.info("using exercise dao from first project " + exerciseDAO);
               userExerciseDAO.setExerciseDAO(exerciseDAO);
-            }
+            }*/
           }
 
           // TODO
@@ -661,9 +662,10 @@ public class DatabaseImpl implements Database {
 
           if (serverProps.useH2()) {
             userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
-          } else {
-            configureProjects();
           }
+//          else {
+//            configureProjects();
+//          }
         }
         userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);//, userPermissionDAO);
       }
@@ -675,14 +677,21 @@ public class DatabaseImpl implements Database {
    *
    * @see #makeDAO
    */
+/*
   private void configureProjects() {
-    // TODO : this seems like a bad idea --
-    Map<Integer, ExercisePhoneInfo> exerciseToPhone = new ExerciseToPhone().getExerciseToPhone(refresultDAO);
-    logger.info("configureProjects - ex to phone size " + exerciseToPhone.size());
-    userExerciseDAO.setExToPhones(exerciseToPhone);
+    // TODOx : this seems like a bad idea --
+//    Map<Integer, ExercisePhoneInfo> exerciseToPhone = new ExerciseToPhone().getExerciseToPhone(refresultDAO);
+//    logger.info("configureProjects - ex to phone size " + exerciseToPhone.size());
+//    userExerciseDAO.useExToPhones(exerciseToPhone);
     projectManagement.configureProjects();
   }
+*/
 
+  /**
+   * For when a new project is added or changes state.
+   * @see mitll.langtest.server.services.ProjectServiceImpl#update
+   * @param project
+   */
   @Override
   public void configureProject(Project project) {
     projectManagement.configureProject(project);

@@ -128,6 +128,10 @@ public class AudioFileHelper implements AlignDecode {
     makeDecodeCorrectnessChecker();
   }
 
+  public String getPronunciations(String transcript, String transliteration) {
+    return webserviceScoring.getPronunciations(transcript, transliteration, true);
+  }
+
   /**
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#getCollator

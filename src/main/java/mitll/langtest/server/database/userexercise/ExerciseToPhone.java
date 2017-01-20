@@ -32,8 +32,6 @@
 
 package mitll.langtest.server.database.userexercise;
 
-import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -43,16 +41,21 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
+/**
+ * Figures out the sequence of phones for an exercise.
+ * Either by looking up what a decoder has already found, or asking the dictionary.
+ */
 public class ExerciseToPhone {
   private static final Logger logger = LogManager.getLogger(ExerciseToPhone.class);
 
   /**
    * TODO: Seems like this could take a long time????
-   * @param refResultDAO
+   *
    * @return
-   * @see DatabaseImpl#configureProjects
+   * @paramx refResultDAO
+   * @seex DatabaseImpl#configureProjects
    */
-  public Map<Integer, ExercisePhoneInfo> getExerciseToPhone(IRefResultDAO refResultDAO) {
+/*  public Map<Integer, ExercisePhoneInfo> getExerciseToPhone(IRefResultDAO refResultDAO) {
     long then = System.currentTimeMillis();
     List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
     long now = System.currentTimeMillis();
@@ -63,7 +66,31 @@ public class ExerciseToPhone {
 
     for (SlickRefResultJson exjson : jsonResults) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
-      /*List<TranscriptSegment> transcriptSegments =*/ netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+      *//*List<TranscriptSegment> transcriptSegments =*//* //netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+
+      int exid = exjson.exid();
+      ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
+      if (phonesForEx == null) exToPhones.put(exid, phonesForEx = new ExercisePhoneInfo());
+      addPhones(phonesForEx, netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT));
+      phonesForEx.setNumPhones(exjson.numalignphones());
+    }
+    logger.info("getExerciseToPhone took " + (System.currentTimeMillis() - then) +
+        " millis to populate ex->phone map of size " + exToPhones.size());
+
+    return exToPhones;
+  }*/
+
+  public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(List<SlickRefResultJson> jsonResults) {
+    long then = System.currentTimeMillis();
+    long now = System.currentTimeMillis();
+    logger.info("getExerciseToPhone took " + (now - then) + " millis to get ref results");
+    Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
+
+    ParseResultJson parseResultJson = new ParseResultJson(null);
+
+    for (SlickRefResultJson exjson : jsonResults) {
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
+      /*List<TranscriptSegment> transcriptSegments =*/ //netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
 
       int exid = exjson.exid();
       ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
@@ -78,21 +105,21 @@ public class ExerciseToPhone {
   }
 
   /**
-   * @param refResultDAO
    * @return
-   * @see DatabaseImpl#configureProjects
+   * @paramx refResultDAO
+   * @seex DatabaseImpl#configureProjects
    */
-  public Map<Integer, ExercisePhoneInfo> getExerciseToPhone2(IRefResultDAO refResultDAO, Set<Integer> inProject) {
+  public Map<Integer, ExercisePhoneInfo> getExerciseToPhone2(
+      //IRefResultDAO refResultDAO,
+      List<SlickRefResultJson> jsonResults,
+      Set<Integer> inProject) {
     long then = System.currentTimeMillis();
-    List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
-    long now = System.currentTimeMillis();
-    logger.info("getExerciseToPhone took " + (now - then) + " millis to get ref results");
-
-
+    //List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
+    logger.info("getExerciseToPhone took " + (System.currentTimeMillis() - then) + " millis to get ref results");
     return getExToPhonePerProject(inProject, jsonResults);
   }
 
-  public Map<Integer, ExercisePhoneInfo> getExToPhonePerProject(Set<Integer> inProject, List<SlickRefResultJson> jsonResults) {
+  Map<Integer, ExercisePhoneInfo> getExToPhonePerProject(Set<Integer> inProject, List<SlickRefResultJson> jsonResults) {
     long then = System.currentTimeMillis();
     Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
 
@@ -103,7 +130,7 @@ public class ExerciseToPhone {
     // partition into same length sets
     Map<Integer, Set<Info>> lengthToInfos = new HashMap<>();
 
-    logger.info("looking at " + inProject.size() + " exercises and " + jsonResults.size() + " results");
+    logger.info("getExerciseToPhone2 looking at " + inProject.size() + " exercises and " + jsonResults.size() + " results");
 
     Map<Integer, Map<String, Set<String>>> exToWordToPron = new HashMap<>();
 
@@ -264,6 +291,7 @@ public class ExerciseToPhone {
 
     /**
      * @param neighbor
+     * @see ExerciseToPhone#addNeighbor
      */
     void addNeighbor(Info neighbor, boolean isOne) {
       //    oneSubNeighbors.add(neighbor);
@@ -308,7 +336,6 @@ public class ExerciseToPhone {
 
     public String toString() {
       StringBuilder builder = getProns(pronToInfo);
-
       StringBuilder builder2 = new StringBuilder();
       for (List<String> pron : pronunciations) builder2.append(getPronKey(pron)).append(", ");
 
@@ -317,7 +344,7 @@ public class ExerciseToPhone {
           "one sub neighbors " + pronToInfo.size() + " : " + builder;// + "\n\ttwo " + pronToInfo2.size() + " " + getProns(pronToInfo2);
     }
 
-    private StringBuilder getProns(Map<String, Info>pronToInfo ) {
+    private StringBuilder getProns(Map<String, Info> pronToInfo) {
       StringBuilder builder = new StringBuilder();
       for (String pron : pronToInfo.keySet()) builder.append(pron).append(",");
       return builder;
