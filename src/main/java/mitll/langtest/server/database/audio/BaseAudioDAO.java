@@ -274,7 +274,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param attr
    * @param language
    * @return
-   * @see #attachAudioToExercise
+   * @see #attachAudio
    */
   private boolean attachAudioAndFixPath(CommonExercise firstExercise,
                                         String installPath,
@@ -317,6 +317,7 @@ public abstract class BaseAudioDAO extends DAO {
       return false;
     }
   }
+
 
   abstract Collection<AudioAttribute> getAudioAttributesForExercise(int exid);
 
