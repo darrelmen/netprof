@@ -135,6 +135,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return db.getContextPractice();
   }
 
+  /**
+   * Not really hooked up yet...
+   */
   @Override
   public void reloadExercises() {
     logger.info("reloadExercises --- !");
@@ -156,97 +159,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (db == null) {
       logger.info("no db yet...");
     } else {
-      projectInfos = getNestedProjectInfo();
+      projectInfos = db.getProjectManagement().getNestedProjectInfo();
     }
 
     return new StartupInfo(serverProps.getProperties(), projectInfos, startupMessage, serverProps.getAffliations());
   }
-
-  /**
-   * TODO : consider moving this into user service?
-   * what if later an admin changes it while someone else is looking at it...
-   * <p>
-   * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
-   * on the exercise indicating it needs to be inspected again (we've added new audio).
-   * <p>
-   * Don't return a path to the normalized audio, since this doesn't let the recorder have feedback about how soft
-   * or loud they are : https://gh.ll.mit.edu/DLI-LTEA/Development/issues/601
-   *
-   * @return
-   */
-  private List<SlimProject> getNestedProjectInfo() {
-    List<SlimProject> projectInfos = new ArrayList<>();
-
-    Map<String, List<SlickProject>> langToProject = new TreeMap<>();
-    Collection<SlickProject> all = db.getProjectDAO().getAll();
-//    logger.info("found " + all.size() + " projects");
-    for (SlickProject project : all) {
-      List<SlickProject> slimProjects = langToProject.get(project.language());
-      if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());
-      slimProjects.add(project);
-    }
-//    logger.info("lang->project is " + langToProject);
-    for (String lang : langToProject.keySet()) {
-      List<SlickProject> slickProjects = langToProject.get(lang);
-      SlickProject firstProject = slickProjects.get(0);
-      SlimProject parent = getProjectInfo(firstProject);
-      projectInfos.add(parent);
-
-      if (slickProjects.size() > 1) {
-        for (SlickProject slickProject : slickProjects) {
-          parent.addChild(getProjectInfo(slickProject));
-          //  logger.info("\t add child to " + parent);
-        }
-      }
-    }
-
-    return projectInfos;
-  }
-
-  /**
-   * @param project
-   * @return
-   */
-  private SlimProject getProjectInfo(SlickProject project) {
-    boolean hasModel = project.getProp(ServerProperties.MODELS_DIR) != null;
-
-    ProjectStatus status = null;
-    try {
-      status = ProjectStatus.valueOf(project.status());
-    } catch (IllegalArgumentException e) {
-      logger.error("got " +e,e);
-      status = ProjectStatus.DEVELOPMENT;
-    }
-
-    boolean isRTL = false;
-    if (status != ProjectStatus.RETIRED) {
-      Collection<CommonExercise> exercises = db.getExercises(project.id());
-      isRTL = isRTL(exercises);
-    }
-
-    return new SlimProject(project.id(),
-        project.name(),
-        project.language(),
-        project.countrycode(),
-        project.course(),
-        ProjectStatus.valueOf(project.status()),
-        project.displayorder(),
-        hasModel,
-        isRTL);
-  }
-
-  private boolean isRTL(Collection<? extends CommonShell> exercises) {
-    boolean isRTL = false;
-    if (!exercises.isEmpty()) {
-      CommonShell next = exercises.iterator().next();
-      HasDirection.Direction direction = WordCountDirectionEstimator.get().estimateDirection(next.getForeignLanguage());
-      // String rtl = properties.get("rtl");
-      isRTL = direction == HasDirection.Direction.RTL;
-      // logger.info("examined text and found it to be " + direction);
-    }
-    return isRTL;
-  }
-
 
   /**
    * Can't check if it's valid if we don't have a model.
@@ -296,7 +213,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * Filter out the default audio recordings...
    *
    * @return
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doMaleFemale
+   * @see mitll.langtest.client.custom.RecorderNPFHelper#getProgressInfo
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress() {
@@ -310,7 +227,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @param typeToSection  indicates the unit and chapter(s) we're asking about
    * @param userListID     if we're asking about a list and not predef items
    * @return
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
   @Override
   public AVPScoreReport getUserHistoryForList(int userid,

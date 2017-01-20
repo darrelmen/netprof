@@ -43,6 +43,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,30 +51,47 @@ import java.util.Map;
 public class BasePhoneDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
 
-  protected static final String PHONE = "phone";
-  protected static final String SEQ = "seq";
+  static final String PHONE = "phone";
+  static final String SEQ = "seq";
   protected static final String SCORE = "score";
   //private static final boolean DEBUG = false;
-  protected static final String RID1 = "RID";
-  protected final ParseResultJson parseResultJson;
+  static final String RID1 = "RID";
+  final ParseResultJson parseResultJson;
 
-  protected BasePhoneDAO(Database database) {
+  BasePhoneDAO(Database database) {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
   }
 
-  protected void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap, String scoreJson, WordAndScore wordAndScore) {
-    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = stringToMap.get(scoreJson);
-    if (netPronImageTypeListMap == null) {
-      netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
-      stringToMap.put(scoreJson, netPronImageTypeListMap);
-    } else {
+   void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap, String scoreJson,
+                      WordAndScore wordAndScore) {
+     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
+         stringToMap.computeIfAbsent(scoreJson, k -> parseResultJson.parseJson(scoreJson));
+     //else {
       // logger.debug("cache hit " + scoreJson.length());
-    }
+    //}
 
     setTranscript(wordAndScore, netPronImageTypeListMap);
   }
 
+  /**
+   *
+   * @param idToRef
+   * @param phoneToScores
+   * @param phoneToWordAndScore
+   * @param exid
+   * @param audioAnswer
+   * @param scoreJson
+   * @param resultTime
+   * @param wseq
+   * @param word
+   * @param rid
+   * @param phone
+   * @param seq
+   * @param phoneScore
+   * @param language
+   * @return
+   */
   WordAndScore getAndRememberWordAndScore(Map<Integer, String> idToRef,
                                           Map<String, List<PhoneAndScore>> phoneToScores,
                                           Map<String, List<WordAndScore>> phoneToWordAndScore,
@@ -81,8 +99,12 @@ public class BasePhoneDAO extends DAO {
                                           String audioAnswer,
                                           String scoreJson,
                                           long resultTime,
-                                          int wseq, String word,
-                                          long rid, String phone, int seq, float phoneScore) {
+                                          int wseq,
+                                          String word,
+                                          long rid,
+                                          String phone,
+                                          int seq,
+                                          float phoneScore, String language) {
     PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime);
 
     List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
@@ -90,8 +112,15 @@ public class BasePhoneDAO extends DAO {
       phoneToWordAndScore.put(phone, wordAndScores = new ArrayList<>());
     }
 
-    WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
-        idToRef.get(exid), scoreJson, resultTime);
+    boolean isLegacy = audioAnswer.startsWith("answers");
+    String filePath = isLegacy ?
+        getRelPrefix(language) + audioAnswer:
+        trimPathForWebPage(audioAnswer);
+
+    WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, (int)rid, wseq, seq,
+        filePath,//trimPathForWebPage(audioAnswer),
+        idToRef.get(exid),
+        scoreJson, resultTime);
 
     wordAndScores.add(wordAndScore);
     phoneAndScore.setWordAndScore(wordAndScore);
@@ -115,5 +144,29 @@ public class BasePhoneDAO extends DAO {
   private String trimPathForWebPage(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
     return (answer == -1) ? path : path.substring(answer);
+  }
+
+
+  /**
+   * Fix the path -  on hydra it's at:
+   *
+   * /opt/netprof/answers/english/answers/plan/1039/1/subject-130
+   *
+   * rel path:
+   *
+   * answers/english/answers/plan/1039/1/subject-130
+   *
+   * @param language
+   * @return
+   */
+  private String getRelPrefix(String language) {
+    String installPath = database.getServerProps().getAnswerDir();
+
+    String s = language.toLowerCase();
+    String prefix = installPath + File.separator + s;
+    int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
+
+    String relPrefix = prefix.substring(netProfDurLength) + File.separator ;
+    return relPrefix;
   }
 }

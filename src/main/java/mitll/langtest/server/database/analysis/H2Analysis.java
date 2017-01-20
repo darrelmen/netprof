@@ -172,14 +172,14 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @param projid
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
+   * @seez mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
   public PhoneReport getPhonesForUser(long id, int minRecordings, int projid) {
     try {
       String sql = getPerfSQL(id);
 
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);
-      return getPhoneReport(id, best);
+      return getPhoneReport(id, best, database.getLanguage());
     } catch (Exception ee) {
       logException(ee);
     }
@@ -187,9 +187,10 @@ class H2Analysis extends Analysis implements IAnalysis {
   }
   /**
    * @param id
-   * @param minRecordings  @return
+   * @param minRecordings
+   * @return
    * @param projid
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores
+   * @seez mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
   public List<WordScore> getWordScoresForUser(long id, int minRecordings, int projid) {
     try {

@@ -39,8 +39,6 @@ import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.exercise.CommonExercise;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.*;
 import org.junit.Test;
 
@@ -90,7 +88,7 @@ public class PhoneTest extends BaseTest {
     }*/
   }
 
-  @Test
+/*  @Test
   public void testWorst2() {
     DatabaseImpl spanish = getDatabase("spanish");
 
@@ -103,7 +101,7 @@ public class PhoneTest extends BaseTest {
 
 
       Set<Integer> singleton1 = Collections.singleton(first.getUniqueID());
-      PhoneReport worstPhonesForResults = dao.getWorstPhonesForResults(first.getUserid(), singleton1, new HashMap<>());
+      PhoneReport worstPhonesForResults = dao.getWorstPhonesForResults(first.getUserid(), singleton1, new HashMap<>(), language);
       logger.info("got " + worstPhonesForResults);
     }
     {
@@ -113,7 +111,7 @@ public class PhoneTest extends BaseTest {
 
       Result truth = resultDAO.getResultByID(41303);
       logger.info("truth " + truth);
-      logger.info("truth report " + phoneDAO.getWorstPhonesForResults(truth.getUserid(), Arrays.asList(truth.getUniqueID()), new HashMap<>()));
+      logger.info("truth report " + phoneDAO.getWorstPhonesForResults(truth.getUserid(), Arrays.asList(truth.getUniqueID()), new HashMap<>(), language));
     }
-  }
+  }*/
 }

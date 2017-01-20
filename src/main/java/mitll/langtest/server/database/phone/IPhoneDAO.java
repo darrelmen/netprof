@@ -14,22 +14,24 @@ public interface IPhoneDAO<T>  extends IDAO {
   boolean addPhone(T phone);
 
   /**
-   * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport(long, int, Map)
+   * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport
    * @param userid
    * @param exids
    * @param idToRef
+   * @param language
    * @return
    */
-  JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef);
+  JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef, String language);
 
   /**
-   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReport(long, Map, int)
+   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReport
    * @param userid
    * @param ids
    * @param idToRef
+   * @param language
    * @return
    */
-  PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef);
+  PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef, String language);
 
   void removeForResult(int resultid);
 }
