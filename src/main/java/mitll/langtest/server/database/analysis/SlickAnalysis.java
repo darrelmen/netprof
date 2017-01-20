@@ -127,7 +127,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   @Override
   public PhoneReport getPhonesForUser(long id, int minRecordings, int projid) {
     Map<Integer, UserInfo> best = getBestForUser((int) id, projid, minRecordings);
-    return getPhoneReport(id, best);
+    return getPhoneReport(id, best, language);
   }
 
   /**

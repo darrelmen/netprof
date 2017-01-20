@@ -48,35 +48,39 @@ import java.util.Map;
  * @see mitll.langtest.client.analysis.WordContainer#getTableWithPager(List)
  */
 public class WordScore implements Serializable, Comparable<WordScore> {
-  private String fileRef;
-  private String nativeAudio;
-  private int id;
-  private long timestamp;
+  private int exid;
   private float pronScore;
   private int resultID;
-  private Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap;
+  private long timestamp;
+
+  private String answerAudio;
+  private String refAudio;
+
+  private Map<NetPronImageType, List<TranscriptSegment>> transcript;
 
   public WordScore() {
   }
 
   /**
    * @param bs
-   * @param netPronImageTypeListMap
+   * @param transcript
    * @see mitll.langtest.server.database.analysis.Analysis#getWordScore
    */
-  public WordScore(BestScore bs, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    this(bs.getExId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(), bs.getNativeAudio(), netPronImageTypeListMap);
+  public WordScore(BestScore bs, Map<NetPronImageType, List<TranscriptSegment>> transcript) {
+    this(bs.getExId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(), bs.getNativeAudio(), transcript);
   }
 
-  private WordScore(int id, float pronScore, long timestamp, int resultID, String fileRef, String nativeAudio,
-                    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    this.id = id;
+  protected WordScore(int exid,
+                    float pronScore,
+                    long timestamp, int resultID, String answerAudio, String refAudio,
+                    Map<NetPronImageType, List<TranscriptSegment>> transcript) {
+    this.exid = exid;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
     this.timestamp = timestamp;
     this.resultID = resultID;
-    this.fileRef = fileRef;
-    this.nativeAudio = nativeAudio;
-    this.netPronImageTypeListMap = netPronImageTypeListMap;
+    this.answerAudio = answerAudio;
+    this.refAudio = refAudio;
+    this.transcript = transcript;
   }
 
   @Override
@@ -88,8 +92,12 @@ public class WordScore implements Serializable, Comparable<WordScore> {
     return i;
   }
 
-  public int getId() {
-    return id;
+  public int getExid() {
+    return exid;
+  }
+
+  public long getResultID() {
+    return resultID;
   }
 
   public long getTimestamp() {
@@ -100,21 +108,24 @@ public class WordScore implements Serializable, Comparable<WordScore> {
     return pronScore;
   }
 
-  public Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeListMap() {
-    return netPronImageTypeListMap;
+  public Map<NetPronImageType, List<TranscriptSegment>> getTranscript() {
+    return transcript;
   }
 
-  public String getFileRef() {
-    return fileRef;
+  public void setTranscript(Map<NetPronImageType, List<TranscriptSegment>> transcript) {
+    this.transcript = transcript;
   }
 
+  public String getAnswerAudio() {
+    return answerAudio;
+  }
 
   /**
    * @see mitll.langtest.client.analysis.WordContainer#getPlayNativeAudio
    * @return
    */
-  public String getNativeAudio() {
-    return nativeAudio;
+  public String getRefAudio() {
+    return refAudio;
   }
 
   public void setTimestamp(long timestamp) {
@@ -122,6 +133,6 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   }
 
   public String toString() {
-    return "WordScore exid " + id + "/" + resultID + " score " + pronScore + "  : " + netPronImageTypeListMap  + " native " + nativeAudio + " fileRef " + fileRef;
+    return "WordScore exid " + exid + "/" + resultID + " score " + pronScore + "  : " + transcript + " native " + refAudio + " fileRef " + answerAudio;
   }
 }

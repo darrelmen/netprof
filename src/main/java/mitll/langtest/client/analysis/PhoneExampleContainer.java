@@ -67,7 +67,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/20/15.
  */
-public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
+public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   private static final String WORDS_USING = "Words with ";
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
 
@@ -83,8 +83,8 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    * @param controller
    * @see AnalysisTab#getPhoneReport
    */
-  public PhoneExampleContainer(ExerciseController controller, ShowTab learnTab, Heading heading) {
-    super(controller);
+  PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading heading) {
+    super(controller, plot);
     this.learnTab = learnTab;
     isSpanish = controller.getLanguage().equalsIgnoreCase("Spanish");
     this.heading = heading;
@@ -115,13 +115,13 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    * @param sortedHistory
    * @see PhoneContainer#clickOnPhone(String)
    */
-  public void addItems(String phone, Collection<WordAndScore> sortedHistory) {
+  void addItems(String phone, Collection<WordAndScore> sortedHistory) {
     this.phone = phone;
     heading.setText(WORDS_USING + phone);
     heading.setSubtext("first ten");
     clear();
     if (sortedHistory != null) {
-     // logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");
+      // logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");
       for (WordAndScore WordAndScore : sortedHistory) {
         addItem(WordAndScore);
       }
@@ -130,21 +130,11 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     }
     flush();
 
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        PlayAudioWidget.addPlayer();
-      }
-    });
+    addPlayer();
   }
 
-  @Override
-  protected CellTable.Resources chooseResources() {
-    CellTable.Resources o;
-    o = GWT.create(LocalTableResources.class);
-    return o;
-  }
 
-  private Column<WordAndScore, SafeHtml> getPlayAudio() {
+/*  private Column<WordAndScore, SafeHtml> getPlayAudio() {
     return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(WordAndScore shell) {
@@ -170,7 +160,7 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
         }
       }
     };
-  }
+  }*/
 
   private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,
                                                                      List<WordAndScore> dataList) {
@@ -205,14 +195,14 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     table.addColumnSortHandler(columnSortHandler);
 
     try {
-      Column<WordAndScore, SafeHtml> column = getPlayAudio();
-      table.addColumn(column, "Play");
-      table.setColumnWidth(column, PLAY_WIDTH + "px");
-
-      column = getPlayNativeAudio();
-      table.addColumn(column, "Ref");
-      table.setColumnWidth(column, PLAY_WIDTH + "px");
-
+//      Column<WordAndScore, SafeHtml> column = getPlayAudio();
+//      table.addColumn(column, "Play");
+//      table.setColumnWidth(column, PLAY_WIDTH + "px");
+//
+//      column = getPlayNativeAudio();
+//      table.addColumn(column, "Ref");
+//      table.setColumnWidth(column, PLAY_WIDTH + "px");
+      addAudioColumns();
       table.setWidth("100%", true);
     } catch (Exception e) {
       logger.warning("Got " + e);
@@ -222,8 +212,8 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   }
 
   /**
-   * @see SimplePagingContainer#addColumnsToTable()
    * @return
+   * @see SimplePagingContainer#addColumnsToTable()
    */
   private Column<WordAndScore, SafeHtml> getItemColumn() {
     return new Column<WordAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -241,7 +231,7 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
         if (columnText.isEmpty()) {
           String foreignLanguage = shell.getWord();
           if (isSpanish) foreignLanguage = foreignLanguage.toUpperCase();
-          columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getScore());
+          columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
         }
         return getSafeHtml(columnText);
       }

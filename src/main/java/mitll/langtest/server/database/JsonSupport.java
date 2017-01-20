@@ -259,6 +259,6 @@ public class JsonSupport {
     now = System.currentTimeMillis();
     if (now - then > 300) logger.warn("getJsonPhoneReport : took " + (now - then) + " millis to attach audio again!");
 
-    return phoneDAO.getWorstPhonesJson(userid, ids, exidToRefAudio);
+    return phoneDAO.getWorstPhonesJson(userid, ids, exidToRefAudio, language);
   }
 }

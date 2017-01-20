@@ -46,7 +46,7 @@ public class PhoneJSON {
    *
    * @param worstPhonesAndScore
    * @return
-   * @see IPhoneDAO#getWorstPhonesJson(long, java.util.Collection, Map)
+   * @see IPhoneDAO#getWorstPhonesJson(long, java.util.Collection, Map, String)
    */
   JSONObject getWorstPhonesJson(PhoneReport worstPhonesAndScore) {
     JSONObject jsonObject = new JSONObject();
@@ -134,7 +134,7 @@ public class PhoneJSON {
     word.put(WID, Integer.toString(wordAndScore.getWseq()));
     word.put(SEQ, Integer.toString(wordAndScore.getSeq()));
     word.put(W, wordAndScore.getWord());
-    word.put(S, Float.toString(round(wordAndScore.getScore())));
+    word.put(S, Float.toString(round(wordAndScore.getPronScore())));
     word.put(RESULT1, Long.toString(wordAndScore.getResultID()));
     return word;
   }

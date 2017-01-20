@@ -124,8 +124,8 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @see #AnalysisTab(LangTestDatabaseAsync, ExerciseController, int, ShowTab, String, int, DivWidget)
    * @return
+   * @see #AnalysisTab(LangTestDatabaseAsync, ExerciseController, int, ShowTab, String, int, DivWidget)
    */
   private Panel getTimeWindowStepper() {
     Panel stepper = getStepperContainer();
@@ -310,7 +310,8 @@ public class AnalysisTab extends DivWidget {
                               AnalysisPlot analysisPlot,
                               final ShowTab showTab,
                               final int minRecordings) {
-    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, showTab, exampleHeader);
+    final PhoneExampleContainer exampleContainer =
+        new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
     final PhonePlot phonePlot = new PhonePlot();
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, isNarrow);
     analysisPlot.addListener(phoneContainer);

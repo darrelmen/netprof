@@ -248,13 +248,15 @@ public abstract class Analysis extends DAO {
   }
 
   /**
-   * @param id
-   * @param projid
-   * @param minRecordings
+   * @paramx id
+   * @paramx projid
+   * @paramx minRecordings
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
+/*
   public abstract List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings);
+*/
 
   List<WordScore> getWordScores(Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
@@ -275,20 +277,24 @@ public abstract class Analysis extends DAO {
   }
 
   /**
+   * TODO : still used???
    * @param id
    * @param minRecordings
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
+/*
   public abstract PhoneReport getPhonesForUser(long id, int minRecordings, int projid);
+*/
 
   /**
    * @param userid
    * @param best
+   * @param language
    * @return
-   * @see #getPhonesForUser(long, int)
+   * @see #getPhonesForUser
    */
-  PhoneReport getPhoneReport(long userid, Map<Integer, UserInfo> best) {
+  PhoneReport getPhoneReport(long userid, Map<Integer, UserInfo> best, String language) {
     long then = System.currentTimeMillis();
     long start = System.currentTimeMillis();
     long now = System.currentTimeMillis();
@@ -308,7 +314,7 @@ public abstract class Analysis extends DAO {
 
     if (DEBUG) logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
     then = System.currentTimeMillis();
-    PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(userid, ids, exToRef);
+    PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(userid, ids, exToRef, language);
 
     now = System.currentTimeMillis();
 
