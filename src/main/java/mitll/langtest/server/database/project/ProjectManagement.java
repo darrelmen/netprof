@@ -159,7 +159,7 @@ public class ProjectManagement implements IProjectManagement {
    * Latchy - would be better to do this when the project is remembered...
    * // TODO : this seems like a bad idea --
    *
-   * @see DatabaseImpl#configureProjects
+   * @seex DatabaseImpl#configureProjects
    */
   // @Override
   private void configureProjects() {
@@ -213,7 +213,7 @@ public class ProjectManagement implements IProjectManagement {
       logger.warn("no exercises in project? " + project);
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), db.getResultDAO(), db.getRefResultDAO(), db.getAudioDAO(),
-        db.getPhoneDAO()));
+        db.getPhoneDAO(), project.getLanguage()));
 
     if (slickProject != null) {
       Map<Integer, String> exerciseIDToRefAudio = db.getExerciseIDToRefAudio(id);
@@ -650,14 +650,14 @@ public class ProjectManagement implements IProjectManagement {
     try {
       status = ProjectStatus.valueOf(project.status());
     } catch (IllegalArgumentException e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
       status = ProjectStatus.DEVELOPMENT;
     }
 
     boolean isRTL = false;
     if (status != ProjectStatus.RETIRED) {
       Collection<CommonExercise> exercises = db.getExercises(project.id());
-      isRTL =isRTL(exercises);
+      isRTL = isRTL(exercises);
     }
 
     return new SlimProject(project.id(),

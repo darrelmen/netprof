@@ -65,20 +65,23 @@ public interface IResultDAO extends IDAO {
   SessionsAndScores getSessionsForUserIn2(Collection<Integer> ids,
                                           int latestResultID, int userid,
                                           Collection<Integer> allIds,
-                                          Map<Integer, CollationKey> idToKey);
+                                          Map<Integer, CollationKey> idToKey,
+                                          String language);
 
-  <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, int userid, Collator collator);
+  <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, int userid, Collator collator,
+                                                                   String language);
 
   Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
                                                                           List<Integer> allIds,
                                                                           Map<Integer, CommonExercise> idToEx,
-                                                                          ExerciseSorter sorter);
+                                                                          ExerciseSorter sorter,
+                                                                          String language);
 
-  SessionInfo getSessions();
+  SessionInfo getSessions(String language);
 
-  void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest);
+  void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest, String language);
 
-  List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session);
+  List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session, String language);
 
   void invalidateCachedResults();
 

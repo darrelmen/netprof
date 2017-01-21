@@ -32,8 +32,6 @@
 
 package mitll.langtest.server;
 
-import com.google.gwt.i18n.client.HasDirection;
-import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -50,18 +48,12 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.SlimProject;
-import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
@@ -253,8 +245,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
         populateCollatorMap(allIDs, idToKey, collator, exercise);
       }
     }
+    String language = db.getLanguage(getProjectID());
     //logger.debug("for " + typeToSection + " found " + allIDs.size());
-    return db.getUserHistoryForList(userid, ids, (int) latestResultID, allIDs, idToKey);
+    return db.getUserHistoryForList(userid, ids, (int) latestResultID, allIDs, idToKey, language);
   }
 
   private Collator getCollator() {

@@ -253,14 +253,17 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     return securityManager.getLoggedInUser(getThreadLocalRequest(), getThreadLocalResponse());
   }
 
+  /**
+   * This is safe!
+   * @return
+   */
   protected String getLanguage() {
     Project project = getProject();
     if (project == null) {
       logger.error("getLanguage : no current project ");
       return "";
     } else {
-      SlickProject project1 = project.getProject();
-      return project1.language();
+      return project.getProject().language();
     }
   }
 

@@ -32,15 +32,14 @@
 
 package mitll.langtest.server.database.result;
 
-import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.text.CollationKey;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 public class UserSessionHistory {
   private static final Logger logger = LogManager.getLogger(UserSessionHistory.class);
@@ -59,10 +58,11 @@ public class UserSessionHistory {
                                               int latestResultID,
                                               Collection<Integer> allIDs,
                                               Map<Integer, CollationKey> idToKey,
-                                              IResultDAO resultDAO) {
+                                              IResultDAO resultDAO,
+                                              String language) {
     logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
-    SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
+    SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey, language);
     /*List<Session> sessionsForUserIn2 = sessionsAndScores.getSessions();
 
     //Map<Integer, User> userMap = userDAO.getUserMap();
@@ -130,11 +130,11 @@ public class UserSessionHistory {
         sessionsAndScores.getSortedResults());
   }
 
-  private int compareTimestamps(Session o1, Session o2) {
+/*  private int compareTimestamps(Session o1, Session o2) {
     return o1.getTimestamp() < o2.getTimestamp() ? +1 : o1.getTimestamp() > o2.getTimestamp() ? -1 : 0;
-  }
+  }*/
 
-  private AVPHistoryForList.UserScore makeScore(int count,
+/*  private AVPHistoryForList.UserScore makeScore(int count,
                                                 User user,// Map<Integer, User> userMap,
                                                 Session session,
                                                 boolean useCorrect) {
@@ -152,6 +152,6 @@ public class UserSessionHistory {
         userID,
         value,
         session.isLatest());
-  }
+  }*/
 
 }
