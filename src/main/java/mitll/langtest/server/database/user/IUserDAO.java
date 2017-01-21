@@ -120,7 +120,7 @@ public interface IUserDAO extends IDAO {
    *
    * @param id
    * @return
-   * @see DatabaseImpl#getUserHistoryForList(int, Collection, int, Collection, Map)
+   * @see DatabaseImpl#getUserHistoryForList(int, Collection, int, Collection, Map, String)
    */
   User getByID(int id);
 

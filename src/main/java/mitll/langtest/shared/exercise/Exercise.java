@@ -335,7 +335,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @param scores
-   * @see mitll.langtest.server.database.result.BaseResultDAO#attachScoreHistory(int, CommonExercise, boolean)
+   * @see mitll.langtest.server.database.result.BaseResultDAO#attachScoreHistory(int, CommonExercise, boolean, String)
    */
   @Override
   public void setScores(List<CorrectAndScore> scores) {

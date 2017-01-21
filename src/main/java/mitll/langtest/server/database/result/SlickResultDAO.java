@@ -47,14 +47,20 @@ import mitll.npdata.dao.result.SlickUserAndTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
 
-public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISchema<Result, SlickResult>*/ {
+public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   private static final Logger logger = LogManager.getLogger(SlickResultDAO.class);
 
   private final ResultDAOWrapper dao;
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   * @param database
+   * @param dbConnection
+   */
   public SlickResultDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new ResultDAOWrapper(dbConnection);
@@ -75,7 +81,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
    * @param exToInt
    * @param transcript
    * @return
-   * @see mitll.langtest.server.database.CopyToPostgres#copyResult
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyResult
    */
   public SlickResult toSlick(Result shared, int projid, Map<String, Integer> exToInt, String transcript) {
     Integer realExID = exToInt.get(shared.getOldExID());
@@ -176,7 +182,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
   }
 
   @Override
-  public List<Result> getResults() {  return getResults(getAll()); }
+  public List<Result> getResults() {
+    return getResults(getAll());
+  }
 
   private List<Result> getResults(Collection<SlickResult> all) {
     List<Result> copy = new ArrayList<>();
@@ -184,8 +192,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
     return copy;
   }
 
-  private List<SlickResult> getAll() { return dao.getAll();  }
-  private List<SlickResult> getAllByProject(int projid) { return dao.getAllByProject(projid);  }
+  private List<SlickResult> getAll() {
+    return dao.getAll();
+  }
+
+  private List<SlickResult> getAllByProject(int projid) {
+    return dao.getAllByProject(projid);
+  }
 
   @Override
   public Collection<Result> getResultsDevices() {
@@ -224,22 +237,22 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
   }
 
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String ignoredSession) {
-    return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids));
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String ignoredSession, String language) {
+    return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids), language);
   }
 
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid, String language) {
     if (!matchAVP) {
-      return getResultsForExIDInForUser(ids, userid, "");
+      return getResultsForExIDInForUser(ids, userid, "", language);
     } else {
-      return getCorrectAndScores(dao.correctAndScoreMatchAVPUser(ids, matchAVP, userid));
+      return getCorrectAndScores(dao.correctAndScoreMatchAVPUser(ids, matchAVP, userid), language);
     }
   }
 
   @Override
-  List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids) {
-    return getCorrectAndScores(dao.correctAndScoreMatchAVP(ids, true));
+  List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language) {
+    return getCorrectAndScores(dao.correctAndScoreMatchAVP(ids, true), language);
   }
 
 
@@ -249,21 +262,27 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
   }
 
   @Override
-  List<CorrectAndScore> getCorrectAndScoresForReal() {
+  List<CorrectAndScore> getCorrectAndScoresForReal(String language) {
     List<SlickCorrectAndScore> slickCorrectAndScores = dao.correctAndScore();
-    return getCorrectAndScores(slickCorrectAndScores);
+    return getCorrectAndScores(slickCorrectAndScores, language);
   }
 
 
-  private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores) {
+  private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
     List<CorrectAndScore> cs = new ArrayList<>();
-    for (SlickCorrectAndScore scs : slickCorrectAndScores) cs.add(fromSlickCS(scs));
+    for (SlickCorrectAndScore scs : slickCorrectAndScores) cs.add(fromSlickCS(scs, language));
     return cs;
   }
 
-  private CorrectAndScore fromSlickCS(SlickCorrectAndScore cs) {
+  private CorrectAndScore fromSlickCS(SlickCorrectAndScore cs, String language) {
+    String path = cs.path();
+    boolean isLegacy = path.startsWith("answers");
+    String filePath = isLegacy ?
+        getRelPrefix(language) + path :
+        trimPathForWebPage2(path);
+
     return new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
-        trimPathForWebPage2(cs.path()), cs.json());
+        trimPathForWebPage2(filePath), cs.json());
   }
 
   public Map<Integer, Integer> getOldToNew() {
@@ -275,6 +294,29 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
   private String trimPathForWebPage2(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
     return (answer == -1) ? path : path.substring(answer);
+  }
+
+  /**
+   * Fix the path -  on hydra it's at:
+   * <p>
+   * /opt/netprof/answers/english/answers/plan/1039/1/subject-130
+   * <p>
+   * rel path:
+   * <p>
+   * answers/english/answers/plan/1039/1/subject-130
+   *
+   * @param language
+   * @return
+   */
+  private String getRelPrefix(String language) {
+    String installPath = database.getServerProps().getAnswerDir();
+
+    String s = language.toLowerCase();
+    String prefix = installPath + File.separator + s;
+    int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
+
+    String relPrefix = prefix.substring(netProfDurLength) + File.separator;
+    return relPrefix;
   }
 
   public Collection<SlickPerfResult> getPerf(int projid) {
