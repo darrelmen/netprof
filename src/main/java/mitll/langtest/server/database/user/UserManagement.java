@@ -171,13 +171,13 @@ public class UserManagement {
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
    * <p>
    * TODO : percent complete should be done from audio table, not result table
-   *
+   * TODO : passing in empty language - is that OK
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    * @see #usersToXLSX
    */
   public List<User> getUsers() {
-    Map<Integer, Float> userToRate = resultDAO.getSessions().getUserToRate();
+    Map<Integer, Float> userToRate = resultDAO.getSessions("").getUserToRate();
     List<User> users = null;
     try {
       UserToCount idToCount = resultDAO.getUserToNumAnswers();
