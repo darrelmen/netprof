@@ -34,18 +34,13 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.SlickResultDAO;
-import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class ResultTest extends BaseTest {
@@ -94,7 +89,7 @@ public class ResultTest extends BaseTest {
 //    logger.info("!match avp " +h2.getResultsForExIDInForUser(strings,false,1).size());
 //  }
 
-
+/*
   @Test
   public void testAVP() {
     DatabaseImpl spanish = getDatabase("spanish", true);
@@ -105,16 +100,16 @@ public class ResultTest extends BaseTest {
     for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getID());
     List<Integer> strings = ids.subList(0, 100);
 
-    logger.info(dao.getResultsForExIDInForUser(strings, 2, "").size());
-    logger.info("match avp " +dao.getResultsForExIDInForUser(strings, true, 2).size());
-    logger.info("!match avp " +dao.getResultsForExIDInForUser(strings, false, 2).size());
+    logger.info(dao.getResultsForExIDInForUser(strings, 2, "", language).size());
+    logger.info("match avp " +dao.getResultsForExIDInForUser(strings, true, 2, language).size());
+    logger.info("!match avp " +dao.getResultsForExIDInForUser(strings, false, 2, language).size());
 
     ResultDAO h2 = new ResultDAO(spanish);
 
-    logger.info(h2.getResultsForExIDInForUser(strings, 1, "").size());
-    logger.info("match avp " +h2.getResultsForExIDInForUser(strings,true,1).size());
-    logger.info("!match avp " +h2.getResultsForExIDInForUser(strings,false,1).size());
-  }
+    logger.info(h2.getResultsForExIDInForUser(strings, 1, "", language).size());
+    logger.info("match avp " +h2.getResultsForExIDInForUser(strings,true,1, language).size());
+    logger.info("!match avp " +h2.getResultsForExIDInForUser(strings,false,1, language).size());
+  }*/
 
   @Test
   public void testAnswerDAO() {
