@@ -65,7 +65,8 @@ public class QuizCorrect {
    */
   public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection,
                                               int userID,
-                                              Collection<Integer> exids, int projectid) {
+                                              Collection<Integer> exids,
+                                              int projectid) {
     //   String session = getLatestSession(typeToSection, userID);
 
 /*    if (typeToSection == null || typeToSection.isEmpty()) {
@@ -88,7 +89,8 @@ public class QuizCorrect {
       allIDs = exids;
     }
 
-    return getQuizCorrectAndScore(typeToSection, userID, allIDs);
+    String language = db.getProject(projectid).getLanguage();
+    return getQuizCorrectAndScore(typeToSection, userID, allIDs, language);
     //  }
   }
 
@@ -97,14 +99,16 @@ public class QuizCorrect {
    * @param typeToSection
    * @param userID
    * @param allIDs
+   * @param language
    * @return
    */
-  private QuizCorrectAndScore getQuizCorrectAndScore(Map<String, Collection<String>> typeToSection, int userID,
-                                                     Collection<Integer> allIDs) {
+  private QuizCorrectAndScore getQuizCorrectAndScore(Map<String, Collection<String>> typeToSection,
+                                                     int userID,
+                                                     Collection<Integer> allIDs, String language) {
     String session = "";//getLatestSession(typeToSection, userID);
     //  logger.info("exercises " +allIDs.size() + " for session " + session);
 
-    Collection<CorrectAndScore> resultsForExIDInForUser = db.getResultDAO().getResultsForExIDInForUser(allIDs, userID, session);
+    Collection<CorrectAndScore> resultsForExIDInForUser = db.getResultDAO().getResultsForExIDInForUser(allIDs, userID, session, language);
     //  for (CorrectAndScore cs:resultsForExIDInForUser) logger.info("found " +cs );
     Collection<CorrectAndScore> copy = getFirstCorrectAndScore(resultsForExIDInForUser);
 
@@ -152,7 +156,7 @@ public class QuizCorrect {
   }*/
 
   /**
-   * @see #getQuizCorrectAndScore(Map, int, Collection)
+   * @see #getQuizCorrectAndScore(Map, int, Collection, String)
    * @param copy
    * @paramx session
    * @return
@@ -179,7 +183,7 @@ public class QuizCorrect {
    *
    * @param resultsForUser
    * @return
-   * @see #getQuizCorrectAndScore(Map, int, Collection)
+   * @see #getQuizCorrectAndScore(Map, int, Collection, String)
    */
   private Collection<CorrectAndScore> getFirstCorrectAndScore(Collection<CorrectAndScore> resultsForUser) {
     Map<String, CorrectAndScore> idToCorrect = new HashMap<String, CorrectAndScore>();

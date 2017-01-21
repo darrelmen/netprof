@@ -158,7 +158,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return new ArrayList<>();
   }
 
-  List<CorrectAndScore> getCorrectAndScoresForReal() {
+  List<CorrectAndScore> getCorrectAndScoresForReal(String language) {
     try {
       return getScoreResultsSQL(getCSSelect() + " FROM " + RESULTS);
     } catch (SQLException e) {
@@ -264,11 +264,12 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * Only take avp audio type and *valid* audio.
    *
    * @param ids
+   * @param language
    * @return
    * @see #getSessionsForUserIn2
    */
 
-  public List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids) {
+  public List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language) {
     try {
       String list = getInList(ids);
 
@@ -297,11 +298,12 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * @param ids
    * @param userid
+   * @param language
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session, String language) {
     try {
       String list = getInList(ids);
 
@@ -342,12 +344,13 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param ids
    * @param matchAVP
    * @param userid
+   * @param language
    * @return
    * @see #getSessionsForUserIn2
    * @see #attachScoreHistory
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid, String language) {
     try {
       String list = getInList(ids);
 
@@ -630,7 +633,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param statement
    * @return
    * @throws SQLException
-   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, boolean, int)
+   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, boolean, int, String)
    */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();

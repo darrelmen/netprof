@@ -148,7 +148,7 @@ class AmasSupport {
    * @param userID
    * @param allIDs
    * @return
-   * @see #filterByUnrecorded(long, Collection, Map)
+   * @see #filterByUnrecorded
    */
   private QuizCorrectAndScore getQuizCorrectAndScore(Map<String, Collection<String>> typeToSection, int userID,
                                                      Collection<Integer> allIDs,
@@ -156,7 +156,7 @@ class AmasSupport {
     String session = getLatestSession(typeToSection, userID);
     //  logger.info("exercises " +allIDs.size() + " for session " + session);
 
-    Collection<CorrectAndScore> resultsForExIDInForUser = resultDAO.getResultsForExIDInForUser(allIDs, userID, session);
+    Collection<CorrectAndScore> resultsForExIDInForUser = resultDAO.getResultsForExIDInForUser(allIDs, userID, session, "");
     //  for (CorrectAndScore cs:resultsForExIDInForUser) logger.info("found " +cs );
     Collection<CorrectAndScore> copy = getFirstCorrectAndScore(resultsForExIDInForUser);
 

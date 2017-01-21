@@ -33,6 +33,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
@@ -64,8 +65,8 @@ public class JsonSupport {
   private final IRefResultDAO refResultDAO;
   private final IAudioDAO audioDAO;
   private final IPhoneDAO phoneDAO;
-//  private final String configDir;
-//  private final String installPath;
+
+  String language;
 
   /**
    * @param sectionHelper
@@ -73,18 +74,20 @@ public class JsonSupport {
    * @param refResultDAO
    * @param audioDAO
    * @param phoneDAO
-   * @see mitll.langtest.server.database.DatabaseImpl#setInstallPath(String, String, String)
+   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject
    */
   public JsonSupport(SectionHelper<CommonExercise> sectionHelper,
-              IResultDAO resultDAO,
-              IRefResultDAO refResultDAO,
-              IAudioDAO audioDAO,
-              IPhoneDAO phoneDAO) {
+                     IResultDAO resultDAO,
+                     IRefResultDAO refResultDAO,
+                     IAudioDAO audioDAO,
+                     IPhoneDAO phoneDAO,
+                     String language) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
     this.refResultDAO = refResultDAO;
     this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
+    this.language = language;
 //    this.configDir = configDir;
 //    this.installPath = installPath;
   }
@@ -119,7 +122,7 @@ public class JsonSupport {
 
     //List<ExerciseCorrectAndScore> exerciseCorrectAndScores = resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToKey);
     Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores =
-        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter);
+        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter, language);
 
     return addJsonHistory(exerciseCorrectAndScores);
   }

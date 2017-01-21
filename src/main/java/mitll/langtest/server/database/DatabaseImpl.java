@@ -74,8 +74,6 @@ import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.user.*;
-import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
-import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -943,15 +941,16 @@ public class DatabaseImpl implements Database {
                                               Collection<Integer> ids,
                                               int latestResultID,
                                               Collection<Integer> allIDs,
-                                              Map<Integer, CollationKey> idToKey) {
+                                              Map<Integer, CollationKey> idToKey,
+                                              String language) {
     return new UserSessionHistory().getUserHistoryForList(userid,
         userDAO.getByID(userid),
         ids,
         latestResultID,
         allIDs,
         idToKey,
-        resultDAO
-    );
+        resultDAO,
+        language);
   }
 
   /**

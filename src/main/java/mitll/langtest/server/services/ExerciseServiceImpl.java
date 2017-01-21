@@ -128,7 +128,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         // now sort : everything gets sorted the same way
         List<CommonExercise> commonExercises;
         if (request.isIncorrectFirstOrder()) {
-          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, getCollator());
+          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, getCollator(),getLanguage());
         } else {
           commonExercises = new ArrayList<>(exercises);
           sortExercises(role, commonExercises);
@@ -319,7 +319,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     List<CommonExercise> copy;
 
     if (incorrectFirst) {
-      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getCollator());
+      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getCollator(),getLanguage());
     } else {
       copy = new ArrayList<>(exercisesForState);
       sortExercises(role, copy);
@@ -434,7 +434,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
     then = now;
 
-    db.getResultDAO().attachScoreHistory(userID, firstExercise, isFlashcardReq);
+    db.getResultDAO().attachScoreHistory(userID, firstExercise, isFlashcardReq, getLanguage(firstExercise));
 
     now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
@@ -460,7 +460,11 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void attachAudio(CommonExercise firstExercise) {
-    db.getAudioDAO().attachAudioToExercise(firstExercise, db.getLanguage(firstExercise));
+    db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise));
+  }
+
+  private String getLanguage(CommonExercise firstExercise) {
+    return db.getLanguage(firstExercise);
   }
 
   /**

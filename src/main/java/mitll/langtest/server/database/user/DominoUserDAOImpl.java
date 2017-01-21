@@ -271,11 +271,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     super.ensureDefaultUsers();
     String userId = dominoAdminUser.getUserId();
     adminUser = delegate.getUser(userId);//BEFORE_LOGIN_USER);
-    logger.info("ensureDefaultUsers got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
+   // logger.info("ensureDefaultUsers got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
 
     if (adminUser.getPrimaryGroup() == null) {
       logger.warn("ensureDefaultUsers no group for " + adminUser);
-
       Group group = getPrimaryGroup(PRIMARY);
       adminUser.setPrimaryGroup(group);
     }

@@ -53,7 +53,7 @@ public class AVPScoreReport implements IsSerializable {
   public AVPScoreReport() {}
 
   /**
-   * @see mitll.langtest.server.database.result.UserSessionHistory#getUserHistoryForList(int, User, Collection, int, Collection, Map, IResultDAO)
+   * @see mitll.langtest.server.database.result.UserSessionHistory#getUserHistoryForList(int, User, Collection, int, Collection, Map, IResultDAO, String)
    * @paramx historyForLists
    * @param sortedHistory
    */
