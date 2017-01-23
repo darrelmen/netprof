@@ -101,7 +101,7 @@ public abstract class BaseAudioDAO extends DAO {
 
 //    logger.info("getExToAudio - for " +projid);
     Collection<AudioAttribute> attributesByProject = getAudioAttributesByProject(projid);
-  //  logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
+    //  logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
 
     for (AudioAttribute audio : attributesByProject) {
       Integer exid = audio.getExid();
@@ -123,7 +123,7 @@ public abstract class BaseAudioDAO extends DAO {
 
     long now = System.currentTimeMillis();
     logger.info("getExToAudio " +
-        " project " + + projid +
+        " project " + +projid +
         "(" + database.getLanguage() +
         ") took " + (now - then) + " millis to get  " + attributesByProject.size() + " audio entries " + this);
 //    logger.debug("map size is " + exToAudio.size());
@@ -135,7 +135,7 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * @param firstExercise
    * @param language
-   * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    * @see DatabaseImpl#attachAudio(CommonExercise)
    * @see DatabaseImpl#writeZip
    */
@@ -326,7 +326,7 @@ public abstract class BaseAudioDAO extends DAO {
    *
    * @param userid only used to determine the gender we should show
    * @return ids with both regular and slow speed recordings
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
   public Collection<Integer> getRecordedBy(int userid, Map<Integer, String> exToTranscript) {
     //Map<Integer, User> userMap = getUserMap(userid);
@@ -349,7 +349,6 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
-   *
    * @param userid
    * @return
    */
@@ -382,13 +381,13 @@ public abstract class BaseAudioDAO extends DAO {
     Set<Integer> maleSlowSpeed = new HashSet<>();
 
     float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs, exToTranscript, maleReg);
-    logger.info("male fast " +maleFast);
+    logger.info("male fast " + maleFast);
     float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs, exToTranscript, maleSlowSpeed);
-    logger.info("male slow " +maleSlow);
+    logger.info("male slow " + maleSlow);
 
     maleReg.retainAll(maleSlowSpeed);
     float male = maleReg.size();
-    logger.info("male total " +male);
+    logger.info("male total " + male);
 
     Set<Integer> femaleIDs = userMapFemales.keySet();
     femaleIDs = new HashSet<>(femaleIDs);
@@ -398,20 +397,20 @@ public abstract class BaseAudioDAO extends DAO {
     Set<Integer> femaleSlowSpeed = new HashSet<>();
     float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs, exToTranscript, femaleReg);
     float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs, exToTranscript, femaleSlowSpeed);
-    logger.info("female fast " +femaleFast);
-    logger.info("female slow " +femaleSlow);
+    logger.info("female fast " + femaleFast);
+    logger.info("female slow " + femaleSlow);
 
     femaleReg.retainAll(femaleSlowSpeed);
     float female = femaleReg.size();
-    logger.info("female total " +female);
+    logger.info("female total " + female);
 
     Set<Integer> conReg = new HashSet<>();
     Set<Integer> conSlow = new HashSet<>();
 
     float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript, conReg);
     float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript, conSlow);
-    logger.info("cmale fast " +cmale);
-    logger.info("cfemale fast " +cfemale);
+    logger.info("cmale fast " + cmale);
+    logger.info("cfemale fast " + cfemale);
     Map<String, Float> report = new HashMap<>();
     report.put(BaseAudioDAO.TOTAL, total);
     report.put(BaseAudioDAO.TOTAL_CONTEXT, totalContext);
@@ -437,7 +436,7 @@ public abstract class BaseAudioDAO extends DAO {
    *
    * @param userid
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
    */
   public Collection<Integer> getRecordedExForUser(int userid) {
     try {
@@ -456,7 +455,7 @@ public abstract class BaseAudioDAO extends DAO {
    *
    * @param userid
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, Collection, boolean)
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
    */
   public Collection<Integer> getRecordedExampleForUser(int userid) {
     try {
@@ -519,7 +518,8 @@ public abstract class BaseAudioDAO extends DAO {
         durationInMillis, audioType,
         miniUser, transcript,
         audioRef,
-        dnr);
+        dnr,
+        -1);
   }
 
   public Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
@@ -549,7 +549,6 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * @param attribute
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getAndMarkDefects
    * @see DatabaseImpl#markAudioDefect(AudioAttribute)
    */
   public int markDefect(AudioAttribute attribute) {
@@ -563,19 +562,23 @@ public abstract class BaseAudioDAO extends DAO {
    *
    * @param userid
    * @param projid
-   * @param attr   @return
+   * @param attr
+   * @return
    * @see mitll.langtest.server.services.QCServiceImpl#markGender
    */
   public void addOrUpdateUser(int userid, int projid, AudioAttribute attr) {
     long timestamp = attr.getTimestamp();
     if (timestamp == 0) timestamp = System.currentTimeMillis();
     float dnr = new AudioCheck(database.getServerProps()).getDNR(new File(attr.getActualPath()));
-    addOrUpdateUser(userid, attr.getExid(), projid, attr.getAudioType(), attr.getAudioRef(), timestamp,
-        (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr);
+    addOrUpdateUser(new AudioInfo(userid, attr.getExid(), projid, attr.getAudioType(), attr.getAudioRef(), timestamp,
+        (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr, attr.getResultid())
+    );
   }
 
-  abstract void addOrUpdateUser(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
-                                int durationInMillis, String transcript, float dnr);
+  abstract void addOrUpdateUser(/*int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
+                                int durationInMillis, String transcript, float dnr*/
+                                AudioInfo info
+  );
 
   abstract int markDefect(int userid, int exerciseID, AudioType audioType);
 
@@ -586,7 +589,7 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * @param userid
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded(ExerciseListRequest, Collection)
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
   public Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext) {
     return getWithContext(getUserMap(userid), exToContext);
@@ -605,7 +608,7 @@ public abstract class BaseAudioDAO extends DAO {
 
   protected boolean isNoAccentMatch(String transcript, String exerciseFL) {
     if (exerciseFL == null) return false;
-    String before  = trimWhitespace(exerciseFL);
+    String before = trimWhitespace(exerciseFL);
     String trimmed = trimWhitespace(transcript);
     String noAccents = StringUtils.stripAccents(before);
     //String transcript = audio.getTranscript();

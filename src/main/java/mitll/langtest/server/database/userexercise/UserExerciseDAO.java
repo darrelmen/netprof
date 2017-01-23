@@ -39,6 +39,7 @@ import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.npdata.dao.SlickExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -103,6 +104,9 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       logException(e);
     }
   }
+
+  public SlickExercise getUnknownExercise() {return null;};
+
 
   /**
    * TODO : Consider how to add multiple context sentences?
@@ -398,7 +402,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
 
   @Override
-  public void ensureTemplateExercise(int projID) {
+  public int ensureTemplateExercise(int projID) {
+    return -1;
   }
 
   @Override
