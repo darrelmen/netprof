@@ -102,6 +102,9 @@ public class Report {
   private static final String COUNT = "count";
   private static final String YTD = COUNT;
   private static final String YTD1 = " YTD ";
+  /**
+   *
+   */
   private static final String REF_AUDIO_RECORDINGS = "Ref Audio Recordings";
   private static final String OPERATING_SYSTEM = "operatingSystem";
   private static final String OPERATING_SYSTEM_VERSION = "operatingSystemVersion";
@@ -245,8 +248,10 @@ public class Report {
     }
 
     String subject = "Weekly Usage Report for " + language + suffix;
-    for (String dest : reportEmails) {
-      mailSupport.sendEmail(NP_SERVER, dest, MY_EMAIL, subject, message);
+    if (mailSupport != null) {
+      for (String dest : reportEmails) {
+        mailSupport.sendEmail(NP_SERVER, dest, MY_EMAIL, subject, message);
+      }
     }
   }
 
@@ -301,6 +306,8 @@ public class Report {
     List<SlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim();
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
+    logger.info("getReport : got " + audioAttributes.size() + " results");
+
     List<Result> results = resultDAO.getResults();
     logger.info("getReport : got " + results.size() + " results");
     List<Result> resultsDevices = resultDAO.getResultsDevices();
@@ -384,7 +391,10 @@ public class Report {
     events.addAll(eventsDevices);
 
     JSONObject allRecordings = new JSONObject();
-    getResults(builder, users, allRecordings, year, exToAudio, results);
+
+    Map<Long, Set<Result>> teacherToRecordings = new HashMap<>();
+
+    getResults(builder, users, allRecordings, year, exToAudio, results, teacherToRecordings);
     jsonObject.put(ALL_RECORDINGS1, allRecordings);
 
     JSONObject deviceRecordings = new JSONObject();
@@ -392,16 +402,18 @@ public class Report {
     jsonObject.put(DEVICE_RECORDINGS1, deviceRecordings);
 
     Calendar calendar = getCalendarForYear(year);
-    Date january1st = getJanuaryFirst(calendar, year);
-    Date january1stNextYear = getNextYear(year);
+//    Date january1st = getJanuaryFirst(calendar, year);
+//    Date january1stNextYear = getNextYear(year);
 
 //    if (DEBUG) {
 //      logger.info("doReport : between " + january1st + " and " + january1stNextYear);
 //    }
 
-    JSONObject referenceRecordings = new JSONObject();
-    addRefAudio(builder, calendar, audioAttributes, referenceRecordings, year);
-    jsonObject.put("referenceRecordings", referenceRecordings);
+    {
+      JSONObject referenceRecordings = new JSONObject();
+      addRefAudio(builder, calendar, audioAttributes, referenceRecordings, year, teacherToRecordings);
+      jsonObject.put("referenceRecordings", referenceRecordings);
+    }
 
     JSONObject browserReport = new JSONObject();
     getBrowserReport(getValidUsers(fixUserStarts()), year, browserReport, builder);
@@ -1019,27 +1031,30 @@ public class Report {
    * @param builder
    * @param year
    * @param exToAudio
+   * @param teacherToRecordings
    * @paramx language
    * @see #doReport
    */
   private void getResults(StringBuilder builder, Set<Long> students,
                           JSONObject jsonObject, int year, Map<String, List<AudioAttribute>> exToAudio,
-                          List<Result> results) {
-    getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, exToAudio);
+                          List<Result> results,
+                          Map<Long, Set<Result>> teacherToRecordings) {
+    getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, exToAudio, teacherToRecordings);
   }
 
   private void getResultsDevices(StringBuilder builder, Set<Long> students,
                                  JSONObject jsonObject, int year, Map<String,
       List<AudioAttribute>> exToAudio,
                                  List<Result> results) {
-    getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, exToAudio);
+    getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, exToAudio, new HashMap<>());
   }
 
   private void getResultsForSet(StringBuilder builder, Set<Long> students,
                                 Collection<Result> results,
                                 String recordings,
                                 JSONObject jsonObject, int year,
-                                Map<String, List<AudioAttribute>> exToAudio) {
+                                Map<String, List<AudioAttribute>> exToAudio,
+                                Map<Long, Set<Result>> userToRecordings) {
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
 
     int ytd = 0;
@@ -1057,6 +1072,10 @@ public class Report {
     int beforeJanuary = 0;
     Set<Long> skipped = new TreeSet<>();
     int size = results.size();
+
+    Map<Long, Integer> idToCount = new HashMap<>();
+
+    // logger.info("getResultsForSet num = " +size);
     try {
       BufferedWriter writer = null;
       teacherAudio = 0;
@@ -1091,6 +1110,11 @@ public class Report {
                 }
               } else {
                 skipped.add(userid);
+                idToCount.put(userid, idToCount.getOrDefault(userid, 0) + 1);
+                Set<Result> orDefault = userToRecordings.getOrDefault(userid, new HashSet<>());
+                orDefault.add(result);
+                userToRecordings.put(userid, orDefault);
+                logger.debug("skip " + result);
                 teacherAudio++;
               }
             }
@@ -1120,7 +1144,13 @@ public class Report {
       StringBuilder builder1 = new StringBuilder();
       builder1.append("\n");
       for (Long skip : skipped) {
-        builder1.append(skip).append("/").append(idToUser.get(skip)).append(",\n");
+        builder1
+            .append(skip)
+            .append("/")
+            .append(idToUser.get(skip))
+            .append(" ")
+            .append(idToCount.get(skip))
+            .append("\n");
       }
       if (DEBUG) logger.debug("getResultsForSet skipped " + teacherAudio + " teacher recordings by " + builder1);
     }
@@ -1151,10 +1181,14 @@ public class Report {
    * @param refAudio
    * @param jsonObject
    * @paramx language
-   * @see #getResults
+   * @see #getReport(JSONObject, int, List, List, Map, Collection, List, List)
    */
-  private <T extends UserAndTime> void addRefAudio(StringBuilder builder, Calendar calendar,
-                                                   Collection<T> refAudio, JSONObject jsonObject, int year) {
+  private <T extends UserAndTime> void addRefAudio(StringBuilder builder,
+                                                   Calendar calendar,
+                                                   Collection<T> refAudio,
+                                                   JSONObject jsonObject,
+                                                   int year,
+                                                   Map<Long, Set<Result>> teacherToRecordings) {
     int ytd = 0;
     Counts counts = new Counts(year);
     Map<Integer, Integer> monthToCount = counts.getMonthToCount();
@@ -1164,13 +1198,26 @@ public class Report {
 
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
 
+    Map<Long, Integer> idToCount = new HashMap<>();
+
+    Map<String, Set<Result>> partition = new HashMap<>();
+
     for (T result : refAudio) {
       if (yearTimeRange.inYear(result.getTimestamp())) {
+        //  logger.info("addRefAudio : include " + result);
         ytd++;
         tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
+        long userid = result.getUserid();
+        idToCount.put(userid, idToCount.getOrDefault(userid, 0) + 1);
       }
     }
 
+    sanityCheckWeekAndMonth(monthToCount, weekToCount);
+
+    builder.append(getSectionReport(ytd, monthToCount, weekToCount, REF_AUDIO_RECORDINGS, jsonObject, year));
+  }
+
+  private void sanityCheckWeekAndMonth(Map<Integer, Integer> monthToCount, Map<Integer, Integer> weekToCount) {
     int monthTotal = 0;
     for (Integer count : monthToCount.values()) monthTotal += count;
 
@@ -1178,14 +1225,9 @@ public class Report {
     for (Integer count : weekToCount.values()) weekTotal += count;
 
     if (monthTotal != weekTotal) {
-      logger.info("ref audio month total " + monthTotal + " week total " + weekTotal);
-      logger.info("ref weeks " + weekToCount.keySet());
+      logger.warn("ref audio month total " + monthTotal + " week total " + weekTotal);
+      logger.warn("ref weeks " + weekToCount.keySet());
     }
-
-//    logger.info("addRefAudio month\n" + monthToCount);
-//    logger.info("week  \n" + weekToCount);
-
-    builder.append(getSectionReport(ytd, monthToCount, weekToCount, REF_AUDIO_RECORDINGS, jsonObject, year));
   }
 
   private static class Counts {

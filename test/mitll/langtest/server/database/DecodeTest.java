@@ -391,6 +391,44 @@ public class DecodeTest extends BaseTest {
   */
   }
 
+
+  @Test
+  public void testPashto1() {
+    DatabaseImpl database = getDatabaseWithConfig("pashto","pashtoQuizlet1.properties");
+    database.getSectionHelper().report();
+  }
+
+  @Test
+  public void testGerman() {
+    DatabaseImpl database = getDatabase("german");
+    database.getSectionHelper().report();
+  }
+
+  @Test
+  public void testRussianReport() {
+    DatabaseImpl database = getDatabase("russian");
+    database.getSectionHelper().report();
+
+    database.doReport(database.getServerProps(), "russian", null, new PathHelper("war"));
+
+  }
+
+  @Test
+  public void testKoreanScoring() {
+    DatabaseImpl database = getDatabase("korean");
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+    String ic = audioFileHelper.getPhonesFor("IC");
+    logger.info("got " + ic);
+    boolean dude = audioFileHelper.checkLTSOnForeignPhrase("dude", "");
+    logger.info("for " + dude + " got " + dude);
+    String korean = "장모님";
+
+    logger.info("for " + korean + " got " + audioFileHelper.checkLTSOnForeignPhrase(korean, ""));
+    logger.info("for " + korean + " got " + audioFileHelper.checkLTSOnForeignPhrase("장모", ""));
+    logger.info("for " + korean + " got " + audioFileHelper.checkLTSOnForeignPhrase("장", ""));
+    logger.info("for " + korean + " got " + audioFileHelper.checkLTSOnForeignPhrase("", ""));
+  }
+
   private void doProgressReport(String config) {
     doProgressReport(config, "quizlet.properties");
   }

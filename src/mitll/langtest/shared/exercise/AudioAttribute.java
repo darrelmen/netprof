@@ -102,12 +102,17 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param user
    * @param transcript       what the speaker read at the time of recording
    * @see mitll.langtest.server.database.AudioDAO#getAudioAttribute
-   * @see mitll.langtest.server.database.AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
+   * @see mitll.langtest.server.database.AudioDAO#getResultsForQuery
    */
-  public AudioAttribute(int uniqueID, long userid,
+  public AudioAttribute(int uniqueID,
+                        long userid,
                         String exid,
                         String audioRef,
-                        long timestamp, long durationInMillis, String type, MiniUser user, String transcript,
+                        long timestamp,
+                        long durationInMillis,
+                        String type,
+                        MiniUser user,
+                        String transcript,
                         float dnr) {
     this.uniqueID = uniqueID;
     this.userid = userid;
@@ -380,7 +385,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
         " attrs " + attributes +
         " by " + userid + "/" + user +
         " transcript '" + transcript +
-        "'\n\tdnr\t" + dnr;
+        "'\tdnr\t" + dnr;
   }
 
   public float getDnr() {
