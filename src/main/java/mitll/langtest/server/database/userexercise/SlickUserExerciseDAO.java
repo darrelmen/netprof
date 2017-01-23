@@ -64,7 +64,7 @@ public class SlickUserExerciseDAO
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#getTypeOrder
-   * @see #addPhoneInfo(SlickExercise, Collection, SectionHelper, int, Exercise)
+   * @see #addPhoneInfo
    */
   public static final String SOUND = "Sound";
   public static final String DIFFICULTY = "Difficulty";
@@ -72,16 +72,19 @@ public class SlickUserExerciseDAO
   /**
    * TODO : need to do something to allow this to scale well - maybe ajax style nested types, etc.
    */
-  private static final boolean ADD_PHONE_LENGTH = false;
+ // private static final boolean ADD_PHONE_LENGTH = false;
+
   private static final String NEW_USER_EXERCISE = "NEW_USER_EXERCISE";
+  private static final String UNKNOWN = "UNKNOWN";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
   private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
-  // private final int beforeLoginUser;
   private final IUserDAO userDAO;
   private IRefResultDAO refResultDAO;
+
+  private SlickExercise unknownExercise;
 
   /**
    * @param database
@@ -454,10 +457,14 @@ public class SlickUserExerciseDAO
    * @param projID
    */
   private void insertDefault(int projID) {
+    insertDefault(projID, NEW_USER_EXERCISE);
+  }
+
+  private void insertDefault(int projID, String newUserExercise) {
     int beforeLoginUser = userDAO.getBeforeLoginUser();
     SlickExercise userExercise = new SlickExercise(-1,
         beforeLoginUser,
-        NEW_USER_EXERCISE,
+        newUserExercise,
         new Timestamp(System.currentTimeMillis()),
         "",
         "",
@@ -502,10 +509,26 @@ public class SlickUserExerciseDAO
 
   private CommonExercise templateExercise;
 
-  public void ensureTemplateExercise(int projID) {
+  /**
+   *
+   * @param projID
+   */
+  public int ensureTemplateExercise(int projID) {
+   int id = 0;
     if (dao.getByExid(NEW_USER_EXERCISE, projID).isEmpty()) {
       insertDefault(projID);
     }
+
+    Seq<SlickExercise> byExid = dao.getByExid(UNKNOWN, projID);
+    if (byExid.isEmpty()) {
+      insertDefault(projID, UNKNOWN);
+    }
+    Seq<SlickExercise> again = dao.getByExid(UNKNOWN, projID);
+    if (!again.isEmpty()) {
+      unknownExercise = again.iterator().next();
+      id = unknownExercise.id();
+    }
+    return id;
   }
 
   public List<CommonExercise> getAllUserExercises(int projid) {
@@ -641,5 +664,9 @@ public class SlickUserExerciseDAO
 
   public IRefResultDAO getRefResultDAO() {
     return refResultDAO;
+  }
+
+  public SlickExercise getUnknownExercise() {
+    return unknownExercise;
   }
 }

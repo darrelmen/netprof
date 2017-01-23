@@ -238,7 +238,6 @@ public class ProjectTest extends BaseTest {
   public void testDrop() {
     IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
     projectDAO.delete(6);
-    //  projectDAO.delete(14);
   }
 
   @Test
@@ -268,8 +267,5 @@ public class ProjectTest extends BaseTest {
     DatabaseImpl database = getDatabase();
     database.setInstallPath("war", "");
     database.populateProjects();
-
-
   }
-
 }

@@ -178,7 +178,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   public void configureProject(Project project) {
     if (project.isConfigured()) {
-      logger.debug("project already configured " + project.getProject().id());
+//      logger.debug("project already configured " + project.getProject().id());
       return;
     }
 
