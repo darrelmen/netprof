@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -53,6 +54,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private final long now = System.currentTimeMillis();
   private final long before = now - (24 * 60 * 60 * 1000);
   private final boolean doCheckOnStartup;
+  private int defaultResult;
 
   public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
@@ -77,42 +79,42 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   public Collection<AudioAttribute> getAudioAttributesByProject(int projid) {
     List<SlickAudio> all = dao.getAll(projid);
     //logger.info("Getting mini users");
-   // Map<Integer, MiniUser> miniUsers = userDAO.getMiniUsers();
+    // Map<Integer, MiniUser> miniUsers = userDAO.getMiniUsers();
     logger.info("getAudioAttributesByProject " + projid +
-        " " + all.size()
+            " " + all.size()
         //+        " users " + miniUsers.size()
     );
     return toAudioAttribute(all);
   }
 
   @Override
-  public AudioAttribute addOrUpdate(int userid, int exerciseID, int projid, AudioType audioType, String audioRef,
-                                    long timestamp, long durationInMillis, String transcript, float dnr) {
-    MiniUser miniUser = userDAO.getMiniUser(userid);
+  public AudioAttribute addOrUpdate(AudioInfo info) {
+    MiniUser miniUser = userDAO.getMiniUser(info.getUserid());
 //    Map<Integer, MiniUser> mini = new HashMap<>();
 //    mini.put(userid, miniUser);
     return toAudioAttribute(
-        dao.addOrUpdate(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript, dnr),
+        dao.addOrUpdate(info.getUserid(), info.getExerciseID(), info.getProjid(), info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(), info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID()),
         miniUser);
   }
 
   /**
    * Update the user if the audio is already there.
    *
-   * @param userid
-   * @param exerciseID
-   * @param projid
-   * @param audioType
-   * @param audioRef
-   * @param timestamp
-   * @param durationInMillis
-   * @param transcript
-   * @param dnr
+   * @paramx userid
+   * @paramx exerciseID
+   * @paramx projid
+   * @paramx audioType
+   * @paramx audioRef
+   * @paramx timestamp
+   * @paramx durationInMillis
+   * @paramx transcript
+   * @paramx dnr
    */
   @Override
-  public void addOrUpdateUser(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
-                              int durationInMillis, String transcript, float dnr) {
-    dao.addOrUpdateUser(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript, dnr);
+  public void addOrUpdateUser(/*int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
+                              int durationInMillis, String transcript, float dnr, int resultid*/
+                              AudioInfo info) {
+    dao.addOrUpdateUser(info.getUserid(), info.getExerciseID(), info.getProjid(), info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(), info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID());
   }
 
   /**
@@ -162,7 +164,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
                         Set<Integer> uniqueIDs,
                         Map<Integer, String> exToTranscript,
                         Set<Integer> idsOfRecordedExercises) {
-    Set<Integer> countForGender1 = dao.getCountForGender(userIds, audioSpeed, uniqueIDs,exToTranscript,true);
+    Set<Integer> countForGender1 = dao.getCountForGender(userIds, audioSpeed, uniqueIDs, exToTranscript, true);
     Set<Integer> countForGender = countForGender1;
     idsOfRecordedExercises.addAll(countForGender);
     return countForGender.size();
@@ -248,8 +250,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    * @see #toAudioAttribute(List)
    */
-  private AudioAttribute toAudioAttribute(SlickAudio s, MiniUser miniUser){//Map<Integer, MiniUser> idToMini2) {
-   // MiniUser miniUser = idToMini.get(s.userid());
+  private AudioAttribute toAudioAttribute(SlickAudio s, MiniUser miniUser) {//Map<Integer, MiniUser> idToMini2) {
+    // MiniUser miniUser = idToMini.get(s.userid());
 
     if (miniUser == null && spew++ < 20) {
       logger.error("toAudioAttribute : no user for " + s.userid());
@@ -274,7 +276,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         miniUser,
         s.transcript(),
         s.actualpath(),
-        s.dnr());
+        s.dnr(),
+        s.resultid());
   }
 
   int c = 0;
@@ -301,6 +304,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     } else {
       long timestamp = orig.getTimestamp();
 
+      int resultid = orig.getResultid();
+
+      if (resultid == -1) {
+        resultid = defaultResult;
+      }
       return new SlickAudio(
           orig.getUniqueID(),
           userid,
@@ -315,14 +323,15 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           false,
           0,
           "",
-          orig.getDnr());
+          orig.getDnr(),
+          resultid);
     }
   }
 
   /**
-   * @paramx idToMini
    * @param all
    * @return
+   * @paramx idToMini
    * @see #getAudioAttributesByProject(int)
    */
   private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all) {
@@ -353,5 +362,16 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   public int getNumRows() {
     return dao.getNumRows();
+  }
+
+  public int getDefaultResult() {
+    logger.info("\n\n\tdefault id is  " + defaultResult);
+    return defaultResult;
+  }
+
+  public void setDefaultResult(int defaultResult) {
+    this.defaultResult = defaultResult;
+
+    logger.info("\n\n\tdefault id is  " + defaultResult);
   }
 }

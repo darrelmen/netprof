@@ -86,4 +86,8 @@ public interface IResultDAO extends IDAO {
   void invalidateCachedResults();
 
   int getNumResults(int projid);
+
+  int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID);
+
+  int getDefaultResult();
 }

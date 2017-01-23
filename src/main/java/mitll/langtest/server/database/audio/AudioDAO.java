@@ -594,7 +594,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
           dur, realType,
           user, transcript,
           audioRef,
-          dnr);
+          dnr,
+          -1);
       audioAttr.setOldexid(exid);
 
       if (user == null) {
@@ -690,15 +691,15 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param dnr
    * @see BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
    */
-  protected void addOrUpdateUser(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
-                                 int durationInMillis, String transcript, float dnr) {
-    if (isBadUser(userid)) {
-      logger.error("huh? userid is " + userid);
+  protected void addOrUpdateUser(AudioInfo info) {
+    int userid = info.getUserid();
+    if (isBadUser(info.getUserid())) {
+      logger.error("huh? userid is " + info.getUserid());
       new Exception().printStackTrace();
     }
     try {
-      logger.debug("addOrUpdate userid = " + userid + " audio ref " + audioRef + " ex " + exerciseID + " at " +
-          new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+//      logger.debug("addOrUpdate userid = " + userid + " audio ref " + audioRef + " ex " + exerciseID + " at " +
+//          new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO + " " +
           "SET " + USERID + "=? " +
@@ -712,18 +713,21 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       int ii = 1;
 
-      statement.setInt(ii++, userid);
+      statement.setInt(ii++, info.getUserid());
+      int exerciseID = info.getExerciseID();
       statement.setString(ii++, "" + exerciseID);
+      AudioType audioType = info.getAudioType();
       statement.setString(ii++, audioType.toString());
+      String audioRef = info.getAudioRef();
       statement.setString(ii++, audioRef);
 
       int i = statement.executeUpdate();
 
       if (i == 0) { // so we didn't update, so we need to add it
-        logger.debug("\taddOrUpdate adding entry for  " + userid + " " + audioRef + " ex " + exerciseID +
-            " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+//        logger.debug("\taddOrUpdate adding entry for  " + userid + " " + audioRef + " ex " + exerciseID +
+//            " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
 
-        long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
+        long l = addAudio(connection, info.getUserid(), audioRef, exerciseID, info.getTimestamp(), audioType, info.getDurationInMillis(), info.getTranscript());
       }
 
       finish(connection, statement);
@@ -752,11 +756,13 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
    */
   @Override
-  public AudioAttribute addOrUpdate(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
-                                    long durationInMillis, String transcript, float dnr) {
-    if (isBadUser(userid)) {
-      logger.error("huh? userid is " + userid, new Exception("huh? userid is " + userid));
-    }
+  public AudioAttribute addOrUpdate(AudioInfo info) {
+  //  int userid,
+ // } int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
+   //                                 long durationInMillis, String transcript, float dnr) {
+//    if (isBadUser(userid)) {
+//      logger.error("huh? userid is " + userid, new Exception("huh? userid is " + userid));
+//    }
     try {
       //logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
       Connection connection = database.getConnection(this.getClass().toString());
@@ -775,7 +781,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       PreparedStatement statement = connection.prepareStatement(sql);
 
       int ii = 1;
-
+/*
       statement.setString(ii++, audioRef);
       statement.setTimestamp(ii++, new Timestamp(timestamp));
       statement.setInt(ii++, (int) durationInMillis);
@@ -789,20 +795,20 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       AudioAttribute audioAttr;
       if (i == 0) {
-        logger.debug("\taddOrUpdate *adding* entry for  " + userid + " " + audioRef + " ex " + exerciseID +// " at " + new Date(timestamp) +
-            " type " + audioType + " dur " + durationInMillis);
+//        logger.debug("\taddOrUpdate *adding* entry for  " + userid + " " + audioRef + " ex " + exerciseID +// " at " + new Date(timestamp) +
+//            " type " + audioType + " dur " + durationInMillis);
 
         long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
         audioAttr = getAudioAttribute((int) l, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript, dnr);
       } else {
-        logger.debug("\taddOrUpdate updating entry for  " + userid + " " + audioRef + " ex " + exerciseID +
-            " type " + audioType + " dur " + durationInMillis);
+//        logger.debug("\taddOrUpdate updating entry for  " + userid + " " + audioRef + " ex " + exerciseID +
+//            " type " + audioType + " dur " + durationInMillis);
         audioAttr = getAudioAttribute(userid, exerciseID, audioType);
-      }
+      }*/
       //  logger.debug("returning " + audioAttr);
       finish(connection, statement);
 
-      return audioAttr;
+      return null;//audioAttr;
     } catch (Exception e) {
       logger.error("got " + e, e);
     }

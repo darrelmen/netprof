@@ -38,6 +38,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.services.AudioService;
 import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.AnswerInfo;
+import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -113,11 +114,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                     boolean doFlashcard,
                                     boolean recordInResults,
                                     boolean addToAudioTable,
-                                    boolean allowAlternates)  {
+                                    boolean allowAlternates) {
     AudioFileHelper audioFileHelper = getAudioFileHelper();
-    if (audioFileHelper == null) {
-      //throw new DominoSessionException("session expired");
-    }
 
     int exerciseID = audioContext.getExid();
     boolean isExistingExercise = exerciseID > 0;
@@ -149,13 +147,16 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (exercise1 == null && isExistingExercise) {
       logger.warn(getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
-    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash);
+    String audioTranscript = getAudioTranscript(audioContext.getAudioType(), commonExercise);
+    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash, audioTranscript);
 
     DecoderOptions options = new DecoderOptions()
         .setRecordInResults(recordInResults)
         .setDoFlashcard(doFlashcard)
         .setRefRecording(addToAudioTable)
         .setAllowAlternates(allowAlternates);
+
+    logger.info("recording info " + recordingInfo);
 
     AudioAnswer audioAnswer = amas ?
         audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
@@ -166,6 +167,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             recordingInfo,
 
             options);
+
+    logger.info("recording audioAnswer " + audioAnswer.getTranscript());
+
 
     int user = audioContext.getUserid();
     if (addToAudioTable && audioAnswer.isValid()) {
@@ -289,7 +293,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     boolean noExistingExercise = exercise1 == null;
     int idToUse = noExistingExercise ? exerciseID : exercise1.getID();
     int projid = noExistingExercise ? -1 : exercise1.getProjectID();
-    String audioTranscript = getAudioTranscript(audioType, exercise1);
+    String audioTranscript = audioAnswer.getTranscript();
     String language = db.getProject(projid).getLanguage();
     //   logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
@@ -310,9 +314,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             serverProps,
             new TrackInfo(audioTranscript, getArtist(user), context, language));
 
-    AudioAttribute audioAttribute =
-        db.getAudioDAO().addOrUpdate(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
-            audioAnswer.getDurationInMillis(), audioTranscript, (float) audioAnswer.getDynamicRange());
+    AudioInfo info = new AudioInfo(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
+        audioAnswer.getDurationInMillis(), audioTranscript, (float) audioAnswer.getDynamicRange(), audioAnswer.getResultID());
+
+    AudioAttribute audioAttribute = db.getAudioDAO().addOrUpdate(info);
+
     audioAnswer.setPath(audioAttribute.getAudioRef());
     logger.debug("addToAudioTable" +
         "\n\tuser " + user +
@@ -491,7 +497,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         return wavFile;
       } else {
         File test = pathHelper.getAbsoluteAudioFile(wavFile);
-  //      logger.info("getWavAudioFile test " + test.getAbsolutePath());
+        //      logger.info("getWavAudioFile test " + test.getAbsolutePath());
         audioFile = test.exists() ? test.getAbsolutePath() : "FILE_MISSING.wav";//getAudioFileHelper().getWavForMP3(audioFile, );
       }
     }

@@ -46,9 +46,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IAudioDAO extends IDAO {
-  AudioAttribute addOrUpdate(int userid, int exerciseID, int projid,
-                             AudioType audioType, String audioRef, long timestamp,
-                             long durationInMillis, String transcript, float dnr);
+  AudioAttribute addOrUpdate(AudioInfo info);
 
   Map<Integer, List<AudioAttribute>> getExToAudio(int projectid);
 

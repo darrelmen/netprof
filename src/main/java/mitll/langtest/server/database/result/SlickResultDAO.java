@@ -34,11 +34,14 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.UserAndTime;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
@@ -55,15 +58,43 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   private static final Logger logger = LogManager.getLogger(SlickResultDAO.class);
 
   private final ResultDAOWrapper dao;
+  private SlickResult defaultResult;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    * @param database
    * @param dbConnection
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
-  public SlickResultDAO(Database database, DBConnection dbConnection) {
+  public SlickResultDAO(DatabaseImpl database, DBConnection dbConnection) {
     super(database);
     dao = new ResultDAOWrapper(dbConnection);
+  }
+
+  public int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID) {
+    List<SlickResult> defResult = dao.getAllByProject(projid);
+
+    if (defResult.isEmpty()) {
+     Timestamp modified = new Timestamp(System.currentTimeMillis());
+
+      dao.insert(new SlickResult(-1, beforeLoginUser, unknownExerciseID, modified,
+          0,
+          AudioType.UNSET.toString(),
+          "",
+          false, AudioAnswer.Validity.INVALID.name(),
+          0, 0, 0, false, 0, "unk", "unk", "", false, 0, -1, "", projid
+      ));
+      defResult = dao.getAllByProject(projid);
+    }
+
+    if (!defResult.isEmpty()) {
+      defaultResult = defResult.iterator().next();
+      logger.info("default " + defaultResult);
+      return defaultResult.id();
+    }
+    else {
+      logger.info("nope - no default result ");
+      return -1;
+    }
   }
 
   public void createTable() {
@@ -329,5 +360,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   public boolean isEmpty() {
     return dao.getNumRows() == 0;
+  }
+
+  public int getDefaultResult() {
+    return defaultResult.id();
   }
 }
