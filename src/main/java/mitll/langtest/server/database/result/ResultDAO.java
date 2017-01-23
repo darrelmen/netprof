@@ -443,6 +443,16 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return numResults;
   }
 
+  @Override
+  public int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID) {
+    return 0;
+  }
+
+  @Override
+  public int getDefaultResult() {
+    return 0;
+  }
+
   /**
    * Get a list of Results for this Query.
    *

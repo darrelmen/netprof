@@ -590,7 +590,7 @@ public class PostgresTest extends BaseTest {
   @Test
   public void testProjects() {
     DatabaseImpl spanish = getDatabaseLight("spanish", false);
-    SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
+    spanish.getProjectDAO().getAll().iterator().next();
   }
 
   /**

@@ -91,7 +91,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getTranscript(),
         answerInfo.getProjid());
 
-    logger.info("inserting answer by " + answerInfo.getUserid() + " to " + answerInfo.getId() + " :  " + answerInfo.getAnswer() + " :\n" +res);
+    logger.info("addAnswer inserting answer by " + answerInfo.getUserid() + " to " + answerInfo.getId() + " :  " + answerInfo.getAnswer() + " :\n" +res);
 
     return dao.insert(res).id();
   }

@@ -86,6 +86,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private long timestamp;
   private long durationInMillis;
   private transient float dnr;
+  private transient int resultid;
 
   /**
    * Don't send to client - just server side
@@ -124,7 +125,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
                         MiniUser user,
                         String transcript,
                         String actualPath,
-                        float dnr) {
+                        float dnr,
+                        int resultid) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
@@ -133,6 +135,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.durationInMillis = durationInMillis;
     this.transcript = transcript;
     this.dnr = dnr;
+    this.resultid = resultid;
 
     this.setUser(user);
     this.audioType = type;
@@ -403,8 +406,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.AttachAudio#attachAudio(CommonExercise, int, Collection, Collection, String)
    * @return
+   * @see mitll.langtest.server.database.exercise.AttachAudio#attachAudio(CommonExercise, int, Collection, Collection, String)
    */
   public String getActualPath() {
     return actualPath;
@@ -414,7 +417,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public String toString() {
     return "Audio" +
         "\n\tid         " + uniqueID +
-       // "\n\tfor ex     " + getID()+
+        // "\n\tfor ex     " + getID()+
         " (old ex " + getOldexid() + ") :" +
         "\n\tpath       " + audioRef +
         "\n\tactual     " + actualPath +
@@ -426,5 +429,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   public float getDnr() {
     return dnr;
+  }
+
+  public int getResultid() {
+    return resultid;
   }
 }

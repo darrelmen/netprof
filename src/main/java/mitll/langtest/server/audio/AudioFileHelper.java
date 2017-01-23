@@ -244,7 +244,8 @@ public class AudioFileHelper implements AlignDecode {
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, options.isRefRecording(), isQuietAudioOK());
 
-    logger.debug("writeAudioFile writing to\n\t" + file.getAbsolutePath() + "\n\tvalidity " + validity);
+    logger.debug("writeAudioFile writing to\n\t" + file.getAbsolutePath() + "\n\tvalidity " + validity +
+        "\n\ttranscript " + recordingInfoInitial.getTranscript());
 /*    long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
@@ -252,17 +253,17 @@ public class AudioFileHelper implements AlignDecode {
           " millis long");
     }*/
 
+    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, file.getPath());
+
+    logger.info("tr " + recordingInfo.getTranscript());
     return getAudioAnswerDecoding(exercise1,
         audioContext,
-        new AnswerInfo.RecordingInfo(recordingInfoInitial, file.getPath()),
+        recordingInfo,
 
         relPath,
         file,
 
         validity,
-
-//        recordInResults, doFlashcard, allowAlternates,
-        //      false
         options
     );
   }
@@ -322,7 +323,8 @@ public class AudioFileHelper implements AlignDecode {
       float score,
       DecoderOptions options) {
     AudioCheck.ValidityAndDur validity = audioConversion.isValid(file, false, isQuietAudioOK());
-    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, true);
+
+    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, true, "");
 
     return options.isDoFlashcard() ?
         getAudioAnswerDecoding(exercise,
@@ -366,10 +368,6 @@ public class AudioFileHelper implements AlignDecode {
    * @param file
    * @param validity
    * @return
-   * @paramx recordInResults
-   * @paramx doFlashcard
-   * @paramx allowAlternates
-   * @paramx useOldSchool
    * @see #getAnswer
    * @see #writeAudioFile
    */
@@ -382,19 +380,11 @@ public class AudioFileHelper implements AlignDecode {
                                              File file,
 
                                              AudioCheck.ValidityAndDur validity,
-
-//                                             boolean recordInResults,
-//                                             boolean doFlashcard,
-//                                             boolean allowAlternates,
-//                                             boolean useOldSchool
                                              DecoderOptions decoderOptions
   ) {
     logValidity(context, file, validity);
-    AudioAnswer answer = getAudioAnswer(context.getReqid(), exercise, wavPath, file, validity,
-        decoderOptions
-        //    doFlashcard,
-        //  true, allowAlternates, useOldSchool
-    );
+
+    AudioAnswer answer = getAudioAnswer(context.getReqid(), exercise, wavPath, file, validity, decoderOptions);
 
     if (decoderOptions.isRecordInResults()) {
       double maxMinRange = validity.getMaxMinRange();
@@ -403,7 +393,7 @@ public class AudioFileHelper implements AlignDecode {
       if (exercise != null) {
         answer.setTranscript(exercise.getForeignLanguage()); // TODO : necessary?
       }
-      logger.debug("getAudioAnswerDecoding recordInResults answer " + answer);
+      logger.debug("getAudioAnswerDecoding recordInResults answer " + answer + " " + answer.getTranscript());
       recordInResults(context, recordingInfo, validity, answer);
     }
     //logger.debug("getAudioAnswerDecoding answer " + answer);
@@ -711,9 +701,6 @@ public class AudioFileHelper implements AlignDecode {
             reqid, file, validity, url) :
         new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
   }
-//  private boolean isNoModel() {
-//    return isNoModel;
-//  }
 
   private boolean hasModel() {
     return !isNoModel;
@@ -823,25 +810,6 @@ public class AudioFileHelper implements AlignDecode {
         validity.getValidity(), reqid, validity.durationInMillis);
   }
 
-  /**
-   * @param testAudioFile
-   * @param lmSentences
-   * @return
-   * @paramx canUseCache
-   * @paramx useOldSchool
-   * @see AutoCRT#getScoreForAudio
-   * @see DecodeCorrectnessChecker#getDecodeScore(File, Collection, AudioAnswer, DecoderOptions)
-   */
-/*  @Override
-  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, String transliteration,
-                                          DecoderOptions options
-  ) {
-    options.setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
-    return getASRScoreForAudio(testAudioFile, lmSentences, transliteration,
-        //    canUseCache, serverProps.usePhoneToDisplay(), useOldSchool
-        options
-    );
-  }*/
   public PretestScore getEasyAlignment(CommonShell exercise, String testAudioPath) {
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
     return getAlignmentScore(exercise, testAudioPath, options);
@@ -1072,9 +1040,6 @@ public class AudioFileHelper implements AlignDecode {
   private String removeSuffix(String audioFile) {
     return audioFile.substring(0, audioFile.length() - SUFFIX_LENGTH);
   }
-/*  public String getWavForMP3(String audioFile, String language) {
-    return mp3Support.getWavForMP3(audioFile, language);
-  }*/
 
   /**
    * Does decoding if doFlashcard is true.
@@ -1096,7 +1061,7 @@ public class AudioFileHelper implements AlignDecode {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     if (decoderOptions.isDoFlashcard()) {
       PretestScore flashcardAnswer = decodeCorrectnessChecker.getDecodeScore(exercise, file, audioAnswer,
-          serverProps.getLanguage(),
+          language,
           decoderOptions
       );
       audioAnswer.setPretestScore(flashcardAnswer);
@@ -1112,7 +1077,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see #getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, boolean, String, Result, boolean, boolean)
+   * @see #getASRScoreForAudio
    */
   private ASR getASRScoring() {
     return webserviceScoring;

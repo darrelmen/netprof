@@ -140,7 +140,7 @@ public class DatabaseImpl implements Database {
   private String installPath;
 
   private IUserDAO userDAO;
- // private IUserPermissionDAO userPermissionDAO;
+  // private IUserPermissionDAO userPermissionDAO;
   private IUserSessionDAO userSessionDAO;
   private IResultDAO resultDAO;
 
@@ -312,13 +312,11 @@ public class DatabaseImpl implements Database {
 
     eventDAO = new SlickEventImpl(dbConnection);
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
-    this.userDAO = new DominoUserDAOImpl(this);
-  //  userPermissionDAO = new SlickUserPermissionDAOImpl(this, dbConnection);
-    //  slickUserDAO.setPermissionDAO(userPermissionDAO);
-
+    this.userDAO        = new DominoUserDAOImpl(this);
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
-    this.inviteDAO = new SlickInviteDAOImpl(this, dbConnection);
-    audioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
+    this.inviteDAO      = new SlickInviteDAOImpl(this, dbConnection);
+    SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
+    audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
     answerDAO = new SlickAnswerDAO(this, dbConnection);
 //    addRemoveDAO = new AddRemoveDAO(this);
@@ -344,9 +342,9 @@ public class DatabaseImpl implements Database {
         new SlickUserListExerciseVisitorDAO(this, dbConnection),
         pathHelper);
 
-    projectDAO = new ProjectDAO(this, dbConnection);
-    userProjectDAO = new UserProjectDAO(dbConnection);
-    dliClassDAO = new DLIClassDAO(dbConnection);
+    projectDAO      = new ProjectDAO(this, dbConnection);
+    userProjectDAO  = new UserProjectDAO(dbConnection);
+    dliClassDAO     = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 
     createTables();
@@ -354,8 +352,8 @@ public class DatabaseImpl implements Database {
     userDAO.ensureDefaultUsers();
     int defaultProject = projectDAO.ensureDefaultProject(userDAO.getBeforeLoginUser());
     // make sure we have a template exercise
-    userExerciseDAO.ensureTemplateExercise(defaultProject);
-
+    int defaultExercise = userExerciseDAO.ensureTemplateExercise(defaultProject);
+    slickAudioDAO.setDefaultResult(resultDAO.ensureDefault(defaultProject, userDAO.getBeforeLoginUser(), defaultExercise));
     try {
       ((UserListManager) userListManager).setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
@@ -378,7 +376,7 @@ public class DatabaseImpl implements Database {
   }
 
   public IAudioDAO getH2AudioDAO() {
-    return new AudioDAO(this, this.userDAO);
+    return new AudioDAO(this, new UserDAO(this));
   }
 
   public IResultDAO getResultDAO() {
@@ -443,7 +441,8 @@ public class DatabaseImpl implements Database {
    * @seex mitll.langtest.server.database.custom.UserListManagerTest#tearDown
    */
   @Deprecated
-  public void closeConnection() throws SQLException {  }
+  public void closeConnection() throws SQLException {
+  }
 
   /**
    * @param installPath
@@ -687,8 +686,9 @@ public class DatabaseImpl implements Database {
 
   /**
    * For when a new project is added or changes state.
-   * @see mitll.langtest.server.services.ProjectServiceImpl#update
+   *
    * @param project
+   * @see mitll.langtest.server.services.ProjectServiceImpl#update
    */
   @Override
   public void configureProject(Project project) {
@@ -1065,8 +1065,6 @@ public class DatabaseImpl implements Database {
   public void createTables() {
     //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
     List<IDAO> idaos = Arrays.asList(
-        //getUserDAO(),
-        //userPermissionDAO,
         getProjectDAO(),
         userExerciseDAO,
         ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),
@@ -1739,9 +1737,7 @@ public class DatabaseImpl implements Database {
     return userListManager.getSecondStateDAO();
   }
 
-  public IProjectDAO getProjectDAO() {
-    return projectDAO;
-  }
+  public IProjectDAO getProjectDAO() {  return projectDAO;  }
 
   public IUserProjectDAO getUserProjectDAO() {
     return userProjectDAO;
@@ -1758,18 +1754,8 @@ public class DatabaseImpl implements Database {
     return userSessionDAO;
   }
 
-/*
-  public IUserPermissionDAO getUserPermissionDAO() {
-    return userPermissionDAO;
-  }
-*/
-
   public IInviteDAO getInviteDAO() {
     return inviteDAO;
-  }
-
-  public String toString() {
-    return "Database : " + this.getClass().toString();
   }
 
   public IUserSecurityManager getUserSecurityManager() {
@@ -1782,5 +1768,9 @@ public class DatabaseImpl implements Database {
 
   public IProjectManagement getProjectManagement() {
     return projectManagement;
+  }
+
+  public String toString() {
+    return "Database : " + this.getClass().toString();
   }
 }

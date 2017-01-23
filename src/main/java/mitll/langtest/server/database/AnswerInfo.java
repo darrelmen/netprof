@@ -74,6 +74,7 @@ public class AnswerInfo {
     String deviceType;
     String device;
     boolean withFlash;
+    private String transcript = "";
 
     public RecordingInfo(RecordingInfo other, String audioFile) {
       this.answer = other.answer;
@@ -81,22 +82,35 @@ public class AnswerInfo {
       this.deviceType = other.deviceType;
       this.device = other.device;
       this.withFlash = other.withFlash;
+      this.transcript = other.transcript;
     }
 
     public RecordingInfo(String answer,
                          String audioFile,
-                         String deviceType, String device,
-                         boolean withFlash) {
+                         String deviceType,
+                         String device,
+                         boolean withFlash,
+                         String transcript) {
       this.answer = answer;
       this.audioFile = audioFile;
       this.deviceType = deviceType;
       this.device = device;
       this.withFlash = withFlash;
+      this.transcript = transcript;
     }
 
     public String toString() {
-      return "answer " + answer + " audioFile " + audioFile + " device " + deviceType + "/" + device + " with flash " + withFlash;
+      return "RecordingInfo answer " + answer + " audioFile " + audioFile + " device " + deviceType + "/" + device +
+          " with flash " + withFlash + " transcript " + getTranscript();
     }
+
+    public String getTranscript() {
+      return transcript;
+    }
+
+/*    public void setTranscript(String transcript) {
+      this.transcript = transcript;
+    }*/
   }
 
   public static class ScoreInfo {
@@ -132,6 +146,9 @@ public class AnswerInfo {
         recordingInfo.device,
 
         recordingInfo.withFlash, validity);
+    if (transcript.isEmpty()) {
+      transcript = recordingInfo.getTranscript();
+    }
   }
 
   private AnswerInfo(int userid,
@@ -142,7 +159,8 @@ public class AnswerInfo {
 
                      String answer,
                      String audioFile,
-                     String deviceType, String device,
+                     String deviceType,
+                     String device,
                      boolean withFlash,
 
                      AudioCheck.ValidityAndDur validity) {
@@ -194,6 +212,7 @@ public class AnswerInfo {
         pronScore,
         scoreJson,
         processDur);
+    setTranscript(other.getTranscript());
   }
 
   private AnswerInfo(int userid, int projid, int id, int questionID,

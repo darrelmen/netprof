@@ -36,6 +36,7 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.npdata.dao.SlickExercise;
 
 import java.util.Collection;
 import java.util.List;
@@ -45,6 +46,8 @@ import java.util.Map;
  * @see
  */
 public interface IUserExerciseDAO extends IDAO {
+  SlickExercise getUnknownExercise();
+
   int add(CommonExercise userExercise, boolean isOverride);
 
   List<CommonShell> getOnList(int listID);
@@ -58,7 +61,7 @@ public interface IUserExerciseDAO extends IDAO {
 
   CommonExercise getTemplateExercise(int projID);
 
-  void ensureTemplateExercise(int projID);
+  int ensureTemplateExercise(int projID);
 
   Collection<CommonExercise> getAllUserExercises(int projid);
 

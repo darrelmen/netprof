@@ -64,7 +64,7 @@ public abstract class BaseAnswerDAO extends DAO {
                            String session, long timeSpent) {
     AnswerInfo answerInfo = new AnswerInfo(
         audioContext,
-        new AnswerInfo.RecordingInfo(answer, answer, "", "", true),
+        new AnswerInfo.RecordingInfo(answer, answer, "", "", true, ""),
         new AudioCheck.ValidityAndDur(0));
 
     return addAnswer(

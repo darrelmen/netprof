@@ -440,7 +440,8 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   private void copyAudio(DatabaseImpl db,
                          Map<Integer, Integer> oldToNewUser,
-                         Map<String, Integer> exToID, int projid) {
+                         Map<String, Integer> exToID,
+                         int projid) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
