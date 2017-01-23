@@ -177,7 +177,7 @@ public class Result implements UserAndTime {
 
   @Override
   public String toString() {
-    return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getExerciseID() + " " +
+    return "Result #" + getUniqueID() + " user " + getUserid() + " exid " + getExerciseID() + " " +
         " at " + new Date(getTimestamp())+
         "  ans " + getAnswer() +
         " audioType : " + getAudioType() +" device " + device+
