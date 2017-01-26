@@ -75,6 +75,8 @@ public class BasePhoneDAO extends DAO {
   }
 
   /**
+   * TODO : don't do this with the idToRef map...
+   *  look it up in a better way
    *
    * @param idToRef
    * @param phoneToScores
@@ -118,7 +120,7 @@ public class BasePhoneDAO extends DAO {
         trimPathForWebPage(audioAnswer);
 
     WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, (int)rid, wseq, seq,
-        filePath,//trimPathForWebPage(audioAnswer),
+        filePath,
         idToRef.get(exid),
         scoreJson, resultTime);
 

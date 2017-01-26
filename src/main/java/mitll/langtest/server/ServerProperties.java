@@ -41,10 +41,8 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
-import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.Affiliation;
-import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -104,14 +102,16 @@ public class ServerProperties {
   public static final String CONFIG = "config";
   public static final String CONFIG_JSON = "config.json";
   public static final String CONFIG_FILE1 = "config.file";
+  public static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
+  public static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
 
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
   @Deprecated
   private static final String NP_SERVER = "np.ll.mit.edu";
   private static final String DOMINO_SERVER = "domino.url";
   private static final String DOMINO_SERVER_DEFAULT = "http://ltea-data2-dev:8080/domino-ltea/";
-  private static final String HELP = "help";
-  private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
+ // private static final String HELP = "help";
+ // private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -139,7 +139,7 @@ public class ServerProperties {
    */
   private static final String PREFERRED_VOICES = "preferredVoices";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
-  private static final String ENABLE_ALL_USERS = "enableAllUsers";
+ // private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String DO_DECODE = "dodecode";
   private static final String DO_TRIM = "dotrim";
 
@@ -153,6 +153,12 @@ public class ServerProperties {
   private static final String CHECK_AUDIO_FILE_EXISTS = "checkAudioFileExists";
   private static final String DO_AUDIO_CHECKS_IN_PRODUCTION = "doAudioChecksInProduction";
   private static final String CHECK_AUDIO_TRANSCRIPT = "checkAudioTranscript";
+  private static final String MIN_ANALYSIS_SCORE = "minAnalysisScore";
+
+
+  private static final int MIN_SCORE_TO_SHOW = 20;// 0.20f;
+  private static final int USER_INITIAL_SCORES = 20;
+  private static final int USER_FINAL_SCORES = 50;
 
   /**
    * Note netprof is all lower case.
@@ -171,7 +177,6 @@ public class ServerProperties {
   private boolean quietAudioOK;
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
-  private final int userInitialScores = 20;
   private String fontFamily;
   private String fontFaceURL;
   private final Map<String, String> phoneToDisplay = new HashMap<>();
@@ -467,19 +472,19 @@ public class ServerProperties {
   }
 */
 
-  private int getIntPropertyDef(String audioOffset, String defaultValue) {
+  private int getIntPropertyDef(String audioOffset, int defaultValue) {
     try {
-      return Integer.parseInt(props.getProperty(audioOffset, defaultValue));
+      String property = props.getProperty(audioOffset);
+      return (property == null) ? defaultValue: Integer.parseInt(property);
     } catch (NumberFormatException e) {
-      return 0;
+      return defaultValue;
     }
   }
 
   public int getMaxNumExercises() {
     int maxNumExercises = Integer.MAX_VALUE;
-    String maxNumExercises1 = MAX_NUM_EXERCISES;
     try {
-      String property = props.getProperty(maxNumExercises1);
+      String property = props.getProperty(MAX_NUM_EXERCISES);
       if (property == null) return maxNumExercises;
       return Integer.parseInt(property);
     } catch (NumberFormatException e) {
@@ -712,22 +717,28 @@ public class ServerProperties {
     return emailList.getEmailAddress();
   }
 
+/*
   public String getApprovalEmailAddress() {
     return emailList.getApprovalEmailAddress();
   }
+*/
 
   /**
    * @return
-   * @see mitll.langtest.server.mail.EmailHelper#addContentDeveloper(String, String, User, MailSupport, String)
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
+   * @see mitll.langtest.server.mail.EmailHelper#addContentDeveloper
+   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser
    */
+/*
   public List<String> getApprovers() {
     return emailList.getApprovers();
   }
+*/
 
+/*
   public List<String> getApproverEmails() {
     return emailList.getApproverEmails();
   }
+*/
 
   /**
    * @return
@@ -743,11 +754,24 @@ public class ServerProperties {
   }
 
   public int getUserInitialScores() {
-    return userInitialScores;
+    return getIntPropertyDef(ANALYSIS_INITIAL_SCORES, USER_INITIAL_SCORES);
+  }
+
+  public int getUserFinalScores() {
+    return getIntPropertyDef(ANALYSIS_NUM_FINAL_AVERAGE_SCORES, USER_FINAL_SCORES);
   }
 
   public int getMinDynamicRange() {
-    return getIntPropertyDef(MIN_DYNAMIC_RANGE, "" + MIN_DYNAMIC_RANGE_DEFAULT);
+    return getIntPropertyDef(MIN_DYNAMIC_RANGE, MIN_DYNAMIC_RANGE_DEFAULT);
+  }
+
+  /**
+   *
+   * @return 0-1 float
+   */
+  public float getMinAnalysisScore() {
+    int intPropertyDef = getIntPropertyDef(MIN_ANALYSIS_SCORE, MIN_SCORE_TO_SHOW);
+    return (float)intPropertyDef/100f;
   }
 
   /**
@@ -834,18 +858,18 @@ public class ServerProperties {
   }
 
   public int getSleepBetweenDecodes() {
-    return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS, "" + SLEEP_BETWEEN_DECODES_DEFAULT);
+    return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS,  SLEEP_BETWEEN_DECODES_DEFAULT);
   }
 
-  private static final long TRIM_SILENCE_BEFORE = 300;
-  private static final long TRIM_SILENCE_AFTER = 300;
+  private static final int TRIM_SILENCE_BEFORE = 300;
+  private static final int TRIM_SILENCE_AFTER = 300;
 
   public long getTrimBefore() {
-    return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
+    return getIntPropertyDef("trimBeforeMillis",   TRIM_SILENCE_BEFORE);
   }
 
   public long getTrimAfter() {
-    return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
+    return getIntPropertyDef("trimAfterMillis",  TRIM_SILENCE_AFTER);
   }
 
   public String getDBConfig() {
@@ -870,6 +894,7 @@ public class ServerProperties {
   /**
    * @return
    * @see
+   * @deprecated
    */
   public String getNPServer() {
     return props.getProperty("SERVER_NAME", NP_SERVER);
@@ -905,6 +930,10 @@ public class ServerProperties {
     return getDefaultTrue("shouldRecalcStudentAudio");
   }
 
+  /**
+   * @deprecated
+   * @return
+   */
   public boolean hasModel() {
     return getCurrentModel() != null;
   }

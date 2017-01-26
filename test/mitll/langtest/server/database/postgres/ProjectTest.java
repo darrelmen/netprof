@@ -264,9 +264,10 @@ public class ProjectTest extends BaseTest {
     logger.info(maleFemaleProgress.toString());
   }
 
+  @Test
   public void testAnalysis() {
     DatabaseImpl database = getAndPopulate();
-    int projectid = 2;
+    int projectid = 3;
     List<UserInfo> userInfo = database.getAnalysis(projectid).getUserInfo(database.getUserDAO(), 5, projectid);
     for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
   }

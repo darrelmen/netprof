@@ -74,7 +74,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     List<SlickResult> defResult = dao.getAllByProject(projid);
 
     if (defResult.isEmpty()) {
-     Timestamp modified = new Timestamp(System.currentTimeMillis());
+      Timestamp modified = new Timestamp(System.currentTimeMillis());
 
       dao.insert(new SlickResult(-1, beforeLoginUser, unknownExerciseID, modified,
           0,
@@ -90,8 +90,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
       defaultResult = defResult.iterator().next();
       logger.info("default " + defaultResult);
       return defaultResult.id();
-    }
-    else {
+    } else {
       logger.info("nope - no default result ");
       return -1;
     }
@@ -350,12 +349,22 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return relPrefix;
   }
 
-  public Collection<SlickPerfResult> getPerf(int projid) {
-    return dao.perf(projid);
+  public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
+    return dao.perf(projid, minScore);
   }
 
+  /**
+   * @param userid
+   * @param projid
+   * @return
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getBestForUser
+   */
   public Collection<SlickPerfResult> getPerfForUser(int userid, int projid) {
     return dao.perfForUser(userid, projid);
+  }
+
+  public Collection<Integer> getPracticedByUser(int userid, int projid) {
+    return dao.practicedByUser(userid, projid);
   }
 
   public boolean isEmpty() {

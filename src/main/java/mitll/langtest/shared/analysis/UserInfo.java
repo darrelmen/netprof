@@ -35,7 +35,6 @@ package mitll.langtest.shared.analysis;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.user.MiniUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -50,7 +49,8 @@ import java.util.Map;
  * @since 10/29/15.
  */
 public class UserInfo implements HasID {
-  private int start;
+ // private int start;
+  private int finalScores;
   private int current;
   private int num;
   private transient List<BestScore> bestScores;
@@ -64,13 +64,15 @@ public class UserInfo implements HasID {
   /**
    * @param bestScores
    * @param initialSamples
+   * @param finalSamples
    * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    */
-  public UserInfo(List<BestScore> bestScores, long startTime, int initialSamples) {
+  public UserInfo(List<BestScore> bestScores, long startTime, int initialSamples, int finalSamples) {
     this.bestScores = bestScores;
     this.num = bestScores.size();
     this.startTime = startTime;
 
+    // done on server
     Collections.sort(bestScores, new Comparator<BestScore>() {
       @Override
       public int compare(BestScore o1, BestScore o2) {
@@ -78,21 +80,19 @@ public class UserInfo implements HasID {
       }
     });
 
-    List<BestScore> bestScores1 = bestScores.subList(0, Math.min(initialSamples, bestScores.size()));
-    float total = 0;
+//    List<BestScore> initialScores = bestScores.subList(0, Math.min(initialSamples, bestScores.size()));
+    List<BestScore> finalScores = bestScores.subList(num - Math.min(finalSamples, num), num);
 
+    this.finalScores = getPercent(finalScores);
+    setCurrent(getPercent(bestScores));
+  }
+
+  private int getPercent(List<BestScore> bestScores1) {
+    float total = 0;
     for (BestScore bs : bestScores1) {
       total += bs.getScore();
     }
-
-    setStart(toPercent(total, bestScores1.size()));
-    //  logger.info("start " + total + " " + start);
-    total = 0;
-    for (BestScore bs : bestScores) {
-      total += bs.getScore();
-    }
-    setCurrent(toPercent(total, bestScores.size()));
-    //  logger.info("current " + total + " " + current);
+    return toPercent(total, bestScores1.size());
   }
 
   private static int toPercent(float total, float size) {
@@ -116,7 +116,6 @@ public class UserInfo implements HasID {
   }
 */
 
-
   /**
    * @param user
    * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
@@ -135,16 +134,16 @@ public class UserInfo implements HasID {
    * @return
    * @see UserContainer#getStart
    */
-  public int getStart() {
-    return start;
-  }
+//  public int getStart() {
+//    return start;
+//  }
 
   public int getCurrent() {
     return current;
   }
 
   public int getDiff() {
-    return getCurrent() - getStart();
+    return getFinalScores() -  getCurrent();// - getStart();
   }
 
   public int getNum() {
@@ -154,10 +153,10 @@ public class UserInfo implements HasID {
   public List<BestScore> getBestScores() {
     return bestScores;
   }
-
-  public void setStart(int start) {
-    this.start = start;
-  }
+//
+//  public void setStart(int start) {
+//    this.start = start;
+//  }
 
   public void setCurrent(int current) {
     this.current = current;
@@ -171,11 +170,7 @@ public class UserInfo implements HasID {
     this.userID = userID;
   }
 
-  public String toString() {
-    //MiniUser user = getUser();
-    return getID() + "/" + getUserID() + " : " + getNum() + " : " + getStart() + " " + getCurrent() + " " + getDiff();
-  }
-
+  @Deprecated
   @Override
   public String getOldID() {
     return null;
@@ -186,12 +181,21 @@ public class UserInfo implements HasID {
     return id;
   }
 
+  public void setId(int id) {
+    this.id = id;
+  }
+
   @Override
   public int compareTo(@NotNull HasID o) {
     return Integer.valueOf(id).compareTo(o.getID());
   }
 
-  public void setId(int id) {
-    this.id = id;
+  public String toString() {
+    //MiniUser user = getUser();
+    return getID() + "/" + getUserID() + " :\t# = " + getNum() + "\tavg " + getCurrent() + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
+  }
+
+  public int getFinalScores() {
+    return finalScores;
   }
 }

@@ -1198,6 +1198,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Seems pretty expensive - why do it?
    * @param projectid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser

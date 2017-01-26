@@ -82,22 +82,18 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public Collection<AudioAttribute> getAudioAttributesByProject(int projid) {
     List<SlickAudio> all = dao.getAll(projid);
-    //logger.info("Getting mini users");
-    // Map<Integer, MiniUser> miniUsers = userDAO.getMiniUsers();
-    logger.info("getAudioAttributesByProject " + projid +
-            " " + all.size()
-        //+        " users " + miniUsers.size()
-    );
+    logger.info("getAudioAttributesByProject " + projid + " " + all.size());
     return toAudioAttribute(all);
   }
 
   @Override
   public AudioAttribute addOrUpdate(AudioInfo info) {
     MiniUser miniUser = userDAO.getMiniUser(info.getUserid());
-//    Map<Integer, MiniUser> mini = new HashMap<>();
-//    mini.put(userid, miniUser);
     return toAudioAttribute(
-        dao.addOrUpdate(info.getUserid(), info.getExerciseID(), info.getProjid(), info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(), info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID()),
+        dao.addOrUpdate(
+            info.getUserid(),
+            info.getExerciseID(),
+            info.getProjid(), info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(), info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID()),
         miniUser);
   }
 
@@ -115,8 +111,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @paramx dnr
    */
   @Override
-  public void addOrUpdateUser(/*int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
-                              int durationInMillis, String transcript, float dnr, int resultid*/
+  public void addOrUpdateUser(
                               AudioInfo info) {
     dao.addOrUpdateUser(info.getUserid(), info.getExerciseID(), info.getProjid(), info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(), info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID());
   }
