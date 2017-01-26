@@ -47,13 +47,12 @@ import java.util.Map;
 public interface UserServiceAsync {
   /**
    * @param userId
-   * @param attemptedHashedPassword
    * @param attemptedFreeTextPassword
    * @param async
    * @seex UserManager#getPermissionsAndSetUser
    * @seex mitll.langtest.client.user.SignInForm#getPermissionsAndSetUser
    */
-  void loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword,
+  void loginUser(String userId, String attemptedFreeTextPassword,
                  AsyncCallback<LoginResult> async);
 
   /**

@@ -35,7 +35,6 @@ package mitll.langtest.server;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.audio.TrackInfo;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.json.ProjectExport;
@@ -52,6 +51,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -142,7 +142,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * Remembers chapters from previous requests...
-   *
+   * <p>
    * OK, so we can make a number of requests - mainly for the iOS app.
    *
    * @param request
@@ -155,26 +155,45 @@ public class ScoreServlet extends DatabaseServlet {
     String queryString = request.getQueryString();
     if (queryString == null) queryString = ""; // how could this happen???
 
-    int projectid = getProject(request);
-    if (projectid == -1) {
+    String passwordFromBody = "";
+    int projid = getProject(request);
+    if (projid == -1) {
       logger.warn("OK - look for project id from url ");
       String[] projids = queryString.split("projid=");
       if (projids.length > 1) {
-        String s = projids[1].split("&")[0];
+        projid = getIntValue(projids[1]);
+      } else {
         try {
-          projectid = Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-          logger.error("can't parse " + s);
+          //  String params = request.getReader().readLine();
+
+          String params = IOUtils.toString(request.getReader());
+          if (params != null && !params.isEmpty()) {
+            String[] projids2 = params.split("projid=");
+            projid = getIntValue(projids2[1]);
+
+            logger.info("doGet Got projid " + projid);
+
+            String[] passParam = params.split("pass=");
+
+            if (passParam.length > 1) {
+              passwordFromBody = passParam[1].split("&")[0];
+              logger.info("doGet Got " + passwordFromBody.length());
+            }
+          }
+        } catch (IOException e) {
+          logger.error("got " + e, e);
         }
       }
     }
 
     getDatabase();
-    String language = getLanguage(projectid);
-    if (!queryString.contains(NESTED_CHAPTERS)) { // quiet output for polling from status webapp
+    String language = projid == -1 ? "unknownLanguage" : getLanguage(projid);
+    if (!queryString.contains(NESTED_CHAPTERS) || true) { // quiet output for polling from status webapp
       String pathInfo = request.getPathInfo();
       logger.debug("ScoreServlet.doGet (" + language +
-          "): Request '" + queryString + "' path " + pathInfo +
+          "):" +
+          "\n\tRequest '" + queryString + "'" +
+          "\n\tpath " + pathInfo +
           " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
     }
 
@@ -197,28 +216,36 @@ public class ScoreServlet extends DatabaseServlet {
           if (shouldRemoveExercisesWithNoAudio || dontRemove) {
             if (dontRemove) {
               if (nestedChaptersEverything == null || (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
-                nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio, projectid);
+                nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio, projid);
                 whenCachedEverything = System.currentTimeMillis();
               }
               toReturn = nestedChaptersEverything;
             } else {
-              toReturn = getJsonNestedChapters(true, projectid);
+              toReturn = getJsonNestedChapters(true, projid);
             }
           } else {
             toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
           }
         } else {
           if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
-            nestedChapters = getJsonNestedChapters(true, projectid);
+            nestedChapters = getJsonNestedChapters(true, projid);
             whenCached = System.currentTimeMillis();
           }
           toReturn = nestedChapters;
         }
-      } else if (userManagement.doGet(request, response, queryString, toReturn)) {
-        logger.info("doGet " + language + " handled user command for " + queryString);
+      } else if (userManagement.doGet(
+          request,
+          response,
+          queryString,
+          toReturn,
+          securityManager,
+          projid,
+          passwordFromBody)) {
+
+        logger.info("doGet " + language + " handled user command");// for " + queryString);
       } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
         queryString = removePrefix(queryString, CHAPTER_HISTORY);
-        toReturn = getChapterHistory(queryString, toReturn, projectid);
+        toReturn = getChapterHistory(queryString, toReturn, projid);
       } else if (matchesRequest(queryString, PROJECTS)) {
         queryString = removePrefix(queryString, PROJECTS);
         jsonString = getProjects(queryString);
@@ -230,7 +257,7 @@ public class ScoreServlet extends DatabaseServlet {
         int year = getYear(queryString);
         getReport(toReturn, year);
       } else if (matchesRequest(queryString, EXPORT)) {
-        toReturn = getJSONForExercises(projectid);
+        toReturn = getJSONForExercises(projid);
       } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
         toReturn = removeRefResult(queryString);
       } else if (matchesRequest(queryString, REPORT)) {
@@ -251,25 +278,37 @@ public class ScoreServlet extends DatabaseServlet {
         toReturn.put(ERROR, "unknown req " + queryString);
       }
     } catch (Exception e) {
-      logger.error(getLanguage(projectid) + " : doing query " + queryString + " got " + e, e);
+      logger.error(getLanguage(projid) + " : doing query " + queryString + " got " + e, e);
       db.logAndNotify(e);
     }
 
     long now = System.currentTimeMillis();
     long l = now - then;
     if (l > 10) {
-      logger.info("doGet : (" + language + ") took " + l + " millis to do " + request.getQueryString());
+      logger.info("doGet : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
     }
     then = now;
     String x = jsonString.isEmpty() ? toReturn.toString() : jsonString;
     now = System.currentTimeMillis();
     l = now - then;
     if (l > 50) {
-      logger.info("doGet : (" + language + ") took " + l + " millis to do " + request.getQueryString() +
+      logger.info("doGet : (" + language + ") took " + l + " millis" +
+          //" to do " + request.getQueryString() +
           " and to do toString on json");
     }
 
     reply(response, x);
+  }
+
+  private int getIntValue(String projid) {
+    int projectid = -1;
+    String s = projid.split("&")[0];
+    try {
+      projectid = Integer.parseInt(s);
+    } catch (NumberFormatException e) {
+      logger.error("getIntValue can't parse " + s);
+    }
+    return projectid;
   }
 
   /**
@@ -537,7 +576,19 @@ public class ScoreServlet extends DatabaseServlet {
         logger.debug("doPost got request " + requestType + " device " + deviceType + "/" + device);
       }
 
-      if (requestType.startsWith(ADD_USER)) {
+      if (requestType.startsWith("hasUser")) {
+        userManagement.tryToLogin(
+            jsonObject,
+            request.getHeader("pass"),
+            request,
+            //response,
+            //requestType,
+            securityManager,
+            request.getIntHeader("projid"),
+            request.getHeader("userid")
+        );
+
+      } else if (requestType.startsWith(ADD_USER)) {
         userManagement.addUser(request, requestType, deviceType, device, jsonObject);
       } else if (
           requestType.startsWith(ALIGN) ||
@@ -561,7 +612,7 @@ public class ScoreServlet extends DatabaseServlet {
         logger.warn("doPost unknown request " + requestType + " device " + deviceType + "/" + device);
       }
     } else {
-      logger.info("request type is null?");
+      logger.info("doPost request type is null?");
       jsonObject = getJsonForAudio(request, ALIGN, deviceType, device);
     }
 
@@ -571,7 +622,7 @@ public class ScoreServlet extends DatabaseServlet {
   private void gotLogEvent(HttpServletRequest request, String device, JSONObject jsonObject) {
     String user = request.getHeader(USER);
 
-    int userid = userManagement.getUserFromParam2(user);
+    int userid = user == null ? -1 : userManagement.getUserFromParam2(user);
     if (getUser(userid) == null) {
       jsonObject.put(ERROR, "unknown user " + userid);
     } else {
@@ -612,7 +663,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   *
    * @param response
    */
   private void configureResponse(HttpServletResponse response) {

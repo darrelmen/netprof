@@ -46,14 +46,10 @@ import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickUserSession;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -61,12 +57,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Random;
-
-import static mitll.langtest.server.database.security.IUserSecurityManager.USER_SESSION_ATT;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
@@ -114,9 +104,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       if (db == null) {
         logger.error("findSharedDatabase no database?");
       } else {
-//        logger.warn("findSharedDatabase getting user security manager");
         securityManager = db.getUserSecurityManager();
-//        securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
       }
     }
   }
@@ -182,7 +170,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * - use cookie to find userid, and put back on a new session
    * - ideally only the startup method should know about this case...
    * 5) if log out, just one session info should be cleared - or all???
-   *  ? what if have two browsers open - logged in in one, logged out in other?
+   * ? what if have two browsers open - logged in in one, logged out in other?
    *
    * @return
    */
@@ -255,6 +243,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   /**
    * This is safe!
+   *
    * @return
    */
   protected String getLanguage() {
@@ -268,8 +257,8 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   }
 
   /**
-   * @see #service(HttpServletRequest, HttpServletResponse)
    * @param e
+   * @see #service(HttpServletRequest, HttpServletResponse)
    */
   @Override
   public void logAndNotifyServerException(Exception e) {
@@ -277,7 +266,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   }
 
   /**
-   *
    * @param e
    * @param additionalMessage
    */
@@ -292,9 +280,8 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       sendEmail(subject, getInfo(prefixedMessage));
 
       logger.error(getInfo(prefixedMessage));
-    }
-    else {
-      logger.error("got " + e,e);
+    } else {
+      logger.error("got " + e, e);
     }
   }
 
@@ -302,8 +289,14 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
   }
 
-  @NotNull
-  protected LoginResult getValidLogin(HttpSession session, User loggedInUser) {
+  /**
+   * @param session
+   * @param loggedInUser
+   * @return
+   * @see UserServiceImpl#loginUser
+   */
+/*  @NotNull
+  LoginResult getValidLogin(HttpSession session, User loggedInUser) {
     LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
     if (!loggedInUser.isValid()) {
       logger.info("user " + loggedInUser + "\n\tis missing email ");
@@ -312,15 +305,15 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       setSessionUser(session, loggedInUser);
     }
     return loginResult;
-  }
+  }*/
 
-  protected LoginResult getInvalidLoginResult(User loggedInUser) {
+/*  LoginResult getInvalidLoginResult(User loggedInUser) {
     if (loggedInUser == null) {
       return new LoginResult(LoginResult.ResultType.Failed);
     } else {
       return new LoginResult(loggedInUser, LoginResult.ResultType.BadPassword);
     }
-  }
+  }*/
 
 /*  public LoginResult findByCookie(long l) {
     logger.info("l " + l);
@@ -356,12 +349,12 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   /**
    * @param session
    * @param loggedInUser
-   * @seex #loginUser
    * @seex #addUser
+   * @see mitll.langtest.server.database.security.UserSecurityManager#lookupUser
    */
-  public long setSessionUser(HttpSession session, User loggedInUser) {
-//    logger.debug("setSessionUser - made session - " + session);
-//    logger.debug("setSessionUser - made user - " + loggedInUser);
+/*  public long setSessionUser(HttpSession session, User loggedInUser) {
+    securityManager.setSessionUser(session,loggedInUser);
+//    logger.debug("setSessionUser - made session - " + session + " user - " + loggedInUser);
 
     try {
       int id1 = loggedInUser.getID();
@@ -370,7 +363,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       // HttpSession session1 = getCurrentSession();
       String sessionID = session.getId();
 
-      /*int selector = random.nextInt();
+      *//*int selector = random.nextInt();
       int validator = random.nextInt();
 
       String sha256hex1 = org.apache.commons.codec.digest.DigestUtils.sha256Hex("" + selector);
@@ -391,7 +384,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
       ByteBuffer buffer = ByteBuffer.allocate(8).putLong(l);
       int x = buffer.getInt(0);
-      int y = buffer.getInt(1);*/
+      int y = buffer.getInt(1);*//*
 
       db.getUserSessionDAO().add(
           new SlickUserSession(-1,
@@ -418,7 +411,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       logger.error("got " + e, e);
       return -1;
     }
-  }
+  }*/
 
   /**
    *
@@ -432,6 +425,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     response.addCookie(cookie);
   }
 */
+/*
   private void logSetSession(HttpSession session1, String sessionID) {
     logger.info("setSessionUser : Adding user to " + sessionID +
         " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
@@ -439,7 +433,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
         ", created=" + session1.getCreationTime() +
         ", " + getAttributesFromSession(session1));
   }
+*/
 
+/*
   @NotNull
   private String getAttributesFromSession(HttpSession session) {
     StringBuilder atts = new StringBuilder("Atts: [ ");
@@ -450,6 +446,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     atts.append("]");
     return atts.toString();
   }
+*/
 
   /**
    * true = create a new session

@@ -43,7 +43,10 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
+import net.sf.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
@@ -62,9 +65,8 @@ public interface IUserDAO extends IDAO {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath(int, int, File, String, boolean, String, String)
+   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
    */
-  @Deprecated
   Database getDatabase();
 
   /**
@@ -104,14 +106,15 @@ public interface IUserDAO extends IDAO {
    * @param id
    * @param passwordHash
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
+   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
    */
   User getStrictUserWithPass(String id, String passwordHash);
 
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
+   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
+   * @see mitll.langtest.server.rest.RestUserManagement#gotHasUser
    */
   User getUserByID(String id);
 
@@ -182,7 +185,7 @@ public interface IUserDAO extends IDAO {
   /**
    * @param getMale
    * @return
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs
    */
   Collection<Integer> getUserIDs(boolean getMale);
 
@@ -190,7 +193,7 @@ public interface IUserDAO extends IDAO {
    * @return
    * @see mitll.langtest.server.database.result.ResultDAO#getUserToResults(AudioType, IUserDAO)
    */
-  Map<Integer, User> getUserMap();
+ // Map<Integer, User> getUserMap();
 
   /**
    * @param emailH
@@ -204,7 +207,7 @@ public interface IUserDAO extends IDAO {
    * @param newHashPassword
    * @param baseURL
    * @return
-   * @see UserServiceImpl#changePassword(int, String, String)
+   * @@deprecated
    * @see mitll.langtest.server.rest.RestUserManagement#changePFor(String, String)
    */
   boolean changePassword(int user, String newHashPassword, String baseURL);
@@ -234,7 +237,7 @@ public interface IUserDAO extends IDAO {
   /**
    * @param key
    * @return
-   * @see UserServiceImpl#changePFor(String, String)
+   * @@deprecated
    */
   User getUserWithResetKey(String key);
 
@@ -248,11 +251,11 @@ public interface IUserDAO extends IDAO {
    * @return
    * @see UserServiceImpl#getCounts()
    */
-  Map<User.Kind, Integer> getCounts();
+ // Map<User.Kind, Integer> getCounts();
 
   /**
    * @param toUpdate
-   * @see UserServiceImpl#update
+   * @see UserServiceImpl#addUser
    */
   void update(User toUpdate);
 

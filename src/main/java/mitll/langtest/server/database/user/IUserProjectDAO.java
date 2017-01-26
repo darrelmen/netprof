@@ -36,16 +36,27 @@ import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserProject;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface IUserProjectDAO extends IDAO {
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject(int, int)
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject
    * @param userid
    * @param projid
    */
   void add(int userid, int projid);
+
+  /**
+   * @see mitll.langtest.server.database.copy.UserCopy#addUserProjectBinding(int, IUserProjectDAO, List)
+   * @param bulk
+   */
   void addBulk(Collection<SlickUserProject> bulk);
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#forgetProject(int)
+   * @param userid
+   */
   void forget(int userid);
-  Collection<SlickUserProject> getAll();
+ // Collection<SlickUserProject> getAll();
   int mostRecentByUser(int user);
 }

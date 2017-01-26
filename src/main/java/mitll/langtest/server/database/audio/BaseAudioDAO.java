@@ -324,6 +324,8 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * Get back the ids of exercises recorded by people who are the same gender as the userid.
    *
+   * TODO : don't do this - won't scale with users
+   *
    * @param userid only used to determine the gender we should show
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
@@ -351,6 +353,7 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * @param userid
    * @return
+   * @see #getRecordedBy
    */
   Collection<Integer> getUserIDs(int userid) {
     User user = userDAO.getUserWhere(userid);

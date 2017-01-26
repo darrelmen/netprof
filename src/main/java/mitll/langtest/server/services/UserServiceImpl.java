@@ -32,13 +32,13 @@
 
 package mitll.langtest.server.services;
 
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
@@ -66,28 +66,20 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * TODO record additional session info in database.
    *
    * @param userId
-   * @param attemptedHashedPassword
    * @param attemptedFreeTextPassword
    * @return
    * @seex #userExists
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
-  public LoginResult loginUser(String userId,
-                               String attemptedHashedPassword,
-                               String attemptedFreeTextPassword) {
+  public LoginResult loginUser(String userId, String attemptedFreeTextPassword) {
     try {
       HttpServletRequest request = getThreadLocalRequest();
-      String remoteAddr = request.getHeader("X-FORWARDED-FOR");
-      if (remoteAddr == null || remoteAddr.isEmpty()) {
-        remoteAddr = request.getRemoteAddr();
-      }
+      String remoteAddr = getRemoteAddr(request);
       String userAgent = request.getHeader("User-Agent");
 
       // ensure a session is created.
       HttpSession session = createSession();
-      logger.info("Login session " + session.getId() + " isNew=" + session.isNew()
-          //    + " host is secondary " + properties.isSecondaryHost()
-      );
+      logger.info("Login session " + session.getId() + " isNew=" + session.isNew());
 
     /*
     UsernamePasswordToken token = new UsernamePasswordToken(userId, attemptedHashedPassword);
@@ -99,31 +91,44 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     logger.info("sub " + subject);*/
 
-//    attemptedFreeTextPassword = rot13(attemptedFreeTextPassword);
-      logger.info("loginUser : userid " + userId + " password '" + attemptedHashedPassword + "'");
-//    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedFreeTextPassword);
-
-      User loggedInUser = db.getUserDAO().loginUser(
-          userId,
-          attemptedFreeTextPassword,
-          userAgent,
-          remoteAddr,
-          session.getId());
-
-      boolean success = loggedInUser != null;
-
-      logActivity(userId, remoteAddr, userAgent, loggedInUser, success);
-
-      if (success) {
-        return getValidLogin(session, loggedInUser);
-      } else {
-        loggedInUser = db.getUserDAO().getUserByID(userId);
-        return getInvalidLoginResult(loggedInUser);
-      }
+      logger.info("loginUser : userid " + userId);// + " password '" + attemptedHashedPassword + "'");
+      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session);
     } catch (Exception e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
       logAndNotifyServerException(e);
       return new LoginResult(Failed);
+    }
+  }
+
+  private String getRemoteAddr(HttpServletRequest request) {
+    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+    if (remoteAddr == null || remoteAddr.isEmpty()) {
+      remoteAddr = request.getRemoteAddr();
+    }
+    return remoteAddr;
+  }
+
+  /*public LoginResult getLoginResult(String userId,
+                                     String attemptedFreeTextPassword,
+                                     String remoteAddr,
+                                     String userAgent,
+                                     HttpSession session) {
+    IUserDAO userDAO = db.getUserDAO();
+    User loggedInUser = userDAO.loginUser(
+        userId,
+        attemptedFreeTextPassword,
+        userAgent,
+        remoteAddr,
+        session.getId());
+
+    boolean success = loggedInUser != null;
+
+    logActivity(userId, remoteAddr, userAgent, loggedInUser, success);
+
+    if (success) {
+      return getValidLogin(session, loggedInUser);
+    } else {
+      return getInvalidLoginResult(userDAO.getUserByID(userId));
     }
   }
 
@@ -133,7 +138,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         ". IP: " + remoteAddr +
         ", UA: " + userAgent +
         (success ? ", user: " + loggedInUser.getID() : ""));
-  }
+  }*/
 
   @Override
   public LoginResult restoreUserSession() {
@@ -227,17 +232,19 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return db.getUsers();
   }
 
+/*
   public Map<User.Kind, Integer> getCounts() {
     return db.getUserDAO().getCounts();
   }
+*/
 
   public Map<String, Integer> getInvitationCounts(User.Kind requestRole) {
     return db.getInviteDAO().getInvitationCounts(requestRole);
   }
 
   /**
-   * @see mitll.langtest.client.dliclass.DLIClassOps#showUsers
    * @return
+   * @see mitll.langtest.client.dliclass.DLIClassOps#showUsers
    */
   @Override
   public Map<User.Kind, Collection<MiniUser>> getKindToUser() {
@@ -251,7 +258,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   public boolean resetPassword(String user) {
     String baseURL = getBaseURL();
-    logger.warn("resetPassword for " + user + " " + baseURL);
+    // logger.warn("resetPassword for " + user + " " + baseURL);
     // Use Domino call to do reset password
     return db.getUserDAO().forgotPassword(user, baseURL);
   }
@@ -287,7 +294,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       if (userByID != null) {
         HttpSession currentSession = getCurrentSession();
         if (currentSession == null) currentSession = createSession();
-        setSessionUser(currentSession, userByID);
+        securityManager.setSessionUser(currentSession, userByID);
       }
       return userByID;
     } else {
@@ -351,7 +358,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     try {
       User sessionUser = getSessionUser();
       if (sessionUser != null) {
-        logger.info("set project (" + projectid + ") for " + sessionUser);
+        logger.info("setProject set project (" + projectid + ") for " + sessionUser);
         db.rememberProject(sessionUser.getID(), projectid);
       }
       db.setStartupInfo(sessionUser, projectid);

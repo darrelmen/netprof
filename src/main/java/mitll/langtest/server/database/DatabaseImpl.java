@@ -550,6 +550,7 @@ public class DatabaseImpl implements Database {
    * Just for import
    *
    * @param projectid
+   * @see mitll.langtest.server.database.copy.CreateProject#createProjectIfNotExists
    */
   public void rememberProject(int projectid) {
     projectManagement.rememberProject(projectid);
@@ -589,7 +590,6 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
    */
   public void setStartupInfo(User userWhere, int projid) {
-    //  logger.info("setStartupInfo on " + userWhere + " for project " + projid);
     projectManagement.setStartupInfo(userWhere, projid);
   }
 
@@ -979,6 +979,11 @@ public class DatabaseImpl implements Database {
     userManagement.usersToXLSX(out);
   }
 
+  /**
+   * TODO : who calls this - reporting?
+   * @see mitll.langtest.server.rest.RestUserManagement#doGet
+   * @return
+   */
   public JSON usersToJSON() {
     return userManagement.usersToJSON();
   }
@@ -1010,8 +1015,6 @@ public class DatabaseImpl implements Database {
    */
   public boolean logEvent(String id, String widgetType, String exid, String context, int userid, String device) {
     if (userid == -1) {
-      userid = userDAO.getBeforeLoginUser();
-
       if (widgetType.equals(UserPassLogin.USER_NAME_BOX)) {
         return true;
       } else {

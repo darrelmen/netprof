@@ -69,17 +69,22 @@ dependencies {
 
     compile 'org.apache.commons:commons-email:latest.integration'
     compile 'org.apache.commons:commons-lang3:latest.integration'
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
     compile 'commons-codec:commons-codec:latest.integration'
     compile 'commons-io:commons-io:latest.integration'
+
+    compile 'org.apache.ignite:ignite-core:1.5.0.final'
 
     compile 'org.apache.logging.log4j:log4j-api:latest.integration'
     compile 'org.apache.logging.log4j:log4j-core:latest.integration'
     compile 'org.apache.logging.log4j:log4j-jcl:latest.integration'
     compile 'org.apache.logging.log4j:log4j-web:latest.integration'
 
-    compile 'org.apache.ignite:ignite-core:1.5.0.final'
+    compile group: 'org.apache.poi', name: 'poi', version: '3.15'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.15'
+    compile group: 'org.apache.poi', name: 'ooxml-schemas', version: '1.3'
 
-//    testCompile 'junit:junit:latest.integration'
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     testCompile 'org.hamcrest:hamcrest-all:latest.integration'
@@ -98,10 +103,6 @@ dependencies {
 
     compile 'org.moxieapps.gwt:highcharts:1.7.0'
 
-    // compile group: 'com.google.gwt.google-apis', name: 'gwt-visualization', version: '1.0.2'
-    // todo consider removing this
-//    compile name: 'gwt-visualization'
-
     // just for AMAS support
     compile name: 'mira'
 
@@ -113,16 +114,10 @@ dependencies {
 
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
 
-    compile group: 'org.apache.poi', name: 'poi', version: '3.15'
-    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.15'
-    compile group: 'org.apache.poi', name: 'ooxml-schemas', version: '1.3'
-
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
     compile group: 'com.google.guava', name: 'guava', version: '20.0'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
-
-    compile group: 'org.apache.shiro', name: 'shiro-core', version: '1.3.2'
-    compile group: 'org.apache.shiro', name: 'shiro-web', version: '1.3.2'
+//    compile group: 'org.apache.shiro', name: 'shiro-core', version: '1.3.2'
+//    compile group: 'org.apache.shiro', name: 'shiro-web', version: '1.3.2'
 }
 
 sourceSets {
@@ -187,70 +182,9 @@ war {
     }
 }
 
-// make standalone jar - for some reason it's huge
+// make standalone jar
 shadowJar {
     zip64 true
-}
-
-task makeDevInstallation(type: Zip) {
-    // appendix = "installation"
-    baseName = "netprof-installation"
-
-    from('war/config/netProfDev') {
-        into 'config'
-    }
-    from('scripts/copy.sh') {
-        into 'bin'
-    }
-    from('docs/*') {
-        into 'docs'
-    }
-    from('scripts/drop.sh') {
-        into 'bin'
-    }
-
-    from('build/libs') {
-        include '**/*.jar'
-        exclude '**/*installation*.jar'
-        into 'lib'
-    }
-
-    from('build/libs') {
-        include '**/*.war'
-        exclude '**/*installation*.jar'
-        into 'dist'
-    }
-}
-
-task makeDLIInstallation(type: Zip) {
-    //  destinationDir = 'build/libs'
-    // appendix = "installation"
-    baseName = "netprof-installation"
-
-    from('war/config/netProfDLI') {
-        into 'config'
-    }
-    from('scripts/copy.sh') {
-        into 'bin'
-    }
-    from('docs/*') {
-        into 'docs'
-    }
-    from('scripts/drop.sh') {
-        into 'bin'
-    }
-
-    from('build/libs') {
-        include '**/*.jar'
-        exclude '**/*installation*.jar'
-        into 'lib'
-    }
-
-    from('build/libs') {
-        include '**/*.war'
-        exclude '**/*installation*.jar'
-        into 'dist'
-    }
 }
 
 distributions {
@@ -286,12 +220,6 @@ distributions {
 }
 
 shadowJar.dependsOn war
-//makeDevInstallation.dependsOn shadowJar
-//makeDLIInstallation.dependsOn shadowJar
-
-//artifacts {
-//    archives distZip
-//}
 
 // ***************************** Publishing **************************************
 

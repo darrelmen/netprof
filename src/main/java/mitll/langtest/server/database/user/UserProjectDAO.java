@@ -81,10 +81,10 @@ public class UserProjectDAO implements IUserProjectDAO {
   }
 
 
-  @Override
-  public Collection<SlickUserProject> getAll() {
-    return dao.getAll();
-  }
+//  @Override
+//  public Collection<SlickUserProject> getAll() {
+//    return dao.getAll();
+//  }
 
   /**
    * TODO - we seem to hit this too often
