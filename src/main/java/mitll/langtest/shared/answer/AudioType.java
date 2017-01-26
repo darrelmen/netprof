@@ -49,6 +49,8 @@ public enum AudioType implements IsSerializable {
   RECORDER("recorder"),  // TODO : somehow user role gets expressed with this
 
   CONTEXT_REGULAR("context=regular", "context", "regular"),
+
+  // Note this is notional for now - we don't collect slow speed sentences (yet)
   CONTEXT_SLOW("context=slow", "context", "slow");
 
   private final String text;

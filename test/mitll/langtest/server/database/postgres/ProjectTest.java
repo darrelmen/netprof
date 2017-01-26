@@ -34,6 +34,7 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
@@ -51,10 +52,7 @@ import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.logging.log4j.*;
 import org.junit.Test;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ProjectTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(ProjectTest.class);
@@ -242,21 +240,32 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testMaleFemale() {
-    DatabaseImpl netProf = getDatabaseVeryLight("netProf", "config.properties", false);
-    netProf.populateProjects();
-    netProf.setInstallPath("", "");
-
-    Map<String, Float> maleFemaleProgress = netProf.getMaleFemaleProgress(2);
-
+    DatabaseImpl database = getAndPopulate();
+    Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(3);
     logger.info(maleFemaleProgress.toString());
+  }
+  @Test
+  public void testMaleFemaleFilterBySameGender() {
+    DatabaseImpl database = getAndPopulate();
+    IAudioDAO audioDAO = database.getAudioDAO();
+    Collection<Integer> recordedBy = audioDAO.getRecordedBySameGender(2, Collections.emptyMap(),3);
+    logger.info("found english " + recordedBy.size());
 
+    Collection<Integer> frecordedBy = audioDAO.getRecordedBySameGender(133, Collections.emptyMap(),3);
+    logger.info("found female english " + frecordedBy.size());
+
+    Collection<Integer> recordedBy2 = audioDAO.getRecordedBySameGender(2, Collections.emptyMap(),2);
+    logger.info("found hindi   " + recordedBy2.size());
+
+    Collection<Integer> frecordedBy2 = audioDAO.getRecordedBySameGender(133, Collections.emptyMap(),2);
+    logger.info("found female hindi   " + frecordedBy2.size());
+
+    Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(3);
+    logger.info(maleFemaleProgress.toString());
   }
 
   public void testAnalysis() {
-    DatabaseImpl database = getDatabase();
-    database.setInstallPath("war", "");
-    database.populateProjects();
-
+    DatabaseImpl database = getAndPopulate();
     int projectid = 2;
     List<UserInfo> userInfo = database.getAnalysis(projectid).getUserInfo(database.getUserDAO(), 5, projectid);
     for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
@@ -264,8 +273,13 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testPhonesLookup() {
+    getAndPopulate();
+  }
+
+  private DatabaseImpl getAndPopulate() {
     DatabaseImpl database = getDatabase();
     database.setInstallPath("war", "");
     database.populateProjects();
+    return database;
   }
 }

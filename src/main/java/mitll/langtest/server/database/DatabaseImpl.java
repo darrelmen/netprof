@@ -312,9 +312,9 @@ public class DatabaseImpl implements Database {
 
     eventDAO = new SlickEventImpl(dbConnection);
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
-    this.userDAO        = new DominoUserDAOImpl(this);
+    this.userDAO = new DominoUserDAOImpl(this);
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
-    this.inviteDAO      = new SlickInviteDAOImpl(this, dbConnection);
+    this.inviteDAO = new SlickInviteDAOImpl(this, dbConnection);
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
@@ -342,9 +342,9 @@ public class DatabaseImpl implements Database {
         new SlickUserListExerciseVisitorDAO(this, dbConnection),
         pathHelper);
 
-    projectDAO      = new ProjectDAO(this, dbConnection);
-    userProjectDAO  = new UserProjectDAO(dbConnection);
-    dliClassDAO     = new DLIClassDAO(dbConnection);
+    projectDAO = new ProjectDAO(this, dbConnection);
+    userProjectDAO = new UserProjectDAO(dbConnection);
+    dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 
     createTables();
@@ -981,8 +981,9 @@ public class DatabaseImpl implements Database {
 
   /**
    * TODO : who calls this - reporting?
-   * @see mitll.langtest.server.rest.RestUserManagement#doGet
+   *
    * @return
+   * @see mitll.langtest.server.rest.RestUserManagement#doGet
    */
   public JSON usersToJSON() {
     return userManagement.usersToJSON();
@@ -1676,21 +1677,24 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * TODO : consider how to do context exercises better - they really aren't different than regular exercises...
+   * Also, this can't handle multiple context sentences...
+   *
    * @param projectid
    * @return
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
   public Map<String, Float> getMaleFemaleProgress(int projectid) {
-    IUserDAO userDAO = getUserDAO();
+    // IUserDAO userDAO = getUserDAO();
     logger.info("getMaleFemaleProgress getting exercises -- " + projectid);
     Collection<CommonExercise> exercises = getExercises(projectid);
 
-    List<DBUser> all = userDAO.getAll();
-    Map<Integer, User> userMapMales = userDAO.getUserMapFromUsers(true, all);
-    logger.info("getMaleFemaleProgress getting userMapMales -- " + userMapMales.size());
-
-    Map<Integer, User> userMapFemales = userDAO.getUserMapFromUsers(false, all);
-    logger.info("getMaleFemaleProgress getting userMapFemales -- " + userMapFemales.size());
+//    List<DBUser> all = userDAO.getAll();
+//    Map<Integer, User> userMapMales = userDAO.getUserMapFromUsers(true, all);
+//    logger.info("getMaleFemaleProgress getting userMapMales -- " + userMapMales.size());
+//
+//    Map<Integer, User> userMapFemales = userDAO.getUserMapFromUsers(false, all);
+//    logger.info("getMaleFemaleProgress getting userMapFemales -- " + userMapFemales.size());
 
     float total = exercises.size();
     Set<Integer> uniqueIDs = new HashSet<>();
@@ -1710,13 +1714,17 @@ public class DatabaseImpl implements Database {
     }
 
     logger.info("getMaleFemaleProgress found " + total + " total exercises, " +
-        uniqueIDs.size() +
-        " unique" +
-        " males " + userMapMales.size() + " females " + userMapFemales.size());
+        uniqueIDs.size());// +
+    // " unique" +
+    // " males " + userMapMales.size() + " females " + userMapFemales.size());
 
+    long then = System.currentTimeMillis();
+    Map<String, Float> recordedReport = getAudioDAO().getRecordedReport(projectid, total, context, uniqueIDs,
+        exToTranscript, exToContextTranscript);
+    long now = System.currentTimeMillis();
+    if (now - then > 100) logger.info("getRecordedReport took " + (now - then));
 
-    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs,
-        exToTranscript, exToContextTranscript, context);
+    return recordedReport;
   }
 
   @Override
@@ -1740,7 +1748,9 @@ public class DatabaseImpl implements Database {
     return userListManager.getSecondStateDAO();
   }
 
-  public IProjectDAO getProjectDAO() {  return projectDAO;  }
+  public IProjectDAO getProjectDAO() {
+    return projectDAO;
+  }
 
   public IUserProjectDAO getUserProjectDAO() {
     return userProjectDAO;

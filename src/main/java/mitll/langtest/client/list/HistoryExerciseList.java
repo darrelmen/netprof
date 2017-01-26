@@ -463,6 +463,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   /**
+   * TODO : gah - why so complicated??? replace with request
+   *
    * @param typeToSection
    * @param prefix
    * @param exerciseID

@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -43,9 +42,14 @@ import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.audio.AudioDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import scala.Tuple2;
+import scala.collection.*;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
 public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = LogManager.getLogger(SlickAudioDAO.class);
@@ -158,21 +162,42 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return toAudioAttributes(byExerciseID);
   }
 
+  /**
+   * Do this differently
+   *
+   * @param projid
+   * @param audioSpeed
+   * @param uniqueIDs
+   * @param exToTranscript
+   * @param idsOfRecordedExercisesForFemales
+   * @return
+   * @see BaseAudioDAO#getRecordedReport
+   */
   @Override
-  int getCountForGender(Set<Integer> userIds,
-                        String audioSpeed,
-                        Set<Integer> uniqueIDs,
-                        Map<Integer, String> exToTranscript,
-                        Set<Integer> idsOfRecordedExercises) {
-    Set<Integer> countForGender1 = dao.getCountForGender(userIds, audioSpeed, uniqueIDs, exToTranscript, true);
-    Set<Integer> countForGender = countForGender1;
-    idsOfRecordedExercises.addAll(countForGender);
-    return countForGender.size();
+  void getCountForGender(int projid, AudioType audioSpeed,
+                         Set<Integer> uniqueIDs,
+                         Map<Integer, String> exToTranscript,
+                         Set<Integer> idsOfRecordedExercisesForMales,
+                         Set<Integer> idsOfRecordedExercisesForFemales) {
+    Map<Object, Seq<Tuple2<Object, Object>>> countForGender4 =
+        dao.getCountForGender(audioSpeed.toString(), uniqueIDs, exToTranscript, true, projid);
+
+    for (Object key : countForGender4.keySet()) {
+      boolean male = userDAO.isMale((Integer) key);
+      scala.collection.Iterator<Tuple2<Object, Object>> iterator = countForGender4.get(key).iterator();
+      Set<Integer> exIDs = getExIDs(iterator);
+
+      if (male) {
+        idsOfRecordedExercisesForMales.addAll(exIDs);
+      } else {
+        idsOfRecordedExercisesForFemales.addAll(exIDs);
+      }
+    }
   }
 
   @Override
-  Set<Integer> getValidAudioOfType(int userid, String audioType) {
-    return dao.getExerciseIDsOfValidAudioOfType(userid, audioType);
+  Set<Integer> getValidAudioOfType(int userid, AudioType audioType) {
+    return dao.getExerciseIDsOfValidAudioOfType(userid, audioType.toString());
   }
 
   /**
@@ -196,7 +221,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.markDefect(userid, exerciseID, audioType.toString());
   }
 
-/*  public Collection<Integer> getRecordedBy(int userid) {
+/*  public Collection<Integer> getRecordedBySameGender(int userid) {
     Collection<Integer> userIDs = getUserIDs(userid);
     return dao.getAudioForGenderBothSpeeds(userIDs);
   }*/
@@ -206,29 +231,160 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * <p>
    * only include ids for audio where the audio transcript matches the exercise text
    *
-   * @param userIDs
    * @param audioSpeed
    * @param exToTranscript
+   * @param projid
    * @return modifiable set - what's returned from scala isn't
+   * @paramx userIDs
+   * @see #getWithContext(boolean, Map, int)
    */
   @Override
-  Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs,
+  Set<Integer> getAudioExercisesForGender(boolean isMale,
                                           String audioSpeed,
-                                          Map<Integer, String> exToTranscript) {
-    boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
-
-    if (checkAudioTranscript) {
-      logger.warn("getAudioExercisesForGender should do check audio transcript -");
+                                          Map<Integer, String> exToTranscript,
+                                          int projid) {
+    if (database.getServerProps().shouldCheckAudioTranscript()) {
+      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
     }
 
-    Set<Integer> audioForGender = dao.getAudioForGender(userIDs, audioSpeed);
-    return new HashSet<>(audioForGender);
+    Map<Object, Seq<Tuple2<Object, Object>>> audioForGender = dao.getAudioForGender(audioSpeed, projid);
+    Set<Pair> genderMatch = getGenderMatch(isMale, audioForGender);
+    return getExercises(genderMatch);
+
+//    Seq<Tuple2<Object, Object>> audioForGender1 = (Seq<Tuple2<Object, Object>>) audioForGender;
+//
+//    scala.collection.Iterator<Tuple2<Object, Object>> iterator = audioForGender1.iterator();
+//
+//    HashSet<Pair> pairs = new HashSet<>();
+//    while (iterator.hasNext()
+//        ) {
+//      Tuple2<Object, Object> next = iterator.next();
+//      Object o = next._1();
+//      Integer exid = (Integer) o;
+//      Integer userid = (Integer) next._2();
+//      Pair pair = new Pair(exid, userid);
+//      pairs.add(pair);
+//    }
+//    return pairs;
   }
 
+  /**
+   * @param isMale
+   * @param regSpeed
+   * @param slowSpeed
+   * @param exToTranscript
+   * @param projid
+   * @return
+   * @see #getRecordedBySameGender(int, Map, int)
+   */
   @Override
+  Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale,
+                                                    String regSpeed,
+                                                    String slowSpeed,
+                                                    Map<Integer, String> exToTranscript,
+                                                    int projid) {
+    if (database.getServerProps().shouldCheckAudioTranscript()) {
+      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
+    }
+
+    Tuple2<Map<Object, Seq<Tuple2<Object, Object>>>, Map<Object, Seq<Tuple2<Object, Object>>>> audioForGenderBothRecorded = dao.getAudioForGenderBothRecorded(regSpeed, slowSpeed, projid);
+
+    Map<Object, Seq<Tuple2<Object, Object>>> regSpeedPairs = audioForGenderBothRecorded._1();
+    Map<Object, Seq<Tuple2<Object, Object>>> slowSpeedPairs = audioForGenderBothRecorded._2();
+
+    Set<Pair> regSpeedGenderMatch = getGenderMatch(isMale, regSpeedPairs);
+    Set<Pair> slowSpeedGenderMatch = getGenderMatch(isMale, slowSpeedPairs);
+
+    // now find overlap
+
+    Set<Integer> regExids = getExercises(regSpeedGenderMatch);
+    Set<Integer> slowExids = getExercises(slowSpeedGenderMatch);
+
+    regExids.retainAll(slowExids);
+
+    return regExids;
+  }
+
+  @NotNull
+  private Set<Integer> getExercises(Set<Pair> regSpeedGenderMatch) {
+    Set<Integer> regExids = new HashSet<>();
+    for (Pair p : regSpeedGenderMatch) regExids.add(p.getExid());
+    return regExids;
+  }
+
+  private Set<Pair> getGenderMatch(boolean isMale, Map<Object, Seq<Tuple2<Object, Object>>> regSpeedPairs) {
+    Set<Pair> regSpeedGenderMatch = new HashSet<>();
+    for (Object key : regSpeedPairs.keySet()) {
+      boolean male = userDAO.isMale((Integer) key);
+      if (male == isMale) {
+        scala.collection.Iterator<Tuple2<Object, Object>> iterator = regSpeedPairs.get(key).iterator();
+        regSpeedGenderMatch.addAll(getPairs(iterator));
+      }
+    }
+    return regSpeedGenderMatch;
+  }
+
+  private Set<Pair> getPairs(scala.collection.Iterator<Tuple2<Object, Object>> iterator) {
+    HashSet<Pair> pairs = new HashSet<>();
+    while (iterator.hasNext()
+        ) {
+      Tuple2<Object, Object> next = iterator.next();
+      Object o = next._1();
+      Integer exid = (Integer) o;
+      Integer userid = (Integer) next._2();
+      Pair pair = new Pair(exid, userid);
+      pairs.add(pair);
+    }
+    return pairs;
+  }
+
+
+  private Set<Integer> getExIDs(scala.collection.Iterator<Tuple2<Object, Object>> iterator) {
+    Set<Integer> pairs = new HashSet<>();
+    while (iterator.hasNext()
+        ) {
+      Tuple2<Object, Object> next = iterator.next();
+      Object o = next._1();
+      Integer exid = (Integer) o;
+      //Integer userid = (Integer) next._2();
+      pairs.add(exid);
+    }
+    return pairs;
+  }
+
+  public static class Pair {
+    private int exid;
+    private int userid;
+
+    public Pair(int exid, int userid) {
+      this.exid = exid;
+      this.userid = userid;
+    }
+
+    public int getExid() {
+      return exid;
+    }
+
+    public int getUserid() {
+      return userid;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      Pair po = (Pair) obj;
+      return Integer.valueOf(exid).equals(po.exid) && Integer.valueOf(userid).equals(po.userid);
+    }
+
+    @Override
+    public int hashCode() {
+      return exid + userid;
+    }
+  }
+
+/*  @Override
   int getCountBothSpeeds(Set<Integer> userIds, Set<Integer> uniqueIDs) {
     return dao.getCountBothSpeeds(userIds, uniqueIDs);
-  }
+  }*/
 
   private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();

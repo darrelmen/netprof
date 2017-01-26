@@ -34,11 +34,9 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,6 +44,11 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IAudioDAO extends IDAO {
+  /**
+   * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
+   * @param info
+   * @return
+   */
   AudioAttribute addOrUpdate(AudioInfo info);
 
   Map<Integer, List<AudioAttribute>> getExToAudio(int projectid);
@@ -58,17 +61,23 @@ public interface IAudioDAO extends IDAO {
                       Collection<AudioAttribute> audioAttributes,
                       String language);
 
-  Collection<Integer> getRecordedBy(int userid, Map<Integer, String> exToTranscript);
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
+   * @param userid
+   * @param exToTranscript
+   * @param projid
+   * @return
+   */
+  Collection<Integer> getRecordedBySameGender(int userid, Map<Integer, String> exToTranscript, int projid);
 
-  Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext);
+  Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext, int projid);
 
-  Map<String, Float> getRecordedReport(Map<Integer, User> userMapMales,
-                                       Map<Integer, User> userMapFemales,
+  Map<String, Float> getRecordedReport(int projid,
                                        float total,
-                                       Set<Integer> uniqueIDs,
+                                       float totalContext,
+                                       Set<Integer> exerciseIDs,
                                        Map<Integer, String> exToTranscript,
-                                       Map<Integer, String> exToContextTranscript,
-                                       float totalContext);
+                                       Map<Integer, String> exToContextTranscript);
 
   /**
    * @param userid
@@ -87,7 +96,7 @@ public interface IAudioDAO extends IDAO {
                                         Map<String, ExerciseAnnotation> fieldToAnnotation);
 
   /**
-   * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItem
+   * @see mitll.langtest.server.services.AudioServiceImpl#reallyCreateNewItem
    * @param uniqueID
    * @param exerciseID
    */
