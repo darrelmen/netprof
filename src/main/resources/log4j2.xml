@@ -35,7 +35,10 @@
     <Properties>
         <Property name="log.mailhost">localhost</Property>
         <Property name="log.mailfrom">noreply@dliflc.edu</Property>
+<!--
         <Property name="log.mailto">raymond.budd@ll.mit.edu,ray.budd@gmail.com,gordon.vidaver@ll.mit.edu</Property>
+-->
+        <Property name="log.mailto">gordon.vidaver@ll.mit.edu</Property>
     </Properties>
     <appenders>
         <!--
@@ -44,7 +47,10 @@
         <SMTP name="Mail" subject="Web App netprof error on host ${hostName}" to="${sys:log.mailto}"
               from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
               bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
-        <RollingFile name="LogFile" fileName="${sys:catalina.base}/logs/netprof-app.log"
+
+        <RollingFile name="LogFile"
+                     additivity="false"
+                     fileName="${sys:catalina.base}/logs/netprof-app.log"
                      filePattern="${sys:catalina.base}/logs/netprof-app-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout
                     pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
@@ -52,7 +58,10 @@
                 <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
         </RollingFile>
-        <RollingFile name="SecFile" fileName="${sys:catalina.base}/logs/netprof-access.log"
+
+        <RollingFile name="SecFile"
+                     additivity="false"
+                     fileName="${sys:catalina.base}/logs/netprof-access.log"
                      filePattern="${sys:catalina.base}/logs/netprof-access-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout
                     pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
@@ -61,9 +70,10 @@
             </Policies>
         </RollingFile>
 
+   <!--
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%-20.30c{1}:%-4L] - %m%n%throwable"/>
-        </Console>
+        </Console>-->
 
     </appenders>
     <loggers>
@@ -150,7 +160,5 @@
         <root level="debug">
             <appender-ref ref="Mail" level="error"/>
         </root>
-
     </loggers>
 </configuration>
-

@@ -558,9 +558,9 @@ public class PostgresTest extends BaseTest {
     User byID = spanish.getUserDAO().getUserByID("gvidaver");
     logger.info("user is " + byID + " project " + next);
     // spanish.rememberUserSelectedProject(byID, id);
-    for (SlickUserProject up : spanish.getUserProjectDAO().getAll()) {
-      logger.info("got " + up);
-    }
+//    for (SlickUserProject up : spanish.getUserProjectDAO().getAll()) {
+//      logger.info("got " + up);
+//    }
   }
 
   @Test
@@ -577,6 +577,7 @@ public class PostgresTest extends BaseTest {
     logger.info("most recent is " + i);
   }
 
+/*
   @Test
   public void testUserCount() {
     DatabaseImpl spanish = getDatabaseLight("netprof", false);
@@ -585,6 +586,7 @@ public class PostgresTest extends BaseTest {
 
     logger.info("got " + counts);
   }
+*/
 
 
   @Test

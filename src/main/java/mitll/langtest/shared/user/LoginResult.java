@@ -43,8 +43,6 @@ import java.util.Date;
  */
 
 public class LoginResult implements Serializable {
-
-
   public enum ResultType {
     Success,
     Failed,
@@ -63,9 +61,8 @@ public class LoginResult implements Serializable {
   private static final long serialVersionUID = -8359612864581208214L;
   private User loggedInUser;
   private ResultType resultType;
-  private long rKey = 0;
+//  private long rKey = 0;
 
-  //private Date serverTime;
   public LoginResult() {
   }
 
@@ -80,44 +77,25 @@ public class LoginResult implements Serializable {
 
   public LoginResult(User loggedInUser, Date serverTime) {
     this(loggedInUser, ResultType.Success);
-    //this.serverTime = serverTime;
   }
 
   public User getLoggedInUser() {
     return loggedInUser;
   }
 
-/*
-  public void setLoggedInUser(User loggedInUser) {
-		this.loggedInUser = loggedInUser;
-	}
-*/
 
   public ResultType getResultType() {
     return resultType;
   }
 
-  /*
-    public void setResultType(ResultType resultType) {
-      this.resultType = resultType;
-    }
-  */
-/*
-  public Date getServerTime() {
-		return serverTime;
-	}
-
-	public void setServerTime(Date serverTime) {
-		this.serverTime = serverTime;
-	}
-	*/
-
-  public void setrKey(long rKey) {
+/*  public void setrKey(long rKey) {
     this.rKey = rKey;
-  }
+  }*/
+/*
   public long getrKey() {
     return rKey;
   }
+*/
 
   public String toString() {
     return "Login result " + resultType + " : " + loggedInUser;
