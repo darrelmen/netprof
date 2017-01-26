@@ -48,6 +48,8 @@ import net.sf.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -148,7 +150,7 @@ public interface IUserDAO extends IDAO {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
+   * @see mitll.langtest.server.database.audio.AudioDAO#getResultsForQuery(Connection, PreparedStatement)
    * @deprecated - don't get all the users
    */
   Map<Integer, MiniUser> getMiniUsers();
@@ -156,6 +158,7 @@ public interface IUserDAO extends IDAO {
   /**
    * @return
    * @see UserServiceImpl#getKindToUser
+   * @deprecated - try to do something better - not all users or not all regardless of project
    */
   Map<User.Kind, Collection<MiniUser>> getMiniByKind();
 
@@ -170,30 +173,38 @@ public interface IUserDAO extends IDAO {
    * @param getMale
    * @return
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)
+   * @deprecated
    */
+/*
   Map<Integer, User> getUserMap(boolean getMale);
+*/
 
-  Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all);
+  /**
+   * @deprecated
+   * @param getMale
+   * @param all
+   * @return
+   */
+ // Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all);
 
   /**
    * @return
    * @see DatabaseImpl#getMaleFemaleProgress(int)
    * @deprecated - don't want to do this
    */
-  List<DBUser> getAll();
+ // List<DBUser> getAll();
 
   /**
-   * @param getMale
+   * @paramx getMale
    * @return
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs
+   * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs
+   * @deprecated
    */
+/*
   Collection<Integer> getUserIDs(boolean getMale);
+*/
 
-  /**
-   * @return
-   * @see mitll.langtest.server.database.result.ResultDAO#getUserToResults(AudioType, IUserDAO)
-   */
- // Map<Integer, User> getUserMap();
+  boolean isMale(int userid);
 
   /**
    * @param emailH
@@ -208,7 +219,7 @@ public interface IUserDAO extends IDAO {
    * @param baseURL
    * @return
    * @@deprecated
-   * @see mitll.langtest.server.rest.RestUserManagement#changePFor(String, String)
+   * @see mitll.langtest.server.rest.RestUserManagement#changePFor
    */
   boolean changePassword(int user, String newHashPassword, String baseURL);
 

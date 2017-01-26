@@ -109,8 +109,8 @@ public class UserTest extends BaseTest {
     logger.info("user devices " + dao.getUsersDevices());
     logger.info("mini " + dao.getMiniUsers());
     logger.info("mini first " + dao.getMiniUser(dao.getMiniUsers().keySet().iterator().next()));
-    logger.info("males " + dao.getUserMap(true));
-    logger.info("females " + dao.getUserMap(false));
+//    logger.info("males " + dao.getUserMap(true));
+//    logger.info("females " + dao.getUserMap(false));
    // logger.info("all " + dao.getUserMap());
 
     logger.info("valid email " + dao.isValidEmail(hash));
