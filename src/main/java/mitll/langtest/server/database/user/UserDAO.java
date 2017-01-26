@@ -693,24 +693,29 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return permissions;
   }
 
-  @Override
-  public Map<Integer, User> getUserMap(boolean getMale) {
-    return getUserMap(getMale, getUsers());
-  }
+//  @Override
+//  public Map<Integer, User> getUserMap(boolean getMale) {
+//    return getUserMap(getMale, getUsers());
+//  }
 
-  @Override
+ /* @Override
   public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {
     return null;
-  }
+  }*/
 
-  @Override
-  public List<DBUser> getAll() {
-    return null;
-  }
+//  @Override
+//  public List<DBUser> getAll() {
+//    return null;
+//  }
 
-  @Override
+/*  @Override
   public Set<Integer> getUserIDs(boolean getMale) {
     return getUserMap(getMale).keySet();
+  }*/
+
+  @Override
+  public boolean isMale(int userid) {
+    return false;
   }
 
   /**
@@ -728,7 +733,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return getMap(getUsers());
   }*/
 
-  private Map<Integer, User> getUserMap(boolean getMale, List<User> users) {
+/*  private Map<Integer, User> getUserMap(boolean getMale, List<User> users) {
     Map<Integer, User> idToUser = new HashMap<>();
     for (User u : users) {
       if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
@@ -736,12 +741,13 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       }
     }
     return idToUser;
-  }
+  }*/
 
   /**
    * @param users
    * @return
    */
+/*
   private Map<Integer, User> getMap(List<User> users) {
     Map<Integer, User> idToUser = new HashMap<>();
     for (User u : users) {
@@ -749,7 +755,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     }
     return idToUser;
   }
-
+*/
 
   @Override
   public boolean changePassword(int user, String newHashPassword, String baseURL) {

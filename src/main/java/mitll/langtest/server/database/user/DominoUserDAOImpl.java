@@ -1104,11 +1104,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param getMale
    * @return
    */
-  @Override
+ /* @Override
   public Map<Integer, User> getUserMap(boolean getMale) {
     List<DBUser> all = getAll();
     return getUserMapFromUsers(getMale, all);
-  }
+  }*/
 
   public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {
     Map<Integer, User> idToUser = new HashMap<>();
@@ -1125,10 +1125,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * adds gender
    *
-   * @param getMale
+   * @paramx getMale
    * @return
    */
-  @Override
+/*  @Override
   public Collection<Integer> getUserIDs(boolean getMale) {
     //logger.warn("getUserIDs: NOTE : no gender support yet.");
 
@@ -1140,22 +1140,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         .collect(Collectors.toList());
 
     return ids;
-  }
+  }*/
 
-  /**
-   * has permissions
-   *
-   * @return
-   * @seex mitll.langtest.server.database.result.ResultDAO#getUserToResults(AudioType, IUserDAO)
-   */
-/*
-  @Override
-  public Map<Integer, User> getUserMap() {
-    Map<Integer, User> idToUser = getUserMap(true);
-    idToUser.putAll(getUserMap(false));
-    return idToUser;
+  public boolean isMale(int userid) {
+    return getByID(userid).isMale();
   }
-*/
 
   /**
    * @param user

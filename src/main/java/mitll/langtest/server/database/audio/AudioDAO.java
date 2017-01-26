@@ -47,7 +47,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = LogManager.getLogger(AudioDAO.class);
@@ -306,8 +305,14 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   }
 
-  public Set<Integer> getWithContext(long userid, Map<Integer, String> exToContext) {
+
+  public Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext,int projid) {
     //  return getAudioForGender(getUserIDsMatchingGender(userid), CONTEXT_REGULAR, exToContext);
+    return null;
+  }
+
+  @Override
+  Set<Integer> getAudioExercisesForGender(boolean male, String audioSpeed, Map<Integer, String> exToTranscript, int projid) {
     return null;
   }
 
@@ -318,9 +323,9 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return userDAO.getUserIDsMatchingGender(isMale);
   }*/
 
-  protected Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs,
-                                                    String audioSpeed,
-                                                    Map<Integer, String> exToTranscript) {
+  protected Set<SlickAudioDAO.Pair> getAudioExercisesForGender(Collection<Integer> userIDs,
+                                                               String audioSpeed,
+                                                               Map<Integer, String> exToTranscript, int projid) {
     Set<Integer> results = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
@@ -354,25 +359,31 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
-    return results;
+    return new HashSet<>();
+  }
+
+  @Override
+  Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale, String regSpeed, String slowSpeed, Map<Integer, String> exToTranscript, int projid) {
+    return null;
   }
 
 
   /**
    * select count(*) from (select count(*) from (select DISTINCT exid, audiotype from audio where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true) where length(exid) > 0 group by exid)
    *
-   * @param userIds
+   * @param projid
    * @param audioSpeed
    * @param uniqueIDs
+   * @param idsOfRecordedExercisesForFemales
    * @return
    * @see #getRecordedReport
    */
-  protected int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<Integer> uniqueIDs,
-                                  Map<Integer, String> exToTranscript,
-                                  Set<Integer> idsOfRecordedExercises) {
+  protected void getCountForGender(int projid, AudioType audioSpeed, Set<Integer> uniqueIDs,
+                                   Map<Integer, String> exToTranscript,
+                                   Set<Integer> idsOfRecordedExercisesForMales, Set<Integer> idsOfRecordedExercisesForFemales) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      String s = getInClause(userIds);
+      String s = getInClause(Collections.EMPTY_SET);
       // logger.info("checking speed " + audioSpeed + " on " + userIds.size() + " users and " + uniqueIDs.size() + " ex ids");
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
       String sql = "select " +
@@ -402,7 +413,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
             if (uniqueIDs.contains(exid)) {
               try {
                 int e = Integer.parseInt(exid);
-                idsOfRecordedExercises.add(e);
+                idsOfRecordedExercisesForMales.add(e);
               } catch (NumberFormatException e1) {
                 logger.warn(e1);
               }
@@ -425,35 +436,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
-    return idsOfRecordedExercises.size();
+   // return idsOfRecordedExercisesForMales.size();
   }
-
-/*  private boolean isNoAccentMatch(String transcript, String exerciseFL) {
-    if (exerciseFL == null) return false;
-    String before = trimWhitespace(exerciseFL);
-    String trimmed = trimWhitespace(transcript);
-    String noAccents = StringUtils.stripAccents(before);
-    //String transcript = audio.getTranscript();
-    String noAccentsTranscript = trimmed == null ? null : StringUtils.stripAccents(trimmed);
-
-    return matchTranscript(before, trimmed) ||
-        matchTranscript(noAccents, noAccentsTranscript);
-  }*/
-/*
-  private String trimWhitespace(String against) {
-    return CharMatcher.WHITESPACE.trimFrom(against);
-  }
-
-  private boolean matchTranscript(String foreignLanguage, String transcript) {
-    return transcript == null ||
-        foreignLanguage.isEmpty() ||
-        transcript.isEmpty() ||
-        removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
-  }
-
-  private String removePunct(String t) {
-    return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
-  }*/
 
   /**
    * @param userIds
@@ -513,7 +497,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
 
-  protected Set<Integer> getValidAudioOfType(int userid, String audioType) {
+  protected Set<Integer> getValidAudioOfType(int userid, AudioType audioType) {
     String sql = "SELECT " + Database.EXID +
         " FROM " + AUDIO + " WHERE " + USERID + "=" + userid +
         " AND " + DEFECT + "<>true " +
@@ -680,15 +664,15 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   /**
    * Why does this have to be so schizo? add or update -- should just choose
    *
-   * @param userid           part of unique id
-   * @param exerciseID       part of unique id
-   * @param projid
-   * @param audioType        part of unique id
-   * @param audioRef
-   * @param timestamp
-   * @param durationInMillis
-   * @param transcript       @return AudioAttribute that represents the audio that has been added to the exercise
-   * @param dnr
+   * @paramx userid           part of unique id
+   * @paramx exerciseID       part of unique id
+   * @paramx projid
+   * @paramx audioType        part of unique id
+   * @paramx audioRef
+   * @paramx timestamp
+   * @paramx durationInMillis
+   * @paramx transcript       @return AudioAttribute that represents the audio that has been added to the exercise
+   * @paramx dnr
    * @see BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
    */
   protected void addOrUpdateUser(AudioInfo info) {
@@ -743,15 +727,15 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * This guarantees that there will only be one row in the audio table for the key "user-exid-speed",
    * e.g. user 20 exid 5 and speed "regular" will only appear once if it's not defective.
    *
-   * @param userid           part of unique id
-   * @param exerciseID       part of unique id
-   * @param projid
-   * @param audioType        part of unique id
-   * @param audioRef
-   * @param timestamp
-   * @param durationInMillis
-   * @param transcript
-   * @param dnr
+   * @paramx userid           part of unique id
+   * @paramx exerciseID       part of unique id
+   * @paramx projid
+   * @paramx audioType        part of unique id
+   * @paramx audioRef
+   * @paramx timestamp
+   * @paramx durationInMillis
+   * @paramx transcript
+   * @paramx dnr
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
    */

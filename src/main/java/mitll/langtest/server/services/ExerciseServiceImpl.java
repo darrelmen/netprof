@@ -44,7 +44,6 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.User;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -88,10 +87,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    */
   @Override
   public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
-
     int projectID = getProjectID();
     if (projectID == -1) {
-
+      logger.warn("getExerciseIds project id is -1?  It should probably have a real value.");
     }
     if (serverProps.isAMAS()) {
       ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
@@ -117,7 +115,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
           // now do a trie over matches
           exercises = getExercisesForSearch(request.getPrefix(), exercises, predefExercises);
         }
-        exercises = filterExercises(request, exercises);
+        exercises = filterExercises(request, exercises, projectID);
 
         String role = request.getRole();
 
@@ -139,9 +137,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         if (userListByID != null) {
           Collection<CommonExercise> exercisesForState = getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
-          return getExerciseListWrapperForPrefix(request, filterExercises(request, exercisesForState));
+          return getExerciseListWrapperForPrefix(request, filterExercises(request, exercisesForState, projectID));
         } else {
-          return getExercisesForSelectionState(request);
+          return getExercisesForSelectionState(request, projectID);
         }
       }
     } catch (Exception e) {
@@ -274,10 +272,10 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
    * @see #getExerciseIds
    */
-  private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request) {
+  private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
     Collection<CommonExercise> exercisesForState =
         getSectionHelper().getExercisesForSelectionState(request.getTypeToSelection());
-    exercisesForState = filterExercises(request, exercisesForState);
+    exercisesForState = filterExercises(request, exercisesForState, projid);
     return getExerciseListWrapperForPrefix(request, exercisesForState);
   }
 
@@ -483,11 +481,12 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   /**
    * @param request
    * @param exercises
+   * @param projid
    * @return
    */
   private Collection<CommonExercise> filterExercises(ExerciseListRequest request,
-                                                     Collection<CommonExercise> exercises) {
-    exercises = filterByUnrecorded(request, exercises);
+                                                     Collection<CommonExercise> exercises, int projid) {
+    exercises = filterByUnrecorded(request, exercises, projid);
     if (request.isOnlyWithAudioAnno()) {
       exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
     }
@@ -565,6 +564,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * Or if looking for example audio, find ones missing examples.
    *
    * @param exercises to filter
+   * @param projid
    * @return exercises missing audio, what we want to record
    * @paramx userID                   exercise not recorded by this user and matching the user's gender
    * @paramx onlyUnrecordedByMyGender do we filter by gender
@@ -574,9 +574,8 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    */
   private Collection<CommonExercise> filterByUnrecorded(
       ExerciseListRequest request,
-      Collection<CommonExercise> exercises) {
-
-    // boolean onlyUnrecordedByMyGender = request.isOnlyUnrecordedByMe();
+      Collection<CommonExercise> exercises,
+      int projid) {
     boolean onlyExamples = request.isOnlyExamples();
 
     if (request.isOnlyUnrecordedByMe()) {
@@ -596,8 +595,8 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       }
 
       Collection<Integer> recordedBySameGender = onlyExamples ?
-          db.getAudioDAO().getWithContext(userID, exToContextTranscript) :
-          db.getAudioDAO().getRecordedBy(userID, exToTranscript);
+          db.getAudioDAO().getWithContext(userID, exToContextTranscript, projid) :
+          db.getAudioDAO().getRecordedBySameGender(userID, exToTranscript, projid);
 
       Set<Integer> allExercises = new HashSet<>();
       for (CommonShell exercise : exercises) {
@@ -821,13 +820,10 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       return (T) db.getAMASExercise(exid);
     }
     int projectID = getProjectID();
-
-
     int userID = getUserIDFromSession();
 
     long then = System.currentTimeMillis();
     Collection<CommonExercise> exercises = getExercises();
-
     long then2 = System.currentTimeMillis();
 
     CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
@@ -944,7 +940,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     long then = System.currentTimeMillis();
     List<AmasExerciseImpl> exercises = db.getAMASExercises();
     if (amasFullTrie == null) {
-      amasFullTrie = new ExerciseTrie<AmasExerciseImpl>(exercises, getOldLanguage(), getSmallVocabDecoder());
+      amasFullTrie = new ExerciseTrie<>(exercises, getOldLanguage(), getSmallVocabDecoder());
     }
 
 //    if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
@@ -960,36 +956,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   private SmallVocabDecoder getSmallVocabDecoder() {
     return getAudioFileHelper().getSmallVocabDecoder();
   }
-
-  /**
-   * TODO : remove duplicate
-   *
-   * @return
-   */
-/*
-  private AudioFileHelper getAudioFileHelper() {
-    if (serverProps.isAMAS()) {
-      return audioFileHelper;
-    } else {
-      Project project = getProject();
-      if (project == null) {
-        logger.warn("getAudioFileHelper no current project???");
-        return null;
-      }
-      return project.getAudioFileHelper();
-    }
-  }
-*/
-
-/*
-  private void sendEmail(String subject, String prefixedMessage) {
-    getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
-  }
-
-  private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
-  }
-*/
   private String getOldLanguage() {
     return serverProps.getLanguage();
   }
