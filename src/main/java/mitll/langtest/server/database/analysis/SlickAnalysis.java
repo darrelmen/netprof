@@ -37,6 +37,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.*;
 import mitll.npdata.dao.SlickPerfResult;
 import org.apache.logging.log4j.LogManager;
@@ -49,10 +50,10 @@ import java.util.*;
 
 public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
-  public static final int WARN_THRESH = 100;
+  private static final int WARN_THRESH = 100;
   private SlickResultDAO resultDAO;
   private static final boolean DEBUG = true;
-  String language;
+  private String language;
 
   /**
    * @param database
@@ -76,6 +77,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param projid
    * @param minRecordings
    * @return
+   * @see AnalysisServiceImpl#getPerformanceForUser
    */
   @Override
   public UserPerformance getPerformanceForUser(long userid, int projid, int minRecordings) {
@@ -137,12 +139,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @param projid
    * @return
+   * @see AnalysisServiceImpl#getUsersWithRecordings
    */
   @Override
   public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int projid) {
-    Collection<SlickPerfResult> perfForUser = resultDAO.getPerf(projid);
-    Map<Integer, UserInfo> best = getBest(perfForUser, minRecordings);
-    return getUserInfos(userDAO, best);
+    Collection<SlickPerfResult> perfForUser = resultDAO.getPerf(projid, database.getServerProps().getMinAnalysisScore());
+    return getUserInfos(userDAO, getBest(perfForUser, minRecordings));
   }
 
   private Map<Integer, UserInfo> getBest(Collection<SlickPerfResult> perfForUser, int minRecordings) {

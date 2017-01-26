@@ -61,11 +61,20 @@ public abstract class Analysis extends DAO {
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
-  private static final float MIN_SCORE_TO_SHOW = 0.20f;
+  //private static final float MIN_SCORE_TO_SHOW = 0.20f;
   static final String EMPTY_JSON = "{}";
   private final ParseResultJson parseResultJson;
   private final IPhoneDAO phoneDAO;
-  Map<Integer, String> exToRef;
+
+  /**
+   * ex to ref can get stale, etc.
+   * why do we need to do all this work when they may never click on the reference audio?
+   * can't we get them for the visible set?
+   * or ask exercise service?
+   * 
+   * @deprecated  let's not use this map - super expensive to make, every time
+   */
+  final Map<Integer, String> exToRef;
 
   /**
    * @param database
@@ -101,59 +110,63 @@ public abstract class Analysis extends DAO {
    * @param userDAO
    * @param best
    * @return
-   * @see SlickAnalysis#getUserInfo(IUserDAO, int, int)
+   * @see SlickAnalysis#getUserInfo
    */
   List<UserInfo> getUserInfos(IUserDAO userDAO, Map<Integer, UserInfo> best) {
     List<UserInfo> userInfos = getUserInfos(best, userDAO);
-    sortUsers(userInfos);
+    sortUsersByTime(userInfos);
 
     // TODO : choose the initial granularity and set initial and current to those values
+    // TODO : do we want to use a session as the unit for the last group???
+/*
     for (UserInfo userInfo : userInfos) {
       Map<Long, List<PhoneSession>> granularityToSessions =
           new PhoneAnalysis().getGranularityToSessions(userInfo.getBestScores());
 
       List<PhoneSession> phoneSessions = chooseGran(granularityToSessions);
       if (!phoneSessions.isEmpty()) {
+        logger.info("getUserInfos For " +userInfo+
+            " Got " + phoneSessions.size() + " sessions");
         PhoneSession first = phoneSessions.get(0);
         PhoneSession last = phoneSessions.get(phoneSessions.size() - 1);
         if (phoneSessions.size() > 2 && last.getCount() < 10) {
           last = phoneSessions.get(phoneSessions.size() - 2);
         }
 
-        userInfo.setStart((int) Math.round(first.getMean() * 100d));
+        //userInfo.setStart((int) Math.round(first.getMean() * 100d));
         userInfo.setCurrent((int) Math.round(last.getMean() * 100d));
       }
     }
+    */
 
     return userInfos;
   }
 
   /**
    * @param best
-   * @paramx userMap
    * @return
+   * @see #getUserInfos(IUserDAO, Map)
    */
   @NotNull
   private List<UserInfo> getUserInfos(Map<Integer, UserInfo> best, IUserDAO userDAO
   ) {
     List<UserInfo> userInfos = new ArrayList<>();
 
-   // Map<Integer, MiniUser> userMap = new HashMap<>();
     for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
       Integer userid = pair.getKey();
-      MiniUser user = userDAO.getMiniUser(userid);// userMap.get(userid);
+    //  MiniUser user = userDAO.getMiniUser(userid);
 
-      if (user == null) {
+      String userChosenID = userDAO.getUserChosenID(userid);
+      if (userChosenID == null) {
         logger.error("getUserInfos huh? no user for " + userid);
       } else {
-        String userID = user.getUserID();
-
-        boolean isLL = lincoln.contains(userID);
+     //   String userID = user.getUserID();
+        boolean isLL = lincoln.contains(userChosenID);
         if (!isLL) {
           UserInfo value = pair.getValue();
-          value.setId(user.getID());
-          value.setUserID(userID);
-//          ((UserInfo) value).setUser(user);
+          value.setId(userid); // necessary?
+          value.setUserID(userChosenID);
+
           userInfos.add(pair.getValue());
         }
       }
@@ -161,7 +174,7 @@ public abstract class Analysis extends DAO {
     return userInfos;
   }
 
-  private void sortUsers(List<UserInfo> userInfos) {
+  private void sortUsersByTime(List<UserInfo> userInfos) {
     Collections.sort(userInfos, new Comparator<UserInfo>() {
       @Override
       public int compare(UserInfo o1, UserInfo o2) {
@@ -226,6 +239,12 @@ public abstract class Analysis extends DAO {
    */
   abstract public UserPerformance getPerformanceForUser(long id, int projid, int minRecordings);
 
+  /**
+   * @see SlickAnalysis#getPerformanceForUser(long, int, int)
+   * @param id
+   * @param best
+   * @return
+   */
   UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
     if (values.isEmpty()) {
@@ -288,11 +307,12 @@ public abstract class Analysis extends DAO {
 */
 
   /**
+   * TODO : don't use exToRef -
    * @param userid
    * @param best
    * @param language
    * @return
-   * @see #getPhonesForUser
+   * @see SlickAnalysis#getPhonesForUser
    */
   PhoneReport getPhoneReport(long userid, Map<Integer, UserInfo> best, String language) {
     long then = System.currentTimeMillis();
@@ -415,13 +435,14 @@ public abstract class Analysis extends DAO {
 
     Map<Integer, UserInfo> userToUserInfo = new HashMap<>();
     int userInitialScores = database.getServerProps().getUserInitialScores();
+    int userFinalScores = database.getServerProps().getUserFinalScores();
 
     for (Map.Entry<Integer, List<BestScore>> pair : userToBest2.entrySet()) {
       List<BestScore> value = pair.getValue();
       Integer userID = pair.getKey();
       if (value.size() >= minRecordings) {
         Long aLong = userToEarliest.get(userID);
-        userToUserInfo.put(userID, new UserInfo(value, aLong, userInitialScores));
+        userToUserInfo.put(userID, new UserInfo(value, aLong, userInitialScores, userFinalScores));
       } else {
         if (DEBUG) logger.debug("getBestForQuery skipping user " + userID + " with just " + value.size() + " scores");
       }
@@ -444,10 +465,10 @@ public abstract class Analysis extends DAO {
    *
    * @param bestScores
    * @return
-   * @see #getWordScoresForUser(long, int, int)
+   * @see #getWordScores
    */
   private List<WordScore> getWordScore(List<BestScore> bestScores) {
-    List<WordScore> results = new ArrayList<WordScore>();
+    List<WordScore> results = new ArrayList<>();
 
     long then = System.currentTimeMillis();
     int skipped = 0;
@@ -459,7 +480,7 @@ public abstract class Analysis extends DAO {
       } else if (json.equals(EMPTY_JSON)) {
         logger.warn("getWordScore json is empty for " + bs);
         // skip low scores
-      } else if (bs.getScore() > MIN_SCORE_TO_SHOW) {
+      } else if (bs.getScore() > database.getServerProps().getMinAnalysisScore()) {
         if (json.isEmpty()) logger.warn("no json for " + bs);
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
         WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);

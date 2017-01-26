@@ -54,12 +54,15 @@ public class ExerciseListRequest implements IsSerializable {
   private int userID = -5;
 
   private String role = "";
+
+  // TODO : which of these are mutually exclusive???
   private boolean onlyUnrecordedByMe = false;
   private boolean onlyExamples = false;
   private boolean incorrectFirstOrder = false;
   private boolean onlyWithAudioAnno = false;
   private boolean onlyDefaultAudio = false;
   private boolean onlyUninspected = false;
+  private boolean onlyForUser = false;
 
   public ExerciseListRequest() {
   }
@@ -71,6 +74,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   /**
    * TODO something less error prone
+   *
    * @param other
    * @return
    */
@@ -95,9 +99,9 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, int)
    * @param typeToSelection
    * @return
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, int)
    */
   public ExerciseListRequest setTypeToSelection(Map<String, Collection<String>> typeToSelection) {
     this.typeToSelection = typeToSelection;
@@ -122,6 +126,10 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  /**
+   * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
+   */
   public int getUserID() {
     return userID;
   }
@@ -136,15 +144,19 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see PagingExerciseList#getRequest()
    * @param role
    * @return
+   * @see PagingExerciseList#getRequest()
    */
   public ExerciseListRequest setRole(String role) {
     this.role = role;
     return this;
   }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
+   * @return
+   */
   public boolean isOnlyUnrecordedByMe() {
     return onlyUnrecordedByMe;
   }
@@ -173,8 +185,8 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterExercises(ExerciseListRequest, Collection)
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterExercises
    */
   public boolean isOnlyWithAudioAnno() {
     return onlyWithAudioAnno;
@@ -187,7 +199,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   /**
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterExercises(ExerciseListRequest, Collection)
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterExercises
    */
   public boolean isOnlyDefaultAudio() {
     return onlyDefaultAudio;
@@ -207,16 +219,26 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  public boolean isOnlyForUser() {
+    return onlyForUser;
+  }
+
+  public ExerciseListRequest setOnlyForUser(boolean onlyForUser) {
+    this.onlyForUser = onlyForUser;
+    return this;
+  }
+
   public String toString() {
     return
         "prefix                  '" + prefix + "'" +
             "\n\tselection           " + getTypeToSelection() +
             "\n\tuser list id        " + userListID +
             "\n\tuser                " + userID +
-            "\n\trole                " + role +
-            "\n\tonly recorded by me " + onlyUnrecordedByMe +
-            "\n\tonly examples       " + onlyExamples +
-            "\n\tonly with audio     " + onlyWithAudioAnno +
-            "\n\tonly uninspecte     " + onlyUninspected;
+            (role.isEmpty() ? "" : "\n\trole                " + role) +
+            (onlyUnrecordedByMe ? "\n\tonly recorded by me" : "") +
+            (onlyExamples ? "\n\tonly examples       " : "") +
+            (onlyWithAudioAnno ? "\n\tonly with audio     " : "") +
+            (onlyUninspected ? "\n\tonly uninspected    " : "")
+        ;
   }
 }

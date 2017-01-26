@@ -477,7 +477,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see IUserDAO#changePassword
    */
   private DBUser savePasswordAndGetUser(int id, String currentPassword, String newHashedPassword, String baseURL) {
-    DBUser dbUser = delegate.lookupDBUser(id);
+    DBUser dbUser = lookupUser(id);
     if (dbUser != null) {
       boolean b = delegate.changePassword(adminUser, dbUser, currentPassword, newHashedPassword, baseURL);
       if (!b) {
@@ -667,8 +667,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   public User getByID(int id) {
-    DBUser dbUser = delegate.lookupDBUser(id);
+    DBUser dbUser = lookupUser(id);
     return dbUser == null ? null : toUser(dbUser);
+  }
+
+  private DBUser lookupUser(int id) {
+    return delegate.lookupDBUser(id);
   }
 
   @Override
@@ -1020,12 +1024,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public MiniUser getMiniUser(int userid) {
-    DBUser byID = delegate.lookupDBUser(userid);
+    DBUser byID = lookupUser(userid);
     return byID == null ? null : getMini(byID);
   }
 
+  public String getUserChosenID(int userid) {
+    DBUser byID = lookupUser(userid);
+    return byID == null ? null : byID.getUserId();
+  }
+
   /**
-   * TODOx : figure out how to get gender
+   * adds gender
    *
    * @param dominoUser
    * @return
@@ -1224,7 +1233,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public void update(User toUpdate) {
-    DBUser dbUser = delegate.lookupDBUser(toUpdate.getID());
+    DBUser dbUser = lookupUser(toUpdate.getID());
 
     if (dbUser != null) {
       dbUser.setEmail(toUpdate.getEmail());

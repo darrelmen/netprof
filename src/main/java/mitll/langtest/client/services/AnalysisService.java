@@ -50,7 +50,6 @@ import java.util.List;
 
 @RemoteServiceRelativePath("analysis-manager")
 public interface AnalysisService extends RemoteService {
-  // Analysis support
   Collection<UserInfo> getUsersWithRecordings();
 
   /**
@@ -64,7 +63,7 @@ public interface AnalysisService extends RemoteService {
    * @param id
    * @param minRecordings
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser(LangTestDatabaseAsync, long, String, int)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
    */
   UserPerformance getPerformanceForUser(int id, int minRecordings);
 
@@ -72,7 +71,7 @@ public interface AnalysisService extends RemoteService {
    * @param id
    * @param minRecordings
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel, int)
+   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    */
   List<WordScore> getWordScores(int id, int minRecordings);
 
@@ -80,7 +79,7 @@ public interface AnalysisService extends RemoteService {
    * @param id
    * @param minRecordings
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
+   * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
    */
   PhoneReport getPhoneScores(int id, int minRecordings);
 

@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.user.BaseUserDAO;
@@ -46,6 +47,7 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -126,7 +128,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         // now sort : everything gets sorted the same way
         List<CommonExercise> commonExercises;
         if (request.isIncorrectFirstOrder()) {
-          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, getCollator(),getLanguage());
+          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, getCollator(), getLanguage());
         } else {
           commonExercises = new ArrayList<>(exercises);
           sortExercises(role, commonExercises);
@@ -162,32 +164,13 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    */
   private Collection<CommonExercise> getExercises() {
     long then = System.currentTimeMillis();
-    Collection<CommonExercise> exercises = getExercisesForUser();
+    Collection<CommonExercise> exercises = db.getExercises(getProjectID());
     long now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("getExercises took " + (now - then) + " millis to get the raw exercise list for " + getLanguage());
     }
 
-/*    if (!didCheckLTS) {
-//      buildExerciseTrie();
-      AudioFileHelper audioFileHelper = getAudioFileHelper();
-      if (audioFileHelper == null) {
-        logger.error("no audio file helper for " + getProject());
-      } else {
-        audioFileHelper.checkLTSAndCountPhones(exercises);
-        didCheckLTS = true;
-      }
-    }*/
-
-    now = System.currentTimeMillis();
-    if (now - then > 200) {
-      logger.info("took " + (now - then) + " millis to get the predef exercise list for " + getLanguage());
-    }
     return exercises;
-  }
-
-  private Collection<CommonExercise> getExercisesForUser() {
-    return db.getExercises(getProjectID());
   }
 
   private Collator getCollator() {
@@ -214,8 +197,10 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
                                 boolean onlyExample) {
     int c = 0;
     if (role.equals(AudioType.RECORDER.toString())) {
+      IAudioDAO audioDAO = db.getAudioDAO();
       Collection<Integer> recordedForUser = onlyExample ?
-          db.getAudioDAO().getRecordedExampleForUser(userID) : db.getAudioDAO().getRecordedExForUser(userID);
+          audioDAO.getRecordedExampleForUser(userID) :
+          audioDAO.getRecordedExForUser(userID);
       //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
       for (CommonShell shell : exercises) {
         if (recordedForUser.contains(shell.getID())) {
@@ -229,31 +214,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     //}
     return c;
   }
-
-  //  @Override
- /* public void logAndNotifyServerException(Exception e) {
-    logAndNotifyServerException(e, "");
-  }*/
-
-  /**
-   * TODO remove duplicate
-   *
-   * @param e
-   * @param additionalMessage
-   */
-//  @Override
-/*  public void logAndNotifyServerException(Exception e, String additionalMessage) {
-    String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
-    if (!message1.contains("Broken Pipe")) {
-      String prefix = additionalMessage.isEmpty() ? "" : additionalMessage + "\n";
-      String prefixedMessage = prefix + //"for " + pathHelper.getInstallPath() +
-          (e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
-      String subject = "Server Exception on ";// + pathHelper.getInstallPath();
-      sendEmail(subject, getInfo(prefixedMessage));
-
-      logger.debug(getInfo(prefixedMessage));
-    }
-  }*/
 
   /**
    * Copies the exercises....?
@@ -310,14 +270,14 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     }
 
     if (exercisesForState.isEmpty()) { // allow lookup by id
-      CommonExercise exercise = getExercise(prefix, userID, incorrectFirst);
+      CommonExercise exercise = getExercise(prefix, incorrectFirst);
       if (exercise != null) exercisesForState = Collections.singletonList(exercise);
     }
     // why copy???
     List<CommonExercise> copy;
 
     if (incorrectFirst) {
-      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getCollator(),getLanguage());
+      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getCollator(), getLanguage());
     } else {
       copy = new ArrayList<>(exercisesForState);
       sortExercises(role, copy);
@@ -483,10 +443,13 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @param exercises
    * @param projid
    * @return
+   * @see #getExerciseIds
    */
   private Collection<CommonExercise> filterExercises(ExerciseListRequest request,
-                                                     Collection<CommonExercise> exercises, int projid) {
+                                                     Collection<CommonExercise> exercises,
+                                                     int projid) {
     exercises = filterByUnrecorded(request, exercises, projid);
+
     if (request.isOnlyWithAudioAnno()) {
       exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
     }
@@ -495,6 +458,20 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     }
     if (request.isOnlyUninspected()) {
       exercises = filterByUninspected(exercises);
+    }
+
+    if (request.isOnlyForUser()) {
+      Collection<Integer> practicedByUser = db.getResultDAO().getPracticedByUser(request.getUserID(), projid);
+      List<CommonExercise> copy = new ArrayList<>();
+
+      // TODO:  gosh - wasteful most of the time....
+      long then = System.currentTimeMillis();
+      for (CommonExercise ex : exercises) {
+        if (practicedByUser.contains(ex.getID())) copy.add(ex);
+      }
+      long now = System.currentTimeMillis();
+      logger.info("filterExercises : took " + (now-then));
+      exercises = copy;
     }
     return exercises;
   }
@@ -571,77 +548,100 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @paramx onlyExamples             only example audio
    * @see #getExerciseIds
    * @see #getExercisesForSelectionState
+   * @see #filterExercises(ExerciseListRequest, Collection, int)
    */
   private Collection<CommonExercise> filterByUnrecorded(
       ExerciseListRequest request,
       Collection<CommonExercise> exercises,
       int projid) {
-    boolean onlyExamples = request.isOnlyExamples();
-
     if (request.isOnlyUnrecordedByMe()) {
-      int userID = request.getUserID();
-      logger.debug("filterByUnrecorded : for " + userID + " only by same gender " + //onlyUnrecordedByMyGender +
-          " examples only " + onlyExamples + " from " + exercises.size());
-
-      Map<Integer, String> exToTranscript = new HashMap<>();
-      Map<Integer, String> exToContextTranscript = new HashMap<>();
-
-      for (CommonExercise shell : exercises) {
-        exToTranscript.put(shell.getID(), shell.getForeignLanguage());
-        String context = shell.hasContext() ? shell.getDirectlyRelated().iterator().next().getForeignLanguage() : null;
-        if (context != null && !context.isEmpty()) {
-          exToContextTranscript.put(shell.getID(), context);
-        }
-      }
-
-      Collection<Integer> recordedBySameGender = onlyExamples ?
-          db.getAudioDAO().getWithContext(userID, exToContextTranscript, projid) :
-          db.getAudioDAO().getRecordedBySameGender(userID, exToTranscript, projid);
-
-      Set<Integer> allExercises = new HashSet<>();
-      for (CommonShell exercise : exercises) {
-        allExercises.add(exercise.getID());
-      }
-
-      //logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
-      allExercises.removeAll(recordedBySameGender);
-      // logger.debug("after all exercises " + allExercises.size());
-
-      List<CommonExercise> copy = new ArrayList<>();
-      Set<Integer> seen = new HashSet<>();
-      for (CommonExercise exercise : exercises) {
-        int trim = exercise.getID();
-        if (allExercises.contains(trim)) {
-          if (seen.contains(trim)) logger.warn("saw " + trim + " " + exercise + " again!");
-          if (!onlyExamples || hasContext(exercise)) {
-            seen.add(trim);
-            copy.add(exercise);
-          }
-        }
-      }
-      //logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
-
-      return copy;
+      return getUnrecordedExercises(request.getUserID(), exercises, projid, request.isOnlyExamples());
     } else {
-      if (onlyExamples) {
-        List<CommonExercise> copy = new ArrayList<>();
-        Set<Integer> seen = new HashSet<>();
-        for (CommonExercise exercise : exercises) {
-          // String trim = exercise.getID().trim();
+      return request.isOnlyExamples() ? getExercisesWithContext(exercises) : exercises;
+    }
+  }
 
-          if (seen.contains(exercise.getID())) logger.warn("saw " + exercise.getID() + " " + exercise + " again!");
-          if (hasContext(exercise)) {
-            seen.add(exercise.getID());
-            copy.add(exercise);
-          }
+  /**
+   * TODO : way too much work here... why go through all exercises?
+   * TODO : why return all exercises?
+   *
+   * @param userID
+   * @param exercises
+   * @param projid
+   * @param onlyExamples
+   * @return
+   */
+  @NotNull
+  private Collection<CommonExercise> getUnrecordedExercises(int userID,
+                                                            Collection<CommonExercise> exercises,
+                                                            int projid,
+                                                            boolean onlyExamples) {
+    Collection<Integer> recordedBySameGender =
+        getRecordedByMatchingGender(userID, exercises, projid, onlyExamples);
+
+    Set<Integer> allExercises = new HashSet<>();
+    for (CommonShell exercise : exercises) {
+      allExercises.add(exercise.getID());
+    }
+
+    //logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
+    allExercises.removeAll(recordedBySameGender);
+    // logger.debug("after all exercises " + allExercises.size());
+
+    List<CommonExercise> copy = new ArrayList<>();
+    Set<Integer> seen = new HashSet<>();
+    for (CommonExercise exercise : exercises) {
+      int trim = exercise.getID();
+      if (allExercises.contains(trim)) {
+        if (seen.contains(trim)) logger.warn("saw " + trim + " " + exercise + " again!");
+        if (!onlyExamples || hasContext(exercise)) {
+          seen.add(trim);
+          copy.add(exercise);
         }
-        //   logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());
-
-        return copy;
-      } else {
-        return exercises;
       }
     }
+    //logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
+
+    return copy;
+  }
+
+  private Collection<Integer> getRecordedByMatchingGender(int userID, Collection<CommonExercise> exercises, int projid, boolean onlyExamples) {
+    // int userID = request.getUserID();
+    logger.debug("filterByUnrecorded : for " + userID + " only by same gender " +
+        " examples only " + onlyExamples + " from " + exercises.size());
+
+    Map<Integer, String> exToTranscript = new HashMap<>();
+    Map<Integer, String> exToContextTranscript = new HashMap<>();
+
+    for (CommonExercise shell : exercises) {
+      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+      String context = shell.hasContext() ? shell.getContext() : null;
+      if (context != null && !context.isEmpty()) {
+        exToContextTranscript.put(shell.getID(), context);
+      }
+    }
+
+    return onlyExamples ?
+        db.getAudioDAO().getWithContext(userID, exToContextTranscript, projid) :
+        db.getAudioDAO().getRecordedBySameGender(userID, exToTranscript, projid);
+  }
+
+  @NotNull
+  private Collection<CommonExercise> getExercisesWithContext(Collection<CommonExercise> exercises) {
+    List<CommonExercise> copy = new ArrayList<>();
+    Set<Integer> seen = new HashSet<>();
+    for (CommonExercise exercise : exercises) {
+      // String trim = exercise.getID().trim();
+
+      if (seen.contains(exercise.getID())) logger.warn("saw " + exercise.getID() + " " + exercise + " again!");
+      if (hasContext(exercise)) {
+        seen.add(exercise.getID());
+        copy.add(exercise);
+      }
+    }
+    //   logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());
+
+    return copy;
   }
 
   private <X extends CommonExercise> boolean hasContext(X exercise) {
@@ -888,7 +888,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     return (T) byID;
   }
 
-  private <T extends Shell> T getExercise(String exid, int userID, boolean isFlashcardReq) {
+  private <T extends Shell> T getExercise(String exid, boolean isFlashcardReq) {
     int exid1 = -1;
     try {
       exid1 = Integer.parseInt(exid);
@@ -902,7 +902,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   /**
    * @param id
    * @param then
-   * @see #getExercise(String, int, boolean)
+   * @see #getExercise(String, boolean)
    */
   private void checkPerformance(int id, long then) {
     long now;
@@ -956,6 +956,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   private SmallVocabDecoder getSmallVocabDecoder() {
     return getAudioFileHelper().getSmallVocabDecoder();
   }
+
   private String getOldLanguage() {
     return serverProps.getLanguage();
   }

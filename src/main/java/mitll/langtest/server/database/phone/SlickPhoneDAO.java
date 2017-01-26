@@ -104,7 +104,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
-   *
    * @param userid
    * @param exids
    * @param idToRef
@@ -122,15 +121,20 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
+   * TODO : don't use idToRef map
+   *
    * @param userid
    * @param ids
    * @param idToRef
    * @param language
    * @return
    * @throws SQLException
+   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReport(long, Map, String)
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef,
+  public PhoneReport getWorstPhonesForResults(long userid,
+                                              Collection<Integer> ids,
+                                              Map<Integer, String> idToRef,
                                               String language) {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult((int) userid, ids);
     return getPhoneReport(phoneReportByResult, idToRef, true, false, language);
@@ -138,6 +142,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   /**
    * TODO : huh? doesn't seem to add last item to total score or total items?
+   * TODO : don't use idToRef map
    *
    * @param idToRef
    * @param addTranscript       true if going to analysis tab
@@ -145,8 +150,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param language
    * @return
    * @throws SQLException
-   * @paramx sql
-   * @seex #getPhoneReport(String, Map, boolean, boolean)
    * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map, String)
    */
   private PhoneReport getPhoneReport(Collection<SlickPhoneReport> phoneReportByResult,

@@ -169,40 +169,7 @@ public interface IUserDAO extends IDAO {
    */
   MiniUser getMiniUser(int userid);
 
-  /**
-   * @param getMale
-   * @return
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)
-   * @deprecated
-   */
-/*
-  Map<Integer, User> getUserMap(boolean getMale);
-*/
-
-  /**
-   * @deprecated
-   * @param getMale
-   * @param all
-   * @return
-   */
- // Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all);
-
-  /**
-   * @return
-   * @see DatabaseImpl#getMaleFemaleProgress(int)
-   * @deprecated - don't want to do this
-   */
- // List<DBUser> getAll();
-
-  /**
-   * @paramx getMale
-   * @return
-   * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs
-   * @deprecated
-   */
-/*
-  Collection<Integer> getUserIDs(boolean getMale);
-*/
+  String getUserChosenID(int userid);
 
   boolean isMale(int userid);
 
