@@ -56,12 +56,11 @@ public interface UserService extends RemoteService {
 
   /**
    * @param userId
-   * @param attemptedHashedPassword   - hashed - don't send clear password
    * @param attemptedFreeTextPassword
    * @return
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
-  LoginResult loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword);
+  LoginResult loginUser(String userId, String attemptedFreeTextPassword);
 
   void logout(String login);
 

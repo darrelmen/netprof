@@ -304,22 +304,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     logger.info("readProperties configDir from props " + configDir);
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-
-    // this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     this.configDir = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
 
-    logger.info("readProperties relativeConfigDir " + relativeConfigDir);
-    logger.info("readProperties configDir         " + configDir);
+    logger.info("readProperties relativeConfigDir " + relativeConfigDir +" configDir         " + configDir);
 
-    // pathHelper.setConfigDir(configDir);
-    //  serverProps = new ServerProperties(servletContext, configDir);
-
-    this.serverProps = serverProps;//new ServerProperties(servletContext, configDir);
-
-    //this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-    // this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-    // pathHelper.setConfigDir(configDir);
-//    serverProps = new ServerProperties(servletContext, configDir);
+    this.serverProps = serverProps;
 
     db = makeDatabaseImpl(this.serverProps.getH2Database());
     securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);

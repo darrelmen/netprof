@@ -35,6 +35,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.user.User;
 
 import java.sql.Connection;
 import java.util.Collection;
@@ -69,4 +70,6 @@ public interface Database {
   Collection<String> getTypeOrder(int projectid);
 
   void configureProject(Project project);
+
+  void setStartupInfo(User userWhere);
 }

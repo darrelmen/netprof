@@ -37,10 +37,12 @@ import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
@@ -51,8 +53,12 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
+import static mitll.langtest.shared.user.LoginResult.ResultType.Success;
 
 /**
  * REST user management functions - add user, reset password, etc.
@@ -68,7 +74,7 @@ public class RestUserManagement {
   private static final String FORGOT_USERNAME = "forgotUsername";
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   * @see #doGet
    */
   private static final String RESET_PASS = "resetPassword";
   private static final String SET_PASSWORD = "setPassword";
@@ -113,8 +119,9 @@ public class RestUserManagement {
   private static final String KIND = "kind";
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   * @see #doGet
    * @see EmailHelper#resetPassword
+   * @deprecated
    */
   public static final String RESET_PASSWORD_FROM_EMAIL = "rp";
   public static final String USERS = "users";
@@ -134,24 +141,38 @@ public class RestUserManagement {
 
   /**
    * Accepts queries - hasUser, forgotUsername, resetPassword, rp, setPassword
+   * <p>
+   * TODO : accept forgot user name without email arg
    *
    * @param request
    * @param response
    * @param queryString
    * @param toReturn
+   * @param projid
+   * @param passwordFromBody
    * @return
    * @see mitll.langtest.server.ScoreServlet#doGet(HttpServletRequest, HttpServletResponse)
    */
-  public boolean doGet(HttpServletRequest request, HttpServletResponse response, String queryString, JSONObject toReturn) {
-    if (queryString.startsWith(HAS_USER)) {
+  public boolean doGet(HttpServletRequest request,
+                       HttpServletResponse response,
+                       String queryString,
+                       JSONObject toReturn,
+                       IUserSecurityManager securityManager,
+                       int projid,
+                       String passwordFromBody) {
+/*    if (queryString.startsWith(HAS_USER)) {
       String[] split1 = getParams(queryString);
-      if (split1.length != 2) {
-        toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
+      if (split1.length < 2) {
+        toReturn.put(ERROR, "expecting two or three parameters");
       } else {
-        gotHasUser(toReturn, split1);
+//        String freeTextPassword = request.getParameter("pass");
+        if (passwordFromBody != null) logger.info("doGet got free text password " + passwordFromBody.length());
+        gotHasUser(toReturn, split1, passwordFromBody, request, securityManager, projid);
       }
       return true;
-    } else if (queryString.startsWith(FORGOT_USERNAME)) {
+    } else
+      */
+      if (queryString.startsWith(FORGOT_USERNAME)) {
       String[] split1 = getParams(queryString);
       if (split1.length != 1) {
         toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
@@ -206,7 +227,7 @@ public class RestUserManagement {
         toReturn.put(VALID, changePFor(token, passwordH, getBaseURL(request)));
       }
       return true;
-    } else if (queryString.equals(USERS)) {
+    } else if (queryString.equals(USERS)) {  // TODO - require a session
       toReturn.put(USERS, db.usersToJSON());
       return true;
     }
@@ -235,24 +256,49 @@ public class RestUserManagement {
   /**
    * Return enough information so we could create a new user from the json.
    *
-   * @param toReturn
-   * @param split1
-   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   * @paramx toReturn
+   * @paramx split1
+   * @paramx projid
+   * @see #doGet
    */
-  private void gotHasUser(JSONObject toReturn, String[] split1) {
+/*
+  private void gotHasUser(JSONObject toReturn,
+                          String[] split1,
+                          String freeTextPassword,
+                          HttpServletRequest request,
+                          IUserSecurityManager securityManager,
+                          int projid) {
     String first = split1[0];
     String user = first.split("=")[1];
 
     String second = split1[1];
     String[] split = second.split("=");
     String passwordH = split.length > 1 ? split[1] : "";
+    // String freeTextPassword = split.length > 2 ? split[2] : "";
 
-    logger.debug("gotHasUser user '" + user + "' pass '" + passwordH + "'");
+    if (freeTextPassword == null) {
+      freeTextPassword = split.length > 2 ? split[2] : "";
+    }
+    if (!freeTextPassword.isEmpty()) {
+      passwordH = freeTextPassword;
+    }
+    // logger.debug("gotHasUser user '" + user + "' pass '" + passwordH + "'");
 
+    tryToLogin(toReturn, freeTextPassword, request, securityManager, projid, user);//, passwordH);
+  }
+*/
+
+  public void tryToLogin(JSONObject toReturn,
+                          String freeTextPassword,
+                          HttpServletRequest request,
+                          IUserSecurityManager securityManager,
+                          int projid,
+                          String user//,
+//                          String passwordH
+  ) {
     IUserDAO userDAO = db.getUserDAO();
     User userFound = userDAO.getUserByID(user);
-
-    logger.debug("gotHasUser user '" + user + "' pass '" + passwordH + "' -> " + userFound);
+    logger.debug("gotHasUser user '" + user);// + "' pass '" + passwordH.length() + "' -> " + userFound);
 
     if (userFound == null) {
       toReturn.put(USERID, -1);
@@ -262,23 +308,56 @@ public class RestUserManagement {
       toReturn.put(TOKEN, "");
       toReturn.put(PASSWORD_CORRECT, FALSE);
     } else {
-      User strictUserWithPass = userDAO.getStrictUserWithPass(user, passwordH);
+      //User strictUserWithPass = userDAO.getStrictUserWithPass(user, passwordH);
 
-      toReturn.put(USERID, userFound.getID());
+      int userid = userFound.getID();
+      toReturn.put(USERID, userid);
       toReturn.put(EMAIL_H, userFound.getEmailHash());
       toReturn.put(KIND, userFound.getUserKind().toString());
       toReturn.put(HAS_RESET, userFound.hasResetKey());
       toReturn.put(TOKEN, userFound.getResetKey());
-      toReturn.put(PASSWORD_CORRECT, strictUserWithPass == null ? FALSE : "TRUE");
-//          userFound.getPasswordHash() == null ? FALSE :
-      //            userFound.getPasswordHash().equalsIgnoreCase(passwordH));
+
+      // so we can tell if we need to collect more info, etc.
+      LoginResult loginResult = loginUser(user, freeTextPassword, request, securityManager);
+      toReturn.put("loginResult", loginResult.getResultType().name());
+
+      if (loginResult.getResultType() == Success) {
+        db.rememberProject(userid,projid);
+        toReturn.put(PASSWORD_CORRECT,  "TRUE");
+      }
+      else {
+        toReturn.put(PASSWORD_CORRECT,  FALSE);
+      }
     }
+  }
+
+  public LoginResult loginUser(String userId,
+                               String attemptedFreeTextPassword,
+                               HttpServletRequest request,
+                               IUserSecurityManager securityManager) {
+    try {
+      String remoteAddr = securityManager.getRemoteAddr(request);
+      String userAgent = request.getHeader("User-Agent");
+      // ensure a session is created.
+      HttpSession session = createSession(request);
+      logger.info("Login session " + session.getId() + " isNew=" + session.isNew());
+      logger.info("loginUser : userid " + userId);// + " password '" + attemptedHashedPassword + "'");
+      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+      //   logAndNotifyServerException(e);
+      return new LoginResult(Failed);
+    }
+  }
+
+  private HttpSession createSession(HttpServletRequest request) {
+    return request.getSession(true);
   }
 
   /**
    * @param token
    * @return
-   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   * @see #doGet
    */
   private long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWithResetKey(token);
@@ -370,14 +449,13 @@ public class RestUserManagement {
    * @param freeTextPassword
    * @return
    * @seex UserServiceImpl#changePFor
-   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   * @see #doGet
    */
   private boolean changePFor(String userid, String freeTextPassword, String baseURL) {
     User userByID = db.getUserDAO().getUserByID(userid);
 
     //  freeTextPassword = rot13(freeTextPassword);
     //   String hash = Md5Hash.getHash(freeTextPassword);
-
     boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword, baseURL);
 
     if (!b) {
@@ -418,7 +496,7 @@ public class RestUserManagement {
 
   /**
    * TODO:  This mainly to support appen?
-   *
+   * <p>
    * TODO : pass in the project id from the iOS app.
    * TODOx : pass in the freetext password from the iOS app.
    * <p>
@@ -439,7 +517,7 @@ public class RestUserManagement {
                       String device,
                       JSONObject jsonObject) {
     String user = request.getHeader(USER);
-   // String project = request.getHeader("projid");
+    // String project = request.getHeader("projid");
     //  String passwordH = request.getHeader(PASSWORD_H);
 /*
     String freeTextPassword = request.getHeader(FREE_TEXT_PASSWORD);
@@ -482,12 +560,12 @@ public class RestUserManagement {
             int age1 = Integer.parseInt(age);
             boolean male = gender.equalsIgnoreCase("male");
 
-            SignUpUser user2 = new SignUpUser(user,"",
+            SignUpUser user2 = new SignUpUser(user, "",
 //                passwordH,
                 emailH, email,
                 User.Kind.CONTENT_DEVELOPER,
-                male, male?MiniUser.Gender.Male:MiniUser.Gender.Female,
-                age1, dialect, deviceType, device, "", "", appURL,"OTHER");
+                male, male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
+                age1, dialect, deviceType, device, "", "", appURL, "OTHER");
 //            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
 //                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
             user1 = getUserManagement().addUser(user2);
@@ -501,7 +579,7 @@ public class RestUserManagement {
               "",
               //            passwordH,
               emailH, email,
-              User.Kind.CONTENT_DEVELOPER, true, MiniUser.Gender.Unspecified, 89, dialect, deviceType, device, "", "", appURL,"OTHER");
+              User.Kind.CONTENT_DEVELOPER, true, MiniUser.Gender.Unspecified, 89, dialect, deviceType, device, "", "", appURL, "OTHER");
           user1 = getUserManagement().addUser(user2);
         }
 

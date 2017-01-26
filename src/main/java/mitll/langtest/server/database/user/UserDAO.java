@@ -716,17 +716,17 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   /**
    * @param getMale
    * @return
-   * @see AudioDAO#getUserIDsMatchingGender
+   * @seex AudioDAO#getUserIDsMatchingGender
    */
-  Set<Long> getUserIDsMatchingGender(boolean getMale) {
+/*  Set<Long> getUserIDsMatchingGender(boolean getMale) {
     return getUserIDs("SELECT " + ID + " FROM " + USERS + " WHERE " + GENDER + " = " + (getMale ? 0 : 1));
-  }
+  }*/
 
-
+/*
   @Override
   public Map<Integer, User> getUserMap() {
     return getMap(getUsers());
-  }
+  }*/
 
   private Map<Integer, User> getUserMap(boolean getMale, List<User> users) {
     Map<Integer, User> idToUser = new HashMap<>();
@@ -835,20 +835,16 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return updateKey(user, resetKey, "");
   }*/
 
-  @Override
+/*  @Override
   public Map<User.Kind, Integer> getCounts() {
     return null;
-  }
+  }*/
 
   @Override
-  public void update(User toUpdate) {
-
-  }
+  public void update(User toUpdate) {}
 
   @Override
-  public void cleanUp() {
-
-  }
+  public void cleanUp() {}
 
   @Override
   public boolean forgotPassword(String user

@@ -35,13 +35,20 @@ package mitll.langtest.server.database.security;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
+import mitll.langtest.server.services.UserServiceImpl;
+import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickUserSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Enumeration;
 
 /**
  * UserSecurityManager: Provide top level security management.
@@ -62,19 +69,19 @@ public class UserSecurityManager implements IUserSecurityManager {
 
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
-  MyRemoteServiceServlet userService;
+  private MyRemoteServiceServlet userService;
 
   /**
    * @param userDAO
    * @param userSessionDAO
    * @see
    */
-  public UserSecurityManager(IUserDAO userDAO, IUserSessionDAO userSessionDAO,
+  public UserSecurityManager(IUserDAO userDAO,
+                             IUserSessionDAO userSessionDAO,
                              MyRemoteServiceServlet userService) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
     this.userService = userService;
-
     //startShiro();
   }
 
@@ -94,6 +101,111 @@ public class UserSecurityManager implements IUserSecurityManager {
       e.printStackTrace();
     }
   }*/
+
+  @Override
+  public LoginResult getLoginResult(String userId,
+                                    String attemptedFreeTextPassword,
+                                    String remoteAddr,
+                                    String userAgent,
+                                    HttpSession session) {
+    User loggedInUser = userDAO.loginUser(
+        userId,
+        attemptedFreeTextPassword,
+        userAgent,
+        remoteAddr,
+        session.getId());
+
+    boolean success = loggedInUser != null;
+
+    logActivity(userId, remoteAddr, userAgent, loggedInUser, success);
+
+    if (success) {
+      return getValidLogin(session, loggedInUser);
+    } else {
+      return getInvalidLoginResult(userDAO.getUserByID(userId));
+    }
+  }
+
+  private void logActivity(String userId, String remoteAddr, String userAgent, User loggedInUser, boolean success) {
+    String resultStr = success ? " was successful" : " failed";
+    log.info(">Session Activity> User login for id " + userId + resultStr +
+        ". IP: " + remoteAddr +
+        ", UA: " + userAgent +
+        (success ? ", user: " + loggedInUser.getID() : ""));
+  }
+
+  /**
+   * @param session
+   * @param loggedInUser
+   * @return
+   * @see UserServiceImpl#loginUser
+   */
+  @NotNull
+  private LoginResult getValidLogin(HttpSession session, User loggedInUser) {
+    LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
+    if (!loggedInUser.isValid()) {
+      log.info("user " + loggedInUser + "\n\tis missing email ");
+      loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
+    } else {
+      setSessionUser(session, loggedInUser);
+    }
+    return loginResult;
+  }
+
+  private LoginResult getInvalidLoginResult(User loggedInUser) {
+    if (loggedInUser == null) {
+      return new LoginResult(LoginResult.ResultType.Failed);
+    } else {
+      return new LoginResult(loggedInUser, LoginResult.ResultType.BadPassword);
+    }
+  }
+
+  public long setSessionUser(HttpSession session, User loggedInUser) {
+//    logger.debug("setSessionUser - made session - " + session + " user - " + loggedInUser);
+
+    try {
+      int id1 = loggedInUser.getID();
+      session.setAttribute(USER_SESSION_ATT, id1);
+      String sessionID = session.getId();
+
+      userSessionDAO.add(
+          new SlickUserSession(-1,
+              id1,
+              sessionID,
+              "",
+              "",
+              new Timestamp(System.currentTimeMillis())));
+
+      logSetSession(session, sessionID);
+
+      userDAO.getDatabase().setStartupInfo(loggedInUser);
+
+      return 1;//l;
+    } catch (Exception e) {
+      log.error("got " + e, e);
+      return -1;
+    }
+  }
+
+  private void logSetSession(HttpSession session1, String sessionID) {
+    log.info("setSessionUser : Adding user to " + sessionID +
+        " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
+        ", session.isNew=" + session1.isNew() +
+        ", created=" + session1.getCreationTime() +
+        ", " + getAttributesFromSession(session1));
+  }
+
+
+  @NotNull
+  private String getAttributesFromSession(HttpSession session) {
+    StringBuilder atts = new StringBuilder("Atts: [ ");
+    Enumeration<String> attEnum = session.getAttributeNames();
+    while (attEnum.hasMoreElements()) {
+      atts.append(attEnum.nextElement() + ", ");
+    }
+    atts.append("]");
+    return atts.toString();
+  }
 
   /**
    * Creates a new session at the end???? why?
@@ -165,7 +277,6 @@ public class UserSecurityManager implements IUserSecurityManager {
       throws RestrictedOperationException, DominoSessionException {
 /*
     Subject subject = SecurityUtils.getSubject();
-
     log.info("subject is " +subject);
     if (subject != null) {
       log.info("subject is " + subject.isRemembered());
@@ -226,21 +337,20 @@ public class UserSecurityManager implements IUserSecurityManager {
 //        log.debug("lookupUser note - no current session - ");
         try {
           session = request.getSession();
-  //        log.debug("lookupUser note - made session - ");
+          //        log.debug("lookupUser note - made session - ");
         } catch (Exception e) {
-          log.error("got " +e,e);
+          log.error("got " + e, e);
         }
       } else {
-      //  log.debug("lookupUser found current session - ");
+        //  log.debug("lookupUser found current session - ");
       }
       /*long cookie =*/
       if (sessUser != null) {
-        userService.setSessionUser(session, sessUser);
-      }
-      else {
+        /*userService.*/setSessionUser(session, sessUser);
+      } else {
         log.debug("no user for session - " + session + " logged out?");
       }
-     // if (cookie != -1) addCookie(response,"r",""+cookie);
+      // if (cookie != -1) addCookie(response,"r",""+cookie);
     } else {
       log.info("User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
     }
@@ -255,6 +365,14 @@ public class UserSecurityManager implements IUserSecurityManager {
       throw new DominoSessionException("Could not look up user!");
     }
     return sessUser;
+  }
+
+  public String getRemoteAddr(HttpServletRequest request) {
+    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+    if (remoteAddr == null || remoteAddr.isEmpty()) {
+      remoteAddr = request.getRemoteAddr();
+    }
+    return remoteAddr;
   }
 
   /**

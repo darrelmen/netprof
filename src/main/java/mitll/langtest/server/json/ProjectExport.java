@@ -20,7 +20,7 @@ public class ProjectExport {
       value.add(proj);
       proj.addProperty("id", project.getProject().id());
       proj.addProperty("name", project.getProject().name());
-      proj.addProperty("type", "npf");
+      proj.addProperty("type", "npf2");
 //      proj.addProperty("appVersion", "npf");
       proj.addProperty("language", project.getProject().language());
       proj.addProperty("course", project.getProject().course());
