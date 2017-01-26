@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+    and their contractors; 2016. Other request for this document shall be referred
+    to DLIFLC.
+
+    WARNING: This document may contain technical data whose export is restricted
+    by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+    Transfer of this data by any means to a non-US person who is not eligible to
+    obtain export-controlled data is prohibited. By accepting this data, the consignee
+    agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+    unclassified, limited distribution documents, destroy by any method that will
+    prevent disclosure of the contents or reconstruction of the document.
+
+    This material is based upon work supported under Air Force Contract No.
+    FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+    or recommendations expressed in this material are those of the author(s) and
+    do not necessarily reflect the views of the U.S. Air Force.
+
+    © 2016 Massachusetts Institute of Technology.
+
+    The software/firmware is provided to you on an As-Is basis
+
+    Delivered to the US Government with Unlimited Rights, as defined in DFARS
+    Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+    U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+    DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+    authorized by the U.S. Government may violate any copyrights that exist in this work.
+
+-->
+<!-- this can be used to turn on debug information -->
+<!--<configuration status="debug"> -->
+<configuration>
+    <Properties>
+        <Property name="log.mailhost">localhost</Property>
+        <Property name="log.mailfrom">noreply@dliflc.edu</Property>
+<!--
+        <Property name="log.mailto">raymond.budd@ll.mit.edu,ray.budd@gmail.com,gordon.vidaver@ll.mit.edu</Property>
+-->
+        <Property name="log.mailto">gordon.vidaver@ll.mit.edu</Property>
+    </Properties>
+    <appenders>
+        <!--
+            The SMTP mailer appears to only work when smtp debug is true.
+          -->
+        <SMTP name="Mail" subject="Web App netprof error on host ${hostName}" to="${sys:log.mailto}"
+              from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
+              bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
+
+        <RollingFile name="LogFile"
+                     additivity="false"
+                     fileName="${sys:catalina.base}/logs/netprof-app.log"
+                     filePattern="${sys:catalina.base}/logs/netprof-app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout
+                    pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="SecFile"
+                     additivity="false"
+                     fileName="${sys:catalina.base}/logs/netprof-access.log"
+                     filePattern="${sys:catalina.base}/logs/netprof-access-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout
+                    pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+
+   <!--
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%-20.30c{1}:%-4L] - %m%n%throwable"/>
+        </Console>-->
+
+    </appenders>
+    <loggers>
+        <logger name="org.mongodb.driver" level="warn" additivity="false">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="org.apache.fop" level="WARN" additivity="true">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="org.apache.fop.fonts.autodetect" level="debug" additivity="true">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="org.apache.pdfbox" level="info" additivity="true">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="mitll.hlt.domino.server.configuration.JSONDigesterBase" level="info" additivity="false">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="mitll.hlt.domino.server.user.UserServiceFacadeImpl" level="debug" additivity="true">
+            <appender-ref ref="SecFile"/>
+        </logger>
+        <logger name="mitll.hlt.domino.server.security" level="debug" additivity="true">
+            <appender-ref ref="SecFile"/>
+        </logger>
+
+        <logger name="mitll" level="debug" additivity="true">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="org.mongodb.driver.protocol.command" level="info" additivity="true">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="org.mongodb.driver.cluster" level="info" additivity="true">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="slick.compiler.QueryCompiler" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+        <logger name="slick.compiler.QueryCompilerBenchmark" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+        <logger name="slick.compiler" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+        <logger name="slick.compiler.CodeGen" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="slick.jdbc" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+        <logger name="slick.jdbc.JdbcBackend" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+        <logger name="slick.backend" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="slick.relational" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+        <logger name="slick.session" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="mitll.hlt.domino.server.util" level="WARN">
+            <appender-ref ref="LogFile"/>
+        </logger>
+        <logger name="mitll.hlt.domino.server.user" level="WARN">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="mitll.langtest" level="DEBUG">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <root level="debug">
+            <appender-ref ref="Mail" level="error"/>
+        </root>
+    </loggers>
+</configuration>

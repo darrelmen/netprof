@@ -176,7 +176,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     if (widgets != null && !controller.getProps().isNoModel() && controller.isRecordingEnabled()) {
       add(widgets);
     }
-    if (controller.isRecordingEnabled()) {
+    if (controller.isRecordingEnabled() && !controller.getProps().isNoModel() ) {
       addUserRecorder(service, controller, center, screenPortion, exercise); // todo : revisit screen portion...
     }
 

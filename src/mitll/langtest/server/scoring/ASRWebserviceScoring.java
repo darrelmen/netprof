@@ -667,7 +667,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
+        if (key.equals(NetPronImageType.WORD_TRANSCRIPT) && value.event.equals("SIL")) {
+          logger.info("getTypeToEndTimes : skipping SIL event " + value);
+        }
+        else {
+          endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
+        }
       }
     }
 
