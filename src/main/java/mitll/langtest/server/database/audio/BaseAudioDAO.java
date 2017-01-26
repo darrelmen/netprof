@@ -627,8 +627,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
   public Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext, int projid) {
-    boolean male = userDAO.isMale(userid);
-    return getWithContext(male, exToContext, projid);
+    return getWithContext(userDAO.isMale(userid), exToContext, projid);
   }
 
   private Set<Integer> getWithContext(boolean male,

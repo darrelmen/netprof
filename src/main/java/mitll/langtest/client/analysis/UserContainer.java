@@ -43,6 +43,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.analysis.UserInfo;
 
@@ -56,7 +57,7 @@ import java.util.List;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
-  private static final String CURRENT = "Curr.";
+  private static final String CURRENT = "Avg";//"Curr.";
   private static final int CURRENT_WIDTH = 60;
   private static final int DIFF_WIDTH = 55;
   private static final int INITIAL_SCORE_WIDTH = 75;
@@ -89,36 +90,17 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   }
 
   /**
-   * @see SimplePagingContainer#addColumnsToTable
+   * @see SimplePagingContainer#configureTable
    */
   @Override
   protected void addColumnsToTable() {
     super.addColumnsToTable();
-    Column<UserInfo, SafeHtml> num = getNum();
-    num.setSortable(true);
-    addColumn(num, new TextHeader("#"));
-    table.addColumnSortHandler(getNumSorter(num, getList()));
-    table.setColumnWidth(num, 50 + "px");
 
-    Column<UserInfo, SafeHtml> start = getStart();
-    start.setSortable(true);
-    addColumn(start, new TextHeader("Initial Score"));
-    table.setColumnWidth(start, INITIAL_SCORE_WIDTH + "px");
-
-    table.addColumnSortHandler(getStartSorter(start, getList()));
-
-    Column<UserInfo, SafeHtml> current = getCurrent();
-    current.setSortable(true);
-    addColumn(current, new TextHeader(CURRENT));
-    table.setColumnWidth(current, CURRENT_WIDTH + "px");
-
-    table.addColumnSortHandler(getCurrentSorter(current, getList()));
-
-    Column<UserInfo, SafeHtml> diff = getDiff();
-    diff.setSortable(true);
-    addColumn(diff, new TextHeader(DIFF_COL_HEADER));
-    table.addColumnSortHandler(getDiffSorter(diff, getList()));
-    table.setColumnWidth(diff, DIFF_WIDTH + "px");
+    addNumber();
+  //  addInitialScore();
+    addCurrent();
+    addFinalScore();
+    addDate();
 
     table.getColumnSortList().push(dateCol);
     table.setWidth("100%", true);
@@ -126,8 +108,50 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     addTooltip();
   }
 
+  private void addDate() {
+    Column<UserInfo, SafeHtml> diff = getDiff();
+    diff.setSortable(true);
+    addColumn(diff, new TextHeader(DIFF_COL_HEADER));
+    table.addColumnSortHandler(getDiffSorter(diff, getList()));
+    table.setColumnWidth(diff, DIFF_WIDTH + "px");
+  }
+
+  private void addCurrent() {
+    Column<UserInfo, SafeHtml> current = getCurrent();
+    current.setSortable(true);
+    addColumn(current, new TextHeader(CURRENT));
+    table.setColumnWidth(current, CURRENT_WIDTH + "px");
+
+    table.addColumnSortHandler(getCurrentSorter(current, getList()));
+  }
+
+  private void addNumber() {
+    Column<UserInfo, SafeHtml> num = getNum();
+    num.setSortable(true);
+    addColumn(num, new TextHeader("#"));
+    table.addColumnSortHandler(getNumSorter(num, getList()));
+    table.setColumnWidth(num, 50 + "px");
+  }
+
+/*
+ private void addInitialScore() {
+    Column<UserInfo, SafeHtml> start = getStart();
+    start.setSortable(true);
+    addColumn(start, new TextHeader("Initial Score"));
+    table.setColumnWidth(start, INITIAL_SCORE_WIDTH + "px");
+    table.addColumnSortHandler(getStartSorter(start, getList()));
+  }
+  */
+
+  private void addFinalScore() {
+    Column<UserInfo, SafeHtml> start = getFinal();
+    start.setSortable(true);
+    addColumn(start, new TextHeader("Latest"));
+    table.setColumnWidth(start, INITIAL_SCORE_WIDTH + "px");
+    table.addColumnSortHandler(getFinalSorter(start, getList()));
+  }
+
   /**
-   *
    * @param englishCol
    * @param dataList
    * @return
@@ -155,6 +179,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return columnSortHandler;
   }
 
+  /*
   private ColumnSortEvent.ListHandler<UserInfo> getStartSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
@@ -177,7 +202,30 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
         });
     return columnSortHandler;
   }
+  */
 
+  private ColumnSortEvent.ListHandler<UserInfo> getFinalSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                               List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<UserInfo>() {
+          public int compare(UserInfo o1, UserInfo o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Integer.valueOf(o1.getFinalScores()).compareTo(o2.getFinalScores());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
 
   private ColumnSortEvent.ListHandler<UserInfo> getCurrentSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                  List<UserInfo> dataList) {
@@ -226,7 +274,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return columnSortHandler;
   }
 
-
+/*
   private Column<UserInfo, SafeHtml> getStart() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -242,7 +290,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
         return getSafeHtml("" + shell.getStart());
       }
     };
-  }
+  }*/
 
   private Column<UserInfo, SafeHtml> getCurrent() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -257,6 +305,23 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       @Override
       public SafeHtml getValue(UserInfo shell) {
         return getSafeHtml("" + shell.getCurrent());
+      }
+    };
+  }
+
+  private Column<UserInfo, SafeHtml> getFinal() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          gotClickOnItem(object);
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml("" + shell.getFinalScores());
       }
     };
   }
