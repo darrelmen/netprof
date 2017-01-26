@@ -75,6 +75,11 @@ class TimeSeriesPlot extends DivWidget {
         });
   }
 
+  /**
+   * @see #getErrorBarToolTip
+   * @param toolTipData
+   * @return
+   */
   private String getTooltipText(ToolTipData toolTipData) {
     try {
       String seriesName1 = toolTipData.getSeriesName();
@@ -100,7 +105,8 @@ class TimeSeriesPlot extends DivWidget {
     String dateToShow = getDateToShow(toolTipData);
     PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
 
-    String countInfo = (session.getCount() < 10) ? "<br/>n = " + session.getCount() : "";
+  //  String countInfo = (session.getCount() < 10) ? "<br/>n = " + session.getCount() : "";
+    String countInfo =  "<br/>n = " + session.getCount();
 
     return getTooltipPrefix(seriesName1, dateToShow) +
         "Mean = " + toolTipData.getYAsLong() + "%" +
@@ -125,7 +131,7 @@ class TimeSeriesPlot extends DivWidget {
     Point point = toolTipData.getPoint();
     String s = getSessionCount(toolTipData);
     String range = "range " + point.getLow() + "-" + point.getHigh();
-    return getTooltipPrefix(seriesName1, dateToShow) + range + s;
+    return getTooltipPrefix(seriesName1, dateToShow) + range + "<br/>"+s;
   }
 
   private String getSessionCount(ToolTipData toolTipData) {

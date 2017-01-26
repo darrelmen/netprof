@@ -36,18 +36,19 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
-import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
-import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static mitll.langtest.server.database.Database.EXID;
 
@@ -451,6 +452,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   @Override
   public int getDefaultResult() {
     return 0;
+  }
+
+  @Override
+  public Collection<Integer> getPracticedByUser(int userid, int projid) {
+    return null;
   }
 
   /**

@@ -90,4 +90,6 @@ public interface IResultDAO extends IDAO {
   int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID);
 
   int getDefaultResult();
+
+  Collection<Integer> getPracticedByUser(int userid, int projid);
 }

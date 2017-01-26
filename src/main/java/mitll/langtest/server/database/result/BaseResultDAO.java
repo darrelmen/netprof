@@ -187,6 +187,7 @@ public abstract class BaseResultDAO extends DAO {
   }
 
   /**
+   * TODO : do we always want to sort results by user scores?
    * @param exercises
    * @param userid
    * @param collator

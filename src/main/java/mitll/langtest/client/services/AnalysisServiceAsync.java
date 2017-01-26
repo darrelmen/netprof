@@ -51,6 +51,10 @@ public interface AnalysisServiceAsync {
 
   void getPhoneScores(int id, int minRecordings, AsyncCallback<PhoneReport> async);
 
+  /**
+   * TODO : not sure why this is ever needed
+   * @param ids
+   * @param async
+   */
   void getShells(List<Integer> ids, AsyncCallback<List<CommonShell>> async);
-
 }

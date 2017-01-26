@@ -305,11 +305,10 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   }
 
-
-  public Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext,int projid) {
-    //  return getAudioForGender(getUserIDsMatchingGender(userid), CONTEXT_REGULAR, exToContext);
-    return null;
-  }
+//  public Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext,int projid) {
+//    //  return getAudioForGender(getUserIDsMatchingGender(userid), CONTEXT_REGULAR, exToContext);
+//    return null;
+//  }
 
   @Override
   Set<Integer> getAudioExercisesForGender(boolean male, String audioSpeed, Map<Integer, String> exToTranscript, int projid) {

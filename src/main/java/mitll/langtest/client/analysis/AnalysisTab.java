@@ -265,7 +265,8 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(List<WordScore> wordScores) {
-        logger.info("got " + wordScores.size() + " for user #" + userid);
+        logger.info("getWordScores : got " + wordScores.size() + " for user #" + userid);
+
         Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
         final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle);
         Panel tableWithPager = wordContainer.getTableWithPager(wordScores);

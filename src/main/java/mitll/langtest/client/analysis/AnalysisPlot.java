@@ -51,6 +51,7 @@ import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import org.jetbrains.annotations.NotNull;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEventHandler;
@@ -89,6 +90,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private static final String I_PAD_I_PHONE = "iPad/iPhone";
   private static final String VOCAB_PRACTICE = "Vocab Practice";
   private static final String LEARN = "Learn";
+  /**
+   * @see #addChart(UserPerformance, String)
+   */
   private static final String CUMULATIVE_AVERAGE = "Average";
   private final Set<String> toShowExercise = new HashSet<>(Arrays.asList(I_PAD_I_PHONE, VOCAB_PRACTICE, LEARN, CUMULATIVE_AVERAGE));
 
@@ -181,7 +185,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
 
           List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
-          weeks.addAll( getPeriods(phoneSessions, WEEK, last));
+          weeks.addAll(getPeriods(phoneSessions, WEEK, last));
 
           List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
           months.addAll(getPeriods(phoneSessions1, MONTH, last));
@@ -230,17 +234,22 @@ public class AnalysisPlot extends TimeSeriesPlot {
     return months2;
   }
 
+  /**
+   * @param userPerformance
+   * @param userChosenID
+   * @see #getPerformanceForUser(AnalysisServiceAsync, int, String, int)
+   */
   private void addChart(UserPerformance userPerformance, String userChosenID) {
     clear();
 
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-    float v = userPerformance.getRawAverage() * 100;
+    float percentAvg = userPerformance.getRawAverage() * 100;
     int rawTotal = rawBestScores.size();
 
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
-      String subtitle = "Score and average (" + rawTotal + " items, average " + (int) v + " %)";
+      String subtitle = "Score and average (" + rawTotal + " items, average " + (int) percentAvg + " %)";
       String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
       chart = getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance);
       add(chart);
@@ -278,9 +287,17 @@ public class AnalysisPlot extends TimeSeriesPlot {
     });
   }
 
+  /**
+   * Only get exercises this person has practiced.
+   * @param service
+   * @param userid
+   * @see #AnalysisPlot
+   */
   private void populateExerciseMap(ExerciseServiceAsync service, int userid) {
+   // logger.info("populateExerciseMap : get exercises for user " + userid);
+
     service.getExerciseIds(
-        new ExerciseListRequest(1, userid),
+        new ExerciseListRequest(1, userid).setOnlyForUser(true),
         new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -290,8 +307,13 @@ public class AnalysisPlot extends TimeSeriesPlot {
           @Override
           public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
             if (exerciseListWrapper != null && exerciseListWrapper.getExercises() != null) {
+              Map<Integer, CommonShell> idToEx = getIdToEx();
+
+//              logger.info("populateExerciseMap : got back " + exerciseListWrapper.getExercises().size() +
+//                  "  exercises for user " + userid);
+
               for (CommonShell shell : exerciseListWrapper.getExercises()) {
-                getIdToEx().put(shell.getID(), shell);
+                idToEx.put(shell.getID(), shell);
               }
             }
           }
@@ -500,13 +522,17 @@ public class AnalysisPlot extends TimeSeriesPlot {
         if (s != null) {
           playAudio.playLast(s, userid);
         } else {
-          logger.info("no point at " + nearestXAsLong);
+          logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
         }
         return true;
       }
     };
   }
 
+  /**
+   * @see #getChart(String)
+   * @return
+   */
   private ToolTip getToolTip() {
     return new ToolTip()
         .setFormatter(new ToolTipFormatter() {
@@ -527,38 +553,50 @@ public class AnalysisPlot extends TimeSeriesPlot {
   /**
    * On mouse over, show info about the answer.
    *
+   * So this tooltip could either be for a group or an exercise
    * @param toolTipData
    * @param exid
    * @param commonShell
    * @return
+   * @see #getToolTip()
    */
   private String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
+   // logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
+    String seriesName = toolTipData.getSeriesName();
+
+    if (granToLabel.values().contains(seriesName)) {
+      Series series = chart.getSeries(toolTipData.getSeriesId());
+
+      if (granToAverage.values().contains(series)) {
+        return getAvgTooltip(toolTipData, seriesName);
+      } else {
+        return getErrorBarToolTip(toolTipData, seriesName);
+      }
+    }
+    else {
+      //else {
+      //logger.info("getTooltip series is " + seriesName + " not in " + values);
+      // }
+      return getExerciseTooltip(toolTipData, exid, commonShell, seriesName);
+    }
+  }
+
+  @NotNull
+  private String getExerciseTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell, String seriesName) {
+    boolean showEx = toShowExercise.contains(seriesName);
+
     String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
     String english = commonShell == null ? "" : commonShell.getEnglish();
-    if (english.equalsIgnoreCase(foreignLanguage) && !commonShell.getMeaning().isEmpty()) english = commonShell.getMeaning();
-
-    String seriesName1 = toolTipData.getSeriesName();
-
-    String dateToShow = getDateToShow(toolTipData);
-    Collection<String> values = granToLabel.values();
-
-    if (values.contains(seriesName1)) {
-      String seriesId = toolTipData.getSeriesId();
-      Series series = chart.getSeries(seriesId);
-      if (granToAverage.values().contains(series)) {
-        return getAvgTooltip(toolTipData, seriesName1);
-      } else {
-        return getErrorBarToolTip(toolTipData, seriesName1);
-      }
-    } //else {
-    //logger.info("getTooltip series is " + seriesName1 + " not in " + values);
-    // }
-    boolean showEx = toShowExercise.contains(seriesName1);
+    if (english.equalsIgnoreCase(foreignLanguage) &&
+        commonShell != null &&
+        !commonShell.getMeaning().isEmpty())
+      english = commonShell.getMeaning();
 
     String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
+    String dateToShow = getDateToShow(toolTipData);
 
     return
-        "<b>" + seriesName1 + "</b>" +
+        "<b>" + seriesName + "</b>" +
             "<br/>" +
             dateToShow +
             (showEx ?
@@ -571,7 +609,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
             (showEx ?
                 "<br/>" + "<b>Click to hear</b>"
                 : "")
-
         ;
   }
 
@@ -727,17 +764,26 @@ public class AnalysisPlot extends TimeSeriesPlot {
   /**
    * Remember time window of data (x-axis).
    *
+   *  When would we ever need to go talk to the server to get the exercises?
    * @param rawBestScores
-   * @see #addChart(UserPerformance, String)
+   * @see #addChart
    */
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
     List<Integer> toGet = new ArrayList<>();
+
+    Map<Integer, CommonShell> idToEx = getIdToEx();
+   // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size());
+
     for (TimeAndScore timeAndScore : rawBestScores) {
       Integer id = timeAndScore.getExid();
       timeToId.put(timeAndScore.getTimestamp(), id);
-      if (!getIdToEx().containsKey(id)) {
+      if (!idToEx.containsKey(id)) {
         toGet.add(id);
       }
+    }
+
+    if (toGet.isEmpty())  {
+      logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size() + " - yielded none?");
     }
 
     if (!rawBestScores.isEmpty()) {
@@ -745,26 +791,29 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
       this.firstTime = rawBestScores.get(0).getTimestamp();
       this.lastTime = timeAndScore.getTimestamp();
-      // logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime));
 
-      service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
-        @Override
-        public void onFailure(Throwable throwable) {
-        }
+      if (!toGet.isEmpty()) {
+        logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
+        service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+          }
 
-        @Override
-        public void onSuccess(List<CommonShell> commonShells) {
-          for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
-        }
-      });
+          @Override
+          public void onSuccess(List<CommonShell> commonShells) {
+            for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
+            logger.info("setRawBestScores getShells got " + commonShells.size());
+          }
+        });
+      }
     } //else {
-      //logger.info("rawBest is empty?");
+    //logger.info("rawBest is empty?");
     //}
   }
 
   /**
    * @return
-   * @see WordContainer#getShell(String)
+   * @see WordContainer#getShell
    */
   Map<Integer, CommonShell> getIdToEx() {
     return idToEx;
