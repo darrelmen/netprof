@@ -79,8 +79,8 @@ public class AudioTest extends BaseTest {
     logger.info("before attach " + exercise.getAudioAttributes().size());
     logger.info("attach " + dao.attachAudio(exercise, ".", "."));
     logger.info("after  attach  " + exercise.getAudioAttributes().size());
-    logger.info("getRecorded " + dao.getRecordedBy(1));
-    logger.info("getRecorded " + dao.getRecordedBy(3));
+    logger.info("getRecorded " + dao.getRecordedBySameGender(1));
+    logger.info("getRecorded " + dao.getRecordedBySameGender(3));
   }*/
 
   @Test
@@ -92,7 +92,7 @@ public class AudioTest extends BaseTest {
 
     Map<Integer, Integer> truth = new HashMap<>();
     for (User user : new UserDAO(spanish).getUsers()) {
-//      Collection<String> recordedBy = dao.getRecordedBy(user.getID());
+//      Collection<String> recordedBy = dao.getRecordedBySameGender(user.getID());
       Collection<Integer> recordedBy = h2AudioDAO.getRecordedExForUser(user.getID());
       if (!recordedBy.isEmpty()) {
         logger.info("h2  for " + user.getUserID() + " recorded\t" + recordedBy.size());
@@ -101,7 +101,7 @@ public class AudioTest extends BaseTest {
 
     IAudioDAO dao = spanish.getAudioDAO();
     for (User user : spanish.getUsers()) {
-//      Collection<String> recordedBy = dao.getRecordedBy(user.getID());
+//      Collection<String> recordedBy = dao.getRecordedBySameGender(user.getID());
       Collection<Integer> recordedBy = dao.getRecordedExForUser(user.getID());
       if (!recordedBy.isEmpty()) {
         logger.info("postgres for " + user.getUserID() + " recorded " + recordedBy.size());
