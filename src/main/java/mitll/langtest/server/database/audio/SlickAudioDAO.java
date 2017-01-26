@@ -196,10 +196,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.markDefect(userid, exerciseID, audioType.toString());
   }
 
-  public Collection<Integer> getRecordedBy(int userid) {
+/*  public Collection<Integer> getRecordedBy(int userid) {
     Collection<Integer> userIDs = getUserIDs(userid);
     return dao.getAudioForGenderBothSpeeds(userIDs);
-  }
+  }*/
 
   /**
    * TODO TODO :

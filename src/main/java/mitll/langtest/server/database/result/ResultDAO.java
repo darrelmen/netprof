@@ -940,7 +940,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param userDAO
    * @return
    */
-  public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, IUserDAO userDAO) {
+/*  public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, IUserDAO userDAO) {
     AudioType typeToUse = isRegular ? AudioType.REGULAR : AudioType.SLOW;
     return getUserToResults(typeToUse, userDAO);
   }
@@ -966,6 +966,6 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       }
     }
     return userToResult;
-  }
+  }*/
 
 }

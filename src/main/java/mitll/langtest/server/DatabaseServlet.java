@@ -58,7 +58,7 @@ public class DatabaseServlet extends HttpServlet {
   protected ServerProperties serverProps;
   private String configDir;
   protected PathHelper pathHelper;
-  private IUserSecurityManager securityManager;
+  protected IUserSecurityManager securityManager;
 
   /**
    * @param wavFile
@@ -154,6 +154,10 @@ public class DatabaseServlet extends HttpServlet {
     return getDatabase().getUserProjectDAO().mostRecentByUser(id);
   }
 
+  /**
+   * @see #getProject
+   * @return
+   */
   protected DatabaseImpl getDatabase() {
     if (db == null) {
       Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
@@ -161,8 +165,7 @@ public class DatabaseServlet extends HttpServlet {
         db = (DatabaseImpl) databaseReference;
         securityManager = db.getUserSecurityManager();
         if (securityManager == null) logger.error("getDatabase huh? no security manager?");
-        //securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
-         logger.debug("getDatabase found existing database reference " + db + " under " +getServletContext());
+        // logger.debug("getDatabase found existing database reference " + db + " under " +getServletContext());
       } else {
         logger.error("getDatabase huh? no existing db reference?");
       }

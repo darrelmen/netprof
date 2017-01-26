@@ -38,7 +38,7 @@ public class AnalysisTest {
     Map<String,CommonExercise> idToEx = new HashMap<String,CommonExercise>();
     for (CommonExercise ex : exercises) idToEx.put(ex.getOldID(),ex);
 
-    Map<Integer, Map<String, Result>> userToResults = ((ResultDAO)war.getResultDAO()).getUserToResults(true, war.getUserDAO());
+    Map<Integer, Map<String, Result>> userToResults = null;//((ResultDAO)war.getResultDAO()).getUserToResults(true, war.getUserDAO());
     Map<String, Result> stringResultMap = userToResults.get(71l);
 
   //  Collection<CorrectAndScore> copy = getFirstCorrectAndScore(resultsForUser);

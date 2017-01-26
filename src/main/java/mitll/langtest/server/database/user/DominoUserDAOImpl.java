@@ -48,6 +48,7 @@ import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.binary.*;
@@ -577,8 +578,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public User getStrictUserWithPass(String id, String encodedPassword) {
-    User user = getUserByID(id);
-    return getUserIfMatch(user, id, encodedPassword);
+    return getUserIfMatch(getUserByID(id), id, encodedPassword);
   }
 
   /**
@@ -603,9 +603,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param encodedPassword
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
+   * @see #getUserIfMatch(User, String, String)
    */
   public User getUserIfMatchPass(User user, String id, String encodedPassword) {
-    logger.info("getUserIfMatchPass '" + id + "' and dominoPassword hash '" + encodedPassword + "'");
+    logger.info("getUserIfMatchPass '" + id + "' and dominoPassword hash '" + encodedPassword.length() + "'");
     String dominoPassword = getUserCredentials(id);
 
     long then = System.currentTimeMillis();
@@ -617,16 +618,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       logger.warn("getUserIfMatchPass : took " + diff + " to check for password match.");
     }
     if (dominoPassword != null && (match || dominoPassword.equals(encodedPassword))) {//dominoPassword.equals(encodedPassword)) {//netProfDelegate.isPasswordMatch(user.getID(), encodedPassword) || magicMatch) {
-      logger.warn("getUserIfMatch match in of " + dominoPassword + " vs encoded " + encodedPassword + " match " + match);
+      logger.warn("getUserIfMatch match in of " + dominoPassword + " vs encoded " + encodedPassword.length() + " match " + match);
       boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
       user.setAdmin(isadmin);
       return user;
     } else {
-      logger.warn("\tgetUserIfMatch no match in db " + dominoPassword + " vs encoded " + encodedPassword);
+      logger.warn("getUserIfMatch no match in db " + dominoPassword + " vs encoded " + encodedPassword.length());
       return null;
     }
   }
-
 
   /**
    * @param userId
@@ -659,7 +659,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public User getUserByID(String id) {
-    //   mitll.hlt.domino.shared.model.user.User dominoUser = delegate.getUser(id);
     mitll.hlt.domino.shared.model.user.DBUser dominoUser = delegate.getDBUser(id);
     if (dominoUser == null) {
       logger.warn("getUserByID no user by '" + id + "'");
@@ -751,8 +750,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     long creationTime = System.currentTimeMillis();
     String device = "";
 
-    //if (dominoUser instanceof DBUser) {
-    // AccountDetail acctDetail = ((DBUser) dominoUser).getAcctDetail();
     AccountDetail acctDetail = dominoUser.getAcctDetail();
     if (acctDetail != null) {
       device = acctDetail.getDevice().toString();
@@ -764,9 +761,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     } else {
       logger.info("toUser no acct detail for " + dominoUser.getDocumentDBID());
     }
-    //} else {
-    //  logger.warn("toUser domino user " + dominoUser.getDocumentDBID() + " is not a DBUser : " + dominoUser.getClass());
-    // }
 
     String email = dominoUser.getEmail();
 
@@ -1152,14 +1146,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * has permissions
    *
    * @return
-   * @see mitll.langtest.server.database.result.ResultDAO#getUserToResults(AudioType, IUserDAO)
+   * @seex mitll.langtest.server.database.result.ResultDAO#getUserToResults(AudioType, IUserDAO)
    */
+/*
   @Override
   public Map<Integer, User> getUserMap() {
     Map<Integer, User> idToUser = getUserMap(true);
     idToUser.putAll(getUserMap(false));
     return idToUser;
   }
+*/
 
   /**
    * @param user
@@ -1167,6 +1163,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param baseURL
    * @return
    * @see mitll.langtest.server.services.UserServiceImpl#changePFor
+   * @deprecated
    */
   @Override
   public boolean changePassword(int user, String newHashPassword, String baseURL) {
@@ -1190,7 +1187,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param newHashPass
    * @param baseURL
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#changePassword
+   * @see mitll.langtest.server.services.UserServiceImpl#changePasswordWithCurrent
    */
   public boolean changePasswordWithCurrent(int user, String currentHashPass, String newHashPass, String baseURL) {
     return savePasswordAndGetUser(user, currentHashPass, newHashPass, baseURL) != null;
@@ -1202,7 +1199,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param userid
    * @see
    */
-  public void forgetPassword(int userid) {
+/*  public void forgetPassword(int userid) {
     DBUser dbUser = delegate.lookupDBUser(userid);
 
     logger.info("forgetPassword " + userid);
@@ -1213,27 +1210,27 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       ClientUserDetail clientUserDetail = getClientUserDetail(dbUser);
       delegate.forgotPassword(adminUser, clientUserDetail, "");
     }
-  }
+  }*/
 
   /**
    * We don't support this UI anymore.
    *
    * @return
    */
-  @Deprecated
+/*  @Deprecated
   public Map<User.Kind, Integer> getCounts() {
     // Map<String, Integer> counts = dao.getCounts();
     Map<User.Kind, Integer> ret = new HashMap<>();
- /*   for (Map.Entry<String, Integer> pair : counts.entrySet()) {
+ *//*   for (Map.Entry<String, Integer> pair : counts.entrySet()) {
       ret.put(User.Kind.valueOf(pair.getKey()), pair.getValue());
     }
- */
+ *//*
     return ret;
-  }
+  }*/
 
   /**
    * user updates happen in domino UI...
-   *
+   * @see UserServiceImpl#addUser
    * @param toUpdate
    */
   @Override
@@ -1257,10 +1254,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
+  /**
+   * @see UserServiceImpl#resetPassword
+   * @param user
+   * @param url
+   * @return
+   */
   @Override
-  public boolean forgotPassword(String user, String url
-                                //    , String emailForLegacy
-  ) {
+  public boolean forgotPassword(String user, String url) {
     DBUser next = delegate.getDBUser(user);
 
     if (next.getPrimaryGroup() == null) {
@@ -1290,14 +1291,4 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     return clientUserDetail1 != null;
   }
-
-/*  private static class MyMongoUserServiceDelegate extends MongoUserServiceDelegate {
-    public MyMongoUserServiceDelegate(ServerProperties props, Mailer mailer, Mongo mongoCP) {
-      super(props.getUserServiceProperties(), mailer, props.getAppName(), mongoCP);
-    }
-
-    public boolean setPassword(mitll.hlt.domino.shared.model.user.User user, String encodedPass) {
-      return doSavePassword(user, encodedPass) != null;
-    }
-  }*/
 }

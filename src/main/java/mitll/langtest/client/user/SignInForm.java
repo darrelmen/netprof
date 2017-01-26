@@ -297,7 +297,7 @@ public class SignInForm extends UserDialog implements SignIn {
 
     signIn.setEnabled(false);
 
-    userManager.getUserService().loginUser(user, hashedPass, freeTextPassword,
+    userManager.getUserService().loginUser(user, freeTextPassword,
         new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
