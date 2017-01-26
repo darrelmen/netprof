@@ -239,7 +239,9 @@ public class AudioFileHelper implements AlignDecode {
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, options.isRefRecording(), serverProps.isQuietAudioOK());
 
-    PretestScore easyAlignment = getEasyAlignment(exercise1, wavPath);
+//    if (!audioContext.isRecording()) {
+//      PretestScore easyAlignment = getEasyAlignment(exercise1, wavPath);
+//    }
 
     // logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
 /*    long now = System.currentTimeMillis();
