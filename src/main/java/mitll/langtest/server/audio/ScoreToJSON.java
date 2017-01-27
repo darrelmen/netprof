@@ -64,10 +64,7 @@ public class ScoreToJSON {
    * @see AudioFileHelper#getAudioAnswerAlignment(String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, File, AudioCheck.ValidityAndDur, boolean, float, String, String, boolean)
    * @see AudioFileHelper#getAudioAnswerDecoding
    */
-  public JSONObject getJsonFromAnswer(AudioAnswer answer) {
-    PretestScore pretestScore = answer.getPretestScore();
-    return getJsonObject(pretestScore);
-  }
+  public JSONObject getJsonFromAnswer(AudioAnswer answer) {  return getJsonObject(answer.getPretestScore());  }
 
   public String asJson(PretestScore pretestScore) {
     return getJsonObject(pretestScore).toString();
@@ -103,8 +100,8 @@ public class ScoreToJSON {
                 if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
                   JSONObject phoneJson = new JSONObject();
                   phoneJson.put("id", Integer.toString(pindex++));
-                  phoneJson.put("p", pevent);
-                  phoneJson.put("s", getScore(pseg));
+                  phoneJson.put("p",   pevent);
+                  phoneJson.put("s",   getScore(pseg));
                   phoneJson.put("str", floatToString(pseg.getStart()));
                   phoneJson.put("end", floatToString(pseg.getEnd()));
                   jsonPhones.add(phoneJson);
@@ -137,7 +134,6 @@ public class ScoreToJSON {
     return Float.toString(round(round));
   }
 
-
   private static float round(float d) {
     return round(d, 3);
   }
@@ -148,5 +144,3 @@ public class ScoreToJSON {
     return bd.floatValue();
   }
 }
-
-

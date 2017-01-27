@@ -33,6 +33,8 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -55,12 +57,20 @@ public class DecodeAlignOutput {
   //private boolean isDecode;
 
   /**
+   * @see AudioFileHelper#decodeOneAttribute
    * @param alignmentScore
    */
   DecodeAlignOutput(PretestScore alignmentScore, boolean isDecode) {
-    this(alignmentScore.getHydecScore(), new ScoreToJSON().getJsonObject(alignmentScore).toString(),
-        alignmentScore.getProcessDur(), false,
+    this(
+        alignmentScore.getHydecScore(),
+        new ScoreToJSON().getJsonObject(alignmentScore).toString(),
+        alignmentScore.getProcessDur(),
+        false,
         alignmentScore);
+  }
+
+  private static String getJson(PretestScore alignmentScore) {
+    return new ScoreToJSON().getJsonObject(alignmentScore).toString();
   }
 
   DecodeAlignOutput(AudioAnswer decodeAnswer, boolean isDecode) {
@@ -72,8 +82,10 @@ public class DecodeAlignOutput {
     this.isCorrect = decodeAnswer.isCorrect();
   }
 
-  DecodeAlignOutput(float score, String json,
-                    long processDurInMillis, boolean isCorrect,
+  DecodeAlignOutput(float score,
+                    String json,
+                    long processDurInMillis,
+                    boolean isCorrect,
                     PretestScore pretestScore) {
     //this(score,json,numPhones(pretestScore),processDurInMillis,isCorrect);
     this.score = score;

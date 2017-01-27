@@ -61,6 +61,8 @@ public class ParseResultJson {
   private static final String S = "s";
   private static final String P = "p";
   private static final String PHONES = "phones";
+  public static final String WORDS = "words";
+  public static final String W = "w";
   private final ServerProperties props;
 
   /**
@@ -112,7 +114,7 @@ public class ParseResultJson {
     JsonParser parser = new JsonParser();
     JsonObject parse = parser.parse(json).getAsJsonObject();
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
-        parseJson(parse, "words", "w", usePhones, wordToPronunciations);
+        parseJson(parse, WORDS, W, usePhones, wordToPronunciations);
 
     if (imageTypeMapMap.isEmpty()) logger.warn("json " + json + " produced empty events map");
     else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
