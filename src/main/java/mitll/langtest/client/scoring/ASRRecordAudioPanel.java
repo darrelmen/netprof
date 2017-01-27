@@ -29,7 +29,8 @@ import mitll.langtest.shared.scoring.PretestScore;
 /**
  * An ASR scoring panel with a record button.
  */
-public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends ASRScoringAudioPanel<T> {
+public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & ScoredExercise>
+    extends ASRScoringAudioPanel<T> {
   static final String DOWNLOAD_AUDIO = "downloadAudio";
 
   private static final String REFERENCE = "";
@@ -208,9 +209,14 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
         exercise.getID() +
         "&" +
         "userID=" +
-        goodwaveExercisePanel.getUser();
+        getUser();
     download.setHref(href);
     downloadAnchor.setHref(href);
+  }
+
+
+  protected int getUser() {
+    return controller.getUserState().getUser();
   }
 
   /**

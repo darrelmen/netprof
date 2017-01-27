@@ -34,6 +34,7 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.server.audio.ScoreToJSON;
 import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.json.JsonExport;
@@ -165,6 +166,8 @@ public class ScoreServlet extends DatabaseServlet {
         try {
           //  String params = request.getReader().readLine();
 
+          // NO - what are you thinking??????
+
           String params = IOUtils.toString(request.getReader());
           if (params != null && !params.isEmpty()) {
             String[] projids2 = params.split("projid=");
@@ -214,7 +217,8 @@ public class ScoreServlet extends DatabaseServlet {
           boolean dontRemove = removeExercisesWithMissingAudio.equals("false");
           if (shouldRemoveExercisesWithNoAudio || dontRemove) {
             if (dontRemove) {
-              if (nestedChaptersEverything == null || (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
+              if (nestedChaptersEverything == null ||
+                  (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
                 nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio, projid);
                 whenCachedEverything = System.currentTimeMillis();
               }
@@ -232,6 +236,8 @@ public class ScoreServlet extends DatabaseServlet {
           }
           toReturn = nestedChapters;
         }
+      } else if (matchesRequest(queryString, "hasUser")) {
+        checkUserAndLogin(request, toReturn);
       } else if (userManagement.doGet(
           request,
           response,
@@ -240,7 +246,6 @@ public class ScoreServlet extends DatabaseServlet {
           securityManager,
           projid,
           passwordFromBody)) {
-
         logger.info("doGet " + language + " handled user command");// for " + queryString);
       } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
         queryString = removePrefix(queryString, CHAPTER_HISTORY);
@@ -565,7 +570,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     String requestType = request.getHeader(REQUEST);
     String deviceType = getOrUnk(request, DEVICE_TYPE);
-    String device     = getOrUnk(request, DEVICE);
+    String device = getOrUnk(request, DEVICE);
 
     JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
@@ -602,11 +607,6 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     writeJsonToOutput(response, jsonObject);
-  }
-
-  @NotNull
-  private String getDeviceType(HttpServletRequest request) {
-    return getOrUnk(request, DEVICE_TYPE);
   }
 
   @NotNull
@@ -729,6 +729,13 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject jsonObject = new JSONObject();
 
     long then = System.currentTimeMillis();
+
+    if (projectid == -1) {
+      logger.error("getJsonNestedChapters project id is not defined : " + projectid);
+    } else {
+      logger.debug("getJsonNestedChapters get content for project id " + projectid);
+    }
+
     JsonExport jsonExport = getJSONExport(projectid);
     String language = getLanguage(projectid);
     long now = System.currentTimeMillis();
@@ -811,12 +818,16 @@ public class ScoreServlet extends DatabaseServlet {
                                      Request requestType,
                                      String deviceType,
                                      String device) throws IOException {
-    int realExID      = Integer.parseInt(request.getHeader(EXERCISE));
-    int reqid         = getReqID(request);
-    int project       = getProject(request);
+    int realExID = Integer.parseInt(request.getHeader(EXERCISE));
+    int reqid = getReqID(request);
+    int project = getProject(request);
+    if (project == -1) {
+      project = request.getIntHeader("projid");
+    }
 
-    String user       = request.getHeader(USER);
+    String user = request.getHeader(USER);
     int userid = userManagement.getUserFromParam(user);
+    String fullJSONFormat = request.getHeader("full");
 
     logger.debug("getJsonForAudio got" +
         "\n\trequest  " + requestType +
@@ -824,6 +835,7 @@ public class ScoreServlet extends DatabaseServlet {
         "\n\tproject  " + project +
         "\n\texercise " + realExID +
         "\n\treq      " + reqid +
+        "\n\tfull     " + fullJSONFormat +
         "\n\tdevice   " + deviceType + "/" + device);
 
     File saveFile = writeAudioFile(request.getInputStream(), project, realExID, userid);
@@ -839,7 +851,7 @@ public class ScoreServlet extends DatabaseServlet {
         deviceType, device,
         new DecoderOptions()
             .setAllowAlternates(getAllowAlternates(request))
-            .setUsePhoneToDisplay(getUsePhoneToDisplay(request)));
+            .setUsePhoneToDisplay(getUsePhoneToDisplay(request)), fullJSONFormat != null);
   }
 
   @NotNull
@@ -904,6 +916,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param deviceType iPad,iPhone, or browser
    * @param device     id for device - helpful for iPads, etc.
    * @param options
+   * @param fullJSON
    * @return score json
    * @paramx allowAlternates   decode against multiple alternatives (e.g. male and female spanish words for the same english word)
    * @paramx usePhoneToDisplay should we remap the phones to different labels for display
@@ -916,7 +929,8 @@ public class ScoreServlet extends DatabaseServlet {
                                             String wavPath,
                                             File saveFile,
                                             String deviceType, String device,
-                                            DecoderOptions options) {
+                                            DecoderOptions options,
+                                            boolean fullJSON) {
     long then = System.currentTimeMillis();
     int mostRecentProjectByUser = getMostRecentProjectByUser(user);
     CommonExercise exercise = db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);  // allow custom items to mask out non-custom items
@@ -925,45 +939,48 @@ public class ScoreServlet extends DatabaseServlet {
     if (exercise == null) {
       jsonForScore.put(VALID, "bad_exercise_id");
     }
-    if (request == Request.WRITEFILE) {
-      jsonForScore.put(VALID, "wrote_file");
-    }
-    else {
-      boolean doFlashcard = request == Request.DECODE;
-      options.setDoFlashcard(doFlashcard);
-      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise,
-          options);
-      long now = System.currentTimeMillis();
-      PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
-      float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
+    // if (request == Request.WRITEFILE) {
+//      jsonForScore.put(VALID, "wrote_file");
+//    } else {
+    boolean doFlashcard = request == Request.DECODE;
+    options.setDoFlashcard(doFlashcard);
+    AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise,
+        options);
+    long now = System.currentTimeMillis();
+    PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
+    float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
 
-      logger.debug("score flashcard " + doFlashcard +
-          " exercise id " + exerciseID + " took " + (now - then) +
-          " millis for " + saveFile.getName() + " = " + hydecScore);
+    logger.debug("getJsonForAudioForUser flashcard " + doFlashcard +
+        " exercise id " + exerciseID + " took " + (now - then) +
+        " millis for " + saveFile.getName() + " = " + hydecScore);
 
-      if (answer != null && answer.isValid()) {
-        boolean usePhoneToDisplay = options.isUsePhoneToDisplay();
-        jsonForScore = getJsonForScore(pretestScore, usePhoneToDisplay);
-        if (doFlashcard) {
-          jsonForScore.put(IS_CORRECT, answer.isCorrect());
-          jsonForScore.put(SAID_WORD,  answer.isSaidAnswer());
-          int decodeResultID = answer.getResultID();
-          jsonForScore.put(RESULT_ID, decodeResultID);
+    if (answer != null && answer.isValid()) {
+      boolean usePhoneToDisplay = options.isUsePhoneToDisplay();
+      jsonForScore = fullJSON ?
+          new ScoreToJSON().getJsonObject(pretestScore) :
+          getJsonForScore(pretestScore, usePhoneToDisplay);
+      jsonForScore.put(SCORE, pretestScore.getHydecScore());
 
-          // attempt to get more feedback when we're too sensitive and match the unknown model
-          if (!answer.isCorrect() && !answer.isSaidAnswer()) {
-            options.setDoFlashcard(false);
-            answer = getAudioAnswerAlign(reqid, exerciseID, user,
-                wavPath, saveFile,
-                deviceType, device,
-                exercise,
-                options);
-            jsonForScore = getJsonFromAlignment(usePhoneToDisplay, answer, decodeResultID);
-          }
+      if (doFlashcard) {
+        jsonForScore.put(IS_CORRECT, answer.isCorrect());
+        jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
+        int decodeResultID = answer.getResultID();
+        jsonForScore.put(RESULT_ID, decodeResultID);
+
+        // attempt to get more feedback when we're too sensitive and match the unknown model
+        if (!answer.isCorrect() && !answer.isSaidAnswer()) {
+          options.setDoFlashcard(false);
+          answer = getAudioAnswerAlign(reqid, exerciseID, user,
+              wavPath, saveFile,
+              deviceType, device,
+              exercise,
+              options);
+          jsonForScore = getJsonFromAlignment(usePhoneToDisplay, answer, decodeResultID);
         }
       }
-      addValidity(exerciseID, jsonForScore, answer);
     }
+    addValidity(exerciseID, jsonForScore, answer);
+    //  }
     return jsonForScore;
   }
 
@@ -1156,6 +1173,8 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * What the iPad wants to see.
+   * <p>
    * For both words and phones, return event text, start, end times, and score for event.
    * Add overall score.
    *

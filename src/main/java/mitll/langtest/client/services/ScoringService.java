@@ -57,13 +57,14 @@ public interface ScoringService extends RemoteService {
    * @param testAudioFile
    * @param sentence
    * @param exerciseID
+   * @param usePhonemeMap
    * @return
    * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                    String transliteration,
 
-                                   ImageOptions imageOptions, int exerciseID);
+                                   ImageOptions imageOptions, int exerciseID, boolean usePhonemeMap);
 
   /**
    * @param reqid
@@ -74,10 +75,12 @@ public interface ScoringService extends RemoteService {
    * @return
    * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
+/*
   PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
                                            String transliteration,
 
                                            ImageOptions imageOptions, int exerciseID);
+*/
 
   /**
    * @param resultid

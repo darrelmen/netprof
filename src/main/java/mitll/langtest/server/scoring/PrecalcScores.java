@@ -50,13 +50,13 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/28/15.
  */
-class PrecalcScores {
+public class PrecalcScores {
 //  private static final Logger logger = LogManager.getLogger(PrecalcScores.class);
 
-  private final Result precalcResult;
+  private Result precalcResult;
   private Scores scores;
   private JsonObject jsonObject;
-  private final boolean isValid;
+  private boolean isValid;
   private final ParseResultJson parseResultJson;
 
   /**
@@ -67,22 +67,39 @@ class PrecalcScores {
    * @param usePhoneToDisplay
    * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
    */
-  PrecalcScores(ServerProperties serverProperties, Result precalcResult, boolean usePhoneToDisplay) {
+  public PrecalcScores(ServerProperties serverProperties, Result precalcResult, boolean usePhoneToDisplay) {
     this.parseResultJson = new ParseResultJson(serverProperties);
     this.precalcResult = precalcResult;
 
     boolean valid = isValidPrecalc();
 
     if (valid) {
-      JsonParser parser = new JsonParser();
-      jsonObject = parser.parse(precalcResult.getJsonScore()).getAsJsonObject();
       float pronScore = precalcResult.getPronScore();
-      scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
-      isValid = isPrecalcValidCheck();
+      parseJSON(precalcResult, usePhoneToDisplay, pronScore);
 //      logger.debug("for cached result " + precalcResult + " is valid " + isValid + " : " + precalcResult.getJsonScore());
     } else {
       isValid = false;
     }
+  }
+
+  public PrecalcScores(ServerProperties serverProperties, String json) {
+    this.parseResultJson = new ParseResultJson(serverProperties);
+    parseJSON(false, -100, json);
+  }
+
+  private void parseJSON(Result precalcResult, boolean usePhoneToDisplay, float pronScore) {
+    String jsonScore = precalcResult.getJsonScore();
+    parseJSON(usePhoneToDisplay, pronScore, jsonScore);
+  }
+
+  private void parseJSON(boolean usePhoneToDisplay, float pronScore, String jsonScore) {
+    JsonParser parser = new JsonParser();
+    jsonObject = parser.parse(jsonScore).getAsJsonObject();
+    if (pronScore == -100) {
+      pronScore = jsonObject.get("score").getAsFloat();
+    }
+    scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
+    isValid = isPrecalcValidCheck();
   }
 
   /**
@@ -91,14 +108,21 @@ class PrecalcScores {
    * @return
    */
   private boolean isPrecalcValidCheck() {
-    Map<String, Float> stringFloatMap = scores.eventScores.get(Scores.WORDS);
-    boolean avp = scores.eventScores.isEmpty() ||
-        (stringFloatMap.isEmpty() &&
-            (precalcResult.getAudioType() != AudioType.PRACTICE || precalcResult.isCorrect())
-        );
-
-//    boolean onlyUnknown = stringFloatMap != null && stringFloatMap.size() == 1 && stringFloatMap.containsKey(SLFFile.UNKNOWN_MODEL);
-    return !avp && !stringFloatMap.containsKey(SLFFile.UNKNOWN_MODEL);
+    Map<String, Map<String, Float>> eventScores = scores.eventScores;
+    if (eventScores.isEmpty()) {
+      return false;
+    } else {
+      Map<String, Float> wordsMap = eventScores.get(Scores.WORDS);
+      return !wordsMap.isEmpty() && !wordsMap.containsKey(SLFFile.UNKNOWN_MODEL);
+    }
+//    boolean avp = eventScores.isEmpty() ||
+//        (wordsMap.isEmpty() &&
+//            (precalcResult != null &&
+//                (precalcResult.getAudioType() != AudioType.PRACTICE || precalcResult.isCorrect()))
+//        );
+//
+////    boolean onlyUnknown = wordsMap != null && wordsMap.size() == 1 && wordsMap.containsKey(SLFFile.UNKNOWN_MODEL);
+//    return !avp && !wordsMap.containsKey(SLFFile.UNKNOWN_MODEL);
   }
 
   /**
@@ -108,7 +132,8 @@ class PrecalcScores {
    * @see #PrecalcScores(ServerProperties, Result, boolean)
    */
   private Scores getCachedScores(float pronScore, JsonObject jsonObject, boolean usePhones) {
-    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseResultJson.parseJson(jsonObject, "words", "w", usePhones, null);
+    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
+        parseResultJson.parseJson(jsonObject, "words", "w", usePhones, null);
     Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
     return new Scores(pronScore, eventScores, 0);
   }
@@ -182,5 +207,9 @@ class PrecalcScores {
 
   public boolean isValid() {
     return isValid;
+  }
+
+  public String toString() {
+    return "isvalid " + isValid() + " scores " + scores;
   }
 }

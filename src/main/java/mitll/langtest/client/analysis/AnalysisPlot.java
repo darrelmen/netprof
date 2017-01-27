@@ -764,7 +764,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   /**
    * Remember time window of data (x-axis).
    *
-   *  When would we ever need to go talk to the server to get the exercises?
+   * TODO :  When would we ever need to go talk to the server to get the exercises?
    * @param rawBestScores
    * @see #addChart
    */
@@ -783,7 +783,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     }
 
     if (toGet.isEmpty())  {
-      logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size() + " - yielded none?");
+     // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size() + " - yielded none?");
     }
 
     if (!rawBestScores.isEmpty()) {

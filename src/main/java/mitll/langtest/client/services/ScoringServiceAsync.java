@@ -39,20 +39,31 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 public interface ScoringServiceAsync {
   void getASRScoreForAudio(int reqid,
-                           long resultID, String testAudioFile, String sentence, String transliteration,
+                           long resultID,
+                           String testAudioFile, String sentence, String transliteration,
 
                            ImageOptions imageOptions,
                            int exerciseID,
-                           AsyncCallback<PretestScore> async);
+                           boolean usePhonemeMap, AsyncCallback<PretestScore> async);
+
+/*  void getASRScoreForAudioPhonemes(int reqid, long resultID,
+                                   String testAudioFile, String sentence,
+                                   String transliteration,
+                                   ImageOptions imageOptions,
+                                   int exerciseID,
+                                   AsyncCallback<PretestScore> async);*/
+
 
   /**
+   * JUST FOR DIALOG DEMO
+   *
    * @param base64EncodedString
    * @param textToAlign
    * @param identifier
    * @param reqid
    * @param device
    * @param async
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile
    */
   void getAlignment(String base64EncodedString,
                     String textToAlign,
@@ -60,14 +71,7 @@ public interface ScoringServiceAsync {
                     String identifier,
                     int reqid, String device, AsyncCallback<AudioAnswer> async);
 
-
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
   void getResultASRInfo(int resultID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);
-
-  void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                   String transliteration,
-                                   ImageOptions imageOptions,
-                                   int exerciseID,
-                                   AsyncCallback<PretestScore> async);
 }
