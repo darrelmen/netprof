@@ -40,6 +40,7 @@ import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,7 +71,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param playButtonSuffix
    * @param exercise
    * @param instance
-   * @param audioType
+   * @paramx audioType
    */
   ASRScoringAudioPanel(String refSentence,
                        String transliteration,
@@ -137,28 +138,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
 
     logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
-    AsyncCallback<PretestScore> async = new AsyncCallback<PretestScore>() {
-      public void onFailure(Throwable caught) {
-        //if (!caught.getMessage().trim().equals("0")) {
-        //  Window.alert("Server error -- couldn't contact server.");
-        //}
-        //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
-        wordTranscript.setVisible(false);
-        phoneTranscript.setVisible(false);
-      }
-
-      public void onSuccess(PretestScore result) {
-        t.cancel();
-
-        if (isMostRecentRequest(SCORE, result.getReqid())) {
-          //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " success " + result);
-          useResult(result, wordTranscript, phoneTranscript, tested.contains(path), path);
-          tested.add(path);
-        } else {
-          //logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " success " + result + " DISCARDING : " + reqs);
-        }
-      }
-    };
+    AsyncCallback<PretestScore> async = getPretestScoreAsyncCallback(path, wordTranscript, phoneTranscript, t);
 
     int id = exercise.getID();
     ImageOptions imageOptions = new ImageOptions(toUse, height, useScoreToColorBkg);
@@ -173,6 +153,32 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
       service.getASRScoreForAudio(
           reqid, resultID, path, refSentence, transliteration,imageOptions, id, async);
     }
+  }
+
+  @NotNull
+  private AsyncCallback<PretestScore> getPretestScoreAsyncCallback(final String path, final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript, final Timer t) {
+    return new AsyncCallback<PretestScore>() {
+        public void onFailure(Throwable caught) {
+          //if (!caught.getMessage().trim().equals("0")) {
+          //  Window.alert("Server error -- couldn't contact server.");
+          //}
+          //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
+          wordTranscript.setVisible(false);
+          phoneTranscript.setVisible(false);
+        }
+
+        public void onSuccess(PretestScore result) {
+          t.cancel();
+
+          if (isMostRecentRequest(SCORE, result.getReqid())) {
+            //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " success " + result);
+            useResult(result, wordTranscript, phoneTranscript, tested.contains(path), path);
+            tested.add(path);
+          } else {
+            //logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " success " + result + " DISCARDING : " + reqs);
+          }
+        }
+      };
   }
 
   private Timer getWaitTimer(final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript, boolean wasVisible) {

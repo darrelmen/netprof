@@ -34,9 +34,6 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -53,7 +50,6 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
-import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.WordAndScore;
 
 import java.util.Collection;
@@ -68,10 +64,11 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
-  private static final String WORDS_USING = "Words with ";
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
 
-  private static final int PLAY_WIDTH = WordContainer.PLAY_WIDTH;
+  private static final String WORDS_USING = "Vocabulary with ";
+
+  //private static final int PLAY_WIDTH = WordContainer.PLAY_WIDTH;
   private static final int ITEM_WIDTH = 200;
   private final ShowTab learnTab;
   private String phone;
@@ -101,7 +98,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
   /**
    * @return
-   * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
+   * @see SetCompleteDisplay#getScoreHistory
    */
   public Panel getTableWithPager() {
     Panel tableWithPager = super.getTableWithPager();
@@ -113,12 +110,14 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   /**
    * @param phone
    * @param sortedHistory
-   * @see PhoneContainer#clickOnPhone(String)
+   * @param maxExamples
+   * @see PhoneContainer#clickOnPhone
    */
-  void addItems(String phone, Collection<WordAndScore> sortedHistory) {
+  void addItems(String phone, Collection<WordAndScore> sortedHistory, int maxExamples) {
     this.phone = phone;
     heading.setText(WORDS_USING + phone);
-    heading.setSubtext("first ten");
+    String subtext = sortedHistory == null ? "" : sortedHistory.size() > maxExamples ? "first " + maxExamples : "" + sortedHistory.size();
+    heading.setSubtext(subtext);
     clear();
     if (sortedHistory != null) {
       // logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");
@@ -129,38 +128,8 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       logger.warning("PhoneExampleContainer.addItems null items");
     }
     flush();
-
     addPlayer();
   }
-
-
-/*  private Column<WordAndScore, SafeHtml> getPlayAudio() {
-    return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(WordAndScore shell) {
-        // CommonShell exercise = null;//getShell(shell.getExID());
-        // logger.info("Got " + shell + "  : " + exercise);
-        // String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
-        return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), "play");
-      }
-    };
-  }
-
-  private Column<WordAndScore, SafeHtml> getPlayNativeAudio() {
-    return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(WordAndScore shell) {
-        //  CommonShell exercise = getShell(shell.getExID());
-        // logger.info("getPlayAudio : Got " + shell.getExID() + "  : " + exercise);
-        //String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
-        if (shell.getRefAudio() != null) {
-          return PlayAudioWidget.getAudioTagHTML(shell.getRefAudio(), "play");
-        } else {
-          return new SafeHtmlBuilder().toSafeHtml();
-        }
-      }
-    };
-  }*/
 
   private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,
                                                                      List<WordAndScore> dataList) {
@@ -195,13 +164,6 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     table.addColumnSortHandler(columnSortHandler);
 
     try {
-//      Column<WordAndScore, SafeHtml> column = getPlayAudio();
-//      table.addColumn(column, "Play");
-//      table.setColumnWidth(column, PLAY_WIDTH + "px");
-//
-//      column = getPlayNativeAudio();
-//      table.addColumn(column, "Ref");
-//      table.setColumnWidth(column, PLAY_WIDTH + "px");
       addAudioColumns();
       table.setWidth("100%", true);
     } catch (Exception e) {

@@ -609,7 +609,7 @@ public class RestUserManagement {
     return db.getUserManagement();
   }
 
-  public int getUserFromParam2(String user) {
+  public int getUserFromParamWarnIfBad(String user) {
     int userid;
     try {
       userid = Integer.parseInt(user);
