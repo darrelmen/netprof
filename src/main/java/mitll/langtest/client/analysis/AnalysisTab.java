@@ -66,7 +66,10 @@ import java.util.logging.Logger;
 public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
-  private static final String WORDS = "Words";
+  private static final String WORDS = "Vocabulary";
+  /**
+   * @see #exampleHeader
+   */
   private static final String WORDS_USING_SOUND = "Words using Sound";
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "scores > 20";

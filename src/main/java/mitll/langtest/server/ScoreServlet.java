@@ -54,8 +54,10 @@ import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -77,15 +79,12 @@ public class ScoreServlet extends DatabaseServlet {
 
   private static final String REQUEST = "request";
   private static final String NESTED_CHAPTERS = "nestedChapters";
-  private static final String ALIGN = "align";
-  private static final String DECODE = "decode";
   private static final String SCORE = "score";
   private static final String CHAPTER_HISTORY = "chapterHistory";
   private static final String REF_INFO = "refInfo";
-  public static final String ROUND_TRIP1 = "roundTrip";
-  private static final String ROUND_TRIP = ROUND_TRIP1;
+  private static final String ROUND_TRIP1 = "roundTrip";
   private static final String PHONE_REPORT = "phoneReport";
-  public static final String PROJECTS = "projects";
+  private static final String PROJECTS = "projects";
 
   private static final String ERROR = "ERROR";
   private static final String USER = "user";
@@ -114,19 +113,20 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String YEAR = "year";
   private static final String JSON_REPORT = "jsonReport";
   private static final String REPORT = "report";
-  public static final String VERSION_NOW = "1.0";
-  public static final String EXPORT = "export";
-  public static final String REMOVE_REF_RESULT = "removeRefResult";
-  public static final String RESULT_ID = "resultID";
-  public static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
-  public static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
-  public static final ImageOptions DEFAULT = ImageOptions.getDefault();
+  private static final String VERSION_NOW = "1.0";
+  private static final String EXPORT = "export";
+  private static final String REMOVE_REF_RESULT = "removeRefResult";
+  private static final String RESULT_ID = "resultID";
+  private static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
+  private static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
+  private static final ImageOptions DEFAULT = ImageOptions.getDefault();
+  private static final String EXERCISE = "exercise";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
 
-  private enum Request {DECODE, ALIGN, RECORD}
+  private enum Request {EVENT, HASUSER, ADDUSER, ROUNDTRIP, DECODE, ALIGN, RECORD, WRITEFILE, UNKNOWN}
 
   // Doug said to remove items with missing audio. 1/12/15
   private static final String START = "start";
@@ -137,7 +137,6 @@ public class ScoreServlet extends DatabaseServlet {
   private long whenCached = -1;
   private long whenCachedEverything = -1;
 
-  private static final String ADD_USER = "addUser";
   private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
 
   /**
@@ -565,64 +564,96 @@ public class ScoreServlet extends DatabaseServlet {
     configureResponse(response);
 
     String requestType = request.getHeader(REQUEST);
-    String deviceType = request.getHeader(DEVICE_TYPE);
-    if (deviceType == null) deviceType = "unk";
-    String device = request.getHeader(DEVICE);
-    if (device == null) device = "unk";
+    String deviceType = getOrUnk(request, DEVICE_TYPE);
+    String device     = getOrUnk(request, DEVICE);
 
     JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
-      if (!requestType.startsWith(EVENT)) {
+      Request realRequest = getRequest(requestType);
+      if (realRequest != Request.EVENT) {
         logger.debug("doPost got request " + requestType + " device " + deviceType + "/" + device);
       }
 
-      if (requestType.startsWith("hasUser")) {
-        userManagement.tryToLogin(
-            jsonObject,
-            request.getHeader("pass"),
-            request,
-            //response,
-            //requestType,
-            securityManager,
-            request.getIntHeader("projid"),
-            request.getHeader("userid")
-        );
-
-      } else if (requestType.startsWith(ADD_USER)) {
-        userManagement.addUser(request, requestType, deviceType, device, jsonObject);
-      } else if (
-          requestType.startsWith(ALIGN) ||
-              requestType.startsWith(DECODE) ||
-              requestType.startsWith(Request.RECORD.toString().toLowerCase())) {
-        jsonObject = getJsonForAudio(request, requestType, deviceType, device);
-      } else if (requestType.startsWith(EVENT)) {
-        // log event
-        gotLogEvent(request, device, jsonObject);
-      } else if (requestType.startsWith(ROUND_TRIP)) {
-        String resultID = request.getHeader(RESULT_ID);
-        String roundTripMillis = request.getHeader(ROUND_TRIP1);
-
-        try {
-          addRT(Integer.parseInt(resultID), Integer.parseInt(roundTripMillis), jsonObject);
-        } catch (NumberFormatException e) {
-          jsonObject.put(ERROR, "bad param format " + e.getMessage());
-        }
-      } else {
-        jsonObject.put(ERROR, "unknown req " + requestType);
-        logger.warn("doPost unknown request " + requestType + " device " + deviceType + "/" + device);
+      switch (realRequest) {
+        case HASUSER:
+          checkUserAndLogin(request, jsonObject);
+          break;
+        case ADDUSER:
+          userManagement.addUser(request, requestType, deviceType, device, jsonObject);
+          break;
+        case ALIGN:
+        case DECODE:
+        case RECORD:
+          jsonObject = getJsonForAudio(request, realRequest, deviceType, device);
+          break;
+        case EVENT:
+          gotLogEvent(request, device, jsonObject);
+          break;
+        case ROUNDTRIP:
+          addRT(request, jsonObject);
+          break;
+        default:
+          gotUnknown(requestType, deviceType, device, jsonObject);
+          break;
       }
     } else {
-      logger.info("doPost request type is null?");
-      jsonObject = getJsonForAudio(request, ALIGN, deviceType, device);
+      logger.info("doPost request type is null - assume align.");
+      jsonObject = getJsonForAudio(request, Request.ALIGN, deviceType, device);
     }
 
     writeJsonToOutput(response, jsonObject);
   }
 
+  @NotNull
+  private String getDeviceType(HttpServletRequest request) {
+    return getOrUnk(request, DEVICE_TYPE);
+  }
+
+  @NotNull
+  private String getOrUnk(HttpServletRequest request, String deviceType1) {
+    String deviceType = request.getHeader(deviceType1);
+    if (deviceType == null) deviceType = "unk";
+    return deviceType;
+  }
+
+  private void checkUserAndLogin(HttpServletRequest request, JSONObject jsonObject) {
+    userManagement.tryToLogin(
+        jsonObject,
+        request.getHeader("pass"),
+        request,
+        securityManager,
+        request.getIntHeader("projid"),
+        request.getHeader("userid")
+    );
+  }
+
+  private void gotUnknown(String requestType, String deviceType, String device, JSONObject jsonObject) {
+    jsonObject.put(ERROR, "unknown req " + requestType);
+    logger.warn("doPost unknown request " + requestType + " device " + deviceType + "/" + device);
+  }
+
+  private void addRT(HttpServletRequest request, JSONObject jsonObject) {
+    String resultID = request.getHeader(RESULT_ID);
+    String roundTripMillis = request.getHeader(ROUND_TRIP1);
+
+    try {
+      addRT(Integer.parseInt(resultID), Integer.parseInt(roundTripMillis), jsonObject);
+    } catch (NumberFormatException e) {
+      jsonObject.put(ERROR, "bad param format " + e.getMessage());
+    }
+  }
+
+  private Request getRequest(String requestType) {
+    for (Request request : Request.values()) {
+      if (requestType.startsWith(request.toString().toLowerCase())) return request;
+    }
+    return Request.UNKNOWN;
+  }
+
   private void gotLogEvent(HttpServletRequest request, String device, JSONObject jsonObject) {
     String user = request.getHeader(USER);
 
-    int userid = user == null ? -1 : userManagement.getUserFromParam2(user);
+    int userid = user == null ? -1 : userManagement.getUserFromParamWarnIfBad(user);
     if (getUser(userid) == null) {
       jsonObject.put(ERROR, "unknown user " + userid);
     } else {
@@ -777,35 +808,59 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   private JSONObject getJsonForAudio(HttpServletRequest request,
-                                     String requestType,
+                                     Request requestType,
                                      String deviceType,
                                      String device) throws IOException {
-    String user = request.getHeader(USER);
-    String exerciseID = request.getHeader("exercise");
-    int i1 = Integer.parseInt(exerciseID);
-    int reqid = getReqID(request);
-    int project = getProject(request);
+    int realExID      = Integer.parseInt(request.getHeader(EXERCISE));
+    int reqid         = getReqID(request);
+    int project       = getProject(request);
+
+    String user       = request.getHeader(USER);
+    int userid = userManagement.getUserFromParam(user);
 
     logger.debug("getJsonForAudio got" +
-        "\n\trequest " + requestType +
+        "\n\trequest  " + requestType +
         "\n\tfor user " + user +
-        "\n\tproject " + project +
-        "\n\texercise " + exerciseID +
-        "\n\treq " + reqid +
-        "\n\tdevice " + deviceType + "/" + device);
+        "\n\tproject  " + project +
+        "\n\texercise " + realExID +
+        "\n\treq      " + reqid +
+        "\n\tdevice   " + deviceType + "/" + device);
 
-    int userid = userManagement.getUserFromParam(user);
-    String wavPath = pathHelper.getAbsoluteToAnswer(db.getProject(project).getLanguage(), i1, 0, userid);
-    File saveFile = new File(wavPath);// pathHelper.getAbsoluteFile(wavPath);
-    new File(saveFile.getParent()).mkdirs();
+    File saveFile = writeAudioFile(request.getInputStream(), project, realExID, userid);
 
-    boolean allowAlternates = getAllowAlternates(request);
-    boolean usePhoneToDisplay = getUsePhoneToDisplay(request);
-
-    writeToFile(request.getInputStream(), saveFile);
+    // TODO : put back trim silence? or is it done somewhere else
 //    new AudioConversion(null).trimSilence(saveFile);
-    return getJsonForAudioForUser(reqid, i1, userid, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
-        deviceType, device, new DecoderOptions().setAllowAlternates(allowAlternates).setUsePhoneToDisplay(usePhoneToDisplay));
+
+    return getJsonForAudioForUser(reqid,
+        realExID,
+        userid,
+        requestType,
+        saveFile.getAbsolutePath(), saveFile,
+        deviceType, device,
+        new DecoderOptions()
+            .setAllowAlternates(getAllowAlternates(request))
+            .setUsePhoneToDisplay(getUsePhoneToDisplay(request)));
+  }
+
+  @NotNull
+  private File writeAudioFile(ServletInputStream inputStream, int project, int realExID, int userid) throws IOException {
+    String wavPath = pathHelper.getAbsoluteToAnswer(
+        db.getProject(project).getLanguage(),
+        realExID,
+        userid);
+    File saveFile = new File(wavPath);
+    makeFileSaveDir(saveFile);
+
+    writeToFile(inputStream, saveFile);
+    return saveFile;
+  }
+
+  private void makeFileSaveDir(File saveFile) {
+    File parent = new File(saveFile.getParent());
+    boolean mkdirs = parent.mkdirs();
+    if (!mkdirs && !parent.exists()) {
+      logger.error("Couldn't make " + parent.getAbsolutePath() + " : permissions set? chown done ?");
+    }
   }
 
   private boolean getUsePhoneToDisplay(HttpServletRequest request) {
@@ -824,7 +879,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param request
    * @return
-   * @see #getJsonForAudio(HttpServletRequest, String, String, String)
+   * @see #getJsonForAudio
    */
   private int getReqID(HttpServletRequest request) {
     String reqid = request.getHeader(REQID);
@@ -852,7 +907,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return score json
    * @paramx allowAlternates   decode against multiple alternatives (e.g. male and female spanish words for the same english word)
    * @paramx usePhoneToDisplay should we remap the phones to different labels for display
-   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
+   * @see #getJsonForAudio
    */
   private JSONObject getJsonForAudioForUser(int reqid,
                                             int exerciseID,
@@ -864,15 +919,19 @@ public class ScoreServlet extends DatabaseServlet {
                                             DecoderOptions options) {
     long then = System.currentTimeMillis();
     int mostRecentProjectByUser = getMostRecentProjectByUser(user);
-    CommonExercise exercise1 = db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);  // allow custom items to mask out non-custom items
+    CommonExercise exercise = db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);  // allow custom items to mask out non-custom items
 
     JSONObject jsonForScore = new JSONObject();
-    if (exercise1 == null) {
+    if (exercise == null) {
       jsonForScore.put(VALID, "bad_exercise_id");
-    } else {
+    }
+    if (request == Request.WRITEFILE) {
+      jsonForScore.put(VALID, "wrote_file");
+    }
+    else {
       boolean doFlashcard = request == Request.DECODE;
       options.setDoFlashcard(doFlashcard);
-      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise1,
+      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise,
           options);
       long now = System.currentTimeMillis();
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
@@ -887,33 +946,17 @@ public class ScoreServlet extends DatabaseServlet {
         jsonForScore = getJsonForScore(pretestScore, usePhoneToDisplay);
         if (doFlashcard) {
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
-          jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
+          jsonForScore.put(SAID_WORD,  answer.isSaidAnswer());
           int decodeResultID = answer.getResultID();
-          jsonForScore.put("resultID", decodeResultID);
+          jsonForScore.put(RESULT_ID, decodeResultID);
 
           // attempt to get more feedback when we're too sensitive and match the unknown model
           if (!answer.isCorrect() && !answer.isSaidAnswer()) {
-/*            answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device,
-                exercise1, usePhoneToDisplay);
-            PretestScore pretestScore1 = answer.getPretestScore();
-            logger.debug("Alignment on an unknown model answer gets " + pretestScore1);
-            //   logger.debug("score info " + answer.getPretestScore().getsTypeToEndTimes());
-            jsonForScore = getJsonForScore(pretestScore1, usePhoneToDisplay);
-
-            // so we mark it correct if the score is above 50% on alignment
-            boolean isCorrect = pretestScore1.getHydecScore() > ALIGNMENT_SCORE_CORRECT;
-            jsonForScore.put(IS_CORRECT, isCorrect);
-            jsonForScore.put(SCORE, pretestScore1.getHydecScore());
-            jsonForScore.put(SAID_WORD, false);   // don't say they said the word - decode says they didn't
-
-            if (pretestScore1.getHydecScore() > 0.25) {
-              logger.info("remember score for result " + decodeResultID);
-              db.rememberScore(decodeResultID, pretestScore1, isCorrect);
-            } else {
-              logger.debug("skipping remembering alignment since score was too low " + pretestScore1.getHydecScore());
-            }*/
             options.setDoFlashcard(false);
-            answer = getAudioAnswerAlign(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise1,
+            answer = getAudioAnswerAlign(reqid, exerciseID, user,
+                wavPath, saveFile,
+                deviceType, device,
+                exercise,
                 options);
             jsonForScore = getJsonFromAlignment(usePhoneToDisplay, answer, decodeResultID);
           }
@@ -968,7 +1011,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * @param reqid      label response with req id so the client can tell if it got a stale response
-   * @param exerciseID for this exercise
+   * @param exerciseID for this exercise - redundant
    * @param user       by this user
    * @param wavPath    path to posted audio file
    * @param saveFile
@@ -980,7 +1023,8 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAudioAnswer(int reqid, int exerciseID, int user,
-                                     String wavPath, File saveFile, String deviceType, String device,
+                                     String wavPath, File saveFile,
+                                     String deviceType, String device,
                                      CommonExercise exercise,
                                      DecoderOptions options) {
     AudioAnswer answer;
@@ -999,7 +1043,8 @@ public class ScoreServlet extends DatabaseServlet {
 
       options.setDoFlashcard(false);
 
-      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device,
+      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
+          deviceType, device,
           options
       );
       answer.setPretestScore(asrScoreForAudio);
