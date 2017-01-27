@@ -63,7 +63,8 @@ public interface AudioService extends RemoteService {
    */
   AudioAnswer writeAudioFile(String base64EncodedString,
                              AudioContext audioContext,
-                             boolean recordedWithFlash, String deviceType, String device,
+                             boolean recordedWithFlash,
+                             String deviceType, String device,
                              boolean doFlashcard, boolean recordInResults,
                              boolean addToAudioTable,
                              boolean allowAlternates)/* throws DominoSessionException*/;

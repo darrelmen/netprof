@@ -54,7 +54,7 @@ public class MailSupport {
   private static final Logger logger = LogManager.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String LOCALHOST = "localhost";
-  private static final int MAIL_PORT = 1025;
+  private static final int MAIL_PORT = 2525;
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
   private static final String MAIL_DEBUG = "mail.debug";
   private static final String MAIL_SMTP_PORT = "mail.smtp.port";
@@ -69,7 +69,9 @@ public class MailSupport {
    */
   public MailSupport(boolean debugEmail, boolean testEmail) {
     this.debugEmail = debugEmail;
-    this.testEmail = testEmail;
+    //this.testEmail = testEmail;
+
+    this.testEmail = true;
     //if (testEmail) logger.debug("\n\n\n--->using test email");
   }
 

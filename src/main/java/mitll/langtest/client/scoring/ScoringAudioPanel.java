@@ -202,7 +202,8 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
    // logger.info("getTranscriptImageURLForAudio width " + widthToUse);
-    scoreAudio(path, resultID, refSentence, transliteration, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
+    scoreAudio(path, resultID, refSentence, transliteration, wordTranscript, phoneTranscript, widthToUse,
+        ANNOTATION_HEIGHT, getReqID("score"));
   }
 
   protected abstract void scoreAudio(final String path,

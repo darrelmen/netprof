@@ -78,8 +78,11 @@ public interface ASR {
 													 boolean decode,
 													 boolean useCache,
                            String prefix,
-                           Result precalcResult,
+//                           Result precalcResult,
+													 PrecalcScores precalcScores,
                            boolean usePhoneToDisplay);
+
+	boolean isAvailable();
 
 	/**
 	 * @see mitll.langtest.server.audio.AudioFileHelper#countPhones

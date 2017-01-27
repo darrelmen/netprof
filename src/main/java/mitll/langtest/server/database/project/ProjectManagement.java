@@ -565,9 +565,11 @@ public class ProjectManagement implements IProjectManagement {
             project1.id(),
             project1.language(),
             hasModel(project1));
-        logger.info("setStartupInfo : For " + userWhere +
+
+    /*    logger.info("setStartupInfo : For " + userWhere +
             "\n\t " + typeOrder +
-            "\n\tSet startup info " + startupInfo);
+            "\n\tSet startup info " + startupInfo);*/
+
         userWhere.setStartupInfo(startupInfo);
       }
     }

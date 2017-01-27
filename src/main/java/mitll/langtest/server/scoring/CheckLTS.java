@@ -110,6 +110,8 @@ class CheckLTS {
    * @see #checkLTS(String, String)
    */
   private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase, String transliteration) {
+//    if (true) return Collections.emptySet();
+
     boolean isEmptyLTS = LTSFactory.isEmpty(lts);
     if (htkDictionary.isEmpty() && isEmptyLTS) {
       if (shown++ < WARN_LTS_COUNT) {

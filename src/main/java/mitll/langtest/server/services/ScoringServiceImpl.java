@@ -33,11 +33,11 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
-import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -45,6 +45,7 @@ import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Collection;
@@ -61,7 +62,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    *
    * @param resultID
    * @return
-   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio
    */
   @Override
   public PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions) {
@@ -111,14 +112,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
             audioFilePath,
             sentence,
             exercise.getTransliteration(),
-            imageOptions,//new ImageOptions(width, height, true),
-//            true,  // make transcript images with colored segments
-            //          false, // false = do alignment
-            //        serverProps.useScoreCache(),
+            imageOptions,
             "" + exerciseID,
-            result,
-            // serverProps.usePhoneToDisplay(), false
-
+            getPrecalcScores(serverProps.usePhoneToDisplay(), result),
 
             new DecoderOptions()
                 .setDoFlashcard(false)
@@ -133,6 +129,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   /**
+   * And check if there is no hydra dcodr available locally, and if so, try to use one on dev.
+   *
    * So first we check and see if we've already done alignment for this audio (if reference audio), and if so, we grab the Result
    * object out of the result table and use it and it's json to generate the score info and transcript inmages.
    *
@@ -141,6 +139,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param testAudioFile
    * @param sentence
    * @param exerciseID
+   * @param usePhonemeMap
    * @return
    * @see ASRScoringAudioPanel#scoreAudio
    */
@@ -151,8 +150,16 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                           String transliteration,
 
                                           ImageOptions imageOptions,
-                                          int exerciseID) {
-    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, transliteration, imageOptions, exerciseID, false);
+                                          int exerciseID,
+                                          boolean usePhonemeMap) {
+    File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg",".wav"));
+    int userIDFromSession = getUserIDFromSession();
+
+    PrecalcScores precalcScores =
+        getAudioFileHelper().checkForWebservice(exerciseID, getProjectID(), userIDFromSession, absoluteAudioFile);
+
+    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, transliteration, imageOptions,
+        exerciseID, usePhonemeMap, precalcScores);
   }
 
   /**
@@ -164,12 +171,14 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param sentence
    * @param exerciseID
    * @param usePhoneToDisplay
+   * @param precalcScores
    * @return
    */
-  private PretestScore getPretestScore(int reqid, int resultID, String testAudioFile, String sentence, String transliteration,
+  private PretestScore getPretestScore(int reqid, int resultID, String testAudioFile, String sentence,
+                                       String transliteration,
                                        ImageOptions imageOptions, int exerciseID,
-                                       boolean usePhoneToDisplay
-  ) {
+                                       boolean usePhoneToDisplay,
+                                       PrecalcScores precalcScores) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
@@ -177,7 +186,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     String answer = split[split.length - 1];
     String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
     Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
-    if (cachedResult != null) {
+
+    boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
+    if (cachedResult != null && precalcScores == null) {
+      precalcScores = getPrecalcScores(usePhoneToDisplay, cachedResult);
       if (DEBUG)
         logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer +
             " found previous " + cachedResult.getUniqueID());
@@ -185,7 +197,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
-    boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
     PretestScore asrScoreForAudio =
         getAudioFileHelper().getASRScoreForAudio(
@@ -195,7 +206,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
             transliteration,
             imageOptions,
             "" + exerciseID,
-            cachedResult,
+            precalcScores,
             new DecoderOptions()
                 .setDoFlashcard(false)
                 .setCanUseCache(serverProps.useScoreCache())
@@ -218,21 +229,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return asrScoreForAudio;
   }
 
-
-  /**
-   * @param reqid
-   * @param resultID
-   * @param testAudioFile
-   * @param sentence
-   * @param exerciseID
-   * @return
-   * @see ASRScoringAudioPanel#scoreAudio
-   */
-  @Override
-  public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                                  String transliteration,
-                                                  ImageOptions imageOptions, int exerciseID) {
-    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, transliteration, imageOptions, exerciseID, true);
+  @NotNull
+  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, Result cachedResult) {
+    return new PrecalcScores(serverProps,cachedResult,usePhoneToDisplay || serverProps.usePhoneToDisplay());
   }
 
   @Override
@@ -265,12 +264,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + identifier);
-      logEvent("audioRecording", "writeAudioFile", identifier, "Writing audio - got zero duration!", -1, "unknown", device);
+      logEvent("audioRecording", "writeAudioFile", identifier, "Writing audio - got zero duration!", -1, device);
     }
     return audioAnswer;
   }
 
-  public void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device) {
+  public void logEvent(String id, String widgetType, String exid, String context, int userid,
+                       String device) {
     try {
       db.logEvent(id, widgetType, exid, context, userid, device);
     } catch (Exception e) {

@@ -146,13 +146,14 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
  //   logger.info("request for " + imageOptions);
 
     ScoringServiceAsync service = controller.getScoringService();
-    if (controller.getProps().shouldUsePhoneToDisplay()) {
-      service.getASRScoreForAudioPhonemes(
-          reqid, resultID, path, refSentence,transliteration, imageOptions, id, async);
-    } else {
+    boolean usePhoneToDisplay = controller.getProps().shouldUsePhoneToDisplay();
+//    if (usePhoneToDisplay) {
+//      service.getASRScoreForAudioPhonemes(
+//          reqid, resultID, path, refSentence,transliteration, imageOptions, id, async);
+//    } else {
       service.getASRScoreForAudio(
-          reqid, resultID, path, refSentence, transliteration,imageOptions, id, async);
-    }
+          reqid, resultID, path, refSentence, transliteration,imageOptions, id, usePhoneToDisplay, async);
+//    }
   }
 
   @NotNull

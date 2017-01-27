@@ -119,7 +119,9 @@ public class ASRScoring extends Scoring implements ASR {
                                   ImageOptions imageOptions,
 
                                   boolean decode,
-                                  boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay) {
+                                  boolean useCache, String prefix,
+                                  PrecalcScores precalcResult,
+                                  boolean usePhoneToDisplay) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
         sentence, transliteration,
         lmSentences,
@@ -129,6 +131,11 @@ public class ASRScoring extends Scoring implements ASR {
         imageOptions,
         decode,
         useCache, prefix, precalcResult, usePhoneToDisplay);
+  }
+
+  @Override
+  public boolean isAvailable() {
+    return true;
   }
 
   /**
@@ -153,7 +160,8 @@ public class ASRScoring extends Scoring implements ASR {
    * @param decode                if true, skips writing image files
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
-   * @param precalcResult         @return score info coming back from alignment/reco
+   * @paramx precalcResult
+   * @return score info coming back from alignment/reco
    * @see ASR#scoreRepeat
    */
   private PretestScore scoreRepeatExercise(String testAudioDir,
@@ -168,7 +176,7 @@ public class ASRScoring extends Scoring implements ASR {
 
                                            boolean decode,
                                            boolean useCache, String prefix,
-                                           Result precalcResult,
+                                           PrecalcScores precalcScores,
                                            boolean usePhoneToDisplay) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
@@ -211,18 +219,18 @@ public class ASRScoring extends Scoring implements ASR {
     Scores scores;
     JsonObject jsonObject = null;
 
-    PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
+//    PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
 
     if (precalcScores.isValid()) {
-      //  logger.info("got valid precalc  " + precalcScores);
+       logger.info("got valid precalc  " + precalcScores);
       scores = precalcScores.getScores();
       jsonObject = precalcScores.getJsonObject();
     } else {
-      if (precalcResult != null) {
-        logger.debug("unusable precalc result, so recalculating : " + precalcResult);
-      }
+//      if (precalcScores != null) {
+//        logger.debug("unusable precalc result, so recalculating : " + precalcScores);
+//      }
 
-      //    logger.debug("recalculating : " + precalcResult);
+        //  logger.debug("recalculating : " + precalcResult);
       scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, transliteration, lmSentences, scoringDir, decode, useCache);
     }
     if (scores == null) {
