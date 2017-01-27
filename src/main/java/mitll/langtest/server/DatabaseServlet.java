@@ -113,11 +113,17 @@ public class DatabaseServlet extends HttpServlet {
     return pathHelper.getInstallPath() + File.separator + "config" + File.separator + config;
   }
 
-  protected void writeToFile(InputStream inputStream, File saveFile) throws IOException {
+  void writeToFile(InputStream inputStream, File saveFile) throws IOException {
     // opens an output stream for writing file
     copyToOutput(inputStream, new FileOutputStream(saveFile));
   }
 
+  /**
+   * TODO replace with commons call
+   * @param inputStream
+   * @param outputStream
+   * @throws IOException
+   */
   private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
     byte[] buffer = new byte[BUFFER_SIZE];
     int bytesRead;

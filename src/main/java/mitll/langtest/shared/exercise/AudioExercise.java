@@ -49,7 +49,6 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioExercise extends ExerciseShell {
-
   final transient  Logger logger = Logger.getLogger("AudioExercise");
 
   private static final String SPEED = "speed";

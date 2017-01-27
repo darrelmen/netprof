@@ -158,7 +158,7 @@ public class ServerProperties {
 
   private static final int MIN_SCORE_TO_SHOW = 20;// 0.20f;
   private static final int USER_INITIAL_SCORES = 20;
-  private static final int USER_FINAL_SCORES = 50;
+  private static final int USER_FINAL_SCORES = 30;
 
   /**
    * Note netprof is all lower case.

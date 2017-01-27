@@ -1083,9 +1083,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
               if (comment != null) {
                 comment.setVisible(false);
               }
-              //    logger.info("delete button clicked - fire changed!");
               LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
-              //     reloadLearnList();
             }
           });
         }

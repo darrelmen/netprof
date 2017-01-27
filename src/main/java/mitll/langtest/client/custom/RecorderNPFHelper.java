@@ -77,8 +77,7 @@ import java.util.logging.Logger;
  * <T extends CommonShell & AudioRefExercise>
  */
 class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  private final Logger logger = Logger.getLogger("RecorderNPFHelper");
-
+  //private final Logger logger = Logger.getLogger("RecorderNPFHelper");
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
   private final boolean doNormalRecording;
@@ -94,7 +93,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    * @param exerciseServiceAsync
    * @see Navigation#Navigation
    */
-  public RecorderNPFHelper(LangTestDatabaseAsync service,
+  RecorderNPFHelper(LangTestDatabaseAsync service,
                            UserFeedback feedback,
                            UserManager userManager,
                            ExerciseController controller,
@@ -214,10 +213,10 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
 
   /**
    * @see #doMaleFemale()
-   * @see MyWaveformExercisePanel#onLoad()
+   * @see MyWaveformExercisePanel#onLoad
    */
   private void getProgressInfo(String instance) {
-    logger.info("Get progress info for " +getClass() + " instance " + instance);
+    //logger.info("Get progress info for " +getClass() + " instance " + instance);
     service.getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -237,6 +236,13 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
     //    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
     private final CommonExercise e;
 
+    /**
+     * @see RecorderNPFHelper#getFactory
+     * @param e
+     * @param controller1
+     * @param exerciseList1
+     * @param instance
+     */
     MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
       this.e = e;
@@ -249,7 +255,6 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
         showRecordedState(e);
       }
     }
-
 
     @Override
     protected void onLoad() {

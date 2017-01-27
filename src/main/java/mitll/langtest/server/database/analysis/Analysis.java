@@ -71,7 +71,7 @@ public abstract class Analysis extends DAO {
    * why do we need to do all this work when they may never click on the reference audio?
    * can't we get them for the visible set?
    * or ask exercise service?
-   * 
+   *
    * @deprecated  let's not use this map - super expensive to make, every time
    */
   final Map<Integer, String> exToRef;

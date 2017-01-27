@@ -53,6 +53,7 @@ import java.util.logging.Logger;
  */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
+
   private static final String RECORD_BUTTON = "RecordButton";
   private static final String ANIMATED_PROGRESS_GIF = "animated_progress.gif";
   private static final String WAIT_URL = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS_GIF;
@@ -60,6 +61,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private PlayAudioPanel playAudioPanel;
   private final Panel parentPanel;
   private final AudioType audioType;
+  private long then;
 
   /**
    * @see RecordAudioPanel#makePostAudioRecordButton(AudioType, String)
@@ -96,7 +98,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * the results table.
    *
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    * @see #postAudioFile
    */
   @Override
@@ -104,7 +106,6 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     return true;
   }
 
-  private long then;
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#start

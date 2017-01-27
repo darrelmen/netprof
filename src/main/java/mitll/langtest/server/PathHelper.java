@@ -57,12 +57,9 @@ public class PathHelper {
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
   private static final String IMAGE_OUTDIR = "imageOutdir";
-//  private static final String TOMCAT_WRITE_DIRECTORY_FULL_PATH = "tomcatWriteDirectoryFullPath";
 
   private String realContextPathTest;
   private final ServletContext context;
-  //  private String configDir;
-  private String installDir;
   private ServerProperties properties;
 
   public PathHelper(ServletContext context) {
@@ -90,23 +87,17 @@ public class PathHelper {
    * @param filePath
    * @return
    * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile
-   *
    */
   public File getAbsoluteFile(String filePath) {
- //   String installPath = properties.getAudioBaseDir(); // was install path
+    //   String installPath = properties.getAudioBaseDir(); // was install path
     String installPath = getInstallPath();
 //    logger.info("getAbsoluteFile " + installPath + "/" +filePath);
     File absolute = getAbsolute(installPath, filePath);
     if (!absolute.exists()) {
       logger.warn("\t getAbsoluteFile doesn't exist: " + absolute.getAbsolutePath());
     }
-
     return absolute;
   }
-
-//  public File getAbsoluteAnswerAudioFile(String filePath, String language) {
-//    return getAbsolute(getAnswerDir() + File.separator + language.toLowerCase(), filePath);
-//  }
 
   public File getAbsoluteBestAudioFile(String filePath, String language) {
     return getAbsolute(properties.getMediaDir() + File.separator + language.toLowerCase(), filePath);
@@ -177,6 +168,7 @@ public class PathHelper {
 
   /**
    * CHEESY - assumes audio base dir is related to answers.
+   *
    * @param audioContext
    * @return
    */
@@ -184,15 +176,18 @@ public class PathHelper {
     return getAbsoluteToAnswer(audioContext).substring(properties.getAudioBaseDir().length());
   }
 
-    /**
-     * TODO : fix this -
-     *
-     * @param language
-     * @param exercise
-     * @param question
-     * @param user
-     * @return
-     */
+  String getAbsoluteToAnswer(String language, int exercise, int user) {
+    return getAbsoluteToAnswer(language, exercise, 0, user);
+  }
+
+  /**
+   *
+   * @param language
+   * @param exercise
+   * @param question - vestigial
+   * @param user
+   * @return
+   */
   String getAbsoluteToAnswer(String language, int exercise, int question, int user) {
     String planAndTestPath =
         language.toLowerCase() + File.separator +
@@ -205,10 +200,6 @@ public class PathHelper {
   public String getAbsoluteWavPathUnder(String planAndTestPath) {
     return getWavPath(getAnswerDir(), planAndTestPath);
   }
-
-/*  public String getRelPathUnder(String planAndTestPath) {
-    return getWavPath(getAnswerDir().substring(properties.getAudioBaseDir().length()), planAndTestPath);
-  }*/
 
   private String getAnswerDir() {
     return properties.getAnswerDir();
@@ -248,17 +239,6 @@ public class PathHelper {
     }
     return imageOutdir;
   }
-/*
-  public void setConfigDir(String configDir) {
-    this.configDir = configDir;
-  }
-*/
-
-/*
-  public String getConfigDir() {
-    return configDir;
-  }
-*/
 
   public void setProperties(ServerProperties properties) {
     this.properties = properties;
