@@ -62,6 +62,7 @@ import java.util.logging.Logger;
  */
 public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private Logger logger = Logger.getLogger("ScoringAudioPanel");
+
   private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
 

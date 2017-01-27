@@ -69,8 +69,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
-  private static final int MAX_EXAMPLES = 10;
   private final Logger logger = Logger.getLogger("PhoneContainer");
+
+  private static final int MAX_EXAMPLES = 25;
 
   private static final int TABLE_WIDTH = 295;
   private static final int SCORE_COL_WIDTH = 60;
@@ -84,6 +85,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private static final int SOUND_WIDTH = 75;
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
+
   private final boolean isNarrow;
   private long from;
   private long to;
@@ -580,7 +582,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     // TODO: better ways of doing this.
     filteredWords = filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES));
-    exampleContainer.addItems(phone, filteredWords);
+    exampleContainer.addItems(phone, filteredWords, MAX_EXAMPLES);
 
     phonePlot.showErrorBarData(filtered, phone);
   }

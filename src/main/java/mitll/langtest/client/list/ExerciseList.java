@@ -697,15 +697,14 @@ UserState userState;
     return exercisePanel;
   }
 
-
   /**
    * @return
    * @see mitll.langtest.client.list.PagingExerciseList#gotClickOnItem
    */
-  boolean isExercisePanelBusy() {
+/*  boolean isExercisePanelBusy() {
     Widget current = innerContainer.getWidget();
     return current != null && current instanceof BusyPanel && ((BusyPanel) current).isBusy();
-  }
+  }*/
 
   /**
    * @param current

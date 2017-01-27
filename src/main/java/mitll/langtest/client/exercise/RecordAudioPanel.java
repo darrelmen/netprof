@@ -67,8 +67,12 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<Shell> {
-  public static final String DYNAMIC_RANGE = "Dynamic Range";
   private final Logger logger = Logger.getLogger("RecordAudioPanel");
+
+  /**
+   * @see #getAfterPlayWidget
+   */
+  private static final String DYNAMIC_RANGE = "Dynamic Range";
   private static final int HEIGHT_OF_RECORD_ROW = 58;
 
   private static final int MIN_VALID_DYNAMIC_RANGE = 32;
