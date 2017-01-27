@@ -41,10 +41,7 @@ import com.google.gson.JsonObject;
 import corpus.HTKDictionary;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.HTTPClient;
-import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -54,6 +51,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
@@ -99,6 +97,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   private final String ip;
   private final int port;
+  private boolean available;
 
   /**
    * @param deployPath
@@ -118,6 +117,20 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     ip = project.getWebserviceIP();
     port = project.getWebservicePort();
+
+    HTTPClient dcodr = getDcodr();
+
+    available = dcodr.isAvailable();
+    if (!available) {
+      logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port);
+    } else {
+      logger.info("\n\nASRWebserviceScoring CAN talk to " + ip + ":" + port);
+
+    }
+  }
+
+  public boolean isAvailable() {
+    return available;
   }
 
   /**
@@ -136,14 +149,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                   String sentence, Collection<String> lmSentences, String transliteration, String imageOutDir,
                                   ImageOptions imageOptions,
                                   boolean decode,
-                                  boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay) {
+                                  boolean useCache, String prefix,
+                                 // Result precalcResult,
+
+                                  PrecalcScores precalcScores,
+                                  boolean usePhoneToDisplay) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
         sentence, lmSentences, transliteration,
         imageOutDir,
         imageOptions,
         decode,
 
-        useCache, prefix, precalcResult, usePhoneToDisplay);
+        useCache, prefix, precalcScores, usePhoneToDisplay);
   }
 
   /**
@@ -169,8 +186,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param precalcResult
    * @param usePhoneToDisplay
    * @return score info coming back from alignment/reco
-   * @paramx tmpDir                where to run hydec
-   * @paramx scoringDir            where the hydec subset is (models, bin.linux64, etc.)
    * @see ASR#scoreRepeat
    */
   // JESS alignment and decoding
@@ -185,7 +200,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            boolean decode,
                                            boolean useCache,
                                            String prefix,
-                                           Result precalcResult,
+                                           PrecalcScores precalcScores,
                                            boolean usePhoneToDisplay) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
@@ -232,16 +247,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
 
     // actually run the scoring
-
     //logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
     // TODO remove the 16k hardcoding?
     double duration = new AudioCheck(props).getDurationInSeconds(wavFile);
 
     JsonObject jsonObject = null;
 
-    PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
-
-    if (precalcScores.isValid()) {
+    if (precalcScores != null && precalcScores.isValid()) {
+      logger.info("got valid precalc  " + precalcScores);
       scores = precalcScores.getScores();
       jsonObject = precalcScores.getJsonObject();
     }
@@ -285,10 +298,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       logger.error("scoreRepeatExercise hydra failed to generate scores.");
       return new PretestScore(-1f);
     }
-    return getPretestScore(imageOutDir,
+    return getPretestScore(
+        imageOutDir,
         imageOptions,
         decode, prefix, noSuffix,
-        scores, phoneLab, wordLab, duration, processDur, usePhoneToDisplay, jsonObject);
+        scores, phoneLab, wordLab,
+        duration, processDur, usePhoneToDisplay, jsonObject);
   }
 
   private void cacheHydraResult(boolean decode, String key, Scores scores, String phoneLab, String wordLab) {
@@ -401,6 +416,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   Set<String> seen = new HashSet<>();
 
+  /**
+   * @param transcript
+   * @param transliteration
+   * @param justPhones
+   * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciations
+   */
   public String getPronunciations(String transcript, String transliteration, boolean justPhones) {
     String dict = "";
     String[] translitTokens = transliteration.toLowerCase().split(" ");
@@ -428,7 +450,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             if (!ltsOutputOk(process)) {
               logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
               if (canUseTransliteration) {
-  //              logger.info("trying transliteration LTS");
+                //              logger.info("trying transliteration LTS");
 
                 String[][] translitprocess = (transcriptTokens.length == 1) ?
                     getLTS().process(StringUtils.join(translitTokens, "")) :
@@ -524,7 +546,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private Object[] runHydra(String audioPath, String transcript, String transliteration, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
+  private Object[] runHydra(String audioPath,
+                            String transcript,
+                            String transliteration,
+                            Collection<String> lmSentences,
+                            String tmpDir,
+                            boolean decode,
+                            int end) {
     // reference trans
     String cleaned = slfFile.cleanToken(transcript).trim();
     if (isMandarin) {
@@ -555,7 +583,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             "[<s>" + after + "</s>]";
 
     long then = System.currentTimeMillis();
-    String resultsStr = runHydra(hydraInput, new HTTPClient(ip, port, "dcodr"));
+    String resultsStr = runHydra(hydraInput, getDcodr());
     if (resultsStr.startsWith("ERROR")) {
       String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
       message = "hydra said " + resultsStr + " : " + message;
@@ -590,6 +618,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 		}*/
       return new Object[]{scores, results[1].replaceAll("#", ""), results[2].replaceAll("#", "")}; // where are the # coming from?
     }
+  }
+
+  @NotNull
+  private HTTPClient getDcodr() {
+    return new HTTPClient(ip, port, "dcodr");
   }
 
   private String getCleanedTranscript(String cleaned, String sep) {
@@ -642,6 +675,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param background
    * @return
    * @see AlignDecode#getASRScoreForAudio
+   * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio(File, Collection, String, DecoderOptions)
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
     List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);

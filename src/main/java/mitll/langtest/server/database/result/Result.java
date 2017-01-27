@@ -50,7 +50,7 @@ public class Result implements UserAndTime {
   private boolean valid;
   private long timestamp;
 
-  private AudioType audioType;
+  private AudioType audioType = AudioType.UNSET;
   private long durationInMillis;
   private boolean correct;
   private float pronScore;

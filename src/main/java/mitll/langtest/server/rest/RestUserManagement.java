@@ -298,7 +298,7 @@ public class RestUserManagement {
   ) {
     IUserDAO userDAO = db.getUserDAO();
     User userFound = userDAO.getUserByID(user);
-    logger.debug("gotHasUser user '" + user);// + "' pass '" + passwordH.length() + "' -> " + userFound);
+    logger.debug("gotHasUser user " + user);// + "' pass '" + passwordH.length() + "' -> " + userFound);
 
     if (userFound == null) {
       toReturn.put(USERID, -1);

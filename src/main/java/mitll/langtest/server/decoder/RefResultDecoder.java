@@ -127,6 +127,8 @@ public class RefResultDecoder {
             ensure(exercises, exToAudio);
           }
 
+          // TODO : consider putting this back
+
  /*         if (serverProps.shouldRecalcDNR()) {
             calcDNROnAudio(exercises, relativeConfigDir, exToAudio);
           }*/
@@ -144,6 +146,9 @@ public class RefResultDecoder {
           populateAudioTable(exercises);
         }
 */
+
+// TODO : consider putting this back
+
         if (db.getServerProps().shouldRecalcStudentAudio()) {
           //  recalcStudentAudio();
           //logger.warn("not doing recalc student audio.");

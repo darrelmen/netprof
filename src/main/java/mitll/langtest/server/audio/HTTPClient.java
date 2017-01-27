@@ -37,6 +37,7 @@ import mitll.langtest.shared.amas.QAPair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
@@ -44,6 +45,12 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.file.Files;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 
 //
@@ -53,18 +60,35 @@ import java.util.Collection;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class HTTPClient {
   private static final Logger logger = LogManager.getLogger(HTTPClient.class);
 
   private HttpURLConnection httpConn;
 
-  public HTTPClient() {}
+  static {
+    //for localhost testing only
+    javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+        new javax.net.ssl.HostnameVerifier(){
+
+          public boolean verify(String hostname,
+                                javax.net.ssl.SSLSession sslSession) {
+              System.err.println("verify " +hostname);
+              return true;
+
+          }
+        });
+  }
+
+  @Deprecated
+  public HTTPClient() {
+  }
+
+
 
   /**
-   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
    * @param webserviceIP
+   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
    */
   public HTTPClient(String webserviceIP, boolean secure) {
     this("http" + (secure ? "s" : "") + "://" + webserviceIP);
@@ -77,19 +101,46 @@ public class HTTPClient {
    */
   public HTTPClient(String webserviceIP, int webservicePort, String service) {
     this("http://" + webserviceIP + ":" + webservicePort + "/" + service);
-
   }
 
+
   /**
-   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
    * @param url
+   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
    */
   public HTTPClient(String url) {
     try {
-      logger.info("URL is : " +url);
+      logger.info("URL is : " + url);
       httpConn = setupPostHttpConn(url);
     } catch (IOException e) {
       logger.error("Error constructing HTTPClient:\n" + e, e);
+    }
+  }
+
+  public void postFile(File theFile) {
+    try {
+      OutputStream outputStream = httpConn.getOutputStream();
+      Files.copy(theFile.toPath(), outputStream);
+
+      outputStream.flush();
+      outputStream.close();
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+  }
+
+  public void addRequestProperty(String k, String v) {
+    httpConn.addRequestProperty(k, v);
+  }
+
+  public boolean isAvailable() {
+    int responseCode = -1;
+    try {
+      responseCode = httpConn.getResponseCode();
+      return responseCode == 200;
+    } catch (IOException e) {
+      logger.warn("Got " + e + " with code " + responseCode);
+      return false;
     }
   }
 
@@ -109,7 +160,7 @@ public class HTTPClient {
   }
 
   private HttpURLConnection setupPostHttpConn(String url) throws IOException {
-    HttpURLConnection httpConn = (HttpURLConnection) (new URL(url)).openConnection();
+    HttpURLConnection httpConn = getHttpURLConnection(url);
     httpConn.setRequestMethod("POST");
     httpConn.setDoOutput(true);
     httpConn.setConnectTimeout(5000);
@@ -120,7 +171,7 @@ public class HTTPClient {
   }
 
   private HttpURLConnection setupGetHttpConn(String url) throws IOException {
-    HttpURLConnection httpConn = (HttpURLConnection) (new URL(url)).openConnection();
+    HttpURLConnection httpConn = getHttpURLConnection(url);
     httpConn.setRequestMethod("GET");
     httpConn.setConnectTimeout(1000);
     //httpConn.setReadTimeout(20000);
@@ -129,31 +180,60 @@ public class HTTPClient {
     return httpConn;
   }
 
+  private HttpURLConnection getHttpURLConnection(String url) throws IOException {
+    HttpURLConnection httpURLConnection = (HttpURLConnection) (new URL(url)).openConnection();
+
+    try {
+      SSLContext ctx = SSLContext.getInstance("TLS");
+      ctx.init(new KeyManager[0], new TrustManager[] {new DefaultTrustManager()}, new SecureRandom());
+      SSLContext.setDefault(ctx);
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    } catch (KeyManagementException e) {
+      e.printStackTrace();
+    }
+
+//
+//    httpURLConnection.seth(new HostnameVerifier() {
+//      @Override
+//      public boolean verify(String arg0, SSLSession arg1) {
+//        return true;
+//      }
+//    });
+    return httpURLConnection;
+  }
+
+  private static class DefaultTrustManager implements X509TrustManager {
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+
+    @Override
+    public X509Certificate[] getAcceptedIssuers() {
+      return null;
+    }
+  }
+
   private void setRequestProperties(HttpURLConnection httpConn) {
     httpConn.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
     httpConn.setRequestProperty("Accept-Charset", "UTF8");
     httpConn.setRequestProperty("charset", "UTF8");
   }
 
-/*
-  private String read(HttpURLConnection conn) {
-		return receive(conn);
-	}
-*/
-
   private void closeConn() {
     httpConn.disconnect();
-    //httpConn = null;
   }
 
   private void send(String input) throws IOException {
-    logger.debug("SEND INPUT: " + input);
-
+    //logger.debug("SEND INPUT: " + input);
     OutputStream outputStream = httpConn.getOutputStream();
-
     CharsetEncoder encoder = Charset.forName("UTF-8").newEncoder();
     encoder.onMalformedInput(CodingErrorAction.REPORT);
     encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+
     BufferedWriter sender = new BufferedWriter(new OutputStreamWriter(outputStream, encoder));
     sender.write(input);
     sender.flush();
@@ -168,7 +248,7 @@ public class HTTPClient {
     try {
       return receive(httpConn, getReader(httpConn));
     } catch (IOException e) {
-      logger.error("Got " + e,e);
+      logger.error("Got " + e, e);
       return "";
     }
   }
@@ -211,5 +291,20 @@ public class HTTPClient {
     String s = sendAndReceive(input);
     closeConn();
     return s;
+  }
+
+  public String sendAndReceiveAndClose(File input) throws IOException {
+    try {
+      postFile(input);
+      String receive = receive();
+      closeConn();
+      return receive;
+    } catch (ConnectException ce) {
+      logger.error("sending " + input + " couldn't connect to server at  " + httpConn.getURL() + " got " + ce);
+      return "";
+    } catch (IOException e) {
+      logger.error("sending " + input + " got " + e, e);
+      throw e;
+    }
   }
 }
