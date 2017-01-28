@@ -158,8 +158,11 @@ public class ScoreServlet extends DatabaseServlet {
     String passwordFromBody = "";
     int projid = getProject(request);
     if (projid == -1) {
-      logger.warn("OK - look for project id from url ");
-      String[] projids = queryString.split("projid=");
+      projid = request.getIntHeader("projid");
+
+
+      logger.warn("OK - look for project id from url header " + projid);
+   /*   String[] projids = queryString.split("projid=");
       if (projids.length > 1) {
         projid = getIntValue(projids[1]);
       } else {
@@ -185,7 +188,7 @@ public class ScoreServlet extends DatabaseServlet {
         } catch (IOException e) {
           logger.error("got " + e, e);
         }
-      }
+      }*/
     }
 
     getDatabase();
@@ -237,6 +240,9 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn = nestedChapters;
         }
       } else if (matchesRequest(queryString, "hasUser")) {
+
+        logger.info("got doGet " + queryString);
+
         checkUserAndLogin(request, toReturn);
       } else if (userManagement.doGet(
           request,

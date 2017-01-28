@@ -44,11 +44,8 @@ import mitll.langtest.shared.scoring.PretestScore;
  * Time: 6:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ScoreListener {
-  void gotScore(PretestScore score, boolean showOnlyOneExercise, String path);
+public interface ScoreListener extends MiniScoreListener {
   int getOffsetWidth();
-
-  void addScore(CorrectAndScore hydecScore);
 
   /**
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#setClassAvg(float)
