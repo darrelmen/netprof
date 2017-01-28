@@ -52,6 +52,7 @@ import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -82,6 +83,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
+  /**
+   *
+   */
   private final List<CorrectAndScore> scores2 = new ArrayList<CorrectAndScore>();
   private final SimplePanel scoreHistoryPanel;
   private float classAvg = 0f;
@@ -183,6 +187,10 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       $wnd.basicMP3Player.init();
   }-*/;
 
+  /**
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#addScore(CorrectAndScore)
+   * @param hydecScore
+   */
   @Override
   public void addScore(CorrectAndScore hydecScore) {
     scores2.add(hydecScore);
@@ -210,6 +218,21 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   @Override
   public void showChart(boolean showOnlyOneExercise) {
     VerticalPanel vp = new VerticalPanel();
+    List<CorrectAndScore> scoreAndPaths = addHistory(vp);
+
+    if (classAvg > 0) {
+      TooltipHelper tooltipHelper = new TooltipHelper();
+      vp.add(getClassAverage(tooltipHelper, !scoreAndPaths.isEmpty()));
+    }
+
+    if (refAudio != null && !scoreAndPaths.isEmpty()) { // show audio to compare yours against
+      vp.add(getRefAudio());
+    }
+    scoreHistoryPanel.add(vp);
+  }
+
+  @NotNull
+  private List<CorrectAndScore> addHistory(VerticalPanel vp) {
     List<CorrectAndScore> scoreAndPaths = scores2;
 
     if (scores2.size() > NUM_TO_SHOW) {
@@ -222,15 +245,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + (i + 1), i);
       vp.add(hp);
     }
-
-    if (classAvg > 0) {
-      vp.add(getClassAverage(tooltipHelper, !scoreAndPaths.isEmpty()));
-    }
-
-    if (refAudio != null && !scoreAndPaths.isEmpty()) { // show audio to compare yours against
-      vp.add(getRefAudio());
-    }
-    scoreHistoryPanel.add(vp);
+    return scoreAndPaths;
   }
 
   /**
@@ -249,6 +264,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     return hp;
   }
 
+  /**
+   *
+   * @param tooltipHelper
+   * @param addLeftMargin
+   * @return
+   */
   private Panel getClassAverage(TooltipHelper tooltipHelper, boolean addLeftMargin) {
     String prefix = "Class Avg";
     CorrectAndScore scoreAndPath = new CorrectAndScore(classAvg, "");

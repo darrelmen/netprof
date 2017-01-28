@@ -1,21 +1,23 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.gauge.ASRScorePanel;
+import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -24,7 +26,13 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * An ASR scoring panel with a record button.
@@ -44,7 +52,7 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
   private GoodwaveExercisePanel goodwaveExercisePanel;
   private final int index;
   private PostAudioRecordButton postAudioRecordButton;
-  private PlayAudioPanel playAudioPanel;
+  private MyPlayAudioPanel playAudioPanel;
   private IconAnchor download;
   private Anchor downloadAnchor;
   private Panel downloadContainer;
@@ -52,8 +60,8 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
   /**
    * TODO make better relationship with ASRRecordAudioPanel
    */
-  Image recordImage1;
-  Image recordImage2;
+  private Image recordImage1;
+  private Image recordImage2;
 
   /**
    * @param controller
@@ -73,6 +81,12 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
     this.index = 1;
     getElement().setId("ASRRecordAudioPanel");
   }
+
+  // TODO : add a subset of the ASRScorePanel.
+//
+//  public MiniScoreListener getScoreListener() {
+//    return new ASRScorePanel("scorer",controller,exerciseID);
+//  }
 
   /**
    * So here we're trying to make the record and play buttons know about each other
@@ -97,6 +111,18 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
     return playAudioPanel;
   }
 
+  protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
+                           boolean scoredBefore, String path) {
+    super.useResult(result, wordTranscript, phoneTranscript, scoredBefore, path);
+    if (result.getHydecScore() > 0) {
+      float zeroToHundred = result.getHydecScore() * 100f;
+      //etASRGaugeValue(Math.min(100.0f, zeroToHundred));
+      playAudioPanel.showDynamicRange(Math.min(100.0f, zeroToHundred));
+    } else {
+      playAudioPanel.hideScore();
+    }
+  }
+
   private class MyPlayAudioPanel extends PlayAudioPanel {
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, SoundManagerAPI soundManager,
                             final PostAudioRecordButton postAudioRecordButton1,
@@ -104,12 +130,12 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
       super(soundManager, new PlayListener() {
         public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
-      // TODO put back busy thing?
+          // TODO put back busy thing?
           postAudioRecordButton1.setEnabled(false);
         }
 
         public void playStopped() {
-        //  goodwaveExercisePanel.setBusy(false);
+          //  goodwaveExercisePanel.setBusy(false);
           postAudioRecordButton1.setEnabled(true);
         }
       }, "", null);
@@ -131,6 +157,69 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
       super.addButtons(optionalToTheRight);
 
       addDownloadAudioWidget();
+
+      scoreBar = getAfterPlayWidget();
+      add(scoreBar);
+    }
+
+    Widget scoreBar;
+    private ProgressBar progressBar;
+
+    /**
+     * Add dynamic range feedback to the right of the play button.
+     *
+     * @return
+     * @seex mitll.langtest.client.scoring.AudioPanel#addWidgets
+     */
+    protected Widget getAfterPlayWidget() {
+      HTML w = new HTML("Score");
+      w.addStyleName("leftTenMargin");
+      w.addStyleName("topBarMargin");
+      Panel afterPlayWidget = new HorizontalPanel();
+
+      afterPlayWidget.add(w);
+      progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+      afterPlayWidget.add(progressBar);
+
+      progressBar.setWidth("300px");
+      Style style = progressBar.getElement().getStyle();
+      style.setMarginLeft(5, Style.Unit.PX);
+      progressBar.addStyleName("topBarMargin");
+
+      afterPlayWidget.setVisible(false);
+      return afterPlayWidget;
+    }
+
+    private static final int MIN_VALID_DYNAMIC_RANGE = 30;
+    private static final int MIN_GOOD_DYNAMIC_RANGE  = 70;
+
+    /**
+     * Set the value on the progress bar to reflect the dynamic range we measure on the audio.
+     *
+     * @param result
+     * @see #useResult(AudioAnswer)
+     */
+    public void showDynamicRange(double dynamicRange) {
+      //   double dynamicRange = result.getDynamicRange();
+      double percent = dynamicRange / 100d;
+      String color = SimpleColumnChart.getColor((float) percent);
+
+      logger.info("percent " + percent + " color " + color);
+
+      progressBar.setPercent(100 * percent);
+      progressBar.setText("" + Math.round(dynamicRange));//(dynamicRange));
+      progressBar.setColor(dynamicRange > MIN_GOOD_DYNAMIC_RANGE ?
+          ProgressBarBase.Color.SUCCESS : dynamicRange > MIN_VALID_DYNAMIC_RANGE ?
+         ProgressBarBase.Color.WARNING :
+          ProgressBarBase.Color.DANGER);
+
+   //   progressBar.getElement().getStyle().setBackgroundColor(color);
+
+      scoreBar.setVisible(true);
+    }
+
+    public void hideScore() {
+      scoreBar.setVisible(false);
     }
 
     private void addDownloadAudioWidget() {
@@ -141,9 +230,9 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
       north.add(getDownloadIcon());
       downloadContainer.add(north);
 
-      DivWidget south = new DivWidget();
-      south.add(getDownloadAnchor());
-      downloadContainer.add(south);
+//      DivWidget south = new DivWidget();
+//      south.add(getDownloadAnchor());
+//      downloadContainer.add(south);
       downloadContainer.setVisible(false);
       downloadContainer.addStyleName("leftFiveMargin");
 
@@ -167,7 +256,6 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
     });
     return downloadAnchor;
   }
-
 
   private IconAnchor getDownloadIcon() {
     download = new IconAnchor();
@@ -214,7 +302,6 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
     downloadAnchor.setHref(href);
   }
 
-
   protected int getUser() {
     return controller.getUserState().getUser();
   }
@@ -245,6 +332,7 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
     @Override
     public void startRecording() {
       playAudioPanel.setEnabled(false);
+      playAudioPanel.hideScore();
       goodwaveExercisePanel.setBusy(true);
       controller.logEvent(this, "RecordButton", getExerciseID(), "startRecording");
 
