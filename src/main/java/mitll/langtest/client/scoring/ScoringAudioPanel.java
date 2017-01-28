@@ -228,7 +228,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param path
    * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
    */
-  void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
+ protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
                  boolean scoredBefore, String path) {
     Map<NetPronImageType, String> netPronImageTypeStringMap = result.getsTypeToImage();
     String words = netPronImageTypeStringMap.get(NetPronImageType.WORD_TRANSCRIPT);
