@@ -46,7 +46,7 @@ public class EmptyScoreListener implements ScoreListener {
   public void setClassAvg(float classAvg) {}
 
   @Override
-  public void gotScore(PretestScore score, boolean showOnlyOneExercise, String path) {}
+  public void gotScore(PretestScore score, String path) {}
 
   @Override
   public int getOffsetWidth() { return 0; }
@@ -55,7 +55,7 @@ public class EmptyScoreListener implements ScoreListener {
   public void addScore(CorrectAndScore hydecScore) {}
 
   @Override
-  public void showChart(boolean showOnlyOneExercise) {}
+  public void showChart() {}
 
   @Override
   public void setRefAudio(String refAudio) {}

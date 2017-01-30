@@ -76,12 +76,12 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    */
   protected NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
                           ListInterface<T> listContainer, boolean addKeyHandler) {
-    this(exercise, controller, provider, listContainer, true, addKeyHandler, false);
+    this(exercise, controller, provider, listContainer, true, addKeyHandler, false, false);
   }
 
   public NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
                           ListInterface<T> listContainer, boolean addButtons, boolean addKeyHandler,
-                          boolean enableNextOnlyWhenAllCompleted) {
+                          boolean enableNextOnlyWhenAllCompleted, boolean addPrevButton) {
     this.provider = provider;
     this.listContainer = listContainer;
     this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
@@ -89,7 +89,9 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     getNextAndPreviousButtons(exercise, controller, addButtons, addKeyHandler);
     getElement().setId("NavigationHelper");
     int id = exercise.getID();
+
     controller.register(prev, id);
+    prev.setVisible(addPrevButton);
     controller.register(next, id);
   }
 
@@ -101,7 +103,8 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @param addKeyHandler
    */
   private void getNextAndPreviousButtons(final HasID e,
-                                         final ExerciseController controller, boolean addButtons, boolean addKeyHandler) {
+                                         final ExerciseController controller, boolean addButtons,
+                                         boolean addKeyHandler) {
     makePrevButton(e, addButtons, addKeyHandler);
     makeNextButton(e, controller, addButtons);
   }

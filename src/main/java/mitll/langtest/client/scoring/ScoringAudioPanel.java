@@ -46,6 +46,7 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -69,9 +70,10 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private final String refSentence;
   private int resultID = -1;
   private final String transliteration;
-  private ScoreListener scoreListener;
+//  private ScoreListener scoreListener;
+  private MiniScoreListener miniScoreListener;
   private PretestScore result;
-  private boolean showOnlyOneExercise = false; // true for when called from the headstart website
+ // private boolean showOnlyOneExercise = false; // true for when called from the headstart website
   private static final boolean debug = false;
 
   /**
@@ -85,7 +87,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   ScoringAudioPanel(String refSentence, String transliteration, ExerciseController controller,
                     ScoreListener gaugePanel, String playButtonSuffix, T exercise,
                     String instance) {
-    this(null, refSentence,transliteration, controller, SHOW_SPECTROGRAM, gaugePanel, 23,
+    this(null, refSentence, transliteration, controller, SHOW_SPECTROGRAM, 23,
         playButtonSuffix, exercise, exercise.getID(), instance);
   }
 
@@ -93,7 +95,6 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param path
    * @param refSentence
    * @param showSpectrogram
-   * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
    * @param exercise
@@ -105,17 +106,16 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
                     String transliteration,
                     ExerciseController controller,
                     boolean showSpectrogram,
-                    ScoreListener gaugePanel,
                     int rightMargin,
                     String playButtonSuffix,
                     T exercise,
                     int exerciseID,
                     String instance) {
-    super(path, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
+    super(path, controller, showSpectrogram, rightMargin, playButtonSuffix,
         exercise, exerciseID, instance);
     this.refSentence = refSentence;
     this.transliteration = transliteration;
-    showOnlyOneExercise = controller.showOnlyOneExercise();
+  //  showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
   }
 
@@ -162,8 +162,12 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param l
    * @see GoodwaveExercisePanel#getAnswerWidget
    */
-  public void addScoreListener(ScoreListener l) {
-    this.scoreListener = l;
+//  public void addScoreListener(ScoreListener l) {
+//    this.scoreListener = l;
+//  }
+
+  public void addMinicoreListener(MiniScoreListener l) {
+    this.miniScoreListener = l;
   }
 
   /**
@@ -201,7 +205,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
-   // logger.info("getTranscriptImageURLForAudio width " + widthToUse);
+    // logger.info("getTranscriptImageURLForAudio width " + widthToUse);
     scoreAudio(path, resultID, refSentence, transliteration, wordTranscript, phoneTranscript, widthToUse,
         ANNOTATION_HEIGHT, getReqID("score"));
   }
@@ -228,8 +232,8 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param path
    * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
    */
- protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
-                 boolean scoredBefore, String path) {
+  protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
+                           boolean scoredBefore, String path) {
     Map<NetPronImageType, String> netPronImageTypeStringMap = result.getsTypeToImage();
     String words = netPronImageTypeStringMap.get(NetPronImageType.WORD_TRANSCRIPT);
     if (words != null) {
@@ -243,8 +247,11 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     } else {
       phoneTranscript.getImage().setUrl(IMAGES_REDX_PNG);
     }
-    if (!scoredBefore && scoreListener != null) {
-      scoreListener.gotScore(result, showOnlyOneExercise, path);
+//    if (!scoredBefore && scoreListener != null) {
+//      scoreListener.gotScore(result, path);
+//    }
+    if (!scoredBefore && miniScoreListener != null) {
+      miniScoreListener.gotScore(result, path);
     }
     this.result = result;
   }
@@ -277,31 +284,35 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   }
 
   /**
-   * @param score
+   * @param scores
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
-  public void addScore(CorrectAndScore score) {
-    scoreListener.addScore(score);
+  void addScores(Collection<CorrectAndScore> scores) {
+    //scoreListener.addScore(score);
+    for (CorrectAndScore score : scores) {
+      miniScoreListener.addScore(score);
+    }
   }
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
   public void showChart() {
-    scoreListener.showChart(showOnlyOneExercise);
+//    scoreListener.showChart();
+    miniScoreListener.showChart();
   }
 
   /**
-   * @param avgScore
+   * @paramx avgScore
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
-  public void setClassAvg(float avgScore) {
-    scoreListener.setClassAvg(avgScore);
-  }
-
-  public void setRefAudio(String refAudio) {
-    scoreListener.setRefAudio(refAudio);
-  }
+//  public void setClassAvg(float avgScore) {
+//    scoreListener.setClassAvg(avgScore);
+//  }
+//
+//  public void setRefAudio(String refAudio) {
+//    scoreListener.setRefAudio(refAudio);
+//  }
 
   private abstract class MyClickHandler implements ClickHandler, EventSegment {
     final NetPronImageType type;

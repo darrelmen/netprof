@@ -90,7 +90,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         exercise.getTransliteration(),
 
         controller1,
-        controller1.getProps().showSpectrogram(), scoreListener, RIGHT_MARGIN, REFERENCE, exercise, instance);
+        controller1.getProps().showSpectrogram(), RIGHT_MARGIN, REFERENCE, exercise, instance);
 //        Result.AUDIO_TYPE_PRACTICE);
   }
 
