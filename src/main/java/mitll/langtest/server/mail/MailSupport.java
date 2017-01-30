@@ -205,6 +205,12 @@ public class MailSupport {
       Properties props = new Properties();
       props.put(MAIL_SMTP_HOST, email_server);
       props.put(MAIL_DEBUG, "" + debugEmail);
+
+      if (testEmail) {
+        props.put(MAIL_SMTP_PORT, ""+MAIL_PORT);
+        logger.debug("Testing : using port " + MAIL_PORT);
+      }
+
       Session session = Session.getDefaultInstance(props, null);
       // logger.debug("sending email to " + recipientEmail);
       Message msg = makeMessage(session, recipientName, recipientEmail, ccEmails, subject, message);

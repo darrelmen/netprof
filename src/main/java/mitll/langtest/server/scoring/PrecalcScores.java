@@ -52,7 +52,6 @@ import java.util.Map;
  */
 public class PrecalcScores {
 //  private static final Logger logger = LogManager.getLogger(PrecalcScores.class);
-
   private Result precalcResult;
   private Scores scores;
   private JsonObject jsonObject;

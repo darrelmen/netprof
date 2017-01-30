@@ -945,9 +945,6 @@ public class ScoreServlet extends DatabaseServlet {
     if (exercise == null) {
       jsonForScore.put(VALID, "bad_exercise_id");
     }
-    // if (request == Request.WRITEFILE) {
-//      jsonForScore.put(VALID, "wrote_file");
-//    } else {
     boolean doFlashcard = request == Request.DECODE;
     options.setDoFlashcard(doFlashcard);
     AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise,
@@ -1242,39 +1239,6 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  /**
-   * @return
-   * @see #getAudioFileHelper()
-   */
-//  private DatabaseImpl getDatabase() {
-//    DatabaseImpl db = null;
-//    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
-//    if (databaseReference != null) {
-//      db = (DatabaseImpl) databaseReference;
-//      // logger.debug("found existing database reference " + db + " under " + getServletContext());
-//    } else {
-//      logger.error("huh? no existing db reference?");
-//    }
-//    return db;
-//  }
-
-  /**
-   * TODOx : audio file helper is project specific now. ????
-   * @return
-   * @see #getAudioFileHelper()
-   */
-/*  @Deprecated  private AudioFileHelper getAudioFileHelperRef() {
-    AudioFileHelper fileHelper = null;
-    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.AUDIO_FILE_HELPER_REFERENCE);
-    if (databaseReference != null) {
-      fileHelper = (AudioFileHelper) databaseReference;
-      // logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
-    } else {
-      logger.error("huh? for " + db.getServerProps().getLanguage() + " no existing audio file reference?");
-    }
-    return fileHelper;
-  }*/
-
 /*  private LoadTesting getLoadTesting() {
     LoadTesting ref = null;
     Object databaseReference = getServletContext().getAttribute(LOAD_TESTING);
@@ -1352,7 +1316,6 @@ public class ScoreServlet extends DatabaseServlet {
     return db.getProject(projid);
   }
 
-
   private static class UserAndSelection {
     private final String[] split1;
     private String user;
@@ -1389,6 +1352,4 @@ public class ScoreServlet extends DatabaseServlet {
       return this;
     }
   }
-
-
 }

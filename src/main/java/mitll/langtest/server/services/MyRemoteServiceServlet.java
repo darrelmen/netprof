@@ -491,7 +491,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
       return msgStr;
     } else {
-      return "";
+      return message;
     }
   }
 
