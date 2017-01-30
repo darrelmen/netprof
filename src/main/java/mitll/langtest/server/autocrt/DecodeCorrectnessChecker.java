@@ -36,6 +36,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.scoring.AlignDecode;
+import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -84,17 +85,18 @@ public class DecodeCorrectnessChecker {
    * @param commonExercise
    * @param audioFile
    * @param answer
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @param precalcScores
+   * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
   public PretestScore getDecodeScore(CommonShell commonExercise,
                                      File audioFile,
                                      AudioAnswer answer,
                                      String language,
-                                     DecoderOptions decoderOptions
-  ) {
+                                     DecoderOptions decoderOptions,
+                                     PrecalcScores precalcScores) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language, decoderOptions.isAllowAlternates());
-    PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions);
+    PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores);
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
 
@@ -135,22 +137,26 @@ public class DecodeCorrectnessChecker {
    * @param possibleSentences any of these can match and we'd call this a correct response
    * @param answer            holds the score, whether it was correct, the decode output, and whether one of the
    *                          possible sentences
+   * @param precalcScores
    * @return PretestScore word/phone alignment with scores
    * @see #getDecodeScore
    */
-  private PretestScore getDecodeScore(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
-                                      DecoderOptions decoderOptions
+  private PretestScore getDecodeScore(File audioFile,
+                                      Collection<String> possibleSentences,
+                                      AudioAnswer answer,
+                                      DecoderOptions decoderOptions,
 
-  ) {
+                                      PrecalcScores precalcScores) {
     List<String> lmSentences = removePunct(possibleSentences);
 //    logger.debug("getDecodeScore " + possibleSentences + " : '" + lmSentences + "'");
     //making the transliteration empty as I don't think it is useful here
-    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(audioFile, lmSentences, "", decoderOptions);
+    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(audioFile, lmSentences, "",
+        decoderOptions, precalcScores);
 
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
             asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
-    // logger.debug("recoSentence is " + recoSentence + " (" +recoSentence.length()+ ")");
+    logger.debug("recoSentence is " + recoSentence + " (" + recoSentence.length() + ")");
 
     boolean isCorrect = isCorrect(possibleSentences, recoSentence);
     double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
@@ -234,9 +240,9 @@ public class DecodeCorrectnessChecker {
   }
 
   /**
-   * @see #getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    * @param possibleSentences
    * @return
+   * @see #getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    * @see #getDecodeScore
    */
   private List<String> removePunct(Collection<String> possibleSentences) {

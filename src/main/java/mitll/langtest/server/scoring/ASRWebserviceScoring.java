@@ -43,7 +43,6 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -159,7 +158,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                   ImageOptions imageOptions,
                                   boolean decode,
                                   boolean useCache, String prefix,
-                                 // Result precalcResult,
 
                                   PrecalcScores precalcScores,
                                   boolean usePhoneToDisplay) {
@@ -192,7 +190,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param decode                if true, skips writing image files
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
-   * @param precalcResult
+   * @param precalcScores
    * @param usePhoneToDisplay
    * @return score info coming back from alignment/reco
    * @see ASR#scoreRepeat
@@ -263,7 +261,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     JsonObject jsonObject = null;
 
     if (precalcScores != null && precalcScores.isValid()) {
-      logger.info("got valid precalc  " + precalcScores);
+      logger.info("scoreRepeatExercise got valid precalc  " + precalcScores);
       scores = precalcScores.getScores();
       jsonObject = precalcScores.getJsonObject();
     }
@@ -368,10 +366,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               prefix1, "", decode, false, jsonObject, reallyUsePhone);
       Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
       Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
-
- /*     logger.info("getPretestScore sTypeToImage" +
-          "\n\tsTypeToImage " + sTypeToImage
-      );*/
+//
+//     logger.info("getPretestScore sTypeToImage" +
+//          "\n\tsTypeToImage " + sTypeToImage
+//      );
 
       return new PretestScore(scores.hydraScore,
           getPhoneToScore(scores),
@@ -684,7 +682,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param background
    * @return
    * @see AlignDecode#getASRScoreForAudio
-   * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio(File, Collection, String, DecoderOptions)
+   * @see AlignDecode#getASRScoreForAudio(File, Collection, String, DecoderOptions, PrecalcScores)
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
     List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);

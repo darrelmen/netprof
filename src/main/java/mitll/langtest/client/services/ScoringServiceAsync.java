@@ -46,14 +46,6 @@ public interface ScoringServiceAsync {
                            int exerciseID,
                            boolean usePhonemeMap, AsyncCallback<PretestScore> async);
 
-/*  void getASRScoreForAudioPhonemes(int reqid, long resultID,
-                                   String testAudioFile, String sentence,
-                                   String transliteration,
-                                   ImageOptions imageOptions,
-                                   int exerciseID,
-                                   AsyncCallback<PretestScore> async);*/
-
-
   /**
    * JUST FOR DIALOG DEMO
    *

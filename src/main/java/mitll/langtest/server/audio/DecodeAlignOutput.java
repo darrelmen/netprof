@@ -54,7 +54,6 @@ public class DecodeAlignOutput {
   private int numPhones;
   private long processDurInMillis;
   private boolean isCorrect;
-  //private boolean isDecode;
 
   /**
    * @see AudioFileHelper#decodeOneAttribute
@@ -69,9 +68,9 @@ public class DecodeAlignOutput {
         alignmentScore);
   }
 
-  private static String getJson(PretestScore alignmentScore) {
-    return new ScoreToJSON().getJsonObject(alignmentScore).toString();
-  }
+//  private static String getJson(PretestScore alignmentScore) {
+//    return new ScoreToJSON().getJsonObject(alignmentScore).toString();
+//  }
 
   DecodeAlignOutput(AudioAnswer decodeAnswer, boolean isDecode) {
     PretestScore pretestScore = decodeAnswer.getPretestScore();

@@ -106,6 +106,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @param scores
    * @return
    * @see #scoreAudio
+   * @see #addWordScoreTable
    */
   private Table makeTable(String label, String scoreColHeader, Map<String, Float> scores) {
     Table table = new Table();
@@ -138,6 +139,13 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     return table;
   }
 
+  /**
+   * @see #getPhoneScoreTable
+   * @param label
+   * @param scoreColHeader
+   * @param scores
+   * @return
+   */
   private Table makeTableHoriz(String label, String scoreColHeader, Map<String, Float> scores) {
     Table table = new Table();
     table.getElement().setId("LeaderboardTable_" + label + "_" + scoreColHeader.substring(0, 3));
@@ -292,7 +300,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    */
   private Widget getWordTable(PretestScore score) {
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime = score.getsTypeToEndTimes();
-    return new WordTable().getWordTable(netPronImageTypeToEndTime);
+    return new WordTable().getWordTable(netPronImageTypeToEndTime, true);
   }
 
   /**

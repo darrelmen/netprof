@@ -156,7 +156,9 @@ public class ParseResultJson {
    * @see PrecalcScores#getCachedScores
    * @see Scoring#getTypeToTranscriptEvents
    */
-  Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JsonObject jsonObject, String words1, String w1, boolean usePhones,
+  Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JsonObject jsonObject,
+                                                        String words1,
+                                                        String w1, boolean usePhones,
                                                         Map<String, List<List<String>>> wordToPronunciations) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
     SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
@@ -188,7 +190,7 @@ public class ParseResultJson {
         logger.debug("no json array at " + words1 + " in " + jsonObject, e);
       }
     } else {
-      logger.warn("skipping " + words1 + " " + w1);// + " has " + jsonObject.());
+      logger.warn("skipping '" + words1 + "' '" + w1);// + " has " + jsonObject.());
     }
 
     return typeToEvent;

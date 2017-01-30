@@ -136,7 +136,7 @@ public class WordTable {
   }
 
 
-  public Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+  public Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, boolean showScore) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
 
     Table table = new Table();
@@ -165,7 +165,7 @@ public class WordTable {
       HTML wscore = new HTML("" + getPercent(word.getScore()));
       wscore.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
-      col.add(wscore);
+      if (showScore) col.add(wscore);
 
 
       Table pTable = new Table();
@@ -181,7 +181,7 @@ public class WordTable {
       pTable.add(row2);
 
       HTMLPanel scoreRow = new HTMLPanel("tr", "");
-      pTable.add(scoreRow);
+      if (showScore) pTable.add(scoreRow);
 
       for (TranscriptSegment phone : pair.getValue()) {
         String event = phone.getEvent();
@@ -199,6 +199,7 @@ public class WordTable {
 
           col = new HTMLPanel("td", "");
           col.add(score);
+
           scoreRow.add(col);
         }
       }
