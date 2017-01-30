@@ -621,8 +621,8 @@ public class AudioConversion {
     }
     if (!new File(lamePath).exists()) {
       logger.error("no lame installed at " + lamePath + " or " + LAME_PATH_WINDOWS);
+      lamePath = LAME;
     }
-    lamePath = LAME;
     return lamePath;
   }
 
