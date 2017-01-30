@@ -443,7 +443,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
    */
   @Override
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
-    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, scorePanel, instance) {
+    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, null, instance) {
       @Override
       protected void addAudioRadioButton(Panel vp, RadioButton fast, AudioAttribute audioAttribute) {
         vp.add(getCommentBox().getEntry(audioPath, fast, exercise.getAnnotation(path)));

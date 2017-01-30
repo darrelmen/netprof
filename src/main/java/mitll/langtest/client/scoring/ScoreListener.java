@@ -32,9 +32,6 @@
 
 package mitll.langtest.client.scoring;
 
-import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.scoring.PretestScore;
-
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -54,7 +51,7 @@ public interface ScoreListener extends MiniScoreListener {
    */
   void setClassAvg(float classAvg);
 
-  void showChart(boolean showOnlyOneExercise);
+  void showChart();
 
   void setRefAudio(String refAudio);
 }

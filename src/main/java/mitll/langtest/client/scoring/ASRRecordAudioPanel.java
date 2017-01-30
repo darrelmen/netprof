@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.gauge.ASRScorePanel;
+import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
@@ -26,13 +26,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * An ASR scoring panel with a record button.
@@ -45,6 +39,8 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
   private static final String RECORD_YOURSELF = "Record";
   private static final String RELEASE_TO_STOP = "Release";
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+  public static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
+  public static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
 
   /**
    * TODO : limit connection here...
@@ -54,8 +50,9 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
   private PostAudioRecordButton postAudioRecordButton;
   private MyPlayAudioPanel playAudioPanel;
   private IconAnchor download;
-  private Anchor downloadAnchor;
+  //  private Anchor downloadAnchor;
   private Panel downloadContainer;
+//  ASRHistoryPanel historyPanel;
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
@@ -75,18 +72,13 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
                       String instance) {
     super(exercise.getForeignLanguage(),
         exercise.getTransliteration(), controller,
-        goodwaveExercisePanel.scorePanel,
+        null,
         REFERENCE, exercise, instance);
     this.goodwaveExercisePanel = goodwaveExercisePanel;
     this.index = 1;
+    //   this.historyPanel =
     getElement().setId("ASRRecordAudioPanel");
   }
-
-  // TODO : add a subset of the ASRScorePanel.
-//
-//  public MiniScoreListener getScoreListener() {
-//    return new ASRScorePanel("scorer",controller,exerciseID);
-//  }
 
   /**
    * So here we're trying to make the record and play buttons know about each other
@@ -101,12 +93,15 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
    */
   @Override
   protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle) {
-    recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
-    recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+    recordImage1 = new Image(UriUtils.fromSafeConstant(FIRST_RED));
+    recordImage1.setVisible(false);
+    recordImage2 = new Image(UriUtils.fromSafeConstant(SECOND_RED));
+    recordImage2.setVisible(false);
+
     postAudioRecordButton = new MyPostAudioRecordButton(controller);
     postAudioRecordButton.getElement().getStyle().setMargin(8, Style.Unit.PX);
-    playAudioPanel = new MyPlayAudioPanel(recordImage1,
-        recordImage2, soundManager, postAudioRecordButton,
+    playAudioPanel = new MyPlayAudioPanel(
+        soundManager, postAudioRecordButton,
         goodwaveExercisePanel);
     return playAudioPanel;
   }
@@ -117,14 +112,25 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
     if (result.getHydecScore() > 0) {
       float zeroToHundred = result.getHydecScore() * 100f;
       //etASRGaugeValue(Math.min(100.0f, zeroToHundred));
-      playAudioPanel.showDynamicRange(Math.min(100.0f, zeroToHundred));
+      playAudioPanel.showScore(Math.min(100.0f, zeroToHundred));
     } else {
       playAudioPanel.hideScore();
     }
   }
 
   private class MyPlayAudioPanel extends PlayAudioPanel {
-    public MyPlayAudioPanel(Image recordImage1, Image recordImage2, SoundManagerAPI soundManager,
+    private DivWidget recordFeedback = new DivWidget();
+    private Widget scoreBar;
+    private ProgressBar progressBar;
+    DivWidget scores;
+
+    /**
+     * @param soundManager
+     * @param postAudioRecordButton1
+     * @param goodwaveExercisePanel
+     * @see #makePlayAudioPanel
+     */
+    public MyPlayAudioPanel(SoundManagerAPI soundManager,
                             final PostAudioRecordButton postAudioRecordButton1,
                             final GoodwaveExercisePanel goodwaveExercisePanel) {
       super(soundManager, new PlayListener() {
@@ -139,10 +145,6 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
           postAudioRecordButton1.setEnabled(true);
         }
       }, "", null);
-      add(recordImage1);
-      recordImage1.setVisible(false);
-      add(recordImage2);
-      recordImage2.setVisible(false);
       getElement().setId("GoodwaveExercisePanel_MyPlayAudioPanel");
     }
 
@@ -154,111 +156,112 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
     protected void addButtons(Widget optionalToTheRight) {
       add(postAudioRecordButton);
       postAudioRecordButton.addStyleName("rightFiveMargin");
+
       super.addButtons(optionalToTheRight);
 
-      addDownloadAudioWidget();
+      add(recordFeedback = new DivWidget());
+      recordFeedback.setWidth("32px");
+      recordFeedback.add(recordImage1);
+      recordFeedback.add(recordImage2);
 
-      scoreBar = getAfterPlayWidget();
-      add(scoreBar);
+      downloadContainer = addDownloadAudioWidget();
+
+      progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+      scoreBar = getAfterPlayWidget(progressBar);
+      scoreBar.addStyleName("floatLeftList");
+
+      scores = new DivWidget();
+
+      scores.add(scoreBar);
+
+      ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exerciseID);
+      addMinicoreListener(historyPanel);
+      historyPanel.addStyleName("floatLeftList");
+      scores.add(historyPanel);
+      historyPanel.showChart();
+
+      add(scores);
     }
 
-    Widget scoreBar;
-    private ProgressBar progressBar;
 
     /**
-     * Add dynamic range feedback to the right of the play button.
+     * Add score feedback to the right of the play button.
      *
      * @return
      * @seex mitll.langtest.client.scoring.AudioPanel#addWidgets
      */
-    protected Widget getAfterPlayWidget() {
-      HTML w = new HTML("Score");
-      w.addStyleName("leftTenMargin");
-      w.addStyleName("topBarMargin");
-      Panel afterPlayWidget = new HorizontalPanel();
+    Widget getAfterPlayWidget(ProgressBar progressBar) {
+      HTML label = new HTML("Score");
+      label.addStyleName("topFiveMargin");
+      label.addStyleName("leftTenMargin");
+      label.addStyleName("floatLeftList");
+      Panel afterPlayWidget = new DivWidget();
 
-      afterPlayWidget.add(w);
-      progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+      afterPlayWidget.add(label);
       afterPlayWidget.add(progressBar);
 
       progressBar.setWidth("300px");
+      progressBar.addStyleName("floatLeftList");
+
       Style style = progressBar.getElement().getStyle();
+      style.setMarginTop(5, Style.Unit.PX);
       style.setMarginLeft(5, Style.Unit.PX);
-      progressBar.addStyleName("topBarMargin");
+      style.setMarginBottom(0, Style.Unit.PX );
 
       afterPlayWidget.setVisible(false);
+
       return afterPlayWidget;
     }
 
     private static final int MIN_VALID_DYNAMIC_RANGE = 30;
-    private static final int MIN_GOOD_DYNAMIC_RANGE  = 70;
+    private static final int MIN_GOOD_DYNAMIC_RANGE = 70;
 
     /**
      * Set the value on the progress bar to reflect the dynamic range we measure on the audio.
      *
-     * @param result
-     * @see #useResult(AudioAnswer)
+     * @param score
+     * @see #useResult
      */
-    public void showDynamicRange(double dynamicRange) {
-      //   double dynamicRange = result.getDynamicRange();
-      double percent = dynamicRange / 100d;
+    void showScore(double score) {
+      //   double score = result.getDynamicRange();
+      double percent = score / 100d;
       String color = SimpleColumnChart.getColor((float) percent);
 
       logger.info("percent " + percent + " color " + color);
 
       progressBar.setPercent(100 * percent);
-      progressBar.setText("" + Math.round(dynamicRange));//(dynamicRange));
-      progressBar.setColor(dynamicRange > MIN_GOOD_DYNAMIC_RANGE ?
-          ProgressBarBase.Color.SUCCESS : dynamicRange > MIN_VALID_DYNAMIC_RANGE ?
-         ProgressBarBase.Color.WARNING :
+      progressBar.setText("" + Math.round(score));//(score));
+      progressBar.setColor(score > MIN_GOOD_DYNAMIC_RANGE ?
+          ProgressBarBase.Color.SUCCESS : score > MIN_VALID_DYNAMIC_RANGE ?
+          ProgressBarBase.Color.WARNING :
           ProgressBarBase.Color.DANGER);
 
-   //   progressBar.getElement().getStyle().setBackgroundColor(color);
+      //   progressBar.getElement().getStyle().setBackgroundColor(color);
 
       scoreBar.setVisible(true);
+      scores.setVisible(true);
     }
 
-    public void hideScore() {
+    void hideScore() {
       scoreBar.setVisible(false);
+      scores.setVisible(false);
     }
 
-    private void addDownloadAudioWidget() {
-      downloadContainer = new DivWidget();
+    private DivWidget addDownloadAudioWidget() {
+      DivWidget downloadContainer = new DivWidget();
       downloadContainer.setWidth("40px");
 
       DivWidget north = new DivWidget();
-      north.add(getDownloadIcon());
+      north.add(download = getDownloadIcon());
       downloadContainer.add(north);
-
-//      DivWidget south = new DivWidget();
-//      south.add(getDownloadAnchor());
-//      downloadContainer.add(south);
       downloadContainer.setVisible(false);
       downloadContainer.addStyleName("leftFiveMargin");
-
-      add(downloadContainer);
+      return downloadContainer;
     }
   }
 
-  private Anchor getDownloadAnchor() {
-    downloadAnchor = new Anchor();
-    downloadAnchor.setHTML("<span><font size=-1>Download</font></span>");
-    addTooltip(downloadAnchor, DOWNLOAD_YOUR_RECORDING);
-
-    downloadAnchor.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(downloadAnchor,
-            "DownloadUserAudio_Anchor",
-            exercise,
-            "downloading audio file " + audioPath);
-      }
-    });
-    return downloadAnchor;
-  }
-
   private IconAnchor getDownloadIcon() {
-    download = new IconAnchor();
+    IconAnchor download = new IconAnchor();
     download.getElement().setId("Download_user_audio_link");
     download.setIcon(IconType.DOWNLOAD);
     download.setIconSize(IconSize.TWO_TIMES);
@@ -299,7 +302,7 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
         "userID=" +
         getUser();
     download.setHref(href);
-    downloadAnchor.setHref(href);
+    //downloadAnchor.setHref(href);
   }
 
   protected int getUser() {
@@ -311,7 +314,7 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
    */
   private class MyPostAudioRecordButton extends PostAudioRecordButton {
     MyPostAudioRecordButton(ExerciseController controller) {
-      super(//goodwaveExercisePanel.getLocalExercise().getID(),
+      super(
           exerciseID,
           controller,
           ASRRecordAudioPanel.this.index,
@@ -319,7 +322,6 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
           RECORD_YOURSELF,
           controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop"
       );
-//            RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop", Result.AUDIO_TYPE_PRACTICE);
     }
 
     @Override
@@ -331,12 +333,15 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
 
     @Override
     public void startRecording() {
-      playAudioPanel.setEnabled(false);
-      playAudioPanel.hideScore();
-      goodwaveExercisePanel.setBusy(true);
       controller.logEvent(this, "RecordButton", getExerciseID(), "startRecording");
 
+      playAudioPanel.setEnabled(false);
+      playAudioPanel.hideScore();
+
+      goodwaveExercisePanel.setBusy(true);
+
       super.startRecording();
+
       recordImage1.setVisible(true);
       downloadContainer.setVisible(false);
     }
@@ -348,6 +353,7 @@ public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & Scor
       playAudioPanel.setEnabled(true);
       goodwaveExercisePanel.setBusy(false);
       super.stopRecording(duration);
+
       recordImage1.setVisible(false);
       recordImage2.setVisible(false);
     }

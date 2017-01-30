@@ -890,10 +890,10 @@ public class AudioFileHelper implements AlignDecode {
 
         try {
           String s = httpClient.sendAndReceiveAndClose(theFile);
-          logger.info("checkForWebservice Got back " + s);
+         // logger.info("checkForWebservice Got back " + s);
           PrecalcScores precalcScores = new PrecalcScores(serverProps, s);
 
-          logger.info("checkForWebservice precalcScores " + precalcScores);
+         // logger.info("checkForWebservice precalcScores " + precalcScores);
 
           return precalcScores;
         } catch (IOException e) {

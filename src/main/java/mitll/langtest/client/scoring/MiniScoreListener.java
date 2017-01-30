@@ -7,10 +7,12 @@ import mitll.langtest.shared.scoring.PretestScore;
  * Created by go22670 on 1/27/17.
  */
 public interface MiniScoreListener {
-  void gotScore(PretestScore score, boolean showOnlyOneExercise, String path);
+  void showChart();
+
+  void gotScore(PretestScore score, String path);
 
   /**
-   * @see mitll.langtest.client.gauge.ASRScorePanel#gotScore(PretestScore, boolean, String)
+   * @see MiniScoreListener#gotScore(PretestScore, String)
    * @param hydecScore
    */
   void addScore(CorrectAndScore hydecScore);

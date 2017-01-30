@@ -58,7 +58,6 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.qc.UserTitle;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
-import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.FormField;
@@ -561,7 +560,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), exercise.getTransliteration(), controller,
-        controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,
+        controller.getProps().showSpectrogram(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,
         exercise, instance
     ) {
       //audio.isRegularSpeed() ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW) {

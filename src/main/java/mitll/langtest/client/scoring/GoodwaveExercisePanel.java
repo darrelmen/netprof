@@ -61,7 +61,6 @@ import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,7 +109,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
   protected final ListServiceAsync listService = GWT.create(ListService.class);
 
-  protected ScoreListener scorePanel;
+  //protected ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
   protected final NavigationHelper navigationHelper;
   private final float screenPortion;
@@ -137,7 +136,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
                                   String instance) {
     this.exercise = commonExercise;
     this.controller = controller;
-//    this.service = controller.getService();
     this.screenPortion = screenPortion;
     this.instance = instance;
     String language = controller.getLanguage();
@@ -165,7 +163,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     center.addStyleName("floatLeft");
     // attempt to left justify
 
-    ASRScorePanel widgets = makeScorePanel(exercise, instance);
+  //  ASRScorePanel widgets =
+    makeScorePanel(exercise, instance);
 
     addQuestionContentRow(exercise, center);
 
@@ -173,9 +172,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     add(center);
 
     // score panel with gauge is on the right
-    if (widgets != null && controller.hasModel() && controller.isRecordingEnabled()) {
+    /*if (widgets != null && controller.hasModel() && controller.isRecordingEnabled()) {
       add(widgets);
-    }
+    }*/
+
     if (controller.isRecordingEnabled()) {
       addUserRecorder(controller.getService(), controller, center, screenPortion, exercise); // todo : revisit screen portion...
     }
@@ -186,22 +186,22 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                              final ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
-    return new NavigationHelper<CommonShell>(getLocalExercise(), controller, new PostAnswerProvider() {
+                                                              final ListInterface<CommonShell> listContainer,
+                                                              boolean addKeyHandler) {
+    return new NavigationHelper<>(getLocalExercise(), controller, new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, HasID completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
-    }, listContainer, true, addKeyHandler, false);
+    }, listContainer, true, addKeyHandler, false, false);
   }
 
   public void wasRevealed() {
   }
 
   protected ASRScorePanel makeScorePanel(T e, String instance) {
-    ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance, controller, e.getID());
-    scorePanel = widgets;
-    return widgets;
+
+    return null;
   }
 
   protected void loadNext() {
@@ -240,13 +240,13 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
                                  float screenPortion, T exercise) {
     DivWidget div = new DivWidget();
     div.getElement().setId("GoodwaveExercisePanel_UserRecorder");
-    ScoringAudioPanel answerWidget = getAnswerWidget(service, controller, screenPortion);
-    String refAudio = exercise.getRefAudio();
-    if (refAudio == null) {
-      refAudio = exercise.getSlowAudioRef();
-    }
+    ScoringAudioPanel answerWidget = getAnswerWidget(controller, screenPortion);
+//    String refAudio = exercise.getRefAudio();
+//    if (refAudio == null) {
+//      refAudio = exercise.getSlowAudioRef();
+//    }
 
-    showRecordingHistory(exercise, answerWidget, refAudio);
+    showRecordingHistory(exercise, answerWidget);
     div.add(answerWidget);
 
     addGroupingStyle(div);
@@ -255,12 +255,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     toAddTo.add(div);
   }
 
-  private void showRecordingHistory(T exercise, ScoringAudioPanel answerWidget, String refAudio) {
-    answerWidget.setRefAudio(refAudio);
-    for (CorrectAndScore score : exercise.getScores()) {
-      answerWidget.addScore(score);
-    }
-    answerWidget.setClassAvg(exercise.getAvgScore());
+  private void showRecordingHistory(T exercise, ScoringAudioPanel answerWidget) {
+//    answerWidget.setRefAudio(refAudio);
+ //  for (CorrectAndScore score : exercise.getScores()) {
+      answerWidget.addScores(exercise.getScores());
+   // }
+//    answerWidget.setClassAvg(exercise.getAvgScore());
     answerWidget.showChart();
   }
 
@@ -343,7 +343,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   protected ASRScoringAudioPanel makeFastAndSlowAudio(String path) {
-    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, controller, scorePanel, instance);
+    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, controller, null, instance);
   }
 
   /**
@@ -521,15 +521,15 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
-   * @param service
    * @param controller
    * @param screenPortion
    * @return
    * @see #addUserRecorder
    */
-  private ScoringAudioPanel getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, float screenPortion) {
-    ScoringAudioPanel widgets = new ASRRecordAudioPanel<T>(this, controller, getLocalExercise(), instance);
-    widgets.addScoreListener(scorePanel);
+  private ScoringAudioPanel getAnswerWidget(final ExerciseController controller, float screenPortion) {
+    ScoringAudioPanel widgets =
+        new ASRRecordAudioPanel<T>(this, controller, getLocalExercise(), instance);
+    //widgets.addScoreListener();
     answerAudio = widgets;
     answerAudio.setScreenPortion(screenPortion);
 
