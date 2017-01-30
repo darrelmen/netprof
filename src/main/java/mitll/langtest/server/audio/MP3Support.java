@@ -34,6 +34,7 @@ package mitll.langtest.server.audio;
 
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.scoring.AlignDecode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -65,7 +66,7 @@ class MP3Support {
    *
    * @param testAudioFile
    * @return
-   * @see AudioFileHelper#getASRScoreForAudio
+   * @see AlignDecode#getASRScoreForAudio
    */
   String dealWithMP3Audio(String testAudioFile) {
    // logger.debug("dealWithMP3Audio " + language + " testAudio " + testAudioFile);

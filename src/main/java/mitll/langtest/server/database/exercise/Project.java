@@ -312,4 +312,8 @@ public class Project implements PronunciationLookup {
   public String toString() {
     return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
+
+  public int getID() {
+    return project.id();
+  }
 }

@@ -279,7 +279,10 @@ public class HTTPClient {
       send(input);
       return receive();
     } catch (ConnectException ce) {
-      logger.error("sending " + input + " couldn't connect to server at  " + httpConn.getURL() + " got " + ce);
+      logger.error("sending" +
+          "\n\tmessage " + input +
+          "\n\tcouldn't connect to server " + httpConn.getURL() +
+          "\n\tgot    " + ce);
       return "";
     } catch (IOException e) {
       logger.error("sending " + input + " got " + e, e);

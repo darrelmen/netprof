@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -55,7 +54,7 @@ public interface ASR {
 	String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
 	/**
-	 * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio
+	 * @see AlignDecode#getASRScoreForAudio
 	 * @param testAudioDir
 	 * @param testAudioFileNoSuffix
 	 * @param sentence
@@ -64,7 +63,7 @@ public interface ASR {
 	 * @param decode
 	 * @param useCache
 	 * @param prefix
-	 * @param precalcResult
+	 * @param precalcScores
 	 * @param usePhoneToDisplay
 	 * @return
 	 */
@@ -78,7 +77,6 @@ public interface ASR {
 													 boolean decode,
 													 boolean useCache,
                            String prefix,
-//                           Result precalcResult,
 													 PrecalcScores precalcScores,
                            boolean usePhoneToDisplay);
 
