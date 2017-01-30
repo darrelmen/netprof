@@ -53,6 +53,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.scoring.WordScoresTable;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.*;
@@ -75,7 +76,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     implements AudioAnswerListener {
   private Logger logger;
 
-  private Heading recoOutput;
+  private Panel recoOutput;
 
   static final int CORRECT_DELAY = 600;
   private static final int DELAY_MILLIS_LONG = 3000;
@@ -190,9 +191,16 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     // add answer widget to do the recording
     toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, service, controller));
 
-    if (controller.getProps().showFlashcardAnswer()) {
-      toAddTo.add(getRecoOutputRow());
+    if (controller.getProps().showFlashcardAnswer() || true) {
+     ;
+
+     // TODO make centered
+     // toAddTo.add( getCenteredWrapper(recoOutput = getRecoOutputRow()));
+      toAddTo.add( recoOutput = getRecoOutputRow());
+      recoOutput.setWidth("100%");
     }
+
+
     scoreFeedbackRow = new DivWidget();
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
     scoreFeedbackRow.setHeight("52px");
@@ -212,7 +220,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    */
   private Widget getAnswerAndRecordButtonRow(int exerciseID, LangTestDatabaseAsync service, ExerciseController controller) {
     // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
-    RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, service, controller, addKeyBinding, instance);
+    RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, controller, addKeyBinding, instance);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
     realRecordButton = answerWidget.getRealRecordButton();
@@ -261,16 +269,18 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
 
   /**
    * Center align the text feedback (correct/incorrect)
-   *
+   * @see #addRecordingAndFeedbackWidgets
    * @return
    */
   private Panel getRecoOutputRow() {
-    recoOutput = new Heading(3, "");
+/*    recoOutput = new Heading(3, "");
     recoOutput.addStyleName("cardHiddenText2");   // same color as background so text takes up space but is invisible
     recoOutput.getElement().getStyle().setColor("#ffffff");
-    recoOutput.getElement().setId("recoOutput");
+    recoOutput.getElement().setId("recoOutput");*/
 
-    Panel recoOutputRow = new FluidRow();
+  //  Panel recoOutputRow = new FluidRow();
+    DivWidget recoOutputRow = new DivWidget();
+/*
     recoOutputRow.getElement().setId("recoOutputRow");
 
     Panel recoOutputContainer = new Paragraph();
@@ -278,21 +288,24 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
 
     recoOutputRow.add(new Column(12, recoOutputContainer));
     recoOutputContainer.add(recoOutput);
+*/
 
+
+  //  return new WordScoresTable();
     return recoOutputRow;
   }
 
   /**
    * @param exerciseID
-   * @param service
    * @param controller
    * @param addKeyBinding
    * @param instance
    * @return
    * @see #getAnswerAndRecordButtonRow(String, LangTestDatabaseAsync, ExerciseController)
    */
-  private RecordButtonPanel getAnswerWidget(final int exerciseID, LangTestDatabaseAsync service,
-                                            ExerciseController controller, final boolean addKeyBinding,
+  private RecordButtonPanel getAnswerWidget(final int exerciseID,
+                                            ExerciseController controller,
+                                            final boolean addKeyBinding,
                                             String instance) {
     // Map<String, Collection<String>> typeToSelection = Collections.emptyMap();
     AudioAnswerListener exercisePanel = this;
@@ -404,9 +417,11 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     scoreFeedbackRow.clear();
   }
 
+/*
   private Heading getRecoOutput() {
     return recoOutput;
   }
+*/
 
   /**
    * @param result
@@ -439,6 +454,10 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       int oldID = exercise.getID();
       if (correct) {
         controller.logEvent(button, "Button", oldID, "correct response - score " + round);
+        recoOutput.clear();
+        recoOutput.add(new WordScoresTable().getStyledWordTable(result.getPretestScore()));
+
+
         showCorrectFeedback(score, heard);
       } else {   // incorrect!!
         controller.logEvent(button, "Button", oldID, "incorrect response - score " + round);
@@ -447,7 +466,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
       //logger.info("\treceivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
-      nextAfterDelay(correct, feedback);
+    //  nextAfterDelay(correct, feedback);
     }
   }
 
@@ -473,31 +492,6 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     // if (showOnlyEnglish) {
     //showHeard(heard);
     //}
-  }
-
-  /**
-   * @paramz heard
-   * @see #showCorrectFeedback(double, String)
-   * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
-   */
-/*  private void showHeard(String heard) {
-    String removedTruth = removePunct(exercise.getForeignLanguage());
-    String removedHeard = removePunct(heard);
-    if (!removedHeard.equalsIgnoreCase(removedTruth)) {
-      logger.info("heard '" + heard + "' '" + removedHeard +
-          "'" +
-          " vs '" + exercise.getForeignLanguage() + " '" + removedTruth +
-          "'" +
-          "'");
-      Heading recoOutput = getRecoOutput();
-      if (recoOutput != null) {
-        recoOutput.setText("Heard " + heard);
-        recoOutput.getElement().getStyle().setColor("#000000");
-      }
-    }
-  }*/
-  private String removePunct(String t) {
-    return t.replaceAll("/", " ").replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
 
   /**
@@ -620,7 +614,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    *
    * @param correct
    * @param feedback make delay dependent on how long the text is
-   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+   * @see #receivedAudioAnswer
    */
   void nextAfterDelay(boolean correct, String feedback) {
 /*    if (NEXT_ON_BAD_AUDIO) {

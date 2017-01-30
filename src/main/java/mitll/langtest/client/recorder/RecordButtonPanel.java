@@ -37,6 +37,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
@@ -47,6 +48,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
@@ -289,9 +291,12 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     return recordButton;
   }
 
+  /**
+   * @see mitll.langtest.client.amas.PressAndHoldExercisePanel#getAnswerWidget
+   * @param result
+   * @param outer
+   */
   protected abstract void receivedAudioAnswer(AudioAnswer result, final Panel outer);
-//  {
-//  }
 
   protected void hideRecordButton() {
     recordButton.setVisible(false);
