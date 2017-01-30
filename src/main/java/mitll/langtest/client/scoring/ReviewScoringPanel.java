@@ -82,7 +82,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
                             ExerciseController controller,
                             int exerciseID,
                             String instance) {
-    super(path, refSentence,transliteration, controller, false, new EmptyScoreListener(), 23, "", null, exerciseID, instance);
+    super(path, refSentence,transliteration, controller, false, 23, "", null, exerciseID, instance);
     tablesContainer = new HorizontalPanel();
     tablesContainer.getElement().setId("TablesContainer");
     belowContainer = new DivWidget();
@@ -183,7 +183,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   }
 
   @Override
-  protected int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
+  protected int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth) {
     return Window.getClientWidth() - WIDTH_MARGIN;
   }
 

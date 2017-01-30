@@ -88,8 +88,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
 
-  private final ScoreListener gaugePanel;
-   protected String audioPath;
+//  private final ScoreListener gaugePanel;
+  protected String audioPath;
   private final Map<String, Integer> reqs = new HashMap<>();
   private int reqid;
 
@@ -119,7 +119,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
   /**
    * @param showSpectrogram
-   * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
    * @param exercise
@@ -130,13 +129,12 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   public AudioPanel(String path,
                     ExerciseController controller,
                     boolean showSpectrogram,
-                    ScoreListener gaugePanel,
                     int rightMargin,
                     String playButtonSuffix,
                     T exercise,
                     int exerciseID,
                     String instance) {
-    this(controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exercise, exerciseID, instance);
+    this(controller, showSpectrogram, 1.0f, rightMargin, exercise, exerciseID, instance);
     this.audioPath = path;
 
     addWidgets(playButtonSuffix, "Record");
@@ -156,7 +154,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   /**
    * @param controller
    * @param showSpectrogram
-   * @param gaugePanel
    * @param screenPortion
    * @param rightMargin
    * @param exercise
@@ -167,7 +164,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    */
   protected AudioPanel(ExerciseController controller,
                        boolean showSpectrogram,
-                       ScoreListener gaugePanel,
                        float screenPortion,
                        int rightMargin,
                        T exercise,
@@ -177,9 +173,10 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     this.soundManager = controller.getSoundManager();
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
-    this.gaugePanel = gaugePanel;
-    if (DEBUG) logger.info("AudioPanel : gauge panel " + gaugePanel);
-    this.showSpectrogram = showSpectrogram;
+//    this.gaugePanel = gaugePanel;
+//    if (DEBUG) logger.info("AudioPanel : gauge panel " + gaugePanel);
+//
+  this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
     this.exercise = exercise;
@@ -380,7 +377,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
     /**
      * @return
-     * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
+     * @see ScoringAudioPanel#scoreAudio
      * @see ASRScoringAudioPanel#scoreAudio
      */
     public Image getImage() {
@@ -394,7 +391,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param path to audio on the server
    * @see #onLoad()
    * @see RecordButton.RecordingListener#stopRecording(long)
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(AudioAnswer)
+   * @see mitll.langtest.client.scoring.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
   public String getImagesForPath(String path) {
@@ -491,14 +488,14 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private int getImageWidth() {
     try {
       int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
-      int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
-      if (gaugePanel != null && rightSide == 0) {
-        //logger.info("adding right side offset ");
-        rightSide = 180; // TODO : hack!!!
-      } else {
-        rightSide = 180;
-      }
-      return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
+//      int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
+//      if (gaugePanel != null && rightSide == 0) {
+//        //logger.info("adding right side offset ");
+//        rightSide = 180; // TODO : hack!!!
+//      } else {
+//        rightSide = 180;
+//      }
+      return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth);//, rightSide);
     } catch (Exception e) {
       // OK, ignore it
       return 200;
@@ -509,11 +506,11 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    *
    * @param leftColumnWidth1
    * @param leftColumnWidth
-   * @param rightSide
+   * @paramx rightSide
    * @return
    */
-  int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
-    int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
+  int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth) {
+    int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth);// - rightSide;
     int i = width / 5;
     width = (i - 1) * 5;
     width -= 4;
@@ -521,8 +518,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
       logger.info("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" + leftColumnWidth1 +
           ") width " + width +
           " (screen portion = " + screenPortion +
-          ") vs window width " + Window.getClientWidth() +
-          " right side " + rightSide);
+          ") vs window width " + Window.getClientWidth()
+          //+ " right side " + rightSide
+      );
     }
     return width;
   }

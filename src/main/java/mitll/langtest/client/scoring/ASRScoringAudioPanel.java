@@ -89,19 +89,18 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param refSentence
    * @param controller
    * @param showSpectrogram
-   * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
    * @param exercise
    * @param instance
-   * @param audioType
+   * @paramx audioType
    */
   public ASRScoringAudioPanel(String path, String refSentence, String transliteration,
-                              ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
+                              ExerciseController controller, boolean showSpectrogram,
                               int rightMargin, String playButtonSuffix,
                               T exercise,
                               String instance) {
-    super(path, refSentence, transliteration, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
+    super(path, refSentence, transliteration, controller, showSpectrogram, rightMargin, playButtonSuffix,
         exercise, exercise.getID(), instance);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }

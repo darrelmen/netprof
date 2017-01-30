@@ -592,7 +592,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 //      @Override
 //      protected void addAudioRadioButton(Panel vp, RadioButton fast) {
 //        vp.add(getCommentBox(true).getEntry(audioPath, fast, exercise.getAnnotation(path)));
-    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, scorePanel, instance) {
+    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, null, instance) {
 
       /**
        * @see #addRegularAndSlow

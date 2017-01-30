@@ -116,8 +116,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
         // use full screen width
         // use keyboard
         controller, showSpectrogram,
-        null // no gauge panel
-        , 1.0f, 0,
+        // no gauge panel
+        1.0f, 0,
       //  exercise.getID(), // TODO : why both here??
         exercise,
         exercise.getID(), instance
@@ -295,7 +295,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
     /**
      * @param optionalToTheRight
-     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI, String, com.google.gwt.user.client.ui.Widget)
+     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel
+     * @see #MyPlayAudioPanel(Image, Image, Panel, String, Widget)
      */
     @Override
     protected void addButtons(Widget optionalToTheRight) {

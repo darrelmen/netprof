@@ -33,6 +33,7 @@
 package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.exercise.HasID;
 
@@ -72,7 +73,7 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   /**
    * @param score
    * @param path
-   * @see mitll.langtest.client.gauge.ASRScorePanel#gotScore(mitll.langtest.shared.scoring.PretestScore, boolean, String)
+   * @see MiniScoreListener#gotScore(mitll.langtest.shared.scoring.PretestScore, String)
    */
   public CorrectAndScore(float score, String path) {
     this.score = score;
