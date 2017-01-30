@@ -68,9 +68,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private int reqid = 0;
   private int exerciseID;
   protected final ExerciseController controller;
-//  private final LangTestDatabaseAsync service;
-//  private final AudioServiceAsync audioServiceAsync;
-
   private final boolean recordInResults;
 
   /**
@@ -89,7 +86,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
                                boolean recordInResults,
                                String recordButtonTitle,
                                String stopButtonTitle) {
-    super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle,
+    super(controller.getRecordTimeout(),
+        controller.getProps().doClickAndHold(),
+        recordButtonTitle,
+        stopButtonTitle,
         controller.getProps());
     setRecordingListener(this);
     this.index = index;
@@ -280,7 +280,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   public abstract void useResult(AudioAnswer result);
-
   public boolean hasValidAudio() {
     return validAudio;
   }

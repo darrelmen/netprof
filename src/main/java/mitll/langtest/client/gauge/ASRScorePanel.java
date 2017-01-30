@@ -48,6 +48,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.pretest.PretestGauge;
+import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -168,18 +169,17 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   /**
    * @param score
-   * @param showOnlyOneExercise
    * @param path
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#useResult
    */
-  public void gotScore(PretestScore score, boolean showOnlyOneExercise, String path) {
+  public void gotScore(PretestScore score, String path) {
     float hydecScore = score.getHydecScore();
     float zeroToHundred = hydecScore * 100f;
     setASRGaugeValue(Math.min(100.0f, zeroToHundred));
     updatePhoneAccuracy(score.getPhoneScores());
     addScore(new CorrectAndScore(hydecScore, path));
     scoreHistoryPanel.clear();
-    showChart(showOnlyOneExercise);
+    showChart();
     addPlayer();
   }
 
@@ -211,12 +211,11 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   /**
-   * @param showOnlyOneExercise
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#showChart()
-   * @see mitll.langtest.client.gauge.ASRScorePanel#gotScore(mitll.langtest.shared.scoring.PretestScore, boolean, String)
+   * @see MiniScoreListener#gotScore(PretestScore, String)
    */
   @Override
-  public void showChart(boolean showOnlyOneExercise) {
+  public void showChart() {
     VerticalPanel vp = new VerticalPanel();
     List<CorrectAndScore> scoreAndPaths = addHistory(vp);
 
@@ -250,7 +249,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   /**
    * @return
-   * @see #showChart(boolean)
+   * @see ScoreListener#showChart()
    */
   private Panel getRefAudio() {
     Widget audioWidget = getAudioWidget(new CorrectAndScore(classAvg, refAudio), PLAY_REFERENCE);
@@ -295,7 +294,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @param scoreAndPath  the audio path and score for the audio
    * @param title         link title
    * @return
-   * @see #showChart(boolean)
+   * @see ScoreListener#showChart()
    */
   private Panel getAudioAndScore(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath, String title,
                                  int i) {
