@@ -241,11 +241,20 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
     exerciseList.loadNextExercise(completedExercise);
   }
 
+  /**
+   *
+   * @param completedExercise not sure how this can be null, but seeing stack traces suggesting it can be
+   */
   protected void showRecordedState(HasID completedExercise) {
-    String id = completedExercise.getID();
+    if (completedExercise == null) {
+      logger.warning("showRecordedState huh - exercise  is null?");
+    }
+    else {
+      String id = completedExercise.getID();
 //    logger.info("Not setting state on " + id);
+      exerciseList.setState(id, STATE.RECORDED);
+    }
 
-    exerciseList.setState(id, STATE.RECORDED);
     //L l = exerciseList.byID(id);
     //logger.info("after recording " +l.getState());
     LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));

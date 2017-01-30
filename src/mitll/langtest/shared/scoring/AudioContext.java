@@ -33,6 +33,7 @@
 package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.Result;
 
 /**
  * reqid               request id from the client, so it can potentially throw away out of order responses
@@ -113,6 +114,11 @@ public class AudioContext implements IsSerializable {
    */
   public String getAudioType() {
     return audioType;
+  }
+
+  public boolean isRecording() {
+    return audioType.equals(Result.AUDIO_TYPE_REGULAR) || audioType.equals(Result.AUDIO_TYPE_SLOW) ||
+         audioType.startsWith("context");
   }
 
   public String toString() {

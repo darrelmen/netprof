@@ -782,22 +782,18 @@ public class AudioDAO extends DAO {
     float male = maleReg.size();
 
     regNotSlow.removeAll(maleSlowSpeed);
-    logger.info("Reg not slow (" +regNotSlow.size()+
-        ") " + regNotSlow);
+//    logger.info("Reg not slow (" +regNotSlow.size()+     ") " + regNotSlow);
     Set<String> slowNotReg = new HashSet<>(maleSlowSpeed);
     slowNotReg.removeAll(origMaleReg);
-    logger.info("Slow not reg (" +slowNotReg.size()+
-        ")" + slowNotReg);
+//    logger.info("Slow not reg (" +slowNotReg.size()+        ")" + slowNotReg);
 
     HashSet<String> notreg = new HashSet<>(uniqueIDs);
     notreg.removeAll(origMaleReg);
-    logger.info("not Reg  (" +notreg.size()+
-        ")" + new TreeSet<>(notreg) + " from " + uniqueIDs.size());
+//    logger.info("not Reg  (" +notreg.size()+      ")" + new TreeSet<>(notreg) + " from " + uniqueIDs.size());
 
     HashSet<String> notslow = new HashSet<>(uniqueIDs);
     notslow.removeAll(maleSlowSpeed);
-    logger.info("not slow (" +notslow.size()+
-        ")" + new TreeSet<>(notslow) + " from " + uniqueIDs.size());
+//    logger.info("not slow (" +notslow.size()+      ")" + new TreeSet<>(notslow) + " from " + uniqueIDs.size());
 
     femaleIDs = new HashSet<>(femaleIDs);
     femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);
@@ -964,7 +960,7 @@ public class AudioDAO extends DAO {
       boolean debug = false;
 //      String intersting = "5496";
 
-      int c= 0;
+      int c = 0;
       while (rs.next()) {
         c++;
         String exid = rs.getString(1);
@@ -1002,11 +998,12 @@ public class AudioDAO extends DAO {
         }
       }
       finish(connection, statement, rs, sql);
-      logger.info("getCountForGender audioSpeed " + audioSpeed +
-          "\n\tsize\t" + idsOfRecordedExercises.size() +
-          "\n\trows\t" + c +
-          "\n\tsql:\n\t" + sql);
-
+      if (DEBUG) {
+        logger.info("getCountForGender audioSpeed " + audioSpeed +
+            "\n\tsize\t" + idsOfRecordedExercises.size() +
+            "\n\trows\t" + c +
+            "\n\tsql:\n\t" + sql);
+      }
 
 /*
       logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
