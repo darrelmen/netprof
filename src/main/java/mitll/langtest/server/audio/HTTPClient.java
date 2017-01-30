@@ -110,7 +110,7 @@ public class HTTPClient {
    */
   public HTTPClient(String url) {
     try {
-      logger.info("URL is : " + url);
+    //  logger.info("URL is : " + url);
       httpConn = setupPostHttpConn(url);
     } catch (IOException e) {
       logger.error("Error constructing HTTPClient:\n" + e, e);

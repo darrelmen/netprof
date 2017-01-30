@@ -87,9 +87,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private final Cache<String, Object[]> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
   private final Cache<String, Object[]> alignAudioToScore; // key => (Scores, wordLab, phoneLab)
 
-  private static final boolean SEND_GRAMMER_WITH_ALIGNMENT = false;
-  private static final boolean ADD_SIL = false;
-  private static final boolean INCLUDE_SELF_SIL_LINK = true;
+  /**
+   * Tell dcodr what grammar to use - include optional sils between words
+   */
+  private static final boolean SEND_GRAMMER_WITH_ALIGNMENT = true;
+  /**
+   * Add sils between words
+   */
+  private static final boolean ADD_SIL = true;
+  /**
+   * Used in possible trimming
+   */
+  private static final boolean INCLUDE_SELF_SIL_LINK = false;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
