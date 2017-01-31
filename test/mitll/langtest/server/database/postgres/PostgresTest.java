@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.postgres;
 
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.copy.CopyToPostgres;
@@ -46,12 +45,10 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickUserProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.*;
 
 public class PostgresTest extends BaseTest {
@@ -543,7 +540,7 @@ public class PostgresTest extends BaseTest {
       String language = project.language();
       logger.info("lang " + language);
       int id = project.id();
-      List<WordScore> wordScoresForUser = database.getAnalysis(id).getWordScoresForUser(4, id, 1);
+      List<WordScore> wordScoresForUser = database.getAnalysis(id).getWordScoresForUser(4, 1);
       for (WordScore ws : wordScoresForUser) {
         logger.info("testWords got " + ws);
       }

@@ -54,11 +54,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private SlickResultDAO resultDAO;
   private static final boolean DEBUG = true;
   private String language;
+  private int projid;
 
   /**
    * @param database
    * @param phoneDAO
    * @param exToRef
+   * @param projid
    * @see DatabaseImpl#configureProject
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    */
@@ -66,26 +68,26 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                        IPhoneDAO phoneDAO,
                        Map<Integer, String> exToRef,
                        SlickResultDAO resultDAO,
-                       String language) {
+                       String language, int projid) {
     super(database, phoneDAO, exToRef);
     this.resultDAO = resultDAO;
     this.language = language;
+    this.projid = projid;
   }
 
   /**
    * @param userid
-   * @param projid
    * @param minRecordings
    * @return
    * @see AnalysisServiceImpl#getPerformanceForUser
    */
   @Override
-  public UserPerformance getPerformanceForUser(long userid, int projid, int minRecordings) {
-    Map<Integer, UserInfo> best = getBestForUser((int) userid, projid, minRecordings);
+  public UserPerformance getPerformanceForUser(long userid, int minRecordings) {
+    Map<Integer, UserInfo> best = getBestForUser((int) userid, minRecordings);
     return getUserPerformance(userid, best);
   }
 
-  private Map<Integer, UserInfo> getBestForUser(int id, int projid, int minRecordings) {
+  private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings) {
     long then = System.currentTimeMillis();
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForUser(id, projid);
     long now = System.currentTimeMillis();
@@ -101,16 +103,15 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   /**
    * @param id
-   * @param projid
    * @param minRecordings
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getWordScores
    */
   @Override
-  public List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings) {
+  public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
     long then = System.currentTimeMillis();
 
-    Map<Integer, UserInfo> best = getBestForUser((int) id, projid, minRecordings);
+    Map<Integer, UserInfo> best = getBestForUser((int) id, minRecordings);
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > WARN_THRESH) {
@@ -122,13 +123,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   /**
    * @param id
    * @param minRecordings
-   * @param projid
+   * @paramx projid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores(int, int)
    */
   @Override
-  public PhoneReport getPhonesForUser(long id, int minRecordings, int projid) {
-    Map<Integer, UserInfo> best = getBestForUser((int) id, projid, minRecordings);
+  public PhoneReport getPhonesForUser(long id, int minRecordings) {
+    Map<Integer, UserInfo> best = getBestForUser((int) id, minRecordings);
     return getPhoneReport(id, best, language);
   }
 
@@ -137,12 +138,11 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    *
    * @param userDAO
    * @param minRecordings
-   * @param projid
    * @return
    * @see AnalysisServiceImpl#getUsersWithRecordings
    */
   @Override
-  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int projid) {
+  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerf(projid, database.getServerProps().getMinAnalysisScore());
     return getUserInfos(userDAO, getBest(perfForUser, minRecordings));
   }
@@ -209,10 +209,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       boolean isLegacy = path.startsWith("answers");
       String filePath = isLegacy ?
-          getRelPrefix(language) + path:
+          getRelPrefix(language) + path :
           trimPathForWebPage(path);
 
-   //   logger.info("isLegacy " + isLegacy + " " + path + " : " + filePath);
+      //   logger.info("isLegacy " + isLegacy + " " + path + " : " + filePath);
 
       BestScore e = new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard,
           //trimPathForWebPage(path),
@@ -233,11 +233,11 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   /**
    * Fix the path -  on hydra it's at:
-   *
+   * <p>
    * /opt/netprof/answers/english/answers/plan/1039/1/subject-130
-   *
+   * <p>
    * rel path:
-   *
+   * <p>
    * answers/english/answers/plan/1039/1/subject-130
    *
    * @param language
@@ -250,7 +250,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     String prefix = installPath + File.separator + s;
     int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
 
-    String relPrefix = prefix.substring(netProfDurLength) + File.separator ;
+    String relPrefix = prefix.substring(netProfDurLength) + File.separator;
     return relPrefix;
   }
 }

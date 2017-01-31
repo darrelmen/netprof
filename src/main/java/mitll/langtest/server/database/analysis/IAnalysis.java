@@ -41,11 +41,11 @@ import mitll.langtest.shared.analysis.WordScore;
 import java.util.List;
 
 public interface IAnalysis {
-  UserPerformance getPerformanceForUser(long id, int projid, int minRecordings);
+  UserPerformance getPerformanceForUser(long id,   int minRecordings);
 
-  List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings);
+  List<WordScore> getWordScoresForUser(long id, int minRecordings);
 
-  PhoneReport getPhonesForUser(long id, int minRecordings, int projid);
+  PhoneReport getPhonesForUser(long id, int minRecordings);
 
-  List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int projid);
+  List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings);
 }

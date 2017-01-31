@@ -190,12 +190,12 @@ public class UserInfo implements HasID {
     return Integer.valueOf(id).compareTo(o.getID());
   }
 
-  public String toString() {
-    //MiniUser user = getUser();
-    return getID() + "/" + getUserID() + " :\t# = " + getNum() + "\tavg " + getCurrent() + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
-  }
-
   public int getFinalScores() {
     return finalScores;
+  }
+
+  public String toString() {
+    //MiniUser user = getUser();
+    return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent() + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
   }
 }

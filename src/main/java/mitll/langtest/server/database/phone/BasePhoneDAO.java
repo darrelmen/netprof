@@ -66,7 +66,7 @@ public class BasePhoneDAO extends DAO {
    void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap, String scoreJson,
                       WordAndScore wordAndScore) {
      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
-         stringToMap.computeIfAbsent(scoreJson, k -> parseResultJson.parseJson(scoreJson));
+         stringToMap.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
      //else {
       // logger.debug("cache hit " + scoreJson.length());
     //}

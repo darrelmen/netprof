@@ -42,7 +42,6 @@ import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -110,7 +109,7 @@ public abstract class Analysis extends DAO {
    * @param userDAO
    * @param best
    * @return
-   * @see SlickAnalysis#getUserInfo
+   * @see IAnalysis#getUserInfo
    */
   List<UserInfo> getUserInfos(IUserDAO userDAO, Map<Integer, UserInfo> best) {
     List<UserInfo> userInfos = getUserInfos(best, userDAO);
@@ -231,16 +230,15 @@ public abstract class Analysis extends DAO {
 
   /**
    * @param id
-   * @param projid
    * @param minRecordings
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  abstract public UserPerformance getPerformanceForUser(long id, int projid, int minRecordings);
+  abstract public UserPerformance getPerformanceForUser(long id, int minRecordings);
 
   /**
-   * @see SlickAnalysis#getPerformanceForUser(long, int, int)
+   * @see Analysis#getPerformanceForUser(long, int)
    * @param id
    * @param best
    * @return
@@ -482,7 +480,7 @@ public abstract class Analysis extends DAO {
         // skip low scores
       } else if (bs.getScore() > database.getServerProps().getMinAnalysisScore()) {
         if (json.isEmpty()) logger.warn("no json for " + bs);
-        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
+        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.readFromJSON(json);
         WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);
         results.add(wordScore);
       } else {
