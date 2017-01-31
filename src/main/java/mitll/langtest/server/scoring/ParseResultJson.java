@@ -35,9 +35,7 @@ package mitll.langtest.server.scoring;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.phone.PhoneDAO;
@@ -102,7 +100,7 @@ public class ParseResultJson {
    * @param json
    * @param usePhones
    * @return
-   * @see #parseJson(String)
+   * @see #readFromJSON(String)
    */
   private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json,
                                                                       boolean usePhones,
@@ -112,9 +110,20 @@ public class ParseResultJson {
 //      logger.warn("json = " + json);
     // }
     JsonParser parser = new JsonParser();
-    JsonObject parse = parser.parse(json).getAsJsonObject();
-    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
-        parseJson(parse, WORDS, W, usePhones, wordToPronunciations);
+    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = Collections.emptyMap();
+
+    if (!json.equals("null")) {  // not exactly sure how this can happen...
+      try {
+        JsonElement parse1 = parser.parse(json);
+
+        JsonObject parse = parse1.getAsJsonObject();
+        imageTypeMapMap = readFromJSON(parse, WORDS, W, usePhones, wordToPronunciations);
+      } catch (Exception e) {
+        logger.error("Couldn't parse" +
+            "\n\tjson " + json +
+            "\n\tgot   " + e, e);
+      }
+    }
 
     if (imageTypeMapMap.isEmpty()) logger.warn("json " + json + " produced empty events map");
     else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
@@ -131,7 +140,7 @@ public class ParseResultJson {
    * @see mitll.langtest.server.database.userexercise.ExerciseToPhone#getExerciseToPhone
    * @see mitll.langtest.server.database.analysis.Analysis#getWordScore(List)
    */
-  public Map<NetPronImageType, List<TranscriptSegment>> parseJson(String json) {
+  public Map<NetPronImageType, List<TranscriptSegment>> readFromJSON(String json) {
     if (json.isEmpty()) {
       logger.warn("json is empty?");
     }
@@ -152,14 +161,15 @@ public class ParseResultJson {
    * @param jsonObject
    * @param words1
    * @param w1
-   * @see #parseJsonString(String, boolean)
+   * @see #parseJsonString
    * @see PrecalcScores#getCachedScores
    * @see Scoring#getTypeToTranscriptEvents
    */
-  Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JsonObject jsonObject,
-                                                        String words1,
-                                                        String w1, boolean usePhones,
-                                                        Map<String, List<List<String>>> wordToPronunciations) {
+  Map<ImageType, Map<Float, TranscriptEvent>> readFromJSON(JsonObject jsonObject,
+                                                           String words1,
+                                                           String w1,
+                                                           boolean usePhones,
+                                                           Map<String, List<List<String>>> wordToPronunciations) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
     SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
     SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
@@ -182,7 +192,7 @@ public class ParseResultJson {
                 wordToPronunciations.put(wordToken, lists = new ArrayList<List<String>>());
               }
               lists.add(phones1);
-            //  logger.info("Adding " + wordToken + " -> " + phones1);
+              //  logger.info("Adding " + wordToken + " -> " + phones1);
             }
           }
         }

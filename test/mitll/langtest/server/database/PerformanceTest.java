@@ -4,7 +4,6 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.shared.analysis.*;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.*;
 import org.junit.Test;
 
@@ -199,7 +198,7 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(connection, "spanish", path);
     int id = 71;
     //int id = 535;   // tiffany
-    UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1,1);
+    UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1);
 
     logger.info("perf " + performanceForUser);
     Map<Long, List<PhoneSession>> granularityToSessions = performanceForUser.getGranularityToSessions();
@@ -210,7 +209,7 @@ public class PerformanceTest extends BaseTest {
     }
     // List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
 
-    PhoneReport report = database.getAnalysis(-1).getPhonesForUser(id, 1, 1);
+    PhoneReport report = database.getAnalysis(-1).getPhonesForUser(id, 1);
 
     Map<String, PhoneStats> phoneToAvgSorted = report.getPhoneToAvgSorted();
     if (phoneToAvgSorted == null) {
@@ -438,7 +437,7 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(getH2Connection(path), urdu, path);
     IAnalysis analysis = database.getAnalysis(-1);
 
-    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5, 1);
+    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
     for (UserInfo userInfo1 : userInfo) logger.warn("Got " + userInfo1);
   }
 //
@@ -463,7 +462,7 @@ public class PerformanceTest extends BaseTest {
     //int id = 41; // big mandarin classroom user
     int id = 1;
     DatabaseImpl database = getSpanishDatabase();
-    PhoneReport phoneReport = database.getAnalysis(-1).getPhonesForUser(id, 1, 1);
+    PhoneReport phoneReport = database.getAnalysis(-1).getPhonesForUser(id, 1);
 
     Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
     long now = System.currentTimeMillis();
@@ -489,7 +488,7 @@ public class PerformanceTest extends BaseTest {
 //    int id = 71;
     DatabaseImpl database = getSpanishDatabase();
 
-    List<UserInfo> userInfo = database.getAnalysis(-1).getUserInfo(database.getUserDAO(), 5, 1);
+    List<UserInfo> userInfo = database.getAnalysis(-1).getUserInfo(database.getUserDAO(), 5);
     // PhoneReport phoneReport = (PhoneReport) userInfo;
 
     // Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();

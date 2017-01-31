@@ -69,7 +69,7 @@ public class UserPerformance implements Serializable {
   /**
    * @param userID
    * @param resultsForQuery
-   * @see Analysis#getPerformanceForUser(long, int, int)
+   * @see Analysis#getPerformanceForUser(long, int)
    */
   public UserPerformance(long userID, List<BestScore> resultsForQuery) {
     this(userID);
@@ -183,7 +183,7 @@ public class UserPerformance implements Serializable {
 
   /**
    * @param granularityToSessions
-   * @see Analysis#getPerformanceForUser(long, int, int)
+   * @see Analysis#getPerformanceForUser(long, int)
    */
   public void setGranularityToSessions(Map<Long, List<PhoneSession>> granularityToSessions) {
     this.granularityToSessions = granularityToSessions;

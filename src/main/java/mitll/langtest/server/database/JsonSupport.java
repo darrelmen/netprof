@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
@@ -43,6 +44,9 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -66,7 +70,7 @@ public class JsonSupport {
   private final IAudioDAO audioDAO;
   private final IPhoneDAO phoneDAO;
 
-  String language;
+  private String language;
 
   /**
    * @param sectionHelper
@@ -264,4 +268,5 @@ public class JsonSupport {
 
     return phoneDAO.getWorstPhonesJson(userid, ids, exidToRefAudio, language);
   }
+
 }
