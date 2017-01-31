@@ -65,12 +65,11 @@ class H2Analysis extends Analysis implements IAnalysis {
 
   /**
    * @param id
-   * @param projid
-   *@param minRecordings  @return
+   * @param minRecordings  @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  public UserPerformance getPerformanceForUser(long id, int projid, int minRecordings) {
+  public UserPerformance getPerformanceForUser(long id, int minRecordings) {
     try {
       Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
 
@@ -84,11 +83,10 @@ class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param userDAO
    * @param minRecordings
-   * @param projid
    * @return
    * @see LangTestDatabaseImpl#getUsersWithRecordings
    */
-  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int projid) {
+  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
     String sql = getPerfSQL();
     try {
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);
@@ -151,7 +149,7 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @return
    * @throws SQLException
-   * @see Analysis#getPerformanceForUser(long, int, int)
+   * @see Analysis#getPerformanceForUser(long, int)
    * @see IAnalysis#getPhonesForUser(long, int, int)
    * @see Analysis#getWordScoresForUser(long, int, int)
    */
@@ -174,7 +172,7 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @return
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
-  public PhoneReport getPhonesForUser(long id, int minRecordings, int projid) {
+  public PhoneReport getPhonesForUser(long id, int minRecordings) {
     try {
       String sql = getPerfSQL(id);
 
@@ -187,12 +185,11 @@ class H2Analysis extends Analysis implements IAnalysis {
   }
   /**
    * @param id
-   * @param minRecordings
+   * @paramx projid
    * @return
-   * @param projid
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
-  public List<WordScore> getWordScoresForUser(long id, int minRecordings, int projid) {
+  public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
     try {
       Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
 

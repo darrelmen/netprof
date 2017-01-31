@@ -47,7 +47,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("serial")
@@ -83,7 +82,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
     int projectID = getProjectID();
-    return db.getAnalysis(projectID).getUserInfo(db.getUserDAO(), MIN_RECORDINGS, projectID);
+    return db.getAnalysis(projectID).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
   }
 
   /**
@@ -103,9 +102,9 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
             db.getPhoneDAO(),
             db.getExerciseIDToRefAudio(projectID),
             (SlickResultDAO) db.getResultDAO(),
-            db.getProject(projectID).getLanguage());
+            db.getProject(projectID).getLanguage(), projectID);
 
-    return slickAnalysis.getPerformanceForUser(id, projectID, minRecordings);
+    return slickAnalysis.getPerformanceForUser(id, minRecordings);
   }
 
   /**
@@ -121,7 +120,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
 
     IAnalysis analysis = db.getAnalysis(projectID);
     logger.info("for user " +id + " project is "+ projectID + " and " + analysis);
-    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, projectID, minRecordings);
+    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, minRecordings);
 //    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getID() + " " + ws.getNativeAudio());
     return wordScoresForUser;
   }
@@ -130,6 +129,6 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   public PhoneReport getPhoneScores(int id, int minRecordings) {
     int projectID = getProjectID();
     if (projectID == -1) return new PhoneReport();
-    return db.getAnalysis(projectID).getPhonesForUser(id, minRecordings, projectID);
+    return db.getAnalysis(projectID).getPhonesForUser(id, minRecordings);
   }
 }

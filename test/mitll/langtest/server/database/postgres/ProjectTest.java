@@ -35,6 +35,7 @@ package mitll.langtest.server.database.postgres;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
@@ -44,6 +45,7 @@ import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.analysis.UserInfo;
+import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.User;
@@ -269,7 +271,13 @@ public class ProjectTest extends BaseTest {
   public void testAnalysis() {
     DatabaseImpl database = getAndPopulate();
     int projectid = 3;
-    List<UserInfo> userInfo = database.getAnalysis(projectid).getUserInfo(database.getUserDAO(), 5, projectid);
+    IAnalysis analysis = database.getAnalysis(projectid);
+    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
+
+    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(6, 5);
+
+    for (WordScore wordScore:wordScoresForUser) logger.info("ws " +wordScore);
+
     for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
   }
 

@@ -39,7 +39,6 @@ import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.shared.answer.AudioType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -132,7 +131,7 @@ public class PrecalcScores {
    */
   private Scores getCachedScores(float pronScore, JsonObject jsonObject, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
-        parseResultJson.parseJson(jsonObject, "words", "w", usePhones, null);
+        parseResultJson.readFromJSON(jsonObject, "words", "w", usePhones, null);
     Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
     return new Scores(pronScore, eventScores, 0);
   }

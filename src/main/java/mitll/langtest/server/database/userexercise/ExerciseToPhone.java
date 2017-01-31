@@ -65,7 +65,7 @@ public class ExerciseToPhone {
     ParseResultJson parseResultJson = new ParseResultJson(null);
 
     for (SlickRefResultJson exjson : jsonResults) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.readFromJSON(exjson.scorejson());
       *//*List<TranscriptSegment> transcriptSegments =*//* //netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
 
       int exid = exjson.exid();
@@ -89,7 +89,7 @@ public class ExerciseToPhone {
     ParseResultJson parseResultJson = new ParseResultJson(null);
 
     for (SlickRefResultJson exjson : jsonResults) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.readFromJSON(exjson.scorejson());
       /*List<TranscriptSegment> transcriptSegments =*/ //netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
 
       int exid = exjson.exid();
