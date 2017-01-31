@@ -222,7 +222,7 @@ public class ProjectManagement implements IProjectManagement {
               db.getPhoneDAO(),
               exerciseIDToRefAudio,
               (SlickResultDAO) db.getResultDAO(),
-              project.getLanguage())
+              project.getLanguage(), id)
       );
       project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
 

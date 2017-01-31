@@ -52,7 +52,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -122,6 +121,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
   private static final String EXERCISE = "exercise";
+  public static final boolean TRY_TO_DO_ALIGNMENT = false;
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -884,7 +884,6 @@ public class ScoreServlet extends DatabaseServlet {
   private boolean getUsePhoneToDisplay(HttpServletRequest request) {
     return getParam(request, USE_PHONE_TO_DISPLAY);
   }
-
   private boolean getAllowAlternates(HttpServletRequest request) {
     return getParam(request, ALLOW_ALTERNATES);
   }
@@ -959,9 +958,10 @@ public class ScoreServlet extends DatabaseServlet {
 
     if (answer != null && answer.isValid()) {
       boolean usePhoneToDisplay = options.isUsePhoneToDisplay();
+      ScoreToJSON scoreToJSON = new ScoreToJSON();
       jsonForScore = fullJSON ?
-          new ScoreToJSON().getJsonObject(pretestScore) :
-          getJsonForScore(pretestScore, usePhoneToDisplay);
+          scoreToJSON.getJsonObject(pretestScore) :
+          scoreToJSON.getJsonForScore(pretestScore, usePhoneToDisplay, serverProps);
       jsonForScore.put(SCORE, pretestScore.getHydecScore());
 
       if (doFlashcard) {
@@ -969,51 +969,9 @@ public class ScoreServlet extends DatabaseServlet {
         jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
         int decodeResultID = answer.getResultID();
         jsonForScore.put(RESULT_ID, decodeResultID);
-
-        // attempt to get more feedback when we're too sensitive and match the unknown model
-        if (!answer.isCorrect() && !answer.isSaidAnswer()) {
-          options.setDoFlashcard(false);
-          answer = getAudioAnswerAlign(reqid, exerciseID, user,
-              wavPath, saveFile,
-              deviceType, device,
-              exercise,
-              options);
-          jsonForScore = getJsonFromAlignment(usePhoneToDisplay, answer, decodeResultID);
-        }
       }
     }
     addValidity(exerciseID, jsonForScore, answer);
-    //  }
-    return jsonForScore;
-  }
-
-  /**
-   * Do alignment when decoding fails, since sometimes it's too sensitive for short words.
-   *
-   * @param usePhoneToDisplay
-   * @param answer
-   * @param decodeResultID
-   * @return
-   */
-  private JSONObject getJsonFromAlignment(boolean usePhoneToDisplay, AudioAnswer answer, long decodeResultID) {
-    JSONObject jsonForScore;
-    PretestScore pretestScore1 = answer.getPretestScore();
-    logger.debug("getJsonFromAlignment Alignment on an unknown model answer gets " + pretestScore1);
-    //   logger.debug("score info " + answer.getPretestScore().getsTypeToEndTimes());
-    jsonForScore = getJsonForScore(pretestScore1, usePhoneToDisplay);
-
-    // so we mark it correct if the score is above 50% on alignment
-    boolean isCorrect = pretestScore1.getHydecScore() > ALIGNMENT_SCORE_CORRECT;
-    jsonForScore.put(IS_CORRECT, isCorrect);
-    jsonForScore.put(SCORE, pretestScore1.getHydecScore());
-    jsonForScore.put(SAID_WORD, false);   // don't say they said the word - decode says they didn't
-
-    if (pretestScore1.getHydecScore() > 0.25) {
-      logger.info("remember score for result " + decodeResultID);
-      db.rememberScore((int) decodeResultID, pretestScore1, isCorrect);
-    } else {
-      logger.debug("skipping remembering alignment since score was too low " + pretestScore1.getHydecScore());
-    }
     return jsonForScore;
   }
 
@@ -1072,44 +1030,6 @@ public class ScoreServlet extends DatabaseServlet {
     return answer;
   }
 
-  /**
-   * @param reqid
-   * @param exerciseID
-   * @param user
-   * @param wavPath
-   * @param saveFile
-   * @param deviceType
-   * @param device
-   * @param exercise1
-   * @return
-   * @paramx doFlashcard
-   * @paramx usePhoneToDisplay
-   * @see #getJsonForAudio
-   */
-  private AudioAnswer getAudioAnswerAlign(int reqid, int exerciseID, int user, String wavPath, File saveFile,
-                                          String deviceType, String device, CommonExercise exercise1,
-                                          DecoderOptions options) {
-    PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(
-        reqid,
-        exerciseID,
-        saveFile.getAbsolutePath(),
-        exercise1.getForeignLanguage(),
-        exercise1.getTransliteration(),
-        options.isUsePhoneToDisplay(),
-        exercise1.getProjectID());
-
-    AudioAnswer answer = getAnswer(
-        reqid,
-        exerciseID,
-        user,
-        wavPath,
-        saveFile,
-        asrScoreForAudio.getHydecScore(),
-        deviceType, device,
-        options);
-    answer.setPretestScore(asrScoreForAudio);
-    return answer;
-  }
 
   /**
    * Don't wait for mp3 to write to return - can take 70 millis for a short file.
@@ -1185,7 +1105,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonForAudioForUser
    */
-  private JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay) {
+/*  private JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay) {
     JSONObject jsonObject = new JSONObject();
 
     jsonObject.put(SCORE, score.getHydecScore());
@@ -1217,7 +1137,7 @@ public class ScoreServlet extends DatabaseServlet {
       jsonObject.put(imageType.toString(), value1);
     }
     return jsonObject;
-  }
+  }*/
 
   /**
    * TODO: Get audio file helper on project choice
@@ -1280,31 +1200,6 @@ public class ScoreServlet extends DatabaseServlet {
             .setUsePhoneToDisplay(usePhoneToDisplay));
   }
 
-  /**
-   * @param reqid
-   * @param exerciseID
-   * @param testAudioFile
-   * @param sentence
-   * @param usePhoneToDisplay
-   * @param projid
-   * @return
-   * @see #getAudioAnswerAlign
-   */
-  private PretestScore getASRScoreForAudioNoCache(int reqid,
-                                                  int exerciseID,
-                                                  String testAudioFile,
-                                                  String sentence,
-                                                  String transliteration,
-                                                  boolean usePhoneToDisplay,
-                                                  int projid) {
-    //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
-    AudioFileHelper audioFileHelper = getAudioFileHelper(projid);
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, "" + exerciseID, null,
-        new DecoderOptions()
-            .setDoFlashcard(false)
-            .setCanUseCache(false)
-            .setUsePhoneToDisplay(usePhoneToDisplay));
-  }
 
   private void addVersion(JSONObject jsonObject, int projid) {
     jsonObject.put(VERSION, VERSION_NOW);

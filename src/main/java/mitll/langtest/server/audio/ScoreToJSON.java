@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.audio;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -59,6 +60,12 @@ import java.util.Map;
 public class ScoreToJSON {
   private static final Logger logger = LogManager.getLogger(ScoreToJSON.class);
 
+  private static final String START = "start";
+  private static final String END = "end";
+  private static final String EVENT = "event";
+  public static final String CONTENT = "content";
+  private static final String SCORE = "score";
+
   /**
    * We skip sils, since we wouldn't want to show them to the user.
    *
@@ -67,14 +74,14 @@ public class ScoreToJSON {
    * @see AudioFileHelper#getAudioAnswerAlignment
    * @see AudioFileHelper#getAudioAnswerDecoding
    */
-  public JSONObject getJsonFromAnswer(AudioAnswer answer) {  return getJsonObject(answer.getPretestScore());  }
+  JSONObject getJsonFromAnswer(AudioAnswer answer) {  return getJsonObject(answer.getPretestScore());  }
 
   /**
    * @see AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
    * @param pretestScore
    * @return
    */
-  public String asJson(PretestScore pretestScore) {
+  String asJson(PretestScore pretestScore) {
     return getJsonObject(pretestScore).toString();
   }
 
@@ -164,5 +171,48 @@ public class ScoreToJSON {
     BigDecimal bd = new BigDecimal(Float.toString(d)).
         setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
     return bd.floatValue();
+  }
+
+  /**
+   * What the iPad wants to see.
+   * <p>
+   * For both words and phones, return event text, start, end times, and score for event.
+   * Add overall score.
+   *
+   * @param score
+   * @return
+   * @see mitll.langtest.server.ScoreServlet#getJsonForAudioForUser
+   */
+  public JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps ) {
+    JSONObject jsonObject = new JSONObject();
+
+    jsonObject.put(SCORE, score.getHydecScore());
+
+    for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getsTypeToEndTimes().entrySet()) {
+      List<TranscriptSegment> value = pair.getValue();
+      JSONArray value1 = new JSONArray();
+      NetPronImageType imageType = pair.getKey();
+
+      boolean usePhone = imageType == NetPronImageType.PHONE_TRANSCRIPT &&
+          (serverProps.usePhoneToDisplay() || usePhoneDisplay);
+
+      for (TranscriptSegment segment : value) {
+        JSONObject object = new JSONObject();
+        String event = segment.getEvent();
+        if (usePhone) {  // remap to display labels
+          event = serverProps.getDisplayPhoneme(event);
+        }
+
+        object.put(EVENT, event);
+        object.put(START, segment.getStart());
+        object.put(END, segment.getEnd());
+        object.put(SCORE, segment.getScore());
+
+        value1.add(object);
+      }
+
+      jsonObject.put(imageType.toString(), value1);
+    }
+    return jsonObject;
   }
 }

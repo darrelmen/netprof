@@ -68,6 +68,7 @@ public class JSONExportTest extends JsonExport {
     CommonExercise exercise = database.getExercise(1,724);
     logger.warn("\n\ntestRead got " + exercise);
   }
+/*
 
 
   @Test
@@ -81,6 +82,7 @@ public class JSONExportTest extends JsonExport {
 
     logger.info("got " + jsonObject);
   }
+*/
 
   @Test
   public void testExport2() {
@@ -91,7 +93,7 @@ public class JSONExportTest extends JsonExport {
 
   }
 
-  @Test
+ /* @Test
   public void testExport3() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     JSONObject jsonObject = new JSONObject();
@@ -101,7 +103,7 @@ public class JSONExportTest extends JsonExport {
 
 
     Collection<CommonExercise> exercises = jsonExport.getExercises(s);
-  }
+  }*/
 
   @Test
   public void testExport4() {

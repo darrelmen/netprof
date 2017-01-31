@@ -102,7 +102,7 @@ public class PhoneAnalysis {
   /**
    * @param answersForUser
    * @return
-   * @see Analysis#getPerformanceForUser(long, int, int)
+   * @see Analysis#getPerformanceForUser(long, int)
    */
   public <T extends SimpleTimeAndScore> Map<Long, List<PhoneSession>> getGranularityToSessions(List<T> answersForUser) {
     //String overall1 = OVERALL;
