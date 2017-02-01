@@ -412,7 +412,7 @@ public abstract class BaseResultDAO extends DAO {
     }
     MutableExercise mutable = firstExercise.getMutable();
     mutable.setScores(resultsForExercise);
-    mutable.setAvgScore(total == 0 ? 0f : scoreTotal / total);
+ //   mutable.setAvgScore(total == 0 ? 0f : scoreTotal / total);
   }
 
   /**

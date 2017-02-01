@@ -33,6 +33,7 @@
 package mitll.langtest.server.amas;
 
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.exercise.Shell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +47,7 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/7/14.
  */
-public class ILRMapping<T extends Shell> {
+public class ILRMapping<T extends Shell & HasUnitChapter> {
   private static final Logger logger = LogManager.getLogger(ILRMapping.class);
   public static final String ILR_LEVEL = "ILR Level";
   public static final String TEST_TYPE = "Test type";

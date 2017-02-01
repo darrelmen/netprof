@@ -64,7 +64,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int WARN_DUR = 100;
   //public static final String MARK_DEFECTS = "markDefects";
 
-  private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
+  private ExerciseTrie<?> amasFullTrie = null;
   private static final boolean DEBUG = false;
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
@@ -154,8 +154,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
             logger.info("projidToWrapper now " + projidToWrapper.size());
           }
-        }
-        else {
+        } else {
           logger.debug("REq " + request.isNoFilter());
           logger.debug("REq " + request.toString());
           logger.debug("REq " + request.getPrefix());
@@ -516,17 +515,17 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private <T extends CommonShell> void sortExercises(ActivityType role, List<T> commonExercises) {
     int projectID = getProjectID();
     new ExerciseSorter(db.getTypeOrder(projectID))
-        .getSortedByUnitThenAlpha(commonExercises,role == ActivityType.RECORDER);
+        .getSortedByUnitThenAlpha(commonExercises, role == ActivityType.RECORDER);
   }
 
-  private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix,
+  private <T extends CommonExercise> Collection<T> getExercisesForSearch(String prefix,
                                                                       Collection<T> exercises,
                                                                       boolean predefExercises) {
     ExerciseTrie<T> fullTrie = getProject().getFullTrie();
     return getExercisesForSearchWithTrie(prefix, exercises, predefExercises, fullTrie);
   }
 
-  private <T extends CommonShell> Collection<T> getExercisesForSearchWithTrie(String prefix,
+  private <T extends CommonExercise> Collection<T> getExercisesForSearchWithTrie(String prefix,
                                                                               Collection<T> exercises,
                                                                               boolean predefExercises,
                                                                               ExerciseTrie<T> fullTrie) {
@@ -741,8 +740,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param <T>
    * @return
    */
-  private <T extends CommonShell> Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
-                                                                                 UserList<T> userListByID) {
+  private <T extends CommonShell & HasUnitChapter> Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
+                                                                                                  UserList<T> userListByID) {
     SectionHelper<T> helper = new SectionHelper<T>();
     Collection<T> exercises2 = getCommonExercises(userListByID);
     long then = System.currentTimeMillis();
@@ -759,7 +758,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     // logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
     return exercisesForState;
   }
-
 
   /**
    * Save transmission bandwidth - don't send a list of fully populated items - just send enough to populate a list
@@ -799,10 +797,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         exercises = getAMASExercises();
 
         // now if there's a prefix, filter by prefix match
-        if (!request.getPrefix().isEmpty()) {
+
+        // TODO : put this back if needed?
+
+        /*       if (!request.getPrefix().isEmpty()) {
           // now do a trie over matches
           exercises = getExercisesForSearchWithTrie(request.getPrefix(), exercises, true, amasFullTrie);
-        }
+        }*/
         AmasSupport amasSupport = new AmasSupport();
         exercises = amasSupport.filterByUnrecorded(request.getUserID(), exercises, typeToSelection, db.getResultDAO());
         // exercises = filterByOnlyAudioAnno(onlyWithAudioAnno, exercises);
@@ -964,13 +965,17 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         " millis, threads " + threadInfo + " on " + hostName);
   }
 
+  /**
+   * TODO : put back trie
+   * @return
+   */
   private List<AmasExerciseImpl> getAMASExercises() {
     logger.info("get getAMASExercises -------");
     long then = System.currentTimeMillis();
     List<AmasExerciseImpl> exercises = db.getAMASExercises();
-    if (amasFullTrie == null) {
+/*    if (amasFullTrie == null) {
       amasFullTrie = new ExerciseTrie<>(exercises, getOldLanguage(), getSmallVocabDecoder());
-    }
+    }*/
 
 //    if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
 //      shareAudioFileHelper(getServletContext());

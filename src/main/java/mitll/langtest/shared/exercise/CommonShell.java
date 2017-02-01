@@ -44,10 +44,8 @@ public interface CommonShell extends Shell {
   String getEnglish();
   String getMeaning();
   String getForeignLanguage();
-  String getAltFL();
-  String getTransliteration();
 
-  int getDominoID();
+
 
   MutableShell getMutableShell();
 
@@ -58,5 +56,4 @@ public interface CommonShell extends Shell {
   Collection<String> getRefSentences();
 
   CommonShell getShell();
-
 }

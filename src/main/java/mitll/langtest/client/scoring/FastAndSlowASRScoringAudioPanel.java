@@ -47,7 +47,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
@@ -59,8 +59,9 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/16/15.
  */
-public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttributeExercise> extends ASRScoringAudioPanel<T> {
+public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAttributeExercise> extends ASRScoringAudioPanel<T> {
   private Logger logger = null;
+
   public static final int RIGHT_MARGIN = 23;
 
   private static final String DEFAULT = "Default";
@@ -82,7 +83,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
   protected FastAndSlowASRScoringAudioPanel(T exercise,
                                             String path,
                                             ExerciseController controller1,
-                                            ScoreListener scoreListener,
                                             String instance
   ) {
     super(path,

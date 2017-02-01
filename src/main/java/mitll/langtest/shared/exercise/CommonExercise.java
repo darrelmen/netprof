@@ -34,6 +34,7 @@ package mitll.langtest.shared.exercise;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -41,8 +42,18 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/20/2014.
  */
-public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
+public interface CommonExercise extends CommonAudioExercise, ScoredExercise, HasUnitChapter {
+  @Deprecated String getOldID();
+
+  int getDominoID();
+
   CommonShell getShell();
+
+  /**
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
+   * @return
+   */
+  String getAltFL();
 
   List<String> getFirstPron();
 
@@ -73,6 +84,10 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
   long getUpdateTime();
 
   int getProjectID();
+
+  Map<String, String> getUnitToValue();
+
+  String getTransliteration();
 
   MutableExercise getMutable();
 

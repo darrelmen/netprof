@@ -24,6 +24,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -31,7 +32,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 /**
  * An ASR scoring panel with a record button.
  */
-public class ASRRecordAudioPanel<T extends CommonShell & AudioRefExercise & ScoredExercise>
+public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & AudioRefExercise & ScoredExercise>
     extends ASRScoringAudioPanel<T> {
   static final String DOWNLOAD_AUDIO = "downloadAudio";
 

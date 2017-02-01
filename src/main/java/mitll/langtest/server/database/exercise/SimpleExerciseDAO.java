@@ -35,6 +35,7 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasUnitChapter;
 
 import java.util.List;
 import java.util.Set;
@@ -45,11 +46,11 @@ import java.util.Set;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/22/16.
  */
-public interface SimpleExerciseDAO<T extends CommonShell> {
+public interface SimpleExerciseDAO<T extends CommonShell & HasUnitChapter> {
   /**
    * @return
    * @see DatabaseImpl#getExercise
-   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @see DatabaseImpl#makeDAO
    * @see UserManagement#getUsers()
    */
   List<T> getRawExercises();

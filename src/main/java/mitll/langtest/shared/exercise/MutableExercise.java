@@ -52,16 +52,16 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void setTransliteration(String transliteration);
 
   /**
-   * @see ResultDAO#attachScoreHistory(long, CommonExercise, boolean)
+   * @see BaseResultDAO#attachScoreHistory
    * @param scoreTotal
    */
   void setScores(List<CorrectAndScore> scoreTotal);
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio
-   * @param v
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio
+   * @paramx v
    */
-  void setAvgScore(float v);
+//  void setAvgScore(float v);
 
   void setRefSentences(Collection<String> orDefault);
 
@@ -73,4 +73,17 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void setCreator(int id);
 
+  /**
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
+   * @return
+   */
+  String getAltFL();
+
+
+  /**
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
+   * @param unit
+   * @param value
+   */
+  void addUnitToValue(String unit, String value);
 }

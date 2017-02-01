@@ -38,6 +38,7 @@ import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.shared.exercise.BaseExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.user.User;
 
@@ -57,6 +58,7 @@ import java.util.Map;
  */
 public class UserList<T extends HasID> extends BaseExercise {
   public static final String MY_LIST = "Favorites";
+  @Deprecated protected String oldid = "";
 
   private User creator;
   private String name;
@@ -81,7 +83,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    */
   public UserList(int uniqueID, User user, String name, String description, String classMarker, boolean isPrivate,
                   long modified) {
-    super("" + uniqueID, uniqueID);
+    super(uniqueID);
     this.creator = user;
     this.name = name;
     this.description = description;
@@ -243,5 +245,19 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   public void setModified(long modified) {
     this.modified = modified;
+  }
+
+  @Deprecated
+  public String getOldID() {
+    return oldid;
+  }
+
+  /**
+   * @param id
+   * @see mitll.langtest.server.database.userexercise.UserExerciseDAO#add(CommonExercise, boolean)
+   */
+  @Deprecated
+  public void setOldID(String id) {
+    this.oldid = id;
   }
 }

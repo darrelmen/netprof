@@ -427,7 +427,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param users
    * @see #makeAudioRow
    */
-  private <X extends CommonShell & AnnotationExercise> void addTabsForUsers(X commonExercise,
+  private <X extends CommonExercise & AnnotationExercise> void addTabsForUsers(X commonExercise,
                                                                             TabPanel tabPanel,
                                                                             Map<MiniUser, List<AudioAttribute>> userToAudio,
                                                                             List<MiniUser> users,
@@ -550,9 +550,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return didChange;
   }
 
-//  private final Set<Widget> audioWasPlayed = new HashSet<>();
-
-  private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
+  private <X extends CommonExercise & AnnotationExercise> Widget getPanelForAudio(final X exercise,
                                                                                final AudioAttribute audio,
                                                                                RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();

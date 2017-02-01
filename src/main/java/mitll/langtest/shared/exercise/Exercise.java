@@ -42,10 +42,7 @@ import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.npdata.dao.SlickExercise;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
 
@@ -61,20 +58,29 @@ import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
  */
 public class Exercise extends AudioExercise implements CommonExercise,
     MutableExercise, MutableAudioExercise, MutableAnnotationExercise, CommonAnnotatable {
+  @Deprecated protected String oldid = "";
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores;
-  private float avgScore;
+ // private float avgScore;
 
   private transient List<String> firstPron = new ArrayList<String>();
   private long updateTime = 0;
 
   private Collection<CommonExercise> directlyRelated = new ArrayList<>();
-  private Collection<CommonExercise> mentions = new ArrayList<>();
+//  private Collection<CommonExercise> mentions = new ArrayList<>();
   private boolean safeToDecode;
 
   private int creator = UNDEFINED_USER;
   private boolean isPredef;
   private boolean isOverride;
+
+  /**
+   * TODO : why do we need to carry this around?
+   */
+  protected Map<String, String> unitToValue = new HashMap<>(3);
+
+  protected String transliteration = "";
+  private int dominoID = -1;
 
   // for serialization
   public Exercise() {
@@ -95,10 +101,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String meaning,
                   int projectid,
                   long updateTime) {
-    super(id, -1, projectid);
+    super(-1, projectid);
     this.meaning = meaning;
     this.updateTime = updateTime;
     addContext(context, altcontext, contextTranslation);
+    this.dominoID = dominoID;
   }
 
 
@@ -127,7 +134,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   @Deprecated
   private Exercise(String id, String context, String altcontext, String contextTranslation, int projectid) {
-    super(id, -1, projectid);
+    super(-1, projectid);
     this.foreignLanguage = context;
     this.altfl = altcontext;
     this.english = contextTranslation;
@@ -144,7 +151,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
    * @see mitll.langtest.server.json.JsonExport#toExercise
    */
-  public Exercise(String id,
+/*  public Exercise(String id,
                   String englishSentence,
                   String foreignLanguage,
                   String meaning,
@@ -157,7 +164,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setForeignLanguage(foreignLanguage);
     setTransliteration(transliteration);
     this.dominoID = dominoID;
-  }
+  }*/
 
   /**
    * @param exid
@@ -178,7 +185,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String meaning,
                   String transliteration,
                   int projectid) {
-    super(oldid, exid, projectid);
+    super(exid, projectid);
     this.creator = creator;
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
@@ -226,7 +233,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> Exercise(T exercise) {
-    super(exercise.getOldID(), exercise.getID(), exercise.getProjectID());
+    super(exercise.getID(), exercise.getProjectID());
     this.isPredef = true;
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
@@ -305,9 +312,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param context
    * @param altcontext
    * @param contextTranslation
-   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#addContextSentences
+   * @seex mitll.langtest.server.database.exercise.JSONURLExerciseDAO#addContextSentences
    */
-  public void addContext(String context, String altcontext, String contextTranslation) {
+  private void addContext(String context, String altcontext, String contextTranslation) {
     if (!context.isEmpty()) {
       Exercise contextExercise = new Exercise("c" + getID(), context, altcontext, contextTranslation, getProjectID());
       contextExercise.setUpdateTime(getUpdateTime());
@@ -342,17 +349,21 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.scores = scores;
   }
 
+/*
   public float getAvgScore() {
     return avgScore;
   }
+*/
 
   /**
    * @param avgScore
    * @see ResultDAO#attachScoreHistory
    */
+/*
   public void setAvgScore(float avgScore) {
     this.avgScore = avgScore;
   }
+*/
 
   /**
    * @paramx bagOfPhones
@@ -439,6 +450,15 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.id = uniqueID;
   }
 
+  @Override
+  public boolean equals(Object other) {
+    boolean checkOld = !getOldID().isEmpty();
+    return other instanceof ExerciseShell &&
+        (checkOld && getOldID().equals(((Exercise) other).getOldID()) ||
+            (getID() == ((ExerciseShell) other).getID())
+        );
+  }
+
   public String toString() {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
 
@@ -468,4 +488,53 @@ public class Exercise extends AudioExercise implements CommonExercise,
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue();
   }
+
+  @Deprecated
+  public String getOldID() {
+    return oldid;
+  }
+
+  /**
+   * @param id
+   * @see UserExerciseDAO#add(CommonExercise, boolean)
+   */
+  @Deprecated
+  public void setOldID(String id) {
+    this.oldid = id;
+  }
+
+
+
+  /**
+   * TODO move down
+   * @return
+   */
+  public Map<String, String> getUnitToValue() {
+    return unitToValue;
+  }
+
+  /**
+   * @param unit
+   * @param value
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
+   */
+  public void addUnitToValue(String unit, String value) {
+    if (value == null) return;
+    unitToValue.put(unit, value);
+  }
+
+  /**
+   * @param unitToValue
+   * @see mitll.langtest.shared.exercise.Exercise#Exercise
+   */
+  public void setUnitToValue(Map<String, String> unitToValue) {
+    this.unitToValue = unitToValue;
+  }
+
+  @Override
+  public String getTransliteration() {
+    return transliteration;
+  }
+  public int getDominoID() { return dominoID;  }
+
 }
