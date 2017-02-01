@@ -55,6 +55,7 @@ import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.*;
@@ -100,6 +101,7 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
    * @param instance
    * @param incorrectFirst
    * @param showFirstNotCompleted
+   * @param activityType
    * @see NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   protected FlexSectionExerciseList(Panel secondRow,
@@ -109,8 +111,8 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
                                     ExerciseController controller,
                                     String instance,
                                     boolean incorrectFirst,
-                                    boolean showFirstNotCompleted) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted);
+                                    boolean showFirstNotCompleted, ActivityType activityType) {
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted, activityType);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);

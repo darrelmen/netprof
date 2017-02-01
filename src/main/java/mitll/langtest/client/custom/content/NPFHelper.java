@@ -49,6 +49,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -276,7 +277,7 @@ public class NPFHelper implements RequiresResize {
   PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName,
                                                                    boolean showFirstNotCompleted) {
     return new NPExerciseList(right, exerciseServiceAsync, feedback, controller,
-        true, instanceName, false,showFirstNotCompleted) {
+        true, instanceName, false,showFirstNotCompleted, ActivityType.LEARN) {
       @Override
       protected void onLastItem() {
         new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {

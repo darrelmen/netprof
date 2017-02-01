@@ -63,9 +63,9 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
    * @param userManager
    * @param controller
    * @param exerciseServiceAsync
-   * @see LangTest#populateBelowHeader
+   * @see AMASInitialUI#populateBelowHeader
    */
-  public AutoCRTChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
+  AutoCRTChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
                                  ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
     super(service, feedback, userManager, controller, null, exerciseServiceAsync);
   }
