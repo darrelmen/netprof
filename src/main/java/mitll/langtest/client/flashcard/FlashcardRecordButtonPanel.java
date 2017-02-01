@@ -59,8 +59,9 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   private final AudioAnswerListener exercisePanel;
 
   private IconAnchor waiting;
-  private IconAnchor correctIcon;
-  private IconAnchor incorrect;
+
+/*  private IconAnchor correctIcon;
+  private IconAnchor incorrect;*/
 
   /**
    * @param exercisePanel
@@ -79,22 +80,22 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   }
 
   /**
-   * @see #layoutRecordButton(com.google.gwt.user.client.ui.Widget)
+   * @see #layoutRecordButton
    */
   @Override
   protected void addImages() {
     waiting     = new IconAnchor();
-    correctIcon = new IconAnchor();
-    incorrect   = new IconAnchor();
-
     waiting.setBaseIcon(MyCustomIconType.waiting);
     hideWaiting();
+
+ /*   correctIcon = new IconAnchor();
+    incorrect   = new IconAnchor();
 
     correctIcon.setBaseIcon(MyCustomIconType.correct);
     correctIcon.setVisible(false);
 
     incorrect.setBaseIcon(MyCustomIconType.incorrect);
-    incorrect.setVisible(false);
+    incorrect.setVisible(false);*/
   }
 
   private void hideWaiting() {
@@ -112,16 +113,16 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     hp.getElement().setId("flashcardButtonContainer");
     hp.add(recordButton1);
     hp.add(waiting);
-    hp.add(correctIcon);
-    hp.add(incorrect);
+/*    hp.add(correctIcon);
+    hp.add(incorrect);*/
     return hp;
   }
 
   @Override
   public void initRecordButton() {
     super.initRecordButton();
-    correctIcon.setVisible(false);
-    incorrect.setVisible(false);
+/*    correctIcon.setVisible(false);
+    incorrect.setVisible(false);*/
     hideWaiting();
   }
 
@@ -142,20 +143,27 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
-    hideRecordButton();
+    hideWaiting();
+    showRecord();
+
+//    hideRecordButton();
+  //  showCorrectIcons(result);
+    exercisePanel.receivedAudioAnswer(result);
+  }
+/*
+  private void showCorrectIcons(AudioAnswer result) {
     if (result.isCorrect()) {
       correctIcon.setVisible(true);
     } else {
       incorrect.setVisible(true);
     }
-    exercisePanel.receivedAudioAnswer(result);
-  }
+  }*/
 
-  @Override
+ /* @Override
   protected void hideRecordButton() {
     recordButton.setVisible(false);
     hideWaiting();
-  }
+  }*/
 
   @Override
   public void flip(boolean first) {
@@ -165,8 +173,19 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   public void stopRecording(long duration) {
     super.stopRecording(duration);
     if (duration > MIN_DURATION) {
-      recordButton.setVisible(false);
-      waiting.setVisible(true);
+      hideRecord();
+      showWaiting();
     }
+  }
+
+  private void hideRecord() {
+    recordButton.setVisible(false);
+  }
+  private void showRecord() {
+    recordButton.setVisible(true);
+  }
+
+  private void showWaiting() {
+    waiting.setVisible(true);
   }
 }

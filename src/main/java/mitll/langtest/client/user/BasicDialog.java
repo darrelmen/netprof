@@ -248,8 +248,8 @@ public class BasicDialog {
     markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message, Placement.RIGHT);
   }
 
-  void markErrorBlur(FormField dialectGroup, String header, String message, Placement right) {
-    markErrorBlur(dialectGroup.group, dialectGroup.box, header, message, right);
+  void markErrorBlur(FormField dialectGroup, String header, String message, Placement right, boolean setFocus) {
+    markErrorBlur(dialectGroup.group, dialectGroup.box, header, message, right, setFocus);
   }
 
   /**
@@ -272,12 +272,21 @@ public class BasicDialog {
     setupPopoverThatHidesItself(dialect, header, message, right);
   }
 
-  void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right) {
+  /**
+   *
+   * @param dialectGroup
+   * @param dialect
+   * @param header
+   * @param message
+   * @param right
+   * @param setFocus
+   */
+  void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right, boolean setFocus) {
     if (DEBUG) logger.info("markErrorBlur " +header + " message " +message);
 
     dialectGroup.setType(ControlGroupType.ERROR);
-    dialect.setFocus(true);
-    setupPopoverBlur(dialect, header, message, right, new MyPopover(), dialectGroup);
+    if (setFocus) dialect.setFocus(true);
+    setupPopoverBlur(dialect, header, message, right, new MyPopover(), dialectGroup, setFocus);
   }
 
 /*
@@ -367,7 +376,7 @@ public class BasicDialog {
     // if (DEBUG) logger.info("markError on '" + dialect.getElement().getExID() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
-    return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover());
+    return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover(), true);
   }
 
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message, Placement placement) {
@@ -387,7 +396,7 @@ public class BasicDialog {
   }
 
   Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, final MyPopover popover, boolean isHTML) {
-    configurePopup(popover, w, heading, message, placement, isHTML);
+    configurePopup(popover, w, heading, message, placement, isHTML, true);
 
     Timer t = new Timer() {
       @Override
@@ -399,8 +408,8 @@ public class BasicDialog {
     return popover;
   }
 
-  private Popover setupPopoverBlur(FocusWidget w, String heading, String message, Placement placement, final MyPopover popover, final ControlGroup dialectGroup) {
-    configurePopup(popover, w, heading, message, placement, true);
+  private Popover setupPopoverBlur(FocusWidget w, String heading, String message, Placement placement, final MyPopover popover, final ControlGroup dialectGroup, boolean requestFocus) {
+    configurePopup(popover, w, heading, message, placement, true, requestFocus);
 
     w.addBlurHandler(new BlurHandler() {
       @Override
@@ -414,8 +423,8 @@ public class BasicDialog {
     return popover;
   }
 
-  private Popover setupPopoverBlurNoControl(Widget widget, HasBlurHandlers hasBlurHandlers, String heading, String message, Placement placement, final MyPopover popover) {
-    configurePopup(popover, widget, heading, message, placement, true);
+  private Popover setupPopoverBlurNoControl(Widget widget, HasBlurHandlers hasBlurHandlers, String heading, String message, Placement placement, final MyPopover popover, boolean requestFocus) {
+    configurePopup(popover, widget, heading, message, placement, true, requestFocus);
 
     hasBlurHandlers.addBlurHandler(new BlurHandler() {
       @Override
@@ -437,14 +446,24 @@ public class BasicDialog {
    * @param message
    * @param placement
    * @param isHTML
-   * @see UserPassLogin#getSignUpForm()
+   * @param requestFocus
+   * @seex UserPassLogin#getSignUpForm
    */
-  void setupPopover(final FocusWidget w, String heading, final String message, Placement placement, boolean isHTML) {
+  void setupPopover(final FocusWidget w, String heading, final String message, Placement placement, boolean isHTML, boolean requestFocus) {
     if (DEBUG) logger.info(" : setupPopover (bad)   : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message);
     final Popover popover = new Popover();
-    configurePopup(popover, w, heading, message, placement, isHTML);
+    configurePopup(popover, w, heading, message, placement, isHTML, requestFocus);
 
-    requestFocus(w);
+    if (requestFocus) requestFocus(w);
+  }
+
+  private void configurePopup(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML, boolean requestFocus) {
+    if (DEBUG) logger.info("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
+
+    if (requestFocus && w instanceof Focusable) {
+      requestFocus((Focusable) w);
+    }
+    showPopover(popover, w, heading, message, placement, isHTML);
   }
 
   private void requestFocus(final Focusable w) {
@@ -453,15 +472,6 @@ public class BasicDialog {
         w.setFocus(true);
       }
     });
-  }
-
-  private void configurePopup(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
-    if (DEBUG) logger.info("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
-
-    if (w instanceof Focusable) {
-      requestFocus((Focusable) w);
-    }
-    showPopover(popover, w, heading, message, placement, isHTML);
   }
 
   /**

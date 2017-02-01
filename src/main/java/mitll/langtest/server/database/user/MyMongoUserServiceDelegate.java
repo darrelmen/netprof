@@ -1,0 +1,105 @@
+package mitll.langtest.server.database.user;
+
+import mitll.hlt.domino.server.user.MongoUserServiceDelegate;
+import mitll.hlt.domino.server.util.LegacyMd5Hash;
+import mitll.hlt.domino.server.util.Mailer;
+import mitll.hlt.domino.server.util.Mongo;
+import mitll.hlt.domino.server.util.UserServiceProperties;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ArrayUtils;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.spec.KeySpec;
+
+/**
+ * Created by go22670 on 2/1/17.
+ */
+class MyMongoUserServiceDelegate extends MongoUserServiceDelegate {
+   MyMongoUserServiceDelegate(UserServiceProperties props, Mailer mailer, String appName, Mongo mongoPool) {
+    super(props, mailer, appName, mongoPool);
+  }
+
+  boolean isMatch(String userid, String encoded, String attempt) {
+//      String encodedAttemptedPass = LegacyMd5Hash.getHash(attempt);
+//      return encodedAttemptedPass.equals(encoded);
+    return authenticate(userid, encoded, attempt);
+  }
+
+  protected boolean authenticate(String userId, String encodedCurrPass, String attemptedTxtPass) {
+    try {
+      // ensure we go through the motions for unmatched usernames
+      // to avoid returning too quickly and
+      // providing information about user name validity.
+      if (encodedCurrPass == null) {
+        return false;
+      }
+
+      String encodedAttemptedPass = encodePass(encodedCurrPass, attemptedTxtPass, PasswordEncoding.common_v1);
+      if (encodedAttemptedPass.equals(encodedCurrPass)) {
+        log.info("Decoded using SHA-512.");
+        return true;
+      }
+      else log.debug("1 no match " +
+          "\n\tcurrent " + encodedCurrPass +
+          "\n\tattempt " + encodedAttemptedPass);
+
+      // Handle Domino Encoding
+      encodedAttemptedPass = encodePass(encodedCurrPass, attemptedTxtPass, PasswordEncoding.domino);
+      if (encodedAttemptedPass.equals(encodedCurrPass)) {
+        log.info("Decoded using SHA1.");
+        return true;
+      }
+      else log.debug("2 no match " +
+          "\n\tcurrent " + encodedCurrPass +
+          "\n\tattempt " + encodedAttemptedPass);
+
+      // Handle NetProF Encoding
+      encodedAttemptedPass = LegacyMd5Hash.getHash(attemptedTxtPass);
+      if (encodedAttemptedPass.equals(encodedCurrPass)) {
+        log.info("Decoded using NetProF-MD5.");
+        return true;
+      }
+      else log.debug("3 no match " +
+          "\n\tcurrent " + encodedCurrPass +
+          "\n\tattempt " + encodedAttemptedPass);
+
+    } catch (Exception ex) {
+      log.warn("Can not authenticate user!", ex);
+    }
+    log.info("Authentication Failed.");
+    return false;
+  }
+
+  private String encodePass(String encodedCurrPass, String txtPass, PasswordEncoding pEnc) throws Exception {
+    byte[] salt = extractSalt(encodedCurrPass, pEnc);
+    return encodePass(txtPass, salt, pEnc);
+  }
+
+  private static final String PASS_PREFIX = "{SSHA}";
+
+  private String encodePass(String txtPass, byte[] salt, PasswordEncoding pEnc) throws Exception {
+    byte[] encryptedPass = encryptPass(txtPass, salt, pEnc);
+    // once encrypted, encode the password
+    // to simplify storage when LDAP is used.
+    return PASS_PREFIX + new String(Base64.encodeBase64(encryptedPass));
+  }
+
+  private byte[] encryptPass(String txtPass, byte[] salt, PasswordEncoding pEnc) throws Exception {
+    // See this link for more info on encryption options.
+    // http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html
+    int iterations = 20000;
+    KeySpec spec = new PBEKeySpec(txtPass.toCharArray(), salt, iterations,
+        pEnc.derivedKeyLength);
+    SecretKeyFactory f = SecretKeyFactory.getInstance(pEnc.algorithm);
+    byte[] encPass = f.generateSecret(spec).getEncoded();
+    return ArrayUtils.addAll(encPass, salt);
+  }
+
+  private byte[] extractSalt(String encodedPass, PasswordEncoding pEnc) {
+    String encodedPassNoPrefix = encodedPass.substring(PASS_PREFIX.length());
+    byte[] hashAndSalt = Base64.decodeBase64(encodedPassNoPrefix.getBytes());
+    int shaLen = hashAndSalt.length - pEnc.saltLength + 1;
+    return ArrayUtils.subarray(hashAndSalt, shaLen - 1, hashAndSalt.length);
+  }
+}

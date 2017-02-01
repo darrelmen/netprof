@@ -122,8 +122,9 @@ public class User extends MiniUser {
 
   /**
    * For right now,  you can only choose to be a student initially.
-   * @see SignUpForm#getRoles
+   *
    * @return
+   * @see SignUpForm#getRoles
    */
   public static Collection<User.Kind> getSelfChoiceRoles() {
     return Arrays.asList(STUDENT);
@@ -556,19 +557,28 @@ public class User extends MiniUser {
    */
   public boolean isValid() {
     boolean hasStandardInfo =
-        isValid(emailHash) &&
-        isValid(email) &&
-        isValid(first) &&
-        isValid(last);
+        //   isValid(emailHash) &&
+        isValidEmailGrammar(email) &&
+            isValid(first) &&
+            isValid(last);
 
     // must have a gender (and ideally age and dialect) if you want to record audio
-    boolean hasOptInfo = hasStandardInfo &&
-        (getPermissions().isEmpty() ||
-            ((getPermissions().contains(Permission.RECORD_AUDIO) ||
-                getPermissions().contains(Permission.DEVELOP_CONTENT)) &&
-                getRealGender() != Gender.Unspecified));
+//    boolean hasOptInfo =
+//        (getPermissions().isEmpty() ||
+//            ((getPermissions().contains(Permission.RECORD_AUDIO) ||
+//                getPermissions().contains(Permission.DEVELOP_CONTENT)) &&
+//                getRealGender() != Gender.Unspecified));
 
-    return hasStandardInfo && hasOptInfo;
+    boolean recordInfoSet =
+        !(getPermissions().contains(Permission.RECORD_AUDIO) ||
+          getPermissions().contains(Permission.DEVELOP_CONTENT)) ||
+            getRealGender() != Gender.Unspecified;
+
+    return hasStandardInfo && recordInfoSet;
+  }
+
+  private boolean isValidEmailGrammar(String text) {
+    return text != null && !text.isEmpty() && text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
   public boolean isValid(String email) {
@@ -587,16 +597,15 @@ public class User extends MiniUser {
     return "user " +
         "\n\tid     " + getID() +
         "\n\tuserid " + getUserID() +
-        "\n\t first '" + first +
-        "'" +
-        "\n\t last  '" + last +
-        "'" +
+        "\n\t first " + first +
+        "\n\t last  " + last +
         "\n\tis a    " + getRealGender() +
         (getAge() < 99 && getAge() > 0 ? "\n\tage     " + getAge() : "") +
         (isAdmin() ? "\n\tadmin   " + isAdmin() : "") +
         (!isEnabled() ? "\n\tenabled   " + isEnabled() : "") +
 //        "\n\tdialect " + getDialect() +
         "\n\temailH " + getEmailHash() +
+        "\n\temail " + getEmail() +
         "\n\tpassH  " + getPasswordHash() +
         (getUserKind() == STUDENT ? "" : "\n\tkind   " + getUserKind()) +
         (getPermissions().isEmpty() ? "" :

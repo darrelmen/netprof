@@ -43,10 +43,12 @@ import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.Affiliation;
+import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.*;
 import java.util.jar.Attributes;
@@ -913,9 +915,11 @@ public class ServerProperties {
    *
    * @return
    * @deprecated
+   * @see mitll.langtest.server.rest.RestUserManagement#addUser
    */
   public String getAppURL() {
-    return props.getProperty(APP_URL, "https://np.ll.mit.edu/netProf");
+    return props.getProperty(APP_URL, "https://np.ll.mit.edu/" +
+        "netProf");
   }
 
   public String getDominoURL() {

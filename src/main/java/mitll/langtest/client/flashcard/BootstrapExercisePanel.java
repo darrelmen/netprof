@@ -34,6 +34,7 @@ package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
@@ -43,11 +44,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
@@ -58,6 +59,7 @@ import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -80,9 +82,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   static final int CORRECT_DELAY = 600;
   private static final int DELAY_MILLIS_LONG = 3000;
-  private static final int LONG_DELAY_MILLIS = 3500;
+  // private static final int LONG_DELAY_MILLIS = 3500;
   public static final int HIDE_DELAY = 2500;
   static final int DELAY_MILLIS = 100;
+
+//  private IconAnchor correctIcon;
+//  private IconAnchor incorrect;
 
   /**
    * @see #getFeedbackGroup(ControlState)
@@ -178,10 +183,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param service
    * @param controller used in subclasses for audio control
    * @param toAddTo
-   * @see #BootstrapExercisePanel
+   * @see #FlashcardPanel
    */
   @Override
-  protected void addRecordingAndFeedbackWidgets(int exerciseID, LangTestDatabaseAsync service,
+  protected void addRecordingAndFeedbackWidgets(int exerciseID,
+                                                LangTestDatabaseAsync service,
                                                 ExerciseController controller,
                                                 Panel toAddTo) {
     if (logger == null) {
@@ -189,22 +195,26 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     }
     // logger.info("called  addRecordingAndFeedbackWidgets ");
     // add answer widget to do the recording
-    toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, service, controller));
+    toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, controller));
 
+/*
     if (controller.getProps().showFlashcardAnswer() || true) {
      ;
 
      // TODO make centered
      // toAddTo.add( getCenteredWrapper(recoOutput = getRecoOutputRow()));
-      toAddTo.add( recoOutput = getRecoOutputRow());
+      toAddTo.add( recoOutput = new DivWidget());
       recoOutput.setWidth("100%");
     }
-
+*/
 
     scoreFeedbackRow = new DivWidget();
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
     scoreFeedbackRow.setHeight("52px");
     toAddTo.add(scoreFeedbackRow);
+
+    toAddTo.add(recoOutput = new DivWidget());
+    //recoOutput.setWidth("100%");
   }
 
   private RecordButtonPanel answerWidget;
@@ -213,14 +223,13 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   /**
    * @param exerciseID
-   * @param service
    * @param controller
    * @return
    * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, LangTestDatabaseAsync, ExerciseController, Panel)
    */
-  private Widget getAnswerAndRecordButtonRow(int exerciseID, LangTestDatabaseAsync service, ExerciseController controller) {
+  private Widget getAnswerAndRecordButtonRow(int exerciseID, ExerciseController controller) {
     // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
-    RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, controller, addKeyBinding, instance);
+    RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, controller, addKeyBinding);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
     realRecordButton = answerWidget.getRealRecordButton();
@@ -272,15 +281,15 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see #addRecordingAndFeedbackWidgets
    * @return
    */
-  private Panel getRecoOutputRow() {
-/*    recoOutput = new Heading(3, "");
+/*  private Panel getRecoOutputRow() {
+*//*    recoOutput = new Heading(3, "");
     recoOutput.addStyleName("cardHiddenText2");   // same color as background so text takes up space but is invisible
     recoOutput.getElement().getStyle().setColor("#ffffff");
-    recoOutput.getElement().setId("recoOutput");*/
+    recoOutput.getElement().setId("recoOutput");*//*
 
   //  Panel recoOutputRow = new FluidRow();
     DivWidget recoOutputRow = new DivWidget();
-/*
+*//*
     recoOutputRow.getElement().setId("recoOutputRow");
 
     Panel recoOutputContainer = new Paragraph();
@@ -288,25 +297,23 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
     recoOutputRow.add(new Column(12, recoOutputContainer));
     recoOutputContainer.add(recoOutput);
-*/
+*//*
 
 
   //  return new WordScoresTable();
     return recoOutputRow;
-  }
+  }*/
 
   /**
    * @param exerciseID
    * @param controller
    * @param addKeyBinding
-   * @param instance
    * @return
-   * @see #getAnswerAndRecordButtonRow(String, LangTestDatabaseAsync, ExerciseController)
+   * @see #getAnswerAndRecordButtonRow
    */
   private RecordButtonPanel getAnswerWidget(final int exerciseID,
                                             ExerciseController controller,
-                                            final boolean addKeyBinding,
-                                            String instance) {
+                                            final boolean addKeyBinding) {
     // Map<String, Collection<String>> typeToSelection = Collections.emptyMap();
     AudioAnswerListener exercisePanel = this;
     return new FlashcardRecordButtonPanel(exercisePanel, controller, exerciseID, 1) {
@@ -379,23 +386,26 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   /**
    * Show progress bar with score percentage, colored by score.
-   * Note it has to be wide enough to hold the text "pronunciation score xxx %"
+   * Note it has to be wide enough to hold the text "number %"
    *
+   * @param correct
    * @param score
    * @see
    */
-  private void showPronScoreFeedback(double score) {
-    scoreFeedbackRow.add(showScoreFeedback(score));
+  private void showPronScoreFeedback(boolean correct, double score) {
+    scoreFeedbackRow.add(showScoreFeedback(correct, score));
   }
 
   /**
+   * TODO : use same as in learn tab or vice versa
+   *
    * @param score
    * @seex #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
    * @paramx centerVertically
    * @paramx useShortWidth
-   * @see BootstrapExercisePanel#showPronScoreFeedback(double)
+   * @see BootstrapExercisePanel#showPronScoreFeedback(boolean, double)
    */
-  private ProgressBar showScoreFeedback(double score) {
+  private DivWidget showScoreFeedback(boolean correct, double score) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 
@@ -403,20 +413,56 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     int percent1 = (int) percent;
     scoreFeedback.setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
 
-    scoreFeedback.setText("Score " + (int) percent + "%");
-    scoreFeedback.setVisible(true);
+    scoreFeedback.setText("Score " + percent1 + "%");
+    //   scoreFeedback.setVisible(true);
     scoreFeedback.setColor(
         score > 0.8 ? ProgressBarBase.Color.SUCCESS :
             score > 0.6 ? ProgressBarBase.Color.DEFAULT :
                 score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
 
-    return scoreFeedback;
+    DivWidget container = new DivWidget();
+
+    container.setId("containerAndBar");
+
+    IconAnchor correctIcon = new IconAnchor();
+
+//    DivWidget iconContainer = new DivWidget();
+//    iconContainer.addStyleName("floatLeftList");
+//
+    correctIcon.setBaseIcon(correct ? MyCustomIconType.correct : MyCustomIconType.incorrect);
+
+/*    iconContainer.add(correctIcon);
+    container.add(iconContainer);
+
+    DivWidget scoreContainer = new DivWidget();
+    scoreContainer.addStyleName("floatLeftList");
+
+    scoreContainer.add(scoreFeedback);*/
+ //   container.add(scoreContainer);
+
+
+//    Panel hp = new HorizontalPanel();
+//    hp.add(correctIcon);
+//    hp.add(scoreFeedback);
+//    container.add(hp);
+
+    return container;
   }
 
-  private void clearFeedback() {
-    scoreFeedbackRow.clear();
-  }
+  /**
+   * @see #layoutRecordButton(com.google.gwt.user.client.ui.Widget)
+   */
+ /* protected void addImages() {
+    correctIcon = new IconAnchor();
+    incorrect   = new IconAnchor();
 
+    correctIcon.setBaseIcon(MyCustomIconType.correct);
+    correctIcon.setVisible(false);
+
+    incorrect.setBaseIcon(MyCustomIconType.incorrect);
+    incorrect.setVisible(false);
+  }
+*/
 /*
   private Heading getRecoOutput() {
     return recoOutput;
@@ -453,21 +499,21 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
       int oldID = exercise.getID();
       if (correct) {
+        showCorrectFeedback(score, heard, result.getPretestScore());
         controller.logEvent(button, "Button", oldID, "correct response - score " + round);
-        recoOutput.clear();
-        recoOutput.add(new WordScoresTable().getStyledWordTable(result.getPretestScore()));
-
-
-        showCorrectFeedback(score, heard);
       } else {   // incorrect!!
-        controller.logEvent(button, "Button", oldID, "incorrect response - score " + round);
         feedback = showIncorrectFeedback(result, score, hasRefAudio, heard);
+        controller.logEvent(button, "Button", oldID, "incorrect response - score " + round);
       }
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
       //logger.info("\treceivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
-    //  nextAfterDelay(correct, feedback);
+      //  nextAfterDelay(correct, feedback);
     }
+  }
+
+  private void clearFeedback() {
+    scoreFeedbackRow.clear();
   }
 
   /**
@@ -484,14 +530,17 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param score
    * @see #receivedAudioAnswer(AudioAnswer)
    */
-  private void showCorrectFeedback(double score, String heard) {
-    showPronScoreFeedback(score);
+  private void showCorrectFeedback(double score, String heard, PretestScore pretestScore) {
+    showPronScoreFeedback(true, score);
     showOtherText();
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
 
     // if (showOnlyEnglish) {
     //showHeard(heard);
     //}
+
+    recoOutput.clear();
+    recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore));
   }
 
   /**
@@ -505,7 +554,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    */
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio, String heard) {
     if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
-      showPronScoreFeedback(score);
+      showPronScoreFeedback(false, score);
       //  showHeard(heard);
     }
     showOtherText();

@@ -103,7 +103,7 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   protected void markErrorBlur(FormField dialectGroup, String message) {
-    markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
+    markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, true);
   }
 
   /**
