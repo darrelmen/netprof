@@ -67,8 +67,7 @@ import java.util.List;
  */
 public class UserPassLogin extends UserDialog implements UserPassDialog {
 //  private final Logger logger = Logger.getLogger("UserPassLogin");
-
-  private static final String USERNAME_BOX_SIGN_IN = "Username_Box_SignIn";
+  //private static final String USERNAME_BOX_SIGN_IN = "Username_Box_SignIn";
   public static final String USER_NAME_BOX = "UserNameBox";
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
@@ -155,40 +154,9 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     signInHasFocus = true;
   }
 
-  public void setSignInPasswordFocus() {
-    signInForm.setFocusPassword();
+  public void setSignInPasswordFocus() { signInForm.setFocusPassword();  }
 
-  }
-
-/*  private boolean checkWelcome() {
-    if (!hasShownWelcome() && props.shouldShowWelcome()) {
-      keyStorage.storeValue(SHOWN_HELLO, "yes");
-      showWelcome();
-      return true;
-    } else return false;
-  }*/
-
-/*
-  private boolean hasShownWelcome() {
-    return keyStorage.hasValue(SHOWN_HELLO);
-  }
-
-  private void showWelcome() {
-    Modal modal = new ModalInfoDialog().getModal(props.getWelcomeMessage(),
-        getLoginInfo(), null, new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            if (BrowserCheck.isIPad()) {
-              showSuggestApp();
-            } else {
-              setFocusOnUserID();
-            }
-          }
-        }, false);
-    modal.setMaxHeigth((600) + "px");
-    modal.show();
-  }
-*/
+  public void tryLogin() { signInForm.tryLogin(); }
 
   /**
    * Don't redirect them to download site just yet.
@@ -388,8 +356,6 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     if (!props.isAMAS()) {
       addBullett(left, SECOND_BULLET, "NewProF1_48x48.png");
       addBullett(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
-//    w3.getElement().getStyle().setMarginTop(-1, Style.Unit.PX);
-//    configure(w3);
     }
   }
 

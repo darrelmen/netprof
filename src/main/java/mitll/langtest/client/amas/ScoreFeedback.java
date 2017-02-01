@@ -61,6 +61,10 @@ class ScoreFeedback {
   private final boolean useWhite;
   private ExerciseController controller;
 
+  /**
+   *
+   * @param useWhite
+   */
   public ScoreFeedback(boolean useWhite) {
     this.useWhite = useWhite;
   }
@@ -165,7 +169,7 @@ class ScoreFeedback {
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#addScoreFeedback(ScoreFeedback)
    * @return
    */
-  public IconAnchor getFeedbackImage() {
+  IconAnchor getFeedbackImage() {
     IconAnchor image;
     image = new IconAnchor();
     image.addStyleName("leftFiveMargin");
@@ -175,7 +179,7 @@ class ScoreFeedback {
     return image;
   }
 
-  public ProgressBar getScoreFeedback() {
+  ProgressBar getScoreFeedback() {
     return scoreFeedback;
   }
 }

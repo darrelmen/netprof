@@ -371,6 +371,9 @@ public class Navigation implements RequiresResize, ShowTab {
     }
   }
 
+  /**
+   * @see #addTabs
+   */
   private void addRecordTabs() {
     recorderTab = makeFirstLevelTab(tabPanel, IconType.MICROPHONE, RECORD_AUDIO);
     recorderTab.getContent().getElement().setId("recorder_contentPanel");
