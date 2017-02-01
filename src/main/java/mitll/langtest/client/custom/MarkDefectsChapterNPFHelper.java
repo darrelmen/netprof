@@ -50,6 +50,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -66,7 +67,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
 
   private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
   private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
-  private static final String MARK_DEFECTS1 = "markDefects";
+  //private static final String MARK_DEFECTS1 = "markDefects";
 
   /**
    * @param service
@@ -74,7 +75,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
    * @param userManager
    * @param controller
    * @param learnHelper
-   * @see Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
+   * @see Navigation#Navigation
    */
   MarkDefectsChapterNPFHelper(LangTestDatabaseAsync service,
                               UserFeedback feedback,
@@ -90,10 +91,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
    * Adds two checkboxes to filter for uninspected items and items with audio that's old enough it's not marked
    * by gender.
    *
-   * @param service
-   * @param feedback
    * @param userManager
-   * @param controller
    * @param outer
    * @return
    */
@@ -107,7 +105,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
                                                                                  String instanceName,
                                                                                  boolean incorrectFirst) {
 //        logger.info("instance is " + instanceName);
-        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, true) {
+        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, ActivityType.MARK_DEFECTS) {
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override
@@ -193,7 +191,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
     return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        return new QCNPFExercise<>(e, controller, exerciseList, MARK_DEFECTS1);
+        return new QCNPFExercise<>(e, controller, exerciseList, ActivityType.MARK_DEFECTS.toString());
       }
     };
   }

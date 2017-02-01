@@ -45,6 +45,7 @@ import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -98,7 +99,7 @@ public class AVPHelper extends NPFHelper {
   @Override
   PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName, boolean showFirstNotCompleted) {
     PagingExerciseList<CommonShell,CommonExercise> widgets = new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
-        true, instanceName, true, false) {
+        true, instanceName, true, false, ActivityType.PRACTICE) {
       @Override
       protected void onLastItem() {
       } // TODO : necessary?

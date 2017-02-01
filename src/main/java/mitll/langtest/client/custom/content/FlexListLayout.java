@@ -173,10 +173,10 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     return exerciseList;
   }
 
-  protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
-
   protected abstract PagingExerciseList<T, U> makeExerciseList(final Panel topRow, Panel currentExercisePanel,
                                                                final String instanceName, boolean incorrectFirst);
+
+  protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
 
   @Override
   public void onResize() {

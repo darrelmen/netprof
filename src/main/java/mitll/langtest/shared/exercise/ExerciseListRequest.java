@@ -34,6 +34,7 @@ package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.shared.answer.ActivityType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   private int userID = -5;
 
-  private String role = "";
+  private ActivityType activityType = ActivityType.UNSET;
 
   // TODO : which of these are mutually exclusive???
   private boolean onlyUnrecordedByMe = false;
@@ -70,6 +71,24 @@ public class ExerciseListRequest implements IsSerializable {
   public ExerciseListRequest(int reqID, int userID) {
     this.reqID = reqID;
     this.userID = userID;
+  }
+
+  public boolean isNoFilter() {
+    return userListID == -1 &&
+        typeToSelection.isEmpty() &&
+        prefix.isEmpty() &&
+        !isFilterActivity(activityType) &&
+        !onlyUnrecordedByMe &&
+        !onlyExamples &&
+        !incorrectFirstOrder &&
+        !onlyWithAudioAnno &&
+        !onlyDefaultAudio &&
+        !onlyUninspected &&
+        !onlyForUser;
+  }
+
+  private boolean isFilterActivity(ActivityType activityType) {
+    return activityType == ActivityType.RECORDER || activityType == ActivityType.MARK_DEFECTS;
   }
 
   /**
@@ -101,7 +120,7 @@ public class ExerciseListRequest implements IsSerializable {
   /**
    * @param typeToSelection
    * @return
-   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, int)
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercisesUsingPrefix
    */
   public ExerciseListRequest setTypeToSelection(Map<String, Collection<String>> typeToSelection) {
     this.typeToSelection = typeToSelection;
@@ -139,17 +158,21 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
-  public String getRole() {
-    return role;
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
+   * @return
+   */
+  public ActivityType getActivityType() {
+    return activityType;
   }
 
   /**
    * @param role
    * @return
-   * @see PagingExerciseList#getRequest()
+   * @see PagingExerciseList#getRequest
    */
-  public ExerciseListRequest setRole(String role) {
-    this.role = role;
+  public ExerciseListRequest setActivityType(ActivityType activityType) {
+    this.activityType = activityType;
     return this;
   }
 
@@ -228,16 +251,30 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  /**
+   *   private boolean onlyUnrecordedByMe = false;
+   private boolean onlyExamples = false;
+   private boolean incorrectFirstOrder = false;
+   private boolean onlyWithAudioAnno = false;
+   private boolean onlyDefaultAudio = false;
+   private boolean onlyUninspected = false;
+   private boolean onlyForUser = false;
+   * @return
+   */
   public String toString() {
     return
         "prefix                  '" + prefix + "'" +
             "\n\tselection           " + getTypeToSelection() +
             "\n\tuser list id        " + userListID +
-            "\n\tuser                " + userID +
-            (role.isEmpty() ? "" : "\n\trole                " + role) +
+                 "\n\tuser                " + userID +
+            (activityType == ActivityType.UNSET ? "" :
+                "\n\tactivity             " + activityType) +
             (onlyUnrecordedByMe ? "\n\tonly recorded by me" : "") +
             (onlyExamples ? "\n\tonly examples       " : "") +
             (onlyWithAudioAnno ? "\n\tonly with audio     " : "") +
+            (onlyDefaultAudio ? "\n\tonlyDefaultAudio     " : "") +
+            (onlyForUser ? "\n\tonlyForUser     " : "") +
+            (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
             (onlyUninspected ? "\n\tonly uninspected    " : "")
         ;
   }

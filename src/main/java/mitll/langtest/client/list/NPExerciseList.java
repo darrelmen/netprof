@@ -33,12 +33,14 @@
 package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.ui.Panel;
+import com.sun.org.apache.regexp.internal.RE;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -52,7 +54,7 @@ import java.util.logging.Logger;
  * @since 1/5/16.
  */
 public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise, V> {
-  private Logger logger = Logger.getLogger("NPExerciseList");
+  //private Logger logger = Logger.getLogger("NPExerciseList");
   protected NPExerciseList(Panel currentExerciseVPanel,
                            ExerciseServiceAsync service,
                            UserFeedback feedback,
@@ -60,8 +62,9 @@ public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList
                            boolean showTypeAhead,
                            String instance,
                            boolean incorrectFirst,
-                           boolean showFirstNotCompleted) {
-    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance, incorrectFirst, showFirstNotCompleted);
+                           boolean showFirstNotCompleted,
+                           ActivityType activityType) {
+    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance, incorrectFirst, showFirstNotCompleted, activityType);
   }
 
   /**
@@ -79,7 +82,7 @@ public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList
         new PagingContainer<CommonShell>(
             controller,
             getVerticalUnaccountedFor(),
-            getRole().equals(AudioType.RECORDER.toString()),
+            getActivityType() == ActivityType.RECORDER,
             showFirstNotCompleted,
             getInstance()) {
           @Override

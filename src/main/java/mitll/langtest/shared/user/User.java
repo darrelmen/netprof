@@ -33,16 +33,14 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.user.SignUpForm;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 import static mitll.langtest.shared.user.User.Kind.STUDENT;
 import static mitll.langtest.shared.user.User.Permission.*;
@@ -118,17 +116,17 @@ public class User extends MiniUser {
     }
   }
 
-  public static Collection<User.Kind> getVisibleRoles() {
+/*  public static Collection<User.Kind> getVisibleRoles() {
     return Arrays.asList(STUDENT, Kind.TEACHER, Kind.AUDIO_RECORDER, Kind.CONTENT_DEVELOPER, Kind.PROJECT_ADMIN, Kind.TEST);
-  }
+  }*/
 
   /**
    * For right now,  you can only choose to be a student initially.
-   *
+   * @see SignUpForm#getRoles
    * @return
    */
   public static Collection<User.Kind> getSelfChoiceRoles() {
-    return Arrays.asList(STUDENT);//, Kind.TEACHER);
+    return Arrays.asList(STUDENT);
   }
 
   /**
@@ -136,6 +134,7 @@ public class User extends MiniUser {
    *
    * @param role
    * @return
+   * @see DominoUserDAOImpl#getUserKind
    */
   public static Collection<Permission> getInitialPermsForRole(Kind role) {
     switch (role) {
@@ -173,21 +172,20 @@ public class User extends MiniUser {
    * @param role
    * @return
    */
+/*
   public static Collection<Permission> getRequestedPermsForRole(Kind role) {
     switch (role) {
       case STUDENT:
         return Collections.emptyList();
 
       case TEACHER:
-        return Arrays.asList(
-            TEACHER_PERM/*,
-            EDIT_STUDENT*/
-        );  // students
+        return Arrays.asList(TEACHER_PERM);
 
       default:
         return Collections.emptyList();
     }
   }
+*/
 
   /**
    * These are the set of possible permissions you can have when you are one of these users.
@@ -195,6 +193,7 @@ public class User extends MiniUser {
    * @param role
    * @return
    */
+/*
   public static Collection<Permission> getPossiblePermsForRole(Kind role) {
     switch (role) {
       case STUDENT:
@@ -227,6 +226,7 @@ public class User extends MiniUser {
         return Collections.emptyList();
     }
   }
+*/
 
   public enum Permission implements IsSerializable {
     TEACHER_PERM("View Student Data"), // gets to see teacher things like student analysis, invite
@@ -247,13 +247,6 @@ public class User extends MiniUser {
     public String getName() {
       return name;
     }
-  }
-
-  public enum PermissionStatus implements IsSerializable {
-    PENDING,
-    GRANTED,
-    DENIED,
-    REVOKED  // needed? maybe after granted
   }
 
   public User() {
@@ -562,7 +555,8 @@ public class User extends MiniUser {
    * @return
    */
   public boolean isValid() {
-    boolean hasStandardInfo = isValid(emailHash) &&
+    boolean hasStandardInfo =
+        isValid(emailHash) &&
         isValid(email) &&
         isValid(first) &&
         isValid(last);

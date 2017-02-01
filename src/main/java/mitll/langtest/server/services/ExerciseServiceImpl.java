@@ -41,6 +41,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -55,15 +56,18 @@ import java.text.Collator;
 import java.util.*;
 
 @SuppressWarnings("serial")
-public class ExerciseServiceImpl extends MyRemoteServiceServlet implements ExerciseService {
+public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceServlet implements ExerciseService<T> {
   private static final Logger logger = LogManager.getLogger(ExerciseServiceImpl.class);
 
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   private static final int SLOW_MILLIS = 40;
   private static final int WARN_DUR = 100;
+  //public static final String MARK_DEFECTS = "markDefects";
 
   private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
   private static final boolean DEBUG = false;
+
+  private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
   /**
    * Complicated.
@@ -88,7 +92,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
-  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
+  public /*<T extends CommonShell>*/ ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
     int projectID = getProjectID();
     if (projectID == -1) {
       logger.warn("getExerciseIds project id is -1?  It should probably have a real value.");
@@ -96,6 +100,16 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     if (serverProps.isAMAS()) {
       ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
       return (ExerciseListWrapper<T>) amasExerciseIds; // TODO : how to do this without forcing it.
+    }
+
+    if (request.isNoFilter()) {
+      synchronized (projidToWrapper) {
+        ExerciseListWrapper<T> exerciseListWrapper = projidToWrapper.get(projectID);
+        if (exerciseListWrapper != null) {
+          logger.info("Returning cached exercises " + exerciseListWrapper);
+          return exerciseListWrapper;
+        }
+      }
     }
 
     Collection<CommonExercise> exercises;
@@ -119,10 +133,8 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         }
         exercises = filterExercises(request, exercises, projectID);
 
-        String role = request.getRole();
-
         if (!isUserListReq) {
-          int i = markRecordedState(userID, role, exercises, request.isOnlyExamples());
+          int i = markRecordedState(userID, request.getActivityType(), exercises, request.isOnlyExamples());
         }
 
         // now sort : everything gets sorted the same way
@@ -131,10 +143,26 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
           commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, getCollator(), getLanguage());
         } else {
           commonExercises = new ArrayList<>(exercises);
-          sortExercises(role, commonExercises);
+          sortExercises(request.getActivityType(), commonExercises);
         }
 
-        return makeExerciseListWrapper(request, commonExercises);
+        ExerciseListWrapper<T> tExerciseListWrapper = makeExerciseListWrapper(request, commonExercises);
+
+        if (request.isNoFilter()) {
+          synchronized (projidToWrapper) {
+            projidToWrapper.put(projectID, tExerciseListWrapper);
+
+            logger.info("projidToWrapper now " + projidToWrapper.size());
+          }
+        }
+        else {
+          logger.debug("REq " + request.isNoFilter());
+          logger.debug("REq " + request.toString());
+          logger.debug("REq " + request.getPrefix());
+          logger.debug("REq " + request.getActivityType());
+          logger.debug("REq " + request.getUserListID());
+        }
+        return tExerciseListWrapper;
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         if (userListByID != null) {
@@ -185,18 +213,18 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * What you want to see in the record audio tab.  One bit of info - recorded or not recorded.
    *
    * @param userID
-   * @param role
+   * @param activityType
    * @param exercises
    * @param onlyExample
    * @return
    * @see #getExerciseIds
    */
   private int markRecordedState(int userID,
-                                String role,
+                                ActivityType activityType,
                                 Collection<? extends CommonShell> exercises,
                                 boolean onlyExample) {
     int c = 0;
-    if (role.equals(AudioType.RECORDER.toString())) {
+    if (activityType == ActivityType.RECORDER) {
       IAudioDAO audioDAO = db.getAudioDAO();
       Collection<Integer> recordedForUser = onlyExample ?
           audioDAO.getRecordedExampleForUser(userID) :
@@ -252,16 +280,15 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   ) {
     String prefix = request.getPrefix();
     int userID = request.getUserID();
-    String role = request.getRole();
-    boolean onlyExamples = request.isOnlyExamples();
+    //String role = request.getRole();
     boolean incorrectFirst = request.isIncorrectFirstOrder();
 
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
-      logger.debug("getExerciseListWrapperForPrefix userID " + userID + " prefix '" + prefix + "' role " + role);
+      logger.debug("getExerciseListWrapperForPrefix userID " + userID + " prefix '" + prefix + "' activity " + request.getActivityType());
     }
 
-    int i = markRecordedState(userID, role, exercisesForState, onlyExamples);
+    int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
     //logger.debug("marked " +i + " as recorded role " +role);
 
     if (hasPrefix) {
@@ -280,7 +307,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getCollator(), getLanguage());
     } else {
       copy = new ArrayList<>(exercisesForState);
-      sortExercises(role, copy);
+      sortExercises(request.getActivityType(), copy);
     }
 
     return makeExerciseListWrapper(request, copy);
@@ -303,10 +330,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
                                                                                  Collection<CommonExercise> exercises) {
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
 
-    int reqID = request.getReqID();
     int userID = request.getUserID();
-    String role = request.getRole();
-    boolean onlyExamples = request.isOnlyExamples();
 
     if (!exercises.isEmpty()) {
       addAnnotationsAndAudio(userID, firstExercise, request.isIncorrectFirstOrder());
@@ -317,27 +341,33 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
     //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
-    if (role.equals(AudioType.RECORDER.toString())) {
-      markRecordedState((int) userID, role, exerciseShells, onlyExamples);
-    } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) ||
-        role.startsWith(AudioType.REVIEW.toString())) {
-      getUserListManager().markState(exerciseShells);
-    } else if (role.equals("markDefects")) {
-      Collection<Integer> defectExercises = getUserListManager().getDefectExercises();
-      int c = 0;
-      for (CommonShell shell : exerciseShells) {
-        if (defectExercises.contains(shell.getID())) {
-          shell.setState(STATE.DEFECT);
-          //    if (shell.getID().startsWith("50")) logger.info("adding defect to " +shell.getID() + " : " + shell.getState());
-          c++;
+    ActivityType role = request.getActivityType();
+    switch (role) {
+      case RECORDER:
+        markRecordedState(userID, role, exerciseShells, request.isOnlyExamples());
+        break;
+      case REVIEW:
+      case QUALITY_CONTROL:
+        getUserListManager().markState(exerciseShells);
+        break;
+      case MARK_DEFECTS:
+        Collection<Integer> defectExercises = getUserListManager().getDefectExercises();
+        int c = 0;
+        for (CommonShell shell : exerciseShells) {
+          if (defectExercises.contains(shell.getID())) {
+            shell.setState(STATE.DEFECT);
+            c++;
+          }
         }
-      }
+        break;
+      default:
+        break;
     }
 
     // TODO : do this the right way vis-a-vis type safe collection...
 
     List<T> exerciseShells1 = (List<T>) exerciseShells;
-    ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(reqID, exerciseShells1, firstExercise);
+    ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);
     //logger.debug("returning " + exerciseListWrapper);
     return exerciseListWrapper;
   }
@@ -470,7 +500,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         if (practicedByUser.contains(ex.getID())) copy.add(ex);
       }
       long now = System.currentTimeMillis();
-      logger.info("filterExercises : took " + (now-then));
+      logger.info("filterExercises : took " + (now - then));
       exercises = copy;
     }
     return exercises;
@@ -483,11 +513,10 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @param commonExercises
    * @param <T>
    */
-  private <T extends CommonShell> void sortExercises(String role, List<T> commonExercises) {
+  private <T extends CommonShell> void sortExercises(ActivityType role, List<T> commonExercises) {
     int projectID = getProjectID();
     new ExerciseSorter(db.getTypeOrder(projectID))
-        .getSortedByUnitThenAlpha(commonExercises,
-            role.equals(AudioType.RECORDER.toString()));
+        .getSortedByUnitThenAlpha(commonExercises,role == ActivityType.RECORDER);
   }
 
   private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix,

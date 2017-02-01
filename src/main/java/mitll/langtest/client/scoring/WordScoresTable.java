@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class WordScoresTable {
   private final Logger logger = Logger.getLogger("WordScoresTable");
 
-  private Panel addWordScoreTable(PretestScore result) {
+/*  private Panel addWordScoreTable(PretestScore result) {
     Table wordTable = makeTable("Word", "Score", result.getWordScores(), true);
 
     ScrollPanel child = new ScrollPanel(wordTable);
@@ -27,7 +27,7 @@ public class WordScoresTable {
     child.setWidth("170px");
     child.setHeight("200px");
     return child;
-  }
+  }*/
 
   public Widget getStyledWordTable(PretestScore result) {
     Widget table2 = getWordTable(result);
@@ -60,7 +60,7 @@ public class WordScoresTable {
    * @see #scoreAudio
    * @see #addWordScoreTable
    */
-  private Table makeTable(String label, String scoreColHeader, Map<String, Float> scores, boolean showScore) {
+/*  private Table makeTable(String label, String scoreColHeader, Map<String, Float> scores, boolean showScore) {
     Table table = new Table();
     table.getElement().setId("ReviewScoreTable_" + label + "_" + scoreColHeader.substring(0, 3));
     table.add(new TableHeader(label));
@@ -91,7 +91,7 @@ public class WordScoresTable {
       }
     }
     return table;
-  }
+  }*/
 
   private int getScore(Map<String, Float> scores, String key) {
     return getPercent(scores.get(key));
