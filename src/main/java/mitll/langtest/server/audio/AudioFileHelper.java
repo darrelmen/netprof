@@ -899,9 +899,11 @@ public class AudioFileHelper implements AlignDecode {
 
           PrecalcScores precalcScores = new PrecalcScores(serverProps, s);
 
+/*
           logger.info("checkForWebservice" +
               "\n\tGot back      " + s +
               "\n\tprecalcScores " + precalcScores);
+*/
 
           return precalcScores;
         } catch (IOException e) {

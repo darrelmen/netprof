@@ -54,6 +54,8 @@ class RegistrationInfo extends BasicDialog {
   private static final String GENDER_GROUP = "GenderGroup";
   private static final String CHOOSE_A_GENDER = "Choose male or female.";
   private static final String DIALECT = "Dialect";
+  public static final String PLEASE_ENTER_YOUR_AGE = "Please enter your age.";
+  public static final String PLEASE_ENTER_A_VALID_AGE = "Please enter a valid age.";
 
   private final FormField ageEntryGroup;
   private FormField dialectGroup;
@@ -116,7 +118,7 @@ class RegistrationInfo extends BasicDialog {
 
   /**
    * If it's invisible, it's valid.
-   *
+   * @see SignUpForm#isFormValid
    * @return
    */
   public boolean checkValid() {
@@ -127,17 +129,37 @@ class RegistrationInfo extends BasicDialog {
     } else return true;
   }
 
+  public boolean checkValidity() {
+    return checkValidGender() && checkMissingAge();
+  }
+
   /**
    * @return
-   * @see #grabFocus
+   * @see #checkValidity
    */
-  boolean checkValidGender() {
+  private boolean checkValidGender() {
     boolean valid = male.getValue() || female.getValue();
     if (!valid) {
       male.setFocus(true);
-      setupPopover(male, TRY_AGAIN, CHOOSE_A_GENDER, Placement.LEFT, false);
+      setupPopover(male, TRY_AGAIN, CHOOSE_A_GENDER, Placement.LEFT, false, true);
     }
     return valid;
+  }
+
+  private boolean checkMissingAge() {
+    if (ageEntryGroup.isEmpty()) {
+      ageEntryGroup.box.setFocus(true);
+      markErrorBlur(ageEntryGroup, "Add info", PLEASE_ENTER_YOUR_AGE, Placement.TOP, true);
+      return false;
+    } else {
+      try {
+        Integer.parseInt(ageEntryGroup.getSafeText());
+        return true;
+      } catch (NumberFormatException e) {
+        markErrorBlur(ageEntryGroup, "Try again", PLEASE_ENTER_A_VALID_AGE, Placement.TOP, true);
+        return false;
+      }
+    }
   }
 
   public boolean isMale() {
@@ -158,27 +180,5 @@ class RegistrationInfo extends BasicDialog {
 
   public RadioButton getFemale() {
     return female;
-  }
-
-  public void grabFocus() {
-    if (checkValidGender()) {
-      checkMissingAge();
-    }
-  }
-
-  private boolean checkMissingAge() {
-    if (ageEntryGroup.isEmpty()) {
-      ageEntryGroup.box.setFocus(true);
-      markErrorBlur(ageEntryGroup, "Add info", "Please enter your age.", Placement.TOP);
-      return false;
-    } else {
-      try {
-        Integer.parseInt(ageEntryGroup.getSafeText());
-        return true;
-      } catch (NumberFormatException e) {
-        markErrorBlur(ageEntryGroup, "Try again", "Please enter a valid age.", Placement.TOP);
-        return false;
-      }
-    }
   }
 }

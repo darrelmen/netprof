@@ -34,20 +34,18 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.common.base.CharMatcher;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.user.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -55,15 +53,23 @@ import java.util.logging.Logger;
 
 public class SignUpForm extends UserDialog implements SignUp {
   private static final String I_M_SORRY = "I'm sorry";
+  /**
+   *
+   */
   private static final String CHOOSE_AFFILIATION = " -- Choose Affiliation -- ";
-  public static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
+  private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
+  public static final String SORRY_NO_EMAIL_MATCH = "Sorry, this email is not in this user account.";
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   public static final int BOGUS_AGE = 99;
+  /**
+   * @see #getSignUpForm
+   */
   private static final String NEW_USER = "New User?";
   private static final int MIN_LENGTH_USER_ID = 4;
+
   /**
-   * @see #getSignUpButton(TextBoxBase, TextBoxBase)
+   * @see #getSignUpButton
    */
   private static final String SIGN_UP = "Sign Up";
   private static final String SIGN_UP_SUBTEXT = "Sign up";
@@ -121,10 +127,10 @@ public class SignUpForm extends UserDialog implements SignUp {
     //logger.info("got " + affiliations);
   }
 
-  public SignUpForm setSignUpButtonTitle(String title) {
+/*  public SignUpForm setSignUpButtonTitle(String title) {
     this.signUpTitle = title;
     return this;
-  }
+  }*/
 
   protected void setMarkFieldsWithLabels(boolean val) {
     this.markFieldsWithLabels = val;
@@ -147,12 +153,21 @@ public class SignUpForm extends UserDialog implements SignUp {
   public void copyInfoToSignUp(String userID, User candidate) {
     signUpUser.box.setText(userID);
 
-    firstName.setText(candidate.getFirst());
-    lastName.setText(candidate.getLast());
-    String email = candidate.getEmail();
-    if (isValidEmail(email)) {
-      signUpEmail.setText(email);
+    if (firstName.getSafeText().isEmpty()) {
+      firstName.setText(candidate.getFirst());
     }
+
+    if (lastName.getSafeText().isEmpty()) {
+      lastName.setText(candidate.getLast());
+    }
+
+    String email = candidate.getEmail();
+    if (signUpEmail.getSafeText().isEmpty()) {
+      if (isValidEmail(email)) {
+        signUpEmail.setText(email);
+      }
+    }
+
     String affiliation = candidate.getAffiliation();
     if (affiliation == null || affiliation.isEmpty()) {
       logger.info("no affiliation?");
@@ -172,14 +187,25 @@ public class SignUpForm extends UserDialog implements SignUp {
 
     if (b) {
       if (firstFocus == null) {
-        registrationInfo.grabFocus();
+        boolean isValid = registrationInfo.checkValidity();
+        if (!isValid) {
+          setFormAndButtonTitles();
+        }
       }
     }
 
     if (firstFocus != null) {
-      setFocusOn(firstFocus.getWidget());
-      markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
+      //     setFocusOn(firstFocus.getWidget());
+//      newUserPrompt.setText("Complete Your Profile");
+//      newUserPrompt.setSubtext("");
+      setFormAndButtonTitles();
+      markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP, true);
     }
+  }
+
+  private void setFormAndButtonTitles() {
+    setNewUserPrompt(false);
+    setSignUpButtonTitle(false);
   }
 
   private void setAffBox(String affiliation) {
@@ -196,20 +222,33 @@ public class SignUpForm extends UserDialog implements SignUp {
     affBox.setSelectedIndex(found ? i + 1 : 0);
   }
 
+  private Heading newUserPrompt;
+
   /**
    * @return
    * @see UserPassLogin#getRightLogin
    */
   @Override
   public Panel getSignUpForm() {
-    Heading heading = new Heading(3, NEW_USER, SIGN_UP_SUBTEXT);
-    heading.addStyleName("signUp");
+    newUserPrompt = new Heading(3, NEW_USER, SIGN_UP_SUBTEXT);
+    newUserPrompt.addStyleName("signUp");
 
     Fieldset fields = getFields();
     fields.add(signUp = getSignUpButton(userBox, emailBox));
     fields.add(pleaseCheck = getPleaseCheck());
 
-    return getTwoPartForm(heading, fields);
+    return getTwoPartForm(newUserPrompt, fields);
+  }
+
+  private void setNewUserPrompt(boolean isNewUser) {
+    if (isNewUser) {
+      newUserPrompt.setText(NEW_USER);
+      newUserPrompt.setSubtext(SIGN_UP_SUBTEXT);
+    } else {
+      //      setFocusOn(firstFocus.getWidget());
+      newUserPrompt.setText("Complete Your Profile");
+      newUserPrompt.setSubtext("");
+    }
   }
 
   private Heading getPleaseCheck() {
@@ -219,7 +258,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     pleaseCheck.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     return pleaseCheck;
   }
-
 
   /**
    * @return
@@ -254,12 +292,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     for (Affiliation value : affiliations) {
       affBox.addItem(value.getDisp());
     }
-//    affBox.addFocusHandler(new FocusHandler() {
-//      @Override
-//      public void onFocus(FocusEvent event) {
-//
-//      }
-//    });
     affBox.getElement().getStyle().setWidth(276, Style.Unit.PX);
     return affBox;
   }
@@ -270,11 +302,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         permissions.contains(User.Permission.QUALITY_CONTROL);
   }
 
-//  private Heading getRolesHeader() {
-//    String rolesHeader = this.rolesHeader;
-//    return getHeader(rolesHeader);
-//  }
-
+/*
   private Heading getHeader(String rolesHeader) {
     Heading w1 = new Heading(5, rolesHeader);
     w1.addStyleName("leftTenMargin");
@@ -283,6 +311,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     w1.getElement().getStyle().setMarginBottom(value, Style.Unit.PX);
     return w1;
   }
+*/
 
   protected Collection<User.Kind> getRoles() {
     return User.getSelfChoiceRoles();
@@ -293,8 +322,39 @@ public class SignUpForm extends UserDialog implements SignUp {
     final TextBoxBase userBox = signUpUser.box;
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "username");
+
+    signUpUser.box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        //logger.info("makeSignInUserName : got blur ");
+        onUserIDBlur();
+      }
+    });
+
     return userBox;
   }
+
+  private void onUserIDBlur() {
+    final String text = signUpUser.getSafeText();
+
+    if (!text.isEmpty()) {
+      //  eventRegistration.logEvent(signUpUser.box, "UserNameBox", "N/A", "left username field '" + text + "'");
+      //logger.info("\tchecking makeSignInUserName " + text);
+      service.getUserByID(text, new AsyncCallback<User>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          logger.warning("\tgot FAILURE on userExists " + text);
+        }
+
+        @Override
+        public void onSuccess(User result) {
+          setSignUpButtonTitle((result == null));
+          setNewUserPrompt((result == null));
+        }
+      });
+    }
+  }
+
 
   private void styleBoxNotLast(TextBoxBase userBox) {
     styleBox(userBox);
@@ -396,6 +456,8 @@ public class SignUpForm extends UserDialog implements SignUp {
     //  registrationInfo.setVisible(false);
   }
 
+  // private Button signUp;
+
   /**
    * @param userBox
    * @param emailBox
@@ -405,12 +467,14 @@ public class SignUpForm extends UserDialog implements SignUp {
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     String buttonID = "SignUp";
 
-    String signUpTitle = this.signUpTitle;
-    Button signUp = getFormButton(buttonID, signUpTitle, eventRegistration);
-
+    Button signUp = getFormButton(buttonID, this.signUpTitle, eventRegistration);
     signUp.addClickHandler(getSignUpClickHandler(userBox, emailBox));
 
     return signUp;
+  }
+
+  private void setSignUpButtonTitle(boolean isSignUp) {
+    signUp.setText(isSignUp ? SIGN_UP : "Add Info");
   }
 
   private ClickHandler getSignUpClickHandler(final TextBoxBase userBox, final TextBoxBase emailBox) {
@@ -422,6 +486,13 @@ public class SignUpForm extends UserDialog implements SignUp {
     };
   }
 
+  /**
+   * Check email...
+   *
+   * @param userID
+   * @param email
+   * @see #getSignUpClickHandler(TextBoxBase, TextBoxBase)
+   */
   private void userEmailCheck(String userID, String email) {
     service.getUserByID(signUpUser.getSafeText(), new AsyncCallback<User>() {
       @Override
@@ -433,26 +504,27 @@ public class SignUpForm extends UserDialog implements SignUp {
       public void onSuccess(User result) {
         if (result == null) {
           logger.info("valid " + signUpUser.getSafeText());
-
           checkForm(userID);
-
         } else {
           String hash = Md5Hash.getHash(email);
-          //     logger.info("user " + userID + " email hash\n\t" + result.getEmailHash() + " vs \n\t"+hash);
           String currentEmailHash = result.getEmailHash();
+          logger.info("userEmailCheck" +
+              "\n\tuser       " + userID +
+              "\n\temail hash " + currentEmailHash +
+              "\n\tvs form    " + hash);
 
           // if the email hash is missing, don't compare with the given email.
           if (currentEmailHash == null ||
               currentEmailHash.isEmpty() ||
-              currentEmailHash.equals(hash)) {  //don't let someone come along and hijack account with different email.
+              currentEmailHash.equals(hash)) {  // don't let someone come along and hijack account with different email.
             if (isFormValid(userID)) {
               gotSignUp(userID, emailBox.getValue());
             } else {
               logger.info("getSignUpClickHandler form is not valid!!");
             }
-
           } else { // email hash mismatch -
-            markErrorBlur(signUpEmail, "Sorry, this email is not in this user account.");
+            String message = signUpEmail.isEmpty() ? "Please enter your email" : isValidEmail(signUpEmail.getSafeText()) ? SORRY_NO_EMAIL_MATCH : VALID_EMAIL;
+            markErrorBlur(signUpEmail, message);
           }
         }
       }
@@ -470,7 +542,15 @@ public class SignUpForm extends UserDialog implements SignUp {
   private boolean isFormValid(String userID) {
     String emailText = signUpEmail.box.getValue();
 
-    if (userID.length() < MIN_LENGTH_USER_ID) {
+    userID = userID.trim();
+
+    String s = CharMatcher.WHITESPACE.trimFrom(userID);
+
+    if (s.length() != userID.length()) {
+      eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "no spaces in userid '" + userID + "'");
+      markErrorBlur(signUpUser, "Please no spaces in user id.");
+      return false;
+    } else if (userID.length() < MIN_LENGTH_USER_ID) {
       eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "short user id '" + userID + "'");
       markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
       return false;
@@ -563,38 +643,52 @@ public class SignUpForm extends UserDialog implements SignUp {
           public void onSuccess(LoginResult result) {
             signUp.setEnabled(true);
 
-            LoginResult.ResultType resultType = result.getResultType();
-            if (resultType == LoginResult.ResultType.BadPassword) {
-              markErrorBlur(signUp, I_M_SORRY,
-                  "Your password is incorrect. Please try again.", Placement.TOP);
-            } else if (resultType == LoginResult.ResultType.Exists) {
-              eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" + user + ").");
-              signUp.setEnabled(true);
-              markErrorBlur(signUpUser, USER_EXISTS);
-            } else {
-              User theUser = result.getLoggedInUser();
-
-              if (resultType == LoginResult.ResultType.Updated) {
-                // shift focus to sign in.
-                userPassLogin.setSignInPasswordFocus();
-              } else {
-                userManager.setPendingUserStorage(theUser.getUserID());
-                if (theUser.isEnabled()) {
-                  eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser));
-                  pleaseCheck.setVisible(true);
-                } else {
-                  eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser) +
-                      "but gotta check email for next step..."
-                  );
-                  //  markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
-                  markErrorBlur(signUp, I_M_SORRY,
-                      "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
-//                signUp.setEnabled(false);
-                }
-              }
-            }
+            handleAddUserResponse(result, user);
           }
         });
+  }
+
+  /**
+   * So, what can happen with a user?
+   * <p>
+   * - user already exists with userid
+   * - user slots are incomplete and need to be updated
+   * - user could be locked
+   * - user should provide password, otherwise anyone could take over an account
+   * - user is new and needs to be added
+   *
+   * @param result
+   */
+  private void handleAddUserResponse(LoginResult result, String user) {
+    LoginResult.ResultType resultType = result.getResultType();
+    if (resultType == LoginResult.ResultType.BadPassword) {
+      markErrorBlur(signUp, I_M_SORRY,
+          "Your password is incorrect. Please try again.", Placement.TOP);
+    } else if (resultType == LoginResult.ResultType.Exists) {
+      eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" + user + ").");
+      signUp.setEnabled(true);
+      markErrorBlur(signUpUser, USER_EXISTS);
+    } else {
+      User theUser = result.getLoggedInUser();
+
+      if (resultType == LoginResult.ResultType.Updated) {
+        // shift focus to sign in.
+        //  userPassLogin.setSignInPasswordFocus();
+        userPassLogin.tryLogin();
+      } else {
+        userManager.setPendingUserStorage(theUser.getUserID());
+        if (theUser.isEnabled()) {
+          eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser));
+          pleaseCheck.setVisible(true);
+        } else {
+          eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser) +
+              "but gotta check email for next step..."
+          );
+          markErrorBlur(signUp, I_M_SORRY,
+              "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
+        }
+      }
+    }
   }
 
 /*  private String getDialect() {

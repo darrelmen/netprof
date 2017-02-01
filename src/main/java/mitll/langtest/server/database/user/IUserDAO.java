@@ -98,9 +98,7 @@ public interface IUserDAO extends IDAO {
    */
   User loginUser(String userId,
                  String attemptedPassword,
-                 //String remoteIP,
                  String userAgent,
-                 //String sessionId,
                  String remoteAddr,
                  String sessionID);
 
