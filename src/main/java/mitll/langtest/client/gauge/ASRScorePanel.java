@@ -192,9 +192,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @param hydecScore
    */
   @Override
-  public void addScore(CorrectAndScore hydecScore) {
-    scores2.add(hydecScore);
-  }
+  public void addScore(CorrectAndScore hydecScore) {  scores2.add(hydecScore);  }
 
   /**
    * @param classAvg

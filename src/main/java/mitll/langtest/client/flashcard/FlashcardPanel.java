@@ -63,10 +63,7 @@ import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.AnnotationExercise;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableAnnotationExercise;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.logging.Logger;
 
@@ -78,7 +75,8 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-public class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExercise & MutableAnnotationExercise> extends HorizontalPanel {
+public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise>//CommonShell & AudioRefExercise & AnnotationExercise & MutableAnnotationExercise>
+    extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
   /**

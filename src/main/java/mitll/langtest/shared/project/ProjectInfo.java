@@ -71,10 +71,10 @@ public class ProjectInfo implements HasID, IsSerializable {
     return language;
   }
 
-  @Override
+/*  @Override
   public String getOldID() {
     return null;
-  }
+  }*/
 
   public int getID() {
     return id;

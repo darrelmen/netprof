@@ -62,7 +62,7 @@ import java.util.logging.Logger;
  * @since
  */
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
-  private Logger logger = Logger.getLogger("ASRScorePanel");
+  private Logger logger = Logger.getLogger("ASRHistoryPanel");
 
   private static final int NUM_TO_SHOW = 3;
   private static final int HEIGHT = 18;
@@ -106,12 +106,12 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#addScore(CorrectAndScore)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#addScores
    * @param hydecScore
    */
   @Override
   public void addScore(CorrectAndScore hydecScore) {
-    logger.info("addScore  ");
+    //logger.info("addScore  ");
     scores2.add(hydecScore);
   }
 
@@ -121,10 +121,10 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    * @see MiniScoreListener#gotScore(PretestScore, String)
    */
   public void showChart() {
-    logger.info("show chart ");
+    //logger.info("show chart ");
     clear();
     //Panel vp = new HorizontalPanel();
-    List<CorrectAndScore> scoreAndPaths = addHistory(this);
+   /* List<CorrectAndScore> scoreAndPaths =*/ addHistory(this);
     //add(vp);
   }
 

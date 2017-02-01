@@ -44,41 +44,21 @@ import java.util.Map;
  * @since 1/5/16.
  */
 public class BaseExercise implements IsSerializable, Shell {
-  @Deprecated protected String oldid = "";
   protected int id = -1;
 
-  /**
-   * TODO : why do we need to carry this around?
-   */
-  protected Map<String, String> unitToValue = new HashMap<>();
   private STATE state = STATE.UNSET;
   private STATE secondState = STATE.UNSET;
 
   protected BaseExercise() {
   }
 
-  protected BaseExercise(String oldid, int id) {
-    this.oldid = oldid;
+  protected BaseExercise(int id) {
     this.id = id;
-  }
-
-  @Deprecated
-  public String getOldID() {
-    return oldid;
   }
 
   @Override
   public int getID() {
     return id;
-  }
-
-  /**
-   * @param id
-   * @see mitll.langtest.server.database.userexercise.UserExerciseDAO#add(CommonExercise, boolean)
-   */
-  @Deprecated
-  public void setOldID(String id) {
-    this.oldid = id;
   }
 
   @Override
@@ -97,28 +77,6 @@ public class BaseExercise implements IsSerializable, Shell {
   @Override
   public void setSecondState(STATE state) {
     this.secondState = state;
-  }
-
-  public Map<String, String> getUnitToValue() {
-    return unitToValue;
-  }
-
-  /**
-   * @param unit
-   * @param value
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
-   */
-  public void addUnitToValue(String unit, String value) {
-    if (value == null) return;
-    unitToValue.put(unit, value);
-  }
-
-  /**
-   * @param unitToValue
-   * @see mitll.langtest.shared.custom.UserExercise#UserExercise
-   */
-  public void setUnitToValue(Map<String, String> unitToValue) {
-    this.unitToValue = unitToValue;
   }
 
   @Override

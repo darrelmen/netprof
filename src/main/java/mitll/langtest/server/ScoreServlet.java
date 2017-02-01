@@ -1066,8 +1066,6 @@ public class ScoreServlet extends DatabaseServlet {
     AudioAnswer answer = audioFileHelper.getAnswer(exercise,
         audioContext,
         wavPath, file, deviceType, device, score,
-        //   doFlashcard,
-        //  allowAlternates,
         options);
 
     final String path = answer.getPath();

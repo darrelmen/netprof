@@ -57,10 +57,7 @@ import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.ScoredExercise;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,7 +72,7 @@ import java.util.List;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise>
+public abstract class GoodwaveExercisePanel<T extends CommonExercise>//<CommonShell & AudioRefExercise & ScoredExercise>
     extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
@@ -343,7 +340,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   protected ASRScoringAudioPanel makeFastAndSlowAudio(String path) {
-    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, controller, null, instance);
+    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, controller, instance);
   }
 
   /**

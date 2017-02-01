@@ -576,7 +576,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param userWhere
-   * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser
+   * @see mitll.langtest.server.database.security.UserSecurityManager#setSessionUser
    * @see UserServiceImpl#getUserFromSession
    */
   public void setStartupInfo(User userWhere) {
@@ -748,7 +748,7 @@ public class DatabaseImpl implements Database {
       this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
       numExercises = fileExerciseDAO.getNumExercises();
     } else {
-      fileExerciseDAO = new FileExerciseDAO<>(mediaDir, getOldLanguage(serverProps), absConfigDir,
+      fileExerciseDAO = new FileExerciseDAO<AmasExerciseImpl>(mediaDir, getOldLanguage(serverProps), absConfigDir,
           lessonPlanFile, installPath);
       numExercises = fileExerciseDAO.getNumExercises();
     }
@@ -1124,7 +1124,8 @@ public class DatabaseImpl implements Database {
       int exID = result.getExID();
       CommonShell exercise = isAmas() ? getAMASExercise(exID) : getExercise(projid, exID);
       if (exercise != null) {
-        result.setDisplayID("" + exercise.getDominoID());
+        int dominoID = isAmas()? -1 : ((CommonExercise)exercise).getDominoID();
+        result.setDisplayID("" + dominoID);
       }
     }
     return getMonitorResultsWithText(monitorResults);
