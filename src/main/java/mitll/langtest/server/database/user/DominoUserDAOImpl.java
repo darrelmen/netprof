@@ -42,18 +42,10 @@ import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.Analysis;
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.services.UserServiceImpl;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
-import net.sf.json.JSONObject;
-import org.apache.commons.codec.binary.*;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.configuration.DeploymentMode;
@@ -68,13 +60,9 @@ import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.security.spec.KeySpec;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
@@ -90,7 +78,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final String PRIMARY = "primary";
-  private static final String DEFAULT_AFFILIATION = "OTHER";
+  private static final String DEFAULT_AFFILIATION = "";//"OTHER";
   public static final String MALE = "male";
   private static final String UID_F = "userId";
   private static final String PASS_F = "pass";
@@ -184,87 +172,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     MyMongoUserServiceDelegate d = new MyMongoUserServiceDelegate(props, mailer, "dude", mongoCP);
     d.initializeDAOs(serializer);
     return d;
-  }
-
-  private static class MyMongoUserServiceDelegate extends MongoUserServiceDelegate {
-
-    public MyMongoUserServiceDelegate(UserServiceProperties props, Mailer mailer, String appName, Mongo mongoPool) {
-      super(props, mailer, appName, mongoPool);
-    }
-
-    public boolean isMatch(String userid, String encoded, String attempt) {
-//      String encodedAttemptedPass = LegacyMd5Hash.getHash(attempt);
-//      return encodedAttemptedPass.equals(encoded);
-      return authenticate(userid, encoded, attempt);
-    }
-
-    protected boolean authenticate(String userId, String encodedCurrPass, String attemptedTxtPass) {
-      try {
-        // ensure we go through the motions for unmatched usernames
-        // to avoid returning too quickly and
-        // providing information about user name validity.
-        if (encodedCurrPass == null) {
-          return false;
-        }
-
-        String encodedAttemptedPass = encodePass(encodedCurrPass, attemptedTxtPass, PasswordEncoding.common_v1);
-        if (encodedAttemptedPass.equals(encodedCurrPass)) {
-          log.info("Decoded using SHA-512.");
-          return true;
-        }
-
-        // Handle Domino Encoding
-        encodedAttemptedPass = encodePass(encodedCurrPass, attemptedTxtPass, PasswordEncoding.domino);
-        if (encodedAttemptedPass.equals(encodedCurrPass)) {
-          log.info("Decoded using SHA1.");
-          return true;
-        }
-
-        // Handle NetProF Encoding
-        encodedAttemptedPass = LegacyMd5Hash.getHash(attemptedTxtPass);
-        if (encodedAttemptedPass.equals(encodedCurrPass)) {
-          log.info("Decoded using NetProF-MD5.");
-          return true;
-        }
-
-      } catch (Exception ex) {
-        log.warn("Can not authenticate user!", ex);
-      }
-      log.info("Authentication Failed.");
-      return false;
-    }
-
-    private String encodePass(String encodedCurrPass, String txtPass, PasswordEncoding pEnc) throws Exception {
-      byte[] salt = extractSalt(encodedCurrPass, pEnc);
-      return encodePass(txtPass, salt, pEnc);
-    }
-
-    private static final String PASS_PREFIX = "{SSHA}";
-
-    private String encodePass(String txtPass, byte[] salt, PasswordEncoding pEnc) throws Exception {
-      byte[] encryptedPass = encryptPass(txtPass, salt, pEnc);
-      // once encrypted, encode the password
-      // to simplify storage when LDAP is used.
-      return PASS_PREFIX + new String(Base64.encodeBase64(encryptedPass));
-    }
-
-    private byte[] encryptPass(String txtPass, byte[] salt, PasswordEncoding pEnc) throws Exception {
-      // See this link for more info on encryption options.
-      // http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html
-      int iterations = 20000;
-      KeySpec spec = new PBEKeySpec(txtPass.toCharArray(), salt, iterations,
-          pEnc.derivedKeyLength);
-      SecretKeyFactory f = SecretKeyFactory.getInstance(pEnc.algorithm);
-      byte[] encPass = f.generateSecret(spec).getEncoded();
-      return ArrayUtils.addAll(encPass, salt);
-    }
-
-    private byte[] extractSalt(String encodedPass, PasswordEncoding pEnc) {
-      String encodedPassNoPrefix = encodedPass.substring(PASS_PREFIX.length());
-      byte[] hashAndSalt = org.apache.commons.codec.binary.Base64.decodeBase64(encodedPassNoPrefix.getBytes());
-      int shaLen = hashAndSalt.length - pEnc.saltLength + 1;
-      return ArrayUtils.subarray(hashAndSalt, shaLen - 1, hashAndSalt.length);
-    }
   }
 
   @Override
@@ -541,27 +448,35 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * @param userId
-   * @param attemptedPassword
+   * @param attemptedTxtPass
    * @param userAgent
    * @param remoteAddr
    * @param sessionID
    * @return
    * @see #getStrictUserWithPass(String, String)
-   * @see mitll.langtest.server.services.UserServiceImpl#loginUser(String, String, String)
+   * @see mitll.langtest.server.services.UserServiceImpl#loginUser
    */
   public User loginUser(String userId,
-                        String attemptedPassword,
+                        String attemptedTxtPass,
                         String userAgent,
                         String remoteAddr,
                         String sessionID) {
-    logger.info("loginUser " + userId + " pass num chars " + attemptedPassword.length());
+    String encodedCurrPass = getUserCredentials(userId);
+
+    logger.info("loginUser '" + userId + "' pass num chars " + attemptedTxtPass.length() + " existing credentials " + encodedCurrPass);
+
+
     DBUser loggedInUser =
         delegate.loginUser(
             userId,
-            attemptedPassword,
+            attemptedTxtPass,
             remoteAddr,
             userAgent,
             sessionID);
+
+    if (loggedInUser == null) {
+      myDelegate.isMatch(userId,encodedCurrPass,attemptedTxtPass);
+    }
     return loggedInUser == null ? null : toUser(loggedInUser);
   }
 
@@ -768,6 +683,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     String email = dominoUser.getEmail();
 
+    logger.info("user " + dominoUser.getUserId() + " email " + email);
+
     Set<User.Permission> permissionSet = new HashSet<>();
     String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
     mitll.hlt.domino.shared.model.user.User.Gender gender = dominoUser.getGender();
@@ -806,7 +723,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return user;
   }
 
-  protected boolean isValidEmailGrammar(String text) {
+  private boolean isValidEmailGrammar(String text) {
     return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
@@ -816,7 +733,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param dominoUser
    * @return
    * @see #getMini(DBUser)
-   * @see #toUser(mitll.hlt.domino.shared.model.user.User)
+   * @see #toUser
    */
   private boolean isAdmin(mitll.hlt.domino.shared.model.user.User dominoUser) {
     Set<String> roleAbbreviations = dominoUser.getRoleAbbreviations();
@@ -834,11 +751,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     Set<String> roleAbbreviations = dominoUser.getRoleAbbreviations();
 
     User.Kind kindToUse = User.Kind.STUDENT;
-//    Set<User.Permission> permissionSet = new HashSet<>();
     Set<User.Kind> seen = new HashSet<>();
 
-    //if (!roleAbbreviations.size() > 1) {
-//      String userId = dominoUser.getUserId();
     //    logger.warn("getUserKind user " + userId + " has multiple roles - choosing first one... " + roleAbbreviations.size());
     for (String role : roleAbbreviations) {
       User.Kind kind = getKindForRole(role);
@@ -846,7 +760,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       permissionSet.addAll(User.getInitialPermsForRole(kind));
       //    logger.info(userId + " has " + role);
     }
-    // }
 
     // teacher trumps others... for the moment
     // need to have ordering over roles...?
@@ -1077,7 +990,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @seex mitll.langtest.server.services.UserServiceImpl#changePFor
    * @see mitll.langtest.server.rest.RestUserManagement#changePFor
    * @see mitll.langtest.server.rest.RestUserManagement#getUserIDForToken(String)
-   * @see mitll.langtest.server.services.UserServiceImpl#getUserIDForToken(String)
+   * @see mitll.langtest.server.services.UserServiceImpl#getUserIDForToken
    */
   @Override
   @Deprecated
@@ -1089,9 +1002,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * TODO : enable content developer will happen in domino user management UI.
    *
-   * @param resetKey
+   * @paramx resetKey
    * @return
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
+   * @seex mitll.langtest.server.mail.EmailHelper#enableCDUser
    */
 /*
   @Override
@@ -1106,19 +1019,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return getByID(userid);
   }
 
-  /**
-   * adds permissions
-   * adds gender
-   *
-   * @param getMale
-   * @return
-   */
- /* @Override
-  public Map<Integer, User> getUserMap(boolean getMale) {
-    List<DBUser> all = getAll();
-    return getUserMapFromUsers(getMale, all);
-  }*/
-
   public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {
     Map<Integer, User> idToUser = new HashMap<>();
     all
@@ -1130,26 +1030,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         .forEach(dbUser -> idToUser.put(dbUser.getDocumentDBID(), toUser(dbUser)));
     return idToUser;
   }
-
-  /**
-   * adds gender
-   *
-   * @paramx getMale
-   * @return
-   */
-/*  @Override
-  public Collection<Integer> getUserIDs(boolean getMale) {
-    //logger.warn("getUserIDs: NOTE : no gender support yet.");
-
-    List<Integer> ids = getAll()
-        .stream()
-        .filter(dbUser -> getMale ? dbUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male :
-            dbUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Female)
-        .map(UserDescriptor::getDocumentDBID)
-        .collect(Collectors.toList());
-
-    return ids;
-  }*/
 
   public boolean isMale(int userid) {
     return getByID(userid).isMale();
@@ -1190,25 +1070,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public boolean changePasswordWithCurrent(int user, String currentHashPass, String newHashPass, String baseURL) {
     return savePasswordAndGetUser(user, currentHashPass, newHashPass, baseURL) != null;
   }
-
-  /**
-   * TODO : Not sure what to put in for urlBase...
-   *
-   * @param userid
-   * @see
-   */
-/*  public void forgetPassword(int userid) {
-    DBUser dbUser = delegate.lookupDBUser(userid);
-
-    logger.info("forgetPassword " + userid);
-
-    if (dbUser == null) {
-      logger.error("no user with id " + userid);
-    } else {
-      ClientUserDetail clientUserDetail = getClientUserDetail(dbUser);
-      delegate.forgotPassword(adminUser, clientUserDetail, "");
-    }
-  }*/
 
   /**
    * We don't support this UI anymore.
@@ -1273,8 +1134,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     try {
       if (!isValidAsEmail(clientUserDetail.getEmail())) {
         logger.error("huh? email " + clientUserDetail.getEmail() + " not valid?");
-        //    clientUserDetail.setEmail(emailForLegacy);
-        //       logger.info("forgotPassword email now " + emailForLegacy);
       }
 
       clientUserDetail1 = delegate.forgotPassword(next,

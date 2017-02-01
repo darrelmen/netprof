@@ -49,4 +49,6 @@ public interface SignIn {
   Anchor getForgotPassword();
 
   boolean clickSendEmail();
+
+  void tryLogin();
 }

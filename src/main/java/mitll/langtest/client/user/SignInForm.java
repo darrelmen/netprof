@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.*;
@@ -61,36 +62,53 @@ public class SignInForm extends UserDialog implements SignIn {
    */
   private static final String DEACTIVATED = "I'm sorry, this account has been deactivated.";
   private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
-  private static final String NO_USER_FOUND = "No userField found - have you signed up?";
+  /**
+   *
+   */
+  private static final String NO_USER_FOUND = "No user with this id - have you signed up?";
 
   private static final int MIN_LENGTH_USER_ID = 4;
 
   private static final int MIN_PASSWORD = 4;
+  /**
+   * @see #getSignInButton
+   */
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
   private static final String BAD_PASSWORD = "Wrong password, please try again.";// - have you signed up?";
   private static final String PASSWORD = "Password";
   private static final String USERNAME = "Username";
   private static final String SIGN_IN = "Log In";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer userField id.";
+
+  /**
+   * @see #getForgotPassword
+   */
   private static final String FORGOT_PASSWORD = "Forgot password?";
+  /**
+   * @see #getForgotPassword
+   */
   private static final String ENTER_A_USER_NAME = "Enter a user name.";
-  private static final String CHECK_EMAIL = "Check Email";
-  private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
-  private static final String SEND = "Send Reset Email";
+//  private static final String CHECK_EMAIL = "Check Email";
+//  private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
+//  private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
-  private static final int EMAIL_POPUP_DELAY = 4000;
+//  private static final int EMAIL_POPUP_DELAY = 4000;
 
   private FormField userField;
+  /**
+   * @see #populateSignInForm
+   */
   private FormField password;
 
   private Button signIn;
 
-  private DecoratedPopupPanel resetEmailPopup;
-  private Button sendEmail;
+  //private DecoratedPopupPanel resetEmailPopup;
+ // private Button sendEmail;
   private final EventRegistration eventRegistration;
   private final UserPassDialog userPassLogin;
   private final SignUp signUpForm;
   private final UserManager userManager;
+  SendEmail sendEmail;
 
   /**
    * @param props
@@ -164,50 +182,57 @@ public class SignInForm extends UserDialog implements SignIn {
       }
     });
 
-    userField.box.addBlurHandler(new BlurHandler() {
+   /* userField.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         //logger.info("makeSignInUserName : got blur ");
-        final String text = userField.getSafeText();
-
-        if (!text.isEmpty()) {
-          eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + text + "'");
-          //logger.info("\tchecking makeSignInUserName " + text);
-          service.getUserByID(text, new AsyncCallback<User>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              logger.warning("\tgot FAILURE on userExists " + text);
-            }
-
-            @Override
-            public void onSuccess(User result) {
-              gotUserExists(result);
-            }
-          });
-        }
+        onUserIDBlur();
       }
-    });
+    });*/
+
+    sendEmail = new SendEmail(eventRegistration, userField);
+
   }
+
+/*  private void onUserIDBlur() {
+    final String text = userField.getSafeText();
+
+    if (!text.isEmpty()) {
+      eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + text + "'");
+      //logger.info("\tchecking makeSignInUserName " + text);
+      service.getUserByID(text, new AsyncCallback<User>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          logger.warning("\tgot FAILURE on userExists " + text);
+        }
+
+        @Override
+        public void onSuccess(User result) {
+          gotUserExists(result);
+        }
+      });
+    }
+  }*/
 
   /**
    * Skip case where really old users didn't have passwords.  Kind of a bad idea - what were we thinking?
    *
    * @param loginUser
    */
-  private void gotUserExists(User loginUser) {
+/*  private void gotUserExists(User loginUser) {
     if (loginUser != null) {
       if (loginUser.isValid()) {
-/*
+*//*
         logger.info("login user " + loginUser.getID() + " is valid");
         logger.info("login user " + loginUser.getPermissions() );
         logger.info("login user " + loginUser.getRealGender() );
-*/
+*//*
       } else {
-/*        logger.info("login user " + loginUser.getID() + " is NOT valid");
+*//*        logger.info("login user " + loginUser.getID() + " is NOT valid");
         logger.info("login user " + loginUser.getID() + " perms " + loginUser.getPermissions());
         logger.info("login user " + loginUser.getID() + " gender " + loginUser.getRealGender());
         logger.info("login user " + loginUser.getID() + " email " + loginUser.getEmail());
-        logger.info("login user " + loginUser.getID() + " email hash " + loginUser.getEmailHash());*/
+        logger.info("login user " + loginUser.getID() + " email hash " + loginUser.getEmailHash());*//*
 
         eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + loginUser.toStringShort());
         copyInfoToSignUp(loginUser.getUserID(), loginUser);
@@ -216,12 +241,13 @@ public class SignInForm extends UserDialog implements SignIn {
     //else {
 //      logger.info("makeSignInUserName : for " + userField.getText() + " - no user with that id");
     // }
-  }
+  }*/
 
   private FormField addPasswordField(Fieldset fieldset, Panel hp) {
     FormField password;
     password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
-    password.box.addFocusHandler(new FocusHandler() {
+    TextBoxBase box = password.box;
+    box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
         userPassLogin.setSignInHasFocus();
@@ -229,7 +255,8 @@ public class SignInForm extends UserDialog implements SignIn {
       }
     });
 
-    hp.add(password.box);
+    hp.add(box);
+    box.addStyleName("rightFiveMargin");
 
     return password;
   }
@@ -243,24 +270,11 @@ public class SignInForm extends UserDialog implements SignIn {
     signIn.setWidth("45px");
     signIn.getElement().setId("SignIn");
     eventRegistration.register(signIn);
+
     signIn.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        String userID = userField.box.getValue();
-        if (userID.length() < MIN_LENGTH_USER_ID) {
-          markErrorBlur(userField, PLEASE_ENTER_A_LONGER_USER_ID);
-        } else {
-          String value = password.box.getValue();
-          if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
-            markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
-          } else if (value.isEmpty()) {
-            eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
-            markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
-            signIn.setEnabled(true);
-          } else {
-            gotLogin(userID, value);
-          }
-        }
+        tryLogin();
       }
     });
     signIn.addStyleName("rightFiveMargin");
@@ -270,19 +284,49 @@ public class SignInForm extends UserDialog implements SignIn {
     return signIn;
   }
 
-/*
-  private String rot13(String val) {
-    StringBuilder builder = new StringBuilder();
-    for (char c : val.toCharArray()) {
-      if (c >= 'a' && c <= 'm') c += 13;
-      else if (c >= 'A' && c <= 'M') c += 13;
-      else if (c >= 'n' && c <= 'z') c -= 13;
-      else if (c >= 'N' && c <= 'Z') c -= 13;
-      builder.append(c);
+  public void tryLogin() {
+    String userID = userField.box.getValue();
+    if (userID.length() < MIN_LENGTH_USER_ID) {
+      markErrorBlur(userField, PLEASE_ENTER_A_LONGER_USER_ID);
+    } else {
+      String value = password.box.getValue();
+      if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
+        markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
+      } else if (value.isEmpty()) {
+
+
+        final String text = userField.getSafeText();
+
+        if (!text.isEmpty()) {
+
+          service.getUserByID(text, new AsyncCallback<User>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              logger.warning("\tgot FAILURE on userExists " + text);
+            }
+
+            @Override
+            public void onSuccess(User result) {
+              if (result == null || result.isValid()) {
+                eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
+                markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
+              }
+              signIn.setEnabled(true);
+            }
+          });
+        }
+//            eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
+        //          markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
+        //        signIn.setEnabled(true);
+      } else {
+        gotLogin(userID, value);
+      }
     }
-    return builder.toString();
   }
-*/
+//
+//  public void doLogin() {
+//    gotLogin(userField.getSafeText(),password.getSafeText());
+//  }
 
   /**
    * @param user
@@ -299,125 +343,45 @@ public class SignInForm extends UserDialog implements SignIn {
 
     userManager.getUserService().loginUser(user, freeTextPassword,
         new AsyncCallback<LoginResult>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        signIn.setEnabled(true);
-        markErrorBlur(signIn, TROUBLE_CONNECTING_TO_SERVER);
-      }
-
-      @Override
-      public void onSuccess(LoginResult result) {
-        if (result.getResultType() == LoginResult.ResultType.Failed) {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
-
-          logger.info("No userField with that name '" + user +
-              "' freeTextPassword " + freeTextPassword.length() + " characters - ");
-
-          markErrorBlur(password, NO_USER_FOUND);
-          signIn.setEnabled(true);
-        } else {
-          User loggedInUser = result.getLoggedInUser();
-          if (!loggedInUser.isEnabled()) {
-            markErrorBlur(userField, DEACTIVATED);
+          @Override
+          public void onFailure(Throwable caught) {
             signIn.setEnabled(true);
-          } else {
-        //    logger.info("user is enabled...");
-            if (result.getResultType() == LoginResult.ResultType.MissingInfo) {
-              copyInfoToSignUp(user, loggedInUser);
-              signIn.setEnabled(true);
-            } else {
-//                  foundExistingUser(result, emptyPassword, freeTextPassword);
-              gotGoodOrBadPassword(result
-                  //    , freeTextPassword
-              );
-            }
+            markErrorBlur(signIn, TROUBLE_CONNECTING_TO_SERVER);
           }
-        }
-      }
-    });
- /*   service.userExists(user, freeTextPassword, new AsyncCallback<User>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        signIn.setEnabled(true);
-        markErrorBlur(signIn, TROUBLE_CONNECTING_TO_SERVER);
-      }
 
-      @Override
-      public void onSuccess(User result) {
-        logger.info("gotLogin : userField is '" + user + "' result " + result);
-
-        if (result == null) {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
-
-          logger.info("No userField with that name '" + user +
-              "' freeTextPassword " + freeTextPassword.length() + " characters - ");
-          markErrorBlur(password,   NO_USER_FOUND);
-          signIn.setEnabled(true);
-        } else {
-          if (!result.isEnabled()) {
-            markErrorBlur(userField, DEACTIVATED);
-            signIn.setEnabled(true);
-          } else {
-
-            foundExistingUser(result, emptyPassword, freeTextPassword);
+          @Override
+          public void onSuccess(LoginResult result) {
+            handleLoginResponse(result, user, freeTextPassword);
           }
-        }
-      }
-    });*/
+        });
   }
 
-  /**
-   * @param foundUser
-   * @param emptyPassword
-   * @param freeTextPassword
-   * @see #gotLogin
-   */
-/*  private void foundExistingUser(User foundUser, boolean emptyPassword, String freeTextPassword) {
-    String emailHash = foundUser.getEmailHash();
-//    String passwordHash = foundUser.getPasswordHash();
-    if (emailHash == null ||
-        //passwordHash == null ||
-        emailHash.isEmpty()
-      // || passwordHash.isEmpty()
-        ) {
-      copyInfoToSignUp(foundUser.getUserID());
+  private void handleLoginResponse(LoginResult result, String user, String freeTextPassword) {
+    if (result.getResultType() == LoginResult.ResultType.Failed) {
+      eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
+      logger.info("No userField with that name '" + user +
+          "' freeTextPassword " + freeTextPassword.length() + " characters - ");
+
+      markErrorBlur(password, NO_USER_FOUND);
       signIn.setEnabled(true);
     } else {
-      // logger.info("Got valid userField " + foundUser);
-      if (emptyPassword) {
-        eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
-        markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
+      User loggedInUser = result.getLoggedInUser();
+      if (!loggedInUser.isEnabled()) {
+        markErrorBlur(userField, DEACTIVATED);
         signIn.setEnabled(true);
       } else {
-        getPermissionsAndSetUser(foundUser.getUserID(), freeTextPassword);
+        //    logger.info("user is enabled...");
+        if (result.getResultType() == LoginResult.ResultType.MissingInfo) {
+          copyInfoToSignUp(user, loggedInUser);
+          signIn.setEnabled(true);
+        } else {
+          gotGoodOrBadPassword(result);
+        }
       }
     }
-  }*/
+  }
 
-  /**
-   * If the user exists with this password?
-   *
-   * @paramx user
-   * @paramx freeTextPassword
-   */
-/*  private void getPermissionsAndSetUser(final String user, final String freeTextPassword) {
-    //console("getPermissionsAndSetUser : " + user);
-    // if (freeTextPassword == null) freeTextPassword = "";
-    userManager.getUserService().loginUser(user, freeTextPassword, new AsyncCallback<LoginResult>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(LoginResult result) {
-        //if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
-        gotGoodOrBadPassword(result, freeTextPassword);
-      }
-    });
-  }*/
-  private void gotGoodOrBadPassword(LoginResult result
-                                    //    , String freeTextPassword
-  ) {
+  private void gotGoodOrBadPassword(LoginResult result) {
     if (result == null ||
         result.getResultType() != LoginResult.ResultType.Success
         ) {
@@ -504,6 +468,11 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   /**
+   * Cases:
+   * 1) user is known and has an email hash
+   * 2) user is known and has a valid email
+   * 3) user is unknown
+   *
    * @return
    * @see UserPassLogin#getForgotRow
    */
@@ -513,29 +482,55 @@ public class SignInForm extends UserDialog implements SignIn {
     forgotPassword.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (userField.getSafeText().isEmpty()) {
+        String safeText = userField.getSafeText();
+        if (safeText.isEmpty()) {
           markErrorBlur(userField, ENTER_A_USER_NAME);
           return;
+        } else {
+
+          service.getUserByID(safeText, new AsyncCallback<User>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              logger.warning("\tgot FAILURE on userExists ");
+            }
+
+            @Override
+            public void onSuccess(User result) {
+              if (result == null) {
+                markErrorBlur(userField, NO_USER_FOUND);
+              }
+              else {
+              //  if (result.isValid()) {
+                  sendEmail.showSendEmail(forgotPassword, safeText, result.isValid());
+                //} else {
+                  //copyInfoToSignUp(safeText, result);
+               // }
+              }
+            }
+          });
+
+          //final TextBox emailEntry = new TextBox();
+         // SendEmail sendEmail = new SendEmail(eventRegistration, userField);
+/*
+          Heading emailEntry = new Heading(5, "Click the button to reset.");
+          resetEmailPopup = new DecoratedPopupPanel(true);
+
+          sendEmail = new Button(SEND);
+          sendEmail.setType(ButtonType.PRIMARY);
+          sendEmail.addStyleName("leftTenMargin");
+          sendEmail.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              onSendReset(
+                  //    emailEntry
+              );
+            }
+          });
+          eventRegistration.register(sendEmail, "N/A", "reset password");
+          makePopup(resetEmailPopup, emailEntry, sendEmail, "");//ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
+          resetEmailPopup.showRelativeTo(forgotPassword);
+*/
         }
-        //final TextBox emailEntry = new TextBox();
-
-        Heading emailEntry = new Heading(5, "Click the button to reset.");
-        resetEmailPopup = new DecoratedPopupPanel(true);
-
-        sendEmail = new Button(SEND);
-        sendEmail.setType(ButtonType.PRIMARY);
-        sendEmail.addStyleName("leftTenMargin");
-        sendEmail.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            onSendReset(
-            //    emailEntry
-            );
-          }
-        });
-        eventRegistration.register(sendEmail, "N/A", "reset password");
-        makePopup(resetEmailPopup, emailEntry, sendEmail, "");//ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
-        resetEmailPopup.showRelativeTo(forgotPassword);
 //        setFocusOn(emailEntry);
         //  setFocusOn(sendEmail);
       }
@@ -549,35 +544,37 @@ public class SignInForm extends UserDialog implements SignIn {
    *
    * @paramx emailEntry - need this since old accounts don't have email with them
    */
+/*
   private void onSendReset() {
     sendEmail.setEnabled(false);
     service.resetPassword(userField.box.getText(),
         new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        sendEmail.setEnabled(true);
-      }
-
-      @Override
-      public void onSuccess(Boolean result) {
-        String heading = result ? CHECK_EMAIL : "Unknown email";
-        String message = result ? PLEASE_CHECK_YOUR_EMAIL : userField.box.getText() + " doesn't have that email. Check for a typo?";
-        setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover() {
-          boolean isFirst = true;
+          @Override
+          public void onFailure(Throwable caught) {
+            sendEmail.setEnabled(true);
+          }
 
           @Override
-          public void hide() {
-            super.hide();
-            if (isFirst) {
-              isFirst = false;
-            } else {
-              resetEmailPopup.hide(); // TODO : ugly - somehow hide is called twice
-            }
+          public void onSuccess(Boolean result) {
+            String heading = result ? CHECK_EMAIL : "Unknown email";
+            String message = result ? PLEASE_CHECK_YOUR_EMAIL : userField.box.getText() + " doesn't have that email. Check for a typo?";
+            setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover() {
+              boolean isFirst = true;
+
+              @Override
+              public void hide() {
+                super.hide();
+                if (isFirst) {
+                  isFirst = false;
+                } else {
+                  resetEmailPopup.hide(); // TODO : ugly - somehow hide is called twice
+                }
+              }
+            }, false);
           }
-        }, false);
-      }
-    });
+        });
   }
+*/
 
   /**
    * @return
@@ -585,9 +582,10 @@ public class SignInForm extends UserDialog implements SignIn {
    */
   @Override
   public boolean clickSendEmail() {
-    if (resetEmailPopup != null && resetEmailPopup.isShowing()) {
+   return sendEmail.clickSendEmail();
+/*    if (resetEmailPopup != null && resetEmailPopup.isShowing()) {
       sendEmail.fireEvent(new KeyPressHelper.ButtonClickEvent());
       return true;
-    } else return false;
+    } else return false;*/
   }
 }

@@ -120,7 +120,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   private void layoutRecordButton(Widget button) {
     SimplePanel recordButtonContainer = new SimplePanel(button);
     recordButtonContainer.setWidth("75px");
-    HorizontalPanel hp = new HorizontalPanel();
+     Panel hp = new HorizontalPanel();
     hp.add(recordButtonContainer);
     this.panel = hp;
     panel.getElement().setId("recordButtonPanel");
@@ -298,9 +298,11 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    */
   protected abstract void receivedAudioAnswer(AudioAnswer result, final Panel outer);
 
+/*
   protected void hideRecordButton() {
     recordButton.setVisible(false);
   }
+*/
 
   public void setAllowAlternates(boolean allowAlternates) {
     this.allowAlternates = allowAlternates;

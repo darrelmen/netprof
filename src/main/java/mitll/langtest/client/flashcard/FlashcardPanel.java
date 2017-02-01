@@ -147,14 +147,14 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     controlState.setStorage(new KeyStorage(controller));
 
     this.soundFeedback = soundFeedback;
-    final DivWidget inner2 = new DivWidget();
-    inner2.getElement().setId("middle_vert_container");
+    final DivWidget middleVert = new DivWidget();
+    middleVert.getElement().setId("middle_vert_container");
 
     Panel contentMiddle = getCardContent();
     DivWidget firstRow = getFirstRow(controller);
     DivWidget cardPrompt = getCardPrompt(e);
     cardPrompt.insert(firstRow, 0);
-    getMiddlePrompt(cardPrompt, contentMiddle, inner2);
+    getMiddlePrompt(cardPrompt, contentMiddle, middleVert);
     mainContainer = contentMiddle;
 
     prevNextRow = new DivWidget();
@@ -170,14 +170,14 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     inner.add(threePartContent);
 
-    //  logger.info("Adding recording widgets to " + inner2.getElement().getExID());
+    //  logger.info("Adding recording widgets to " + middleVert.getElement().getExID());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-        addRecordingAndFeedbackWidgets(getID(), service, controller, inner2);
+        addRecordingAndFeedbackWidgets(getID(), service, controller, middleVert);
       }
     });
-    //  logger.info("After adding recording widgets to " + inner2.getElement().getExID());
-    inner2.add(getFinalWidgets());
+    //  logger.info("After adding recording widgets to " + middleVert.getElement().getExID());
+    middleVert.add(getFinalWidgets());
 
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     warnNoFlash.setVisible(false);
@@ -661,9 +661,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     if (controlState.isAutoPlay()) {
       //  logger.info("BootstrapExercisePanel auto play so going to next");
       playRefAndGoToNextIfSet();
-    } else {
-      //  logger.info("BootstrapExercisePanel auto play OFF ");
     }
+    //else {
+      //  logger.info("BootstrapExercisePanel auto play OFF ");
+    //}
   }
 
   void playRefAndGoToNextIfSet() {

@@ -144,7 +144,7 @@ public class UserSecurityManager implements IUserSecurityManager {
   private LoginResult getValidLogin(HttpSession session, User loggedInUser) {
     LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
     if (!loggedInUser.isValid()) {
-      log.info("user " + loggedInUser + "\n\tis missing email ");
+      log.info("user " + loggedInUser + "\n\tis not valid ");
       loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
     } else {
       setSessionUser(session, loggedInUser);
@@ -346,7 +346,8 @@ public class UserSecurityManager implements IUserSecurityManager {
       }
       /*long cookie =*/
       if (sessUser != null) {
-        /*userService.*/setSessionUser(session, sessUser);
+        /*userService.*/
+        setSessionUser(session, sessUser);
       } else {
         log.debug("no user for session - " + session + " logged out?");
       }
@@ -445,13 +446,19 @@ public class UserSecurityManager implements IUserSecurityManager {
    *
    * @param request
    * @return
+   * @see MyRemoteServiceServlet#getUserIDFromSessionNoCheck
    */
   public int getUserIDFromRequest(HttpServletRequest request) {
-    HttpSession session = request != null ? getCurrentSession(request) : null;
-    if (session != null) {
-      return (Integer) session.getAttribute(USER_SESSION_ATT);
-    } else {
+    if (request == null) {
+      log.error("how can request be null?", new Exception());
       return -1;
+    } else {
+      HttpSession session = getCurrentSession(request);
+      if (session != null) {
+        return (Integer) session.getAttribute(USER_SESSION_ATT);
+      } else {
+        return -1;
+      }
     }
   }
 

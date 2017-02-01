@@ -36,4 +36,5 @@ public interface UserPassDialog {
   void clearSignInHasFocus();
   void setSignInHasFocus();
   void setSignInPasswordFocus();
+  void tryLogin();
 }
