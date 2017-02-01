@@ -18,11 +18,11 @@ public class Affiliation implements HasID {
     this.abb = abb;
     this.disp = disp;
   }
-
+/*
   @Override
   public String getOldID() {
     return null;
-  }
+  }*/
 
   @Override
   public int getID() {

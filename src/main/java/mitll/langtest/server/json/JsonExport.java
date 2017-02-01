@@ -195,7 +195,7 @@ public class JsonExport {
 
   private int c = 0;
 
-  private <T extends CommonShell> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
+  private <T extends CommonShell & HasUnitChapter> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
     for (String type : sectionHelper.getTypeOrder()) {
       String value = exercise.getUnitToValue().get(type);
       if (value == null) {

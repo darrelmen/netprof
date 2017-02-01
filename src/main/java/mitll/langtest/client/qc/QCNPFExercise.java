@@ -84,7 +84,7 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QCNPFExercise<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise>
+public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise>
     extends GoodwaveExercisePanel<T> {
   public static final String UNINSPECTED_TOOLTIP = "Item has uninspected audio.";
   private Logger logger = Logger.getLogger("QCNPFExercise");

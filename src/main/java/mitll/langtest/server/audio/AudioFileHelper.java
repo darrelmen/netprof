@@ -178,7 +178,7 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
-  private boolean isInDictOrLTS(CommonShell exercise) {
+  private boolean isInDictOrLTS(CommonExercise exercise) {
     return asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
   }
 
@@ -811,7 +811,7 @@ public class AudioFileHelper implements AlignDecode {
         validity.getValidity(), reqid, validity.durationInMillis);
   }
 
-  public PretestScore getEasyAlignment(CommonShell exercise, String testAudioPath) {
+  public PretestScore getEasyAlignment(CommonExercise exercise, String testAudioPath) {
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
     return getAlignmentScore(exercise, testAudioPath, options);
   }
@@ -821,7 +821,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean)
    */
 
-  private PretestScore getAlignmentScore(CommonShell exercise, String testAudioPath, DecoderOptions options) {
+  private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, DecoderOptions options) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), exercise.getTransliteration(),
         DEFAULT, "" + exercise.getID(), null,
         options);
@@ -1251,7 +1251,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * @see #AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify)
+   * @see #AudioFileHelper
    */
   private void makeDecodeCorrectnessChecker() {
     decodeCorrectnessChecker = new DecodeCorrectnessChecker(this, serverProps.getMinPronScore());

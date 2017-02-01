@@ -33,10 +33,7 @@
 package mitll.langtest.shared.amas;
 
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.MutableShell;
-import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.io.InputStream;
@@ -55,7 +52,7 @@ import java.util.*;
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AmasExerciseImpl implements CommonShell {
+public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   public static final String EN = "en";
   public static final String FL = "fl";
 
@@ -271,7 +268,6 @@ public class AmasExerciseImpl implements CommonShell {
     return "";
   }
 
-  @Override
   public String getAltFL() {
     return null;
   }
@@ -282,10 +278,12 @@ public class AmasExerciseImpl implements CommonShell {
   }
 */
 
+/*
   @Override
   public String getTransliteration() {
     return null;
   }
+*/
 
   public int getDominoID() {
     return realID;
@@ -338,5 +336,9 @@ public class AmasExerciseImpl implements CommonShell {
   @Override
   public int compareTo(HasID o) {
     return Integer.valueOf(getID()).compareTo(o.getID());
+  }
+
+  public String getId() {
+    return id;
   }
 }
