@@ -44,5 +44,5 @@ import java.util.List;
  */
 public interface ScoredExercise {
   List<CorrectAndScore> getScores();
-  float getAvgScore();
+//  float getAvgScore();
 }

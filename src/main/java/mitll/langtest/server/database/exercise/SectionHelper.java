@@ -35,6 +35,7 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
@@ -55,7 +56,7 @@ import java.util.*;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SectionHelper<T extends Shell> {
+public class SectionHelper<T extends Shell & HasUnitChapter> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
   public static final String SOUND = "Sound";
   private List<String> predefinedTypeOrder = new ArrayList<>();

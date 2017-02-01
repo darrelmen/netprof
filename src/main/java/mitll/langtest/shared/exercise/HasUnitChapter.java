@@ -34,13 +34,21 @@ package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.Map;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/2/16.
  */
-public interface HasID extends IsSerializable, Comparable<HasID> {
- // @Deprecated String getOldID();
-  int getID();
+public interface HasUnitChapter extends IsSerializable {
+  Map<String, String> getUnitToValue();
+
+  /**
+   * @param unit
+   * @param value
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
+   */
+  void addUnitToValue(String unit, String value);
 }

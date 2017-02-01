@@ -34,6 +34,7 @@ package mitll.langtest.server.trie;
 
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,7 +53,7 @@ import java.util.Collection;
  * Time: 4:42 PM
  * @see Project#fullTrie
  */
-public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
+public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private static final Logger logger = LogManager.getLogger(ExerciseTrie.class);
 
   private static final int TOOLONG_TO_WAIT = 150;
@@ -183,8 +184,8 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
    * @param prefix
    * @param smallVocabDecoder
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseListWrapperForPrefix
    */
   public Collection<T> getExercises(String prefix, SmallVocabDecoder smallVocabDecoder) {
     return getMatches(smallVocabDecoder.getTrimmed(prefix.toLowerCase()));

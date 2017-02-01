@@ -66,8 +66,8 @@ public class AudioExercise extends ExerciseShell {
   public AudioExercise() {
   }
 
-  public AudioExercise(@Deprecated String oldID, int id, int projectid) {
-    super(oldID, id);
+  public AudioExercise(int id, int projectid) {
+    super(id);
     this.projectid = projectid;
   }
 
@@ -526,11 +526,19 @@ public class AudioExercise extends ExerciseShell {
     this.projectid = projectid;
   }
 
-  //  @Override
+  /**
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
+   * @return
+   */
   public String getAltFL() {
     return altfl;
   }
 
+  /**
+   * For instance for languages like serbo-croatian, where the same foreign item may have two different
+   * forms.
+   * @param foreignLanguage
+   */
   public void setAltFL(String foreignLanguage) {
     this.altfl = foreignLanguage;
   }
@@ -540,6 +548,7 @@ public class AudioExercise extends ExerciseShell {
         " project " + projectid +
         " audio attr (" + getAudioAttributes().size() +
         ") :" + getAudioAttributes() + " and " +
-        fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
+        fieldToAnnotation + " annotations";//, unit/lesson " + getUnitToValue();
   }
+
 }

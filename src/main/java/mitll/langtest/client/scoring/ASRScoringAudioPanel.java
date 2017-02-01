@@ -36,7 +36,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;

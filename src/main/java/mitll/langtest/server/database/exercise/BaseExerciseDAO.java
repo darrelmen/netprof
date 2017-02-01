@@ -554,7 +554,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private Map<Integer, Map<String, String>> findDefects() {
     Map<Integer, Map<String, String>> idToDefectMap = new HashMap<>();
 
-    for (CommonShell shell : exercises) {
+    for (CommonExercise shell : exercises) {
       Map<String, String> fieldToDefect = new HashMap<>();
       checkForSemicolons(fieldToDefect, shell.getForeignLanguage(), shell.getTransliteration());
 

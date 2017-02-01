@@ -170,11 +170,11 @@ public class UserInfo implements HasID {
     this.userID = userID;
   }
 
-  @Deprecated
+/*  @Deprecated
   @Override
   public String getOldID() {
     return null;
-  }
+  }*/
 
   @Override
   public int getID() {

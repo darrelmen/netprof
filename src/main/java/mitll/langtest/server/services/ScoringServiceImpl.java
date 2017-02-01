@@ -75,12 +75,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       boolean isAMAS = serverProps.isAMAS();
       CommonShell exercise;
       String sentence = "";
+      String transliteration = "";
       if (isAMAS) {
         exercise = db.getAMASExercise(exerciseID);
         sentence = exercise.getForeignLanguage();
       } else {
         CommonExercise exercise1 = db.getExercise(getProjectID(), exerciseID);
-
+        transliteration = exercise1.getTransliteration();
         exercise = exercise1;
 
         if (exercise1 != null) {
@@ -111,7 +112,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
             1,
             audioFilePath,
             sentence,
-            exercise.getTransliteration(),
+            transliteration,
             imageOptions,
             "" + exerciseID,
             getPrecalcScores(serverProps.usePhoneToDisplay(), result),

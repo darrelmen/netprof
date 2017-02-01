@@ -60,12 +60,4 @@ public interface Shell extends HasID {
 
   void setSecondState(STATE state);
 
-  Map<String, String> getUnitToValue();
-
-  /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
-   * @param unit
-   * @param value
-   */
-  void addUnitToValue(String unit, String value);
 }

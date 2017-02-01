@@ -55,6 +55,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 
@@ -71,7 +72,8 @@ import java.util.logging.Logger;
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
+abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExercise & ScoredExercise>
+    extends GoodwaveExercisePanel<T> {
   private final Logger logger = Logger.getLogger("NPFExercise");
 
   private static final String ADD_ITEM = "Add Item to List";

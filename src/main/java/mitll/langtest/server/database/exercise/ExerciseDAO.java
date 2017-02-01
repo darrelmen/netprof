@@ -38,6 +38,7 @@ import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasUnitChapter;
 
 import java.util.Collection;
 import java.util.Map;
@@ -55,7 +56,7 @@ import java.util.Map;
  * Time: 3:42 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T> {
+public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends SimpleExerciseDAO<T> {
   /**
    * @Deprecated - do we still need this with domino content management?
    * @param userExercise

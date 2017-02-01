@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -47,22 +48,32 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/11/16.
  */
-public class UnitChapterItemHelper<T extends CommonShell> {
-  private Logger logger = Logger.getLogger("UnitChapterItemHelper");
+public class UnitChapterItemHelper<T extends CommonExercise> {
+  private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
 
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#addInstructions
    */
-  public static final int HEADING_FOR_UNIT_LESSON = 4;
-  public static final String CORRECT = "correct";
-  public static final String ITEM = "Item";
+  private static final int HEADING_FOR_UNIT_LESSON = 4;
+ // public static final String CORRECT = "correct";
+  private static final String ITEM = "Item";
 
-  Collection<String> typeOrder;
+  private final Collection<String> typeOrder;
 
+  /**
+   * @see GoodwaveExercisePanel#getQuestionContent
+   * @param typeOrder
+   */
   public UnitChapterItemHelper(Collection<String> typeOrder) {
     this.typeOrder = typeOrder;
   }
 
+  /**
+   * @see GoodwaveExercisePanel#getQuestionContent
+   * @param exercise
+   * @param vp
+   * @return
+   */
   public Panel addUnitChapterItem(T exercise, Panel vp) {
     Widget itemHeader = getItemHeader(exercise);
     if (exercise.getUnitToValue().isEmpty()) {
