@@ -878,11 +878,13 @@ public class AudioFileHelper implements AlignDecode {
     boolean available = webserviceScoring.isAvailable();
     if (!available) logger.debug("local webservice not available for " + theFile.getName());
     if (!available && !theFile.getName().endsWith("ogg")) {
+ /*
       logger.info("checkForWebservice exid    " + exid);
       logger.info("checkForWebservice projid  " + projid);
       logger.info("checkForWebservice userid  " + userid);
       logger.info("checkForWebservice theFile " + theFile.getAbsolutePath());
       logger.info("checkForWebservice exists  " + theFile.exists());
+      */
 
       if (theFile.exists()) {
         HTTPClient httpClient = new HTTPClient("https://netprof1-dev.llan.ll.mit.edu/netprof/scoreServlet");

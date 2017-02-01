@@ -43,12 +43,12 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.custom.dialog.EditItem;
-import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
 
@@ -95,7 +95,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   ExerciseListRequest lastSuccessfulRequest = null;
 
   private static final boolean DEBUG = false;
-UserState userState;
+  private UserState userState;
 
   /**
    * @param currentExerciseVPanel
@@ -124,7 +124,6 @@ UserState userState;
     addWidgets(currentExerciseVPanel);
     getElement().setId("ExerciseList_" + instance);
   }
-
 
   /**
    * @param currentExerciseVPanel
@@ -166,7 +165,7 @@ UserState userState;
 
   private ExerciseListRequest getRequest() {
     return new ExerciseListRequest(incrRequest(), getUser())
-        .setRole(getRole())
+        .setActivityType(getActivityType())
         .setIncorrectFirstOrder(incorrectFirstOrder);
   }
 
@@ -251,9 +250,10 @@ UserState userState;
    *
    * @return
    */
-  String getRole() {
-    return getInstance() == null || getInstance().startsWith("record") ? AudioType.RECORDER.toString() : getInstance();
-  }
+  abstract ActivityType getActivityType();
+  //{
+  //  return  getInstance() == null || getInstance().startsWith("record") ? AudioType.RECORDER.toString() : getInstance();
+ // }
 
   public String getInstance() {
     return instance;
@@ -874,15 +874,6 @@ UserState userState;
   public boolean onFirst() {
     return onFirst(getCurrentExercise());
   }
-
-/*  public boolean isRTL() {
-    if (!isEmpty()) {
-      HasDirection.Direction direction = WordCountDirectionEstimator.get().estimateDirection(getAt(0).getForeignLanguage());
-      logger.info("isRTL not empty : rtl " + direction);
-    }
-    boolean b = !isEmpty() && WordCountDirectionEstimator.get().estimateDirection(getAt(0).getForeignLanguage()) == HasDirection.Direction.RTL;
-    return b;
-  }*/
 
   /**
    * @param current

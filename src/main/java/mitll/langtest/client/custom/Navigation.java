@@ -73,6 +73,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -100,10 +101,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String CLASSROOM = "classroom";
 
   private static final String CHAPTERS = "Learn Pronunciation";
-  /**
-   * @seex #addUserMaintenance
-   */
-  //private static final String USERS = "Users";
+
   //private static final String CLASSES = "Classes";
 
   private static final String PROJECTS = "Projects";
@@ -209,7 +207,7 @@ public class Navigation implements RequiresResize, ShowTab {
           protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                      Panel currentExercisePanel,
                                                                                      String instanceName, boolean incorrectFirst) {
-            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, false);
+            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, ActivityType.LEARN);
           }
         };
       }
@@ -275,16 +273,6 @@ public class Navigation implements RequiresResize, ShowTab {
     if (userManager.hasPermission(User.Permission.DEVELOP_CONTENT) || userManager.getCurrent().isAdmin()) {
       addProjectMaintenance();
     }
-
-//    User.Kind userKind = userManager.getCurrent().getUserKind();
-/*    if (userManager.hasPermission(User.Permission.TEACHER_PERM) ||
-        userManager.hasPermission(User.Permission.EDIT_STUDENT) ||
-        userManager.hasPermission(User.Permission.EDIT_USER) ||
-        userManager.hasPermission(User.Permission.INVITE) ||
-
-        userManager.getCurrent().isAdmin()) {
-      addUserMaintenance();
-    }*/
 
     boolean hasTeacher = userManager.hasPermission(User.Permission.TEACHER_PERM);
     boolean onlyOnePerm = userManager.getPermissions().size() == 1;
@@ -420,7 +408,6 @@ public class Navigation implements RequiresResize, ShowTab {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTabAndLogEvent(MARK_DEFECTS, recorderTab);
-
         markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
       }
     });
@@ -720,10 +707,6 @@ public class Navigation implements RequiresResize, ShowTab {
         ProjectOps ops = new ProjectOps(controller, lifecycleSupport);
         ops.show(projects);
         projects.setResizeable(ops);
-//        UserOps userOps = new UserOps(controller, userManager);
-//        userOps.showUsers(users);
-//        users.setResizeable(userOps);
-//
       } else if (clickedTab.equals(RECORD_AUDIO)) {
         recorderHelper.showNPF(recorderTab, AudioType.RECORDER.toString());
       } else if (clickedTab.equals(RECORD_EXAMPLE)) {
@@ -731,13 +714,6 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (clickedTab.equals(MARK_DEFECTS) && markDefectsTab != null) {
         markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
       } else if (clickedTab.equals(PRACTICE) && practiceTab != null) {
-//      } else if (value.equals(RECORD_AUDIO)) {
-//        recorderHelper.showNPF(recorderTab, "record_audio");
-//      } else if (value.equals(RECORD_EXAMPLE)) {
-//        recordExampleHelper.showNPF(recordExampleTab, "record_example_audio");
-//      } else if (value.equals(MARK_DEFECTS) && markDefectsTab != null) {
-//        markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
-//      } else if (value.equals(PRACTICE) && practiceTab != null) {
         showPracticeTab();
       } else if (clickedTab.equals(ANALYSIS) && analysis != null) {
         showAnalysis();

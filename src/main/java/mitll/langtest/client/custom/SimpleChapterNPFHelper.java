@@ -76,6 +76,8 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   private ExerciseList npfExerciseList;
   private final ReloadableContainer predefinedContentList;
 
+ // private final ActivityType activityType;
+
   /**
    * @param service
    * @param feedback
@@ -97,6 +99,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     this.predefinedContentList = predefinedContentList;
 
     final SimpleChapterNPFHelper<T, U> outer = this;
+  //  this.activityType = activityType;
     this.flexListLayout = getMyListLayout(userManager, outer);
   }
 
@@ -112,6 +115,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    *
    * @param tabAndContent in this tab
    * @param instanceName  flex, review, etc.
+   * @paramx activityType
    * @see Navigation#addPracticeTab()
    * @see Navigation#addTabs
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
@@ -129,7 +133,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   /**
    * @param listContent
    * @param instanceName
-   * @see #showNPF(TabAndContent, String)
+   * @see #showNPF
    */
   protected void addNPFToContent(Panel listContent, String instanceName) {
     listContent.add(doNPF(instanceName));

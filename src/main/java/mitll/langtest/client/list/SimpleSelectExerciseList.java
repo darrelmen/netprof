@@ -45,6 +45,7 @@ import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
@@ -68,6 +69,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    * @param controller
    * @param instance
    * @param incorrectFirst
+   * @param activityType
    */
   public SimpleSelectExerciseList(Panel secondRow,
                                   Panel currentExerciseVPanel,
@@ -75,8 +77,9 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
                                   UserFeedback feedback,
                                   ExerciseController controller,
                                   String instance,
-                                  boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, false);
+                                  boolean incorrectFirst,
+                                  ActivityType activityType) {
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, false, activityType);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
