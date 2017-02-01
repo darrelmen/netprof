@@ -39,7 +39,6 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -50,6 +49,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.*;
@@ -87,6 +87,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
   boolean showFirstNotCompleted = false;
+  private ActivityType activityType;
 
   /**
    * @param currentExerciseVPanel
@@ -98,6 +99,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param instance
    * @param incorrectFirst
    * @param showFirstNotCompleted
+   * @param activityType
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList
    */
@@ -109,11 +111,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
                      boolean showTypeAhead,
                      String instance,
                      boolean incorrectFirst,
-                     boolean showFirstNotCompleted) {
+                     boolean showFirstNotCompleted, ActivityType activityType) {
     super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
     this.showFirstNotCompleted = showFirstNotCompleted;
+    this.activityType = activityType;
 
     addComponents();
     getElement().setId("PagingExerciseList_" + instance);
@@ -169,11 +172,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   ExerciseListRequest getRequest(String prefix) {
+
     return new ExerciseListRequest(incrRequest(),
         controller.getUserState().getUser())
         .setPrefix(prefix)
         .setUserListID(userListID)
-        .setRole(getRole())
+        .setActivityType(getActivityType())
         .setOnlyUnrecordedByMe(false)
         .setOnlyExamples(isOnlyExamples())
         .setIncorrectFirstOrder(incorrectFirstOrder)
@@ -187,7 +191,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    controller.getUserState().getUser())
    .setPrefix(prefix)
    .setUserListID(userListID)
-   .setRole(getRole())
+   .setActivityType(getRole())
    .setOnlyUnrecordedByMe(getUnrecorded())
    .setOnlyExamples(isOnlyExamples())
    .setIncorrectFirstOrder(incorrectFirstOrder)
@@ -208,17 +212,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
   abstract protected ClickablePagingContainer<T> makePagingContainer();
-/*  {
-    final PagingExerciseList<T, U> outer = this;
-    pagingContainer =
-        new ClickablePagingContainer<T>(controller) {
-          @Override
-          protected void gotClickOnItem(T e) {
-            outer.gotClickOnItem(e);
-          }
-        };
-    return pagingContainer;
-  }*/
 
   /**
    * Skip to first not completed or just go to the first item.
@@ -616,5 +609,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   protected void setOnlyExamples(boolean onlyExamples) {
     this.onlyExamples = onlyExamples;
+  }
+
+  @Override
+  public ActivityType getActivityType() {
+    return activityType;
   }
 }

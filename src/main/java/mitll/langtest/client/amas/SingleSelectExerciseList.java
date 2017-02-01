@@ -53,6 +53,7 @@ import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
@@ -90,15 +91,17 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @param instance
    * @param incorrectFirst
    * @param showFirstNotCompleted
-   * @see ResponseExerciseList#ResponseExerciseList(Panel, Panel, LangTestDatabaseAsync, UserFeedback, ExerciseController, String)
+   * @see ResponseExerciseList#ResponseExerciseList
    */
   SingleSelectExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
                            ExerciseServiceAsync service,
                            UserFeedback feedback,
                            ExerciseController controller,
-                           String instance, boolean incorrectFirst, boolean showFirstNotCompleted) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted);
+                           String instance,
+                           boolean incorrectFirst,
+                           boolean showFirstNotCompleted) {
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted, ActivityType.AUTOCRT);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);

@@ -30,34 +30,51 @@
  *
  */
 
-package mitll.langtest.shared.user;
+package mitll.langtest.shared.answer;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.sql.Timestamp;
+public enum ActivityType implements IsSerializable {
+  UNSET("unset"),
 
-/**
- * Not sure if this is being used... yet?
- */
-@Deprecated
-public class UserPermission implements IsSerializable {
+  PRACTICE("practice"),  // or avp or flashcard
+  LEARN("learn"), // learn tab
+  TEXT("text"), // auto crt?
+  DIALOG("dialog"), // auto crt?
+  EDIT("edit"), // auto crt?
+  AUTOCRT("autocrt"), // auto crt?
 
-  int foruser, byuser, changedby;
-  User.Permission permission;
-  User.PermissionStatus status;
-  Timestamp modified, changebytime;
+  REVIEW("review"),      // TODO: gah - try to remove this
+  QUALITY_CONTROL("qualityControl"),      // TODO: gah - try to remove this
+  RECORDER("recorder"),  // TODO : somehow user role gets expressed with this
+  MARK_DEFECTS("markDefects");  // TODO : somehow user role gets expressed with this
 
-  public UserPermission() {}
+  private final String text;
+  private final String type;
+  private final String speed;
 
-  public UserPermission(int foruser, int byuser, int changedby,
-                        User.Permission permission,
-                        User.PermissionStatus status,
-                        Timestamp modified, Timestamp changebytime) {
-    this.foruser =foruser;
-    this.byuser = byuser;
-    this.changedby = changedby;
-    this.permission = permission;
-    this.status = status;
+  ActivityType(final String text) {
+    this.text = text;
+    type = "";
+    speed = "";
   }
 
+  ActivityType(final String text, String type, String speed) {
+    this.text = text;
+    this.type = type;
+    this.speed = speed;
+  }
+
+  @Override
+  public String toString() {
+    return text;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String getSpeed() {
+    return speed;
+  }
 }

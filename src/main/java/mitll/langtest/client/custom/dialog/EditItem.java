@@ -54,6 +54,7 @@ import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -75,7 +76,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
-  final Logger logger = Logger.getLogger("EditItem");
+  private final Logger logger = Logger.getLogger("EditItem");
 
   public static final String NEW_ITEM = "*New Item*";
   public static final int NEW_EXERCISE_ID = -100;
@@ -181,7 +182,7 @@ public class EditItem {
 
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
         new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
-            true, instanceName, false,false) {
+            true, instanceName, false,false, ActivityType.EDIT) {
           @Override
           protected void onLastItem() {
             new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {

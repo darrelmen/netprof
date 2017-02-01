@@ -44,6 +44,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -63,7 +64,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
 
-  public PracticeHelper(
+  PracticeHelper(
       LangTestDatabaseAsync service,
       UserFeedback feedback,
       UserManager userManager,
@@ -98,7 +99,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName,
                                                                                  boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, true, false) {
+        return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, true, ActivityType.PRACTICE) {
           @Override
           protected CommonShell findFirstExercise() {
             int currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
@@ -131,9 +132,8 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
                                                   boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
 //            logger.info("got loadExercisesUsingPrefix " +prefix);
             //  controller.logException(new Exception("where did this come from?"));
-            prefix = ""; // practice helper doesn't use a search box
-
-            super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
+            //prefix = ""; // practice helper doesn't use a search box
+            super.loadExercisesUsingPrefix(typeToSection, "", exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             statsFlashcardFactory.setSelection(typeToSection);
           }
         };

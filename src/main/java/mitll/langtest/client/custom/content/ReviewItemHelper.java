@@ -48,6 +48,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -163,7 +164,7 @@ public class ReviewItemHelper extends NPFHelper {
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                String instanceName, boolean incorrectFirst) {
       FlexListLayout outer = this;
-      return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst, true) {
+      return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst, ActivityType.REVIEW) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         /**

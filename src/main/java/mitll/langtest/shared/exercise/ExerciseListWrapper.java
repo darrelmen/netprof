@@ -44,7 +44,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   private CommonExercise firstExercise;
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    * @param reqID
    * @param ids
    * @param firstExercise

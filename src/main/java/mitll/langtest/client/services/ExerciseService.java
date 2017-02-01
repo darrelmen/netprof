@@ -40,15 +40,14 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
 
 @RemoteServiceRelativePath("exercise-manager")
-public interface ExerciseService extends RemoteService {
-
+public interface ExerciseService<T extends CommonShell> extends RemoteService {
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String, boolean)
    * @param request
-   * @param <T>
+   * @paramx <T>
    * @return
    */
-  <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request);
+  /*<T extends CommonShell>*/ ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request);
 
   /**
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)

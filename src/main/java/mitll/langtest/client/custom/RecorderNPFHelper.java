@@ -57,6 +57,7 @@ import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -98,7 +99,8 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
                            UserManager userManager,
                            ExerciseController controller,
                            boolean doNormalRecording,
-                           ReloadableContainer exerciseList, ExerciseServiceAsync exerciseServiceAsync) {
+                           ReloadableContainer exerciseList,
+                    ExerciseServiceAsync exerciseServiceAsync) {
     super(service, feedback, userManager, controller, exerciseList, exerciseServiceAsync);
     this.doNormalRecording = doNormalRecording;
   }
@@ -125,7 +127,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                  String instanceName,
                                                                                  boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst, true) {
+        return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst, ActivityType.RECORDER) {
           private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
           private CheckBox filterOnly;
 
