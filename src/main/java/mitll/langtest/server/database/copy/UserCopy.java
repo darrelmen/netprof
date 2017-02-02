@@ -51,11 +51,10 @@ public class UserCopy {
    * @see CopyToPostgres#copyOneConfig
    */
   Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO, String optName) throws Exception {
-//    SlickUserDAOImpl dominoUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
 
     Map<Integer, Integer> oldToNew = new HashMap<>();
-    addDefaultUsers(oldToNew, /*(BaseUserDAO)*/ dominoUserDAO);
+    addDefaultUsers(oldToNew, dominoUserDAO);
 
     IUserProjectDAO slickUserProjectDAO = db.getUserProjectDAO();
 
@@ -189,7 +188,7 @@ public class UserCopy {
    * @param projid
    * @param slickUserProjectDAO
    * @param added
-   * @see #copyUsers(DatabaseImpl, int, IResultDAO)
+   * @see #copyUsers
    */
   private void addUserProjectBinding(int projid, IUserProjectDAO slickUserProjectDAO, List<ClientUserDetail> added) {
     logger.info("addUserProjectBinding adding user->project for " + projid);

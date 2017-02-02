@@ -32,12 +32,19 @@
 
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Fieldset;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.common.base.CharMatcher;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -45,13 +52,15 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.user.*;
+import mitll.langtest.shared.user.Affiliation;
+import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SignUpUser;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class SignUpForm extends UserDialog implements SignUp {
   private static final String I_M_SORRY = "I'm sorry";
@@ -508,26 +517,27 @@ public class SignUpForm extends UserDialog implements SignUp {
           logger.info("valid " + signUpUser.getSafeText());
           checkForm(userID);
         } else {
-          String hash = Md5Hash.getHash(email);
-          String currentEmailHash = result.getEmailHash();
+          //String hash = Md5Hash.getHash(email);
+          //String currentEmailHash = result.getEmailHash();
           logger.info("userEmailCheck" +
-              "\n\tuser       " + userID +
-              "\n\temail hash " + currentEmailHash +
-              "\n\tvs form    " + hash);
+              "\n\tuser       " + userID);//
+          // +
+          //    "\n\temail hash " + currentEmailHash +
+          //    "\n\tvs form    " + hash);
 
           // if the email hash is missing, don't compare with the given email.
-          if (currentEmailHash == null ||
-              currentEmailHash.isEmpty() ||
-              currentEmailHash.equals(hash)) {  // don't let someone come along and hijack account with different email.
+//          if (currentEmailHash == null ||
+//              currentEmailHash.isEmpty() ||
+//              currentEmailHash.equals(hash)) {  // don't let someone come along and hijack account with different email.
             if (isFormValid(userID)) {
               gotSignUp(userID, emailBox.getValue());
             } else {
               logger.info("getSignUpClickHandler form is not valid!!");
             }
-          } else { // email hash mismatch -
-            String message = signUpEmail.isEmpty() ? "Please enter your email" : isValidEmail(signUpEmail.getSafeText()) ? SORRY_NO_EMAIL_MATCH : VALID_EMAIL;
-            markErrorBlur(signUpEmail, message);
-          }
+          //} else { // email hash mismatch -
+          //  String message = signUpEmail.isEmpty() ? "Please enter your email" : isValidEmail(signUpEmail.getSafeText()) ? SORRY_NO_EMAIL_MATCH : VALID_EMAIL;
+          //  markErrorBlur(signUpEmail, message);
+         // }
         }
       }
     });

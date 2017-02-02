@@ -44,13 +44,10 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1087,7 +1084,7 @@ public class ScoreServlet extends DatabaseServlet {
   private void ensureMP3Later(final String path, final int user, final String foreignLanguage, String english, String language) {
     new Thread(() -> {
       //long then = System.currentTimeMillis();
-      ensureMP3(path, new TrackInfo(foreignLanguage, getUserID(user), english, language));
+      writeCompressedVersions(path, new TrackInfo(foreignLanguage, getUserID(user), english, language));
       // long now = System.currentTimeMillis();
       //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
     }).start();

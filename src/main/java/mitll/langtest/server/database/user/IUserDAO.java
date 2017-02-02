@@ -108,7 +108,7 @@ public interface IUserDAO extends IDAO {
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
    */
-  User getStrictUserWithPass(String id, String passwordHash);
+ // User getStrictUserWithPass(String id, String passwordHash);
 
   /**
    * @param id

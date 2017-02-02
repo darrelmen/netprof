@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -118,7 +119,7 @@ public class UserDAOToExcel {
   );
 
   /**
-   * @see UserDAO#toJSON(List)
+   * @see UserManagement#usersToJSON
    * @param users
    * @return
    */
@@ -154,8 +155,8 @@ public class UserDAOToExcel {
       String passwordHash = user.getPasswordHash();
       jsonObject.put(COLUMNSJSON.get(j++), passwordHash == null || passwordHash.isEmpty() ? "NO_PASSWORD" : "HAS_PASSWORD");
 
-      String emailHash = user.getEmailHash();
-      jsonObject.put(COLUMNSJSON.get(j++), emailHash == null || emailHash.isEmpty() ? "NO_EMAIL" : "HAS_EMAIL");
+      String email = user.getEmail();
+      jsonObject.put(COLUMNSJSON.get(j++), email == null || email.isEmpty() ? "NO_EMAIL" : email);
       jsonObject.put(COLUMNSJSON.get(j++), user.getDevice());
 
       json.add(jsonObject);
@@ -217,8 +218,8 @@ public class UserDAOToExcel {
       row.createCell(j++).setCellValue(userKind.toString());
       String passwordHash = user.getPasswordHash();
       row.createCell(j++).setCellValue(passwordHash == null || passwordHash.isEmpty() ? "NO_PASSWORD" : "HAS_PASSWORD");
-      String emailHash = user.getEmailHash();
-      row.createCell(j++).setCellValue(emailHash == null || emailHash.isEmpty() ? "NO_EMAIL" : "HAS_EMAIL");
+      String email = user.getEmail();
+      row.createCell(j++).setCellValue(email == null || email.isEmpty() ? "NO_EMAIL" : email);
       row.createCell(j++).setCellValue(user.getDevice());
     }
     long now = System.currentTimeMillis();
