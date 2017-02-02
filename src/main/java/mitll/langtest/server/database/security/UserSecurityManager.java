@@ -349,7 +349,7 @@ public class UserSecurityManager implements IUserSecurityManager {
         /*userService.*/
         setSessionUser(session, sessUser);
       } else {
-        log.debug("no user for session - " + session + " logged out?");
+        log.debug("lookupUser no user for session - " + session + " logged out?");
       }
       // if (cookie != -1) addCookie(response,"r",""+cookie);
     } else {
