@@ -37,10 +37,12 @@ import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +63,7 @@ public class WordTable {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
     builder.append("<table>");
-   // builder.append("<table cellspacing='5'>");
+    // builder.append("<table cellspacing='5'>");
 
     builder.append("<thead>");
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
@@ -69,12 +71,12 @@ public class WordTable {
       builder.append("<th style='text-align:center; background-color:" + SimpleColumnChart.getColor(word.getScore()) +
           "'>");
       builder.append(
-       //   "&nbsp;"+
+          //   "&nbsp;"+
           word.getEvent()
-         //     +"&nbsp;"
+          //     +"&nbsp;"
       );
       builder.append("</th>");
- //     builder.append("<th>&nbsp;</th>");
+      //     builder.append("<th>&nbsp;</th>");
     }
 
     builder.append("</thead>");
@@ -103,7 +105,7 @@ public class WordTable {
       builder.append("</thead>");
       builder.append("</table>");
       builder.append("</td>");
-  //    builder.append("<td>&nbsp;</td>");
+      //    builder.append("<td>&nbsp;</td>");
 
     }
 
@@ -154,19 +156,20 @@ public class WordTable {
       TranscriptSegment word = pair.getKey();
 
       TableHeader header = new TableHeader(word.getEvent());
-      header.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
-      String color = SimpleColumnChart.getColor(word.getScore());
-      header.getElement().getStyle().setBackgroundColor(color);
-
+      alignCenter(header);
+      setColor(word, header);
       table.add(header);
 
       HTMLPanel col;
       srow.add(col = new HTMLPanel("td", ""));
-      HTML wscore = new HTML("" + getPercent(word.getScore()));
-      wscore.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
-      if (showScore) col.add(wscore);
+      HTML wscore = showScore ? getScore(word) : new HTML();
+      alignCenter(wscore);
+      col.add(wscore);
 
+      if (!showScore) {
+        wscore.getElement().getStyle().setHeight(0, Style.Unit.PX);
+      }
 
       Table pTable = new Table();
       pTable.removeStyleName("table");
@@ -181,23 +184,28 @@ public class WordTable {
       pTable.add(row2);
 
       HTMLPanel scoreRow = new HTMLPanel("tr", "");
-      if (showScore) pTable.add(scoreRow);
-
+      pTable.add(scoreRow);
+      if (!showScore) {
+        scoreRow.getElement().getStyle().setHeight(0, Style.Unit.PX);
+      }
       for (TranscriptSegment phone : pair.getValue()) {
         String event = phone.getEvent();
         if (!event.equals("sil")) {
           TableHeader h = new TableHeader(event);
-          h.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+          alignCenter(h);
           pTable.add(h);
-          String color1 = SimpleColumnChart.getColor(phone.getScore());
-          h.getElement().getStyle().setBackgroundColor(color1);
+          setColor(phone, h);
 
           //  HTML score = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
-          HTML score = new HTML("" + getPercent(phone.getScore()));
-          score.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+          HTML score = showScore ? getScore(phone) : new HTML();
+          alignCenter(score);
           score.getElement().getStyle().setWidth(25, Style.Unit.PX);
 
           col = new HTMLPanel("td", "");
+
+          if (!showScore) {
+            score.getElement().getStyle().setHeight(0, Style.Unit.PX);
+          }
           col.add(score);
 
           scoreRow.add(col);
@@ -206,6 +214,20 @@ public class WordTable {
     }
 
     return table;
+  }
+
+  @NotNull
+  private HTML getScore(TranscriptSegment word) {
+    return new HTML("" + getPercent(word.getScore()));
+  }
+
+  private void setColor(TranscriptSegment phone, TableHeader h) {
+    String color1 = SimpleColumnChart.getColor(phone.getScore());
+    h.getElement().getStyle().setBackgroundColor(color1);
+  }
+
+  private void alignCenter(UIObject header) {
+    header.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
   }
 
   private int getPercent(Float aFloat) {
@@ -237,8 +259,7 @@ public class WordTable {
           }
         }
       }
-    }
-    else {
+    } else {
       logger.warning("getWordToPhones no words in " + netPronImageTypeToEndTime);
     }
     return wordToPhones;

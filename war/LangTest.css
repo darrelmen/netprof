@@ -1069,7 +1069,10 @@ body>.dropdown-popup .nav-list>li.active>a  {
 }
 
 .loginPage {
-    margin: -154px -228px 0 -418px;
+    /*
+    margin: -154px -2288px 0 -418px;
+    */
+    margin: -189px -228px 0 -418px;
     top: 290px;
     width: 838px;
     left: 50%;
