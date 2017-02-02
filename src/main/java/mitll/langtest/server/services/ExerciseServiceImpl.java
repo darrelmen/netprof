@@ -92,10 +92,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
-  public /*<T extends CommonShell>*/ ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
+  public ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
     int projectID = getProjectID();
     if (projectID == -1) {
       logger.warn("getExerciseIds project id is -1?  It should probably have a real value.");
+      List<T> ts = new ArrayList<T>();
+      return new ExerciseListWrapper<T>(request.getReqID(), ts, null);
     }
     if (serverProps.isAMAS()) {
       ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
@@ -519,16 +521,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   private <T extends CommonExercise> Collection<T> getExercisesForSearch(String prefix,
-                                                                      Collection<T> exercises,
-                                                                      boolean predefExercises) {
+                                                                         Collection<T> exercises,
+                                                                         boolean predefExercises) {
     ExerciseTrie<T> fullTrie = getProject().getFullTrie();
     return getExercisesForSearchWithTrie(prefix, exercises, predefExercises, fullTrie);
   }
 
   private <T extends CommonExercise> Collection<T> getExercisesForSearchWithTrie(String prefix,
-                                                                              Collection<T> exercises,
-                                                                              boolean predefExercises,
-                                                                              ExerciseTrie<T> fullTrie) {
+                                                                                 Collection<T> exercises,
+                                                                                 boolean predefExercises,
+                                                                                 ExerciseTrie<T> fullTrie) {
     ExerciseTrie<T> trie = predefExercises ? fullTrie : new ExerciseTrie<T>(exercises, getLanguage(), getSmallVocabDecoder());
     exercises = trie.getExercises(prefix, getSmallVocabDecoder());
 
@@ -967,6 +969,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * TODO : put back trie
+   *
    * @return
    */
   private List<AmasExerciseImpl> getAMASExercises() {
