@@ -70,4 +70,6 @@ public interface UILifecycle {
   void logout();
 
   void clearContent();
+
+  void chooseProjectAgain();
 }

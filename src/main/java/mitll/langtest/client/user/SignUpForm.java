@@ -50,6 +50,8 @@ import mitll.langtest.shared.user.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SignUpForm extends UserDialog implements SignUp {
   private static final String I_M_SORRY = "I'm sorry";
@@ -544,9 +546,8 @@ public class SignUpForm extends UserDialog implements SignUp {
 
     userID = userID.trim();
 
-    String s = CharMatcher.WHITESPACE.trimFrom(userID);
-
-    if (s.length() != userID.length()) {
+    String[] split = userID.split("\\s");
+    if (split.length > 1) {//s.length() != userID.length()) {
       eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "no spaces in userid '" + userID + "'");
       markErrorBlur(signUpUser, "Please no spaces in user id.");
       return false;

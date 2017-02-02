@@ -46,7 +46,7 @@ public class WordScoresTable {
    */
   private Widget getWordTable(PretestScore score) {
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime = score.getsTypeToEndTimes();
-    return new WordTable().getWordTable(netPronImageTypeToEndTime, true);
+    return new WordTable().getWordTable(netPronImageTypeToEndTime, false);
   }
 
   /**

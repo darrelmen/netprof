@@ -88,7 +88,7 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getForgotPassword
    */
   private static final String ENTER_A_USER_NAME = "Enter a user name.";
-//  private static final String CHECK_EMAIL = "Check Email";
+  //  private static final String CHECK_EMAIL = "Check Email";
 //  private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
 //  private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
@@ -103,7 +103,7 @@ public class SignInForm extends UserDialog implements SignIn {
   private Button signIn;
 
   //private DecoratedPopupPanel resetEmailPopup;
- // private Button sendEmail;
+  // private Button sendEmail;
   private final EventRegistration eventRegistration;
   private final UserPassDialog userPassLogin;
   private final SignUp signUpForm;
@@ -242,7 +242,6 @@ public class SignInForm extends UserDialog implements SignIn {
 //      logger.info("makeSignInUserName : for " + userField.getText() + " - no user with that id");
     // }
   }*/
-
   private FormField addPasswordField(Fieldset fieldset, Panel hp) {
     FormField password;
     password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
@@ -286,19 +285,21 @@ public class SignInForm extends UserDialog implements SignIn {
 
   public void tryLogin() {
     String userID = userField.box.getValue();
-    if (userID.length() < MIN_LENGTH_USER_ID) {
+
+    String[] split = userID.split("\\s");
+    if (split.length > 1) {//s.length() != userID.length()) {
+      eventRegistration.logEvent(signIn, "TextBox", "N/A", "no spaces in userid '" + userID + "'");
+      markErrorBlur(userField, "Please no spaces in user id.");
+    } else if (userID.length() < MIN_LENGTH_USER_ID) {
       markErrorBlur(userField, PLEASE_ENTER_A_LONGER_USER_ID);
     } else {
       String value = password.box.getValue();
       if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
         markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
       } else if (value.isEmpty()) {
-
-
         final String text = userField.getSafeText();
 
         if (!text.isEmpty()) {
-
           service.getUserByID(text, new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -315,18 +316,11 @@ public class SignInForm extends UserDialog implements SignIn {
             }
           });
         }
-//            eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
-        //          markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
-        //        signIn.setEnabled(true);
       } else {
         gotLogin(userID, value);
       }
     }
   }
-//
-//  public void doLogin() {
-//    gotLogin(userField.getSafeText(),password.getSafeText());
-//  }
 
   /**
    * @param user
@@ -334,7 +328,7 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getSignInButton
    */
   private void gotLogin(final String user, final String freeTextPassword) {
-    final String hashedPass = Md5Hash.getHash(freeTextPassword);
+    //  final String hashedPass = Md5Hash.getHash(freeTextPassword);
     logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
         //    " or '" + hashedPass + "'"
     );
@@ -382,30 +376,20 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   private void gotGoodOrBadPassword(LoginResult result) {
-    if (result == null ||
-        result.getResultType() != LoginResult.ResultType.Success
-        ) {
+    if (result == null || result.getResultType() != LoginResult.ResultType.Success) {
       gotBadPassword(/*result.getLoggedInUser(), freeTextPassword*/);
     } else {
       gotGoodPassword(result.getLoggedInUser()
-          //    , freeTextPassword
       );
     }
   }
 
-  private void gotGoodPassword(User foundUser
-  ) {
+  private void gotGoodPassword(User foundUser) {
     String user = foundUser.getUserID();
-    if (foundUser.isEnabled() //||
-      //   foundUser.getUserKind() != User.Kind.CONTENT_DEVELOPER ||
-      //    props.enableAllUsers()
-        ) {
-      //foundUser.setPassword()
+    if (foundUser.isEnabled()) {
       eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
       //    logger.info("Got valid userField " + userField + " and matching password, so we're letting them in.");
-      storeUser(foundUser, userManager
-          //    , passwordHash
-      );
+      storeUser(foundUser, userManager);
     } else {
       eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
       markErrorBlur(signIn, "I'm sorry", DEACTIVATED, Placement.LEFT);
@@ -498,83 +482,20 @@ public class SignInForm extends UserDialog implements SignIn {
             public void onSuccess(User result) {
               if (result == null) {
                 markErrorBlur(userField, NO_USER_FOUND);
-              }
-              else {
-              //  if (result.isValid()) {
-                  sendEmail.showSendEmail(forgotPassword, safeText, result.isValid());
+              } else {
+                //  if (result.isValid()) {
+                sendEmail.showSendEmail(forgotPassword, safeText, result.isValid());
                 //} else {
-                  //copyInfoToSignUp(safeText, result);
-               // }
+                //copyInfoToSignUp(safeText, result);
+                // }
               }
             }
           });
-
-          //final TextBox emailEntry = new TextBox();
-         // SendEmail sendEmail = new SendEmail(eventRegistration, userField);
-/*
-          Heading emailEntry = new Heading(5, "Click the button to reset.");
-          resetEmailPopup = new DecoratedPopupPanel(true);
-
-          sendEmail = new Button(SEND);
-          sendEmail.setType(ButtonType.PRIMARY);
-          sendEmail.addStyleName("leftTenMargin");
-          sendEmail.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-              onSendReset(
-                  //    emailEntry
-              );
-            }
-          });
-          eventRegistration.register(sendEmail, "N/A", "reset password");
-          makePopup(resetEmailPopup, emailEntry, sendEmail, "");//ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
-          resetEmailPopup.showRelativeTo(forgotPassword);
-*/
         }
-//        setFocusOn(emailEntry);
-        //  setFocusOn(sendEmail);
       }
     });
     return forgotPassword;
   }
-
-  /**
-   * So - two cases - old legacy users have no email, new ones do.
-   * Potentially we could skip asking users for their email...?
-   *
-   * @paramx emailEntry - need this since old accounts don't have email with them
-   */
-/*
-  private void onSendReset() {
-    sendEmail.setEnabled(false);
-    service.resetPassword(userField.box.getText(),
-        new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            sendEmail.setEnabled(true);
-          }
-
-          @Override
-          public void onSuccess(Boolean result) {
-            String heading = result ? CHECK_EMAIL : "Unknown email";
-            String message = result ? PLEASE_CHECK_YOUR_EMAIL : userField.box.getText() + " doesn't have that email. Check for a typo?";
-            setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover() {
-              boolean isFirst = true;
-
-              @Override
-              public void hide() {
-                super.hide();
-                if (isFirst) {
-                  isFirst = false;
-                } else {
-                  resetEmailPopup.hide(); // TODO : ugly - somehow hide is called twice
-                }
-              }
-            }, false);
-          }
-        });
-  }
-*/
 
   /**
    * @return
@@ -582,10 +503,6 @@ public class SignInForm extends UserDialog implements SignIn {
    */
   @Override
   public boolean clickSendEmail() {
-   return sendEmail.clickSendEmail();
-/*    if (resetEmailPopup != null && resetEmailPopup.isShowing()) {
-      sendEmail.fireEvent(new KeyPressHelper.ButtonClickEvent());
-      return true;
-    } else return false;*/
+    return sendEmail.clickSendEmail();
   }
 }
