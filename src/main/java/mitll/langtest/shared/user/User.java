@@ -34,8 +34,6 @@ package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.user.SignUpForm;
-import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -56,8 +54,10 @@ public class User extends MiniUser {
    */
   private String passwordHash;
 
+/*
   private String emailHash;
-  private String email;
+*/
+  private String email = "";
   private boolean enabled;
   private boolean admin;
   private int numResults;
@@ -115,10 +115,6 @@ public class User extends MiniUser {
       return show;
     }
   }
-
-/*  public static Collection<User.Kind> getVisibleRoles() {
-    return Arrays.asList(STUDENT, Kind.TEACHER, Kind.AUDIO_RECORDER, Kind.CONTENT_DEVELOPER, Kind.PROJECT_ADMIN, Kind.TEST);
-  }*/
 
   /**
    * For right now,  you can only choose to be a student initially.
@@ -191,7 +187,7 @@ public class User extends MiniUser {
   /**
    * These are the set of possible permissions you can have when you are one of these users.
    *
-   * @param role
+   * @paramx role
    * @return
    */
 /*
@@ -269,7 +265,7 @@ public class User extends MiniUser {
     this(id, age, gender, experience, ipaddr, password, NOT_SET, NOT_SET, NOT_SET, enabled, false, permissions,
         STUDENT,
         "",
-        "", "", "", //"",
+        "", "", //"",
         System.currentTimeMillis(), "OTHER");
   }
 
@@ -288,7 +284,6 @@ public class User extends MiniUser {
         copy.getPermissions(),
         copy.getUserKind(),
         copy.getEmail(),
-        copy.getEmailHash(),
         copy.getDevice(),
         copy.getResetKey(),
         copy.getTimestampMillis(),
@@ -308,7 +303,6 @@ public class User extends MiniUser {
    * @param permissions
    * @param userKind
    * @param email
-   * @param emailHash
    * @param device
    * @param resetPassKey
    * @param timestamp
@@ -328,7 +322,7 @@ public class User extends MiniUser {
               String userID, boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind,
 
-              String email, String emailHash,
+              String email,
 
               String device,
               String resetPassKey,
@@ -341,7 +335,7 @@ public class User extends MiniUser {
     if (passwordH == null) passwordH = "";
     this.passwordHash = passwordH;
     this.email = email;
-    this.emailHash = emailHash;
+  //  this.emailHash = emailHash;
     this.userKind = userKind;
     this.setEnabled(enabled);
     this.admin = isAdmin;
@@ -465,17 +459,20 @@ public class User extends MiniUser {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.copy.UserCopy#addUser(DominoUserDAOImpl, Map, User)
-   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers(DatabaseImpl, int, IResultDAO)
-   * @deprecated
+   * @see mitll.langtest.server.database.copy.UserCopy#addUser
+   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
    */
   public String getPasswordHash() {
     return passwordHash;
   }
 
-  public String getEmailHash() {
+  /**
+   *
+   * @return
+   */
+/*  public String getEmailHash() {
     return emailHash;
-  }
+  }*/
 
   public Kind getUserKind() {
     return userKind;
@@ -604,7 +601,7 @@ public class User extends MiniUser {
         (isAdmin() ? "\n\tadmin   " + isAdmin() : "") +
         (!isEnabled() ? "\n\tenabled   " + isEnabled() : "") +
 //        "\n\tdialect " + getDialect() +
-        "\n\temailH " + getEmailHash() +
+//        "\n\temailH " + getEmailHash() +
         "\n\temail " + getEmail() +
         "\n\tpassH  " + getPasswordHash() +
         (getUserKind() == STUDENT ? "" : "\n\tkind   " + getUserKind()) +

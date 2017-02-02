@@ -94,8 +94,7 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * @seex CopyToPostgres#createProjectIfNotExists
-   * @see DatabaseImpl#populateProjects()
+   * @see DatabaseImpl#populateProjects
    */
   @Override
   public void populateProjects() {
@@ -159,45 +158,56 @@ public class ProjectManagement implements IProjectManagement {
    * Latchy - would be better to do this when the project is remembered...
    * // TODO : this seems like a bad idea --
    *
-   * @seex DatabaseImpl#configureProjects
+   * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
    */
-  // @Override
   private void configureProjects() {
     Collection<Project> projects = getProjects();
     logger.info("configureProjects got " + projects.size() + " projects");
     for (Project project : projects) {
-      configureProject(project);
+      configureProject(project, false);
     }
+  }
+
+  public void configureProjectByID(int projid) {
+    configureProject(getProject(projid), false);
   }
 
   /**
    * only configured if we have a slick project for it... how could we not???
    *
    * @param project
+   * @param configureEvenRetired
    * @see #configureProjects
    */
-  public void configureProject(Project project) {
-    if (project.isConfigured()) {
-//      logger.debug("project already configured " + project.getProject().id());
+  public void configureProject(Project project, boolean configureEvenRetired) {
+    boolean skipRetired = project.isRetired() && !configureEvenRetired;
+    boolean isConfigured = project.getExerciseDAO().isConfigured();
+    if (skipRetired || isConfigured) {
+      if (isConfigured) {
+        logger.debug("configureProject project already configured " + project.getProject().id());
+      } else  {
+        logger.info("skipping fully loading project " + project + " since it's retired");
+      }
       return;
     }
 
-    // logger.info("configureProject " + project);
+    logger.info("configureProject " + project);
     SlickProject slickProject = project.getProject();
-    project.setConfigured(slickProject != null);
+    //  project.setConfigured(slickProject != null);
 
     if (slickProject == null) {
       logger.info("configureProject : note : no project for " + project);
-    } else {
+    }
+/*    else {
       try {
-        if (ProjectStatus.valueOf(slickProject.status()) == ProjectStatus.RETIRED) {
+        if (project.isRetired() && !configureEvenRetired) {
           logger.info("skipping fully loading project " + project + " since it's retired");
           return;
         }
       } catch (IllegalArgumentException e) {
         logger.error("couldn't parse status " + slickProject.status() + " expecting one of " + ProjectStatus.values());
       }
-    }
+    }*/
 
     // TODO : why would we want to keep going on a project that has no slick project -- if it's new???
 
@@ -321,7 +331,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param projid
    * @see #configureProject
    */
-  public void setDependencies(ExerciseDAO exerciseDAO, int projid) {
+  private void setDependencies(ExerciseDAO exerciseDAO, int projid) {
     logger.info("setDependencies - " + projid);
     IAudioDAO audioDAO = db.getAudioDAO();
 
@@ -459,7 +469,7 @@ public class ProjectManagement implements IProjectManagement {
 
     if (!project.isConfigured()) {
       logger.info("\tgetExercises configure " + projectid);
-      configureProject(project);
+      configureProject(project, false);
     }
 
     List<CommonExercise> rawExercises = project.getRawExercises();
@@ -555,6 +565,8 @@ public class ProjectManagement implements IProjectManagement {
       if (project.getStatus() == ProjectStatus.RETIRED && !userWhere.isAdmin()) {
         logger.info("project is retired - so kicking the user back to project choice screen.");
       } else {
+        configureProject(project, true);
+
         SlickProject project1 = project.getProject();
         List<String> typeOrder = getTypeOrder(project);
 
@@ -582,7 +594,7 @@ public class ProjectManagement implements IProjectManagement {
 
     boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
     boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
-    if (!sound) logger.warn("setStartupInfo : sound missing???");
+    if (!sound) logger.warn("getTypeOrder : sound hierarchy missing for " + project);
     else {
       typeOrder.add(SlickUserExerciseDAO.SOUND);
     }

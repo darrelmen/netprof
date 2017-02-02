@@ -49,6 +49,7 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -182,6 +183,8 @@ public class UserManagement {
     try {
       UserToCount idToCount = resultDAO.getUserToNumAnswers();
       users = userDAO.getUsers();
+      Collections.sort(users);
+
       //int total = exerciseDAO.getRawExercises().size();
       for (User u : users) {
         Integer numResults = idToCount.getIdToCount().get(u.getID());

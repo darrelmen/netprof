@@ -254,7 +254,7 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
   }
 
   /**
-   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @see DatabaseImpl#makeDAO
    * @return
    */
   @Override
@@ -287,5 +287,10 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
   @Override
   public Set<Integer> getIDs() {
     return null;
+  }
+
+  @Override
+  public boolean isConfigured() {
+    return false;
   }
 }

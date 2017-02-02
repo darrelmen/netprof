@@ -71,4 +71,6 @@ public interface SimpleExerciseDAO<T extends CommonShell & HasUnitChapter> {
   List<String> getTypeOrder();
 
   Set<Integer> getIDs();
+
+  boolean isConfigured();
 }

@@ -48,8 +48,6 @@ import java.io.IOException;
  */
 public class PathWriter {
   private static final Logger logger = LogManager.getLogger(PathWriter.class);
-
-  //private static final String BEST_AUDIO = "bestAudio";
   private final File bestDir;
 
   public PathWriter(ServerProperties properties) {
@@ -100,16 +98,16 @@ public class PathWriter {
       copyAndNormalize(wavFileRef, serverProperties, destination);
     } else {
       if (FileUtils.sizeOf(destination) == 0) {
-        logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
+        logger.error("\ngetPermanentAudioPath : huh? " + destination + " is empty???");
       }
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
     }
 //    ensureMP3(bestAudioPath, overwrite, title, artist, serverProperties);
 
-    String s = new AudioConversion(serverProperties).writeMP3Easy(destination, overwrite, trackInfo);
+    String s = new AudioConversion(serverProperties).writeCompressedVersions(destination, overwrite, trackInfo);
 
     String relPath = destination.getAbsolutePath().substring(serverProperties.getAudioBaseDir().length());
-    logger.info("ensureMP3 " +
+    logger.info("getPermanentAudioPath " +
         "\n\twrote to " + s +
         "\n\trel path " + relPath
     );
@@ -138,52 +136,4 @@ public class PathWriter {
     // logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
     new AudioConversion(serverProperties).normalizeLevels(destination);
   }
-
-  /**
-   * @param wavFile
-   * @param overwrite
-   * @param trackInfo
-   * @param serverProperties
-   * @see #getPermanentAudioPath
-   */
-  private void ensureMP3(String wavFile,
-                         boolean overwrite,
-                         ServerProperties serverProperties, TrackInfo trackInfo) {
-    if (wavFile != null) {
-      String parent = serverProperties.getMediaDir();
-
-      AudioConversion audioConversion = new AudioConversion(serverProperties);
-      if (!audioConversion.exists(parent, wavFile)) {
-        logger.warn("ensureMP3 can't find " + wavFile + " under " + parent);
-        //    parent = pathHelper.getConfigDir();
-        parent = serverProperties.getAnswerDir();
-      }
-      if (!audioConversion.exists(parent, wavFile)) {
-        logger.error("ensureMP3 can't find " + wavFile + " under " + parent);
-      }
-      String s = audioConversion.ensureWriteMP3(parent, wavFile, overwrite, trackInfo);
-      logger.info("ensureMP3 wrote " + wavFile + " to " + s);
-    } else {
-      logger.warn("not converting wav to mp3???\n\n\n");
-    }
-  }
-
-/*  private void ensureMP3Easy(PathHelper pathHelper,
-                         String wavFile,
-                         boolean overwrite,
-                         String title,
-                         String artist,
-                         ServerProperties serverProperties) {
-    if (wavFile != null) {
-      if (new File(wavFile).exists()) {
-        AudioConversion audioConversion = new AudioConversion(serverProperties);
-        audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title, artist);
-      }
-      else {
-        logger.error("can't find " + wavFile);
-      }
-    } else {
-      logger.warn("not converting wav to mp3???\n\n\n");
-    }
-  }*/
 }

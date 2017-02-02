@@ -536,7 +536,7 @@ public class AudioConversion {
       }
       absolutePathToWav = getAbsoluteFile(realContextPath, pathToWav);
     }
-    return writeMP3Easy(absolutePathToWav, overwrite, trackInfo);
+    return writeCompressedVersions(absolutePathToWav, overwrite, trackInfo);
   }
 
   /**
@@ -544,9 +544,9 @@ public class AudioConversion {
    * @param overwrite
    * @param trackInfo
    * @return
-   * @see PathWriter#getPermanentAudioPath(File, String, boolean, String, int, String, String, ServerProperties)
+   * @see PathWriter#getPermanentAudioPath
    */
-  String writeMP3Easy(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {
+  public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {
     String mp3File = absolutePathToWav.getAbsolutePath().replace(WAV, MP3);
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
@@ -775,7 +775,7 @@ public class AudioConversion {
    * @param oggFile
    * @param trackInfo
    * @return
-   * @see #writeMP3Easy
+   * @see #writeCompressedVersions
    */
   private boolean convertToOGGFileAndCheck(String oggPath, String pathToAudioFile, String oggFile, TrackInfo trackInfo) {
     if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + oggFile);

@@ -91,7 +91,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     logger.info("sub " + subject);*/
 
-      logger.info("loginUser : userid " + userId);// + " password '" + attemptedHashedPassword + "'");
+//      logger.info("loginUser : userid " + userId);// + " password '" + attemptedHashedPassword + "'");
       return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session);
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -357,11 +357,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public User setProject(int projectid) {
     try {
       User sessionUser = getSessionUser();
-      if (sessionUser != null) {
+      if (sessionUser != null) { // when could this be null?
         logger.info("setProject set project (" + projectid + ") for " + sessionUser);
+        db.getProjectManagement().configureProjectByID(projectid);
         db.rememberProject(sessionUser.getID(), projectid);
+        db.setStartupInfo(sessionUser, projectid);
       }
-      db.setStartupInfo(sessionUser, projectid);
       return sessionUser;
     } catch (DominoSessionException e) {
       logger.error("got " + e, e);

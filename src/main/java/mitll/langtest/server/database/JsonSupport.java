@@ -32,11 +32,10 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.phone.IPhoneDAO;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -44,9 +43,6 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -78,7 +74,7 @@ public class JsonSupport {
    * @param refResultDAO
    * @param audioDAO
    * @param phoneDAO
-   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject
+   * @see IProjectManagement#configureProject
    */
   public JsonSupport(SectionHelper<CommonExercise> sectionHelper,
                      IResultDAO resultDAO,

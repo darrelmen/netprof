@@ -303,6 +303,7 @@ public class RestUserManagement {
     if (userFound == null) {
       toReturn.put(USERID, -1);
       toReturn.put(EMAIL_H, -1);
+      toReturn.put(EMAIL, -1);
       toReturn.put(KIND, -1);
       toReturn.put(HAS_RESET, -1);
       toReturn.put(TOKEN, "");
@@ -312,7 +313,9 @@ public class RestUserManagement {
 
       int userid = userFound.getID();
       toReturn.put(USERID, userid);
-      toReturn.put(EMAIL_H, userFound.getEmailHash());
+      // TODO : do we need to do something else here?
+      toReturn.put(EMAIL_H, "");//userFound.getEmailHash());
+      toReturn.put(EMAIL, userFound.getEmail());//userFound.getEmailHash());
       toReturn.put(KIND, userFound.getUserKind().toString());
       toReturn.put(HAS_RESET, userFound.hasResetKey());
       toReturn.put(TOKEN, userFound.getResetKey());
