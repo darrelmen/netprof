@@ -56,61 +56,31 @@ public class DatabaseServlet extends HttpServlet {
   private static final int BUFFER_SIZE = 4096;
   protected DatabaseImpl db = null;
   protected ServerProperties serverProps;
-  private String configDir;
   protected PathHelper pathHelper;
-  protected IUserSecurityManager securityManager;
+  IUserSecurityManager securityManager;
 
   /**
    * @param wavFile
    * @param trackInfo
    * @see mitll.langtest.server.ScoreServlet#ensureMP3Later
    */
-  void ensureMP3(String wavFile, TrackInfo trackInfo) {
-    ensureMP3(wavFile, configDir, trackInfo);
+  void writeCompressedVersions(String wavFile, TrackInfo trackInfo) {
+    File absolutePathToWav = new File(wavFile);
+    if (!absolutePathToWav.exists()) logger.error("no file at " +absolutePathToWav);
+    String s = new AudioConversion(serverProps).writeCompressedVersions(absolutePathToWav, false, trackInfo);
   }
 
-  private boolean ensureMP3(String wavFile, String configDir, TrackInfo trackInfo) {
-    if (wavFile != null) {
-      //  String mediaDir = pathHelper.getInstallPath();
-      String mediaDir = serverProps.getMediaDir();
-      //logger.debug("ensureMP3 : wav " + wavFile + " under " + mediaDir);
-
-      AudioConversion audioConversion = new AudioConversion(serverProps);
-      if (!audioConversion.exists(mediaDir, wavFile)) {
-        logger.warn("ensureMP3 can't find " + wavFile + " under " + mediaDir + " trying config... ");
-        mediaDir = configDir;
-      }
-      if (!audioConversion.exists(mediaDir, wavFile)) {
-        logger.error("ensureMP3 huh? can't find " + wavFile + " under " + mediaDir);
-      }
-      String filePath = audioConversion.ensureWriteMP3(mediaDir, wavFile, false, trackInfo);
-      return new File(filePath).exists();
-    } else {
-      return false;
-    }
-  }
-
+  /**
+   * @see DownloadServlet#init
+   */
   void setPaths() {
     pathHelper = getPathHelper();
-    // String config = getServletContext().getInitParameter("config");
-    //this.relativeConfigDir = "config" + File.separator + config;
-    // logger.debug("setPaths rel " + relativeConfigDir  + " pathHelper " + pathHelper);
-    this.configDir = getConfigDir();
   }
 
   private PathHelper getPathHelper() {
     serverProps = getDatabase().getServerProps();
     if (serverProps == null) throw new IllegalArgumentException("huh? props is null?");
     return new PathHelper(getServletContext(), serverProps);
-  }
-
-  private String getConfigDir() {
-    return getConfigDir(pathHelper);
-  }
-
-  private String getConfigDir(PathHelper pathHelper) {
-    String config = getServletContext().getInitParameter("config");
-    return pathHelper.getInstallPath() + File.separator + "config" + File.separator + config;
   }
 
   void writeToFile(InputStream inputStream, File saveFile) throws IOException {
@@ -178,5 +148,4 @@ public class DatabaseServlet extends HttpServlet {
     }
     return db;
   }
-
 }

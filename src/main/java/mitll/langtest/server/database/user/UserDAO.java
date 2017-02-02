@@ -306,6 +306,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return getUser(id, freeTextPassword);
   }
 */
+/*
   @Override
   public User getStrictUserWithPass(String id, String passwordHash) {
     logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash + "'");
@@ -322,6 +323,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
     return getUserWhere(-1, sql);
   }
+*/
 
   /**
    * @param id
@@ -656,7 +658,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           permissions,
           userKind1,
           "",
-          emailH,
           device,
           resetKey,
           //  "",

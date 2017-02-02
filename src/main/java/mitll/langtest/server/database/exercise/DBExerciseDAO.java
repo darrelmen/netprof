@@ -112,7 +112,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
           userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
 
-      logger.info("read " + exerciseToPhoneForProject.size() + " for " + projid);
+      logger.info("readExercises read " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo for " + projid);
 
       List<CommonExercise> allNonContextExercises =
           userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject, fullProject);

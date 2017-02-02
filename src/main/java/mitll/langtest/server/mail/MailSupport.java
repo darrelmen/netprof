@@ -70,13 +70,12 @@ public class MailSupport {
   public MailSupport(boolean debugEmail, boolean testEmail) {
     this.debugEmail = debugEmail;
     //this.testEmail = testEmail;
-
-    this.testEmail = true;
+    this.testEmail = testEmail;
     //if (testEmail) logger.debug("\n\n\n--->using test email");
   }
 
   /**
-   * @see EmailHelper#enableCDUser(String, String, String, String)
+   * @see EmailHelper#enableCDUser
    * @see Report#sendEmails
    * @param serverName
    * @param to

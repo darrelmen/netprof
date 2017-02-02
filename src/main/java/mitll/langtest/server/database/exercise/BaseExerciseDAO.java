@@ -89,7 +89,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param userListManager
    * @param addDefects
    * @param language
-   * @see DBExerciseDAO#DBExerciseDAO(ServerProperties, IUserListManager, boolean, SlickUserExerciseDAO, SlickProject)
+   * @see DBExerciseDAO#DBExerciseDAO
    */
   BaseExerciseDAO(ServerProperties serverProps, IUserListManager userListManager, boolean addDefects,
                   String language,
@@ -239,6 +239,16 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 //      logger.warn("\n\n\nhuh? install path " + fileInstallPath.getAbsolutePath() + " doesn't exist???");
 //    }
 
+    if (!serverProps.isLaptop()) {
+      makeSureAudioIsThere(audioDAO, projectID);
+    }
+
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
+    logger.info("setAudioDAO exToAudio " +exToAudio.size());
+    this.attachAudio = new AttachAudio(exToAudio, language, serverProps.shouldCheckAudioTranscript(), serverProps);
+  }
+
+  private void makeSureAudioIsThere(IAudioDAO audioDAO, int projectID) {
     boolean foundFiles = audioDAO.didFindAnyAudioFiles(projectID);
     String mediaDir = serverProps.getMediaDir();
     File file = new File(mediaDir);
@@ -261,10 +271,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     } else {
       logger.warn("configuration error? - expecting a media directory " + mediaDir);
     }
-
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
-    logger.info("setAudioDAO exToAudio " +exToAudio.size());
-    this.attachAudio = new AttachAudio(exToAudio, language, serverProps.shouldCheckAudioTranscript(), serverProps);
   }
 
   /**
@@ -488,7 +494,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param addRemoveDAO
    * @param audioDAO
    * @param projid
-   * @seex DatabaseImpl#setDependencies
    * @see mitll.langtest.server.database.project.ProjectManagement#setDependencies
    */
   public void setDependencies(IUserExerciseDAO userExerciseDAO,
@@ -499,6 +504,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     this.addRemoveDAO = addRemoveDAO;
     setAudioDAO(audioDAO, projid);
   }
+
+  public boolean isConfigured() { return audioDAO != null; }
 
   private int warns = 0;
 

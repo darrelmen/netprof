@@ -453,7 +453,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param remoteAddr
    * @param sessionID
    * @return
-   * @see #getStrictUserWithPass(String, String)
+   * @seex #getStrictUserWithPass(String, String)
    * @see mitll.langtest.server.services.UserServiceImpl#loginUser
    */
   public User loginUser(String userId,
@@ -481,7 +481,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * TODO : don't use password hash - use free text instead
+   * TODOx : don't use password hash - use free text instead
    * <p>
    * TODO : (somewhere else) allow admin masquerade login - e.g. gvidaver/steve - with gvidaver's password logs you in as steve
    *
@@ -491,10 +491,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @seex mitll.langtest.server.database.copy.UserCopy#copyUsers
    * @see mitll.langtest.server.rest.RestUserManagement#gotHasUser
    */
-  @Override
-  public User getStrictUserWithPass(String id, String encodedPassword) {
-    return getUserIfMatch(getUserByID(id), id, encodedPassword);
-  }
+//  @Override
+//  public User getStrictUserWithPass(String id, String encodedPassword) {
+//    return getUserIfMatch(getUserByID(id), id, encodedPassword);
+//  }
 
   /**
    * @param user
@@ -503,14 +503,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    * @see #getStrictUserWithPass
    */
-  private User getUserIfMatch(User user, String id, String encodedPassword) {
+/*  private User getUserIfMatch(User user, String id, String encodedPassword) {
     if (user != null) {
       return getUserIfMatchPass(user, id, encodedPassword);
     } else {
       logger.info("getUserIfMatch '" + id + "' is an unknown user");
       return null;
     }
-  }
+  }*/
 
   /**
    * @param user
@@ -518,7 +518,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param encodedPassword
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
-   * @see #getUserIfMatch(User, String, String)
+   * @seex #getUserIfMatch
    */
   public User getUserIfMatchPass(User user, String id, String encodedPassword) {
     logger.info("getUserIfMatchPass '" + id + "' and dominoPassword hash '" + encodedPassword.length() + "'");
@@ -623,9 +623,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     String last = user.getLast();
     if (last == null) last = "Unknown";
     String email = user.getEmail();
-    if (email == null || email.isEmpty()) {
-      email = user.getEmailHash();
-    }
+//    if (email == null || email.isEmpty()) {
+//      email = user.getEmailHash();
+//    }
 
     Group primaryGroup = getGroup();
     Group secondary = getGroupOrMake(projectName);
@@ -703,7 +703,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         Collections.emptyList(),
         getUserKind(dominoUser, permissionSet),
         email,
-        emailHash,//dominoUser.emailhash(),
+        //dominoUser.emailhash(),
         device,//        dominoUser.device(),
         "",//dominoUser.resetpasswordkey(),
         creationTime,
@@ -987,10 +987,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    *
    * @param resetKey
    * @return
-   * @seex mitll.langtest.server.services.UserServiceImpl#changePFor
    * @see mitll.langtest.server.rest.RestUserManagement#changePFor
    * @see mitll.langtest.server.rest.RestUserManagement#getUserIDForToken(String)
-   * @see mitll.langtest.server.services.UserServiceImpl#getUserIDForToken
    */
   @Override
   @Deprecated

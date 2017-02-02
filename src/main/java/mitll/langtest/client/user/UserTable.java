@@ -277,7 +277,8 @@ public class UserTable extends PagerTable {
     table.addColumnSortHandler(getKindSorter(kind, list));
 
 
-    TextColumn<User> emailH = new TextColumn<User>() {
+/*
+   TextColumn<User> emailH = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
         return contact.getEmailHash() == null ? "NO" : "YES";
@@ -285,6 +286,7 @@ public class UserTable extends PagerTable {
     };
     table.addColumn(emailH, "Email?");
     setColWidth(table, emailH);
+    */
 
 /*
    TextColumn<User> passH = new TextColumn<User>() {
