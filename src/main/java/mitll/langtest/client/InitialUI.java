@@ -104,6 +104,10 @@ public class InitialUI implements UILifecycle {
   private final Banner banner;
 
   protected Panel headerRow;
+
+  /**
+   * TODO : move breadcrumbs up into banner
+   */
   private Breadcrumbs breadcrumbs;
   protected Panel contentRow;
   private Navigation navigation;
@@ -125,7 +129,7 @@ public class InitialUI implements UILifecycle {
     userFeedback = langTest;
     this.userMenu = new UserMenu(langTest, userManager, this);
     this.choices = new ProjectChoices(langTest, this);
-    banner = new Banner(props);
+    banner = new Banner(props,this);
   }
 
   /**
@@ -325,7 +329,6 @@ public class InitialUI implements UILifecycle {
    *
    * @see #configureUIGivenUser(long)
    * @see #gotUser(User)
-   * @see #setProjectForUser(int)
    */
   private void showNavigation() {
     if (contentRow.getElement().getChildCount() == 1) {
@@ -435,7 +438,7 @@ public class InitialUI implements UILifecycle {
   /**
    * @see #addCrumbs(Breadcrumbs)
    */
-  private void chooseProjectAgain() {
+  public void chooseProjectAgain() {
     userService.forgetProject(new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -673,6 +676,8 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
+   *
+   * TODO : move breadcrumbs up into banner
    * @see #addProjectChoices
    */
   private void addBreadcrumbs() {
@@ -706,10 +711,12 @@ public class InitialUI implements UILifecycle {
     return projectCrumb;
   }
 
+/*
   @NotNull
   private Image getFlag(String cc) {
     return new Image("langtest/cc/" + cc + ".png");
   }
+*/
 
   @Override
   public void clickOnParentCrumb(SlimProject parent) {

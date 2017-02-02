@@ -23,10 +23,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 
 /**
@@ -42,6 +39,9 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
   public static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   public static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
+
+  public static final int FIRST_STEP  = 35;
+  public static final int SECOND_STEP = 75;
 
   /**
    * TODO : limit connection here...
@@ -214,8 +214,6 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
       return afterPlayWidget;
     }
 
-    private static final int MIN_VALID_DYNAMIC_RANGE = 30;
-    private static final int MIN_GOOD_DYNAMIC_RANGE = 70;
 
     /**
      * Set the value on the progress bar to reflect the dynamic range we measure on the audio.
@@ -232,8 +230,8 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
 
       progressBar.setPercent(100 * percent);
       progressBar.setText("" + Math.round(score));//(score));
-      progressBar.setColor(score > MIN_GOOD_DYNAMIC_RANGE ?
-          ProgressBarBase.Color.SUCCESS : score > MIN_VALID_DYNAMIC_RANGE ?
+      progressBar.setColor(score > SECOND_STEP ?
+          ProgressBarBase.Color.SUCCESS : score > FIRST_STEP ?
           ProgressBarBase.Color.WARNING :
           ProgressBarBase.Color.DANGER);
 

@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.UILifecycle;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.shared.user.User;
@@ -64,13 +65,18 @@ import java.util.logging.Logger;
 public class Banner implements RequiresResize {
   private final Logger logger = Logger.getLogger("Banner");
 
-  public static final String ABOUT_NET_PRO_F = "About NetProF";
+  private static final String ABOUT_NET_PRO_F = "About NetProF";
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
+
+  /**
+   * @see #makeNPFHeaderRow
+   */
+
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
   private static final String RECORDING_DISABLED = "RECORDING DISABLED";
   private static final int MIN_SCREEN_WIDTH = 1100;
-  private static final String LOG_OUT = "Log Out";
+  // private static final String LOG_OUT = "Log Out";
   private static final double MIN_RATIO = 0.7;
   private static final int min = 720;
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
@@ -89,16 +95,18 @@ public class Banner implements RequiresResize {
   private Dropdown cogMenu;
   private final PropertyHandler props;
   private List<NavLink> adminLinks = new ArrayList<>();
+  private UILifecycle lifecycle;
 
   /**
    * @see mitll.langtest.client.InitialUI#InitialUI
    */
-  public Banner(PropertyHandler props) {
+  public Banner(PropertyHandler props, UILifecycle lifecycle) {
     this.props = props;
     HREF = "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
         //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
+    this.lifecycle = lifecycle;
   }
 
   /**
@@ -134,6 +142,12 @@ public class Banner implements RequiresResize {
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Banner.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
     flashcardImage.addStyleName("rightFiveMargin");
+    flashcardImage.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        lifecycle.chooseProjectAgain();
+      }
+    });
     iconLeftHeader.add(flashcardImage);
     iconLeftHeader.add(flashcard);
     headerRow.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -268,6 +282,7 @@ public class Banner implements RequiresResize {
 
   /**
    * Make sure this points to the manual.
+   *
    * @return
    */
   private Anchor getAnchorManual() {
@@ -344,10 +359,10 @@ public class Banner implements RequiresResize {
       @Override
       public void onClick(ClickEvent clickEvent) {
         List<String> strings = java.util.Arrays.asList(
-           // "Language",
+            // "Language",
             "Version       ",
             "Release Date  ",
-          //  "Model Version",
+            //  "Model Version",
             "Recording type");
 
         List<String> values = null;
@@ -357,10 +372,10 @@ public class Banner implements RequiresResize {
           String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
           String model = props.getModelDir().replaceAll("models.", "");
           values = java.util.Arrays.asList(
-           //   props.getLanguage(),
+              //   props.getLanguage(),
               versionInfo,
               releaseDate,
-            //  model,
+              //  model,
               recordingInfo
           );
         } catch (Exception e) {

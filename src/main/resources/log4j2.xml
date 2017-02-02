@@ -40,6 +40,7 @@
 -->
         <Property name="log.mailto">gordon.vidaver@ll.mit.edu</Property>
     </Properties>
+
     <appenders>
         <!--
             The SMTP mailer appears to only work when smtp debug is true.
@@ -100,6 +101,7 @@
         <logger name="mitll.hlt.domino.server.user.UserServiceFacadeImpl" level="debug" additivity="true">
             <appender-ref ref="SecFile"/>
         </logger>
+
         <logger name="mitll.hlt.domino.server.security" level="debug" additivity="true">
             <appender-ref ref="SecFile"/>
         </logger>
@@ -149,6 +151,7 @@
         <logger name="mitll.hlt.domino.server.util" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
+
         <logger name="mitll.hlt.domino.server.user" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
