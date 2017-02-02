@@ -79,6 +79,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
+  private static final int CARD_HEIGHT = 362;//320;
+
   /**
    * @see #addPlayingHighlight
    */
@@ -426,7 +428,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private Panel getCardContent() {
     final ClickableSimplePanel contentMiddle = new ClickableSimplePanel();
 
-    contentMiddle.setHeight("320px");
+    contentMiddle.setHeight(CARD_HEIGHT +
+        "px");
     contentMiddle.getElement().setId("Focusable_content");
     contentMiddle.addClickHandler(new ClickHandler() {
       @Override
