@@ -54,9 +54,9 @@ public class User extends MiniUser {
    */
   private String passwordHash;
 
-/*
-  private String emailHash;
-*/
+  /*
+    private String emailHash;
+  */
   private String email = "";
   private boolean enabled;
   private boolean admin;
@@ -335,7 +335,7 @@ public class User extends MiniUser {
     if (passwordH == null) passwordH = "";
     this.passwordHash = passwordH;
     this.email = email;
-  //  this.emailHash = emailHash;
+    //  this.emailHash = emailHash;
     this.userKind = userKind;
     this.setEnabled(enabled);
     this.admin = isAdmin;
@@ -467,13 +467,11 @@ public class User extends MiniUser {
   }
 
   /**
-   *
    * @return
    */
 /*  public String getEmailHash() {
     return emailHash;
   }*/
-
   public Kind getUserKind() {
     return userKind;
   }
@@ -568,7 +566,7 @@ public class User extends MiniUser {
 
     boolean recordInfoSet =
         !(getPermissions().contains(Permission.RECORD_AUDIO) ||
-          getPermissions().contains(Permission.DEVELOP_CONTENT)) ||
+            getPermissions().contains(Permission.DEVELOP_CONTENT)) ||
             getRealGender() != Gender.Unspecified;
 
     return hasStandardInfo && recordInfoSet;
@@ -594,8 +592,8 @@ public class User extends MiniUser {
     return "user " +
         "\n\tid     " + getID() +
         "\n\tuserid " + getUserID() +
-        "\n\t first " + first +
-        "\n\t last  " + last +
+        (first.isEmpty() ? "" : "\n\t first " + first) +
+        (last.isEmpty() ? "" : "\n\t last  " + last) +
         "\n\tis a    " + getRealGender() +
         (getAge() < 99 && getAge() > 0 ? "\n\tage     " + getAge() : "") +
         (isAdmin() ? "\n\tadmin   " + isAdmin() : "") +
