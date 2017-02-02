@@ -104,8 +104,10 @@ public class CopyToPostgres<T extends CommonShell> {
 
   private void dropOneConfig(String config) throws Exception {
     DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null, ".");
-    String language = databaseLight.getLanguage();
+  //  String language = databaseLight.getLanguage();
     IProjectDAO projectDAO = databaseLight.getProjectDAO();
+
+    logger.debug("byname "+ projectDAO.getByName(config));
     List<SlickProject> collect = projectDAO.getAll().stream().filter(p -> p.name().equalsIgnoreCase(config)).collect(Collectors.toList());
 
     for (SlickProject project : collect) {
