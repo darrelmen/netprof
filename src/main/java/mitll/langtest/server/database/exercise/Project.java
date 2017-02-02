@@ -39,8 +39,8 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectManagement;
-import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -77,7 +77,7 @@ public class Project implements PronunciationLookup {
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
 
-  private boolean wasConfigured = false;
+  //private boolean wasConfigured = false;
 
   /**
    * @param exerciseDAO
@@ -145,6 +145,10 @@ public class Project implements PronunciationLookup {
     return project;
   }
 
+  public boolean isRetired() {
+   return project != null && ProjectStatus.valueOf(project.status()) == ProjectStatus.RETIRED;
+  }
+
   /**
    * If we can't get the type order out of the section helper... find it from the project
    *
@@ -196,7 +200,7 @@ public class Project implements PronunciationLookup {
 
   /**
    * @param analysis
-   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject
+   * @see IProjectManagement#configureProject
    */
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
@@ -281,16 +285,16 @@ public class Project implements PronunciationLookup {
    * @see ProjectManagement#getExercises
    */
   public boolean isConfigured() {
-    return wasConfigured;
+    return exerciseDAO != null && exerciseDAO.isConfigured();
   }
 
   /**
-   * @param wasConfigured
-   * @see ProjectManagement#configureProject
+   * @paramx wasConfigured
+   * @see IProjectManagement#configureProject
    */
-  public void setConfigured(boolean wasConfigured) {
-    this.wasConfigured = wasConfigured;
-  }
+//  public void setConfigured(boolean wasConfigured) {
+//    this.wasConfigured = wasConfigured;
+//  }
 
   public ProjectStatus getStatus() {
     try {

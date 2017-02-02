@@ -250,7 +250,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     Project project = getProject();
     if (project == null) {
       logger.error("getLanguage : no current project ");
-      return "";
+      return "unset";
     } else {
       return project.getProject().language();
     }

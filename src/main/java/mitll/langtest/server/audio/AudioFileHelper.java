@@ -43,6 +43,7 @@ import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -146,7 +147,7 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param exercises
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercises
-   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject
+   * @see IProjectManagement#configureProject
    */
   public void checkLTSAndCountPhones(Collection<CommonExercise> exercises) {
     synchronized (this) {
@@ -1118,8 +1119,6 @@ public class AudioFileHelper implements AlignDecode {
               userID,
               file);
 
-//      if (precalcScores == null) {
-
       PretestScore flashcardAnswer = decodeCorrectnessChecker.getDecodeScore(exercise,
           file,
           audioAnswer,
@@ -1190,7 +1189,9 @@ public class AudioFileHelper implements AlignDecode {
    * @see #makeASRScoring
    */
   private HTKDictionary makeDict(String installPath, String modelsDir) {
-    logger.info("makeDict : install path is '" + installPath + "'\n\tmodelsDir " + modelsDir);
+    logger.info("makeDict :" +
+        "\n\tinstall path " + installPath +
+        "\n\tmodelsDir    " + modelsDir);
     String scoringDir = Scoring.getScoringDir(serverProps.getAudioBaseDir());
     String dictFile =
         new ConfigFileCreator(serverProps.getProperties(), null, scoringDir, modelsDir).getDictFile();

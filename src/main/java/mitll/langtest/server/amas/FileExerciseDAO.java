@@ -119,6 +119,11 @@ public class FileExerciseDAO<T extends CommonShell & HasUnitChapter> implements 
   }
 
   @Override
+  public boolean isConfigured() {
+    return false;
+  }
+
+  @Override
   public T getExercise(int id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {

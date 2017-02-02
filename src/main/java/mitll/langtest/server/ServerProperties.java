@@ -50,6 +50,8 @@ import org.apache.logging.log4j.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -123,6 +125,7 @@ public class ServerProperties {
   private static final String MEDIA_DIR = "mediaDir";
   private static final String ANSWER_DIR = "answerDir";
   private static final String NETPROF_AUDIO_DIR = "audioDir";
+  private static final String DCODR_DIR = "dcodrDir";
   //  private static final String RECO_TEST = "recoTest";
 //  private static final String RECO_TEST2 = "recoTest2";
   private static final String MIN_PRON_SCORE = "minPronScore";
@@ -166,10 +169,9 @@ public class ServerProperties {
    * Note netprof is all lower case.
    */
   private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netprof/";
+  private static final String DEFAULT_DCODR_DIR = "/opt/dcodr/";
   public static final String BEST_AUDIO = "bestAudio";
- // private static final String DEFAULT_BEST_AUDIO = DEFAULT_NETPROF_AUDIO_DIR + BEST_AUDIO;
-  public static final String ANSWERS = "answers";
-  //private static final String DEFAULT_ANSWERS = DEFAULT_NETPROF_AUDIO_DIR + ANSWERS;
+  private static final String ANSWERS = "answers";
 
   private Properties props = new Properties();
 
@@ -420,6 +422,19 @@ public class ServerProperties {
 
   public String getAudioBaseDir() {
     return props.getProperty(NETPROF_AUDIO_DIR, DEFAULT_NETPROF_AUDIO_DIR);
+  }
+
+  public String getDcodrBaseDir() {
+    return props.getProperty(DCODR_DIR, DEFAULT_DCODR_DIR);
+  }
+
+  public boolean isLaptop() {
+    try {
+      InetAddress ip = InetAddress.getLocalHost();
+      return ip.getHostName().contains("MITLL");
+    } catch (UnknownHostException e) {
+      return false;
+    }
   }
 
   public double getMinPronScore() {
@@ -719,32 +734,10 @@ public class ServerProperties {
     return emailList.getEmailAddress();
   }
 
-/*
-  public String getApprovalEmailAddress() {
-    return emailList.getApprovalEmailAddress();
-  }
-*/
-
-  /**
-   * @return
-   * @see mitll.langtest.server.mail.EmailHelper#addContentDeveloper
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser
-   */
-/*
-  public List<String> getApprovers() {
-    return emailList.getApprovers();
-  }
-*/
-
-/*
-  public List<String> getApproverEmails() {
-    return emailList.getApproverEmails();
-  }
-*/
-
   /**
    * @return
    * @see UserDAO#UserDAO
+   * @deprecated  defined in domino
    */
   public Set<String> getAdmins() {
     Set<String> strings = Collections.emptySet();

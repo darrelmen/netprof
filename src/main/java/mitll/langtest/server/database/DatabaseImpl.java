@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database;
 
-import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
@@ -692,7 +691,7 @@ public class DatabaseImpl implements Database {
    */
   @Override
   public void configureProject(Project project) {
-    projectManagement.configureProject(project);
+    projectManagement.configureProject(project, false);
   }
 
   /**
@@ -1203,7 +1202,7 @@ public class DatabaseImpl implements Database {
    * @param projectid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
-   * @see ProjectManagement#configureProject
+   * @see IProjectManagement#configureProject
    */
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
     Collection<CommonExercise> exercises = getExercises(projectid);

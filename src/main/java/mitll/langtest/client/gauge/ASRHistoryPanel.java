@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -91,6 +92,9 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   }
 
   /**
+   * User just got a score back.
+   *
+   * don't show the current score
    * @param score
    * @param path
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#useResult
@@ -126,6 +130,17 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     //Panel vp = new HorizontalPanel();
    /* List<CorrectAndScore> scoreAndPaths =*/ addHistory(this);
     //add(vp);
+  }
+
+  //call this after adding the widget to the page
+  @Override
+  public void onLoad() {
+    // System.out.println("looking for dom element id " + id + " width " + canvas.getOffsetWidth() );
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        addPlayer();
+      }
+    });
   }
 
   private native void addPlayer() /*-{
