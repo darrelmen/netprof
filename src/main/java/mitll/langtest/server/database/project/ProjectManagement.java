@@ -473,8 +473,8 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     List<CommonExercise> rawExercises = project.getRawExercises();
-    if (rawExercises.isEmpty()) {
-      logger.warn("getExercises no exercises in " + serverProps.getLessonPlan());// + " at " + installPath);
+    if (rawExercises.isEmpty() || rawExercises.size() < 100) {
+      logger.warn("getExercises no exercises in " + serverProps.getLessonPlan() + " = " + rawExercises.size());// + " at " + installPath);
     }
     return rawExercises;
   }
@@ -493,9 +493,17 @@ public class ProjectManagement implements IProjectManagement {
   public Project getProject(int projectid) {
     if (projectid == -1) return getFirstProject();
     Project project = idToProject.get(projectid);
+
+    Set<Integer> knownProjects = idToProject.keySet();
+
     if (project == null) {
       Collection<SlickProject> all = projectDAO.getAll();
-      if (all.size() != idToProject.size()) {
+
+      Set<Integer> dbProjects = all.stream().map(SlickProject::id).collect(Collectors.toSet());
+
+      dbProjects.removeAll(knownProjects);
+
+      if (!dbProjects.isEmpty()) {
         logger.debug("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
             ") - refreshing projects");
         populateProjects();
@@ -628,7 +636,8 @@ public class ProjectManagement implements IProjectManagement {
 
     Map<String, List<SlickProject>> langToProject = new TreeMap<>();
     Collection<SlickProject> all = db.getProjectDAO().getAll();
-//    logger.info("found " + all.size() + " projects");
+
+    logger.info("getNestedProjectInfo : found " + all.size() + " projects");
     for (SlickProject project : all) {
       List<SlickProject> slimProjects = langToProject.get(project.language());
       if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());

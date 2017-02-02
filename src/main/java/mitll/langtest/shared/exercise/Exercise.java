@@ -102,6 +102,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int projectid,
                   long updateTime) {
     super(-1, projectid);
+    this.oldid = id;
     this.meaning = meaning;
     this.updateTime = updateTime;
     addContext(context, altcontext, contextTranslation);

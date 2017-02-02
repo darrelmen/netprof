@@ -219,7 +219,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
         Sheet sheet = wb.getSheetAt(i);
-        if (sheet.getPhysicalNumberOfRows() > 0) {
+        int physicalNumberOfRows = sheet.getPhysicalNumberOfRows();
+
+        if (DEBUG) logger.info("readExercises sheet " + sheet.getSheetName() + " had " + physicalNumberOfRows+ " rows.");
+
+        if (physicalNumberOfRows > 0) {
           Collection<CommonExercise> exercises1 = readFromSheet(sheet);
           exercises.addAll(exercises1);
           logger.info("readExercises sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
@@ -283,7 +287,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     int skipped = 0;
     int deleted = 0;
     int englishSkipped = 0;
-
+int rows = 0;
     String unitName = null, chapterName = null, weekName = null;
     try {
       Iterator<Row> iter = sheet.rowIterator();
@@ -293,6 +297,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
       for (; iter.hasNext(); ) {
         Row next = iter.next();
+        rows++;
         if (id > maxExercises) break;
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
 
@@ -461,6 +466,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
+
+    if (DEBUG) logger.debug("read " + rows + " rows");
 
     logStatistics(id, semis, skipped, englishSkipped, deleted);
 

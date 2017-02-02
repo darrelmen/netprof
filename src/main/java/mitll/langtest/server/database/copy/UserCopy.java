@@ -124,7 +124,7 @@ public class UserCopy {
 //              oldToNew.put(importID, existingID);
               } else {
                 if (WARN_ON_COLLISION) {
-                  logger.info("\n\n\ncopyUsers found existing user with password difference " + importUserID + " : " + userByID1 + "\n\n\n");
+                  logger.info("COLLISION : copyUsers found existing user with password difference " + importUserID + " : " + userByID1 + "\n");
                 }
 
                 oldToNew.put(importID, userByID1.getID());

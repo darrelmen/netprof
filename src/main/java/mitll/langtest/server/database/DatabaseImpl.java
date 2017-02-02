@@ -727,7 +727,11 @@ public class DatabaseImpl implements Database {
    */
   public Project getProject(int projectid) {
     if (projectid == -1) {
-      logger.warn("getProject asking for project -1?", new Exception());
+      if (serverProps.useH2()) {
+        logger.info("getProject asking for project -1?");
+      } else {
+        logger.warn("getProject asking for project -1?", new Exception());
+      }
     }
     return projectManagement.getProject(projectid);
   }
@@ -1123,7 +1127,7 @@ public class DatabaseImpl implements Database {
       int exID = result.getExID();
       CommonShell exercise = isAmas() ? getAMASExercise(exID) : getExercise(projid, exID);
       if (exercise != null) {
-        int dominoID = isAmas()? -1 : ((CommonExercise)exercise).getDominoID();
+        int dominoID = isAmas() ? -1 : ((CommonExercise) exercise).getDominoID();
         result.setDisplayID("" + dominoID);
       }
     }
@@ -1199,6 +1203,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * Seems pretty expensive - why do it?
+   *
    * @param projectid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
