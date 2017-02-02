@@ -69,6 +69,7 @@ public abstract class BaseUserDAO extends DAO {
   public static final String DEFAULT_USER1 = "defaultUser";
   public static final String DEFAULT_MALE_USER = "defaultMaleUser";
   public static final String DEFAULT_FEMALE_USER = "defaultFemaleUser";
+  public static final String UNSET_EMAIL = "unset@unset.com";
   @Deprecated
   final String language;
   protected int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
@@ -260,11 +261,12 @@ public abstract class BaseUserDAO extends DAO {
         0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
         kind,
         "",
-        "",//"admin@dliflc.edu",
+        UNSET_EMAIL,//"admin@dliflc.edu",
         "",
         first,
         last,
-        "","MIT-LL");
+        "",
+        "MIT-LL");
   }
 
   abstract int getIdForUserID(String id);

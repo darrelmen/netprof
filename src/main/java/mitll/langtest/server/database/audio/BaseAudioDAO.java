@@ -323,7 +323,6 @@ public abstract class BaseAudioDAO extends DAO {
     }
   }
 
-
   abstract Collection<AudioAttribute> getAudioAttributesForExercise(int exid);
 
   /**
