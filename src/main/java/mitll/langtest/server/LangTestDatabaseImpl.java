@@ -70,6 +70,10 @@ import java.util.*;
 public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements LangTestDatabase {
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
 
+  /**
+   *
+   *
+   */
   public static final String DATABASE_REFERENCE = "databaseReference";
 
   /**
@@ -308,11 +312,21 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     logger.info("readProperties relativeConfigDir " + relativeConfigDir +" configDir         " + configDir);
 
-    this.serverProps = serverProps;
+    try {
+      this.serverProps = serverProps;
 
-    db = makeDatabaseImpl(this.serverProps.getH2Database());
-    securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
-    db.setUserSecurityManager(securityManager);
+      db = makeDatabaseImpl(this.serverProps.getH2Database());
+
+      logger.info("readProperties made database " + db);
+
+      securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
+      logger.info("readProperties made securityManager " + securityManager);
+      db.setUserSecurityManager(securityManager);
+
+      logger.info("readProperties shareDB ");
+    } catch (Exception e) {
+      logger.error("Got "+e,e);
+    }
 
     shareDB(servletContext);
 //    shareLoadTesting(servletContext);
@@ -344,7 +358,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.debug("hmm... found existing database reference " + databaseReference);
     }
     servletContext.setAttribute(DATABASE_REFERENCE, db);
-    logger.info("shared db " + servletContext.getAttribute(DATABASE_REFERENCE));
+    logger.info("shareDB shared db " + servletContext.getAttribute(DATABASE_REFERENCE));
   }
 
   /**
