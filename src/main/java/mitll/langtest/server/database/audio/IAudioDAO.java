@@ -55,8 +55,21 @@ public interface IAudioDAO extends IDAO {
 
   Collection<AudioAttribute> getAudioAttributesByProject(int projid);
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
+   * @param firstExercise
+   * @param language
+   * @return
+   */
   int attachAudioToExercise(CommonExercise firstExercise, String language);
 
+  /**
+   * @see
+   * @param firstExercise
+   * @param audioAttributes
+   * @param language
+   * @return
+   */
   boolean attachAudio(CommonExercise firstExercise,
                       Collection<AudioAttribute> audioAttributes,
                       String language);

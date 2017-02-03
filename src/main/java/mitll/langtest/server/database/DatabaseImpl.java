@@ -1257,23 +1257,28 @@ public class DatabaseImpl implements Database {
    * @param correct
    * @param isMale
    * @param speed
+   * @param model
    * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    */
-  public long addRefAnswer(int userID, int exerciseID,
+  public long addRefAnswer(int userID,
+                           int exerciseID,
                            String audioFile,
-                           long durationInMillis, boolean correct,
+                           long durationInMillis,
+                           boolean correct,
                            DecodeAlignOutput alignOutput,
                            DecodeAlignOutput decodeOutput,
 
                            DecodeAlignOutput alignOutputOld,
                            DecodeAlignOutput decodeOutputOld,
 
-                           boolean isMale, String speed) {
+                           boolean isMale,
+                           String speed,
+                           String model) {
     return refresultDAO.addAnswer(userID, exerciseID, audioFile, durationInMillis, correct,
         alignOutput, decodeOutput,
         alignOutputOld, decodeOutputOld,
-        isMale, speed);
+        isMale, speed, model);
   }
 
   /**
@@ -1536,9 +1541,9 @@ public class DatabaseImpl implements Database {
    * @param ex
    * @return
    */
-  public int attachAudio(CommonExercise ex) {
+/*  public int attachAudio(CommonExercise ex) {
     return getAudioDAO().attachAudioToExercise(ex, getLanguage(ex));
-  }
+  }*/
 
   /**
    * Expensive ?

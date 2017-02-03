@@ -72,6 +72,7 @@ import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
 import static mitll.langtest.shared.user.User.Kind.ADMIN;
 import static mitll.langtest.shared.user.User.Kind.PROJECT_ADMIN;
+import static mitll.langtest.shared.user.User.Kind.STUDENT;
 
 /**
  * Store user info in domino tables.
@@ -134,8 +135,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
         logger.info("DominoUserDAOImpl cache - ignite!");
         // newContext.setAttribute(IGNITE, ignite);
-      }
-      else {
+      } else {
         logger.debug("DominoUserDAOImpl no cache");
       }
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
@@ -188,7 +188,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     super.ensureDefaultUsers();
     String userId = dominoAdminUser.getUserId();
     adminUser = delegate.getUser(userId);//BEFORE_LOGIN_USER);
-   // logger.info("ensureDefaultUsers got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
+    // logger.info("ensureDefaultUsers got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
 
     if (adminUser.getPrimaryGroup() == null) {
       logger.warn("ensureDefaultUsers no group for " + adminUser);
@@ -229,10 +229,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       logger.error("\n\n\naddUserToMongo didn't set password for " + user.getUserId() + " : " +
           clientUserDetailSResult1.getResponseMessage());
       return null;
+    } else {
+      return clientUserDetailSResult1.get();
     }
-
-    ClientUserDetail clientUserDetail = clientUserDetailSResult1.get();
-    return clientUserDetail;
   }
 
   /**
@@ -484,7 +483,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
             sessionID);
 
     if (loggedInUser == null) {
-      myDelegate.isMatch(encodedCurrPass,attemptedTxtPass);
+      myDelegate.isMatch(encodedCurrPass, attemptedTxtPass);
     }
     return loggedInUser == null ? null : toUser(loggedInUser);
   }
@@ -526,8 +525,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param id
    * @param encodedPassword
    * @return
-   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
    * @seex #getUserIfMatch
+   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
    */
   public User getUserIfMatchPass(User user, String id, String encodedPassword) {
     logger.info("getUserIfMatchPass '" + id + "' and dominoPassword hash '" + encodedPassword.length() + "'");
@@ -591,9 +590,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.security.UserSecurityManager#getUserForID
    * @param id
    * @return
+   * @see mitll.langtest.server.database.security.UserSecurityManager#getUserForID
    */
   public User getByID(int id) {
     DBUser dbUser = lookupUser(id);
@@ -641,10 +640,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 //      email = user.getEmailHash();
 //    }
 
-    Group primaryGroup = getGroup();
+    //Group primaryGroup = ;
     Group secondary = getGroupOrMake(projectName);
 
-    Set<String> roleAbbreviations = Collections.singleton(user.getUserKind().getRole());
+
+    User.Kind userKind = user.getUserKind();
+
+
+    Set<String> roleAbbreviations = Collections.singleton(userKind.getRole());
     // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
@@ -653,9 +656,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         last,
         email,
         DEFAULT_AFFILIATION,
-        user.isMale() ? DMALE : DFEMALE,
+        userKind ==
+            STUDENT ? mitll.hlt.domino.shared.model.user.User.Gender.Unspecified :
+            user.isMale() ? DMALE : DFEMALE,
         roleAbbreviations,
-        primaryGroup
+        getGroup()
     );
     AccountDetail acctDetail = new AccountDetail(
         dominoImportUser,
@@ -823,7 +828,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * TODO : get device info from domino user
-   *
+   * <p>
    * For Reporting.
    *
    * @return
@@ -832,7 +837,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public List<User> getUsersDevices() {
 
-        return Collections.emptyList();//dao.getUsersFromDevices());
+    return Collections.emptyList();//dao.getUsersFromDevices());
   }
 
   private Map<Integer, MiniUser> miniUserCache = null;
@@ -1018,8 +1023,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * TODO : enable content developer will happen in domino user management UI.
    *
-   * @paramx resetKey
    * @return
+   * @paramx resetKey
    * @seex mitll.langtest.server.mail.EmailHelper#enableCDUser
    */
 /*
@@ -1105,8 +1110,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * user updates happen in domino UI...
-   * @see UserServiceImpl#addUser
+   *
    * @param toUpdate
+   * @see UserServiceImpl#addUser
    */
   @Override
   public void update(User toUpdate) {
@@ -1130,10 +1136,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @see UserServiceImpl#resetPassword
    * @param user
    * @param url
    * @return
+   * @see UserServiceImpl#resetPassword
    */
   @Override
   public boolean forgotPassword(String user, String url) {

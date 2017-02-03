@@ -128,6 +128,7 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   public String getCC(String config) {
     String cc = "";
+
     List<String> languages = Arrays.asList(
         "croatian",
         "dari",

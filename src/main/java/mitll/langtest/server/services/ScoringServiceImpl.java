@@ -71,7 +71,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     PretestScore asrScoreForAudio = null;
     try {
       Result result = db.getResultDAO().getResultByID(resultID);
-
       int exerciseID = result.getExerciseID();
 
       boolean isAMAS = serverProps.isAMAS();
@@ -276,14 +275,19 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public boolean isHydraRunning(int projid) {
     Project project = db.getProject(projid);
     if (project == null) {
-      logger.error("no project with id " + projid);
+      logger.error("isHydraRunning no project with id " + projid);
       return false;
     } else {
-      AudioFileHelper audioFileHelper = project.getAudioFileHelper();
-      boolean hydraAvailable = audioFileHelper.isHydraAvailable();
-      boolean hydraAvailableCheckNow = audioFileHelper.isHydraAvailableCheckNow();
-      if (!hydraAvailable && hydraAvailableCheckNow) audioFileHelper.setAvailable();
-      return hydraAvailableCheckNow;
+      try {
+        AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+        boolean hydraAvailable = audioFileHelper.isHydraAvailable();
+        boolean hydraAvailableCheckNow = audioFileHelper.isHydraAvailableCheckNow();
+        if (!hydraAvailable && hydraAvailableCheckNow) audioFileHelper.setAvailable();
+        return hydraAvailableCheckNow;
+      } catch (Exception e) {
+        logger.error("got " + e, e);
+        return false;
+      }
     }
   }
 

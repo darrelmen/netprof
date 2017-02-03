@@ -154,16 +154,24 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param imageOutDir
    * @param useCache
    * @param prefix
-   * @param precalcResult
+   * @param precalcScores
    * @param usePhoneToDisplay
    * @return PretestScore object
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    */
-  public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-                                  String sentence, Collection<String> lmSentences, String transliteration, String imageOutDir,
+  public PretestScore scoreRepeat(String testAudioDir,
+                                  String testAudioFileNoSuffix,
+                                  String sentence,
+                                  Collection<String> lmSentences,
+                                  String transliteration,
+
+                                  String imageOutDir,
                                   ImageOptions imageOptions,
+
                                   boolean decode,
-                                  boolean useCache, String prefix,
+                                  boolean useCache,
+
+                                  String prefix,
 
                                   PrecalcScores precalcScores,
                                   boolean usePhoneToDisplay) {
@@ -487,7 +495,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
                 String key = transcript + "-" + transliteration;
                 if (!seen.contains(key)) {
-                  logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
+                  logger.warn("getPronunciations couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
                 }
 
                 seen.add(key);

@@ -614,7 +614,11 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private boolean hasModel(SlickProject project1) {
-    return project1.getProp(ServerProperties.MODELS_DIR) != null;
+    return getModel(project1) != null;
+  }
+
+  private String getModel(SlickProject project1) {
+    return project1.getProp(ServerProperties.MODELS_DIR);
   }
 
 
@@ -666,7 +670,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #getNestedProjectInfo
    */
   private SlimProject getProjectInfo(SlickProject project) {
-    boolean hasModel = project.getProp(ServerProperties.MODELS_DIR) != null;
+    boolean hasModel = getModel(project) != null;
 
     ProjectStatus status = null;
     try {

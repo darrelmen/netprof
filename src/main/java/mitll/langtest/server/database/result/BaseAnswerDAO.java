@@ -52,7 +52,7 @@ public abstract class BaseAnswerDAO extends DAO {
    * @param classifierScore
    * @param session
    * @param timeSpent
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
    */
   public int addTextAnswer(AudioContext audioContext,
@@ -65,7 +65,7 @@ public abstract class BaseAnswerDAO extends DAO {
     AnswerInfo answerInfo = new AnswerInfo(
         audioContext,
         new AnswerInfo.RecordingInfo(answer, answer, "", "", true, ""),
-        new AudioCheck.ValidityAndDur(0));
+        new AudioCheck.ValidityAndDur(0),"");
 
     return addAnswer(
         new AnswerInfo(answerInfo, new AnswerInfo.ScoreInfo(correct, pronScore, "", 0)));

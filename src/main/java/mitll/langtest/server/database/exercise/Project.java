@@ -137,7 +137,7 @@ public class Project implements PronunciationLookup {
 
 
   public boolean isNoModel() {
-    return project.getProp(ServerProperties.MODELS_DIR) == null;
+    return getModelsDir() == null;
   }
 
   public boolean hasModel() {
@@ -149,7 +149,7 @@ public class Project implements PronunciationLookup {
   }
 
   public boolean isRetired() {
-   return project != null && ProjectStatus.valueOf(project.status()) == ProjectStatus.RETIRED;
+    return project != null && ProjectStatus.valueOf(project.status()) == ProjectStatus.RETIRED;
   }
 
   /**
@@ -210,7 +210,11 @@ public class Project implements PronunciationLookup {
     String language = project == null ? "unk" : project.language();
     fullTrie = new ExerciseTrie<>(getExercisesForUser(), language, getSmallVocabDecoder());
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper(), hasModel());
-    refResultDecoder.doRefDecode(getExercisesForUser());
+//    refResultDecoder.doRefDecode(getExercisesForUser());
+  }
+
+  public void recalcRefAudio() {
+    refResultDecoder.writeRefDecode(getExercisesForUser(), project.id());
   }
 
   public SlickAnalysis getAnalysis() {
@@ -298,7 +302,6 @@ public class Project implements PronunciationLookup {
 //  public void setConfigured(boolean wasConfigured) {
 //    this.wasConfigured = wasConfigured;
 //  }
-
   public ProjectStatus getStatus() {
     try {
       return ProjectStatus.valueOf(project.status());
