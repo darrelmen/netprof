@@ -4,9 +4,11 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.ListBox;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -90,6 +92,8 @@ public class ProjectEditForm extends UserDialog {
     });
   }
 
+  HTML feedback;
+
   private Fieldset getFields(ProjectInfo info, Button editButton) {
     Fieldset fieldset = new Fieldset();
     Heading id = new Heading(4, "ID", "" + info.getID());
@@ -102,6 +106,32 @@ public class ProjectEditForm extends UserDialog {
         .setWidth(SIGN_UP_WIDTH);
 
     setBox(info.getStatus());
+
+    Button w = new Button("Check Audio", IconType.STETHOSCOPE);
+    fieldset.add(w);
+    w.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        w.setEnabled(false);
+        feedback.setText("Please wait...");
+
+        projectServiceAsync.checkAudio(info.getID(), new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            w.setEnabled(true);
+
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            w.setEnabled(true);
+            feedback.setText("Audio check complete.");
+          }
+        });
+      }
+    });
+    feedback = new HTML();
+    fieldset.add(feedback);
 
     return fieldset;
   }

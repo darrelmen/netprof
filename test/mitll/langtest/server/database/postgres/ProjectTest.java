@@ -288,6 +288,15 @@ public class ProjectTest extends BaseTest {
 
 
   @Test
+  public void testDropCroatian() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    IProjectDAO projectDAO = andPopulate.getProjectDAO();
+    int croatian = projectDAO.getByName("croatian");
+    projectDAO.delete(croatian);
+    andPopulate.destroy();
+  }
+
+  @Test
   public void testParse() {
     ServerProperties serverProperties = new ServerProperties();
 

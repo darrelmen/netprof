@@ -40,16 +40,12 @@ import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
-import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.util.*;
 
 /**
@@ -103,13 +99,16 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   /**
    * Only for AMAS.
+   *
    * @return
    */
   public int getNumExercises() {
     return getRawExercises().size();
   }
 
-  public Set<Integer> getIDs() { return idToExercise.keySet(); }
+  public Set<Integer> getIDs() {
+    return idToExercise.keySet();
+  }
 
   /**
    * @return
@@ -165,6 +164,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * Is this kosher to do - exToAudio
    * Worry about if the audio transcript doesn't match the exercise transcript
+   *
    * @see #setAudioDAO
    */
   private void attachAudio() {
@@ -223,7 +223,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   /**
    * There must be an /opt/netProf/bestAudio directory for audio.
-   *
+   * <p>
    * Only validate audio when there is audio to validate.
    * <p>
    * TODO : what if they add a user exercise and add audio to it, or record new audio for other exercises???
@@ -240,12 +240,19 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 //    }
 
     if (!serverProps.isLaptop()) {
-      makeSureAudioIsThere(audioDAO, projectID);
+      //makeSureAudioIsThere(audioDAO, projectID);
+      audioDAO.makeSureAudioIsThere(projectID,language, false);
     }
 
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
-    logger.info("setAudioDAO exToAudio " +exToAudio.size());
+    logger.info("setAudioDAO exToAudio " + exToAudio.size());
     this.attachAudio = new AttachAudio(exToAudio, language, serverProps.shouldCheckAudioTranscript(), serverProps);
+  }
+
+/*
+
+  public void makeSureAudioIsThere(int projectID) {
+    makeSureAudioIsThere(audioDAO, projectID);
   }
 
   private void makeSureAudioIsThere(IAudioDAO audioDAO, int projectID) {
@@ -272,6 +279,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       logger.warn("configuration error? - expecting a media directory " + mediaDir);
     }
   }
+*/
 
   /**
    * TODO : make it easy to look up by domino id.
@@ -335,6 +343,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   /**
    * The idea here is to
+   *
    * @param all
    * @return
    */
@@ -505,7 +514,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     setAudioDAO(audioDAO, projid);
   }
 
-  public boolean isConfigured() { return audioDAO != null; }
+  public boolean isConfigured() {
+    return audioDAO != null;
+  }
 
   private int warns = 0;
 
