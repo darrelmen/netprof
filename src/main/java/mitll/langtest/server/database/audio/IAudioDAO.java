@@ -107,4 +107,6 @@ public interface IAudioDAO extends IDAO {
   void updateDNR(int uniqueID, float dnr);
 
   boolean didFindAnyAudioFiles(int projectid);
+
+  void makeSureAudioIsThere(int projectID, String language, boolean validateAll);
 }

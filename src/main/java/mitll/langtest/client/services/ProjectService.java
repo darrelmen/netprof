@@ -43,4 +43,5 @@ public interface ProjectService extends RemoteService {
   List<ProjectInfo> getAll();
   boolean exists(int projectid);
   boolean update(ProjectInfo info);
+  void checkAudio(int projectid);
 }

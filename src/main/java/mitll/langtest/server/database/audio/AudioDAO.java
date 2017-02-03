@@ -861,6 +861,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
+  public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
+
+  }
+
+  @Override
   public void validateFileExists(int projid, String installPath, String language) {
 
   }
