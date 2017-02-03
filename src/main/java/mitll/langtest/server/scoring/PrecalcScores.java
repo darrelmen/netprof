@@ -50,7 +50,7 @@ import java.util.Map;
  * @since 9/28/15.
  */
 public class PrecalcScores {
-//  private static final Logger logger = LogManager.getLogger(PrecalcScores.class);
+  //  private static final Logger logger = LogManager.getLogger(PrecalcScores.class);
   private Result precalcResult;
   private Scores scores;
   private JsonObject jsonObject;
@@ -94,7 +94,7 @@ public class PrecalcScores {
     JsonParser parser = new JsonParser();
     jsonObject = parser.parse(jsonScore).getAsJsonObject();
     if (pronScore == -100) {
-      pronScore = jsonObject.get("score").getAsFloat();
+      pronScore = jsonObject != null && jsonObject.get("score") != null ? jsonObject.get("score").getAsFloat() : -1;
     }
     scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
     isValid = isPrecalcValidCheck();
