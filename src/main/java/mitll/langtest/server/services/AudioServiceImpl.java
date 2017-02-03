@@ -551,4 +551,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   public void checkAudio(int projectid) {
     db.getAudioDAO().makeSureAudioIsThere(projectid, db.getProject(projectid).getLanguage(), true);
   }
+
+  public void recalcRefAudio(int projid) {
+    db.getProject(projid).recalcRefAudio();
+  }
 }

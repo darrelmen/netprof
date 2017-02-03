@@ -93,4 +93,6 @@ public interface AudioService extends RemoteService {
   CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language);
 
   void checkAudio(int projectid);
+
+  void recalcRefAudio(int projectid);
 }

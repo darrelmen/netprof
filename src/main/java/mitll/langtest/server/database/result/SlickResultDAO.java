@@ -75,11 +75,19 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
       Timestamp modified = new Timestamp(System.currentTimeMillis());
 
       dao.insert(new SlickResult(-1, beforeLoginUser, unknownExerciseID, modified,
-          0,
+          // 0,
           AudioType.UNSET.toString(),
           "",
           false, AudioAnswer.Validity.INVALID.name(),
-          0, 0, 0, false, 0, "unk", "unk", "", false, 0, -1, "", projid
+          0,
+          0,
+          0,
+          false,
+          0,
+          "unk",
+          "unk",
+          "", false, 0, "", -1,
+          projid, ""
       ));
       defResult = dao.getAllByProject(projid);
     }
@@ -120,7 +128,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
           shared.getUserid(),
           realExID,
           new Timestamp(shared.getTimestamp()),
-          shared.getQid(),
+          //shared.getQid(),
           shared.getAudioType().toString(),
           shared.getAnswer(),
           shared.isValid(),
@@ -136,9 +144,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
           shared.isWithFlash(),
           shared.getDynamicRange(),
           //    getLanguage(),
-          shared.getUniqueID(),
           transcript,
-          projid
+          shared.getUniqueID(),
+          projid,
+          shared.getModel()
       );
   }
 
@@ -151,8 +160,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     audiotype = audiotype.replaceAll("=", "_");
     return new Result(slick.id(),
         slick.userid(),
-        slick.exid(),
-        slick.qid(),
+        slick.exid(), 0,
+        // slick.qid(),
         getRelativePath(slick),
         slick.valid(),
         slick.modified().getTime(),
@@ -166,7 +175,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         slick.roundtripdur(),
         slick.withflash(),
         slick.dynamicrange(),
-        slick.validity());
+        slick.validity(),
+        slick.model());
   }
 
   private MonitorResult fromSlick2(SlickResult slick) {
@@ -259,7 +269,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     List<SlickUserAndTime> tuple4s = dao.userAndTime();
     List<UserAndTime> userAndTimes = new ArrayList<>();
     for (SlickUserAndTime tuple : tuple4s) {
-      userAndTimes.add(new MyUserAndTime(tuple.userid(), tuple.exerciseid(), tuple.modified(), tuple.qid()));
+      userAndTimes.add(new MyUserAndTime(tuple.userid(), tuple.exerciseid(), tuple.modified()/*, tuple.qid()*/));
     }
     return userAndTimes;
   }

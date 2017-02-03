@@ -72,7 +72,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getUserid(),
         answerInfo.getId(),
         new Timestamp(System.currentTimeMillis()),
-        answerInfo.getQuestionID(),
+       // answerInfo.getQuestionID(),
         answerInfo.getAudioType().toString(),
         answerInserted,
         answerInfo.isValid(),
@@ -87,9 +87,10 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getScoreJson(),
         answerInfo.isWithFlash(),
         (float) answerInfo.getSnr(),
-        -1,
         answerInfo.getTranscript(),
-        answerInfo.getProjid());
+        -1,
+        answerInfo.getProjid(),
+        answerInfo.getModel());
 
     logger.info("addAnswer inserting answer by " + answerInfo.getUserid() + " to " + answerInfo.getId() + " :  " + answerInfo.getAnswer() + " :\n" +res);
 

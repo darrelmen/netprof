@@ -89,25 +89,43 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.deleteByExID(exid) > 0;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#addRefAnswer
+   * @param userID
+   * @param exid
+   * @param audioFile
+   * @param durationInMillis
+   * @param correct
+   * @param alignOutput
+   * @param decodeOutput
+   * @param alignOutputOld
+   * @param decodeOutputOld
+   * @param isMale
+   * @param speed
+   * @param model
+   * @return
+   */
   @Override
   public long addAnswer(int userID, int exid,
                         String audioFile, long durationInMillis, boolean correct,
                         DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput,
                         DecodeAlignOutput alignOutputOld, DecodeAlignOutput decodeOutputOld,
-                        boolean isMale, String speed) {
-    SlickRefResult insert = dao.insert(toSlick(userID, exid, audioFile, durationInMillis, correct, alignOutput, decodeOutput, isMale, speed));
+                        boolean isMale, String speed, String model) {
+    SlickRefResult insert = dao.insert(toSlick(userID, exid, audioFile, durationInMillis, correct,
+        alignOutput, decodeOutput, isMale, speed, model));
     return insert.id();
   }
 
-
   SlickRefResult toSlick(int userID, int exid, String audioFile, long durationInMillis, boolean correct,
-                         DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput, boolean isMale, String speed) {
+                         DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput, boolean isMale,
+                         String speed, String model) {
     return new SlickRefResult(-1,
         userID, exid, new Timestamp(System.currentTimeMillis()), audioFile, durationInMillis,
         correct,
         decodeOutput.getScore(), decodeOutput.getJson(), decodeOutput.getNumPhones(), decodeOutput.getProcessDurInMillis(),
         alignOutput.getScore(), alignOutput.getJson(), alignOutput.getNumPhones(), alignOutput.getProcessDurInMillis(),
-        isMale, speed
+        isMale, speed,
+        model
     );
   }
 
@@ -122,7 +140,9 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
         result.isCorrect(),
         decodeOutput.getScore(), decodeOutput.getJson(), decodeOutput.getNumPhones(), decodeOutput.getProcessDurInMillis(),
         alignOutput.getScore(), alignOutput.getJson(), alignOutput.getNumPhones(), alignOutput.getProcessDurInMillis(),
-        result.isMale(), result.getAudioType().toString()
+        result.isMale(),
+        result.getAudioType().toString(),
+        result.getModel()
     );
   }
 
@@ -144,9 +164,15 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return results;
   }
 
+/*
   private List<SlickRefResultJson> getJsonResults() {
     //  logger.info("getJsonResults --- ");
     return dao.getAllSlim();
+  }
+*/
+
+  public List<String> getAllFilesForProject(int projid) {
+    return dao.getAllFiles(projid);
   }
 
   private List<SlickRefResultJson> getJsonResultsForProject(int projid) {
@@ -154,15 +180,14 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   /**
-   * @see DBExerciseDAO#readExercises
    * @param projid
    * @return
+   * @see DBExerciseDAO#readExercises
    */
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
     List<SlickRefResultJson> jsonResults = getJsonResultsForProject(projid);
     return new ExerciseToPhone().getExerciseToPhoneForProject(jsonResults);
   }
-
 
   @Override
   public Result getResult(int exid, String answer) {
@@ -223,7 +248,8 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
           slickRef.duration(),
           slickRef.correct(), pronScore1,
           "browser", "",
-          0, 0, false, 30, "");
+          0, 0, false, 30, "",
+          slickRef.model());
       result.setJsonScore(scoreJson1);
       return result;
     } else return null;
@@ -231,7 +257,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
 
   @Override
   public int getNumResults() {
-    logger.info("getNumResults ---");
+  //  logger.info("getNumResults ---");
     return dao.getNumRows();
   }
 }

@@ -173,7 +173,7 @@ public class InvalidateAudioTest {
       if (exercise == null) {
         logger.error("huh? no exercise for " + ex);
       } else {
-        i += war.attachAudio(exercise);
+       // i += war.attachAudio(exercise);
         for (AudioAttribute att : exercise.getAudioAttributes()) {
           audioDAO.markDefect(att);
           logger.debug("marked " + att);
@@ -195,7 +195,7 @@ public class InvalidateAudioTest {
       if (exercise == null) {
         logger.error("huh? no exercise for " + ex);
       } else {
-        i += war.attachAudio(exercise);
+       // i += war.attachAudio(exercise);
         for (AudioAttribute att : exercise.getAudioAttributes()) {
           if (att.isContextAudio()) {
             audioDAO.markDefect(att);

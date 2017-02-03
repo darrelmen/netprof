@@ -41,20 +41,20 @@ class MyUserAndTime implements UserAndTime {
   private final int userID;
   private final int exid;
   private final long time;
-  private final int qid;
+  //private final int qid;
 
   /**
    * @see ResultDAO#getUserAndTimeForQuery(Connection, PreparedStatement)
    * @param userID
    * @param exid
    * @param time
-   * @param qid
+   * @paramx qid
    */
-  MyUserAndTime(int userID, int exid, long time, int qid) {
+  MyUserAndTime(int userID, int exid, long time/*, int qid*/) {
     this.userID = userID;
     this.exid = exid;
     this.time = time;
-    this.qid = qid;
+  //  this.qid = qid;
   }
 
   @Override
@@ -74,7 +74,7 @@ class MyUserAndTime implements UserAndTime {
 
   @Override
   public String getID() {
-    return getExid() + "/" + qid;
+    return getExid() + "/" + 0;//qid;
   }
 
   public String toString () { return "user " + userID + " exid " + exid + " time " + time; }

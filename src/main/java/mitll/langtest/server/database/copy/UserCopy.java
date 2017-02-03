@@ -111,8 +111,8 @@ public class UserCopy {
                   logger.warn("copyUsers no user for '" + compoundID + "'");
 
                   toImport.setUserID(compoundID);
-                  ClientUserDetail e = addUser(dominoUserDAO, oldToNew, toImport, optName);
-                  added.add(e);
+                 // ClientUserDetail e = ;
+                  added.add(addUser(dominoUserDAO, oldToNew, toImport, optName));
                 }
 //              String passwordHash1 = userByID1.getPasswordHash();
 //              if (!passwordHash1.isEmpty()) {

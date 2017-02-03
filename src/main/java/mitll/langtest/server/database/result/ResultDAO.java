@@ -494,6 +494,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
         if (missingScoreCol++ < 2) logger.info("Got " + e);
       }
       String device = rs.getString(DEVICE);
+      String model = rs.getString(MODEL);
+
       AudioType realAudioType = AudioType.UNSET;
       boolean withFlash = rs.getBoolean(WITH_FLASH);
 
@@ -525,7 +527,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           realAudioType, dur, correct, pronScore, device,
           rs.getString(DEVICE_TYPE), rs.getLong(PROCESS_DUR), rs.getLong(ROUND_TRIP_DUR), withFlash,
           rs.getFloat(SNR),
-          validity);
+          validity, model);
 
       result.setJsonScore(json);
       result.setOldExID(exid);
@@ -576,7 +578,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
 
       int exid1 = -1; // NO backwards compatibility
-      UserAndTime userAndTime = new MyUserAndTime(userID, exid1, timestamp.getTime(), rs.getInt(QID));
+      UserAndTime userAndTime = new MyUserAndTime(userID, exid1, timestamp.getTime()/*, rs.getInt(QID)*/);
 
       results.add(userAndTime);
     }
