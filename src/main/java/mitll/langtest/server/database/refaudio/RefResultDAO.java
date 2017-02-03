@@ -120,6 +120,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @param correct
    * @param isMale
    * @param speed
+   * @param model
    * @return id of new row in result table
    * @see DatabaseImpl#addRefAnswer
    */
@@ -130,13 +131,13 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
                         long durationInMillis,
                         boolean correct,
 
-                 DecodeAlignOutput alignOutput,
-                 DecodeAlignOutput decodeOutput,
+                        DecodeAlignOutput alignOutput,
+                        DecodeAlignOutput decodeOutput,
 
-                 DecodeAlignOutput alignOutputOld,
-                 DecodeAlignOutput decodeOutputOld,
+                        DecodeAlignOutput alignOutputOld,
+                        DecodeAlignOutput decodeOutputOld,
 
-                 boolean isMale, String speed) {
+                        boolean isMale, String speed, String model) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
@@ -455,6 +456,11 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     return numResults;
   }
 
+  @Override
+  public List<String> getAllFilesForProject(int projid) {
+    return null;
+  }
+
   /**
    * Get a list of Results for this Query.
    * <p>
@@ -526,7 +532,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
             audioType, dur,
             correct, pronScore1,
             "browser", "",
-            0, 0, false, 30, "");
+            0, 0, false, 30, "", model);
         result.setMale(isMale);
 
         long hydraDecodeDur = rs.getLong(RefResultDAO.DECODE_PROCESS_DUR);

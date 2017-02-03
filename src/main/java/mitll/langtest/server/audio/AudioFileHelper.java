@@ -460,7 +460,8 @@ public class AudioFileHelper implements AlignDecode {
     AnswerInfo infoOrig = new AnswerInfo(
         context,
         recordingInfo,
-        validity);
+        validity,
+        getModelsDir());
 
     AnswerInfo info = new AnswerInfo(
         infoOrig,
@@ -524,7 +525,8 @@ public class AudioFileHelper implements AlignDecode {
             decodeOutputOld,
 
             attribute.isMale(),
-            attribute.isRegularSpeed() ? REG : SLOW);
+            attribute.isRegularSpeed() ? REG : SLOW,
+            getModelsDir());
       }
     } else {
       logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
@@ -604,6 +606,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param duration
    * @param isMale
    * @param speed
+   * @param model
    * @return
    * @paramx wavPath
    * @paramx numAlignPhones
@@ -619,7 +622,8 @@ public class AudioFileHelper implements AlignDecode {
                                          DecodeAlignOutput alignOutputOld,
                                          DecodeAlignOutput decodeOutputOld,
 
-                                         boolean isMale, String speed) {
+                                         boolean isMale, String speed,
+                                         String model) {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(duration);
     // logger.debug("validity dur " + validity.durationInMillis);
 
@@ -634,7 +638,8 @@ public class AudioFileHelper implements AlignDecode {
         alignOutputOld,
         decodeOutputOld,
 
-        isMale, speed);
+        isMale, speed,
+        model);
     // TODO : add word and phone table for refs
     //	recordWordAndPhoneInfo(decodeAnswer, answerID);
     //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
@@ -703,7 +708,7 @@ public class AudioFileHelper implements AlignDecode {
       AnswerInfo infoOrig = new AnswerInfo(
           context,
           recordingInfo,
-          validity);
+          validity, getModelsDir());
 
       AnswerInfo info = new AnswerInfo(infoOrig,
           new AnswerInfo.ScoreInfo(true, score, new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur));
@@ -714,6 +719,10 @@ public class AudioFileHelper implements AlignDecode {
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);
     return answer;
+  }
+
+  private String getModelsDir() {
+    return project.getModelsDir();
   }
 
 

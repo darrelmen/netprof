@@ -39,6 +39,9 @@ import mitll.langtest.shared.answer.AudioType;
 import java.beans.Transient;
 import java.util.Date;
 
+/**
+ * Only server side.
+ */
 public class Result implements UserAndTime {
   private int uniqueID;
   private int userid;
@@ -66,11 +69,14 @@ public class Result implements UserAndTime {
   private float dynamicRange;
   private String validity;
   private boolean isMale;
+
+  private String model;
+
   private DecodeAlignOutput alignOutput;
   private DecodeAlignOutput decodeOutput;
 
-  public Result() {
-  }
+//  public Result() {
+//  }
 
   /**
    * @param userid
@@ -88,6 +94,7 @@ public class Result implements UserAndTime {
    * @param roundTripDur
    * @param withFlash
    * @param dynamicRange
+   * @param model
    * @paramx answerType
    * @paramx plan
    * @see ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
@@ -103,7 +110,7 @@ public class Result implements UserAndTime {
                 long durationInMillis, boolean correct, float pronScore, String device,
                 String deviceType,
                 long processDur, long roundTripDur, boolean withFlash, float dynamicRange,
-                String validity) {
+                String validity, String model) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
@@ -122,6 +129,7 @@ public class Result implements UserAndTime {
     this.withFlash = withFlash;
     this.dynamicRange = dynamicRange;
     this.validity = validity;
+    this.model = model;
   }
 
   /**
@@ -296,5 +304,9 @@ public class Result implements UserAndTime {
 
   public void setExid(int exid) {
     this.exid = exid;
+  }
+
+  public String getModel() {
+    return model;
   }
 }

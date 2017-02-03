@@ -61,4 +61,5 @@ public interface AudioServiceAsync {
 
   void checkAudio(int projectid, AsyncCallback<Void> async);
 
+  void recalcRefAudio(int id, AsyncCallback<Void> asyncCallback);
 }

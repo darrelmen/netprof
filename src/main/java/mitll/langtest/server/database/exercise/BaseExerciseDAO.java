@@ -59,10 +59,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final String CONTAINS_SEMI = "contains semicolon - should this item be split?";
   private static final String ENGLISH = "english";
   private static final String MISSING_ENGLISH = "missing english";
-  public static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
 
   private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
-  protected final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
+  private final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
   protected final String language;
   protected final ServerProperties serverProps;
   private final IUserListManager userListManager;
@@ -76,9 +76,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see #setDependencies
    */
   private IUserExerciseDAO userExerciseDAO;
+  /**
+   * @see #attachAudio()
+   */
   private AttachAudio attachAudio;
   private IAudioDAO audioDAO;
-  private int id;
+  private final int id;
 
   /**
    * @param serverProps
@@ -166,16 +169,29 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * Worry about if the audio transcript doesn't match the exercise transcript
    *
    * @see #setAudioDAO
+   * @see #afterReadingExercises
    */
   private void attachAudio() {
     Set<Integer> transcriptChanged = new HashSet<>();
 
     logger.info("attachAudio afterReadingExercises trying to attach audio to " + exercises.size() + " with project id " + id);
+   // Map<Integer, List<AudioAttribute>> exToAudio = ;
+    attachAudio.attachAllAudio(exercises, audioDAO.getExToAudio(id), transcriptChanged);
 
+    //consistencyCheck();
+
+    if (!transcriptChanged.isEmpty()) {
+      logger.info("attachAudio afterReadingExercises : found " + transcriptChanged.size() + " changed transcripts in set of " + exercises.size() + " items");
+    }
+  }
+
+ /* private void attachAllAudio(Set<Integer> transcriptChanged) {
     int c = 0;
 
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(id);
+
     attachAudio.setExToAudio(exToAudio, getMultiPronWords(exercises));
+
     Set<String> allTranscripts = new HashSet<>();
     for (List<AudioAttribute> audioAttributes : exToAudio.values()) {
       for (AudioAttribute audioAttribute : audioAttributes) {
@@ -190,7 +206,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         allTranscripts.remove(audioAttribute.getTranscript().toLowerCase());
       }
 
- /*     if (i < 25) {
+ *//*     if (i < 25) {
         if (c++ < 25) {
           logger.warn(language + " (" + exercises.size() +
               ") -----------> adding old school audio for " + ex.getID() + " : " + serverProps.getLessonPlan());
@@ -199,18 +215,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
           attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
         }
-      }*/
+      }*//*
     }
 
     logger.info("attachAudio found " + allTranscripts.size() + " orphan audio cuts - ");// + allTranscripts);
-
-    //consistencyCheck();
-
-    if (!transcriptChanged.isEmpty()) {
-      logger.info("attachAudio afterReadingExercises : found " + transcriptChanged.size() + " changed transcripts in set of " + exercises.size() + " items");
-    }
   }
-
+*/
   /**
    * @return
    * @see DatabaseImpl#getSectionHelper(int)
@@ -234,15 +244,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    */
   private void setAudioDAO(IAudioDAO audioDAO, int projectID) {
     this.audioDAO = audioDAO;
-//    File fileInstallPath = new File(installPath);
-//    if (!fileInstallPath.exists()) {
-//      logger.warn("\n\n\nhuh? install path " + fileInstallPath.getAbsolutePath() + " doesn't exist???");
-//    }
-
     if (!serverProps.isLaptop()) {
       logger.info("setAudioDAO makeSureAudioIsThere " + projectID);
-
-      //makeSureAudioIsThere(audioDAO, projectID);
       audioDAO.makeSureAudioIsThere(projectID, language, false);
     }
 
@@ -250,38 +253,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     logger.info("setAudioDAO exToAudio " + exToAudio.size());
     this.attachAudio = new AttachAudio(exToAudio, language, serverProps.shouldCheckAudioTranscript(), serverProps);
   }
-
-/*
-
-  public void makeSureAudioIsThere(int projectID) {
-    makeSureAudioIsThere(audioDAO, projectID);
-  }
-
-  private void makeSureAudioIsThere(IAudioDAO audioDAO, int projectID) {
-    boolean foundFiles = audioDAO.didFindAnyAudioFiles(projectID);
-    String mediaDir = serverProps.getMediaDir();
-    File file = new File(mediaDir);
-    if (file.exists()) {
-      if (file.isDirectory()) {
-        String[] list = file.list();
-        if (list == null) {
-          logger.error("setAudioDAO configuration error - can't get files from media directory " + mediaDir);
-        } else if (list.length > 0) { // only on pnetprof (behind firewall), znetprof has no audio, might have a directory.
-          logger.debug("setAudioDAO validating files under " + file.getAbsolutePath());
-          if (serverProps.doAudioChecksInProduction() &&
-              (serverProps.doAudioFileExistsCheck() || !foundFiles)) {
-            audioDAO.validateFileExists(projectID, mediaDir, language);
-          }
-        }
-      } else {
-        logger.error("configuration error - expecting media directory " + mediaDir + " to be directory.");
-
-      }
-    } else {
-      logger.warn("configuration error? - expecting a media directory " + mediaDir);
-    }
-  }
-*/
 
   /**
    * TODO : make it easy to look up by domino id.
@@ -306,12 +277,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * So the story is we get the user exercises out of the database on demand.
    * <p>
-   * We need to join with the audio table entries every time.
+   * We need to join with the audio table entries every time - why? worried about recording happening concurrently?
    * <p>
    * TODO : also, this a lot of work just to get the one ref audio recording.
    *
    * @param all
-   * @see DatabaseImpl#getExerciseIDToRefAudio(int)
+   * @see DatabaseImpl#getExerciseIDToRefAudio
    */
   public void attachAudio(Collection<CommonExercise> all) {
     int projectid = all.isEmpty() ? -1 : all.iterator().next().getProjectID();
@@ -319,12 +290,13 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         ")" +
         " attach audio to " + all.size() + " exercises");
 
-    attachAudio.setExToAudio(audioDAO.getExToAudio(projectid), getMultiPronWords(all));
+    attachAudio.setExToAudio(audioDAO.getExToAudio(projectid), attachAudio.getMultiPronWords(all));
     int user = 0;
     int examined = 0;
 
     Collection<Integer> transcriptChanged = new HashSet<>();
 
+    // latchy...
     for (CommonExercise ex : all) {
       if (!ex.hasRefAudio()) {
         attachAudio.attachAudio(ex, transcriptChanged);
@@ -334,7 +306,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     }
     if (user > 0) {
       logger.info("attachAudio out of " + exercises.size() + //" " + missing +
-          " are missing ref audio, out of " + examined + " user exercises missing = " + user);
+          " are missing ref audio, out of " + examined +
+          " user exercises missing = " + user);
     }
 
     if (!transcriptChanged.isEmpty()) {
@@ -344,15 +317,21 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   /**
-   * The idea here is to
+   * Get set of fl words have multiple english equivalents.
+   * <p>
+   * Not sure why we have to recalc it all the time.
+   * <p>
+   * So perhaps if french "livre" appears as livre-book, livre-magazine you wouldn't want to
+   * use the audio for the first occurence if you don't have it for the second occurence.
    *
    * @param all
    * @return
    */
-  private Set<String> getMultiPronWords(Collection<CommonExercise> all) {
+/*  public Set<String> getMultiPronWords(Collection<CommonExercise> all) {
     Map<String, String> seen = new HashMap<>();
     Set<String> multiPron = new HashSet<>();
 
+    long then = System.currentTimeMillis();
     for (CommonExercise ex : all) {
       String foreignLanguage = ex.getForeignLanguage();
       String english = seen.get(foreignLanguage);
@@ -363,8 +342,14 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       }
       seen.put(foreignLanguage, english1);
     }
+
+    long now = System.currentTimeMillis();
+
+    if (now - then > 100) logger.info("took " + (now - then) + " to get " + multiPron.size() +
+        "  multi def words ");
+
     return multiPron;
-  }
+  }*/
 
   /**
    * TODO : better to use a filter
@@ -703,7 +688,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    *
    * @param exercises
    */
-  void populateSections(Collection<CommonExercise> exercises) {
+  private void populateSections(Collection<CommonExercise> exercises) {
     for (CommonExercise ex : exercises) {
       Collection<SectionHelper.Pair> pairs = new ArrayList<>();
       for (Map.Entry<String, String> pair : ex.getUnitToValue().entrySet()) {

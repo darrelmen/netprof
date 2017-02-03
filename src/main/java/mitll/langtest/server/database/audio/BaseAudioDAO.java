@@ -97,7 +97,8 @@ public abstract class BaseAudioDAO extends DAO {
    * @param projid
    * @return
    * @seex ExerciseDAO#setAudioDAO
-   * @see AudioExport#writeFolderContents
+   *
+   * @see AudioExport#attachAudio(Collection, IAudioDAO, String)
    * @see DatabaseImpl#attachAllAudio
    * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#attachAudio()
    */
@@ -106,7 +107,7 @@ public abstract class BaseAudioDAO extends DAO {
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
 
-//    logger.info("getExToAudio - for " +projid);
+    logger.info("getExToAudio - for " +projid);
     Collection<AudioAttribute> attributesByProject = getAudioAttributesByProject(projid);
     //  logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
 
@@ -143,7 +144,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param firstExercise
    * @param language
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
-   * @see DatabaseImpl#attachAudio(CommonExercise)
+   * @see DatabaseImpl#attachAudio
    * @see DatabaseImpl#writeZip
    */
   public int attachAudioToExercise(CommonExercise firstExercise, String language) {
@@ -302,10 +303,10 @@ public abstract class BaseAudioDAO extends DAO {
 
         // or if we store bestAudio/spanish/123/regular_YYY.wav ...? e.g. for newly recorded audio
 
-        String s = language.toLowerCase();
-        String prefix = installPath + File.separator + s;
+        String lang = language.toLowerCase();
+        String prefix = installPath + File.separator + lang;
         String relPrefix = prefix.substring(netProfDurLength);
-        if (!audioRef.contains(s)) {
+        if (!audioRef.contains(lang)) {
           if (DEBUG_ATTACH) logger.info("audioref " + audioRef + " does not contain '" + prefix +
               "' before " + attr.getAudioRef());
           attr.setAudioRef(relPrefix + File.separator + audioRef);
