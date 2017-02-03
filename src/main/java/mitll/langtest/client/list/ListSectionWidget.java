@@ -60,6 +60,8 @@ import java.util.logging.Logger;
 public class ListSectionWidget implements SectionWidget {
   private final Logger logger = Logger.getLogger("MenuSectionWidget");
 
+  public static final int RIGHT_MARGIN = 15;
+
   private final String type;
   private ListBox listBox;
   private final Collection<SectionNode> nodes;
@@ -92,20 +94,16 @@ public class ListSectionWidget implements SectionWidget {
                   String label,
                   List<String> values) {
     Panel horizontalPanel = new HorizontalPanel();
-    horizontalPanel.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+    horizontalPanel.getElement().getStyle().setMarginRight(RIGHT_MARGIN, Style.Unit.PX);
 
     // add label
     Heading child = new Heading(5, label);
     child.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
+
     horizontalPanel.add(child);
-
-    Button left = getLeftButton(values);
-    horizontalPanel.add(left);
-
+    horizontalPanel.add(getLeftButton(values));
     horizontalPanel.add(toolbar);
-
-    Button right = getRightButton(values, left);
-    horizontalPanel.add(right);
+    horizontalPanel.add(getRightButton(values));
 
     this.num = values.size();
 
@@ -133,7 +131,7 @@ public class ListSectionWidget implements SectionWidget {
     return left;
   }
 
-  private Button getRightButton(final List<String> values, Button left) {
+  private Button getRightButton(final List<String> values) {
     Button right = new Button("", IconType.CARET_RIGHT);
     right.addStyleName("leftFiveMargin");
     right.addStyleName("topMargin");

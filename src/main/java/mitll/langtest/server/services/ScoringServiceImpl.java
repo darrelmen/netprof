@@ -35,6 +35,7 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
@@ -132,7 +133,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   /**
    * And check if there is no hydra dcodr available locally, and if so, try to use one on dev.
-   *
+   * <p>
    * So first we check and see if we've already done alignment for this audio (if reference audio), and if so, we grab the Result
    * object out of the result table and use it and it's json to generate the score info and transcript inmages.
    *
@@ -154,7 +155,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                           ImageOptions imageOptions,
                                           int exerciseID,
                                           boolean usePhonemeMap) {
-    File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg",".wav"));
+    File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg", ".wav"));
     int userIDFromSession = getUserIDFromSession();
 
     PrecalcScores precalcScores =
@@ -233,7 +234,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   @NotNull
   private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, Result cachedResult) {
-    return new PrecalcScores(serverProps,cachedResult,usePhoneToDisplay || serverProps.usePhoneToDisplay());
+    return new PrecalcScores(serverProps, cachedResult, usePhoneToDisplay || serverProps.usePhoneToDisplay());
   }
 
   @Override
@@ -275,11 +276,14 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public boolean isHydraRunning(int projid) {
     Project project = db.getProject(projid);
     if (project == null) {
-      logger.error("no project with id "  +projid);
+      logger.error("no project with id " + projid);
       return false;
-    }
-    else {
-      return project.getAudioFileHelper().isHydraAvailable();
+    } else {
+      AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+      boolean hydraAvailable = audioFileHelper.isHydraAvailable();
+      boolean hydraAvailableCheckNow = audioFileHelper.isHydraAvailableCheckNow();
+      if (!hydraAvailable && hydraAvailableCheckNow) audioFileHelper.setAvailable();
+      return hydraAvailableCheckNow;
     }
   }
 
