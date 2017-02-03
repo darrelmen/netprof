@@ -80,7 +80,8 @@ public class AudioFileHelper implements AlignDecode {
   private static final String REG = "reg";
   private static final String SLOW = "slow";
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
-  public static final ImageOptions DEFAULT = ImageOptions.getDefault();
+  private static final ImageOptions DEFAULT = ImageOptions.getDefault();
+  private static final boolean USE_HYDEC_FALLBACK = false;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -171,8 +172,10 @@ public class AudioFileHelper implements AlignDecode {
           //        boolean validForeignPhrase = isInDictOrLTS(exercise);
           if (!validForeignPhrase) {
             if (count < 10) {
-              logger.warn("huh? for " + exercise.getID() +
-                  " " + exercise.getEnglish() + " fl '" + exercise.getForeignLanguage() + "'");
+              logger.warn("checkLTSAndCountPhones : huh? for " +
+                  "\n\tex      " + exercise.getID() +
+                  "\n\tenglish " + exercise.getEnglish() +
+                  "\n\tfl      " + exercise.getForeignLanguage());
             }
             count++;
           } else {
@@ -585,9 +588,9 @@ public class AudioFileHelper implements AlignDecode {
     return serverProps.isQuietAudioOK();
   }
 
-  private boolean useScoreCache() {
-    return serverProps.useScoreCache();
-  }
+//  private boolean useScoreCache() {
+//    return serverProps.useScoreCache();
+//  }
 
   /**
    * Really helpful - could have annotation info always at hand, so don't have to wait for it in learn tab...
@@ -852,7 +855,7 @@ public class AudioFileHelper implements AlignDecode {
         validity.getValidity(), reqid, validity.durationInMillis);
   }
 
-  public PretestScore getEasyAlignment(CommonExercise exercise, String testAudioPath) {
+  private PretestScore getEasyAlignment(CommonExercise exercise, String testAudioPath) {
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
     return getAlignmentScore(exercise, testAudioPath, options);
   }
@@ -888,7 +891,7 @@ public class AudioFileHelper implements AlignDecode {
                                           String transliteration,
                                           DecoderOptions options,
                                           PrecalcScores precalcScores) {
-    List<String> unk = new ArrayList<String>();
+    List<String> unk = new ArrayList<>();
 
     if (isMacOrWin() || useOldSchoolServiceOnly || options.isUseOldSchool()) {  // i.e. NOT using cool new jcodr webservice
       unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
@@ -916,9 +919,9 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.services.ScoringServiceImpl#getASRScoreForAudio
    */
   public PrecalcScores checkForWebservice(int exid, int projid, int userid, File theFile) {
-    boolean available = webserviceScoring.isAvailable();
+    boolean available = isHydraAvailable();
     if (!available) logger.debug("local webservice not available for " + theFile.getName());
-    if (!available && !theFile.getName().endsWith("ogg")) {
+    if (!available && !theFile.getName().endsWith("ogg") && serverProps.isLaptop()) {
  /*
       logger.info("checkForWebservice exid    " + exid);
       logger.info("checkForWebservice projid  " + projid);
@@ -957,6 +960,10 @@ public class AudioFileHelper implements AlignDecode {
     } else {
       return null;
     }
+  }
+
+  public boolean isHydraAvailable() {
+    return webserviceScoring.isAvailable();
   }
 
   /**
@@ -1070,7 +1077,7 @@ public class AudioFileHelper implements AlignDecode {
         precalcScores,
         options.isUsePhoneToDisplay());
 
-    if (!pretestScore.isRanNormally() && isWebservice) {
+    if (!pretestScore.isRanNormally() && isWebservice && USE_HYDEC_FALLBACK) {
       logger.warn("getASRScoreForAudio Using hydec as fallback for " + (options.isDoFlashcard() ? " decoding " : " aligning ") + testAudioFile + " against '" +
           sentence +
           "'");

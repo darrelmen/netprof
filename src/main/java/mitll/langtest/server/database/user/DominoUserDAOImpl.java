@@ -155,7 +155,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public void cleanUp() {
+  public void close() {
     if (pool != null) {
       logger.info("closing connection to " + pool);
       pool.closeConnection();
@@ -178,10 +178,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return Ignition.start(cfg);
   }
 
-  private MyMongoUserServiceDelegate makeMyServiceDelegate() {//UserServiceProperties props,
-                                                           //Mailer mailer, Mongo mongoCP, JSONSerializer serializer) {
-    MyMongoUserServiceDelegate d = new MyMongoUserServiceDelegate();//props, mailer, "dude", mongoCP);
- //   d.initializeDAOs(serializer);
+  private MyMongoUserServiceDelegate makeMyServiceDelegate() {
+    MyMongoUserServiceDelegate d = new MyMongoUserServiceDelegate();
     return d;
   }
 

@@ -44,5 +44,4 @@ public interface ProjectServiceAsync {
 
   void update(ProjectInfo info, AsyncCallback<Boolean> async);
 
-  void checkAudio(int projectid, AsyncCallback<Void> async);
 }

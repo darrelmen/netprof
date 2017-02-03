@@ -49,7 +49,7 @@ import java.util.Collection;
  * Time: 3:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface Database {
+public interface Database extends AutoCloseable {
   String TIME = "time";
   String EXID = "exid";
 

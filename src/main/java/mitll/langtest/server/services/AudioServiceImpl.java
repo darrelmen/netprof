@@ -546,4 +546,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     return userExercise;
   }
+
+  @Override
+  public void checkAudio(int projectid) {
+    db.getAudioDAO().makeSureAudioIsThere(projectid, db.getProject(projectid).getLanguage(), true);
+  }
 }

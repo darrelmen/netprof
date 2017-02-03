@@ -66,4 +66,6 @@ public interface ScoringServiceAsync {
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
   void getResultASRInfo(int resultID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);
+
+  void isHydraRunning(int projid, AsyncCallback<Boolean> async);
 }

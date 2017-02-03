@@ -51,11 +51,14 @@ public interface AudioServiceAsync {
                       boolean addToAudioTable,
                       boolean allowAlternates,
 
-                      AsyncCallback<AudioAnswer> async) /*throws DominoSessionException*/;
+                      AsyncCallback<AudioAnswer> async);
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
                             String exerciseID,
                             AsyncCallback<ImageResponse> async);
 
   void reallyCreateNewItem(long userListID, CommonExercise userExercise, String language, AsyncCallback<CommonExercise> async);
+
+  void checkAudio(int projectid, AsyncCallback<Void> async);
+
 }
