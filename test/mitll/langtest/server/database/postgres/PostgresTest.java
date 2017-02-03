@@ -68,6 +68,7 @@ public class PostgresTest extends BaseTest {
     spanish.dropAll();
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
     logger.info("after drop " + listOfTables);
+    spanish.close();
   }
 
   @Test
@@ -80,6 +81,7 @@ public class PostgresTest extends BaseTest {
       logger.info("got " + iterator.next());
     }
     logger.info("list tables " + listOfTables);
+    spanish.close();
   }
 
   @Test
@@ -88,11 +90,13 @@ public class PostgresTest extends BaseTest {
     spanish.dropAll();
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
     logger.info("after drop " + listOfTables);
+    spanish.close();
   }
 
   @Test
   public void testListAll() {
     DBConnection spanish = getConnection();
+    spanish.close();
   }
 
   @Test
@@ -311,7 +315,7 @@ public class PostgresTest extends BaseTest {
           sectionHelper.report();
         } else {
           cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
-          databaseLight.destroy();
+          databaseLight.close();
         }
 
         long now = System.currentTimeMillis();
@@ -384,29 +388,9 @@ public class PostgresTest extends BaseTest {
         logger.debug("not deleting " + project);
       }
     }
-  }
 
-  @Test
-  public void testCopyProject() {
-    testCreate();
-    String config = "spanish";
-    DatabaseImpl spanish = getDatabaseLight(config, true);
-    CopyToPostgres copyToPostgres = new CopyToPostgres();
-    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC(config), null, 0, false);
-  }
+    english.close();
 
-  @Test
-  public void testCopyUserExercises() {
-    testCreate();
-    DatabaseImpl spanish = getDatabaseLight("spanish", true);
-    // new CopyToPostgres().copyOnlyUserExercises(spanish);
-  }
-
-  @Test
-  public void testCopyUserJoinExercises() {
-    testCreate();
-    DatabaseImpl spanish = getDatabaseLight("spanish", true);
-    //   new CopyToPostgres().copyUserExListJoin(spanish);
   }
 
   @Test
@@ -423,6 +407,7 @@ public class PostgresTest extends BaseTest {
       }
     }
     logger.info("Got " + rawExercises.iterator().next());
+    spanish.close();
     //   new CopyToPostgres().copyUserExListJoin(spanish);
   }
 

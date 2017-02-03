@@ -36,6 +36,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.amas.QAPair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -298,16 +299,21 @@ public class HTTPClient {
 
   public String sendAndReceiveAndClose(File input) throws IOException {
     try {
-      postFile(input);
-      String receive = receive();
-      closeConn();
-      return receive;
+      return postAndClose(input);
     } catch (ConnectException ce) {
-      logger.error("sending " + input + " couldn't connect to server at  " + httpConn.getURL() + " got " + ce);
+      logger.error("sendAndReceiveAndClose sending " + input + " couldn't connect to server at  " + httpConn.getURL() + " got " + ce);
       return "";
     } catch (IOException e) {
-      logger.error("sending " + input + " got " + e, e);
+      logger.error("sendAndReceiveAndClose sending " + input + " got " + e, e);
       throw e;
     }
+  }
+
+  @NotNull
+  private String postAndClose(File input) throws IOException {
+    postFile(input);
+    String receive = receive();
+    closeConn();
+    return receive;
   }
 }

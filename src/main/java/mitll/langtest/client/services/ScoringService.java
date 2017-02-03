@@ -43,11 +43,10 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 @RemoteServiceRelativePath("scoring-manager")
 public interface ScoringService extends RemoteService {
-
   /**
    * @param resultID
    * @return
-   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio
    */
   PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions);
 
@@ -59,28 +58,12 @@ public interface ScoringService extends RemoteService {
    * @param exerciseID
    * @param usePhonemeMap
    * @return
-   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ASRScoringAudioPanel#scoreAudio
    */
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                    String transliteration,
 
                                    ImageOptions imageOptions, int exerciseID, boolean usePhonemeMap);
-
-  /**
-   * @param reqid
-   * @param resultID
-   * @param testAudioFile
-   * @param sentence
-   * @param exerciseID
-   * @return
-   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
-   */
-/*
-  PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                           String transliteration,
-
-                                           ImageOptions imageOptions, int exerciseID);
-*/
 
   /**
    * @param resultid
@@ -105,4 +88,6 @@ public interface ScoringService extends RemoteService {
                            String identifier,
                            int reqid,
                            String device);
+
+  boolean isHydraRunning(int projid);
 }

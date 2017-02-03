@@ -953,7 +953,7 @@ public class ScoreServlet extends DatabaseServlet {
         " exercise id " + exerciseID + " took " + (now - then) +
         " millis for " + saveFile.getName() + " = " + hydecScore);
 
-    if (answer != null && answer.isValid()) {
+    if (answer != null && answer.isValid() && pretestScore != null) {
       boolean usePhoneToDisplay = options.isUsePhoneToDisplay();
       ScoreToJSON scoreToJSON = new ScoreToJSON();
       jsonForScore = fullJSON ?

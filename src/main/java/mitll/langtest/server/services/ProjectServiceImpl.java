@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ProjectService;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -57,7 +58,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
             project.modified().getTime(),
             ProjectStatus.valueOf(project.status()),
             project.displayorder(),
-            project.countrycode())
+            project.countrycode(),
+             project.getProp(ServerProperties.WEBSERVICE_HOST_PORT))
         )
         .collect(Collectors.toList());
   }
@@ -85,10 +87,5 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
     db.getProjectManagement().refreshProjects();
     return update;
-  }
-
-  @Override
-  public void checkAudio(int projectid) {
-    db.getAudioDAO().makeSureAudioIsThere(projectid, db.getProject(projectid).getLanguage(), true);
   }
 }

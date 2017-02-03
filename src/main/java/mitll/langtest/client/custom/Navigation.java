@@ -364,8 +364,13 @@ public class Navigation implements RequiresResize, ShowTab {
       if (targetName.contains(PRACTICE)) {
         Panel createdPanel1 = practiceHelper.getCreatedPanel();
         if (createdPanel1 != null) {
-          //       logger.info("getTabPanel : practice : got shown event : '" + showEvent + "' target '" + targetName + "'");
-          ((FlashcardPanel) createdPanel1).wasRevealed();
+          if (createdPanel1 instanceof FlashcardPanel) {
+            //       logger.info("getTabPanel : practice : got shown event : '" + showEvent + "' target '" + targetName + "'");
+            ((FlashcardPanel) createdPanel1).wasRevealed();
+          }
+          else {
+            logger.warning("huh? flashcard panel was a " + createdPanel1.getClass());
+          }
         }
       }
     }

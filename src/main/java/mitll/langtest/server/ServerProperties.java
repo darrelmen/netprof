@@ -32,23 +32,17 @@
 
 package mitll.langtest.server;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.typesafe.config.ConfigFactory;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
-import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.Affiliation;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -81,41 +75,47 @@ public class ServerProperties {
       Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
 */
 
+  @Deprecated
   public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
+  @Deprecated
   private static final String MIRA_DEVEL = "https://" + MIRA_DEVEL_HOST;
+  @Deprecated
   private static final String MIRA_LEN = "https://mira.ll.mit.edu/scorer/item";
+  @Deprecated
   private static final String MIRA_DEFAULT = MIRA_LEN;
+  @Deprecated
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
 
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
+  @Deprecated
   private static final String USE_MYSQL = "useMYSQL";
   private static final String USE_H_2 = "useH2";
   private static final String USE_POSTGRE_SQL = "usePostgreSQL";
-  private static final String TYPE_ORDER = "typeOrder";
+  //private static final String TYPE_ORDER = "typeOrder";
   private static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   public static final String MODELS_DIR = "MODELS_DIR";
-  public static final String DB_CONFIG = "dbConfig";
-  public static final String POSTGRES_HYDRA = "postgresHydra";
-  public static final String POSTGRES = "postgres";
-  public static final String AFFLIATIONS = "affliations";
-  public static final String ABBREVIATION = "abbreviation";
-  public static final String DISPLAY_NAME = "displayName";
-  public static final String ID = "_id";
+  private static final String DB_CONFIG = "dbConfig";
+  private static final String POSTGRES_HYDRA = "postgresHydra";
+  private static final String POSTGRES = "postgres";
 
   public static final String CONFIG = "config";
   public static final String CONFIG_JSON = "config.json";
-  public static final String CONFIG_FILE1 = "config.file";
-  public static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
-  public static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
+  public static final String UI_PROPERTIES = "ui.properties";
+  private static final String CONFIG_FILE1 = "config.file";
+  private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
+  private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
+  private static final String APPLICATION_CONF = "/opt/netprof/config/application.conf";
 
+  @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
   @Deprecated
   private static final String NP_SERVER = "np.ll.mit.edu";
+
   private static final String DOMINO_SERVER = "domino.url";
   private static final String DOMINO_SERVER_DEFAULT = "http://ltea-data2-dev:8080/domino-ltea/";
- // private static final String HELP = "help";
- // private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
+  // private static final String HELP = "help";
+  // private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -132,7 +132,7 @@ public class ServerProperties {
   private static final String MIN_PRON_SCORE_DEFAULT = "" + 0.31f;
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
-  private static final String AUDIO_OFFSET = "audioOffset";
+//  private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
   //  private static final String NO_MODEL = "noModel";
   private static final String TIER_INDEX = "tierIndex";
@@ -144,7 +144,7 @@ public class ServerProperties {
    */
   private static final String PREFERRED_VOICES = "preferredVoices";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
- // private static final String ENABLE_ALL_USERS = "enableAllUsers";
+  // private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String DO_DECODE = "dodecode";
   private static final String DO_TRIM = "dotrim";
 
@@ -159,7 +159,6 @@ public class ServerProperties {
   private static final String DO_AUDIO_CHECKS_IN_PRODUCTION = "doAudioChecksInProduction";
   private static final String CHECK_AUDIO_TRANSCRIPT = "checkAudioTranscript";
   private static final String MIN_ANALYSIS_SCORE = "minAnalysisScore";
-
 
   private static final int MIN_SCORE_TO_SHOW = 20;// 0.20f;
   private static final int USER_INITIAL_SCORES = 20;
@@ -191,11 +190,16 @@ public class ServerProperties {
   private String buildVers = "Unknown";
   private String buildDate = "Unknown";
 
+  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+
+  /**
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject
+   */
   public static List<String> CORE_PROPERTIES = Arrays.asList(
       ServerProperties.MODELS_DIR,
       "N_OUTPUT",
       "N_HIDDEN",
-      "webserviceHostPort"
+      WEBSERVICE_HOST_PORT
   );
   private String configFileFullPath;
 
@@ -203,7 +207,6 @@ public class ServerProperties {
   }
 
   /**
-   *
    * @param props
    * @param releaseVers
    * @param buildUser
@@ -225,7 +228,7 @@ public class ServerProperties {
 
     try {
       useProperties(configDir, buildDate);
-     // logger.debug("props " + props);
+      // logger.debug("props " + props);
 
       putProp(props, "releaseVers", releaseVers);
       putProp(props, "buildUser", buildUser);
@@ -243,15 +246,6 @@ public class ServerProperties {
   }
 
   /**
-   * @param servletContext
-   * @param configDir
-   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
-   */
-/*  public ServerProperties(ServletContext servletContext, String configDir) {
-    this(servletContext, configDir, servletContext.getInitParameter(CONFIG_FILE));
-  }*/
-
-  /**
    * Just for IMPORT.
    *
    * @param configDir
@@ -259,18 +253,13 @@ public class ServerProperties {
    * @seex mitll.langtest.server.database.ImportCourseExamples#makeDatabaseImpl
    */
   public ServerProperties(String configDir, String configFile) {
-//    this(configDir, configFile);
-//  }
-//
-//  private ServerProperties(//ServletContext servletContext,
-//                           String configDir, String configFile) {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile, "");//getDateFromManifest(servletContext));
     readPhonemeMap(configDir);
   }
 
   private void setApplicationConf() {
-    String applicationConfPath = "/opt/netprof/config/application.conf";
+    String applicationConfPath = APPLICATION_CONF;
     if (props.containsKey(CONFIG_FILE1)) {
       applicationConfPath = props.getProperty(CONFIG_FILE1);
     }
@@ -310,41 +299,9 @@ public class ServerProperties {
   private void useProperties(File configDir, String dateFromManifest) throws FileNotFoundException {
     emailList = new EmailList(props);
     readProperties(dateFromManifest);
-    getAffiliations(configDir);
+    affliations = new JsonConfigReader().getAffiliations(configDir);
     setApplicationConf();
   }
-
-  /**
-   * Read json file.
-   *
-   * @param configDir
-   * @throws FileNotFoundException
-   */
-  private void getAffiliations(File configDir) throws FileNotFoundException {
-    File file = new File(configDir, CONFIG_JSON);
-    if (file.exists()) {
-      JsonParser parser = new JsonParser();
-      JsonObject parse = parser.parse(new FileReader(file)).getAsJsonObject();
-      JsonArray config = parse.getAsJsonArray(CONFIG);
-
-      for (JsonElement elem : config) {
-
-        JsonObject asJsonObject = elem.getAsJsonObject();
-        if (asJsonObject.has(AFFLIATIONS)) {
-          JsonElement affiliations1 = asJsonObject.get(AFFLIATIONS);
-
-          JsonArray affiliations = affiliations1.getAsJsonArray();
-          for (JsonElement aff : affiliations) {
-            JsonObject asJsonObject1 = aff.getAsJsonObject();
-            String abbreviation = asJsonObject1.get(ABBREVIATION).getAsString();
-            String displayName = asJsonObject1.get(DISPLAY_NAME).getAsString();
-            affliations.add(new Affiliation(asJsonObject1.get(ID).getAsInt(), abbreviation, displayName));
-          }
-        }
-      }
-    }
-  }
-
 
   /**
    * @return
@@ -397,13 +354,14 @@ public class ServerProperties {
    * @return
    * @Deprecated each project will have it's types and type order
    */
-  public Collection<String> getTypes() {
+/*  public Collection<String> getTypes() {
     String property = props.getProperty(TYPE_ORDER, "Unit,Chapter");
     return Arrays.asList(property.split(","));
-  }
+  }*/
 
   /**
    * Relative to install location
+   *
    * @return
    * @see LangTestDatabaseImpl#setInstallPath
    */
@@ -414,6 +372,7 @@ public class ServerProperties {
 
   /**
    * Relative to install location
+   *
    * @return
    */
   public String getAnswerDir() {
@@ -492,7 +451,7 @@ public class ServerProperties {
   private int getIntPropertyDef(String audioOffset, int defaultValue) {
     try {
       String property = props.getProperty(audioOffset);
-      return (property == null) ? defaultValue: Integer.parseInt(property);
+      return (property == null) ? defaultValue : Integer.parseInt(property);
     } catch (NumberFormatException e) {
       return defaultValue;
     }
@@ -518,7 +477,7 @@ public class ServerProperties {
     return getPropertyMap(this.props);
   }
 
-  public Map<String, String> getPropertyMap(Properties props) {
+  private Map<String, String> getPropertyMap(Properties props) {
     Map<String, String> kv = new HashMap<>();
     for (Object prop : props.keySet()) {
       String sp = (String) prop;
@@ -599,7 +558,7 @@ public class ServerProperties {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
-  public String getProperty(String prop) {
+  private String getProperty(String prop) {
     return props.getProperty(prop);
   }
 
@@ -654,7 +613,7 @@ public class ServerProperties {
   /**
    * @param phone
    * @return
-   * @see ScoreServlet#getJsonForScore(PretestScore, boolean)
+   * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore
    */
   public String getDisplayPhoneme(String phone) {
     String s = phoneToDisplay.get(phone);
@@ -737,7 +696,7 @@ public class ServerProperties {
   /**
    * @return
    * @see UserDAO#UserDAO
-   * @deprecated  defined in domino
+   * @deprecated defined in domino
    */
   public Set<String> getAdmins() {
     Set<String> strings = Collections.emptySet();
@@ -761,12 +720,11 @@ public class ServerProperties {
   }
 
   /**
-   *
    * @return 0-1 float
    */
   public float getMinAnalysisScore() {
     int intPropertyDef = getIntPropertyDef(MIN_ANALYSIS_SCORE, MIN_SCORE_TO_SHOW);
-    return (float)intPropertyDef/100f;
+    return (float) intPropertyDef / 100f;
   }
 
   /**
@@ -853,18 +811,18 @@ public class ServerProperties {
   }
 
   public int getSleepBetweenDecodes() {
-    return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS,  SLEEP_BETWEEN_DECODES_DEFAULT);
+    return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS, SLEEP_BETWEEN_DECODES_DEFAULT);
   }
 
   private static final int TRIM_SILENCE_BEFORE = 300;
   private static final int TRIM_SILENCE_AFTER = 300;
 
   public long getTrimBefore() {
-    return getIntPropertyDef("trimBeforeMillis",   TRIM_SILENCE_BEFORE);
+    return getIntPropertyDef("trimBeforeMillis", TRIM_SILENCE_BEFORE);
   }
 
   public long getTrimAfter() {
-    return getIntPropertyDef("trimAfterMillis",  TRIM_SILENCE_AFTER);
+    return getIntPropertyDef("trimAfterMillis", TRIM_SILENCE_AFTER);
   }
 
   public String getDBConfig() {
@@ -907,8 +865,8 @@ public class ServerProperties {
    * Not what you want probably...
    *
    * @return
-   * @deprecated
    * @see mitll.langtest.server.rest.RestUserManagement#addUser
+   * @deprecated
    */
   public String getAppURL() {
     return props.getProperty(APP_URL, "https://np.ll.mit.edu/" +
@@ -928,8 +886,8 @@ public class ServerProperties {
   }
 
   /**
-   * @deprecated
    * @return
+   * @deprecated
    */
   public boolean hasModel() {
     return getCurrentModel() != null;

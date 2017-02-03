@@ -1279,9 +1279,9 @@ public class DatabaseImpl implements Database {
   /**
    * @see LangTestDatabaseImpl#destroy()
    */
-  public void destroy() {
+  public void close() {
     try {
-      userDAO.cleanUp();
+      userDAO.close();
       if (connection != null) {
         connection.contextDestroyed();
       }

@@ -855,7 +855,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public void update(User toUpdate) {}
 
   @Override
-  public void cleanUp() {}
+  public void close() {}
 
   @Override
   public boolean forgotPassword(String user

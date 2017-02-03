@@ -69,8 +69,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
     if (rightSide != null) {
 //      logger.info("got right side ");
       rightSide.clear();
-    }
-    else {
+    } else {
       logger.warning("huh? no right side?");
     }
     this.projectOps = projectOps;
@@ -81,7 +80,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
   @Override
   protected void makeInitialSelection(Collection<T> users, T userToSelect) {
     if (selectFirst) {
-    //  logger.info("selecting first " + header + " users " + users.size());
+      //  logger.info("selecting first " + header + " users " + users.size());
 
       Scheduler.get().scheduleDeferred(() -> {
             if (!users.isEmpty()) {
@@ -213,29 +212,14 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
     super.gotClickOnItem(project);
     rightSide.clear();
 
-    ProjectEditForm projectEditForm = new ProjectEditForm(projectOps, controller.getProps(), controller);
+    ProjectEditForm projectEditForm =
+        new ProjectEditForm(
+            projectOps,
+            controller.getProps(),
+            controller,
+        controller.getAudioService(), controller.getScoringService());
     rightSide.add(projectEditForm.getForm(project));
 
     projectOps.clearOthers(this);
   }
-
-  /*  private void populateUserEdit(DivWidget userDetail, User user) {
-    EditUserForm signUpForm = new EditUserForm(
-        controller.getProps(),
-        controller.getUserManager(),
-        controller,
-        new UserPassDialog() {
-          @Override
-          public void clearSignInHasFocus() {
-          }
-
-          @Override
-          public void setSignInHasFocus() {
-          }
-        }, user, projectOps);
-    signUpForm.setSignUpButtonTitle("Edit User");
-    Panel signUpForm1 = signUpForm.getSignUpForm(user);
-    signUpForm1.addStyleName("leftFiveMargin");
-    userDetail.add(signUpForm1);
-  }*/
 }

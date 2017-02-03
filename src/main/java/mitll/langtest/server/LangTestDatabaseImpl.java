@@ -285,7 +285,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (db == null) {
       logger.warn("DatabaseImpl was never made properly...");
     } else {
-      db.destroy(); // TODO : redundant with h2 shutdown hook?
+      db.close(); // TODO : redundant with h2 shutdown hook?
       db.stopDecode();
     }
   }
