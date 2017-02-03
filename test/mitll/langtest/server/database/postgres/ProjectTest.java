@@ -293,7 +293,7 @@ public class ProjectTest extends BaseTest {
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
     int croatian = projectDAO.getByName("croatian");
     projectDAO.delete(croatian);
-    andPopulate.destroy();
+    andPopulate.close();
   }
 
   @Test

@@ -36,6 +36,7 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -268,6 +269,18 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       logEvent("audioRecording", "writeAudioFile", identifier, "Writing audio - got zero duration!", -1, device);
     }
     return audioAnswer;
+  }
+
+  @Override
+  public boolean isHydraRunning(int projid) {
+    Project project = db.getProject(projid);
+    if (project == null) {
+      logger.error("no project with id "  +projid);
+      return false;
+    }
+    else {
+      return project.getAudioFileHelper().isHydraAvailable();
+    }
   }
 
   public void logEvent(String id, String widgetType, String exid, String context, int userid,

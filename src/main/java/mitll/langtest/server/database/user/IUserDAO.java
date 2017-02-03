@@ -32,29 +32,22 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.Report;
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.services.UserServiceImpl;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
-import net.sf.json.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface IUserDAO extends IDAO {
+public interface IUserDAO extends IDAO, AutoCloseable {
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
@@ -235,5 +228,5 @@ public interface IUserDAO extends IDAO {
    */
   void update(User toUpdate);
 
-  void cleanUp();
+  void close() throws Exception;
 }

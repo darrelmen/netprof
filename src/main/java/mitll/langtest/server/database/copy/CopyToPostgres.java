@@ -99,7 +99,7 @@ public class CopyToPostgres<T extends CommonShell> {
     boolean hasModel = databaseLight.getServerProps().hasModel();
     logger.info("loading " + language + " " + hasModel);
     new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), language, 0, !hasModel);
-    databaseLight.destroy();
+    databaseLight.close();
   }
 
   private void dropOneConfig(String config) throws Exception {
@@ -115,7 +115,7 @@ public class CopyToPostgres<T extends CommonShell> {
       projectDAO.delete(project.id());
     }
 
-    databaseLight.destroy();
+    databaseLight.close();
   }
 
   /**
