@@ -17,6 +17,7 @@ import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserNotification;
+import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
@@ -36,6 +37,9 @@ public class ProjectChoices {
    */
   private static final String PLEASE_SELECT_A_LANGUAGE = "Select a language";
   private static final String PLEASE_SELECT_A_COURSE = "Select a course";
+  /**
+   * @see #getHeader(List, int)
+   */
   private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
 
   /**
@@ -77,20 +81,36 @@ public class ProjectChoices {
   }
 
   /**
-   * @see InitialUI#addProjectChoices
+   * Overkill?
+   *
    * @param level
    * @param parent
+   * @see InitialUI#addProjectChoices
    */
   public void showProjectChoices(int level, SlimProject parent) {
-    List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
-//    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
-    showProjectChoices(getVisibleProjects(projects), level);
+    if (parent != null) {
+      showProjectChoices(getVisibleProjects(parent.getChildren()), level);
+    } else {
+      long then = System.currentTimeMillis();
+
+      service.getStartupInfo(new AsyncCallback<StartupInfo>() {
+        public void onFailure(Throwable caught) {
+          lifecycleSupport.onFailure(caught, then);
+        }
+
+        public void onSuccess(StartupInfo startupInfo) {
+          logger.info("got " +startupInfo);
+          showProjectChoices(getVisibleProjects(startupInfo.getProjects()), level);
+        }
+      });
+    }
   }
 
   /**
    * Students and teachers can only see production sites.
    * Admins can see retired sites.
    * Developers can see development sites.
+   *
    * @param projects
    * @return
    */
@@ -190,6 +210,7 @@ public class ProjectChoices {
    * @param result
    * @param nest
    * @return
+   * @see #showProjectChoices
    */
   @NotNull
   private DivWidget getHeader(List<SlimProject> result, int nest) {
@@ -305,8 +326,8 @@ public class ProjectChoices {
   }
 
   /**
-   * @see #setProjectForUser
    * @param projectid
+   * @see #setProjectForUser
    */
   private void reallySetTheProject(int projectid) {
     logger.info("setProjectForUser set project for " + projectid);

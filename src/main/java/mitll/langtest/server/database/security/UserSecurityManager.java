@@ -189,7 +189,7 @@ public class UserSecurityManager implements IUserSecurityManager {
 
   private void logSetSession(HttpSession session1, String sessionID) {
     log.info("setSessionUser : Adding user to " + sessionID +
-        " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
+        " lookup is " + getUserIDFromSession(session1) +
         ", session.isNew=" + session1.isNew() +
         ", created=" + session1.getCreationTime() +
         ", " + getAttributesFromSession(session1));
@@ -424,21 +424,14 @@ public class UserSecurityManager implements IUserSecurityManager {
               request.getSession().isNew(),
               uidI);
 
-          sessUser = rememberUser(uidI);
+          sessUser = userDAO.getByID(uidI);
         }
-//        else {
-//          return userForID;
-//        }
       }
     } else if (request != null) {
       log.info("Lookup user from session returning null for null session. Request SID={}",
           request.getRequestedSessionId());
     }
     return sessUser;
-  }
-
-  private int getUserIDFromSession(HttpSession session) {
-    return (Integer) session.getAttribute(USER_SESSION_ATT);
   }
 
   /**
@@ -455,11 +448,15 @@ public class UserSecurityManager implements IUserSecurityManager {
     } else {
       HttpSession session = getCurrentSession(request);
       if (session != null) {
-        return (Integer) session.getAttribute(USER_SESSION_ATT);
+        return getUserIDFromSession(session);
       } else {
         return -1;
       }
     }
+  }
+
+  private Integer getUserIDFromSession(HttpSession session) {
+    return (Integer) session.getAttribute(USER_SESSION_ATT);
   }
 
   /**
@@ -479,7 +476,7 @@ public class UserSecurityManager implements IUserSecurityManager {
       log.warn("lookupUserFromDBSession no user for session " + sid + " in database?");
       return null;
     } else {
-      return rememberUser(userForSession);
+      return userDAO.getByID(userForSession);//rememberUser(userForSession);
     }
   }
 
@@ -490,19 +487,13 @@ public class UserSecurityManager implements IUserSecurityManager {
    */
   private User rememberUser(int uidI) {
     User sessUser = userDAO.getByID(uidI);
-
     if (sessUser == null) {
       log.error("rememberUser huh? no user with id " + uidI);
       return null;
     } else {
-      //rememberIDToUser(uidI, sessUser);
       return sessUser;
     }
   }
-
-//  private synchronized void rememberIDToUser(int id, User user) {
-//    idToSession.put(id, user);
-//  }
 
   /**
    * @param id

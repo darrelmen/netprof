@@ -195,6 +195,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
   }
 
+  /**
+   * @see #getUserIDFromSession
+   * @return
+   */
   private int getUserIDFromSessionNoCheck() {
     return securityManager.getUserIDFromRequest(getThreadLocalRequest());
   }

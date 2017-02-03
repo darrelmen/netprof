@@ -42,6 +42,7 @@ import mitll.langtest.shared.exercise.HasUnitChapter;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Container for exercises for the site.
@@ -74,14 +75,14 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   /**
    * @param id
    * @return
-   * @see DatabaseImpl#deleteItem(int, int)
+   * @see DatabaseImpl#deleteItem
    */
   boolean remove(int id);
 
   /**
    * @param userExerciseDAO
    * @param projid
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
+   * @see mitll.langtest.server.database.project.ProjectManagement#setDependencies
    */
   void setDependencies(IUserExerciseDAO userExerciseDAO,
                        AddRemoveDAO addRemoveDAO,
@@ -95,4 +96,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   void attachAudio(Collection<CommonExercise> all);
 
   Map<Integer,String> getIDToFL(int projid);
+
+  void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe);
 }

@@ -1,12 +1,12 @@
 package mitll.langtest.server.database.user;
 
-import mitll.hlt.domino.server.user.MongoUserServiceDelegate;
+import mitll.hlt.domino.server.user.UserServiceDelegateBase;
 import mitll.hlt.domino.server.util.LegacyMd5Hash;
-import mitll.hlt.domino.server.util.Mailer;
-import mitll.hlt.domino.server.util.Mongo;
-import mitll.hlt.domino.server.util.UserServiceProperties;
+import mitll.langtest.server.database.security.UserSecurityManager;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -15,18 +15,20 @@ import java.security.spec.KeySpec;
 /**
  * Created by go22670 on 2/1/17.
  */
-class MyMongoUserServiceDelegate extends MongoUserServiceDelegate {
-   MyMongoUserServiceDelegate(UserServiceProperties props, Mailer mailer, String appName, Mongo mongoPool) {
-    super(props, mailer, appName, mongoPool);
-  }
+class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
+  private static final Logger log = LogManager.getLogger(UserSecurityManager.class);
 
-  boolean isMatch(String userid, String encoded, String attempt) {
+//  MyMongoUserServiceDelegate(UserServiceProperties props, Mailer mailer, String appName, Mongo mongoPool) {
+//    super(props, mailer, appName, mongoPool);
+//  }
+
+  boolean isMatch( String encoded, String attempt) {
 //      String encodedAttemptedPass = LegacyMd5Hash.getHash(attempt);
 //      return encodedAttemptedPass.equals(encoded);
-    return authenticate(userid, encoded, attempt);
+    return authenticate( encoded, attempt);
   }
 
-  protected boolean authenticate(String userId, String encodedCurrPass, String attemptedTxtPass) {
+  private boolean authenticate( String encodedCurrPass, String attemptedTxtPass) {
     try {
       // ensure we go through the motions for unmatched usernames
       // to avoid returning too quickly and
@@ -35,7 +37,7 @@ class MyMongoUserServiceDelegate extends MongoUserServiceDelegate {
         return false;
       }
 
-      String encodedAttemptedPass = encodePass(encodedCurrPass, attemptedTxtPass, PasswordEncoding.common_v1);
+      String encodedAttemptedPass = encodePass(encodedCurrPass, attemptedTxtPass, UserServiceDelegateBase.PasswordEncoding.common_v1);
       if (encodedAttemptedPass.equals(encodedCurrPass)) {
         log.info("Decoded using SHA-512.");
         return true;
@@ -45,7 +47,7 @@ class MyMongoUserServiceDelegate extends MongoUserServiceDelegate {
           "\n\tattempt " + encodedAttemptedPass);
 
       // Handle Domino Encoding
-      encodedAttemptedPass = encodePass(encodedCurrPass, attemptedTxtPass, PasswordEncoding.domino);
+      encodedAttemptedPass = encodePass(encodedCurrPass, attemptedTxtPass, UserServiceDelegateBase.PasswordEncoding.domino);
       if (encodedAttemptedPass.equals(encodedCurrPass)) {
         log.info("Decoded using SHA1.");
         return true;
@@ -71,21 +73,21 @@ class MyMongoUserServiceDelegate extends MongoUserServiceDelegate {
     return false;
   }
 
-  private String encodePass(String encodedCurrPass, String txtPass, PasswordEncoding pEnc) throws Exception {
+  private String encodePass(String encodedCurrPass, String txtPass, UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
     byte[] salt = extractSalt(encodedCurrPass, pEnc);
     return encodePass(txtPass, salt, pEnc);
   }
 
   private static final String PASS_PREFIX = "{SSHA}";
 
-  private String encodePass(String txtPass, byte[] salt, PasswordEncoding pEnc) throws Exception {
+  private String encodePass(String txtPass, byte[] salt, UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
     byte[] encryptedPass = encryptPass(txtPass, salt, pEnc);
     // once encrypted, encode the password
     // to simplify storage when LDAP is used.
     return PASS_PREFIX + new String(Base64.encodeBase64(encryptedPass));
   }
 
-  private byte[] encryptPass(String txtPass, byte[] salt, PasswordEncoding pEnc) throws Exception {
+  private byte[] encryptPass(String txtPass, byte[] salt, UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
     // See this link for more info on encryption options.
     // http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html
     int iterations = 20000;
@@ -96,7 +98,7 @@ class MyMongoUserServiceDelegate extends MongoUserServiceDelegate {
     return ArrayUtils.addAll(encPass, salt);
   }
 
-  private byte[] extractSalt(String encodedPass, PasswordEncoding pEnc) {
+  private byte[] extractSalt(String encodedPass, UserServiceDelegateBase.PasswordEncoding pEnc) {
     String encodedPassNoPrefix = encodedPass.substring(PASS_PREFIX.length());
     byte[] hashAndSalt = Base64.decodeBase64(encodedPassNoPrefix.getBytes());
     int shaLen = hashAndSalt.length - pEnc.saltLength + 1;

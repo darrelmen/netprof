@@ -138,11 +138,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     //logger.info("got " + affiliations);
   }
 
-/*  public SignUpForm setSignUpButtonTitle(String title) {
-    this.signUpTitle = title;
-    return this;
-  }*/
-
   protected void setMarkFieldsWithLabels(boolean val) {
     this.markFieldsWithLabels = val;
   }
@@ -206,9 +201,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
 
     if (firstFocus != null) {
-      //     setFocusOn(firstFocus.getWidget());
-//      newUserPrompt.setText("Complete Your Profile");
-//      newUserPrompt.setSubtext("");
       setFormAndButtonTitles();
       markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP, true);
     }
@@ -345,6 +337,9 @@ public class SignUpForm extends UserDialog implements SignUp {
     return userBox;
   }
 
+  /**
+   * @see #makeSignUpUsername
+   */
   private void onUserIDBlur() {
     final String text = signUpUser.getSafeText();
 
