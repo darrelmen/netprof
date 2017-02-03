@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.analysis.BasicUserContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
 @Deprecated

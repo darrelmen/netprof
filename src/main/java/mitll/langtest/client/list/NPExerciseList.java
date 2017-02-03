@@ -33,7 +33,6 @@
 package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.ui.Panel;
-import com.sun.org.apache.regexp.internal.RE;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -41,11 +40,8 @@ import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
