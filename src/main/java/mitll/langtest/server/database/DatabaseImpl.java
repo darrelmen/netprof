@@ -309,6 +309,8 @@ public class DatabaseImpl implements Database {
   private void initializeDAOs(PathHelper pathHelper) {
     dbConnection = getDbConnection();
 
+    logger.debug("initializeDAOs ---");
+
     eventDAO = new SlickEventImpl(dbConnection);
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
     this.userDAO = new DominoUserDAOImpl(this);

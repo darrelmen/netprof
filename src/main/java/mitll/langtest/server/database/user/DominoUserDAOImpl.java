@@ -33,14 +33,16 @@
 package mitll.langtest.server.database.user;
 
 import com.mongodb.client.MongoCollection;
-import mitll.hlt.domino.server.user.*;
+import mitll.hlt.domino.server.user.IGroupDAO;
+import mitll.hlt.domino.server.user.IUserServiceDelegate;
+import mitll.hlt.domino.server.user.MongoGroupDAO;
+import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
 import mitll.hlt.domino.server.util.*;
 import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
-import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
@@ -66,7 +68,6 @@ import java.time.ZoneId;
 import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
 import static mitll.langtest.shared.user.User.Kind.ADMIN;
@@ -109,9 +110,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public DominoUserDAOImpl(Database database) {
     super(database);
 
-    for (User.Kind kind : User.Kind.values()) {
-      roleToKind.put(kind.getRole(), kind);
-    }
+    populateRoles();
     mitll.langtest.server.ServerProperties serverProps = database.getServerProps();
     Properties props = serverProps.getProps();
     pool = Mongo.createPool(new DBProperties(props));
@@ -122,9 +121,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       mitll.hlt.domino.server.util.ServerProperties dominoProps =
           new ServerProperties(props, "1.0", "demo", "0", "now");
 
-      //
       dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, serverProps.getAppTitle());
-      String appName = dominoProps.getAppName();
+      //String appName = dominoProps.getAppName();
       //     logger.info("DominoUserDAOImpl app name is " + appName);
 
       ignite = null;
@@ -134,15 +132,25 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
           ignite.configuration().setGridLogger(new Slf4jLogger());
         }
 
-        logger.info("cache - ignite!");
+        logger.info("DominoUserDAOImpl cache - ignite!");
         // newContext.setAttribute(IGNITE, ignite);
       }
+      else {
+        logger.debug("DominoUserDAOImpl no cache");
+      }
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
+      logger.debug("DominoUserDAOImpl made delegate");
       myDelegate = makeMyServiceDelegate();//dominoProps.getUserServiceProperties(), mailer, pool, serializer);
 
       dominoAdminUser = delegate.getAdminUser();
     } else {
-      logger.error("couldn't connect to user service");
+      logger.error("DominoUserDAOImpl couldn't connect to user service - no pool!\n\n");
+    }
+  }
+
+  private void populateRoles() {
+    for (User.Kind kind : User.Kind.values()) {
+      roleToKind.put(kind.getRole(), kind);
     }
   }
 
