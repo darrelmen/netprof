@@ -96,7 +96,12 @@ public class AudioFileHelper implements AlignDecode {
   private final DatabaseImpl db;
   private final LogAndNotify logAndNotify;
   private boolean checkedLTS = false;
+
+  /**
+   * @deprecated why would we want this?
+   */
   private Map<String, Integer> phoneToCount;
+
   private boolean useOldSchoolServiceOnly = false;
   private final AudioConversion audioConversion;
   private final boolean isNoModel;
@@ -155,9 +160,15 @@ public class AudioFileHelper implements AlignDecode {
         checkedLTS = true;
         int count = 0;
 
+        long now = System.currentTimeMillis();
         phoneToCount = new HashMap<>();
+        Set<Integer> safe = new HashSet<>();
+        Set<Integer> unsafe = new HashSet<>();
+
         for (CommonExercise exercise : exercises) {
-          boolean validForeignPhrase = isInDictOrLTS(exercise);
+
+          boolean validForeignPhrase = isValidForeignPhrase(now, safe, unsafe, exercise);
+          //        boolean validForeignPhrase = isInDictOrLTS(exercise);
           if (!validForeignPhrase) {
             if (count < 10) {
               logger.warn("huh? for " + exercise.getID() +
@@ -167,10 +178,22 @@ public class AudioFileHelper implements AlignDecode {
           } else {
             countPhones(exercise.getMutable());
           }
+
+          // check context sentences?  why?
           for (CommonExercise context : exercise.getDirectlyRelated()) {
-            context.getMutable().setSafeToDecode(isInDictOrLTS(context));
+            boolean validForeignPhrase2 = isValidForeignPhrase(now, safe, unsafe, context);
+            if (context.isSafeToDecode() != validForeignPhrase2) {
+              context.getMutable().setSafeToDecode(validForeignPhrase2);
+            }
+          //  context.getMutable().setSafeToDecode(validForeignPhrase2);//isInDictOrLTS(context));
           }
         }
+
+        if (!safe.isEmpty() || !unsafe.isEmpty()) {
+          logger.info("marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
+        }
+
+        project.getExerciseDAO().markSafeUnsafe(safe, unsafe);
 
         if (count > 0) {
           logger.warn("huh? out of " + exercises.size() + " LTS fails on " + count);
@@ -179,11 +202,28 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
+  private boolean isValidForeignPhrase(long now, Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise) {
+    boolean tooLongAgo = isStale(now, exercise);
+    boolean validForeignPhrase = exercise.isSafeToDecode();
+    if (tooLongAgo) {
+      validForeignPhrase = isInDictOrLTS(exercise);
+      Set<Integer> toAddTo = validForeignPhrase ? safe : unsafe;
+      toAddTo.add(exercise.getID());
+    }
+    return validForeignPhrase;
+  }
+
+  private boolean isStale(long now, CommonExercise exercise) {
+    return now - exercise.getLastChecked() > 24 * 60 * 60 * 1000L;
+  }
+
   private boolean isInDictOrLTS(CommonExercise exercise) {
     return asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
   }
 
   /**
+   * Why would we want to make a map of phone->count?
+   *
    * @param exercise
    * @param <T>
    * @see #checkLTSAndCountPhones
@@ -1135,7 +1175,10 @@ public class AudioFileHelper implements AlignDecode {
     return audioAnswer;
   }
 
-
+  /**
+   * @return
+   * @deprecated why would we want this?
+   */
   public Map<String, Integer> getPhoneToCount() {
     return phoneToCount;
   }

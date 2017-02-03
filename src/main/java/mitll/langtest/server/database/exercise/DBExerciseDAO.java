@@ -48,7 +48,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
   private SlickUserExerciseDAO userExerciseDAO;
   private SlickProject project;
-  Project fullProject;
+  private Project fullProject;
+
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
    */
@@ -162,6 +163,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       idToEx.put(ex.getID(), ex);
     }
     return idToEx;
+  }
+
+  public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
+    userExerciseDAO.getDao().updateCheckedBulk(safe, true);
+    userExerciseDAO.getDao().updateCheckedBulk(unsafe, false);
   }
 
   public String toString() {

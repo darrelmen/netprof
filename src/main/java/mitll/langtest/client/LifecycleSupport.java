@@ -59,4 +59,6 @@ public interface LifecycleSupport extends EventRegistration {
   Collection<User.Permission> getPermissions();
 
   Widget getFlashRecordPanel();
+
+  void onFailure(Throwable caught, long then);
 }

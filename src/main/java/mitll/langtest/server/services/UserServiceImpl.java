@@ -189,7 +189,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public LoginResult addUser(SignUpUser user, String url) {
     UserManagement userManagement = db.getUserManagement();
-    User userByID = db.getUserDAO().getUserByID(user.getUserID());
+    User userByID = getUserByID(user.getUserID());
 
     if (userByID != null) {
       if (userByID.isValid()) {
@@ -290,7 +290,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL());
 
     if (result) {
-      User userByID = db.getUserDAO().getUserByID(userId);
+      User userByID = getUserByID(userId);
       if (userByID != null) {
         HttpSession currentSession = getCurrentSession();
         if (currentSession == null) currentSession = createSession();

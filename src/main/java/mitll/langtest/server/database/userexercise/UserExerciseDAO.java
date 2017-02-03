@@ -386,7 +386,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    *
    * @param exid
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID
    */
   @Override
   public CommonExercise getByExID(int exid) {
@@ -453,7 +453,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   /**
    * @param exids
    * @return
-   * @see UserListManager#getDefectList(java.util.Collection)
+   * @see UserListManager#getDefectList
    */
   @Override
   public Collection<CommonExercise> getByExID(Collection<Integer> exids) {
@@ -518,11 +518,12 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         rs.getInt("creatorid"),
         rs.getString("english"),
         rs.getString("foreignLanguage"),
+        "",
         rs.getString(TRANSLITERATION),
         rs.getBoolean(OVERRIDE),
         unitToValue,
         date.getTime(),
-        -1);
+        -1, false, System.currentTimeMillis());
   }
 
   //  private Map<String, List<AudioAttribute>> exToAudio;
