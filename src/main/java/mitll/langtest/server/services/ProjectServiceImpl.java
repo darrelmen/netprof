@@ -86,4 +86,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     db.getProjectManagement().refreshProjects();
     return update;
   }
+
+  @Override
+  public void checkAudio(int projectid) {
+    db.getAudioDAO().makeSureAudioIsThere(projectid, db.getProject(projectid).getLanguage(), true);
+  }
 }
