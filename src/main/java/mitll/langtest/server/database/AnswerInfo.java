@@ -35,6 +35,8 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -43,6 +45,8 @@ import mitll.langtest.shared.scoring.AudioContext;
  * @since 2/24/16.
  */
 public class AnswerInfo {
+  private static final Logger logger = LogManager.getLogger(AnswerInfo.class);
+
   private int userid;
   private int id;
   private int projid;
@@ -247,7 +251,7 @@ public class AnswerInfo {
     this.roundTripDur = 0;//roundTripDur;
     this.snr = snr;
 
-    if (answer.isEmpty()) System.err.println("answer is not set?");
+    if (answer.isEmpty()) logger.debug("answer is not set?");
   }
 
   public int getUserid() {

@@ -220,7 +220,7 @@ public class ASRScoring extends Scoring implements ASR {
 
 //    PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
 
-    if (precalcScores.isValid()) {
+    if (precalcScores != null && precalcScores.isValid()) {
        logger.info("got valid precalc  " + precalcScores);
       scores = precalcScores.getScores();
       jsonObject = precalcScores.getJsonObject();
