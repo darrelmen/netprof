@@ -64,7 +64,6 @@ class ProjectEditForm extends UserDialog {
     Button editProject = getEditButton();
 
     Fieldset fields = getFields(info, editProject);
-
     fields.add(editProject);
 
     Panel twoPartForm = getTwoPartForm(heading, fields);
@@ -86,8 +85,7 @@ class ProjectEditForm extends UserDialog {
             if (!result) {
               if (info.getPort() == -1) {
                 feedback.setText("No Hydra service for this language.");
-              }
-              else {
+              } else {
                 feedback.setText("Hydra service is not available on port " + info.getPort());
               }
             }
@@ -147,8 +145,19 @@ class ProjectEditForm extends UserDialog {
 
     setBox(info.getStatus());
 
+    fieldset.add(getCheckAudio(info));
+    fieldset.add(getRecalcRefAudio(info));
+
+    feedback = new HTML();
+    feedback.addStyleName("topFiveMargin");
+    feedback.addStyleName("bottomFiveMargin");
+    fieldset.add(feedback);
+
+    return fieldset;
+  }
+
+  private Button getCheckAudio(final ProjectInfo info) {
     Button w = new Button("Check Audio", IconType.STETHOSCOPE);
-    fieldset.add(w);
     w.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -170,13 +179,34 @@ class ProjectEditForm extends UserDialog {
         });
       }
     });
+    return w;
+  }
 
-    feedback = new HTML();
-    feedback.addStyleName("topFiveMargin");
-    feedback.addStyleName("bottomFiveMargin");
-    fieldset.add(feedback);
+  private Button getRecalcRefAudio(final ProjectInfo info) {
+    Button w = new Button("Align ref audio", IconType.STETHOSCOPE);
 
-    return fieldset;
+    w.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        w.setEnabled(false);
+        feedback.setText("Please wait...");
+
+        audioServiceAsync.recalcRefAudio(info.getID(), new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            w.setEnabled(true);
+
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            w.setEnabled(true);
+            feedback.setText("In progress...");
+          }
+        });
+      }
+    });
+    return w;
   }
 
   private ListBox getBox(final Button editButton) {

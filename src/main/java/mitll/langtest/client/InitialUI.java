@@ -32,12 +32,7 @@
 
 package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.Breadcrumbs;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -50,11 +45,7 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -88,6 +79,9 @@ import java.util.logging.Logger;
 public class InitialUI implements UILifecycle {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  /**
+   * @see #getRootContainer
+   */
   public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
 
   protected static final String LOGIN = "Login";
@@ -180,12 +174,17 @@ public class InitialUI implements UILifecycle {
     verticalContainer.add(contentRow);
     this.contentRow = contentRow;
 
-    DivWidget w = new DivWidget();
-    w.getElement().setId(DownloadIFrame.DOWNLOAD_AREA_ID);
-    RootPanel.get().add(w);
-    w.setVisible(false);
+    RootPanel.get().add(getDownloadDiv());
 
     return contentRow;
+  }
+
+  @NotNull
+  private DivWidget getDownloadDiv() {
+    DivWidget w = new DivWidget();
+    w.getElement().setId(DownloadIFrame.DOWNLOAD_AREA_ID);
+    w.setVisible(false);
+    return w;
   }
 
   /**
@@ -309,6 +308,7 @@ public class InitialUI implements UILifecycle {
     return headerRow.getOffsetHeight();
   }
 
+  Heading child;
   /**
    * * TODO : FIX ME for headstart?
    *
@@ -332,6 +332,9 @@ public class InitialUI implements UILifecycle {
        * {@link #makeFlashContainer}
        */
       contentRow.add(lifecycleSupport.getFlashRecordPanel());
+      child = new Heading(3, "Please allow recording");
+      child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
+      contentRow.add(child);
     }
     // logger.info("populateBelowHeader -- ");
     lifecycleSupport.recordingModeSelect();
@@ -344,12 +347,13 @@ public class InitialUI implements UILifecycle {
    * <p>
    * languge - course (FL100 or FL200 or FL300) Elementary FL/Intermediate FL/Advanced FL - what do you want to do
    *
-   * @see #configureUIGivenUser(long)
+   * @see #configureUIGivenUser
    * @see #gotUser(User)
    */
   private void showNavigation() {
-    if (contentRow.getElement().getChildCount() == 1) {
+    if (contentRow.getElement().getChildCount() == 2) {
       // logger.info("showNavigation : - add to content root");
+      contentRow.remove(child);
       contentRow.add(navigation.getTabPanel());
     } else {
       logger.info("showNavigation : first row has " + contentRow.getElement().getChildCount() + " child(ren) - not adding tab panel???");
@@ -481,8 +485,9 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
+   * @deprecated
    * @return
-   * @see #populateRootPanel()
+   * @see #populateRootPanel
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel
    */
   private boolean showOnlyOneExercise() {

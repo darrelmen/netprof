@@ -35,8 +35,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -45,7 +43,7 @@ import org.apache.logging.log4j.Logger;
  * @since 2/24/16.
  */
 public class AnswerInfo {
-  private static final Logger logger = LogManager.getLogger(AnswerInfo.class);
+//  private static final Logger logger = LogManager.getLogger(AnswerInfo.class);
 
   private int userid;
   private int id;
@@ -67,9 +65,14 @@ public class AnswerInfo {
   private String validity;
   private String transcript = "";
   private double snr;
+  private String model;
 
   public int getProjid() {
     return projid;
+  }
+
+  public String getModel() {
+    return model;
   }
 
   public static class RecordingInfo {
@@ -134,9 +137,17 @@ public class AnswerInfo {
     }
   }
 
+  /**
+   *
+   * @param audioContext
+   * @param recordingInfo
+   * @param validity
+   * @param model
+   */
   public AnswerInfo(AudioContext audioContext,
                     RecordingInfo recordingInfo,
-                    AudioCheck.ValidityAndDur validity
+                    AudioCheck.ValidityAndDur validity,
+                    String model
   ) {
     this(audioContext.getUserid(),
         audioContext.getProjid(),
@@ -149,7 +160,7 @@ public class AnswerInfo {
         recordingInfo.deviceType,
         recordingInfo.device,
 
-        recordingInfo.withFlash, validity);
+        recordingInfo.withFlash, validity, model);
     if (transcript.isEmpty()) {
       transcript = recordingInfo.getTranscript();
     }
@@ -167,7 +178,8 @@ public class AnswerInfo {
                      String device,
                      boolean withFlash,
 
-                     AudioCheck.ValidityAndDur validity) {
+                     AudioCheck.ValidityAndDur validity,
+                     String model) {
     this.userid = userid;
     this.projid = projid;
     this.id = id;
@@ -183,6 +195,7 @@ public class AnswerInfo {
     this.validity = validity.getValidity().name();
     this.roundTripDur = 0;//roundTripDur;
     this.snr = validity.getMaxMinRange();
+    this.model = model;
   }
 
   public AnswerInfo(AnswerInfo other,
@@ -251,7 +264,7 @@ public class AnswerInfo {
     this.roundTripDur = 0;//roundTripDur;
     this.snr = snr;
 
-    if (answer.isEmpty()) logger.debug("answer is not set?");
+ //   if (answer.isEmpty()) logger.debug("answer is not set?");
   }
 
   public int getUserid() {

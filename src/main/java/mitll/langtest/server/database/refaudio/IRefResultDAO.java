@@ -58,7 +58,7 @@ public interface IRefResultDAO extends IDAO {
                  DecodeAlignOutput alignOutputOld,
                  DecodeAlignOutput decodeOutputOld,
 
-                 boolean isMale, String speed);
+                 boolean isMale, String speed, String model);
 
   boolean removeForAudioFile(String audioFile);
 
@@ -73,11 +73,11 @@ public interface IRefResultDAO extends IDAO {
   /**
    * @see RefResultDecoder#getDecodedFiles()
    * @return
+   * @deprecated
    */
   List<Result> getResults();
 
 //  List<SlickRefResultJson> getJsonResults();
-//
 //  List<SlickRefResultJson> getJsonResultsForProject(int projid);
 
   Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
@@ -96,4 +96,6 @@ public interface IRefResultDAO extends IDAO {
    * @return
    */
   int getNumResults();
+
+  List<String> getAllFilesForProject(int projid);
 }

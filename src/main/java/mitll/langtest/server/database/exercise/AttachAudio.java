@@ -40,6 +40,7 @@ import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
@@ -293,20 +294,62 @@ public class AttachAudio {
   }
 
   /**
-   * Assumes audio index field looks like : 11109 8723 8722 8721
-   *
-   * @return
-   * @paramx refAudioIndex
+   * @see BaseExerciseDAO#attachAudio()
+   * @param exercises
+   * @param exToAudio
+   * @param transcriptChanged
    */
-/*  private String findBest(String refAudioIndex) {
-    String[] split = refAudioIndex.split("\\s+");
-    return (split.length == 0) ? "" : split[0];
+  public void attachAllAudio(List<CommonExercise> exercises,
+                             Map<Integer, List<AudioAttribute>> exToAudio,
+                             Set<Integer> transcriptChanged) {
+    int c = 0;
+    setExToAudio(exToAudio, getMultiPronWords(exercises));
+    Set<String> allTranscripts = getAllTranscripts(exToAudio);
+
+    for (CommonExercise ex : exercises) {
+      attachAudio(ex, transcriptChanged);
+
+      // remove all transcripts of attached audio
+      Collection<AudioAttribute> audioAttributes = ex.getAudioAttributes();
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        allTranscripts.remove(audioAttribute.getTranscript().toLowerCase());
+      }
+
+ /*     if (i < 25) {
+        if (c++ < 25) {
+          logger.warn(language + " (" + exercises.size() +
+              ") -----------> adding old school audio for " + ex.getID() + " : " + serverProps.getLessonPlan());
+        }
+        String refAudioIndex = ex.getRefAudioIndex();
+        if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
+          attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
+        }
+      }*/
+    }
+    logger.info("attachAudio found " + allTranscripts.size() + " orphan audio cuts - ");// + allTranscripts);
   }
-  private String ensureForwardSlashes(String wavPath) {
-    return wavPath.replaceAll("\\\\", "/");
-  }*/
+
+  @NotNull
+  private Set<String> getAllTranscripts(Map<Integer, List<AudioAttribute>> exToAudio) {
+    Set<String> allTranscripts = new HashSet<>();
+    for (List<AudioAttribute> audioAttributes : exToAudio.values()) {
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        allTranscripts.add(audioAttribute.getTranscript().toLowerCase());
+      }
+    }
+    return allTranscripts;
+  }
+
+  /**
+   * Remember a map of transcript to audio - so we can possibly use it later...?
+   *
+   * @param exToAudio
+   * @param multiPron
+   */
   public void setExToAudio(Map<Integer, List<AudioAttribute>> exToAudio, Set<String> multiPron) {
     this.exToAudio = exToAudio;
+
+
     this.transcriptToAudio = new HashMap<>();
 
     logger.info("setExToAudio found " + multiPron.size() + " items with differing english translations");
@@ -326,8 +369,42 @@ public class AttachAudio {
             audioAttributes1.add(audioAttribute);
           }
         }
-
       }
     }
+  }
+
+  /**
+   * Get set of fl words have multiple english equivalents.
+   * <p>
+   * Not sure why we have to recalc it all the time.
+   * <p>
+   * So perhaps if french "livre" appears as livre-book, livre-magazine you wouldn't want to
+   * use the audio for the first occurence if you don't have it for the second occurence.
+   *
+   * @param all
+   * @return
+   */
+  public Set<String> getMultiPronWords(Collection<CommonExercise> all) {
+    Map<String, String> seen = new HashMap<>();
+    Set<String> multiPron = new HashSet<>();
+
+    long then = System.currentTimeMillis();
+    for (CommonExercise ex : all) {
+      String foreignLanguage = ex.getForeignLanguage();
+      String english = seen.get(foreignLanguage);
+      String english1 = ex.getEnglish();
+      if (english != null && !english.equals(english1)) {
+        multiPron.add(foreignLanguage);
+//        logger.info("getMultiPronWords before " + foreignLanguage + " eng " + english + " vs " + english1);
+      }
+      seen.put(foreignLanguage, english1);
+    }
+
+    long now = System.currentTimeMillis();
+
+    if (now - then > 100) logger.info("took " + (now - then) + " to get " + multiPron.size() +
+        "  multi def words ");
+
+    return multiPron;
   }
 }

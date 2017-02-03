@@ -42,17 +42,19 @@ import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 //import mitll.langtest.shared.MiniUser;
 
@@ -82,6 +84,9 @@ public class RefResultDecoder {
   private final boolean hasModel;
   private final AudioCheck audioCheck;
 
+  private final BlockingQueue<DecodeTask> queue = new LinkedBlockingQueue<>();
+  //private Set<Integer> pendingDecodes = new HashSet<>();
+
   /**
    * @param db
    * @param serverProperties
@@ -89,8 +94,11 @@ public class RefResultDecoder {
    * @param audioFileHelper
    * @see Project#setAnalysis
    */
-  public RefResultDecoder(DatabaseImpl db, ServerProperties serverProperties, PathHelper pathHelper,
-                          AudioFileHelper audioFileHelper, boolean hasModel) {
+  public RefResultDecoder(DatabaseImpl db,
+                          ServerProperties serverProperties,
+                          PathHelper pathHelper,
+                          AudioFileHelper audioFileHelper,
+                          boolean hasModel) {
     this.db = db;
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
@@ -98,12 +106,14 @@ public class RefResultDecoder {
     this.audioConversion = new AudioConversion(serverProperties);
     this.hasModel = hasModel;
     audioCheck = new AudioCheck(serverProperties);
+
+    new Thread(new Consumer()).start();
   }
 
   /**
    * Used to have cheesy check for trying to convert old audio held outside of audio table into audio table
    * entries.
-   *
+   * <p>
    * TODO : pass in project list!
    * TODO : don't pass in list of exercises.
    *
@@ -645,76 +655,157 @@ public class RefResultDecoder {
    *
    * @see #doRefDecode
    */
-  private void writeRefDecode(Collection<CommonExercise> exercises, int projid) {
+  public void writeRefDecode(Collection<CommonExercise> exercises, int projid) {
     // boolean b = db.getServerProps().shouldDoDecode();
     //logger.warn("writeRefDecode got " + b + " for should do decode");
-    if (false) {
-      Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
-      // String installPath = pathHelper.getInstallPath();
+    //if (false) {
+    Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
+    // String installPath = pathHelper.getInstallPath();
 
-      int numResults = db.getRefResultDAO().getNumResults();
-      String language = db.getLanguage(projid);
-      logger.debug(" writeRefDecode : found " +
-          numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio");
+//    int numResults = db.getRefResultDAO().getNumResults();
+//      String language = db.getLanguage(projid);
+    logger.debug("writeRefDecode : found " +
+        // numResults +
+        " in ref results table vs " + exToAudio.size() + " exercises with audio");
 
-      Set<String> decodedFiles = getDecodedFiles();
-      logger.debug(" found " + decodedFiles.size() + " previous ref results, checking " +
-          exercises.size() + " exercises ");
+    Set<String> decodedFiles = getDecodedFiles(projid);
+    logger.debug("writeRefDecode for project " + projid +
+        " found " + decodedFiles.size() + " previous ref results, checking " +
+        exercises.size() + " exercises ");
 
-      if (stopDecode) logger.debug("Stop decode true");
+    if (stopDecode) logger.debug("Stop decode true");
+//      int count = 0;
+//      int attrc = 0;
+//      int maleAudio = 0;
+//      int femaleAudio = 0;
+//      int defaultAudio = 0;
 
-      int count = 0;
-      int attrc = 0;
-      int maleAudio = 0;
-      int femaleAudio = 0;
-      int defaultAudio = 0;
+    Stats allstats = new Stats();
 
-      for (CommonExercise exercise : exercises) {
-        if (stopDecode) return;
-
-        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
-        if (audioAttributes != null) {
-          db.getAudioDAO().attachAudio(exercise, /*installPath, relativeConfigDir,*/ audioAttributes, language);
-          attrc += audioAttributes.size();
-        }
-
-        Set<Long> preferredVoices = serverProps.getPreferredVoices();
-        Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
-        Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-
-        List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
-        boolean maleEmpty = maleUsers.isEmpty();
-
-        List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
-        boolean femaleEmpty = femaleUsers.isEmpty();
-
-        if (!maleEmpty) {
-          List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
-          maleAudio += audioAttributes1.size();
-          count += doDecode(decodedFiles, exercise, audioAttributes1);
-        }
-        if (!femaleEmpty) {
-          List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
-          femaleAudio += audioAttributes1.size();
-
-          count += doDecode(decodedFiles, exercise, audioAttributes1);
-        } else if (maleEmpty) {
-          Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
-          defaultAudio += defaultUserAudio.size();
-          count += doDecode(decodedFiles, exercise, defaultUserAudio);
-        }
-        if (count > 0 && count % 100 == 0) logger.debug("ref decode - did " + count + " decodes");
-      }
-      logger.debug("writeRefDecode : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
-          defaultAudio + " default " + "decoded " + count);
+    for (CommonExercise exercise : exercises) {
+      if (stopDecode) return;
+//        queue.add(exercise);
+      //Stats stats =
+      queueDecodeExercise(/*exToAudio, language,*/ decodedFiles, exercise);
+//        allstats.add(stats);
+      //stats.count += stats.count;
+      //      if (stats.count > 0 && stats.count % 100 == 0) logger.debug("ref decode - did " + stats.count + " decodes");
+    }
+    logger.debug("writeRefDecode : Out of " + allstats.attrc + " best audio files, " +
+        allstats.maleAudio + " male, " + allstats.femaleAudio + " female, " +
+        allstats.defaultAudio + " default " + "decoded " + allstats.count);
 
 /*      if (serverProps.addMissingInfo()) {
         runMissingInfo(exercises);
       } else {
         logger.debug("not looking for missing info");
       }*/
+    //}
+  }
+
+  class Consumer implements Runnable {
+    public void run() {
+      try {
+        int c = 0;
+        while (true) {
+          DecodeTask remove = queue.take();
+          decodeOneExercise(remove.exercise, remove.toDecode);
+          if (++c % 100 == 0) logger.debug("decode did " + c);
+
+          if (stopDecode) {
+            logger.info("stop decoding remaning " + queue.size() + " jobs");
+            queue.clear();
+          }
+        }
+      } catch (Exception e) {
+        logger.error("Got " + e, e);
+      }
     }
   }
+
+/*
+  @NotNull
+  private Stats queueDecodeExercise(
+      //Map<Integer, List<AudioAttribute>> exToAudio,
+      //                       String language,
+      Set<String> decodedFiles,
+      CommonExercise exercise) {
+
+//        int excount = 0;
+//        int attrc = 0;
+//        int maleAudio = 0;
+//        int femaleAudio = 0;
+//        int defaultAudio = 0;
+
+//    List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+
+    return decodeExercise2(decodedFiles, exercise);
+  }
+*/
+
+  @NotNull
+  private void queueDecodeExercise(Set<String> decodedFiles, CommonExercise exercise) {
+    //   Stats stats = new Stats();
+
+    /*   if (audioAttributes != null) {
+      db.getAudioDAO().attachAudio(exercise, audioAttributes, language);
+      stats.attrc += audioAttributes.size();
+    }*/
+
+    Set<Long> preferredVoices = Collections.emptySet();//.getPreferredVoices();
+    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
+    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+
+    List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
+    boolean maleEmpty = maleUsers.isEmpty();
+
+    List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
+    boolean femaleEmpty = femaleUsers.isEmpty();
+
+    int added = 0;
+    if (!maleEmpty) {
+      List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
+      if (!audioAttributes1.isEmpty()) {
+        //   stats.maleAudio += audioAttributes1.size();
+        //stats.count +=
+        try {
+          queue.put(doDecode(decodedFiles, exercise, audioAttributes1));
+          added++;
+        } catch (InterruptedException e) {
+          logger.error("got " + e, e);
+        }
+      }
+    }
+    if (!femaleEmpty) {
+      List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
+      // stats.femaleAudio += audioAttributes1.size();
+      if (!audioAttributes1.isEmpty()) {
+        //stats.count +=
+        try {
+          queue.put(doDecode(decodedFiles, exercise, audioAttributes1));
+          added++;
+        } catch (InterruptedException e) {
+          logger.error("got " + e, e);
+        }
+      }
+    } else if (maleEmpty) {
+      Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
+      // stats.defaultAudio += defaultUserAudio.size();
+      // stats.count +=
+      if (!defaultUserAudio.isEmpty()) {
+        try {
+          queue.put(doDecode(decodedFiles, exercise, defaultUserAudio));
+          added++;
+        } catch (InterruptedException e) {
+          logger.error("got " + e, e);
+        }
+      }
+    }
+    if (added == 0 && spew++ < 200) logger.info("no audio for " + exercise.getID());
+    // return stats;
+  }
+
+  int spew = 0;
 
 /*  private void runMissingInfo(final Collection<CommonExercise> exercises) {
     new Thread(new Runnable() {
@@ -734,18 +825,39 @@ public class RefResultDecoder {
     }
   }
 
+  private static class Stats {
+    int count = 0;
+    int attrc = 0;
+    int maleAudio = 0;
+    int femaleAudio = 0;
+    int defaultAudio = 0;
+
+    public void add(Stats other) {
+      count += other.count;
+      attrc += other.attrc;
+      maleAudio += other.maleAudio;
+      femaleAudio += other.femaleAudio;
+      defaultAudio += other.defaultAudio;
+    }
+  }
+
   /**
    * Get the set of files that have already been decoded and aligned so we don't do them a second time.
    *
    * @return
    * @see #writeRefDecode
    */
-  private Set<String> getDecodedFiles() {
-    logger.info("getDecodedFiles ----");
-    List<Result> results = db.getRefResultDAO().getResults();
+  private Set<String> getDecodedFiles(int projid) {
+    //logger.info("getDecodedFiles ----");
+    //List<Result> results = db.getRefResultDAO().getResults();
+
+    List<String> files = db.getRefResultDAO().getAllFilesForProject(projid);
+
     Set<String> decodedFiles = new HashSet<>();
-    for (Result res : results) {
-      String[] bestAudios = res.getAnswer().split(File.separator);
+    //   for (Result res : results) {
+    for (String res : files) {
+      // String[] bestAudios = res.getAnswer().split(File.separator);
+      String[] bestAudios = res.split(File.separator);
       if (bestAudios.length > 1) {
         String bestAudio = bestAudios[bestAudios.length - 1];
         decodedFiles.add(bestAudio);
@@ -760,20 +872,28 @@ public class RefResultDecoder {
    * @param exercise
    * @param audioAttributes
    * @return
-   * @see #writeRefDecode
+   * @see #queueDecodeExercise(Set, CommonExercise)
    */
-  private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
+  private DecodeTask doDecode(Set<String> decodedFiles,
+                              CommonExercise exercise,
+                              Collection<AudioAttribute> audioAttributes) {
+    List<AudioAttribute> toDecode = getNotYetDecoded(decodedFiles, audioAttributes);
+    return new DecodeTask(exercise, toDecode);
+  }
+
+  private static class DecodeTask {
+    CommonExercise exercise;
+    List<AudioAttribute> toDecode;
+
+    public DecodeTask(CommonExercise exercise, List<AudioAttribute> toDecode) {
+      this.exercise = exercise;
+      this.toDecode = toDecode;
+    }
+  }
+
+  private int decodeOneExercise(CommonExercise exercise, List<AudioAttribute> toDecode) {
     int count = 0;
     boolean doHydec = serverProps.shouldDoDecodeWithHydec();
-    List<AudioAttribute> toDecode = new ArrayList<>();
-    for (AudioAttribute attribute : audioAttributes) {
-      if (!attribute.isContextAudio()) {
-        String bestAudio = getFile(attribute);
-        if (!decodedFiles.contains(bestAudio)) {
-          toDecode.add(attribute);
-        }
-      }
-    }
     for (AudioAttribute attribute : toDecode) {
       if (stopDecode) return 0;
 
@@ -821,6 +941,20 @@ public class RefResultDecoder {
     }
 
     return count;
+  }
+
+  @NotNull
+  private List<AudioAttribute> getNotYetDecoded(Set<String> decodedFiles, Collection<AudioAttribute> audioAttributes) {
+    List<AudioAttribute> toDecode = new ArrayList<>();
+    for (AudioAttribute attribute : audioAttributes) {
+      if (!attribute.isContextAudio()) {
+        String bestAudio = getFile(attribute);
+        if (!decodedFiles.contains(bestAudio)) {
+          toDecode.add(attribute);
+        }
+      }
+    }
+    return toDecode;
   }
 
   private void doEnsure(Collection<AudioAttribute> audioAttributes, String title, String comment, String language) {
