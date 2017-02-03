@@ -520,13 +520,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   public int getDefaultResult() {
-    logger.info("\n\n\tdefault id is  " + defaultResult);
+   // logger.info("\n\n\tdefault id is  " + defaultResult);
     return defaultResult;
   }
 
   public void setDefaultResult(int defaultResult) {
     this.defaultResult = defaultResult;
-    logger.info("\n\n\tdefault id is  " + defaultResult);
+   // logger.info("\n\n\tdefault id is  " + defaultResult);
   }
 
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
