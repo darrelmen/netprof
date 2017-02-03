@@ -45,13 +45,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import scala.Tuple2;
-import scala.collection.*;
+import scala.collection.Seq;
 
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.Map;
-import java.util.Set;
 
 public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = LogManager.getLogger(SlickAudioDAO.class);

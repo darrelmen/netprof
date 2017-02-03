@@ -34,15 +34,8 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickUserPermission;
 import mitll.npdata.dao.permission.UserPermissionDAOWrapper;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public class SlickUserPermissionDAOImpl extends DAO {//} implements IUserPermissionDAO {
   private final UserPermissionDAOWrapper dao;

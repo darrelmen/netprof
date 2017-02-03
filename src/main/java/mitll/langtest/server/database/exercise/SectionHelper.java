@@ -34,7 +34,6 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.user.User;

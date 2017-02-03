@@ -35,7 +35,9 @@ package mitll.langtest.server.database.userexercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeSet;
 
 public class ExercisePhoneInfo {
   private static final Logger logger = LogManager.getLogger(ExercisePhoneInfo.class);

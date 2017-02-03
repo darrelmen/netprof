@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -41,7 +40,6 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
