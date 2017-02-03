@@ -245,6 +245,9 @@ public class LangTest implements
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
 
+  /**
+   *
+   */
   private StartupInfo startupInfo;
   private ProjectStartupInfo projectStartupInfo;
 

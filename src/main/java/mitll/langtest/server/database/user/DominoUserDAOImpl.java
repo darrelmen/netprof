@@ -42,6 +42,7 @@ import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.MiniUser;
@@ -65,6 +66,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
 import static mitll.langtest.shared.user.User.Kind.ADMIN;
@@ -116,7 +118,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     if (pool != null) {
       JSONSerializer serializer = Mongo.makeSerializer();
-      Mailer m = new Mailer(new MailerProperties(props));
+      Mailer mailer = new Mailer(new MailerProperties(props));
       mitll.hlt.domino.server.util.ServerProperties dominoProps =
           new ServerProperties(props, "1.0", "demo", "0", "now");
 
@@ -135,8 +137,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         logger.info("cache - ignite!");
         // newContext.setAttribute(IGNITE, ignite);
       }
-      delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, ignite);
-      myDelegate = makeMyServiceDelegate(dominoProps.getUserServiceProperties(), m, pool, serializer);
+      delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
+      myDelegate = makeMyServiceDelegate();//dominoProps.getUserServiceProperties(), mailer, pool, serializer);
 
       dominoAdminUser = delegate.getAdminUser();
     } else {
@@ -147,6 +149,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public void cleanUp() {
     if (pool != null) {
+      logger.info("closing connection to " + pool);
       pool.closeConnection();
     }
     if (ignite != null) {
@@ -167,10 +170,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return Ignition.start(cfg);
   }
 
-  private MyMongoUserServiceDelegate makeMyServiceDelegate(UserServiceProperties props,
-                                                           Mailer mailer, Mongo mongoCP, JSONSerializer serializer) {
-    MyMongoUserServiceDelegate d = new MyMongoUserServiceDelegate(props, mailer, "dude", mongoCP);
-    d.initializeDAOs(serializer);
+  private MyMongoUserServiceDelegate makeMyServiceDelegate() {//UserServiceProperties props,
+                                                           //Mailer mailer, Mongo mongoCP, JSONSerializer serializer) {
+    MyMongoUserServiceDelegate d = new MyMongoUserServiceDelegate();//props, mailer, "dude", mongoCP);
+ //   d.initializeDAOs(serializer);
     return d;
   }
 
@@ -213,7 +216,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public ClientUserDetail addAndGet(ClientUserDetail user,
                                     String encodedPass) {
     invalidateCache();
-    logger.info("addAndGet really adding " + user);
+    //logger.info("addAndGet really adding " + user);
     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
     boolean b = !clientUserDetailSResult1.isError();
     if (!b) {
@@ -475,7 +478,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
             sessionID);
 
     if (loggedInUser == null) {
-      myDelegate.isMatch(userId,encodedCurrPass,attemptedTxtPass);
+      myDelegate.isMatch(encodedCurrPass,attemptedTxtPass);
     }
     return loggedInUser == null ? null : toUser(loggedInUser);
   }
@@ -525,7 +528,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     String dominoPassword = getUserCredentials(id);
 
     long then = System.currentTimeMillis();
-    boolean match = myDelegate.isMatch(id, dominoPassword, encodedPassword);
+    boolean match = myDelegate.isMatch(dominoPassword, encodedPassword);
     long now = System.currentTimeMillis();
 
     long diff = now - then;
@@ -581,6 +584,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return dominoUser == null ? null : toUser(dominoUser);
   }
 
+  /**
+   * @see mitll.langtest.server.database.security.UserSecurityManager#getUserForID
+   * @param id
+   * @return
+   */
   public User getByID(int id) {
     DBUser dbUser = lookupUser(id);
     return dbUser == null ? null : toUser(dbUser);
@@ -683,10 +691,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     String email = dominoUser.getEmail();
 
-    logger.info("user " + dominoUser.getUserId() + " email " + email);
+    logger.info("toUser : user " + dominoUser.getUserId() + " email " + email);
 
     Set<User.Permission> permissionSet = new HashSet<>();
-    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
+//    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
     mitll.hlt.domino.shared.model.user.User.Gender gender = dominoUser.getGender();
     User user = new User(
         dominoUser.getDocumentDBID(),
@@ -775,6 +783,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @NotNull
   private User.Kind getKindForRole(String firstRole) {
+    if (firstRole.equals("PoM")) firstRole = User.Kind.PROJECT_ADMIN.getRole();
     User.Kind kind = roleToKind.get(firstRole);
     if (kind == null) {
       try {
@@ -785,7 +794,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         User.Kind kindByName = getKindByName(firstRole);
         if (kindByName == null) {
           if (!firstRole.startsWith("ILR")) {
-            logger.error("getUserKind no user for " + firstRole);
+            logger.warn("getUserKind no user for " + firstRole);
           }
           kind = User.Kind.STUDENT;
         } else {
@@ -807,14 +816,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * TOOD : get device info from domino user?
+   * TODO : get device info from domino user
+   *
    * For Reporting.
    *
    * @return
+   * @see Report#getReport
    */
   @Override
   public List<User> getUsersDevices() {
-    return Collections.emptyList();//dao.getUsersFromDevices());
+
+        return Collections.emptyList();//dao.getUsersFromDevices());
   }
 
   private Map<Integer, MiniUser> miniUserCache = null;

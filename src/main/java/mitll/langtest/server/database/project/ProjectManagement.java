@@ -184,7 +184,7 @@ public class ProjectManagement implements IProjectManagement {
     boolean isConfigured = project.getExerciseDAO().isConfigured();
     if (skipRetired || isConfigured) {
       if (isConfigured) {
-        logger.debug("configureProject project already configured " + project.getProject().id());
+       // logger.debug("configureProject project already configured " + project.getProject().id());
       } else  {
         logger.info("skipping fully loading project " + project + " since it's retired");
       }
@@ -245,7 +245,6 @@ public class ProjectManagement implements IProjectManagement {
       project.setRTL(isRTL(rawExercises));
 
 //      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
-//
 //      Map<Integer, ExercisePhoneInfo> exToPhonePerProject = new ExerciseToPhone().getExToPhonePerProject(exids, jsonResults);
 //      project.setExToPhone(exToPhonePerProject);
       //    project.setPhoneTrie(commonExerciseExerciseTrie);

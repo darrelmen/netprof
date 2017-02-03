@@ -35,12 +35,10 @@ package mitll.langtest.shared.exercise;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.npdata.dao.SlickExercise;
 
 import java.util.*;
 
@@ -58,17 +56,19 @@ import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
  */
 public class Exercise extends AudioExercise implements CommonExercise,
     MutableExercise, MutableAudioExercise, MutableAnnotationExercise, CommonAnnotatable {
-  @Deprecated protected String oldid = "";
+  @Deprecated
+  protected String oldid = "";
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores;
- // private float avgScore;
+  // private float avgScore;
 
   private transient List<String> firstPron = new ArrayList<String>();
   private long updateTime = 0;
 
   private Collection<CommonExercise> directlyRelated = new ArrayList<>();
-//  private Collection<CommonExercise> mentions = new ArrayList<>();
+  //  private Collection<CommonExercise> mentions = new ArrayList<>();
   private boolean safeToDecode;
+  private transient long safeToDecodeLastChecked;
 
   private int creator = UNDEFINED_USER;
   private boolean isPredef;
@@ -106,9 +106,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.meaning = meaning;
     this.updateTime = updateTime;
     addContext(context, altcontext, contextTranslation);
-    this.dominoID = dominoID;
+    //   this.dominoID = dominoID;
   }
-
 
   /**
    * @param exid
@@ -139,6 +138,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.foreignLanguage = context;
     this.altfl = altcontext;
     this.english = contextTranslation;
+    this.oldid = id;
   }
 
   /**
@@ -173,33 +173,36 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param creator
    * @param englishSentence
    * @param foreignLanguage
+   * @param altFL
    * @param meaning
    * @param transliteration
    * @param projectid
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#fromSlickToExercise(SlickExercise, Collection, SectionHelper)
+   * @param candecode
+   * @param lastChecked
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#fromSlickToExercise
    */
   public Exercise(int exid,
                   String oldid,
                   int creator,
                   String englishSentence,
                   String foreignLanguage,
+                  String altFL,
                   String meaning,
                   String transliteration,
-                  int projectid) {
+                  int projectid,
+                  boolean candecode,
+                  long lastChecked) {
     super(exid, projectid);
+    this.oldid = oldid;
     this.creator = creator;
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
     setForeignLanguage(foreignLanguage);
     setTransliteration(transliteration);
+    setAltFL(altFL);
+    this.safeToDecode = candecode;
+    safeToDecodeLastChecked = lastChecked;
   }
-
-/*  public CommonShell getShell() {
-    ExerciseShell exerciseShell = new ExerciseShell(getID(), english, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
-//    exerciseShell.setState(getState());
-//    exerciseShell.setSecondState(getSecondState());
-    return exerciseShell;
-  }*/
 
   /**
    * @param uniqueID
@@ -207,10 +210,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param creator
    * @param english
    * @param foreignLanguage
+   * @param altFL
    * @param transliteration
    * @param isOverride
    * @param modifiedTimestamp
    * @param projectid
+   * @param candecode
+   * @param lastChecked
    * @see UserExerciseDAO#getUserExercise
    */
   public Exercise(int uniqueID,
@@ -218,15 +224,17 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int creator,
                   String english,
                   String foreignLanguage,
+                  String altFL,
                   String transliteration,
                   boolean isOverride,
                   Map<String, String> unitToValue,
                   long modifiedTimestamp,
-                  int projectid) {
-    this(uniqueID, exerciseID, creator, english, foreignLanguage, "", transliteration, projectid);
+                  int projectid, boolean candecode, long lastChecked) {
+    this(uniqueID, exerciseID, creator, english, foreignLanguage, altFL, "", transliteration, projectid, candecode, lastChecked);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
+    this.safeToDecode = candecode;
   }
 
   /**
@@ -379,8 +387,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
    * @param firstPron
+   * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
    */
   @Override
   public void setFirstPron(List<String> firstPron) {
@@ -389,7 +397,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @param updateTime
-   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
+   * @seex mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
    */
   public void setUpdateTime(long updateTime) {
     this.updateTime = updateTime;
@@ -431,6 +439,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 */
 
+  /**
+   * @return
+   * @see mitll.langtest.client.custom.exercise.ContextCommentNPFExercise#getItemContent
+   */
   public boolean isSafeToDecode() {
     return safeToDecode;
   }
@@ -505,9 +517,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
 
-
   /**
    * TODO move down
+   *
    * @return
    */
   public Map<String, String> getUnitToValue() {
@@ -536,6 +548,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public String getTransliteration() {
     return transliteration;
   }
-  public int getDominoID() { return dominoID;  }
 
+  public int getDominoID() {
+    return dominoID;
+  }
+
+  public long getLastChecked() {
+    return safeToDecodeLastChecked;
+  }
 }
+
