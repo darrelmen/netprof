@@ -240,8 +240,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 //    }
 
     if (!serverProps.isLaptop()) {
+      logger.info("setAudioDAO makeSureAudioIsThere " + projectID);
+
       //makeSureAudioIsThere(audioDAO, projectID);
-      audioDAO.makeSureAudioIsThere(projectID,language, false);
+      audioDAO.makeSureAudioIsThere(projectID, language, false);
     }
 
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);

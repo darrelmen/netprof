@@ -284,7 +284,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    *
    * @param userid only used to determine the gender we should show
    * @return ids with both regular and slow speed recordings
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    */
   public Set<Integer> getRecordedBy(long userid, Map<Integer, String> exToTranscript) {
 /*
@@ -608,7 +608,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.ImportCourseExamples#copyAudio
+   * @seex mitll.langtest.server.database.ImportCourseExamples#copyAudio
    */
   public long add(Result result, int userid, String path) {
     try {
@@ -862,14 +862,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
-
   }
-
-  @Override
-  public void validateFileExists(int projid, String installPath, String language) {
-
-  }
-
   /**
    * An audio cut is uniquely identified by by exercise id, speed (reg/slow), and who recorded it.
    *

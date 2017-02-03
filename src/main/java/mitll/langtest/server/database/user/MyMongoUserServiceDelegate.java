@@ -18,6 +18,7 @@ import java.security.spec.KeySpec;
 class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
   private static final Logger log = LogManager.getLogger(UserSecurityManager.class);
 
+  boolean DEBUG =false;
 //  MyMongoUserServiceDelegate(UserServiceProperties props, Mailer mailer, String appName, Mongo mongoPool) {
 //    super(props, mailer, appName, mongoPool);
 //  }
@@ -42,7 +43,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
         log.info("Decoded using SHA-512.");
         return true;
       }
-      else log.debug("1 no match " +
+      else if (DEBUG) log.debug("1 no match " +
           "\n\tcurrent " + encodedCurrPass +
           "\n\tattempt " + encodedAttemptedPass);
 
@@ -52,7 +53,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
         log.info("Decoded using SHA1.");
         return true;
       }
-      else log.debug("2 no match " +
+      else if (DEBUG)  log.debug("2 no match " +
           "\n\tcurrent " + encodedCurrPass +
           "\n\tattempt " + encodedAttemptedPass);
 
@@ -62,14 +63,14 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
         log.info("Decoded using NetProF-MD5.");
         return true;
       }
-      else log.debug("3 no match " +
+      else if (DEBUG)  log.debug("3 no match " +
           "\n\tcurrent " + encodedCurrPass +
           "\n\tattempt " + encodedAttemptedPass);
 
     } catch (Exception ex) {
       log.warn("Can not authenticate user!", ex);
     }
-    log.info("Authentication Failed.");
+    log.info("Authentication Failed for " + encodedCurrPass);
     return false;
   }
 

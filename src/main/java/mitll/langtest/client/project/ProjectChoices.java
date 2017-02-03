@@ -1,6 +1,11 @@
 package mitll.langtest.client.project;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.Section;
+import com.github.gwtbootstrap.client.ui.Thumbnail;
+import com.github.gwtbootstrap.client.ui.Thumbnails;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -10,7 +15,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.*;
+import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.LangTestDatabase;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.LifecycleSupport;
+import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.UILifecycle;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
@@ -23,7 +34,11 @@ import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
