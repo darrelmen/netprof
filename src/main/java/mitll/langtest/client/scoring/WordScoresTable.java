@@ -1,14 +1,10 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.incubator.Table;
-import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;

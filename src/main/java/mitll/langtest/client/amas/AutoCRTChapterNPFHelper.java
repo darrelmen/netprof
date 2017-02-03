@@ -34,7 +34,6 @@ package mitll.langtest.client.amas;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;

@@ -134,11 +134,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param projid
    * @param installPath
    * @param language
-   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#makeSureAudioIsThere
+   * @see #makeSureAudioIsThere
    */
-  @Override
-  public void validateFileExists(int projid, String installPath, String language) {
+ // @Override
+  private void validateFileExists(int projid, String installPath, String language) {
     long pastTime = doCheckOnStartup ? now : before;
+    logger.debug("validateFileExists before " + new Date(pastTime));
     dao.validateFileExists(projid, pastTime, installPath, language.toLowerCase());
   }
 
@@ -529,11 +530,19 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    // logger.info("\n\n\tdefault id is  " + defaultResult);
   }
 
+  /**
+   * @see
+   * @param projectID
+   * @param language
+   * @param validateAll
+   */
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
     boolean foundFiles = didFindAnyAudioFiles(projectID);
     String mediaDir = serverProps.getMediaDir();
     File file = new File(mediaDir);
+    logger.info("makeSureAudioIsThere " + projectID + " " + language + " " + validateAll);
     if (file.exists()) {
+      logger.debug("makeSureAudioIsThere " + file + " exists ");
       if (file.isDirectory()) {
         String[] list = file.list();
         if (list == null) {
@@ -543,15 +552,15 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           if (validateAll ||
               (serverProps.doAudioChecksInProduction() &&
                   (serverProps.doAudioFileExistsCheck() || !foundFiles))) {
+            logger.debug("makeSureAudioIsThere validateFileExists ");
             validateFileExists(projectID, mediaDir, language);
           }
         }
       } else {
         logger.error("configuration error - expecting media directory " + mediaDir + " to be directory.");
-
       }
     } else {
-      logger.warn("configuration error? - expecting a media directory " + mediaDir);
+      logger.error("configuration error? - expecting a media directory " + mediaDir);
     }
   }
 
