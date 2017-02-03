@@ -35,7 +35,6 @@ package mitll.langtest.server.amas;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.SimpleExerciseDAO;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 import org.apache.logging.log4j.LogManager;

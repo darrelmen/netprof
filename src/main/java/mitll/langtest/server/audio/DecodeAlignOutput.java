@@ -33,8 +33,6 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;

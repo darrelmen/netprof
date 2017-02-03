@@ -37,7 +37,6 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
-import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSONObject;
 
 import java.util.Collection;
