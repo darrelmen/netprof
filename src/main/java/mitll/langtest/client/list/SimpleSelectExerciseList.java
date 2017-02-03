@@ -48,7 +48,12 @@ import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectionWidget> {

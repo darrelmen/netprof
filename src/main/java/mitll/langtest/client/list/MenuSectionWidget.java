@@ -49,7 +49,12 @@ import mitll.langtest.client.table.ListSelect;
 import mitll.langtest.client.table.TableSelect;
 import mitll.langtest.shared.SectionNode;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 //import java.util.logging.Logger;
 
