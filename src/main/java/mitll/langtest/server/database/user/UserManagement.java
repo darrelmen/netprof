@@ -38,7 +38,6 @@ import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.UserToCount;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickUserPermission;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -46,9 +45,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.OutputStream;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
