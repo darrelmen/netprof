@@ -39,7 +39,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.services.UserServiceImpl;
-import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

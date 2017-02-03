@@ -35,7 +35,6 @@ package mitll.langtest.server;
 import com.typesafe.config.ConfigFactory;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.shared.user.Affiliation;
