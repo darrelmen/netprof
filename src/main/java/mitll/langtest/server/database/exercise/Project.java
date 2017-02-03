@@ -313,11 +313,11 @@ public class Project implements PronunciationLookup {
     isRTL = RTL;
   }
 
-  public String toString() {
-    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
-  }
-
   public int getID() {
     return project.id();
+  }
+
+  public String toString() {
+    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }

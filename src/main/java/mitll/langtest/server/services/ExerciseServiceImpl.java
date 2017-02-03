@@ -157,11 +157,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
             logger.info("projidToWrapper now " + projidToWrapper.size());
           }
         } else {
-          logger.debug("REq " + request.isNoFilter());
-          logger.debug("REq " + request.toString());
-          logger.debug("REq " + request.getPrefix());
-          logger.debug("REq " + request.getActivityType());
-          logger.debug("REq " + request.getUserListID());
+//          logger.debug("REq " + request.isNoFilter());
+//          logger.debug("REq " + request.toString());
+//          logger.debug("REq " + request.getPrefix());
+//          logger.debug("REq " + request.getActivityType());
+//          logger.debug("REq " + request.getUserListID());
         }
         return tExerciseListWrapper;
       } else { // sort by unit-chapter selection

@@ -52,6 +52,7 @@ import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import scala.collection.Seq;
 
 import java.sql.Timestamp;
@@ -72,7 +73,7 @@ public class SlickUserExerciseDAO
   /**
    * TODO : need to do something to allow this to scale well - maybe ajax style nested types, etc.
    */
- // private static final boolean ADD_PHONE_LENGTH = false;
+  // private static final boolean ADD_PHONE_LENGTH = false;
 
   private static final String NEW_USER_EXERCISE = "NEW_USER_EXERCISE";
   private static final String UNKNOWN = "UNKNOWN";
@@ -128,7 +129,7 @@ public class SlickUserExerciseDAO
         shared.getEnglish(),
         shared.getMeaning(),
         shared.getForeignLanguage(),
-        "",
+        shared.getAltFL(),
         shared.getTransliteration(),
         shared.isOverride(),
         unitToValue.getOrDefault(first, ""),
@@ -137,7 +138,9 @@ public class SlickUserExerciseDAO
         false,
         false,
         false,
-        shared.getID());
+        shared.getID(),
+        false,
+        never);
   }
 
   /**
@@ -205,8 +208,12 @@ public class SlickUserExerciseDAO
         isPredef,
         isContext,
         false,
-        -1);
+        -1,
+        false,
+        never);
   }
+
+  Timestamp never = new Timestamp(0);
 
   /**
    * @param slick
@@ -214,13 +221,7 @@ public class SlickUserExerciseDAO
    * @see #getUserExercises(Collection)
    */
   private Exercise fromSlick(SlickExercise slick) {
-    Map<String, String> unitToValue = new HashMap<>();
-    Iterator<String> iterator = getTypeOrder().iterator();
-    String first = iterator.next();
-    String second = iterator.hasNext() ? iterator.next() : "";
-    unitToValue.put(first, slick.unit());
-    if (!second.isEmpty())
-      unitToValue.put(second, slick.lesson());
+    Map<String, String> unitToValue = getUnitToValue(slick);
 
     Exercise userExercise = new Exercise(
         slick.id(),
@@ -228,13 +229,29 @@ public class SlickUserExerciseDAO
         slick.userid(),
         slick.english(),
         slick.foreignlanguage(),
+        slick.altfl(),
         slick.transliteration(),
         slick.isoverride(),
         unitToValue,
-        slick.modified().getTime(), slick.projid());
+        slick.modified().getTime(),
+        slick.projid(),
+        slick.candecode(),
+        slick.candecodechecked().getTime());
 
 //    logger.info("fromSlick created " + userExercise);
     return userExercise;
+  }
+
+  @NotNull
+  private Map<String, String> getUnitToValue(SlickExercise slick) {
+    Map<String, String> unitToValue = new HashMap<>();
+    Iterator<String> iterator = getTypeOrder().iterator();
+    String first = iterator.next();
+    String second = iterator.hasNext() ? iterator.next() : "";
+    unitToValue.put(first, slick.unit());
+    if (!second.isEmpty())
+      unitToValue.put(second, slick.lesson());
+    return unitToValue;
   }
 
   /**
@@ -259,9 +276,12 @@ public class SlickUserExerciseDAO
         BaseUserDAO.UNDEFINED_USER,
         slick.english(),
         slick.foreignlanguage(),
+        slick.altfl(),
         slick.meaning(),
         slick.transliteration(),
-        slick.projid());
+        slick.projid(),
+        slick.candecode(),
+        slick.candecodechecked().getTime());
 
     List<String> translations = new ArrayList<String>();
     if (!slick.foreignlanguage().isEmpty()) {
@@ -462,14 +482,15 @@ public class SlickUserExerciseDAO
 
   private void insertDefault(int projID, String newUserExercise) {
     int beforeLoginUser = userDAO.getBeforeLoginUser();
+    Timestamp now = new Timestamp(System.currentTimeMillis());
     SlickExercise userExercise = new SlickExercise(-1,
         beforeLoginUser,
         newUserExercise,
-        new Timestamp(System.currentTimeMillis()),
+        now,
         "",
         "",
         "",
-        "", "", false, "", "", projID, true, false, false, -1);
+        "", "", false, "", "", projID, true, false, false, -1, false, now);
 
     logger.info("insert default " + userExercise);
     insert(userExercise);
@@ -510,11 +531,10 @@ public class SlickUserExerciseDAO
   private CommonExercise templateExercise;
 
   /**
-   *
    * @param projID
    */
   public int ensureTemplateExercise(int projID) {
-   int id = 0;
+    int id = 0;
     if (dao.getByExid(NEW_USER_EXERCISE, projID).isEmpty()) {
       insertDefault(projID);
     }
@@ -551,6 +571,15 @@ public class SlickUserExerciseDAO
     return getExercises(dao.getAllPredefByProject(projectid), typeOrder, sectionHelper, exerciseToPhoneForProject, lookup);
   }
 
+  /**
+   * @see DBExerciseDAO#readExercises
+   * @param projectid
+   * @param typeOrder
+   * @param sectionHelper
+   * @param exerciseToPhoneForProject
+   * @param lookup
+   * @return
+   */
   public List<CommonExercise> getContextByProject(int projectid, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper,
                                                   Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject, PronunciationLookup lookup) {
     return getExercises(dao.getAllContextPredefByProject(projectid), typeOrder, sectionHelper, exerciseToPhoneForProject, lookup);
@@ -668,5 +697,9 @@ public class SlickUserExerciseDAO
 
   public SlickExercise getUnknownExercise() {
     return unknownExercise;
+  }
+
+  public ExerciseDAOWrapper getDao() {
+    return dao;
   }
 }

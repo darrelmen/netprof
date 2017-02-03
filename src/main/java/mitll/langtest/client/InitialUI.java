@@ -229,6 +229,10 @@ public class InitialUI implements UILifecycle {
     return new HTML(lifecycleSupport.getInfoLine());
   }
 
+  /**
+   * NO NO NO don't do this
+   * @return
+   */
   @Deprecated
   @Override
   public boolean isRTL() {
