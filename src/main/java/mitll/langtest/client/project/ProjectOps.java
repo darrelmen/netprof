@@ -32,8 +32,6 @@
 
 package mitll.langtest.client.project;
 
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -59,20 +57,13 @@ import java.util.stream.Collectors;
 
 public class ProjectOps implements RequiresResize {
   private final Logger logger = Logger.getLogger("ProjectOps");
-  public static final String USERS = "Users";
-  // private final Logger logger = Logger.getLogger("UserOps");
-//  private final UserManager userManager;
   private final ExerciseController controller;
 
-  //  private final Map<User.Kind, Label> kindToLabel = new HashMap<>();
-//  private final Map<String, Label> inviteToLabel = new HashMap<>();
-  // private final Map<User.Kind, IconType> kindToIcon = new HashMap<>();
-//  private User.Kind currentKind;
   private DivWidget currentContent;
   private DivWidget currentUserForm;
 
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
-  LifecycleSupport lifecycleSupport;
+  private final LifecycleSupport lifecycleSupport;
 
   /**
    * @param controller
@@ -80,10 +71,8 @@ public class ProjectOps implements RequiresResize {
    * @see Navigation#addProjectMaintenance()
    */
   public ProjectOps(ExerciseController controller, LifecycleSupport lifecycleSupport) {
-    // setKindToIcon();
     this.controller = controller;
     this.lifecycleSupport = lifecycleSupport;
-    // this.userManager = userManager;
   }
 
   public void refreshStartupInfo() {
@@ -111,25 +100,15 @@ public class ProjectOps implements RequiresResize {
 
     currentContent = left;
     currentUserForm = detail;
-    //  NavLink first = getKinds(left, right, detail);
-    //right.getElement().setId("projectContent");
-    //right.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
-//    logger.info("Loaded everything...");
     showInitialState(left, detail);
   }
 
-  //private NavLink lastClicked = null;
-
   private void showInitialState(final DivWidget left, final DivWidget detail/*, NavLink first*/) {
-    // final NavLink toClick = first;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
-        //   if (toClick != null) {
         showProjects(//User.Kind.STUDENT,
             left, detail);
-        //   toClick.setActive(true);
-        //   lastClicked = toClick;
         // }
       }
     });
@@ -179,9 +158,9 @@ public class ProjectOps implements RequiresResize {
   }
 
   /**
-   * @param kind
-   * @param content
-   * @param userForm
+   * @paramx kind
+   * @paramx content
+   * @paramx userForm
    * @return
    */
 /*  private NavLink getUserLink(User.Kind kind, DivWidget content, DivWidget userForm) {
@@ -236,7 +215,7 @@ public class ProjectOps implements RequiresResize {
    * @paramx kind
    * @see #showInitialState
    */
-  private void showProjects(//final User.Kind kind,
+  private void showProjects(
                             final DivWidget content, DivWidget userForm) {
 
     projectServiceAsync.getAll(new AsyncCallback<List<ProjectInfo>>() {
@@ -335,7 +314,7 @@ public class ProjectOps implements RequiresResize {
     return projectContainer;
   }
 
-  private List<ProjectContainer<?>> projectContainers = new ArrayList<>();
+  private final List<ProjectContainer<?>> projectContainers = new ArrayList<>();
 
   public void clearOthers(ProjectContainer<?> current) {
     //logger.info("clearOthers of " + current);

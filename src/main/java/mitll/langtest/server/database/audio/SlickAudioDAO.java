@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.audio;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
@@ -46,6 +47,7 @@ import org.jetbrains.annotations.NotNull;
 import scala.Tuple2;
 import scala.collection.*;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.Map;
@@ -59,11 +61,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private final long before = now - (24 * 60 * 60 * 1000);
   private final boolean doCheckOnStartup;
   private int defaultResult;
+  ServerProperties serverProps;
 
   public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
     dao = new AudioDAOWrapper(dbConnection);
-    doCheckOnStartup = database.getServerProps().doAudioCheckOnStartup();
+    serverProps = database.getServerProps();
+    doCheckOnStartup = serverProps.doAudioCheckOnStartup();
   }
 
   public void createTable() {
@@ -112,7 +116,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   @Override
   public void addOrUpdateUser(
-                              AudioInfo info) {
+      AudioInfo info) {
     dao.addOrUpdateUser(info.getUserid(), info.getExerciseID(), info.getProjid(), info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(), info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID());
   }
 
@@ -130,7 +134,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param projid
    * @param installPath
    * @param language
-   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#makeSureAudioIsThere
    */
   @Override
   public void validateFileExists(int projid, String installPath, String language) {
@@ -522,7 +526,33 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   public void setDefaultResult(int defaultResult) {
     this.defaultResult = defaultResult;
-
     logger.info("\n\n\tdefault id is  " + defaultResult);
   }
+
+  public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
+    boolean foundFiles = didFindAnyAudioFiles(projectID);
+    String mediaDir = serverProps.getMediaDir();
+    File file = new File(mediaDir);
+    if (file.exists()) {
+      if (file.isDirectory()) {
+        String[] list = file.list();
+        if (list == null) {
+          logger.error("setAudioDAO configuration error - can't get files from media directory " + mediaDir);
+        } else if (list.length > 0) { // only on pnetprof (behind firewall), znetprof has no audio, might have a directory.
+          logger.debug("setAudioDAO validating files under " + file.getAbsolutePath());
+          if (validateAll ||
+              (serverProps.doAudioChecksInProduction() &&
+                  (serverProps.doAudioFileExistsCheck() || !foundFiles))) {
+            validateFileExists(projectID, mediaDir, language);
+          }
+        }
+      } else {
+        logger.error("configuration error - expecting media directory " + mediaDir + " to be directory.");
+
+      }
+    } else {
+      logger.warn("configuration error? - expecting a media directory " + mediaDir);
+    }
+  }
+
 }
