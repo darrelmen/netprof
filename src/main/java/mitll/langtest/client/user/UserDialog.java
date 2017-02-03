@@ -154,7 +154,7 @@ public abstract class UserDialog extends BasicDialog {
     this.enterKeyButtonHelper = enterKeyButtonHelper;
   }
 
-   Form getUserForm() {
+  protected Form getUserForm() {
     Form signInForm = new Form();
     signInForm.addStyleName("topMargin");
     signInForm.addStyleName("formRounded");

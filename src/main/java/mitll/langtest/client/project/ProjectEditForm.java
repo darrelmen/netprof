@@ -1,24 +1,19 @@
 package mitll.langtest.client.project;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Fieldset;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.ListBox;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
+import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.user.UserDialog;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
@@ -27,22 +22,32 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by go22670 on 1/17/17.
  */
-public class ProjectEditForm extends UserDialog {
+class ProjectEditForm extends UserDialog {
   private final EventRegistration eventRegistration;
   private final ProjectOps projectOps;
   private ListBox statusBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
+  private AudioServiceAsync audioServiceAsync;
+  private ScoringServiceAsync scoringServiceAsync;
+
+  private HTML feedback;
 
   /**
    * @param projectOps
    * @param props
-   * @see
+   * @see ProjectContainer#gotClickOnItem
    */
-  ProjectEditForm(ProjectOps projectOps, PropertyHandler props, EventRegistration eventRegistration) {
+  ProjectEditForm(ProjectOps projectOps,
+                  PropertyHandler props,
+                  EventRegistration eventRegistration,
+                  AudioServiceAsync audioServiceAsync,
+                  ScoringServiceAsync scoringServiceAsync) {
     super(props);
     this.projectOps = projectOps;
     this.eventRegistration = eventRegistration;
+    this.audioServiceAsync = audioServiceAsync;
+    this.scoringServiceAsync = scoringServiceAsync;
   }
 
   /**
@@ -62,7 +67,33 @@ public class ProjectEditForm extends UserDialog {
 
     fields.add(editProject);
 
-    return getTwoPartForm(heading, fields);
+    Panel twoPartForm = getTwoPartForm(heading, fields);
+    return twoPartForm;
+  }
+
+  @Override
+  protected Form getUserForm() {
+    Form signInForm = new Form() {
+      protected void onLoad() {
+        scoringServiceAsync.isHydraRunning(info.getID(), new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Boolean result) {
+            if (!result) {
+              feedback.setText("Hydra service is not available on port " + info.getPort());
+            }
+          }
+        });
+      }
+    };
+    signInForm.addStyleName("topMargin");
+    signInForm.addStyleName("formRounded");
+    signInForm.getElement().getStyle().setBackgroundColor("white");
+    return signInForm;
   }
 
   @NotNull
@@ -97,7 +128,6 @@ public class ProjectEditForm extends UserDialog {
     });
   }
 
-  HTML feedback;
 
   private Fieldset getFields(ProjectInfo info, Button editButton) {
     Fieldset fieldset = new Fieldset();
@@ -120,7 +150,7 @@ public class ProjectEditForm extends UserDialog {
         w.setEnabled(false);
         feedback.setText("Please wait...");
 
-        projectServiceAsync.checkAudio(info.getID(), new AsyncCallback<Void>() {
+        audioServiceAsync.checkAudio(info.getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
             w.setEnabled(true);
@@ -135,7 +165,10 @@ public class ProjectEditForm extends UserDialog {
         });
       }
     });
+
     feedback = new HTML();
+    feedback.addStyleName("topFiveMargin");
+    feedback.addStyleName("bottomFiveMargin");
     fieldset.add(feedback);
 
     return fieldset;
@@ -162,16 +195,12 @@ public class ProjectEditForm extends UserDialog {
         editButton.setEnabled(changed());
       }
     });
-    //affBox.getElement().getStyle().setWidth(276, Style.Unit.PX);
+
     return affBox;
   }
 
   private boolean changed() {
-    if (info.getStatus() != ProjectStatus.valueOf(statusBox.getValue())) {
-      return true;
-    } else {
-      return false;
-    }
+    return (info.getStatus() != ProjectStatus.valueOf(statusBox.getValue()));
   }
 
   private void setBox(ProjectStatus statusValue) {

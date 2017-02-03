@@ -439,7 +439,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     for (String word : transcriptTokens) {
       String trim = word.trim();
       if (!trim.equals(word)) {
-        logger.warn("trim is different '" + trim + "' != '" + word + "'");
+        logger.warn("getPronunciations trim is different '" + trim + "' != '" + word + "'");
         word = trim;
       }
       if (!word.equals(" ") && !word.isEmpty()) {
@@ -450,12 +450,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           }
         } else {
           if (getLTS() == null) {
-            logger.warn(this + " " + languageProperty + " : LTS is null???");
+            logger.warn("getPronunciations " +this + " " + languageProperty + " : LTS is null???");
           } else {
             String word1 = word.toLowerCase();
             String[][] process = getLTS().process(word1);
             if (!ltsOutputOk(process)) {
-              logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
+              logger.warn("getPronunciations couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
               if (canUseTransliteration) {
                 //              logger.info("trying transliteration LTS");
 

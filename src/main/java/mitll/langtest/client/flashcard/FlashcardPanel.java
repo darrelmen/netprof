@@ -229,7 +229,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   private void playRefOrAutoPlay() {
-
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         maybePlayRef(controlState);
