@@ -189,7 +189,7 @@ public class AudioFileHelper implements AlignDecode {
             if (context.isSafeToDecode() != validForeignPhrase2) {
               context.getMutable().setSafeToDecode(validForeignPhrase2);
             }
-          //  context.getMutable().setSafeToDecode(validForeignPhrase2);//isInDictOrLTS(context));
+            //  context.getMutable().setSafeToDecode(validForeignPhrase2);//isInDictOrLTS(context));
           }
         }
 
@@ -963,8 +963,20 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
+  /**
+   * @return
+   * @see mitll.langtest.server.services.ScoringServiceImpl#isHydraRunning
+   */
   public boolean isHydraAvailable() {
     return webserviceScoring.isAvailable();
+  }
+
+  public boolean isHydraAvailableCheckNow() {
+    return webserviceScoring.isAvailableCheckNow();
+  }
+
+  public void setAvailable() {
+    webserviceScoring.setAvailable();
   }
 
   /**

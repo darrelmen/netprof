@@ -84,7 +84,12 @@ class ProjectEditForm extends UserDialog {
           @Override
           public void onSuccess(Boolean result) {
             if (!result) {
-              feedback.setText("Hydra service is not available on port " + info.getPort());
+              if (info.getPort() == -1) {
+                feedback.setText("No Hydra service for this language.");
+              }
+              else {
+                feedback.setText("Hydra service is not available on port " + info.getPort());
+              }
             }
           }
         });

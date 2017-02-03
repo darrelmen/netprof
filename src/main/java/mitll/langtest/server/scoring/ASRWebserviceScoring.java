@@ -126,9 +126,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     ip = project.getWebserviceIP();
     port = project.getWebservicePort();
 
-    HTTPClient dcodr = getDcodr();
-
-    available = dcodr.isAvailable();
+    setAvailable();
     if (!available) {
       logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port);
     } else {
@@ -137,8 +135,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
+  public void setAvailable() {
+    available = isAvailableCheckNow();
+  }
+
   public boolean isAvailable() {
     return available;
+  }
+
+  public boolean isAvailableCheckNow() {
+    return getDcodr().isAvailable();
   }
 
   /**
