@@ -123,7 +123,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     Integer realExID = exToInt.get(shared.getOldExID());
 
     if (realExID == null) return null;
-    else
+    else {
+      String model = shared.getModel();
+      if (model == null) model = "";
       return new SlickResult(-1,
           shared.getUserid(),
           realExID,
@@ -147,8 +149,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
           transcript,
           shared.getUniqueID(),
           projid,
-          shared.getModel()
+          model
       );
+    }
   }
 
   private String checkNull(String deviceType) {
