@@ -516,7 +516,7 @@ public class ListManager implements RequiresResize {
 
     Panel secondRow = new FluidRow();    // TODO : this is wacky -- clean up...
 
-    String userID = ul.getCreator().getUserID();
+    String userID = ul.getUserChosenID();
     if (!userID.equals(User.NOT_SET)) {
       addCreatedBy(container, secondRow, userID);
     }
@@ -591,7 +591,7 @@ public class ListManager implements RequiresResize {
    * @see #showList
    */
   private void addVisitor(UserList ul) {
-    if (ul.getCreator().getID() != controller.getUser()) {
+    if (ul.getUserID() != controller.getUser()) {
       listService.addVisitor(ul.getID(), controller.getUser(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -781,7 +781,7 @@ public class ListManager implements RequiresResize {
   }
 
   private boolean createdByYou(UserList<?> ul) {
-    return ul.getCreator().getID() == getUser();
+    return ul.getUserID() == getUser();
   }
 
   private int getUser() {

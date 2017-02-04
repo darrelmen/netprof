@@ -65,7 +65,7 @@ public class AnswerInfo {
   private String validity;
   private String transcript = "";
   private double snr;
-  private String model;
+  private String model = "";
 
   public int getProjid() {
     return projid;
@@ -199,8 +199,9 @@ public class AnswerInfo {
   }
 
   public AnswerInfo(AnswerInfo other,
-                    ScoreInfo scoreInfo) {
+                    ScoreInfo scoreInfo, String model) {
     this(other, scoreInfo.correct, scoreInfo.pronScore, scoreInfo.scoreJson, scoreInfo.processDur);
+    this.model = model;
   }
 
   private AnswerInfo(AnswerInfo other,

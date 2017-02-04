@@ -130,8 +130,8 @@ public class Navigation implements RequiresResize, ShowTab {
   /**
    * @see #addRecordTabs
    */
-  private static final String RECORD_AUDIO = "Record Audio";
-  private static final String RECORD_EXAMPLE = "Record In-context Audio";
+  private static final String RECORD_AUDIO = "Record";
+  private static final String RECORD_EXAMPLE = "Record Context";
 
   /**
    * @see #selectPreviousTab

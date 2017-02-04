@@ -185,6 +185,8 @@ public class SignUpForm extends UserDialog implements SignUp {
     // demoHeader.setVisible(b);
     registrationInfo.setVisible(b);
 
+   // registrationInfo.setGenderVisible(true);  // always ask - so then we can display gender matching audio.
+
     FormField firstFocus =
         firstName.isEmpty() ?
             firstName :
@@ -266,7 +268,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @return
    * @paramx user
    */
-  private Fieldset getFields(/*User user*/) {
+  private Fieldset getFields() {
     Fieldset fieldset = new Fieldset();
     userBox = makeSignUpUsername(fieldset);
     makeSignUpFirstName(fieldset);
@@ -304,17 +306,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     return permissions.contains(User.Permission.DEVELOP_CONTENT) || permissions.contains(User.Permission.RECORD_AUDIO) ||
         permissions.contains(User.Permission.QUALITY_CONTROL);
   }
-
-/*
-  private Heading getHeader(String rolesHeader) {
-    Heading w1 = new Heading(5, rolesHeader);
-    w1.addStyleName("leftTenMargin");
-    int value = 5;
-    w1.getElement().getStyle().setMarginTop(value, Style.Unit.PX);
-    w1.getElement().getStyle().setMarginBottom(value, Style.Unit.PX);
-    return w1;
-  }
-*/
 
   protected Collection<User.Kind> getRoles() {
     return User.getSelfChoiceRoles();
