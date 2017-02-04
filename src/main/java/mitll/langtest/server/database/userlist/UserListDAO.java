@@ -40,6 +40,7 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -139,7 +140,7 @@ import java.util.List;
               "VALUES(?,?,?,?,?,?);");
       int i = 1;
       //     statement.setLong(i++, userList.getUserID());
-      statement.setLong(i++, userList.getCreator().getID());
+      statement.setLong(i++, userList.getUserID());
       statement.setString(i++, userList.getName());
       statement.setString(i++, userList.getDescription());
       statement.setString(i++, userList.getClassMarker());
@@ -393,7 +394,7 @@ import java.util.List;
   private List<UserList<CommonShell>> getUserLists(String sql, long userid) throws SQLException {
     List<UserList<CommonShell>> lists = getWhere(sql);
     for (UserList<CommonShell> ul : lists) {
-      if (userid == -1 || ul.getCreator().getID() == userid || !ul.isFavorite()) {   // skip other's favorites
+      if (userid == -1 || ul.getUserID() == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
       }
     }
@@ -408,15 +409,16 @@ import java.util.List;
 
     while (rs.next()) {
       int uniqueid = rs.getInt("uniqueid");
+      User userWhere = userDAO.getUserWhere(rs.getInt(CREATORID));
       lists.add(new UserList<>(
               uniqueid, //id
-              userDAO.getUserWhere(rs.getInt(CREATORID)), // age
-              rs.getString(NAME), // exp
-              rs.getString("description"), // exp
-              rs.getString("classmarker"), // exp
-              rs.getBoolean(ISPRIVATE),
-              rs.getTimestamp("modified").getTime()
-          )
+          userWhere.getID() , // age
+          // exp
+          userWhere.getUserID(), rs.getString(NAME), // exp
+          rs.getString("description"), // exp
+          rs.getString("classmarker"),
+          rs.getBoolean(ISPRIVATE),
+          rs.getTimestamp("modified").getTime())
       );
     }
     //logger.debug("getWhere : got " + lists);

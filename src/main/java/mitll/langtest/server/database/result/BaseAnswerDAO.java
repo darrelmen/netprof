@@ -68,7 +68,7 @@ public abstract class BaseAnswerDAO extends DAO {
         new AudioCheck.ValidityAndDur(0),"");
 
     return addAnswer(
-        new AnswerInfo(answerInfo, new AnswerInfo.ScoreInfo(correct, pronScore, "", 0)));
+        new AnswerInfo(answerInfo, new AnswerInfo.ScoreInfo(correct, pronScore, "", 0), ""));
   }
 
   abstract int addAnswer(AnswerInfo answerInfo);

@@ -351,7 +351,7 @@ public class InitialUI implements UILifecycle {
    * @see #gotUser(User)
    */
   private void showNavigation() {
-    if (contentRow.getElement().getChildCount() == 2) {
+    if (contentRow.getElement().getChildCount() <= 2) {
       // logger.info("showNavigation : - add to content root");
       contentRow.remove(child);
       contentRow.add(navigation.getTabPanel());

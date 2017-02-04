@@ -599,6 +599,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return dbUser == null ? null : toUser(dbUser);
   }
 
+  @Override
+  public User getUserWhere(int userid) { return getByID(userid);  }
+
   private DBUser lookupUser(int id) {
     return delegate.lookupDBUser(id);
   }
@@ -1018,26 +1021,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public User getUserWithResetKey(String resetKey) {
     logger.warn("no reset key! " + resetKey);
     return null;//convertOrNull(dao.getByReset(resetKey));
-  }
-
-  /**
-   * TODO : enable content developer will happen in domino user management UI.
-   *
-   * @return
-   * @paramx resetKey
-   * @seex mitll.langtest.server.mail.EmailHelper#enableCDUser
-   */
-/*
-  @Override
-  @Deprecated
-  public User getUserWithEnabledKey(String resetKey) {
-    //return convertOrNull(dao.getByEnabledReq(resetKey));
-    return null;
-  }
-*/
-  @Override
-  public User getUserWhere(int userid) {
-    return getByID(userid);
   }
 
   public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {

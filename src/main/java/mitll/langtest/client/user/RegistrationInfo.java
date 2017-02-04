@@ -91,9 +91,13 @@ class RegistrationInfo extends BasicDialog {
   }
 
   public void setVisible(boolean visible) {
-    genders.setVisible(visible);
+    setGenderVisible(true);
     ageEntryGroup.setVisible(visible);
     if (dialectGroup != null) dialectGroup.setVisible(visible);
+  }
+
+  public void setGenderVisible(boolean visible) {
+    genders.setVisible(visible);
   }
 
   public boolean isVisible() {
