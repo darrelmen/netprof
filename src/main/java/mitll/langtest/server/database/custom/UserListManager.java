@@ -350,7 +350,7 @@ public class UserListManager implements IUserListManager {
       if (hasByName(userid, name, projid)) {
         return null;
       } else {
-        UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate, System.currentTimeMillis());
+        UserList e = new UserList(i++, userid, userWhere.getUserID(), name, description, dliClass, isPrivate, System.currentTimeMillis());
         userListDAO.add(e, projid);
         logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
         return e;
@@ -603,8 +603,9 @@ public class UserListManager implements IUserListManager {
     List<CommonExercise> onList = getReviewedExercises(allKnown, ids);
 
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
-    UserList<CommonShell> userList = new UserList<>(userListID, getQCUser(), name, description, "", false,
-        System.currentTimeMillis());
+    User qcUser = getQCUser();
+    UserList<CommonShell> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
+        false, System.currentTimeMillis());
 
     List<CommonShell> copy = new ArrayList<>();
     for (CommonShell orig : onList) copy.add(orig.getShell());
@@ -621,8 +622,9 @@ public class UserListManager implements IUserListManager {
     List<CommonExercise> onList = getReviewedExercises(allKnown, ids);
 
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
-    UserList<CommonExercise> userList = new UserList<>(userListID, getQCUser(), name, description, "", false,
-        System.currentTimeMillis());
+    User qcUser = getQCUser();
+    UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
+        false, System.currentTimeMillis());
 
 //    List<CommonShell> copy = new ArrayList<>();
 //    for (CommonShell orig : onList) copy.add(orig.getShell());

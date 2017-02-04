@@ -350,7 +350,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
           " by " +
               (uniqueID == IUserListManager.COMMENT_MAGIC_ID ? "Students" :
                   uniqueID == IUserListManager.REVIEW_MAGIC_ID ? REVIEWERS :
-                      ul.getCreator().getUserID());
+                      ul.getUserChosenID());
       Heading h4Again = yourList ? new Heading(5, html1) : new Heading(4, "", html1);
 
       h4Again.addStyleName("floatRight");
@@ -447,10 +447,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   private boolean isYourList(UserList ul) {
     return createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST);
   }
-
-  private boolean createdByYou(UserList ul) {
-    return ul.getCreator().getID() == userManager.getUser();
-  }
+  private boolean createdByYou(UserList ul) {  return ul.getUserID() == userManager.getUser();  }
 
   private Widget getUserListText2(String content) {
     Widget nameInfo = new HTML(content);
