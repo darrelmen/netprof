@@ -90,7 +90,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   public SlickUserExerciseList toSlick(UserList<CommonShell> shared, int projid) {
-    return toSlick2(shared, shared.getCreator().getID(), projid);
+    return toSlick2(shared, shared.getUserID(), projid);
   }
 
   public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid, int projid) {
@@ -113,23 +113,21 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   private UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
     return new UserList<>(
         slick.id(),
-        userDAO.getUserWhere(slick.userid()),
-        slick.name(),
+        slick.userid(),
+        userDAO.getUserChosenID(slick.userid()), slick.name(),
         slick.description(),
         slick.classmarker(),
-        slick.isprivate(),
-        slick.modified().getTime());
+        slick.isprivate(), slick.modified().getTime());
   }
 
   private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
     return new UserList<>(
         slick.id(),
-        userDAO.getUserWhere(slick.userid()),
-        slick.name(),
+        slick.userid(),
+        userDAO.getUserChosenID(slick.userid()), slick.name(),
         slick.description(),
         slick.classmarker(),
-        slick.isprivate(),
-        slick.modified().getTime());
+        slick.isprivate(), slick.modified().getTime());
   }
 
   public void insert(SlickUserExerciseList UserExercise) {
@@ -252,7 +250,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    */
   private void populateLists(Collection<UserList<CommonShell>> lists, long userid) {
     for (UserList<CommonShell> ul : lists) {
-      if (userid == -1 || ul.getCreator().getID() == userid || !ul.isFavorite()) {   // skip other's favorites
+      if (userid == -1 || ul.getUserID() == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
       }
     }

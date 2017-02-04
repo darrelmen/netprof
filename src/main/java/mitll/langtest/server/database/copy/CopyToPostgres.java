@@ -658,7 +658,7 @@ public class CopyToPostgres<T extends CommonShell> {
     List<SlickUserExerciseList> bulk = new ArrayList<>();
 
     for (UserList<CommonShell> list : oldUserLists) {
-      int oldID = list.getCreator().getID();
+      int oldID = list.getUserID();
       Integer newUserID = oldToNewUser.get(oldID);
       if (newUserID == null) {
         logger.error("UserListManager can't find user " + oldID + " in " + oldToNewUser.size());

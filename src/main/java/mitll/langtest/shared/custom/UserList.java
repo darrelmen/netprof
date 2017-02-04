@@ -40,7 +40,6 @@ import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.shared.exercise.BaseExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,9 +57,12 @@ import java.util.Map;
  */
 public class UserList<T extends HasID> extends BaseExercise {
   public static final String MY_LIST = "Favorites";
+
+  private int userid;
+  private String userChosenID;
   @Deprecated protected String oldid = "";
 
-  private User creator;
+//  private User creator;
   private String name;
   private String description;
   private String classMarker;
@@ -74,17 +76,23 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   /**
    * @param uniqueID
-   * @param user
+   * @paramx user
+   * @param userid
+   * @param userChosenID
    * @param name
    * @param description
    * @param classMarker
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see UserListDAO#getWhere(long, boolean)
    */
-  public UserList(int uniqueID, User user, String name, String description, String classMarker, boolean isPrivate,
+  public UserList(int uniqueID,
+                  //User user,
+                  int userid, String userChosenID, String name, String description, String classMarker, boolean isPrivate,
                   long modified) {
     super(uniqueID);
-    this.creator = user;
+  //  this.creator = user;
+    this.userid = userid;
+    this.userChosenID = userChosenID;
     this.name = name;
     this.description = description;
     this.classMarker = classMarker;
@@ -92,12 +100,14 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.modified = modified;
   }
 
+  public int getUserID() { return userid; }
+
   /**
    * @param ul
    * @see mitll.langtest.client.custom.dialog.EditItem#makeListOfOnlyYourItems(UserList)
    */
   public UserList(UserList<T> ul) {
-    this(ul.getID(), ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified());
+    this(ul.getID(),/* ul.getCreator(),*/ ul.getUserID() , ul.getUserChosenID(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified());
   }
 
   public UserList<T> getCopy() {
@@ -184,9 +194,9 @@ public class UserList<T extends HasID> extends BaseExercise {
     return toRemove != null && exercises.remove(toRemove) ? toRemove : null;
   }
 
-  public User getCreator() {
+/*  public User getCreator() {
     return creator;
-  }
+  }*/
 
   /**
    * @paramx uniqueID
@@ -233,7 +243,8 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   @Override
   public String toString() {
-    long id = creator == null ? -1 : creator.getID();
+    long id =
+        getUserID();
     return "UserList #" + getID() + " '" + name + "' by " + id +
         " : " + (isReview ? " REVIEW " : "") +
         " : with " +  getNumItems()  + " exercises.";
@@ -259,5 +270,9 @@ public class UserList<T extends HasID> extends BaseExercise {
   @Deprecated
   public void setOldID(String id) {
     this.oldid = id;
+  }
+
+  public String getUserChosenID() {
+    return userChosenID;
   }
 }

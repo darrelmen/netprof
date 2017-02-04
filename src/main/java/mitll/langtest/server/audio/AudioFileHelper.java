@@ -467,7 +467,7 @@ public class AudioFileHelper implements AlignDecode {
         infoOrig,
 
         new AnswerInfo.ScoreInfo(answer.isCorrect(), (float) answer.getScore(),
-            new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur));
+            new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur), getModelsDir());
 
     int answerID = db.getAnswerDAO().addAnswer(info);
     answer.setResultID(answerID);
@@ -705,13 +705,14 @@ public class AudioFileHelper implements AlignDecode {
     if (options.isRecordInResults()) {
       int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
 
+      String modelsDir = getModelsDir();
       AnswerInfo infoOrig = new AnswerInfo(
           context,
           recordingInfo,
-          validity, getModelsDir());
+          validity, modelsDir);
 
       AnswerInfo info = new AnswerInfo(infoOrig,
-          new AnswerInfo.ScoreInfo(true, score, new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur));
+          new AnswerInfo.ScoreInfo(true, score, new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur), modelsDir);
 
       answer.setTranscript(exercise.getForeignLanguage());
       int answerID = db.getAnswerDAO().addAnswer(info);
