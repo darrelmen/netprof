@@ -49,7 +49,6 @@ import java.util.Date;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class UserExerciseDAO extends DAO {
   private static final Logger logger = Logger.getLogger(UserExerciseDAO.class);
@@ -67,12 +66,16 @@ public class UserExerciseDAO extends DAO {
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
   private static final String CREATORID = "creatorid";
+  public static final String ENGLISH = "english";
 
   private ExerciseDAO<CommonExercise> exerciseDAO;
   private static final boolean DEBUG = false;
+  private final boolean isEnglish;
 
-  public UserExerciseDAO(Database database) {
+  public UserExerciseDAO(Database database, boolean isEnglish) {
     super(database);
+    this.isEnglish = isEnglish;
+    if (DEBUG) logger.info("is english " + isEnglish);
     try {
       createUserTable(database);
       Collection<String> columns = getColumns(USEREXERCISE);
@@ -130,7 +133,7 @@ public class UserExerciseDAO extends DAO {
           "INSERT INTO " + USEREXERCISE +
               "(" +
               EXERCISEID + "," +
-              "english" + "," +
+              ENGLISH + "," +
               "foreignLanguage" + "," +
               TRANSLITERATION + "," +
               CREATORID + "," +
@@ -146,7 +149,18 @@ public class UserExerciseDAO extends DAO {
               ")");
       int i = 1;
       statement.setString(i++, userExercise.getID());
-      statement.setString(i++, fixSingleQuote(userExercise.getEnglish()));
+      String english = userExercise.getEnglish();
+
+    //  logger.info("for " + userExercise.getID() + " : english '" + english + "'");
+    //  logger.info("for " + userExercise.getID() + " : meaning '" + userExercise.getMeaning() + "'");
+      if (isEnglish && english.isEmpty()) { // english for english is meaning (fl for english is the english word or phrase)
+        english = userExercise.getMeaning();
+      //  logger.info("--- for " + userExercise.getID() + " : english '" + english + "'");
+
+      }
+      String x1 = fixSingleQuote(english);
+      //logger.info("--- for " + userExercise.getID() + " : x1 '" + x1 + "'");
+      statement.setString(i++, x1);
       statement.setString(i++, fixSingleQuote(userExercise.getForeignLanguage()));
       statement.setString(i++, fixSingleQuote(userExercise.getTransliteration()));
       statement.setLong(i++, userExercise.getCombinedMutableUserExercise().getCreator());
@@ -181,7 +195,7 @@ public class UserExerciseDAO extends DAO {
       if (id == -1) {
         logger.error("huh? no key was generated?");
       }
-      //logger.debug("unique id = " + id);
+//      logger.debug("unique id = " + id);
 
       userExercise.getCombinedMutableUserExercise().setUniqueID(id);
 
@@ -200,15 +214,17 @@ public class UserExerciseDAO extends DAO {
         preparedStatement.close();
         userExercise.getCombinedMutableUserExercise().setID(customID);
 
-        if (DEBUG) logger.debug("\tuserExercise= " + userExercise);
+        if (DEBUG) logger.debug("\tuserExercise update id " + userExercise);
       }
 
       finish(connection, statement);
 
-    //  logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
+      //  logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
       if (DEBUG) {
-        logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
+        logger.debug("new        " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
+        logger.debug("confirm Ex " + getWhere(userExercise.getID()));
       }
+
     } catch (Exception ee) {
       logException(ee);
     }
@@ -252,6 +268,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   int c = 0;
+
   /**
    * @param listID
    * @return
@@ -281,17 +298,19 @@ public class UserExerciseDAO extends DAO {
           if (byID != null) {
             userExercises2.add(new UserExercise(byID, byID.getCreator())); // all predefined references
           } else {
-            if (c++< 10)
-            logger.error("getOnList: huh can't find user exercise '" + ue.getID() + "'");
+            if (c++ < 10)
+              logger.error("getOnList: huh can't find user exercise '" + ue.getID() + "'");
           }
         } else {
           userExercises2.add(ue);
         }
       }
 
-      if (c <10 && !userExercises.isEmpty()) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
+      if (c > 0 && c < 10 && !userExercises.isEmpty()) {
+        logger.warn("getOnList huh? can't find " + c + "/" + userExercises.size() + " items???");
+      }
 
-      boolean isEnglish = database.getLanguage().equalsIgnoreCase("english");
+      boolean isEnglish = database.getLanguage().equalsIgnoreCase(ENGLISH);
       String join2 = getJoin2(listID);
       if (DEBUG) logger.debug("\tusing exercise = " + join2);
       for (String exid : getExercises(join2)) {
@@ -383,8 +402,7 @@ public class UserExerciseDAO extends DAO {
 
   public Collection<CommonExercise> getByUser(int user) {
     String sql = "SELECT * from " + USEREXERCISE + " where " + CREATORID + "=" + user;
-    Collection<CommonExercise> commonExercises = getCommonExercises(sql);
-    return commonExercises;
+    return getCommonExercises(sql);
   }
 
   public Collection<CommonExercise> getAll() {
@@ -394,7 +412,7 @@ public class UserExerciseDAO extends DAO {
   /**
    * @return
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
-   * @see #setAudioDAO(mitll.langtest.server.database.AudioDAO)
+   * @seex #setAudioDAO
    */
   public Collection<CommonExercise> getOverrides() {
     return getCommonExercises("SELECT * from " + USEREXERCISE + " where " + OVERRIDE + "=true");
@@ -441,7 +459,7 @@ public class UserExerciseDAO extends DAO {
     List<CommonExercise> exercises = new ArrayList<>();
     try {
       PreparedStatement statement = connection.prepareStatement(sql);
-      //logger.debug("getUserExercises sql = " + sql);
+//      logger.debug("getUserExercises sql = " + sql);
       ResultSet rs = statement.executeQuery();
 
       List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
@@ -452,11 +470,12 @@ public class UserExerciseDAO extends DAO {
 
         Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
 
+        String english = rs.getString(ENGLISH);
         UserExercise e = new UserExercise(
             rs.getLong("uniqueid"),
             rs.getString(EXERCISEID),
             rs.getLong(CREATORID),
-            rs.getString("english"),
+            english,
             rs.getString("foreignLanguage"),
             rs.getString(TRANSLITERATION),
             rs.getString(CONTEXT),
@@ -466,8 +485,15 @@ public class UserExerciseDAO extends DAO {
             date.getTime()
         );
 
+        if (isEnglish) {
+         // logger.info("getUserExercises set meaning using english '" + english +"'");
+          e.setMeaning(english);
+         // logger.info("getUserExercises                   meaning '" + e.getMeaning()+"'");
+        } else {
+         // logger.info("getUserExercises not english " + english);
+        }
 
-//        logger.info("getUserExercises " + e);
+      //  logger.info("getUserExercises " + e);
 
 /*        if (addMissingAudio) {
           String ref = rs.getString(REF_AUDIO);
@@ -526,14 +552,13 @@ public class UserExerciseDAO extends DAO {
 
 //  private Map<String, List<AudioAttribute>> exToAudio;
 //  private AudioDAO audioDAO;
- // public void setAudioDAO(AudioDAO audioDAO) {
-    //  exToAudio = audioDAO.getExToAudio();
-    //  this.audioDAO = audioDAO;
+  // public void setAudioDAO(AudioDAO audioDAO) {
+  //  exToAudio = audioDAO.getExToAudio();
+  //  this.audioDAO = audioDAO;
 /*    if (ADD_MISSING_AUDIO) {
       getOverrides(true);
     }*/
   //}
-
   private Map<String, String> getUnitToValue(ResultSet rs, List<String> typeOrder) throws SQLException {
     String first = rs.getString(UNIT);
     String second = rs.getString(LESSON);
@@ -569,11 +594,12 @@ public class UserExerciseDAO extends DAO {
    * @param userExercise
    * @param createIfDoesntExist
    * @see UserListManager#editItem
+   *
    */
   public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      String sql = "UPDATE " + USEREXERCISE +" " +
+      String sql = "UPDATE " + USEREXERCISE + " " +
           "SET " +
           "english=?," +
           "foreignLanguage=?," +
@@ -588,7 +614,12 @@ public class UserExerciseDAO extends DAO {
 
       int ii = 1;
 
-      statement.setString(ii++, userExercise.getEnglish());
+      String english = userExercise.getEnglish();
+      if (isEnglish) {
+        logger.info("update " + english);
+        english = userExercise.getMeaning();
+      }
+      statement.setString(ii++, english);
       statement.setString(ii++, userExercise.getForeignLanguage());
       statement.setString(ii++, userExercise.getTransliteration());
       statement.setString(ii++, userExercise.getContext());

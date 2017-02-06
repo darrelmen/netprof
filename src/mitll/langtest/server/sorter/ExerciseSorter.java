@@ -89,6 +89,7 @@ public class ExerciseSorter extends SimpleSorter {
      */
   public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) { return phoneCompFirst(o1, o2, phoneToCount);  }
 
+  int spew = 0;
   /**
    * Compare and put shorter pronunciations before longer ones.
    * When they are the same length, compare phones, and when you get to a difference, use their relative occurrence
@@ -131,12 +132,12 @@ public class ExerciseSorter extends SimpleSorter {
         if (!a.equals(b)) {
           Integer a1 = phoneToCount.get(a);
           if (a1 == null) {
-            logger.error("phoneCompFirst huh? no phone count for " + a + " in " + phoneToCount.keySet() + " for " +o1.getID());
+            if (spew++ < 100) logger.error("phoneCompFirst huh? no phone count for " + a + " in " + phoneToCount.keySet() + " for " +o1.getID());
             a1 = -1;
           }
           Integer b1 = phoneToCount.get(b);
           if (b1 == null) {
-            logger.error("phoneCompFirst huh? no phone count for " + b + " in " + phoneToCount.keySet() + " for " +o2.getID());
+            if (spew++ < 100) logger.error("phoneCompFirst huh? no phone count for " + b + " in " + phoneToCount.keySet() + " for " +o2.getID());
             b1 = -1;
           }
           int compt = a1.compareTo(b1);

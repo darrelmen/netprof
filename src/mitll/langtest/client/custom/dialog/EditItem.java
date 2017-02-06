@@ -341,7 +341,8 @@ public class EditItem {
                                  Panel right,
                                  UserList<CommonShell> ul,
                                  ListInterface<CommonShell> pagingContainer,
-                                 boolean doNewExercise, boolean setFields) {
+                                 boolean doNewExercise,
+                                 boolean setFields) {
     NewUserExercise editableExercise = getAddOrEditPanel(newExercise, itemMarker, originalList, doNewExercise);
     right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
     if (setFields) editableExercise.setFields(newExercise);

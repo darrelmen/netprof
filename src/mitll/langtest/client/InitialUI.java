@@ -84,7 +84,7 @@ public class InitialUI {
    *
    * @see #getLinksToSites()
    */
-  private static final int LEFT_LIST_WIDTH = 167;
+  private static final int LEFT_LIST_WIDTH = 20;//167;
 
   private static final String LANGTEST_IMAGES = "langtest/images/";
   private static final int NO_USER_INITIAL = -2;

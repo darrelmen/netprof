@@ -206,7 +206,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     addRemoveDAO = new AddRemoveDAO(this);
 
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
-    userExerciseDAO = new UserExerciseDAO(this);
+    boolean isEnglish = getLanguage().equalsIgnoreCase("english");
+    userExerciseDAO = new UserExerciseDAO(this,isEnglish);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     resultDAO = new ResultDAO(this);
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
@@ -1322,8 +1323,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     if (userEx == null) {
       toRet = getExercise(id);
+//      logger.info("chooseWhichExercise got predef " + toRet);
     } else {
-      //logger.info("getCustomOrPredefExercise got user ex for " + id);
+//      logger.info("chooseWhichExercise got user ex for " + id);
       long updateTime = userEx.getUpdateTime();
       CommonExercise predef = getExercise(id);
 

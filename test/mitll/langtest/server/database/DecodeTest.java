@@ -29,7 +29,7 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testFrench() {
     DatabaseImpl<CommonExercise> russian = getDatabase("french");
-    CommonExercise exercise = russian.getExercise("2127");
+    CommonExercise exercise = russian.getExercise("1540");
     //String context = exercise.getContext();
 
     russian.getSectionHelper().report();

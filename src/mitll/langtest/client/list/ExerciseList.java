@@ -447,7 +447,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (exerciseID.isEmpty()) {
       loadFirstExercise(searchIfAny);
     } else {
-    //  logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny +"'");
+      //  logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny +"'");
       pushFirstSelection(exerciseID, searchIfAny);
     }
   }
@@ -484,14 +484,16 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public void hide() { getParent().setVisible(false);  }
+  public void hide() {
+    getParent().setVisible(false);
+  }
 
   /**
    * If we're not already showing this item, ask there server for the exercise.
    * Does this by pushing a history item and then noticing the history item change.
    *
-   * @see #rememberAndLoadFirst
    * @param searchIfAny
+   * @see #rememberAndLoadFirst
    */
   protected void loadFirstExercise(String searchIfAny) {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
@@ -534,7 +536,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ListInterface ListInterface#loadPreviousExercise
    */
   public void loadExercise(String itemID) {
-//    if (DEBUG) logger.info("ExerciseList.loadExercise itemID " + itemID);
+   if (DEBUG) logger.info("ExerciseList.loadExercise itemID " + itemID);
     pushNewItem("", itemID);
   }
 
@@ -561,7 +563,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public boolean loadByID(String id) {
     if (hasExercise(id)) {
-      // if (DEBUG) logger.info("loading exercise " + id);
+      if (DEBUG) logger.info("loading exercise " + id);
       loadExercise(id);
       return true;
     } else {
@@ -754,7 +756,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Compare with google response for this state.
    */
   void showEmptyExercise() {
-    createdPanel = new SimplePanel(new Heading(3,"<b>Your search or selection did not match any items.</b>"));
+    createdPanel = new SimplePanel(new Heading(3, "<b>Your search or selection did not match any items.</b>"));
     createdPanel.getElement().setId(EMPTY_PANEL);
     innerContainer.setWidget(createdPanel);
   }

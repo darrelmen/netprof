@@ -100,8 +100,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param modifiedTimestamp
    * @see mitll.langtest.server.database.custom.UserExerciseDAO#getUserExercises
    */
-  public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
-                      String transliteration, String context, String contextTranslation,
+  public UserExercise(long uniqueID, String exerciseID, long creator,
+                      String english,
+                      String foreignLanguage,
+                      String transliteration,
+                      String context, String contextTranslation,
                       boolean isOverride,
                       Map<String, String> unitToValue, long modifiedTimestamp
   ) {
@@ -139,7 +142,6 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   public CommonShell getShell() {
     return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
   }
-
 
   private void copyAudio(AudioRefExercise exercise) {
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
@@ -254,11 +256,6 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   public void setRefSentences(Collection<String> orDefault) {
     this.refSentences = orDefault;
   }
-
-/*  @Override
-  public String getRefAudioIndex() {
-    return "";
-  }*/
 
   public void setAvgScore(float avgScore) {
     this.avgScore = avgScore;
