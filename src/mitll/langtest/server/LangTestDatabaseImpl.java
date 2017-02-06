@@ -769,7 +769,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // TODO : do this the right way vis-a-vis type safe collection...
 
     List<T> exerciseShells1 = (List<T>) exerciseShells;
-
     ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(reqID, exerciseShells1, firstExercise);
     return exerciseListWrapper;
   }
