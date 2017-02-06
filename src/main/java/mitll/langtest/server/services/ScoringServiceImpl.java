@@ -279,9 +279,19 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       return false;
     } else {
       try {
+        logger.error("isHydraRunning  project with id " + projid);
+
         AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+
+        logger.error("isHydraRunning  audioFileHelper " + audioFileHelper);
+
         boolean hydraAvailable = audioFileHelper.isHydraAvailable();
+        logger.error("isHydraRunning  hydraAvailable " + hydraAvailable);
+
         boolean hydraAvailableCheckNow = audioFileHelper.isHydraAvailableCheckNow();
+
+        logger.error("isHydraRunning  isHydraAvailableCheckNow " + hydraAvailableCheckNow);
+
         if (!hydraAvailable && hydraAvailableCheckNow) audioFileHelper.setAvailable();
         return hydraAvailableCheckNow;
       } catch (Exception e) {
