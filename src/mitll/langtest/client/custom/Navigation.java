@@ -321,7 +321,7 @@ public class Navigation implements RequiresResize, ShowTab {
     nameToIndex.clear();
 
     addDialogTab();
-    addACTab();
+   // addACTab();
     addLearnTab();
     addPracticeTab();
     addStudyLists();
