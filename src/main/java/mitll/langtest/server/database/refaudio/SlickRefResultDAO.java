@@ -119,6 +119,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   SlickRefResult toSlick(int userID, int exid, String audioFile, long durationInMillis, boolean correct,
                          DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput, boolean isMale,
                          String speed, String model) {
+    if (model == null) model = "";
     return new SlickRefResult(-1,
         userID, exid, new Timestamp(System.currentTimeMillis()), audioFile, durationInMillis,
         correct,
@@ -132,6 +133,8 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   public SlickRefResult toSlick(Result result) {
     DecodeAlignOutput alignOutput = result.getAlignOutput();
     DecodeAlignOutput decodeOutput = result.getDecodeOutput();
+    String model = result.getModel();
+    if (model == null) model = "";
     return new SlickRefResult(-1,
         result.getUserid(),
         result.getExerciseID(),
@@ -142,7 +145,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
         alignOutput.getScore(), alignOutput.getJson(), alignOutput.getNumPhones(), alignOutput.getProcessDurInMillis(),
         result.isMale(),
         result.getAudioType().toString(),
-        result.getModel()
+        model
     );
   }
 
