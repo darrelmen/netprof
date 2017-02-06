@@ -114,7 +114,7 @@ public class HTTPClient {
    */
   public HTTPClient(String url) {
     try {
-    //  logger.info("URL is : " + url);
+      logger.info("HTTPClient URL is : " + url);
       httpConn = setupPostHttpConn(url);
     } catch (IOException e) {
       logger.error("Error constructing HTTPClient:\n" + e, e);
@@ -140,7 +140,9 @@ public class HTTPClient {
   public boolean isAvailable() {
     int responseCode = -1;
     try {
+      logger.info("asking " +httpConn);
       responseCode = httpConn.getResponseCode();
+      logger.info("responseCode " +responseCode);
       return responseCode == 200;
     } catch (IOException e) {
       logger.warn("Got " + e + " with code " + responseCode);
