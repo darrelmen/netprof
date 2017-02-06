@@ -73,6 +73,7 @@ public class ServerProperties {
       "Egyptian",
       "English",
       "Farsi",
+      "French",
       "German",
       "Iraqi",
       "Japanese",
@@ -84,6 +85,7 @@ public class ServerProperties {
       "Pashto1",
       "Pashto2",
       "Pashto3",
+      "Portuguese",
       "Russian",
       "Spanish",
       "Sudanese",
@@ -143,7 +145,7 @@ public class ServerProperties {
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
   private static final String ADD_MISSING_INFO = "addMissingInfo";
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
-  private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
+  private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 400; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String BEST_AUDIO = "bestAudio";

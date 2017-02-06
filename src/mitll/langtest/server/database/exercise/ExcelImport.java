@@ -711,6 +711,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     }
     imported.setRefSentences(translations);
     imported.setForeignLanguage(foreignLanguagePhrase);
+
     imported.setUpdateTime(lastModified);
     return imported;
   }

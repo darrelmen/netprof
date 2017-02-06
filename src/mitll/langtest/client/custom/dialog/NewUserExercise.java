@@ -34,6 +34,7 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -41,6 +42,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -73,10 +75,12 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 class NewUserExercise extends BasicDialog {
+  public static final String CONTEXT = "context";
+  public static final String CONTEXT_TRANSLATION = "context translation";
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
-  private static final int MAX_CHARACTERS = 300;
   protected static final int TEXT_FIELD_WIDTH = 500;
+  private static final int LABEL_WIDTH = 105;
 
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
@@ -101,9 +105,24 @@ class NewUserExercise extends BasicDialog {
   final ExerciseController controller;
   final LangTestDatabaseAsync service;
   private final HasText itemMarker;
+  /**
+   * @see EditableExerciseDialog#setFields
+   */
   FormField english;
   FormField foreignLang;
   FormField translit;
+  FormField context;
+  FormField contextTrans;
+
+  protected final HTML englishAnno = new HTML();
+  protected final HTML translitAnno = new HTML();
+  protected final HTML foreignAnno = new HTML();
+  protected final HTML contextAnno = new HTML();
+  protected final HTML contextTransAnno = new HTML();
+
+  protected String originalContext = "";
+  protected String originalContextTrans = "";
+
   CreateFirstRecordAudioPanel rap;
   CreateFirstRecordAudioPanel rapSlow;
 
@@ -195,9 +214,9 @@ class NewUserExercise extends BasicDialog {
 
     container.add(getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording));
 
-    addBlurHandler(id1,foreignLang);
-    addBlurHandler(id1,translit);
-    addBlurHandler(id1,english);
+    addBlurHandler(id1, foreignLang);
+    addBlurHandler(id1, translit);
+    addBlurHandler(id1, english);
     return container;
   }
 
@@ -222,6 +241,22 @@ class NewUserExercise extends BasicDialog {
   }
 
   protected void makeOptionalRows(DivWidget upper) {
+    makeContextRow(upper);
+    makeContextTransRow(upper);
+  }
+
+  protected void makeContextRow(Panel container) {
+    Panel row = new FluidRow();
+    container.add(row);
+    context = addContext(container, newUserExercise);
+    //context = makeBoxAndAnno(row, "Context", "", contextAnno);
+  }
+
+  protected void makeContextTransRow(Panel container) {
+    Panel row = new FluidRow();
+    container.add(row);
+    //   contextTrans = makeBoxAndAnno(row, "Context Translation", "", contextTransAnno);
+    contextTrans = addContextTranslation(container, newUserExercise);
   }
 
   /**
@@ -245,7 +280,9 @@ class NewUserExercise extends BasicDialog {
   void addItemsAtTop(Panel container) {
   }
 
-  void gotBlur() {  gotBlur(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);  }
+  void gotBlur() {
+    gotBlur(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
+  }
 
   void gotBlur(FormField foreignLang,
                RecordAudioPanel rap,
@@ -253,8 +290,7 @@ class NewUserExercise extends BasicDialog {
                UserList<CommonShell> ul,
                ListInterface<CommonShell> pagingContainer,
                Panel toAddTo) {
-
-    logger.info("got blur -");
+    //   logger.info("got blur -");
     grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
   }
 
@@ -336,33 +372,98 @@ class NewUserExercise extends BasicDialog {
     return delete;
   }
 
-  void makeEnglishRow(Panel container) {
+  /**
+   * @param container
+   * @return
+   * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
+   */
+//  @Override
+  protected void makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    english = addControlFormField(row, getEnglishLabel(), false, 1, MAX_CHARACTERS, "", TEXT_FIELD_WIDTH);
+    english = makeBoxAndAnno(row, getEnglishLabel(), "", englishAnno);
   }
 
   String getEnglishLabel() {
-    return getLanguage().equalsIgnoreCase("english") ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
+    return isEnglish() ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
   }
 
-  void makeForeignLangRow(Panel container) {
-    //  logger.info("NewUserExercise.makeForeignLangRow --->");
+  private void makeForeignLangRow(Panel container) {
+    //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
     Panel row = new FluidRow();
     container.add(row);
-    foreignLang = addControlFormField(row, getLanguage(), false, 1, MAX_CHARACTERS, "", TEXT_FIELD_WIDTH);
+
+    foreignAnno.getElement().setId("foreignLanguageAnnotation");
+//    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
+    foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+    setMarginBottom(foreignLang);
   }
 
   private String getLanguage() {
     return controller.getLanguage();
   }
 
-  void makeTranslitRow(Panel container) {
+  protected void setMarginBottom(FormField foreignLang) {
+    foreignLang.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+  }
+  private void makeTranslitRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    translit = addControlFormField(row, TRANSLITERATION_OPTIONAL, false, 0, MAX_CHARACTERS, "", TEXT_FIELD_WIDTH);
+    String subtext = "";
+    translit = makeBoxAndAnno(row, getTransliterationLabel(), subtext, translitAnno);
   }
+
+  String getTransliterationLabel() {
+    return TRANSLITERATION_OPTIONAL;
+  }
+
+  private <S extends CommonShell & AudioRefExercise & AnnotationExercise> FormField addContext(Panel container, S newUserExercise) {
+    FormField formField = makeBoxAndAnno(container, "Context", "", contextAnno);
+
+    TextBoxBase box = formField.box;
+    box.setText(originalContext = newUserExercise.getContext());
+    box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        gotBlur();
+        logBlur("ContextBox = ", box);
+      }
+    });
+
+    useAnnotation(newUserExercise, CONTEXT, contextAnno);
+    return formField;
+  }
+
+  private void logBlur(String prefix, TextBoxBase box) {
+    try {
+      long uniqueID = originalList.getUniqueID();
+      controller.logEvent(box, "TextBox", "UserList_" + uniqueID, prefix + box.getValue());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private  <S extends CommonShell & AudioRefExercise & AnnotationExercise> FormField addContextTranslation(Panel container,
+                                                                                                            S newUserExercise) {
+    FormField formField = makeBoxAndAnno(container, "Context Translation", "", contextTransAnno);
+
+    TextBoxBase box1 = formField.box;
+    box1.setText(originalContextTrans = newUserExercise.getContextTranslation());
+    box1.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        gotBlur();
+        logBlur("ContextTransBox = ", box1);
+      }
+    });
+    useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno);
+    return formField;
+  }
+
+  void useAnnotation(AnnotationExercise userExercise, String field, HTML annoField) {
+  }
+
 
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
     logger.info("setFields : setting fields with " + newUserExercise);
@@ -411,10 +512,6 @@ class NewUserExercise extends BasicDialog {
                         ListInterface<CommonShell> pagingContainer,
                         Panel toAddTo,
                         ControlGroup normalSpeedRecording) {
-    //if (logger != null) {
-    //logger.info(this.getClass() + " adding create button - new user");
-    //}
-
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording);
     Style style = submit.getElement().getStyle();
     style.setMarginBottom(5, Style.Unit.PX);
@@ -480,7 +577,9 @@ class NewUserExercise extends BasicDialog {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
     } else if (english.getSafeText().isEmpty()) {
       String enterTheEnglishPhrase = isEnglish() ? ENTER_MEANING : ENTER_THE_ENGLISH_PHRASE;
-      markError(english, enterTheEnglishPhrase);
+      if (!isEnglish()) {
+        markError(english, enterTheEnglishPhrase);
+      }
     } else if (validateForm(foreignLang, rap, normalSpeedRecording, foreignChanged)) {
       isValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
     } else {
@@ -538,16 +637,18 @@ class NewUserExercise extends BasicDialog {
   void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
     String text = english.getSafeText();
 
- //   logger.info("so english  field is " + text + " fl " + foreignLang.getSafeText());
- //   logger.info("so translit field is " + translit.getSafeText());
+    //   logger.info("so english  field is " + text + " fl " + foreignLang.getSafeText());
+    //   logger.info("so translit field is " + translit.getSafeText());
     if (isEnglish()) {
       mutableExercise.setMeaning(text);
-    }
-    else {
+    } else {
       mutableExercise.setEnglish(text);
     }
     mutableExercise.setForeignLanguage(foreignLang.getSafeText());
     mutableExercise.setTransliteration(translit.getSafeText());
+
+    mutableExercise.setContext(context.getSafeText());
+    mutableExercise.setContextTranslation(contextTrans.getSafeText());
   }
 
   /**
@@ -565,6 +666,25 @@ class NewUserExercise extends BasicDialog {
         }
       });
     }
+  }
+
+  /**
+   * @param row
+   * @param label
+   * @param subtext
+   * @param annoBox
+   * @return
+   * @see #makeEnglishRow(Panel)
+   */
+  FormField makeBoxAndAnno(Panel row, String label, String subtext, HTML annoBox) {
+    FormField formField = addControlFormFieldHorizontal(row, label, subtext,
+        false, 1, annoBox,
+        LABEL_WIDTH, TEXT_FIELD_WIDTH);
+    setMarginBottom(formField);
+
+    annoBox.addStyleName("leftFiveMargin");
+    annoBox.addStyleName("editComment");
+    return formField;
   }
 
   /**
@@ -659,11 +779,11 @@ class NewUserExercise extends BasicDialog {
     private WaveformPostAudioRecordButton postAudioButton;
 
     /**
-     * @see #makeRecordAudioPanel(Panel, boolean, String)
      * @param newExercise
      * @param row
      * @param recordRegularSpeed
      * @param instance
+     * @see #makeRecordAudioPanel(Panel, boolean, String)
      */
     public CreateFirstRecordAudioPanel(CommonExercise newExercise, Panel row,
                                        boolean recordRegularSpeed, String instance) {

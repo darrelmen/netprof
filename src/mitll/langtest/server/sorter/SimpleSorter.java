@@ -37,6 +37,7 @@ import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
+import org.apache.log4j.Logger;
 
 import java.io.OutputStream;
 import java.util.Collection;
@@ -52,7 +53,9 @@ import java.util.List;
  * @since 10/9/15.
  */
 public class SimpleSorter extends ExerciseComparator {
-  public SimpleSorter(Collection<String> typeOrder) {
+  private static final Logger logger = Logger.getLogger(SimpleSorter.class);
+
+  SimpleSorter(Collection<String> typeOrder) {
     super(typeOrder);
   }
 
@@ -62,17 +65,20 @@ public class SimpleSorter extends ExerciseComparator {
    *
    * @param toSort
    * @param recordedLast
+   * @param isEnglish
    * @return
-   * @see LangTestDatabaseImpl#sortExercises(String, List)
+   * @see LangTestDatabaseImpl#sortExercises
    */
-  public void getSortedByUnitThenAlpha(List<? extends CommonShell> toSort, final boolean recordedLast) {
+  public void getSortedByUnitThenAlpha(List<? extends CommonShell> toSort, final boolean recordedLast, boolean isEnglish) {
     if (typeOrder.isEmpty()) {
+//      logger.info("getSortedByUnitThenAlpha sorting tooltip ");
+
       sortByTooltip(toSort);
     } else {
       Collections.sort(toSort, new Comparator<CommonShell>() {
         @Override
         public int compare(CommonShell o1, CommonShell o2) {
-          return SimpleSorter.this.simpleCompare(o1, o2, recordedLast);
+          return SimpleSorter.this.simpleCompare(o1, o2, recordedLast, isEnglish);
         }
       });
     }
@@ -83,7 +89,7 @@ public class SimpleSorter extends ExerciseComparator {
    * NOTE:  be careful to use collation order when it's not "english-foreign language"
    *
    * @param exerciseShells
-   * @see mitll.langtest.server.database.AudioExport#writeZip(OutputStream, String, SectionHelper, Collection, String, AudioDAO, String, String, boolean)
+   * @see mitll.langtest.server.database.AudioExport#writeZip
    * @see mitll.langtest.server.database.AudioExport#writeZipJustOneAudio(OutputStream, SectionHelper, Collection, String)
    */
   public <T extends CommonShell> void sortByTooltip(List<T> exerciseShells) {

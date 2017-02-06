@@ -175,7 +175,8 @@ class CheckLTS {
             boolean htkEntry = htkDictionary.contains(token);
             if (DEBUG) logger.info("checkLTS in dict for " + token + " = " + htkEntry);
 
-            if (htkEntry // && !htkDictionary.isEmpty()
+            if (!htkEntry) htkDictionary.contains(token.toLowerCase());
+            if (htkEntry
                 ) {
               if (process != null) {
                 logger.info("2 checkLTS in dict for " + process.length);

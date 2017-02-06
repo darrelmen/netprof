@@ -94,7 +94,7 @@ public class AudioExport {
                 String relPath,
                 boolean isDefectList,
                 AudioExportOptions options) throws Exception {
-    List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState);
+    List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState, language1);
     boolean skipAudio = typeToSection.isEmpty() && !options.isAllContext();
     logger.info("skip audio = " + skipAudio);
     writeToStream(copy, audioDAO, installPath, relPath, getPrefix(typeToSection, typeOrder), typeOrder, language1, out,
@@ -129,9 +129,10 @@ public class AudioExport {
     writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, false, isDefectList, options);
   }
 
-  private List<CommonExercise> getSortedExercises(SectionHelper<?> sectionHelper, Collection<CommonExercise> exercisesForSelectionState) {
+  private List<CommonExercise> getSortedExercises(SectionHelper<?> sectionHelper,
+                                                  Collection<CommonExercise> exercisesForSelectionState, String language1) {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
-    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
+    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false, isEnglish(language1));
     return copy;
   }
 

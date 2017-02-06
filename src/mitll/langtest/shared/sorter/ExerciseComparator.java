@@ -47,32 +47,38 @@ import java.util.Collection;
  */
 public class ExerciseComparator {
   protected final Collection<String> typeOrder;
-  public ExerciseComparator(Collection<String> typeOrder) { this.typeOrder = typeOrder; }
+
+  public ExerciseComparator(Collection<String> typeOrder) {
+    this.typeOrder = typeOrder;
+  }
 
   protected String removePunct(String t) {
     return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
 
-  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast) {
+  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean isEnglish) {
     if (recordedLast) {
-      if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
-        return +1;
-      } else if (o1.getState() == STATE.RECORDED && o2.getState() != STATE.RECORDED) {
-        return -1;
-      }
+      Integer x = getRecordedOrder(o1, o2);
+      if (x != null) return x;
     }
 
     // items in same chapter alphabetical by tooltip
-    return tooltipComp(o1, o2);
+    return isEnglish ? flCompare(o1, o2) : tooltipComp(o1, o2);
+  }
+
+  private Integer getRecordedOrder(CommonShell o1, CommonShell o2) {
+    if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
+      return +1;
+    } else if (o1.getState() == STATE.RECORDED && o2.getState() != STATE.RECORDED) {
+      return -1;
+    }
+    return null;
   }
 
   public int compare(CommonExercise o1, CommonExercise o2, boolean recordedLast) {
     if (recordedLast) {
-      if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
-        return +1;
-      } else if (o1.getState() == STATE.RECORDED && o2.getState() != STATE.RECORDED) {
-        return -1;
-      }
+      Integer x = getRecordedOrder(o1, o2);
+      if (x != null) return x;
     }
 
     // compare first by hierarchical order - unit, then chapter, etc.
@@ -107,6 +113,12 @@ public class ExerciseComparator {
   protected <T extends CommonShell> int tooltipComp(T o1, T o2) {
     String id1 = o1.getEnglish();
     String id2 = o2.getEnglish();
+    return compareStrings(id1, id2);
+  }
+
+  protected <T extends CommonShell> int flCompare(T o1, T o2) {
+    String id1 = o1.getForeignLanguage();
+    String id2 = o2.getForeignLanguage();
     return compareStrings(id1, id2);
   }
 

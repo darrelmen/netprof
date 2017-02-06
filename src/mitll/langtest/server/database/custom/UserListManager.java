@@ -499,7 +499,9 @@ public class UserListManager {
     UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
 
-    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
+    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false,
+        userDAO.getDatabase().getLanguage().equalsIgnoreCase("english"));
+
 
     userList.setExercises(copy);
 
