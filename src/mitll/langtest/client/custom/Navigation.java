@@ -527,6 +527,7 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private void reallyShowInitialState() {
+    logger.info("reallyShowInitialState lists for " + userManager.getUserID());
     service.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -693,9 +694,6 @@ public class Navigation implements RequiresResize, ShowTab {
 
   /**
    * @param toUse
-   * @seex #clickOnYourLists(long)
-   * @seex #selectPreviouslyClickedSubTab(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
-   * @seex #showMyLists
    * @see #selectPreviousTab
    */
   private void clickOnTab(final TabAndContent toUse) {
