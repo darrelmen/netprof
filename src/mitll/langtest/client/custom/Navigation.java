@@ -51,6 +51,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
+import mitll.langtest.client.angularComponent.ACViewer;
+import mitll.langtest.client.angularComponent.ACWindow;
 import mitll.langtest.client.contextPractice.DialogViewer;
 import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.content.FlexListLayout;
@@ -94,6 +96,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String STUDY_LISTS = "Study Lists";
   private static final String OTHERS_LISTS = "Study Visited Lists";
   private static final String PRACTICE = "Audio Vocabulary Practice";
+  private static final String ACLABEL = "Angular Component";
   private static final String ANALYSIS = "Analysis";
 
   public static final String REVIEW = "review";
@@ -129,6 +132,8 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private DialogViewer dialogWindow;
 
+  private ACViewer acWindow;
+
   private final SimpleChapterNPFHelper recorderHelper, recordExampleHelper;
   private final SimpleChapterNPFHelper markDefectsHelper, learnHelper;
 
@@ -143,6 +148,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private TabAndContent analysis, studentAnalysis;
   private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab;
   private TabAndContent practiceTab;
+  private TabAndContent acTab;
 
   private final Map<String, TabAndContent> nameToTab = new HashMap<>();
   private final Map<String, Integer> nameToIndex = new HashMap<>();
@@ -192,6 +198,8 @@ public class Navigation implements RequiresResize, ShowTab {
       makeDialogWindow(service, controller);
     }
 
+    makeACWindow(service, controller);
+
     markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper);
     practiceHelper = new PracticeHelper(service, feedback, userManager, controller);
     recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller,      true,  learnHelper);
@@ -213,6 +221,27 @@ public class Navigation implements RequiresResize, ShowTab {
           public void onSuccess(ContextPractice cpw) {
             logger.info("run async to get dialog ui");
             dialogWindow = new DialogWindow(service, controller, cpw);
+          }
+
+          public void onFailure(Throwable caught) {
+            logger.info("getContextPractice failed");
+          }
+          //TODO: this is naughty
+        });
+      }
+    });
+  }
+
+  private void makeACWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
+    GWT.runAsync(new RunAsyncCallback() {
+      public void onFailure(Throwable caught) {
+        downloadFailedAlert();
+      }
+
+      public void onSuccess() {
+        service.getContextPractice(new AsyncCallback<ContextPractice>() {
+          public void onSuccess(ContextPractice cpw) {
+            acWindow = new ACWindow(service);
           }
 
           public void onFailure(Throwable caught) {
@@ -292,6 +321,7 @@ public class Navigation implements RequiresResize, ShowTab {
     nameToIndex.clear();
 
     addDialogTab();
+    addACTab();
     addLearnTab();
     addPracticeTab();
     addStudyLists();
@@ -454,6 +484,27 @@ public class Navigation implements RequiresResize, ShowTab {
       checkAndMaybeClearTab(PRACTICE);
       practiceHelper.showNPF(practiceTab, PRACTICE);
       practiceHelper.hideList();
+    }
+  }
+
+  private void addACTab(){
+    acTab = makeFirstLevelTab(tabPanel, IconType.PUZZLE_PIECE, ACLABEL);
+    acTab.getContent().getElement().setId("acPanel");
+    acTab.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        showACTab();
+        logEvent(acTab, ACLABEL);
+      }
+    });
+  }
+
+  private void showACTab(){
+    if(acTab != null){
+      checkAndMaybeClearTab(ACLABEL);
+      logEvent(acTab, ACLABEL);
+      acTab.getContent().getElement().setId("contentPanel");
+      acWindow.viewAC(acTab.getContent());
     }
   }
 
