@@ -259,10 +259,16 @@ public class NPFHelper implements RequiresResize {
       copy.add(ex);
     }
 
-    boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
-//    new ExerciseSorter(Collections.emptySet()).getSortedByUnitThenAlpha(copy, false,
-//        isEnglish);
+    sortList(copy);
 
+    String id = toSelect == null ? "" : toSelect.getID();
+    npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
+    npfExerciseList.setWidth("270px");
+    npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
+  }
+
+  private void sortList(List<CommonShell> copy) {
+    boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
     ExerciseComparator exerciseComparator = new ExerciseComparator(Collections.emptySet());
     Collections.sort(copy, new Comparator<CommonShell>() {
       @Override
@@ -270,12 +276,6 @@ public class NPFHelper implements RequiresResize {
         return exerciseComparator.simpleCompare(o1, o2, false, isEnglish);
       }
     });
-
-
-    String id = toSelect == null ? "" : toSelect.getID();
-    npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
-    npfExerciseList.setWidth("270px");
-    npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
   }
 
   /**

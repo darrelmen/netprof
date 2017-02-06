@@ -138,7 +138,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    *
    * @return
    */
-  public Collection<T> getExercises() {
+  public List<T> getExercises() {
     return exercises;
   }
 

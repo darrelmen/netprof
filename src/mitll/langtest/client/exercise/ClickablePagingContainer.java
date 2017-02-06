@@ -160,7 +160,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
   public void addExercise(T exercise) {
     idToExercise.put(exercise.getID(), exercise);
     getList().add(exercise);
-    logger.info("addExercise adding " + exercise);
+  //  logger.info("addExercise adding " + exercise);
   }
 
   /**
@@ -169,7 +169,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
    * @see mitll.langtest.client.list.PagingExerciseList#addExerciseAfter
    */
   public void addExerciseAfter(T afterThisOne, T exercise) {
-    logger.info("addExerciseAfter adding " + exercise);
+   // logger.info("addExerciseAfter adding " + exercise);
     List<T> list = getList();
     int before = list.size();
     String id = exercise.getID();

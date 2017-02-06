@@ -116,10 +116,10 @@ public class ExerciseComparator {
     return compareStrings(id1, id2);
   }
 
-  protected <T extends CommonShell> int flCompare(T o1, T o2) {
+  private <T extends CommonShell> int flCompare(T o1, T o2) {
     String id1 = o1.getForeignLanguage();
     String id2 = o2.getForeignLanguage();
-    return compareStrings(id1, id2);
+    return id1.compareTo(id2);
   }
 
   public int compareStrings(String id1, String id2) {
