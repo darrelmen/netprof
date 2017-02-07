@@ -114,24 +114,24 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
     this.quizScorePanel = quizScorePanel;
     getScores(true);
 
-    if (!controller.getProps().isAdminView()) {
+    //if (!controller.getProps().isAdminView()) {
       int clientWidth = Window.getClientWidth();
       int value = (int) (((float) clientWidth) * 0.638);
       value = Math.min(920, value);
       getElement().getStyle().setWidth(value, Style.Unit.PX);
-    }
+   // }
   }
 
   @Override
   protected void onAttach() {
     super.onAttach();
 
-    if (!controller.getProps().isAdminView()) {
+    //if (!controller.getProps().isAdminView()) {
       int clientWidth = Window.getClientWidth();
       int value = (int) (((float) clientWidth) * 0.09);
       value = Math.min(130, value);
       getParent().getElement().getStyle().setMarginLeft(value, Style.Unit.PX);
-    }
+   // }
   }
 
   /**

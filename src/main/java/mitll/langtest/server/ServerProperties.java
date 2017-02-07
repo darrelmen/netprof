@@ -40,6 +40,7 @@ import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.shared.user.Affiliation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
 import java.io.*;
@@ -91,6 +92,7 @@ public class ServerProperties {
   private static final String USE_H_2 = "useH2";
   private static final String USE_POSTGRE_SQL = "usePostgreSQL";
   //private static final String TYPE_ORDER = "typeOrder";
+  @Deprecated
   private static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   public static final String MODELS_DIR = "MODELS_DIR";
@@ -100,11 +102,13 @@ public class ServerProperties {
 
   public static final String CONFIG = "config";
   public static final String CONFIG_JSON = "config.json";
+
   public static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
   private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
   private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
   private static final String APPLICATION_CONF = "/opt/netprof/config/application.conf";
+  public static final String RELEASE_DATE = "releaseDate";
 
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
@@ -131,7 +135,7 @@ public class ServerProperties {
   private static final String MIN_PRON_SCORE_DEFAULT = "" + 0.31f;
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
-//  private static final String AUDIO_OFFSET = "audioOffset";
+  //  private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
   //  private static final String NO_MODEL = "noModel";
   private static final String TIER_INDEX = "tierIndex";
@@ -172,6 +176,7 @@ public class ServerProperties {
   private static final String ANSWERS = "answers";
 
   private Properties props = new Properties();
+  private Properties uiprops = new Properties();
 
   private double minPronScore;
 
@@ -233,6 +238,8 @@ public class ServerProperties {
       putProp(props, "buildUser", buildUser);
       putProp(props, "buildVers", buildVers);
       putProp(props, "buildDate", buildDate);
+
+
     } catch (FileNotFoundException e) {
       logger.error("ServerProperties looking in " + configDir + " :" + e, e);
     }
@@ -257,6 +264,26 @@ public class ServerProperties {
     readPhonemeMap(configDir);
   }
 
+  /**
+   * @param configDir
+   * @param configFile
+   * @param dateFromManifest
+   */
+  private void readProps(String configDir, String configFile, String dateFromManifest) {
+    String configFileFullPath = configDir + File.separator + configFile;
+    if (!new File(configFileFullPath).exists()) {
+      logger.error("couldn't find config file " + new File(configFileFullPath));
+    } else {
+      try {
+        props = readPropertiesFromFile(configFileFullPath);
+        useProperties(new File(configDir), dateFromManifest);
+        this.configFileFullPath = configFileFullPath;
+      } catch (IOException e) {
+        logger.error("got " + e, e);
+      }
+    }
+  }
+
   private void setApplicationConf() {
     String applicationConfPath = APPLICATION_CONF;
     if (props.containsKey(CONFIG_FILE1)) {
@@ -271,28 +298,12 @@ public class ServerProperties {
     ConfigFactory.invalidateCaches();
   }
 
-  /**
-   * @param configDir
-   * @param configFile
-   * @param dateFromManifest
-   */
-  private void readProps(String configDir, String configFile, String dateFromManifest) {
-    String configFileFullPath = configDir + File.separator + configFile;
-    if (!new File(configFileFullPath).exists()) {
-      logger.error("couldn't find config file " + new File(configFileFullPath));
-    } else {
-      try {
-        props = new Properties();
-        FileInputStream inStream = new FileInputStream(configFileFullPath);
-        props.load(inStream);
-        useProperties(new File(configDir), dateFromManifest);
-//        logger.info("aff " + affliations);
-
-        this.configFileFullPath = configFileFullPath;
-      } catch (IOException e) {
-        logger.error("got " + e, e);
-      }
-    }
+  @NotNull
+  private Properties readPropertiesFromFile(String configFileFullPath) throws IOException {
+    Properties properties = new Properties();
+    FileInputStream inStream = new FileInputStream(configFileFullPath);
+    properties.load(inStream);
+    return properties;
   }
 
   private void useProperties(File configDir, String dateFromManifest) throws FileNotFoundException {
@@ -300,6 +311,21 @@ public class ServerProperties {
     readProperties(dateFromManifest);
     affliations = new JsonConfigReader().getAffiliations(configDir);
     setApplicationConf();
+
+    String configFileFullPath = configDir + File.separator + props.getProperty("uiprops", UI_PROPERTIES);
+
+    try {
+      uiprops = readPropertiesFromFile(configFileFullPath);
+      copyValue(RELEASE_DATE,"unset");
+      copyValue(APP_TITLE,"unset");
+      logger.info("useProperties ui props has " + uiprops.size());
+    } catch (IOException e) {
+      logger.error("got " + e + " reading from " + configFileFullPath, e);
+    }
+  }
+
+  private void copyValue(String prop, String defaultValue) {
+    uiprops.setProperty(prop, props.getProperty(prop, defaultValue));
   }
 
   /**
@@ -545,7 +571,7 @@ public class ServerProperties {
 
   private void setReleaseDate(String dateFromManifest) {
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
-      props.setProperty("releaseDate", dateFromManifest);
+      props.setProperty(RELEASE_DATE, dateFromManifest);
     }
   }
 
@@ -903,5 +929,9 @@ public class ServerProperties {
 
   public List<Affiliation> getAffliations() {
     return affliations;
+  }
+
+  public Map<String, String> getUIProperties() {
+    return  getPropertyMap(uiprops);
   }
 }

@@ -46,7 +46,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -859,12 +858,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @param props
    * @return
    * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout
    */
   @Override
-  public Widget getExerciseListOnLeftSide(PropertyHandler props) {
+  public Widget getExerciseListOnLeftSide() {
     Panel leftColumn = new FlowPanel();
     leftColumn.getElement().setId("ExerciseList_leftColumn");
     leftColumn.addStyleName("floatLeft");

@@ -90,14 +90,14 @@ public class PropertyHandler {
   private static final String DIALOG = "dialog";
 
   private static final String LANGUAGE = "language";
-  private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
+  @Deprecated private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
   // private static final String ADMIN_PARAM = "admin";
-  private static final String ANALYSIS = "analysis";
+  @Deprecated private static final String ANALYSIS = "analysis";
   @Deprecated
   private static final String TURK_PARAM = "turk";
   @Deprecated
@@ -105,7 +105,7 @@ public class PropertyHandler {
 
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
-  private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
+  @Deprecated private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
@@ -305,6 +305,7 @@ public class PropertyHandler {
       } else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
+      else if (key.equals("showSpectrogram")) spectrogram = getBoolean(value);
 
         //    else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
       else if (key.equals(DIALOG)) dialog = value;
@@ -570,13 +571,11 @@ public class PropertyHandler {
     return demoMode;
   }
 
+/*
   public boolean isAdminView() {
     return false;//adminView;
   }
-
-  public boolean useAnalysis() {
-    return analysis;
-  }
+*/
 
   public boolean canPracticeContext() {
     return canPracticeContext;
@@ -652,18 +651,6 @@ public class PropertyHandler {
     return resetPassToken;
   }
 
-/*
-  String getCdEnableToken() {
-    return cdEnableToken;
-  }
-*/
-
-/*
-  String getEmailRToken() {
-    return emailRToken;
-  }
-*/
-
   public boolean doClickAndHold() {
     return clickAndHold;
   }
@@ -675,12 +662,6 @@ public class PropertyHandler {
   public boolean showContextButton() {
     return showContext;
   }
-
-/*
-  public boolean shouldShowWelcome() {
-    return showWelcome;
-  }
-*/
 
   private static boolean knownChoice(String choice) {
     return TEXT.equals(choice) || AUDIO.equals(choice) || SPEECH.equals(choice);

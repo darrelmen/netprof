@@ -147,7 +147,7 @@ public class EditItem {
     UserList<CommonShell> copy = makeListOfOnlyYourItems(originalList);
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, copy, originalList, includeAddItem);
-    pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
+    pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
 
     rememberAndLoadFirst(copy, exerciseList);
     return hp;

@@ -144,7 +144,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   public boolean isAvailableCheckNow() {
-    return getDcodr().isAvailable();
+    return new HTTPClient().isAvailable(ip, port, "dcodr");
   }
 
   /**
@@ -464,7 +464,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           }
         } else {
           if (getLTS() == null) {
-            logger.warn("getPronunciations " +this + " " + languageProperty + " : LTS is null???");
+            logger.warn("getPronunciations " + this + " " + languageProperty + " : LTS is null???");
           } else {
             String word1 = word.toLowerCase();
             String[][] process = getLTS().process(word1);
@@ -594,14 +594,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
 
     String sep = ";";
-    String after = getCleanedTranscript(cleaned, sep);
+    String cleanedTranscript = getCleanedTranscript(cleaned, sep);
 
     String hydraInput =
         tmpDir + "/:" +
             audioPath + ":" +
             hydraDict + ":" +
-            smallLM + ":xxx,0," + end + "," +
-            "[<s>" + after + "</s>]";
+            smallLM + ":" +
+            "xxx,0," + end + "," +
+            "[<s>" + cleanedTranscript + "</s>]";
 
     long then = System.currentTimeMillis();
     String resultsStr = runHydra(hydraInput, getDcodr());
