@@ -280,7 +280,7 @@ public class Navigation implements RequiresResize, ShowTab {
       addAnalysis();
     }
 
-    if (controller.getProps().useAnalysis() || hasTeacher) {
+    if (hasTeacher) {
       addTeacherAnalysis();
     }
 

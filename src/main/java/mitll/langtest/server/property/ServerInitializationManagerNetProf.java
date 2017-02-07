@@ -236,8 +236,10 @@ public class ServerInitializationManagerNetProf {
         buildDate = atts.getValue("Built-Date");
       } else {
 
-    if (DEBUG)        log.warn("getServerProperties Did not load attribute information. Are you running in " +
-            "a servlet container? Context:" + ctx);
+        if (DEBUG) {
+          log.warn("getServerProperties Did not load attribute information. Are you running in " +
+              "a servlet container? Context:" + ctx);
+        }
       }
 
       return new ServerProperties(props, releaseVers, buildUser, buildVers, buildDate, configDir);

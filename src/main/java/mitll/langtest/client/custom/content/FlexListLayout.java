@@ -131,7 +131,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     if (npfExerciseList == null) {
       logger.warning("huh? exercise list is null for " + instanceName + " and " + uniqueID);
     } else {
-      Widget exerciseListOnLeftSide = npfExerciseList.getExerciseListOnLeftSide(controller.getProps());
+      Widget exerciseListOnLeftSide = npfExerciseList.getExerciseListOnLeftSide();
       exerciseListContainer.add(exerciseListOnLeftSide);
     }
 

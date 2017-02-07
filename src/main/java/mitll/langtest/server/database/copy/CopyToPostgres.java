@@ -88,13 +88,16 @@ public class CopyToPostgres<T extends CommonShell> {
   public static final String NETPROF_PROPERTIES = "netprof.properties";
 
   private static final boolean DEBUG = false;
+  public static final String DROP = "drop";
+  public static final String COPY = "copy";
 
   /**
    * @param config
+   * @param optionalProperties
    * @see #main(String[])
    */
-  private void copyOneConfigCommand(String config) throws Exception {
-    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null, ".");
+  private void copyOneConfigCommand(String config, String optionalProperties) throws Exception {
+    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, ".");
     String language = databaseLight.getLanguage();
     boolean hasModel = databaseLight.getServerProps().hasModel();
     logger.info("loading " + language + " " + hasModel);
@@ -104,10 +107,10 @@ public class CopyToPostgres<T extends CommonShell> {
 
   private void dropOneConfig(String config) throws Exception {
     DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null, ".");
-  //  String language = databaseLight.getLanguage();
+    //  String language = databaseLight.getLanguage();
     IProjectDAO projectDAO = databaseLight.getProjectDAO();
 
-    logger.debug("byname "+ projectDAO.getByName(config));
+    logger.debug("byname " + projectDAO.getByName(config));
     List<SlickProject> collect = projectDAO.getAll().stream().filter(p -> p.name().equalsIgnoreCase(config)).collect(Collectors.toList());
 
     for (SlickProject project : collect) {
@@ -222,7 +225,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @paramx host
    * @paramx user
    * @paramx pass
-   * @see mitll.langtest.server.database.postgres.PostgresTest#testCopy
+   * @see #copyOneConfigCommand
    */
   public static DatabaseImpl getDatabaseLight(String config,
                                               boolean useH2,
@@ -240,10 +243,7 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("getDatabaseLight path " + configFile.getAbsolutePath());
 
     ServerProperties serverProps = getServerProperties(config, propsFile, installPath);
-    ServerProperties serverProps2 = getServerProperties(
-        //"netprof",
-        "",
-        NETPROF_PROPERTIES, "/opt/netprof");
+    ServerProperties serverProps2 = getServerProperties("", NETPROF_PROPERTIES, "/opt/netprof");
 
     readProps(serverProps, serverProps2);
 
@@ -262,7 +262,8 @@ public class CopyToPostgres<T extends CommonShell> {
         new PathHelper(installPath, serverProps), false, null, false);
 
     database.setInstallPath(installPath,
-        configFile.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan()
+        configFile.getParentFile().getAbsolutePath() + File.separator +
+            database.getServerProps().getLessonPlan()
     );
 
     return database;
@@ -974,6 +975,13 @@ public class CopyToPostgres<T extends CommonShell> {
     // }
   }
 
+  /**
+   * Expects something like:
+   * copy english
+   * copy pashto pashto1
+   *
+   * @param arg
+   */
   public static void main(String[] arg) {
     if (arg.length < 2) {
       logger.error("expecting either copy or drop followed by config, e.g. copy spanish");
@@ -981,20 +989,21 @@ public class CopyToPostgres<T extends CommonShell> {
     }
     String action = arg[0];
     String config = arg[1];
-    boolean inTest = arg.length > 2;
+    String optconfig = arg.length > 2 ? arg[2] : null;
+    //boolean inTest = arg.length > 2;
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
-    if (action.equals("drop")) {
+    if (action.equals(DROP)) {
       logger.info("drop " + config);
       try {
         copyToPostgres.dropOneConfig(config);
       } catch (Exception e) {
         logger.error("couldn't drop config " + config, e);
       }
-    } else if (action.equals("copy")) {
+    } else if (action.equals(COPY)) {
       logger.info("copying " + config);
       try {
-        copyToPostgres.copyOneConfigCommand(config);
+        copyToPostgres.copyOneConfigCommand(config, optconfig);
       } catch (Exception e) {
         logger.error("couldn't copy config " + config, e);
       }

@@ -33,6 +33,7 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.scoring.ASRWebserviceScoring;
 import mitll.langtest.shared.amas.QAPair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -74,21 +75,16 @@ public class HTTPClient {
     //for localhost testing only
     javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
         new javax.net.ssl.HostnameVerifier(){
-
           public boolean verify(String hostname,
                                 javax.net.ssl.SSLSession sslSession) {
               System.err.println("verify " +hostname);
               return true;
-
           }
         });
   }
 
-  @Deprecated
-  public HTTPClient() {
-  }
-
-
+ // @Deprecated
+  public HTTPClient() {}
 
   /**
    * @param webserviceIP
@@ -101,16 +97,16 @@ public class HTTPClient {
   /**
    * @param webserviceIP
    * @param webservicePort
-   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
+   * @see ASRWebserviceScoring#getDcodr
    */
   public HTTPClient(String webserviceIP, int webservicePort, String service) {
     this("http://" + webserviceIP + ":" + webservicePort + "/" + service);
   }
 
-
   /**
    * @param url
    * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
+   * @see AudioFileHelper#checkForWebservice
    */
   public HTTPClient(String url) {
     try {
@@ -121,7 +117,7 @@ public class HTTPClient {
     }
   }
 
-  public void postFile(File theFile) {
+  private void postFile(File theFile) {
     try {
       OutputStream outputStream = httpConn.getOutputStream();
       Files.copy(theFile.toPath(), outputStream);
@@ -133,19 +129,27 @@ public class HTTPClient {
     }
   }
 
-  public void addRequestProperty(String k, String v) {
+  void addRequestProperty(String k, String v) {
     httpConn.addRequestProperty(k, v);
   }
 
-  public boolean isAvailable() {
-    int responseCode = -1;
+  /**
+   *
+   * @param webserviceIP
+   * @param webservicePort
+   * @param service
+   * @return
+   */
+  public boolean isAvailable(String webserviceIP, int webservicePort, String service) {
     try {
-      logger.info("asking " +httpConn);
-      responseCode = httpConn.getResponseCode();
-      logger.info("responseCode " +responseCode);
-      return responseCode == 200;
+      String s = readFromGET("http://" + webserviceIP + ":" + webservicePort + "/" + service + "/index.html");
+      logger.info("response " + s);
+      return true;
+    } catch (FileNotFoundException fnf) {
+      logger.debug("isAvailable " + fnf);
+      return true;
     } catch (IOException e) {
-      logger.warn("Got " + e + " with code " + responseCode);
+      logger.warn("Got " + e);
       return false;
     }
   }
@@ -155,14 +159,27 @@ public class HTTPClient {
    * @return
    * @see mitll.langtest.server.database.exercise.DominoReader#readProjectInfo(ServerProperties)
    */
-  public String readFromGET(String url) {
-    try {
+  public String readFromGET(String url) throws IOException {
+    //try {
       logger.info("Reading from " + url);
-      return receive(setupGetHttpConn(url));
-    } catch (IOException e) {
-      e.printStackTrace();
-      return "";
-    }
+      HttpURLConnection httpConn = setupGetHttpConn(url);
+      String receive = receive(httpConn);
+      httpConn.disconnect();
+      return receive;
+//    } catch (IOException e) {
+//      e.printStackTrace();
+//      return "";
+//    }
+  }
+
+  private HttpURLConnection setupGetHttpConn(String url) throws IOException {
+    HttpURLConnection httpConn = getHttpURLConnection(url);
+    httpConn.setRequestMethod("GET");
+    httpConn.setConnectTimeout(1000);
+    //httpConn.setReadTimeout(20000);
+    //httpConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+    setRequestProperties(httpConn);
+    return httpConn;
   }
 
   private HttpURLConnection setupPostHttpConn(String url) throws IOException {
@@ -176,16 +193,6 @@ public class HTTPClient {
     return httpConn;
   }
 
-  private HttpURLConnection setupGetHttpConn(String url) throws IOException {
-    HttpURLConnection httpConn = getHttpURLConnection(url);
-    httpConn.setRequestMethod("GET");
-    httpConn.setConnectTimeout(1000);
-    //httpConn.setReadTimeout(20000);
-    //httpConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-    setRequestProperties(httpConn);
-    return httpConn;
-  }
-
   private HttpURLConnection getHttpURLConnection(String url) throws IOException {
     HttpURLConnection httpURLConnection = (HttpURLConnection) (new URL(url)).openConnection();
 
@@ -193,22 +200,16 @@ public class HTTPClient {
       SSLContext ctx = SSLContext.getInstance("TLS");
       ctx.init(new KeyManager[0], new TrustManager[] {new DefaultTrustManager()}, new SecureRandom());
       SSLContext.setDefault(ctx);
-    } catch (NoSuchAlgorithmException e) {
-      e.printStackTrace();
-    } catch (KeyManagementException e) {
+    } catch (NoSuchAlgorithmException | KeyManagementException e) {
       e.printStackTrace();
     }
 
-//
-//    httpURLConnection.seth(new HostnameVerifier() {
-//      @Override
-//      public boolean verify(String arg0, SSLSession arg1) {
-//        return true;
-//      }
-//    });
     return httpURLConnection;
   }
 
+  /**
+   * @deprecated can we avoid this?
+   */
   private static class DefaultTrustManager implements X509TrustManager {
 
     @Override
@@ -250,13 +251,13 @@ public class HTTPClient {
     return receive(this.httpConn, getReader(this.httpConn));
   }
 
-  private String receive(HttpURLConnection httpConn) {
-    try {
+  private String receive(HttpURLConnection httpConn) throws IOException  {
+   // try {
       return receive(httpConn, getReader(httpConn));
-    } catch (IOException e) {
-      logger.error("Got " + e, e);
-      return "";
-    }
+   // } catch (IOException e) {
+   //   logger.error("Got " + e, e);
+   //   return "";
+   // }
   }
 
   private String receive(HttpURLConnection httpConn, BufferedReader reader) throws IOException {
@@ -280,29 +281,29 @@ public class HTTPClient {
     return new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF8"));
   }
 
-  private String sendAndReceive(String input) throws IOException {
-    try {
-      send(input);
-      return receive();
-    } catch (ConnectException ce) {
-      logger.error("sending" +
-          "\n\tmessage " + input +
-          "\n\tcouldn't connect to server " + httpConn.getURL() +
-          "\n\tgot    " + ce);
-      return "";
-    } catch (IOException e) {
-      logger.error("sending " + input + " got " + e, e);
-      throw e;
-    }
-  }
-
   public String sendAndReceiveAndClose(String input) throws IOException {
     String s = sendAndReceive(input);
     closeConn();
     return s;
   }
 
-  public String sendAndReceiveAndClose(File input) throws IOException {
+  private String sendAndReceive(String input) throws IOException {
+    try {
+      send(input);
+      return receive();
+    } catch (ConnectException ce) {
+      logger.error("sendAndReceive sending" +
+          "\n\tmessage " + input +
+          "\n\tcouldn't connect to server " + httpConn.getURL() +
+          "\n\tgot     " + ce);
+      return "";
+    } catch (IOException e) {
+      logger.error("sendAndReceive sending " + input + " got " + e, e);
+      throw e;
+    }
+  }
+
+  String sendAndReceiveAndClose(File input) throws IOException {
     try {
       return postAndClose(input);
     } catch (ConnectException ce) {
