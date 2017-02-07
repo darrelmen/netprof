@@ -41,6 +41,7 @@ import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -863,6 +864,12 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
   }
+
+  @Override
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise) {
+    return null;
+  }
+
   /**
    * An audio cut is uniquely identified by by exercise id, speed (reg/slow), and who recorded it.
    *

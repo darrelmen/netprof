@@ -46,8 +46,8 @@ import java.util.Map;
  * @since 12/4/15.
  */
 public class PhoneSessionInternal {
-  final SummaryStatistics summaryStatistics  = new SummaryStatistics();
-  final SummaryStatistics summaryStatistics2 = new SummaryStatistics();
+  private final SummaryStatistics summaryStatistics  = new SummaryStatistics();
+  private final SummaryStatistics summaryStatistics2 = new SummaryStatistics();
 
   private double mean;
   private double stdev;
@@ -62,14 +62,14 @@ public class PhoneSessionInternal {
    * @param bin
    * @see PhoneAnalysis#partition(List, List, Map, Map)
    */
-  public PhoneSessionInternal(long bin) {
+  PhoneSessionInternal(long bin) {
     this.bin = bin;
     this.queue = MinMaxPriorityQueue
         .maximumSize(10)
         .create();
   }
 
-  public void addValue(float value, long timestamp, WordAndScore wordAndScore) {
+  void addValue(float value, long timestamp, WordAndScore wordAndScore) {
     if (summaryStatistics.getN() == 0) {
       start = timestamp;
     }
@@ -94,15 +94,15 @@ public class PhoneSessionInternal {
     this.meanTime = summaryStatistics2.getMean();
   }
 
-  public double getMean() {
+  double getMean() {
     return mean;
   }
 
-  public double getStdev() {
+  double getStdev() {
     return stdev;
   }
 
-  public double getMeanTime() {
+  double getMeanTime() {
     return meanTime;
   }
 
@@ -114,7 +114,7 @@ public class PhoneSessionInternal {
     return summaryStatistics.getN();
   }
 
-  public long getBin() {
+  long getBin() {
     return bin;
   }
 
@@ -126,12 +126,12 @@ public class PhoneSessionInternal {
     return start;
   }
 
+  public MinMaxPriorityQueue<WordAndScore> getQueue() {
+    return queue;
+  }
+
   @Override
   public String toString() {
     return getCount() + " s " + getStart() + " - " + getEnd() + " mean " + getMean();
-  }
-
-  public MinMaxPriorityQueue<WordAndScore> getQueue() {
-    return queue;
   }
 }

@@ -94,6 +94,7 @@ import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
@@ -101,6 +102,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -139,7 +141,6 @@ public class DatabaseImpl implements Database {
   private String installPath;
 
   private IUserDAO userDAO;
-  // private IUserPermissionDAO userPermissionDAO;
   private IUserSessionDAO userSessionDAO;
   private IResultDAO resultDAO;
 
@@ -930,8 +931,8 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
-  public JSONObject getJsonPhoneReport(long userid, int projid, Map<String, Collection<String>> typeToValues) {
-    return getJsonSupport((int) userid).getJsonPhoneReport(userid, projid, typeToValues, getLanguage(projid));
+  public JSONObject getJsonPhoneReport(int userid, int projid, Map<String, Collection<String>> typeToValues) {
+    return getJsonSupport((int) userid).getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
   }
 
   /**
@@ -1211,7 +1212,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
    * @see IProjectManagement#configureProject
    */
-  public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
+/*  public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
     Collection<CommonExercise> exercises = getExercises(projectid);
     logger.info("getExerciseIDToRefAudio for project #" + projectid + " exercises " + exercises.size());
 
@@ -1222,14 +1223,14 @@ public class DatabaseImpl implements Database {
     getExerciseDAO(projectid).attachAudio(all);
     populateIDToRefAudio(join, all);
     return join;
-  }
+  }*/
 
   /**
-   * @param join
-   * @param all
-   * @param <T>
+   * @paramx join
+   * @paramx all
+   * @paramx <T>
    */
-  private <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<Integer, String> join,
+/*  private <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<Integer, String> join,
                                                                                Collection<CommonExercise> all) {
     for (CommonExercise exercise : all) {
       String refAudio = exercise.getRefAudio();
@@ -1243,7 +1244,7 @@ public class DatabaseImpl implements Database {
     if (join.isEmpty()) {
       logger.warn("populateIDToRefAudio huh? no ref audio on " + all.size() + " exercises???");
     }
-  }
+  }*/
 
   public IAnswerDAO getAnswerDAO() {
     return answerDAO;
@@ -1379,37 +1380,35 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercise
    */
   public CommonExercise getCustomOrPredefExercise(int projid, int id) {
-/*    CommonExercise userEx = getUserExerciseByExID(id);  // allow custom items to mask out non-custom items
-
-    CommonExercise toRet;
-
-    if (userEx == null) {
-      toRet = getExercise(id);
-    } else {
-      //logger.info("got user ex for " + id);
-      long updateTime = userEx.getUpdateTime();
-      CommonExercise predef = getExercise(id);
-
-      boolean usePredef = predef != null && predef.getUpdateTime() > updateTime;
-      toRet = usePredef ? predef : userEx;
-
-      if (predef != null && !usePredef) {
-        // DON'T use the unit/chapter from database, at least for now
-        userEx.getCombinedMutableUserExercise().setUnitToValue(predef.getUnitToValue());
-      }
-    }*/
-
     CommonExercise toRet = getExercise(projid, id);
     if (toRet == null) {
       if (warns++ < 50)
-        logger.info("couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
+        logger.info("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
-//      if (toRet != null) {
-//        attachAudio(toRet);
-//      }
     }
 
     return toRet;
+  }
+
+  @Nullable
+  private String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, int projid) {
+    //CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projid, exid);
+    Project project = getProject(projid);
+    return getNativeAudio(userToGender, userid, exid, project);
+  }
+
+  @Nullable
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project) {
+    CommonExercise exercise = project.getExercise(exid);
+    int projid = project.getID();
+
+    if (exercise == null) {
+      if (warns++ < 50)
+        logger.info("getCustomOrPredefExercise couldn't find exercise " + exid + " in project #" + projid + " looking in user exercise table");
+      exercise = getUserExerciseByExID(exid);
+    }
+
+    return audioDAO.getNativeAudio(userToGender, userid, exercise);
   }
 
   /**
@@ -1429,7 +1428,10 @@ public class DatabaseImpl implements Database {
     return serverProps;
   }
 
-
+  /**
+   * TODO : are we going to support this?
+   * @return
+   */
   private AddRemoveDAO getAddRemoveDAO() {
     return null;//addRemoveDAO;
   }

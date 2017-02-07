@@ -275,22 +275,22 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public boolean isHydraRunning(int projid) {
     Project project = db.getProject(projid);
     if (project == null) {
-      logger.error("isHydraRunning no project with id " + projid);
+      logger.debug("isHydraRunning no project with id " + projid);
       return false;
     } else {
       try {
-        logger.error("isHydraRunning  project with id " + projid);
+        logger.debug("isHydraRunning  project with id " + projid);
 
         AudioFileHelper audioFileHelper = project.getAudioFileHelper();
 
-        logger.error("isHydraRunning  audioFileHelper " + audioFileHelper);
+        logger.debug("isHydraRunning  audioFileHelper " + audioFileHelper);
 
         boolean hydraAvailable = audioFileHelper.isHydraAvailable();
-        logger.error("isHydraRunning  hydraAvailable " + hydraAvailable);
+        logger.debug("isHydraRunning  hydraAvailable " + hydraAvailable);
 
         boolean hydraAvailableCheckNow = audioFileHelper.isHydraAvailableCheckNow();
 
-        logger.error("isHydraRunning  isHydraAvailableCheckNow " + hydraAvailableCheckNow);
+        logger.debug("isHydraRunning  isHydraAvailableCheckNow " + hydraAvailableCheckNow);
 
         if (!hydraAvailable && hydraAvailableCheckNow) audioFileHelper.setAvailable();
         return hydraAvailableCheckNow;

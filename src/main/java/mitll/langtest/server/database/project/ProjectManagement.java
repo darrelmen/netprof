@@ -222,17 +222,20 @@ public class ProjectManagement implements IProjectManagement {
     } else {
       logger.warn("no exercises in project? " + project);
     }
-    project.setJsonSupport(new JsonSupport(project.getSectionHelper(), db.getResultDAO(), db.getRefResultDAO(), db.getAudioDAO(),
-        db.getPhoneDAO(), project.getLanguage()));
+    project.setJsonSupport(new JsonSupport(project.getSectionHelper(),
+        db.getResultDAO(), db.getRefResultDAO(), db.getAudioDAO(),
+        db.getPhoneDAO(),
+        project));
 
     if (slickProject != null) {
-      Map<Integer, String> exerciseIDToRefAudio = db.getExerciseIDToRefAudio(id);
+      //Map<Integer, String> exerciseIDToRefAudio = db.getExerciseIDToRefAudio(id);
       project.setAnalysis(
           new SlickAnalysis(db,
               db.getPhoneDAO(),
-              exerciseIDToRefAudio,
               (SlickResultDAO) db.getResultDAO(),
-              project.getLanguage(), id)
+              project.getLanguage(),
+              id
+          )
       );
       project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
 

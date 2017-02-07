@@ -77,6 +77,4 @@ public interface AnalysisService extends RemoteService {
    * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
    */
   PhoneReport getPhoneScores(int id, int minRecordings);
-
-
 }

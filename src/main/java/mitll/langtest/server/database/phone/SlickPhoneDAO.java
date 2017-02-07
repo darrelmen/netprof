@@ -33,17 +33,20 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.npdata.dao.BaseOps;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPhone;
 import mitll.npdata.dao.SlickPhoneReport;
 import mitll.npdata.dao.phone.PhoneDAOWrapper;
 import net.sf.json.JSONObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -52,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
-  //  private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
   private final PhoneDAOWrapper dao;
 
   public SlickPhoneDAO(Database database, DBConnection dbConnection) {
@@ -66,8 +69,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   @Override
   public String getName() {
-    BaseOps dao = this.dao.dao();
-    return dao.name();
+    return this.dao.dao().name();
   }
 
   public SlickPhone toSlick(Phone shared) {
@@ -106,56 +108,66 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   /**
    * @param userid
    * @param exids
-   * @param idToRef
    * @param language
+   * @param project
    * @return
+   * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport
    */
   @Override
-  public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef,
-                                       String language) {
+  public JSONObject getWorstPhonesJson(int userid,
+                                       Collection<Integer> exids,
+                                       String language,
+                                       Project project) {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises((int) userid, exids);
-    PhoneReport report = getPhoneReport(phoneReportByResult, idToRef, false, true,
-        language);
+    PhoneReport report = getPhoneReport(phoneReportByResult, false, true,
+        language, userid, project);
     // logger.info("getWorstPhonesJson phone report " + report);
     return new PhoneJSON().getWorstPhonesJson(report);
   }
 
   /**
-   * TODO : don't use idToRef map
+   * TODOx : don't use idToRef map
    *
    * @param userid
    * @param ids
-   * @param idToRef
    * @param language
+   * @param project
    * @return
    * @throws SQLException
-   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReport(long, Map, String)
+   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReport
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(long userid,
+  public PhoneReport getWorstPhonesForResults(int userid,
                                               Collection<Integer> ids,
-                                              Map<Integer, String> idToRef,
-                                              String language) {
+                                              String language,
+                                              Project project) {
+    long then = System.currentTimeMillis();
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult((int) userid, ids);
-    return getPhoneReport(phoneReportByResult, idToRef, true, false, language);
+    long now = System.currentTimeMillis();
+    if (now - then > 100) logger.info("getWorstPhonesForResults took " + (now - then));
+    return getPhoneReport(phoneReportByResult, true, false, language, userid, project);
   }
 
   /**
    * TODO : huh? doesn't seem to add last item to total score or total items?
    * TODO : don't use idToRef map
    *
-   * @param idToRef
    * @param addTranscript       true if going to analysis tab
    * @param sortByLatestExample
    * @param language
+   * @param userid
+   * @param project
    * @return
    * @throws SQLException
-   * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map, String)
+   * @paramx idToRef
+   * @see #getWorstPhonesForResults
    */
   private PhoneReport getPhoneReport(Collection<SlickPhoneReport> phoneReportByResult,
-                                     Map<Integer, String> idToRef,
                                      boolean addTranscript,
-                                     boolean sortByLatestExample, String language) {
+                                     boolean sortByLatestExample,
+                                     String language,
+                                     int userid,
+                                     Project project) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
 
     int currentExercise = -1;
@@ -166,6 +178,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap = new HashMap<>();
     int c = 0;
+
+    Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
+
     for (SlickPhoneReport report : phoneReportByResult) {
       int i = 1;
       c++;
@@ -183,7 +198,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         totalItems++;
       }
 
-      WordAndScore wordAndScore = getAndRememberWordAndScore(idToRef, phoneToScores, phoneToWordAndScore,
+      String refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project);
+
+      WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise, phoneToScores, phoneToWordAndScore,
           exid, report.answer(), scoreJson, report.modified(),
           report.wseq(), report.word(),
           report.rid(), report.phone(), report.pseq(), report.pscore(), language);

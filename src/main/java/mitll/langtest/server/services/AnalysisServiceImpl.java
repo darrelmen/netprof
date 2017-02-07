@@ -81,15 +81,14 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
-    int projectID = getProjectID();
-    return db.getAnalysis(projectID).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
+    return db.getAnalysis(getProjectID()).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
   }
 
   /**
    * @param id
    * @param minRecordings
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
+   * @see mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
    */
   @Override
   public UserPerformance getPerformanceForUser(int id, int minRecordings) {
@@ -100,9 +99,10 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     SlickAnalysis slickAnalysis =
         new SlickAnalysis(db,
             db.getPhoneDAO(),
-            db.getExerciseIDToRefAudio(projectID),
             (SlickResultDAO) db.getResultDAO(),
-            db.getProject(projectID).getLanguage(), projectID);
+            db.getProject(projectID).getLanguage(),
+            projectID
+        );
 
     return slickAnalysis.getPerformanceForUser(id, minRecordings);
   }
@@ -119,7 +119,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     if (projectID == -1) return new ArrayList<>();
 
     IAnalysis analysis = db.getAnalysis(projectID);
-    logger.info("for user " +id + " project is "+ projectID + " and " + analysis);
+    logger.info("getWordScores for user " +id + " project is "+ projectID + " and " + analysis);
     List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, minRecordings);
 //    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getID() + " " + ws.getNativeAudio());
     return wordScoresForUser;

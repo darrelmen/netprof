@@ -34,16 +34,20 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.audio.AudioDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import scala.Tuple2;
 import scala.collection.Seq;
 
@@ -562,4 +566,45 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
+  @Nullable
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise) {
+    String nativeAudio = null;
+    if (exercise != null) {
+      MiniUser.Gender orDefault = getGender(userToGender, userid);
+      if (orDefault == null) return null;
+
+      Map<MiniUser, List<AudioAttribute>> userMap = exercise.getUserMap(orDefault == MiniUser.Gender.Male);
+      Collection<List<AudioAttribute>> values = userMap.values();
+      if (values.isEmpty()) {
+        userMap = exercise.getUserMap(orDefault != MiniUser.Gender.Male);
+        values = userMap.values();
+      }
+      if (values.isEmpty()) {
+        //missing++;
+      } else {
+        List<AudioAttribute> next = values.iterator().next();
+        if (next.isEmpty()) logger.error("huh? no audio on " + values);
+        else {
+          nativeAudio = next.get(next.size() - 1).getAudioRef();
+        }
+      }
+    }
+    return nativeAudio;
+  }
+
+  @Nullable
+  private MiniUser.Gender getGender(Map<Integer, MiniUser.Gender> userToGender, int userid) {
+    MiniUser.Gender orDefault = userToGender.get(userid);
+    if (orDefault == null) {
+      User byID = userDAO.getByID(userid);
+      if (byID == null) {
+        logger.warn("getNativeAudio huh? can't find " + userid);
+        //return null;
+      }
+      else {
+        userToGender.put(userid, byID.getRealGender());
+      }
+    }
+    return orDefault;
+  }
 }

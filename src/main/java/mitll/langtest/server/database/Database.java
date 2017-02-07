@@ -35,10 +35,13 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
 import java.sql.Connection;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -72,4 +75,8 @@ public interface Database extends AutoCloseable {
   void configureProject(Project project);
 
   void setStartupInfo(User userWhere);
+
+  CommonExercise getCustomOrPredefExercise(int projid, int id);
+
+  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project);
 }

@@ -33,6 +33,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -67,6 +68,7 @@ public class JsonSupport {
   private final IPhoneDAO phoneDAO;
 
   private String language;
+  private Project project;
 
   /**
    * @param sectionHelper
@@ -81,15 +83,14 @@ public class JsonSupport {
                      IRefResultDAO refResultDAO,
                      IAudioDAO audioDAO,
                      IPhoneDAO phoneDAO,
-                     String language) {
+                     Project project) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
     this.refResultDAO = refResultDAO;
     this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
-    this.language = language;
-//    this.configDir = configDir;
-//    this.installPath = installPath;
+    this.language = project.getLanguage();
+    this.project = project;
   }
 
   /**
@@ -238,10 +239,11 @@ public class JsonSupport {
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    * @see DatabaseImpl#getJsonPhoneReport(long, int, Map)
    */
-  JSONObject getJsonPhoneReport(long userid, int projid, Map<String, Collection<String>> typeToValues, String language) {
+  JSONObject getJsonPhoneReport(int userid, Map<String, Collection<String>> typeToValues, String language) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
     long then = System.currentTimeMillis();
+    int projid = project.getID();
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projid);
     long now = System.currentTimeMillis();
 
@@ -262,7 +264,6 @@ public class JsonSupport {
     now = System.currentTimeMillis();
     if (now - then > 300) logger.warn("getJsonPhoneReport : took " + (now - then) + " millis to attach audio again!");
 
-    return phoneDAO.getWorstPhonesJson(userid, ids, exidToRefAudio, language);
+    return phoneDAO.getWorstPhonesJson(userid, ids, language, project);
   }
-
 }

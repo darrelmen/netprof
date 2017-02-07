@@ -7,6 +7,5 @@ import mitll.langtest.server.database.IDAO;
  */
 public interface IWordDAO  extends IDAO  {
   long addWord(Word word);
-
   void removeForResult(int resultid);
 }
