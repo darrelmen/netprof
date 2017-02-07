@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.analysis;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.ResultDAO;
@@ -60,7 +59,7 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @seex DatabaseImpl#makeDAO(String, String, String)
    */
   public H2Analysis(Database database, IPhoneDAO phoneDAO, Map<Integer, String> exToRef) {
-    super(database, phoneDAO, exToRef);
+    super(database, phoneDAO);
   }
 
   /**
@@ -84,7 +83,7 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @param userDAO
    * @param minRecordings
    * @return
-   * @see LangTestDatabaseImpl#getUsersWithRecordings
+   * @seex LangTestDatabaseImpl#getUsersWithRecordings
    */
   public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
     String sql = getPerfSQL();
@@ -150,8 +149,8 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @return
    * @throws SQLException
    * @see Analysis#getPerformanceForUser(long, int)
-   * @see IAnalysis#getPhonesForUser(long, int, int)
-   * @see Analysis#getWordScoresForUser(long, int, int)
+   * @see IAnalysis#getPhonesForUser
+   * @seex Analysis#getWordScoresForUser
    */
   private Map<Integer, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
     if (DEBUG) logger.info("getBest sql =\n" + sql);
@@ -168,16 +167,15 @@ class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param id
    * @param minRecordings
-   * @param projid
+   * @paramx projid
    * @return
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
-  public PhoneReport getPhonesForUser(long id, int minRecordings) {
+  public PhoneReport getPhonesForUser(int id, int minRecordings) {
     try {
       String sql = getPerfSQL(id);
-
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);
-      return getPhoneReport(id, best, database.getLanguage());
+      return getPhoneReport(id, best, database.getLanguage(), null);
     } catch (Exception ee) {
       logException(ee);
     }
@@ -249,7 +247,7 @@ class H2Analysis extends Analysis implements IAnalysis {
       }
       long time = timestamp.getTime();
 
-      String nativeAudio = exToRef.get(exid);
+      String nativeAudio = null;//exToRef.get(exid);
       if (nativeAudio == null) {
         if (exid.startsWith("Custom")) {
 //          logger.debug("missing audio for " + exid);
@@ -263,7 +261,7 @@ class H2Analysis extends Analysis implements IAnalysis {
 
     if (DEBUG || true) {
       logger.info("getUserToResults total " + count + " missing audio " + missing +
-          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " exToRef " + exToRef.size());
+          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn);// + " exToRef " + exToRef.size());
       if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
       if (emptyCount > 0) logger.info("missing score json count " + emptyCount + "/" + count);
     }

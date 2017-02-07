@@ -442,9 +442,9 @@ public class ScoreServlet extends DatabaseServlet {
     logger.debug("getPhoneReport : user " + user + " selection " + selection);
     try {
       long then = System.currentTimeMillis();
-      long userid = Long.parseLong(user);
+      int userid = Integer.parseInt(user);
 
-      toReturn = db.getJsonPhoneReport(userid, getMostRecentProjectByUser((int) userid), selection);
+      toReturn = db.getJsonPhoneReport(userid, getMostRecentProjectByUser(userid), selection);
       long now = System.currentTimeMillis();
       if (now - then > 250) {
         logger.debug("getPhoneReport : user " + user + " selection " + selection +

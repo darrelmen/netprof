@@ -34,11 +34,13 @@ package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickPerfResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,28 +53,32 @@ import java.util.*;
 public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
   private static final int WARN_THRESH = 100;
+  public static final String ANSWERS = "answers";
   private SlickResultDAO resultDAO;
   private static final boolean DEBUG = true;
   private String language;
   private int projid;
+//  private IUserDAO userDAO;
+  private Project project;
 
   /**
    * @param database
    * @param phoneDAO
-   * @param exToRef
    * @param projid
    * @see DatabaseImpl#configureProject
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
    */
   public SlickAnalysis(Database database,
                        IPhoneDAO phoneDAO,
-                       Map<Integer, String> exToRef,
                        SlickResultDAO resultDAO,
-                       String language, int projid) {
-    super(database, phoneDAO, exToRef);
+                       String language,
+                       int projid) {
+    super(database, phoneDAO);
     this.resultDAO = resultDAO;
     this.language = language;
     this.projid = projid;
+  //  this.userDAO = userDAO;
+    project = database.getProject(projid);
   }
 
   /**
@@ -123,14 +129,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   /**
    * @param id
    * @param minRecordings
-   * @paramx projid
    * @return
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores(int, int)
+   * @paramx projid
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores
    */
   @Override
-  public PhoneReport getPhonesForUser(long id, int minRecordings) {
-    Map<Integer, UserInfo> best = getBestForUser((int) id, minRecordings);
-    return getPhoneReport(id, best, language);
+  public PhoneReport getPhonesForUser(int id, int minRecordings) {
+    return getPhoneReport(id, getBestForUser(id, minRecordings), language, project);
   }
 
   /**
@@ -157,6 +162,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @see #getBest
    */
   private Map<Integer, List<BestScore>> getUserToResults(Collection<SlickPerfResult> perfs) {
+    long then = System.currentTimeMillis();
+
     Map<Integer, List<BestScore>> userToBest = new HashMap<>();
 
     int iPad = 0;
@@ -164,7 +171,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     int learn = 0;
     int count = 0;
     int missing = 0;
-    Set<String> missingAudio = new TreeSet<>();
+    //Set<String> missingAudio = new TreeSet<>();
+
+    Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
 
     int emptyCount = 0;
     for (SlickPerfResult perf : perfs) {
@@ -198,7 +207,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
       long time = timestamp.getTime();
 
-      String nativeAudio = exToRef.get(exid);
+      String nativeAudio = database.getNativeAudio(userToGender, perf.userid(), exid, project);
       if (nativeAudio == null) {
 //        if (exid.startsWith("Custom")) {
 ////          logger.debug("missing audio for " + exid);
@@ -207,7 +216,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         missing++;
       }
 
-      boolean isLegacy = path.startsWith("answers");
+      boolean isLegacy = path.startsWith(ANSWERS);
       String filePath = isLegacy ?
           getRelPrefix(language) + path :
           trimPathForWebPage(path);
@@ -222,9 +231,11 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
 
     if (DEBUG || true) {
+      long now = System.currentTimeMillis();
+
       logger.info("getUserToResults total " + count + " missing audio " + missing +
-          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " exToRef " + exToRef.size());
-      if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
+          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " took " + (now-then) + " millis");//+ " exToRef " + exToRef.size());
+   //   if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
       if (emptyCount > 0) logger.info("missing score json count " + emptyCount + "/" + count);
     }
 
@@ -250,7 +261,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     String prefix = installPath + File.separator + s;
     int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
 
-    String relPrefix = prefix.substring(netProfDurLength) + File.separator;
-    return relPrefix;
+    return prefix.substring(netProfDurLength) + File.separator;
   }
 }
