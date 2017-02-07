@@ -127,7 +127,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       //     logger.info("DominoUserDAOImpl app name is " + appName);
 
       ignite = null;
-      if (dominoProps.isCacheEnabled()) {
+      if (dominoProps.isCacheEnabled() || true) {
         ignite = getIgnite();
         if (ignite != null) {
           ignite.configuration().setGridLogger(new Slf4jLogger());
@@ -705,7 +705,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     String email = dominoUser.getEmail();
 
-    logger.info("toUser : user " + dominoUser.getUserId() + " email " + email);
+    logger.info("toUser : user " + dominoUser.getUserId() + " email " + email);//, new Exception());
 
     Set<User.Permission> permissionSet = new HashSet<>();
 //    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;

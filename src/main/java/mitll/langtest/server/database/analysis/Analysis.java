@@ -36,6 +36,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
@@ -73,7 +74,7 @@ public abstract class Analysis extends DAO {
    *
    * @deprecated  let's not use this map - super expensive to make, every time
    */
-  final Map<Integer, String> exToRef;
+ // final Map<Integer, String> exToRef;
 
   /**
    * @param database
@@ -81,29 +82,13 @@ public abstract class Analysis extends DAO {
    * @see DatabaseImpl#getAnalysis(int)
    * @see DatabaseImpl#makeDAO
    */
-  public Analysis(Database database, IPhoneDAO phoneDAO, Map<Integer, String> exToRef) {
+  public Analysis(Database database, IPhoneDAO phoneDAO) {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
     this.phoneDAO = phoneDAO;
-    this.exToRef = exToRef;
-    logger.info("Analysis : exToRef has " + exToRef.size());
+ //   this.exToRef = exToRef;
+    //logger.info("Analysis : exToRef has " + exToRef.size());
   }
-
-  private final Set<String> lincoln = new HashSet<>(Arrays.asList(
-      "gvidaver",
-      "rbudd",
-      "jmelot",
-      "esalesky",
-      "gatewood",
-      "testing",
-      "grading",
-      "fullperm",
-      //"0001abcd",
-      "egodoy",
-      "rb2rb2",
-      "dajone3",
-      //"WagnerSandy",
-      "rbtrbt"));
 
   /**
    * @param userDAO
@@ -147,20 +132,18 @@ public abstract class Analysis extends DAO {
    * @see #getUserInfos(IUserDAO, Map)
    */
   @NotNull
-  private List<UserInfo> getUserInfos(Map<Integer, UserInfo> best, IUserDAO userDAO
-  ) {
+  private List<UserInfo> getUserInfos(Map<Integer, UserInfo> best, IUserDAO userDAO) {
     List<UserInfo> userInfos = new ArrayList<>();
 
     for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
       Integer userid = pair.getKey();
-    //  MiniUser user = userDAO.getMiniUser(userid);
 
       String userChosenID = userDAO.getUserChosenID(userid);
       if (userChosenID == null) {
         logger.error("getUserInfos huh? no user for " + userid);
       } else {
      //   String userID = user.getUserID();
-        boolean isLL = lincoln.contains(userChosenID);
+        boolean isLL = database.getServerProps().getLincolnPeople().contains(userChosenID);
         if (!isLL) {
           UserInfo value = pair.getValue();
           value.setId(userid); // necessary?
@@ -182,7 +165,7 @@ public abstract class Analysis extends DAO {
     });
   }
 
-  private List<PhoneSession> chooseGran(Map<Long, List<PhoneSession>> granularityToSessions) {
+/*  private List<PhoneSession> chooseGran(Map<Long, List<PhoneSession>> granularityToSessions) {
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);
@@ -217,16 +200,16 @@ public abstract class Analysis extends DAO {
       //}
     }
 
-/*    if (!oneSet) {
+*//*    if (!oneSet) {
       if (grans.isEmpty()) {
         logger.error("huh? empty map for " + granularityToSessions);
       } else {
         Long first = grans.iterator().next();
         phoneSessions1 = granularityToSessions.get(first);
       }
-    }*/
+    }*//*
     return phoneSessions1;
-  }
+  }*/
 
   /**
    * @param id
@@ -275,6 +258,11 @@ public abstract class Analysis extends DAO {
   public abstract List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings);
 */
 
+  /**
+   * @see SlickAnalysis#getWordScoresForUser(long, int)
+   * @param best
+   * @return
+   */
   List<WordScore> getWordScores(Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
     if (values.isEmpty()) {
@@ -309,10 +297,11 @@ public abstract class Analysis extends DAO {
    * @param userid
    * @param best
    * @param language
+   * @param project
    * @return
-   * @see SlickAnalysis#getPhonesForUser
+   * @see IAnalysis#getPhonesForUser
    */
-  PhoneReport getPhoneReport(long userid, Map<Integer, UserInfo> best, String language) {
+  PhoneReport getPhoneReport(int userid, Map<Integer, UserInfo> best, String language, Project project) {
     long then = System.currentTimeMillis();
     long start = System.currentTimeMillis();
     long now = System.currentTimeMillis();
@@ -332,19 +321,22 @@ public abstract class Analysis extends DAO {
 
     if (DEBUG) logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
     then = System.currentTimeMillis();
-    PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(userid, ids, exToRef, language);
+    PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(userid, ids, language, project);
 
     now = System.currentTimeMillis();
 
-    if (DEBUG)
-      logger.debug(" getPhonesForUser " + userid + " took " + (now - then) + " millis to phone report");
+    long diff = now - then;
+    if (DEBUG || diff > 100) {
+      logger.debug(" getPhonesForUser " + userid + " took " + diff + " millis to phone report");
+    }
     if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
-    if (DEBUG) {
-      now = System.currentTimeMillis();
-      logger.debug(" getPhonesForUser " + userid + " took " + (now - start) + " millis to get " +
+    long diff2 = System.currentTimeMillis() - start;
+    if (DEBUG || diff2 > 100) {
+      logger.debug(" getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
           /*phonesForUser.size() +*/ " phones");
     }
+
     setSessions(phoneReport.getPhoneToAvgSorted());
 
     return phoneReport;

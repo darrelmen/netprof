@@ -8,6 +8,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.shared.analysis.PhoneAndScore;
@@ -144,16 +145,16 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   /**
    * @param userid
    * @param ids
-   * @param idToRef
    * @param language
+   * @param project
    * @return
    * @throws SQLException
-   * @see Analysis#getPhonesForUser
+   * @seex Analysis#getPhonesForUser
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef, String language) {
+  public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, String language, Project project) {
     try {
-      return getPhoneReport(getResultIDJoinSQL(userid, ids), idToRef, true, false);
+      return getPhoneReport(getResultIDJoinSQL(userid, ids), null, true, false);
     } catch (Exception e) {
       logAndNotify.logAndNotifyServerException(e,"sql exception for user " +userid + " and result ids "  + ids);
       return new PhoneReport();
@@ -168,14 +169,14 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   /**
    * @param userid
    * @param exids
-   * @param idToRef
    * @param language
+   * @param project
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
-   * @see JsonSupport#getJsonPhoneReport(long, int, Map)
+   * @seex JsonSupport#getJsonPhoneReport(long, int, Map)
    */
-  public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef, String language) {
-    PhoneReport phoneReport = getPhoneReport(userid, exids, idToRef);
+  public JSONObject getWorstPhonesJson(int userid, Collection<Integer> exids, String language, Project project) {
+    PhoneReport phoneReport = getPhoneReport(userid, exids, null);
     logger.info("getWorstPhonesJson phone report " + phoneReport);
     return new PhoneJSON().getWorstPhonesJson(phoneReport);
   }
@@ -205,7 +206,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param sortByLatestExample
    * @return
    * @throws SQLException
-   * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map, String)
+   * @see IPhoneDAO#getWorstPhonesForResults(int, Collection, String, Project)
    * @see #getPhoneReport(String, Map, boolean, boolean)
    */
   protected PhoneReport getPhoneReport(String sql,
@@ -263,7 +264,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }
 
       try {
-        WordAndScore wordAndScore = getAndRememberWordAndScore(idToRef, phoneToScores, phoneToWordAndScore,
+        WordAndScore wordAndScore = getAndRememberWordAndScore(null, phoneToScores, phoneToWordAndScore,
             Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
             wseq, word,
             rid, phone, seq, phoneScore, database.getLanguage());
