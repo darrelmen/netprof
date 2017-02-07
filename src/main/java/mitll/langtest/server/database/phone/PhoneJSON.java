@@ -46,7 +46,7 @@ public class PhoneJSON {
    *
    * @param worstPhonesAndScore
    * @return
-   * @see IPhoneDAO#getWorstPhonesJson(long, java.util.Collection, Map, String)
+   * @see IPhoneDAO#getWorstPhonesJson(int, java.util.Collection, String, mitll.langtest.server.database.exercise.Project)
    */
   JSONObject getWorstPhonesJson(PhoneReport worstPhonesAndScore) {
     JSONObject jsonObject = new JSONObject();

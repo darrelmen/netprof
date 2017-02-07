@@ -37,6 +37,7 @@ import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.MiniUser;
 
 import java.util.Collection;
 import java.util.List;
@@ -122,4 +123,6 @@ public interface IAudioDAO extends IDAO {
   boolean didFindAnyAudioFiles(int projectid);
 
   void makeSureAudioIsThere(int projectID, String language, boolean validateAll);
+
+  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise);
 }

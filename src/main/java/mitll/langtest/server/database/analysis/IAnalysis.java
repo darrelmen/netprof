@@ -45,7 +45,7 @@ public interface IAnalysis {
 
   List<WordScore> getWordScoresForUser(long id, int minRecordings);
 
-  PhoneReport getPhonesForUser(long id, int minRecordings);
+  PhoneReport getPhonesForUser(int id, int minRecordings);
 
   List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings);
 }

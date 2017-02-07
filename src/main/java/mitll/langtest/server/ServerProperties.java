@@ -103,7 +103,7 @@ public class ServerProperties {
   public static final String CONFIG = "config";
   public static final String CONFIG_JSON = "config.json";
 
-  public static final String UI_PROPERTIES = "ui.properties";
+  private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
   private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
   private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
@@ -206,6 +206,24 @@ public class ServerProperties {
       WEBSERVICE_HOST_PORT
   );
   private String configFileFullPath;
+
+
+  private final Set<String> lincoln = new HashSet<>(Arrays.asList(
+      "gvidaver",
+      "rbudd",
+      "jmelot",
+      "esalesky",
+      "gatewood",
+      "testing",
+      "grading",
+      "fullperm",
+      //"0001abcd",
+      "egodoy",
+      "rb2rb2",
+      "dajone3",
+      //"WagnerSandy",
+      "rbtrbt"));
+
 
   public ServerProperties() {
   }
@@ -318,7 +336,7 @@ public class ServerProperties {
       uiprops = readPropertiesFromFile(configFileFullPath);
       copyValue(RELEASE_DATE,"unset");
       copyValue(APP_TITLE,"unset");
-      logger.info("useProperties ui props has " + uiprops.size());
+     // logger.info("useProperties ui props has " + uiprops.size());
     } catch (IOException e) {
       logger.error("got " + e + " reading from " + configFileFullPath, e);
     }
@@ -931,6 +949,7 @@ public class ServerProperties {
     return affliations;
   }
 
+  public Set<String> getLincolnPeople() { return  lincoln; }
   public Map<String, String> getUIProperties() {
     return  getPropertyMap(uiprops);
   }

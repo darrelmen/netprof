@@ -45,6 +45,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -78,7 +79,7 @@ public class BasePhoneDAO extends DAO {
    * TODO : don't do this with the idToRef map...
    *  look it up in a better way
    *
-   * @param idToRef
+   * @paramx idToRef
    * @param phoneToScores
    * @param phoneToWordAndScore
    * @param exid
@@ -93,8 +94,10 @@ public class BasePhoneDAO extends DAO {
    * @param phoneScore
    * @param language
    * @return
+   * @see SlickPhoneDAO#getPhoneReport
    */
-  WordAndScore getAndRememberWordAndScore(Map<Integer, String> idToRef,
+  WordAndScore getAndRememberWordAndScore(//Map<Integer, String> idToRef,
+                                          String refAudioForExercise,
                                           Map<String, List<PhoneAndScore>> phoneToScores,
                                           Map<String, List<WordAndScore>> phoneToWordAndScore,
                                           int exid,
@@ -121,7 +124,7 @@ public class BasePhoneDAO extends DAO {
 
     WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, (int)rid, wseq, seq,
         filePath,
-        idToRef.get(exid),
+        refAudioForExercise,
         scoreJson, resultTime);
 
     wordAndScores.add(wordAndScore);

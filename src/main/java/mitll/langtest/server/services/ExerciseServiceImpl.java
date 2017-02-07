@@ -500,7 +500,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         if (practicedByUser.contains(ex.getID())) copy.add(ex);
       }
       long now = System.currentTimeMillis();
-      logger.info("filterExercises : took " + (now - then));
+      if (now-then > 100) {
+        logger.info("filterExercises : took " + (now - then));
+      }
       exercises = copy;
     }
     return exercises;
