@@ -985,6 +985,9 @@ public class AudioFileHelper implements AlignDecode {
     return webserviceScoring.isAvailableCheckNow();
   }
 
+  /**
+   * @see mitll.langtest.server.services.ScoringServiceImpl#isHydraRunning
+   */
   public void setAvailable() {
     webserviceScoring.setAvailable();
   }
@@ -1241,7 +1244,7 @@ public class AudioFileHelper implements AlignDecode {
       //    String installPath = serverProps.getAudioBaseDir();
       HTKDictionary htkDictionary = readDictionary(project, installPath);
       webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
-      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
+      oldschoolScoring  = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
     }
     asrScoring = oldschoolScoring;
   }

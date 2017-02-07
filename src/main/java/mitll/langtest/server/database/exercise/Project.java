@@ -213,8 +213,13 @@ public class Project implements PronunciationLookup {
 //    refResultDecoder.doRefDecode(getExercisesForUser());
   }
 
+  /**
+   * @see mitll.langtest.server.services.AudioServiceImpl#recalcRefAudio
+   */
   public void recalcRefAudio() {
-    refResultDecoder.writeRefDecode(getExercisesForUser(), project.id());
+    Collection<CommonExercise> exercisesForUser = getExercisesForUser();
+    logger.info("recalcRefAudio " + project + " " + exercisesForUser.size() + " exercises.");
+    refResultDecoder.writeRefDecode(exercisesForUser, project.id());
   }
 
   public SlickAnalysis getAnalysis() {

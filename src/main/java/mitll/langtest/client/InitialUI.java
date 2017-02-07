@@ -655,7 +655,7 @@ public class InitialUI implements UILifecycle {
       banner.setCogVisible(true);
       banner.setVisibleAdmin(
           user.isAdmin() ||
-              props.isAdminView() ||
+             // props.isAdminView() ||
               user.getUserKind() == User.Kind.PROJECT_ADMIN ||
               user.isCD());
     }

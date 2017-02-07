@@ -36,7 +36,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.dialog.PrevNextList;
@@ -82,10 +81,9 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
 
   /**
    * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout(UserList, String)
-   * @param props
    * @return
    */
-  Widget getExerciseListOnLeftSide(PropertyHandler props);
+  Widget getExerciseListOnLeftSide();
 
   void loadFirst();
 

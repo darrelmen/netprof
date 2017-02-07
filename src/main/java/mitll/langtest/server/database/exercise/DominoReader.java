@@ -4,6 +4,8 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
 import net.sf.json.JSONObject;
 
+import java.io.IOException;
+
 /**
  * Created by go22670 on 4/5/16.
  */
@@ -35,7 +37,12 @@ class DominoReader {
       baseURL = baseURL.substring(0, baseURL.length() - DOCUMENTS.length());
     }
 //    else if (baseURL.endsWith("exam"))
-    String projectInfo = new HTTPClient().readFromGET(baseURL);
+    String projectInfo = null;
+    try {
+      projectInfo = new HTTPClient().readFromGET(baseURL);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     JSONObject jsonObject = JSONObject.fromObject(projectInfo);
     JSONObject language = jsonObject.getJSONObject("language");
     String upperName = language.getString("name");

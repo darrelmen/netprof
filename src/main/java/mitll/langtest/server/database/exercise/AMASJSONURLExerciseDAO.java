@@ -42,6 +42,7 @@ import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -107,7 +108,12 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
    * @return
    */
   private String getJSON() {
-    return new HTTPClient().readFromGET(serverProps.getLessonPlan());
+    try {
+      return new HTTPClient().readFromGET(serverProps.getLessonPlan());
+    } catch (IOException e) {
+      e.printStackTrace();
+      return "";
+    }
   }
 
   private List<AmasExerciseImpl> getExercisesFromArray(String json) {
