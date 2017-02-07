@@ -116,6 +116,7 @@ public class Report {
   private static final String ACTIVE_I_PAD = "Active iPad/iPhone Users";
   private static final int EVIL_LAST_WEEK = 54;
   private static final String SKIP_USER = "gvidaver";
+  public static final int DAY_TO_SEND_REPORT = Calendar.SUNDAY;
 
   private final IUserDAO userDAO;
   private final IResultDAO resultDAO;
@@ -165,7 +166,7 @@ public class Report {
 
     // check if it's a monday
     if (!getShouldSkip() &&
-        Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY &&
+        Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT &&
         !reportEmails.isEmpty()) {
       writeAndSendReport(serverProps.getLanguage(), site, mailSupport, pathHelper, reportEmails, getThisYear());
     } else {

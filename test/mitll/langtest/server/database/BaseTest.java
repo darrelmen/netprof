@@ -76,49 +76,9 @@ public class BaseTest {
                                                  boolean useLocal,
                                                  String optPropsFile) {
     return CopyToPostgres.getDatabaseLight(config,useH2,useLocal,optPropsFile,"war");
-/*    String installPath = "war";
-    logger.info("getDatabaseLight db " + config + " props " + optPropsFile);
-
-    String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
-
-    logger.info("getDatabaseLight db " + config + " props " + propsFile);
-
-    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
-
-    logger.info("getDatabaseLight path " + file.getAbsolutePath());
-
-    ServerProperties serverProps = getServerProperties(config, propsFile);
-    ServerProperties serverProps2 = getServerProperties("netProf", DOMINO_PROPERTIES);
-    String configFileFullPath = serverProps2.getConfigFileFullPath();
-    try {
-      serverProps.getProps().load(new FileInputStream(configFileFullPath));
-    } catch (IOException e) {
-      logger.error("can't find " + configFileFullPath);
-    }
-    if (useLocal) {
-      serverProps.setLocalPostgres();
-    } else {
-      serverProps.setHydraPostgres();
-    }
-//    serverProps.getProps().setProperty("databaseHost", host);
-//    serverProps.getProps().setProperty("databaseUser", user);
-//    serverProps.getProps().setProperty("databasePassword", pass);
-
-    serverProps.setH2(useH2);
-
-    String parent = file.getParentFile().getAbsolutePath();
-    String name = file.getName();
-
-    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper("war", serverProps), false, null, false);
-
-    database.setInstallPath(installPath,
-        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan());
-
-    return database;*/
   }
 
-  protected static ServerProperties getServerProperties(String config, String propsFile) {
+  private static ServerProperties getServerProperties(String config, String propsFile) {
     // String s = "quizlet.properties";
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + propsFile);
     return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
@@ -151,7 +111,6 @@ public class BaseTest {
     File file = new File("/opt/netprof/config/netprof.properties");
     String name = file.getName();
     String parent = file.getParentFile().getAbsolutePath();
-
 
     ServerProperties serverProps = new ServerProperties(parent, name);
     return  serverProps;
@@ -203,7 +162,7 @@ public class BaseTest {
     return database;
   }
 
-  protected static File getPropertiesFile(String config) {
+  private static File getPropertiesFile(String config) {
     String quizlet = "quizlet";
     if (config.equals("msa")) quizlet = "classroom";
     else if (config.equals("pashto1")) quizlet = "pashtoQuizlet1";

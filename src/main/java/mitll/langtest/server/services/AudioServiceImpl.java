@@ -40,6 +40,7 @@ import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
@@ -553,6 +554,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   public void recalcRefAudio(int projid) {
-    db.getProject(projid).recalcRefAudio();
+    Project project = db.getProject(projid);
+    logger.info("recalc ref audio on " +project);
+    project.recalcRefAudio();
   }
 }
