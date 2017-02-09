@@ -141,7 +141,7 @@ gwt {
     gwtVersion = '2.8.0'
     modules 'mitll.langtest.LangTest'
 
-    logLevel = 'ERROR'
+  //  logLevel = 'ERROR'
 
     minHeapSize = "512M";
     maxHeapSize = "4G";

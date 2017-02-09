@@ -151,19 +151,22 @@ class RegistrationInfo extends BasicDialog {
   }
 
   private boolean checkMissingAge() {
-    if (ageEntryGroup.isEmpty()) {
-      ageEntryGroup.box.setFocus(true);
-      markErrorBlur(ageEntryGroup, "Add info", PLEASE_ENTER_YOUR_AGE, Placement.TOP, true);
-      return false;
-    } else {
-      try {
-        Integer.parseInt(ageEntryGroup.getSafeText());
-        return true;
-      } catch (NumberFormatException e) {
-        markErrorBlur(ageEntryGroup, "Try again", PLEASE_ENTER_A_VALID_AGE, Placement.TOP, true);
+    if (ageEntryGroup.isVisible()) {
+      if (ageEntryGroup.isEmpty()) {
+        ageEntryGroup.box.setFocus(true);
+        markErrorBlur(ageEntryGroup, "Add info", PLEASE_ENTER_YOUR_AGE, Placement.TOP, true);
         return false;
+      } else {
+        try {
+          Integer.parseInt(ageEntryGroup.getSafeText());
+          return true;
+        } catch (NumberFormatException e) {
+          markErrorBlur(ageEntryGroup, "Try again", PLEASE_ENTER_A_VALID_AGE, Placement.TOP, true);
+          return false;
+        }
       }
     }
+    else return true;
   }
 
   public boolean isMale() {
