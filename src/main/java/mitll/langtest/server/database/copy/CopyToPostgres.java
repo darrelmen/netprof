@@ -249,9 +249,10 @@ public class CopyToPostgres<T extends CommonShell> {
 
     if (useLocal) {
       serverProps.setLocalPostgres();
-    } else {
-      serverProps.setHydraPostgres();
     }
+//    else {
+//      serverProps.setHydraPostgres();
+//    }
 
     serverProps.setH2(useH2);
 
