@@ -225,6 +225,7 @@ import java.util.logging.Logger;
  * 2.0.0
  * - development to master
  * 2.0.2
+ * 2.0.3
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements
@@ -233,7 +234,7 @@ public class LangTest implements
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
-  public static final String VERSION_INFO = "2.0.2";
+  public static final String VERSION_INFO = "2.0.3";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -289,6 +290,7 @@ public class LangTest implements
 
       public void onSuccess(StartupInfo startupInfo) {
         long now = System.currentTimeMillis();
+        if (startupInfo == null) logger.warning("startup info is null??");
         rememberStartup(startupInfo);
         onModuleLoad2();
 
@@ -516,10 +518,12 @@ public class LangTest implements
       populateRootPanel();
 
       setPageTitle();
+      if (browserCheck == null) logger.warning("no browser check?");
       browserCheck.checkForCompatibleBrowser();
 
-      if (!startupInfo.getMessage().isEmpty()) {
-        showErrorMessage("Configuration Error", startupInfo.getMessage());
+      String message = startupInfo.getMessage();
+      if (message != null && !message.isEmpty()) {
+        showErrorMessage("Configuration Error", message);
       }
 
      // loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
@@ -634,8 +638,7 @@ public class LangTest implements
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
   private void makeFlashContainer() {
-    logger.info("makeFlashContainer - called");
-
+   // logger.info("makeFlashContainer - called");
     MicPermission micPermission = new MicPermission() {
       /**
        * @see mitll.langtest.client.recorder.WebAudioRecorder
