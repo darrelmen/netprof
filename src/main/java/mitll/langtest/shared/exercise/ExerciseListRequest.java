@@ -252,13 +252,6 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   *   private boolean onlyUnrecordedByMe = false;
-   private boolean onlyExamples = false;
-   private boolean incorrectFirstOrder = false;
-   private boolean onlyWithAudioAnno = false;
-   private boolean onlyDefaultAudio = false;
-   private boolean onlyUninspected = false;
-   private boolean onlyForUser = false;
    * @return
    */
   public String toString() {

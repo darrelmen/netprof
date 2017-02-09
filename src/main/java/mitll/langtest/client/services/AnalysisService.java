@@ -48,9 +48,10 @@ public interface AnalysisService extends RemoteService {
   Collection<UserInfo> getUsersWithRecordings();
 
   /**
+   * TODO : why do we have to do this at all???
    * @param ids
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores
    */
   List<CommonShell> getShells(List<Integer> ids);
 

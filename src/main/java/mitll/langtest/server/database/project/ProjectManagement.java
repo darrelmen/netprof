@@ -34,6 +34,7 @@ package mitll.langtest.server.database.project;
 
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -147,9 +148,11 @@ public class ProjectManagement implements IProjectManagement {
       logger.info("\tproject " + project);
     }
 
-    ExerciseDAO<CommonExercise> exerciseDAO = getFirstProject().getExerciseDAO();
-    logger.info("using exercise dao from first project " + exerciseDAO);
-    db.getUserExerciseDAO().setExerciseDAO(exerciseDAO);
+    if (!idToProject.isEmpty()) {
+      ExerciseDAO<CommonExercise> exerciseDAO = getFirstProject().getExerciseDAO();
+      logger.info("using exercise dao from first project " + exerciseDAO);
+      db.getUserExerciseDAO().setExerciseDAO(exerciseDAO);
+    }
 
     configureProjects();
   }
@@ -547,6 +550,12 @@ public class ProjectManagement implements IProjectManagement {
     return collect;
   }
 
+  /**
+   * @see #getProject(int)
+   * @see #getProjectOrFirst(int)
+   * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
+   * @return
+   */
   @Override
   public Project getFirstProject() {
     return getProjects().iterator().next();
@@ -636,6 +645,7 @@ public class ProjectManagement implements IProjectManagement {
    * or loud they are : https://gh.ll.mit.edu/DLI-LTEA/Development/issues/601
    *
    * @return
+   * @see LangTestDatabaseImpl#getStartupInfo
    */
   public List<SlimProject> getNestedProjectInfo() {
     List<SlimProject> projectInfos = new ArrayList<>();
