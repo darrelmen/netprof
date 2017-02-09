@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
+import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.analysis.PhoneSession;
@@ -152,9 +153,14 @@ public class AnalysisPlot extends TimeSeriesPlot {
     populateGranToLabel();
 
     this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback);
-    populateExerciseMap(service, userid);
 
     getPerformanceForUser(this.service, userid, userChosenID, minRecordings);
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        populateExerciseMap(service, userid);
+      }
+    });
   }
 
   private void populateGranToLabel() {
@@ -289,6 +295,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   /**
    * Only get exercises this person has practiced.
+   * Use this to get info for tooltips, etc.
+   * Too heavy?
+   * Why not get that info on demand?
+   *
    * @param service
    * @param userid
    * @see #AnalysisPlot
@@ -297,7 +307,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
    // logger.info("populateExerciseMap : get exercises for user " + userid);
 
     service.getExerciseIds(
-        new ExerciseListRequest(1, userid).setOnlyForUser(true),
+        new ExerciseListRequest(1, userid)
+            .setOnlyForUser(true),
         new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -308,7 +319,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
           public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
             if (exerciseListWrapper != null && exerciseListWrapper.getExercises() != null) {
               Map<Integer, CommonShell> idToEx = getIdToEx();
-
 //              logger.info("populateExerciseMap : got back " + exerciseListWrapper.getExercises().size() +
 //                  "  exercises for user " + userid);
 
@@ -764,7 +774,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   /**
    * Remember time window of data (x-axis).
    *
-   * TODO :  When would we ever need to go talk to the server to get the exercises?
+   * TODO : When would we ever need to go talk to the server to get the exercises?
    * @param rawBestScores
    * @see #addChart
    */

@@ -293,7 +293,6 @@ public abstract class Analysis extends DAO {
 */
 
   /**
-   * TODO : don't use exToRef -
    * @param userid
    * @param best
    * @param language
@@ -303,8 +302,8 @@ public abstract class Analysis extends DAO {
    */
   PhoneReport getPhoneReport(int userid, Map<Integer, UserInfo> best, String language, Project project) {
     long then = System.currentTimeMillis();
-    long start = System.currentTimeMillis();
-    long now = System.currentTimeMillis();
+    long start = then;
+    long now = then;
 
     if (DEBUG)
       logger.debug(" getPhonesForUser " + userid + " took " + (now - then) + " millis to get " + best.size());

@@ -77,7 +77,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #getSignUpForm
    */
   private static final String NEW_USER = "New User?";
-  private static final int MIN_LENGTH_USER_ID = 4;
+  private static final int MIN_LENGTH_USER_ID = 5;
 
   /**
    * @see #getSignUpButton

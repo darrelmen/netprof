@@ -29,6 +29,8 @@ public class FormField {
     group.setVisible(visible);
   }
 
+  public boolean isVisible() { return group.isVisible(); }
+
   public String getSafeText() {
     return sanitize(box.getText());
   }

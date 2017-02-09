@@ -93,6 +93,15 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return getUserPerformance(userid, best);
   }
 
+  /**
+   * @see #getPerformanceForUser(long, int)
+   * @see #getPhonesForUser(int, int)
+   * @see #getWordScoresForUser(long, int)
+   *
+   * @param id
+   * @param minRecordings
+   * @return
+   */
   private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings) {
     long then = System.currentTimeMillis();
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForUser(id, projid);
@@ -132,6 +141,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @return
    * @paramx projid
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores
+   * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
    */
   @Override
   public PhoneReport getPhonesForUser(int id, int minRecordings) {

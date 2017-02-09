@@ -1,5 +1,6 @@
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -29,16 +30,26 @@ public abstract class AudioExampleContainer<T extends WordScore> extends
 
   protected final AnalysisPlot plot;
 
+  /**
+   * @see PhoneExampleContainer#PhoneExampleContainer
+   * @param controller
+   * @param plot
+   */
   AudioExampleContainer(ExerciseController controller, AnalysisPlot plot) {
     super(controller);
     this.plot = plot;
   }
 
+  /**
+   * @see #getPlayAudio
+   * @param id
+   * @return
+   */
   protected CommonShell getShell(int id) {
     return plot.getIdToEx().get(id);
   }
 
-  protected void addAudioColumns() {
+  void addAudioColumns() {
     Column<T, SafeHtml> column = getPlayAudio();
     SafeHtmlHeader header = new SafeHtmlHeader(new SafeHtml() {
       @Override
@@ -107,7 +118,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends
     return o;
   }
 
-  protected void addPlayer() {
+  void addPlayer() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         PlayAudioWidget.addPlayer();

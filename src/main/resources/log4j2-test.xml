@@ -39,11 +39,12 @@
         <Property name="log.mailfrom">noreply@dliflc.edu</Property>
         <Property name="log.mailto">raymond.budd@ll.mit.edu,ray.budd@gmail.com,gordon.vidaver@ll.mit.edu</Property>
     </Properties>
+
     <appenders>
         <!--
            The SMTP mailer appears to only work when smtp debug is true.
           -->
-        <SMTP name="Mail" subject="Web App ${web:contextPath} error on host ${hostName}" to="${sys:log.mailto}"
+  <!--      <SMTP name="Mail" subject="Web App ${web:contextPath} error on host ${hostName}" to="${sys:log.mailto}"
               from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
               bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
         <RollingFile name="STDOUT" fileName="${sys:catalina.base}/logs/${web:contextPath}-app.log"
@@ -61,7 +62,7 @@
             <Policies>
                 <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
-        </RollingFile>
+        </RollingFile>-->
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%-30.30c{1}:%-4L] - %m%n%throwable"/>
         </Console>
@@ -84,10 +85,10 @@
         </logger>
 
         <logger name="mitll.hlt.domino.server.user.UserServiceFacadeImpl" level="debug" additivity="true">
-            <appender-ref ref="SecFile"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
         <logger name="mitll.hlt.domino.server.security" level="debug" additivity="true">
-            <appender-ref ref="SecFile"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
 
         <logger name="mitll" level="debug" additivity="true">
@@ -114,7 +115,7 @@
         <logger name="slick.relational" level="INFO"/>
         <logger name="slick.session" level="INFO"/>
 
-        <logger name="mitll.hlt.domino.server.util" level="WARN"/>
+        <logger name="mitll.hlt.domino.server.util" level="DEBUG"/>
         <logger name="mitll.hlt.domino.server.user" level="DEBUG"/>
 
         <root level="debug">
