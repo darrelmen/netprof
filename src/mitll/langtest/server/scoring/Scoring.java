@@ -71,6 +71,12 @@ public abstract class Scoring {
   private static final float SCORE_SCALAR = 1.0f;
   private static final String SCORING = "scoring";
 
+  private static final String START_SIL = "<s>";
+  private static final String END_SIL = "</s>";
+  private static final String SIL = "sil";
+  private static final String CAP_SIL = "SIL";
+  private final Collection<String> toSkip = new HashSet<>(Arrays.asList(START_SIL, END_SIL, SIL, CAP_SIL));
+
   final String scoringDir;
   final String deployPath;
   final ServerProperties props;
@@ -178,7 +184,7 @@ public abstract class Scoring {
    * @param suffix
    * @param decode             if true don't bother to write out images for word and phone
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
-   * @see ASRWebserviceScoring#getPretestScore(String, int, int, boolean, boolean, String, String, Scores, String, String, double, int, boolean)
+   * @see ASRWebserviceScoring#getPretestScore
    */
   EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
@@ -304,9 +310,9 @@ public abstract class Scoring {
    * @param suffix
    * @param decode
    * @param useWebservice
-   * @param object             TODO Actually use it
+   * @param object
    * @return
-   * @see ASRScoring#getPretestScore(String, int, int, boolean, boolean, String, String, File, Scores, JSONObject, boolean)
+   * @see ASRScoring#getPretestScore
    */
   EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
                                           String audioFileNoSuffix, boolean useScoreToColorBkg,
@@ -414,17 +420,20 @@ public abstract class Scoring {
     }
   }
 
+  public boolean validLTS(String fl, String transliteration) {
+    if (fl.isEmpty()) return false;
+    Set<String> strings = checkLTS(fl, transliteration);
+   // logger.info("For " + fl + " got " + strings);
+    return strings.isEmpty();
+  }
+
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.scoring.Scoring#validLTS(String)
+   * @see mitll.langtest.server.scoring.Scoring#validLTS
    */
   Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
     return checkLTSHelper.checkLTS(foreignLanguagePhrase, transliteration);
-  }
-
-  public boolean validLTS(String fl, String transliteration) {
-    return checkLTS(fl, transliteration).isEmpty();
   }
 
   /**
@@ -461,13 +470,14 @@ public abstract class Scoring {
         Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
         for (Float timeStamp : timeToEvent.keySet()) {
           String event = timeToEvent.get(timeStamp).event;
-          if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
-            String trim = event.trim();
-            if (trim.length() > 0) {
-              //logger.debug("Got " + event + " trim '" +trim+ "'");
-              b.append(trim);
-              b.append(" ");
-            }
+          String trim = event.trim();
+          if (!trim.isEmpty() && !toSkip.contains(event)) {
+//            logger.debug("getRecoSentence including " + event + " trim '" + trim + "'");
+            b.append(trim);
+            b.append(" ");
+          }
+          else {
+  //          logger.debug("getRecoSentence skipping  " + event + " trim '" + trim + "'");
           }
         }
       }

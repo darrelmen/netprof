@@ -45,6 +45,7 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
@@ -176,7 +177,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     if (widgets != null && !controller.getProps().isNoModel() && controller.isRecordingEnabled()) {
       add(widgets);
     }
-    if (controller.isRecordingEnabled()) {
+    if (controller.isRecordingEnabled() && !controller.getProps().isNoModel()) {
       addUserRecorder(service, controller, center, screenPortion, exercise); // todo : revisit screen portion...
     }
 
@@ -292,7 +293,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     Panel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
     vp.addStyleName("blockStyle");
-   // vp.addStyleName("topFiveMargin");
+//    vp.addStyleName("topFiveMargin");
 
     new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise, vp);
     vp.add(getItemContent(exercise));
@@ -325,7 +326,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     //else {
 //      logger.info("getScoringAudioPanel path is " +path +
 //          " for " + e.getAudioAttributes());
-   // }
+    // }
     contentAudio = getAudioPanel(path);
     contentAudio.setScreenPortion(screenPortion);
     return contentAudio;
@@ -424,7 +425,13 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    */
   private void getClickableWords(String label, String value, Panel nameValueRow) {
     DivWidget horizontal = new DivWidget();
-    horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+
+    Element element = horizontal.getElement();
+
+    element.setId("clickableWords_" + label);
+    Style style = element.getStyle();
+    style.setDisplay(Style.Display.INLINE_BLOCK);
+    style.setMarginBottom(-8, Style.Unit.PX);
 
     List<String> tokens = new ArrayList<>();
     boolean flLine = label.contains(SAY) || (isJapanese && label.contains(TRANSLITERATION));
@@ -556,7 +563,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @param instance
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
-     ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
+    ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
       super(exercise.getForeignLanguage(), exercise.getTransliteration(), service, controller, scorePanel, REFERENCE,
           exercise.getID(), exercise, instance, Result.AUDIO_TYPE_PRACTICE);
       this.index = 1;

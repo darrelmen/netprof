@@ -172,7 +172,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
       show.addStyleName("floatRight");
       show.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-      show.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+      //show.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
       show.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
 
       row.add(show);

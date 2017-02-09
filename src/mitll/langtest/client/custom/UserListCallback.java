@@ -77,7 +77,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   private final boolean showIsPublic;
   private final String optionalExercise;
 
-  boolean DEBUG = true;
+  private boolean DEBUG = false;
 
   /**
    * @param contentPanel

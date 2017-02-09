@@ -210,10 +210,19 @@ public class Analysis extends DAO {
     return bestForQuery;
   }
 
+  /**
+   * @see #getUserInfo
+   * @return
+   */
   private String getPerfSQL() {
     return getPerfSQL(0, false);
   }
 
+  /**
+   * @see #getPerformanceForUser(long, int)
+   * @param id
+   * @return
+   */
   private String getPerfSQL(long id) {
     return getPerfSQL(id, true);
   }
@@ -233,6 +242,9 @@ public class Analysis extends DAO {
         " FROM " + ResultDAO.RESULTS +
         " where " + useridClause +
         ResultDAO.PRON_SCORE + ">0" + // discard when they got it wrong in avp
+        " AND " + ResultDAO.AUDIO_TYPE +"<>'context=regular'"+
+        " AND " + ResultDAO.AUDIO_TYPE +"<>'regular'"+
+        " AND " + ResultDAO.AUDIO_TYPE +"<>'slow'"+
         " order by " + Database.EXID + ", " + Database.TIME;
   }
 

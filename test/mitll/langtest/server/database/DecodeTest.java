@@ -29,7 +29,7 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testFrench() {
     DatabaseImpl<CommonExercise> russian = getDatabase("french");
-    CommonExercise exercise = russian.getExercise("2127");
+    CommonExercise exercise = russian.getExercise("1540");
     //String context = exercise.getContext();
 
     russian.getSectionHelper().report();
@@ -149,6 +149,8 @@ public class DecodeTest extends BaseTest {
 
     logger.info("got\n" + exercise);
     logger.info("got\n" + db.getCustomOrPredefExercise("1826"));
+
+
   }
 
   @Test
@@ -187,7 +189,7 @@ public class DecodeTest extends BaseTest {
     DatabaseImpl msa = getDatabase("msa");
     //JSONObject war = msa.doReport(new PathHelper("war"));
     AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), msa.getServerProps(), msa, null);
-    audioFileHelper.checkLTSOnForeignPhrase("test");
+    audioFileHelper.checkLTSOnForeignPhrase("test", "");
     // logger.info("json:\n"+war);
   }
 
@@ -313,11 +315,7 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testSorani() {
     DatabaseImpl database = getDatabase("sorani");
-<<<<<<< HEAD
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
-=======
     //  AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
->>>>>>> 6dda7ca4109a0862416d6ad0d7749b71e502486f
     Collection exercises = database.getExercises();
     logger.info("Got " + exercises.size());
     if (exercises.isEmpty()) {
@@ -347,8 +345,6 @@ public class DecodeTest extends BaseTest {
   public void testSpanishProgress() {
     doProgressReport("spanish");
   }
-<<<<<<< HEAD
-=======
 
   @Test
   public void testSudaneseProgress() {
@@ -380,6 +376,59 @@ public class DecodeTest extends BaseTest {
     logger.info("ex " + exercise.getAudioAttributes());
   }
 
+  @Test
+  public void testJapaneseProgress() {
+    DatabaseImpl database = getDatabase("japanese");
+    database.getSectionHelper().report();
+
+    /*
+    doReport(database);
+    database.getExerciseIDToRefAudio();
+    CommonExercise exercise = database.getExercise("1093");
+    database.attachAudio(exercise);
+    logger.info("ex " +exercise);
+    logger.info("ex " +exercise.getAudioAttributes());
+  */
+  }
+
+
+  @Test
+  public void testPashto1() {
+    DatabaseImpl database = getDatabaseWithConfig("pashto","pashtoQuizlet1.properties");
+    database.getSectionHelper().report();
+  }
+
+  @Test
+  public void testGerman() {
+    DatabaseImpl database = getDatabase("german");
+    database.getSectionHelper().report();
+  }
+
+  @Test
+  public void testRussianReport() {
+    DatabaseImpl database = getDatabase("russian");
+    database.getSectionHelper().report();
+
+    database.doReport(database.getServerProps(), "russian", null, new PathHelper("war"));
+
+  }
+
+  @Test
+  public void testKoreanScoring() {
+    DatabaseImpl database = getDatabase("korean");
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+    String ic = audioFileHelper.getPhonesFor("IC");
+    logger.info("got " + ic);
+    boolean dude = audioFileHelper.checkLTSOnForeignPhrase("dude", "");
+    logger.info("for " + dude + " got " + dude);
+    String korean = "장모님";
+
+    logger.info("for " + korean + " got " + audioFileHelper.checkLTSOnForeignPhrase(korean, ""));
+    logger.info("for " + korean + " got " + audioFileHelper.checkLTSOnForeignPhrase("장모", ""));
+    logger.info("for " + korean + " got " + audioFileHelper.checkLTSOnForeignPhrase("장", ""));
+    logger.info("for " + korean + " got " + audioFileHelper.checkLTSOnForeignPhrase("", ""));
+  }
+
   private void doProgressReport(String config) {
     doProgressReport(config, "quizlet.properties");
   }
@@ -389,7 +438,7 @@ public class DecodeTest extends BaseTest {
   }
 
   private void doReport(DatabaseImpl database) {
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+//    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
     Collection exercises = database.getExercises();
     logger.info("Got " + exercises.size());
     if (exercises.isEmpty()) {

@@ -56,10 +56,9 @@ import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -91,6 +90,7 @@ public class EditItem {
 
   private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   private final String instanceName;
+  boolean DEBUG = true;
 
   /**
    * @param service
@@ -203,6 +203,7 @@ public class EditItem {
             boolean addNewItem = includeAddItem;
 
             for (final CommonShell es : result) {
+            //  logger.info("rememberExercises " + es.getID() + " " + es.getEnglish() + " " + es.getForeignLanguage());
               addExercise(es);
               if (includeAddItem && es.getID().equals(NEW_EXERCISE_ID)) {
                 addNewItem = false;
@@ -278,11 +279,37 @@ public class EditItem {
   private void rememberAndLoadFirst(final UserList<CommonShell> ul, PagingExerciseList<CommonShell, CommonExercise> npfExerciseList) {
     npfExerciseList.setUserListID(ul.getUniqueID());
     List<CommonShell> userExercises = new ArrayList<>();
-    Collection<CommonShell> exercises = ul.getExercises();
+    List<CommonShell> exercises = ul.getExercises();
     for (CommonShell e : exercises) {
       userExercises.add(e);  // TODO something better here
     }
+
+    //  logger.info("rememberAndLoadFirst sort " + ul.getName() + " with " +exercises.size());
+    sortList(userExercises);
+
     npfExerciseList.rememberAndLoadFirst(userExercises);
+  }
+
+  private void sortList(List<CommonShell> copy) {
+    boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
+    ExerciseComparator exerciseComparator = new ExerciseComparator(Collections.emptySet());
+
+//    for (CommonShell es:copy) {
+//      logger.info("sortList before " +es.getID() + " " + es.getEnglish() + " "+es.getForeignLanguage());
+//    }
+
+    Collections.sort(copy, new Comparator<CommonShell>() {
+      @Override
+      public int compare(CommonShell o1, CommonShell o2) {
+        if (o1.getID().equals(NEW_EXERCISE_ID)) return +1;
+        else if (o2.getID().equals(NEW_EXERCISE_ID)) return -1;
+        else return exerciseComparator.simpleCompare(o1, o2, false, isEnglish);
+      }
+    });
+
+//    for (CommonShell es:copy) {
+//      logger.info("sortList after " +es.getID() + " " + es.getEnglish() + " "+es.getForeignLanguage());
+//    }
   }
 
   private UserExercise newExercise;
@@ -341,7 +368,8 @@ public class EditItem {
                                  Panel right,
                                  UserList<CommonShell> ul,
                                  ListInterface<CommonShell> pagingContainer,
-                                 boolean doNewExercise, boolean setFields) {
+                                 boolean doNewExercise,
+                                 boolean setFields) {
     NewUserExercise editableExercise = getAddOrEditPanel(newExercise, itemMarker, originalList, doNewExercise);
     right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
     if (setFields) editableExercise.setFields(newExercise);

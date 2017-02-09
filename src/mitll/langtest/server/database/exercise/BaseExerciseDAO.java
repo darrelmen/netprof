@@ -59,6 +59,7 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
   private static final String CONTAINS_SEMI = "contains semicolon - should this item be split?";
   private static final String ENGLISH = "english";
   private static final String MISSING_ENGLISH = "missing english";
+  private static final int LOG_MISSING_SKIP_LIMIT = 10;
 
   private final Map<String, CommonExercise> idToExercise = new HashMap<>();
   protected final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
@@ -309,7 +310,9 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     SortedSet<String> staleOverrides = new TreeSet<String>();
     for (CommonExercise userExercise : overrides) {
       String overrideID = userExercise.getID();
+//      logger.info("overrideID : "+overrideID);
       if (removes.contains(overrideID)) {
+        logger.info("addOverlays skipping remove "+overrideID);
         removedSoSkipped++;
       } else {
         if (isKnownExercise(overrideID)) {
@@ -324,18 +327,17 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
             Map<String, String> unitToValue = exercise.getUnitToValue();
             userExercise.getCombinedMutableUserExercise().setUnitToValue(unitToValue);
 
-            logger.debug("addOverlays refresh exercise for " + userExercise.getID() + " '" + userExercise.getForeignLanguage() +
-                "' vs '" + exercise.getForeignLanguage() +
+            logger.debug("addOverlays refresh exercise for\t" + userExercise.getID() + "\t'" + userExercise.getForeignLanguage() +
+                "' vs\t'" + exercise.getForeignLanguage() +
                 "'");
+
             sectionHelper.refreshExercise(userExercise);
             addOverlay(userExercise);
 
-//          Collection<CommonExercise> exercisesForSimpleSelectionState = sectionHelper.getExercisesForSimpleSelectionState(unitToValue);
-//          for (CommonExercise exercise:exercisesForSimpleSelectionState) if (exercise.getID().equals(overrideID)) logger.warn("found " + exercise);
             override++;
           } else {
             skippedOverride++;
-            if (skippedOverride < 5)
+            if (skippedOverride < LOG_MISSING_SKIP_LIMIT)
               logger.info("for " + overrideID + " skipping override, since predef exercise is newer " + new Date(predefUpdateTime) + " > " + new Date(userExUpdateTime));
           }
         } else {
@@ -372,7 +374,7 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     if (currentExercise == null) {
       logger.error("addOverlay : huh? can't find " + userExercise);
     } else {
-      logger.debug("addOverlay at " + userExercise.getID() + " found " + currentExercise);
+//      logger.debug("addOverlay at " + userExercise.getID() + " found " + currentExercise);
       synchronized (this) {
         int i = exercises.indexOf(currentExercise);
         if (i == -1) {
@@ -381,7 +383,7 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
           exercises.set(i, userExercise);
         }
         idToExercise.put(idOfNewExercise, userExercise);
-        logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
+  //      logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
     return currentExercise;

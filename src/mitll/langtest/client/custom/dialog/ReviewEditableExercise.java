@@ -37,14 +37,15 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.media.client.Audio;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -121,12 +122,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
 
-  private FormField context;
-  private FormField contextTrans;
-  private final HTML contextAnno = new HTML();
-  private final HTML contextTransAnno = new HTML();
-  private String originalContext = "";
-  private String originalContextTrans = "";
   private List<RememberTabAndContent> tabs;
 
   /**
@@ -160,99 +155,19 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     this.exerciseList = exerciseList;
   }
 
-  /**
-   * TODO should move this stuff into a class that handles these basic operations
-   *
-   * @param newUserExercise
-   * @param <S>
-   */
-  @Override
-  public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
-    super.setFields(newUserExercise);
-
-    addContext(newUserExercise);
-    addContextTranslation(newUserExercise);
-  }
-
-  private <S extends CommonShell & AudioRefExercise & AnnotationExercise> void addContext(S newUserExercise) {
-    final TextBoxBase box = context.box;
-    context.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
-    context.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-    addBlurHandler(ul.getID(),context);
-
-    box.setText(originalContext = newUserExercise.getContext());
-    box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        gotBlur();
-        logBlur("ContextBox = ", box);
-      }
-    });
-
-    useAnnotation(newUserExercise, "context", contextAnno);
-  }
-
-  private void logBlur(String prefix, TextBoxBase box) {
-    try {
-      long uniqueID = originalList.getUniqueID();
-      controller.logEvent(box, "TextBox", "UserList_" + uniqueID, prefix + box.getValue());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  private <S extends CommonShell & AudioRefExercise & AnnotationExercise> void addContextTranslation(S newUserExercise) {
-    TextBoxBase box1 = contextTrans.box;
-
-    contextTrans.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-    addBlurHandler(ul.getID(),contextTrans);
-
-    box1.setText(originalContextTrans = newUserExercise.getContextTranslation());
-    box1.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        gotBlur();
-        logBlur("ContextTransBox = ", box1);
-      }
-    });
-
-    useAnnotation(newUserExercise, "context translation", contextTransAnno);
-  }
-
-  /**
-   * @see #gotBlur(FormField, RecordAudioPanel, ControlGroup, UserList, ListInterface, Panel)
-   * @param mutableExercise
-   */
-  void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
-    super.grabInfoFromFormAndStuffInfoExercise(mutableExercise);
-    mutableExercise.setContext(context.getSafeText());
-    mutableExercise.setContextTranslation(contextTrans.getSafeText());
-  }
-
-  protected void makeOptionalRows(DivWidget upper) {
-    makeContextRow(upper);
-    makeContextTransRow(upper);
-  }
-
-  private void makeContextRow(Panel container) {
+/*
+  protected void makeContextRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
     context = makeBoxAndAnno(row, "Context", "", contextAnno);
   }
 
-  private void makeContextTransRow(Panel container) {
+  protected void makeContextTransRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
     contextTrans = makeBoxAndAnno(row, "Context Translation", "", contextTransAnno);
   }
-
-  @Override
-  protected boolean anyFieldsDirty() {
-    return super.anyFieldsDirty() ||
-        !originalContext.equals(context.getSafeText()) ||
-        !originalContextTrans.equals(contextTrans.getSafeText());
-  }
-
+*/
 
   private int currentTab = 0;
 
@@ -743,7 +658,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
-    super.afterValidForeignPhrase(ul,exerciseList,toAddTo,onClick);
+    super.afterValidForeignPhrase(ul, exerciseList, toAddTo, onClick);
     LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
   }
 
@@ -863,13 +778,17 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
    */
   @Override
-  protected void audioPosted() {  reallyChange(listInterface, false, getKeepAudio());  }
+  protected void audioPosted() {
+    reallyChange(listInterface, false, getKeepAudio());
+  }
 
   /**
-   * @see #postChangeIfDirty
    * @return
+   * @see #postChangeIfDirty
    */
-  protected boolean getKeepAudio() { return keepAudio.getValue();  }
+  protected boolean getKeepAudio() {
+    return keepAudio.getValue();
+  }
 
   /**
    * @see #isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
@@ -941,7 +860,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
     }
     if (!originalList.remove(newUserExercise)) {
-   //   logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
+      //   logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
     }
 
     service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
@@ -1047,8 +966,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
               if (comment != null) {
                 comment.setVisible(false);
               }
-          //    logger.info("delete button clicked - fire changed!");
-             LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+              //    logger.info("delete button clicked - fire changed!");
+              LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
               //     reloadLearnList();
             }
           });

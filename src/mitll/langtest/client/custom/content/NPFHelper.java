@@ -48,12 +48,17 @@ import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.sorter.ExerciseComparator;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -98,7 +103,7 @@ public class NPFHelper implements RequiresResize {
     this.controller = controller;
     this.showQC = showQC;
     this.showFirstNotCompleted = showFirstNotCompleted;
- //   logger.info("this " + this.getClass() + " shows first completed = " + showFirstNotCompleted);
+    //   logger.info("this " + this.getClass() + " shows first completed = " + showFirstNotCompleted);
   }
 
   /**
@@ -132,10 +137,10 @@ public class NPFHelper implements RequiresResize {
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-     // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+      //  logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
       addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
-     // logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+      // logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
       rememberAndLoadFirst(ul, toSelect);
     }
   }
@@ -225,7 +230,7 @@ public class NPFHelper implements RequiresResize {
    * @see ##getRightSideContent
    */
   PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName, boolean showFirstNotCompleted) {
-  //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
+    //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList = makeExerciseList(right, instanceName, showFirstNotCompleted);
     setFactory(exerciseList, instanceName, showQC);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -250,12 +255,27 @@ public class NPFHelper implements RequiresResize {
 
     List<CommonShell> copy = new ArrayList<>();
     for (CommonShell ex : ul.getExercises()) {
+      // logger.info("copy from ul "+ ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage());
       copy.add(ex);
     }
-    String id = toSelect == null ? "": toSelect.getID();
-    npfExerciseList.rememberAndLoadFirst(copy,"", "", id);
+
+    sortList(copy);
+
+    String id = toSelect == null ? "" : toSelect.getID();
+    npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
+  }
+
+  private void sortList(List<CommonShell> copy) {
+    boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
+    ExerciseComparator exerciseComparator = new ExerciseComparator(Collections.emptySet());
+    Collections.sort(copy, new Comparator<CommonShell>() {
+      @Override
+      public int compare(CommonShell o1, CommonShell o2) {
+        return exerciseComparator.simpleCompare(o1, o2, false, isEnglish);
+      }
+    });
   }
 
   /**

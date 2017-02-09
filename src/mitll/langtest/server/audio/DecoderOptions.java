@@ -13,7 +13,7 @@ public class DecoderOptions {
   private boolean usePhoneToDisplay = false;
 
   public DecoderOptions() {}
-  public DecoderOptions(boolean isRefRecording,
+/*  public DecoderOptions(boolean isRefRecording,
                         boolean recordInResults, boolean doFlashcard, boolean canUseCache, boolean allowAlternates, boolean useOldSchool,
                         boolean usePhoneToDisplay) {
     this.isRefRecording = isRefRecording;
@@ -23,7 +23,7 @@ public class DecoderOptions {
     this.allowAlternates = allowAlternates;
     this.useOldSchool = useOldSchool;
     this.usePhoneToDisplay = usePhoneToDisplay;
-  }
+  }*/
 
   public boolean isRefRecording() {
     return isRefRecording;

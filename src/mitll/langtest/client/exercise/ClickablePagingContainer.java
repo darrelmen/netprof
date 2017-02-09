@@ -36,6 +36,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -140,8 +141,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
     table.setSelectionModel(selectionModel);
   }
 
-  protected void gotClickOnItem(final T e) {
-  }
+  protected void gotClickOnItem(final T e) {}
 
   @Override
   public void clear() {
@@ -155,11 +155,12 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
 
   /**
    * @param exercise
-   * @see ListInterface#addExercise(Shell)
+   * @see ListInterface#addExercise
    */
   public void addExercise(T exercise) {
     idToExercise.put(exercise.getID(), exercise);
     getList().add(exercise);
+  //  logger.info("addExercise adding " + exercise);
   }
 
   /**
@@ -168,7 +169,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
    * @see mitll.langtest.client.list.PagingExerciseList#addExerciseAfter
    */
   public void addExerciseAfter(T afterThisOne, T exercise) {
-    //logger.info("addExercise adding " + exercise);
+   // logger.info("addExerciseAfter adding " + exercise);
     List<T> list = getList();
     int before = list.size();
     String id = exercise.getID();
@@ -180,6 +181,10 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
     if (before + 1 != after) logger.warning("didn't add " + exercise.getID());
   }
 
+  /**
+   * @see PagingExerciseList#getKeys
+   * @return
+   */
   public Set<String> getKeys() {
     return idToExercise.keySet();
   }

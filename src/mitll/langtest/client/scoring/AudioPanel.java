@@ -72,8 +72,8 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
-  public static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
   private final Logger logger = Logger.getLogger("AudioPanel");
+  public static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
 
   private static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
 
@@ -216,7 +216,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     divWithRelativePosition.add(imageContainer);
     imageContainer.getElement().setId("AudioPanel_imageContainer");
     int heightForTranscripts = rightMargin > 0 ? 2 * TRANSCRIPT_IMAGE_HEIGHT : 0;
-
     float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts;
     imageContainer.setHeight(totalHeight + "px");
     //  imageContainer.setWidth(getImageWidth()+"px");

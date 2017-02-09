@@ -69,6 +69,7 @@ public class ExerciseListRequest implements Serializable {
 
   /**
    * TODO something less error prone
+   *
    * @param other
    * @return
    */
@@ -198,10 +199,11 @@ public class ExerciseListRequest implements Serializable {
   public String toString() {
     return
         "prefix                  '" + prefix + "'" +
-            "\n\tselection           " + getTypeToSelection() +
+            (getTypeToSelection().isEmpty() ? "" : "\n\tselection           " + getTypeToSelection()) +
             "\n\tuser list id        " + userListID +
             "\n\tuser                " + userID +
             "\n\trole                " + role +
+            "\n\tincorrect first     " + incorrectFirstOrder +
             "\n\tonly recorded by me " + onlyUnrecordedByMe +
             "\n\tonly examples       " + onlyExamples +
             "\n\tonly with audio     " + onlyWithAudioAnno +

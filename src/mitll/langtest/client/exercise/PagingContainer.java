@@ -51,6 +51,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.custom.dialog.EditItem.NEW_EXERCISE_ID;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -72,7 +74,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   private static final String ENGLISH = "English";
   private final boolean english;
   private final boolean showExerciseState;
-  private final String instance;
+  //  private final String instance;
   private int FLLength = MAX_LENGTH_ID;
 
   /**
@@ -96,10 +98,13 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
     boolean japanese = controller.getLanguage().equalsIgnoreCase("Japanese");
     if (japanese) FLLength = JAPANESE_LENGTH;
     this.showExerciseState = showExerciseState;
-    this.instance = instance;
-   // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
+    //  this.instance = instance;
+    // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
   }
 
+  /**
+   * english column sorted by default
+   */
   protected void addColumnsToTable() {
     Column<T, SafeHtml> englishCol = getEnglishColumn();
     englishCol.setSortable(true);
@@ -145,9 +150,15 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                String id1 = o1.getForeignLanguage();
-                String id2 = o2.getForeignLanguage();
-                return id1.toLowerCase().compareTo(id2.toLowerCase());
+
+                if (o1.getID().equals(NEW_EXERCISE_ID)) return +1;
+                else if (o2.getID().equals(NEW_EXERCISE_ID)) return -1;
+                else {
+
+                  String id1 = o1.getForeignLanguage();
+                  String id2 = o2.getForeignLanguage();
+                  return id1.toLowerCase().compareTo(id2.toLowerCase());
+                }
               }
             }
             return -1;
@@ -158,6 +169,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
   private ColumnSortEvent.ListHandler<T> getEnglishSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
+    final boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
     columnSortHandler.setComparator(englishCol,
         new Comparator<T>() {
           public int compare(T o1, T o2) {
@@ -169,7 +181,9 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return sorter.simpleCompare(o1, o2, isRecorder);
+                if (o1.getID().equals(NEW_EXERCISE_ID)) return +1;
+                else if (o2.getID().equals(NEW_EXERCISE_ID)) return -1;
+                else return sorter.simpleCompare(o1, o2, isRecorder, isEnglish);
               }
             }
             return -1;
@@ -181,7 +195,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
   /**
    * @return
-   * @see #addColumnsToTable()
+   * @see #addColumnsToTable
    */
   private Column<T, SafeHtml> getEnglishColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {
@@ -206,7 +220,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
             STATE state = shell.getState();
 
             boolean isDefect = state == STATE.DEFECT;
-            boolean isFixed  = state == STATE.FIXED;
+            boolean isFixed = state == STATE.FIXED;
             boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
             boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
 
@@ -304,11 +318,11 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    */
   private String getFLText(CommonShell shell) {
     String toShow = shell.getForeignLanguage();
-    if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
+    String english = shell.getEnglish();
+    if (this.english && !english.equals(EditItem.NEW_ITEM)) {
       String meaning = shell.getMeaning();
-      toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
+      toShow = meaning.isEmpty() ? english : meaning;
     }
-    if (toShow.isEmpty()) toShow = shell.getID();
     return toShow;
   }
 }

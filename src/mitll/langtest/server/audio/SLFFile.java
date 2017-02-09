@@ -39,6 +39,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -49,25 +50,28 @@ import java.util.List;
  * See <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node288_ct.html">SLF File Documentation</a>
  */
 public class SLFFile {
-  //private static final Logger logger = Logger.getLogger(SLFFile.class);
+  private static final Logger logger = Logger.getLogger("SLFFile");
 
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
   private static final String ENCODING = "UTF8";
 
- // private static final String LINK_WEIGHT = "-1.00";
-  public static final float EQUAL_LINK_CONSTANT = -1.00f;
- // public static final float UNKNOWN_MODEL_BIAS_CONSTANT = -1.20f;
+  // private static final String LINK_WEIGHT = "-1.00";
+  private static final float EQUAL_LINK_CONSTANT = -1.00f;
+  // public static final float UNKNOWN_MODEL_BIAS_CONSTANT = -1.20f;
   private static final String UNKNOWN_MODEL_BIAS = "-1.20";
+  private static final String STANDARD_WEIGHT = "-1.00";
+  private static final String SIL = "SIL";
 
   /**
    * Unknown Model Bias Weight balances the likelihood between matching one of the decode words or the unknown model.
-   *
+   * <p>
    * Writes a file into the temp directory, with name {@link mitll.langtest.server.scoring.ASRScoring#SMALL_LM_SLF}
-   * @see mitll.langtest.server.audio.AudioFileHelper#createSLFFile
+   *
    * @param lmSentences
    * @param tmpDir
    * @param unknownModelBiasWeight - a property you can set in the property file
    * @return
+   * @see mitll.langtest.server.scoring.ASRScoring#calcScoreForAudio
    */
   public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
     String slfFile = getSLFPath(tmpDir);
@@ -87,7 +91,7 @@ public class SLFFile {
       int newNodes = 2;
 
       StringBuilder linksBuf = new StringBuilder();
-      Collection<String> sentencesToUse = new ArrayList<String>(lmSentences);
+      Collection<String> sentencesToUse = new ArrayList<>(lmSentences);
       sentencesToUse.add(UNKNOWN_MODEL);
 
       SmallVocabDecoder svd = new SmallVocabDecoder();
@@ -99,14 +103,14 @@ public class SLFFile {
         for (String token : tokens) {
           int next = newNodes++;
           linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
-            " l=" +
-            (token.equals(UNKNOWN_MODEL) ? unknownModelBias : linkWeight) +
-            "\n");
+              " l=" +
+              (token.equals(UNKNOWN_MODEL) ? unknownModelBias : linkWeight) +
+              "\n");
           nodesBuf.append("I=" +
-            next +
-            " W=" +
-            token +
-            "\n");
+              next +
+              " W=" +
+              token +
+              "\n");
 
           start = next;
         }
@@ -127,72 +131,125 @@ public class SLFFile {
     return slfFile;
   }
 
-  public String getSLFPath(String tmpDir) {
+  private String getSLFPath(String tmpDir) {
     return tmpDir + File.separator + ASRScoring.SMALL_LM_SLF;
   }
 
   /**
-   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra(String, String, Collection, String, boolean, int)
+   * creates string LM for hydra
+   *
    * @param lmSentences
+   * @param addSil
+   * @param includeUnk
+   * @param includeSelfSILLink
    * @return
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
    */
-  // creates string LM for hydra
-  public String[] createSimpleSLFFile(Collection<String> lmSentences) {
-	  List<String> slf = new ArrayList<String>();
-	  slf.add("VERSION=1.0;");
+  public String[] createSimpleSLFFile(Collection<String> lmSentences, boolean addSil, boolean includeUnk, boolean includeSelfSILLink) {
+    List<String> slf = new ArrayList<>();
+    slf.add("VERSION=1.0;");
 
-	  int linkCount = 0;
-	  StringBuilder nodesBuf = new StringBuilder();
-	  nodesBuf.append("I=0 W=<s>;");
-	  nodesBuf.append("I=1 W=</s>;");
-	  int newNodes = 2;
-	  StringBuilder linksBuf = new StringBuilder();
-	  Collection<String> sentencesToUse = new ArrayList<String>(lmSentences);
-	  sentencesToUse.add(UNKNOWN_MODEL);
-	  String finalSentence = "";
+    int linkCount = 0;
+    StringBuilder nodesBuf = new StringBuilder();
+    nodesBuf.append("I=0 W=<s>;");
+    int finalNodeIndex = 1;
+    nodesBuf.append("I=" + finalNodeIndex + " W=</s>;");
+    int newNodes = 2;
+    StringBuilder linksBuf = new StringBuilder();
 
-	  SmallVocabDecoder svd = new SmallVocabDecoder();
-	  int ctr = 0;
-	  for (String sentence : sentencesToUse) {
-		  Collection<String> tokens = svd.getTokens(sentence);
-		  int start = 0;
+    // include the UNKNOWNMODEL
+    Collection<String> sentencesToUse = new ArrayList<>(lmSentences);
+    if (includeUnk) {
+      sentencesToUse.add(UNKNOWN_MODEL);
+    }
 
-		  for (String token : tokens) {
-			  String cleanedToken = cleanToken(token);
+    String finalSentence = "";
+
+    SmallVocabDecoder svd = new SmallVocabDecoder();
+    int ctr = 0;
+    for (String sentence : sentencesToUse) {
+      Collection<String> tokens = svd.getTokens(sentence);
+
+      int prevNode = 0;  // points to initial node
+      int currentSil = 0;
+      int c = 0;
+
+      if (includeSelfSILLink) {
+        linksBuf.append(getLink(linkCount++, prevNode, prevNode, STANDARD_WEIGHT, false));
+      }
+
+//      logger.info("tokens " + tokens);
+      for (String token : tokens) {
+        boolean onLast = ++c == tokens.size();
+        //      logger.info("onLast " + onLast + " c " + c + " " + token + " tokens " + tokens.size());
+        String cleanedToken = cleanToken(token);
 
         if (!cleanedToken.isEmpty()) {
-          int next = newNodes++;
-          linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
-              " l=" +
-              (cleanedToken.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") + ";");
-          nodesBuf.append("I=" +
-              next +
-              " W=" +
-              (cleanedToken.toUpperCase().equals(UNKNOWN_MODEL) ? cleanedToken.toUpperCase() : cleanedToken) +
-              ";");
-          if (!cleanedToken.toUpperCase().equals(UNKNOWN_MODEL))
+          int currentNode = newNodes++;
+          boolean isUNK = cleanedToken.toUpperCase().equals(UNKNOWN_MODEL);
+          String linkWeight = isUNK ? UNKNOWN_MODEL_BIAS : STANDARD_WEIGHT;
+
+          linksBuf.append(getLink(linkCount++, prevNode, currentNode, linkWeight, false));
+
+          String wordtoken = isUNK ? cleanedToken.toUpperCase() : cleanedToken;
+          nodesBuf.append(getNode(currentNode, wordtoken));
+
+          if (addSil && !isUNK) {
+            if (c > 1) {
+              linksBuf.append(getLink(linkCount++, currentSil, currentNode, linkWeight, false));
+            }
+
+            if (!onLast) {
+              currentSil = newNodes++;
+              nodesBuf.append(getNode(currentSil, SIL));
+              linksBuf.append(getLink(linkCount++, currentNode, currentSil, linkWeight, false));
+            }
+          }
+          if (!isUNK) {
             finalSentence += cleanedToken + ";";
+          }
 
-          start = next;
+          prevNode = currentNode;
         }
-		  }
-		  linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=1" + " l=-1.00" + (ctr == sentencesToUse.size() - 1 ? "" : ";"));
-		  ctr += 1;
-	  }
-	  slf.add("N=" + newNodes + " L=" + linkCount + ";");
-	  slf.add(nodesBuf.toString());
-	  slf.add(linksBuf.toString());
+      }
 
-	  StringBuilder slfBuf = new StringBuilder();
-	  for(int i = 0; i < slf.size(); i++) {
-		  slfBuf.append(slf.get(i));
-		  //if(i != (slf.size() - 1))
-		//	  slfBuf.append(";");
-	  }
-	  return new String[]{slfBuf.toString(), finalSentence};
+      //int linkID = linkCount++;
+      // String finalLinkWeight = "-1.00";
+      boolean isLastLink = ctr == sentencesToUse.size() - 1;
+      //linksBuf.append("J=" + linkID + " S=" + prevNode + " E=" + finalNodeIndex + " l=" + finalLinkWeight + (isLastLink ? "" : ";"));
+      linksBuf.append(getLink(linkCount++, prevNode, finalNodeIndex, STANDARD_WEIGHT, isLastLink && !includeSelfSILLink));
+
+      if (includeSelfSILLink) {
+        linksBuf.append(getLink(linkCount++, finalNodeIndex, finalNodeIndex, STANDARD_WEIGHT, isLastLink));
+      }
+      ctr += 1;
+    }
+    slf.add(getNodeAndLinkCount(newNodes, linkCount));
+    slf.add(nodesBuf.toString());
+    slf.add(linksBuf.toString());
+
+    StringBuilder slfBuf = new StringBuilder();
+    for (String aSlf : slf) {
+      slfBuf.append(aSlf);
+      //if(i != (slf.size() - 1))
+      //	  slfBuf.append(";");
+    }
+    return new String[]{slfBuf.toString(), finalSentence};
+  }
+
+  private String getNodeAndLinkCount(int newNodes, int linkCount) {
+    return "N=" + newNodes + " L=" + linkCount + ";";
+  }
+
+  private String getLink(int linkID, int prevNode, int currentNode, String linkWeight, boolean isLastLink) {
+    return "J=" + linkID + " S=" + prevNode + " E=" + currentNode + " l=" + linkWeight + (isLastLink ? "" : ";");
+  }
+
+  private String getNode(int currentNode, String wordtoken) {
+    return "I=" + currentNode + " W=" + wordtoken + ";";
   }
 
   public String cleanToken(String token) {
-    return token.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
+    return token.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}", "").toLowerCase();
   }
 }

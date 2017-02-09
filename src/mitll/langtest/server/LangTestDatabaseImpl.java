@@ -319,10 +319,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         } else {
           commonExercises = new ArrayList<>(exercises);
 
-  /*        logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
-              "sorting   " + commonExercises.size() +
-              " for request " + request);
-  */
+          logger.debug("getExerciseIds : (" + getLanguage() + ") " +
+              "sorting" +
+              "\n\tlist of size " + commonExercises.size() +
+              "\n\tfor request  " + request);
+
           sortExercises(role, commonExercises);
         }
 
@@ -364,7 +365,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private <T extends CommonShell> void sortExercises(String role, List<T> commonExercises) {
-    new ExerciseSorter(db.getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
+    new ExerciseSorter(db.getTypeOrder()).getSortedByUnitThenAlpha(commonExercises,
+        role.equals(Result.AUDIO_TYPE_RECORDER), getLanguage().equalsIgnoreCase("english"));
   }
 
   private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises, boolean predefExercises) {
@@ -734,8 +736,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       firstExercise = db.getCustomOrPredefExercise(exercises.iterator().next().getID());  // allow custom items to mask out non-custom items
     }
 
-//    CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
-
     int reqID = request.getReqID();
     int userID = request.getUserID();
     String role = request.getRole();
@@ -769,9 +769,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // TODO : do this the right way vis-a-vis type safe collection...
 
     List<T> exerciseShells1 = (List<T>) exerciseShells;
-
     ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(reqID, exerciseShells1, firstExercise);
-    //logger.debug("returning " + exerciseListWrapper);
     return exerciseListWrapper;
   }
 

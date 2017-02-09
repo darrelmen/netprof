@@ -439,7 +439,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public Collection<T> rememberExercises(Collection<T> result) {
     inOrderResult = result;
     if (doShuffle) {
-      // logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
+      logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
       ArrayList<T> ts = new ArrayList<>(result);
       result = ts;
       Shuffler.shuffle(ts);
