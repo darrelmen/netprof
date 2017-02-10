@@ -276,14 +276,18 @@ public class UserPassLogin extends UserDialog {
   }
 
   private Panel getLinksToSites() {
-    Panel hp = new HorizontalPanel();
+    //Panel hp = new HorizontalPanel();
+    DivWidget hp = new DivWidget();
     hp.getElement().setId("UserPassLogin_linksToSites");
-    hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    hp.getElement().getStyle().setMarginTop(40, Style.Unit.PX);
+    hp.getElement().getStyle().setClear(Style.Clear.RIGHT);
 
     String sitePrefix = props.getSitePrefix();
     for (String site : props.getSites()) {
       Anchor w = new Anchor(site, sitePrefix + site.replaceAll("Mandarin", "CM"));
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+      w.addStyleName("floatLeftList");
+
       hp.add(w);
     }
     return hp;
