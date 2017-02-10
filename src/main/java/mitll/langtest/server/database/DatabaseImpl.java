@@ -1245,7 +1245,6 @@ public class DatabaseImpl implements Database {
       logger.warn("populateIDToRefAudio huh? no ref audio on " + all.size() + " exercises???");
     }
   }*/
-
   public IAnswerDAO getAnswerDAO() {
     return answerDAO;
   }
@@ -1390,21 +1389,25 @@ public class DatabaseImpl implements Database {
     return toRet;
   }
 
+/*
   @Nullable
   private String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, int projid) {
     //CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projid, exid);
     Project project = getProject(projid);
     return getNativeAudio(userToGender, userid, exid, project);
   }
+*/
 
   @Nullable
   public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project) {
     CommonExercise exercise = project.getExercise(exid);
-    int projid = project.getID();
 
     if (exercise == null) {
-      if (warns++ < 50)
+      if (warns++ < 50) {
+        int projid = project.getID();
         logger.info("getCustomOrPredefExercise couldn't find exercise " + exid + " in project #" + projid + " looking in user exercise table");
+      }
+
       exercise = getUserExerciseByExID(exid);
     }
 
@@ -1430,6 +1433,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * TODO : are we going to support this?
+   *
    * @return
    */
   private AddRemoveDAO getAddRemoveDAO() {

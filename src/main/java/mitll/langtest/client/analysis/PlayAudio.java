@@ -71,11 +71,13 @@ class PlayAudio {
   }
 
   /**
-   * @see AnalysisPlot#getSeriesClickEventHandler
    * @param id
    * @param userid
+   * @see AnalysisPlot#getSeriesClickEventHandler
    */
   void playLast(int id, int userid) {
+    logger.info("playLast playing exercise " + id + " for " + userid);
+
     service.getExercise(id, false, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -84,11 +86,10 @@ class PlayAudio {
       @Override
       public void onSuccess(CommonExercise commonExercise) {
         if (commonExercise == null) {
-          logger.info("playLast no exercise " +id + " for " + userid);
+          logger.info("playLast no exercise " + id + " for " + userid);
           // if the exercise has been deleted...?
           // show popup?
-        }
-        else {
+        } else {
           List<CorrectAndScore> scores = commonExercise.getScores();
           if (scores.isEmpty()) {
             String msg = "playLast no Correct and scores for exercise : " + id + " and user " + userid;
@@ -103,8 +104,7 @@ class PlayAudio {
               public void onSuccess(Void aVoid) {
               }
             });*/
-          }
-          else {
+          } else {
             CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
             String refAudio = commonExercise.getRefAudio();
 
@@ -130,23 +130,23 @@ class PlayAudio {
    * @see #playLast
    */
   private void playLastThenRef(CorrectAndScore correctAndScore, String refAudio) {
-    final String path  = getPath(refAudio);
+    final String path = getPath(refAudio);
     final String path1 = getPath(correctAndScore.getPath());
     soundFeedback.queueSong(path1, new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
         playFeedback.setVisible(true);
-       // logger.info("\t songStarted song " + path1 + " -------  " + System.currentTimeMillis());
+        logger.info("\t songStarted song " + path1 + " -------  " + System.currentTimeMillis());
       }
 
       @Override
       public void songEnded() {
         playFeedback.setVisible(false);
-      //  logger.info("\t songEnded song " + path1 + " -------  " + System.currentTimeMillis());
+        logger.info("\t songEnded song " + path1 + " -------  " + System.currentTimeMillis());
         t = new Timer() {
           @Override
           public void run() {
-         //   logger.info("\t songEnded queue song " + path + " -------  " + System.currentTimeMillis());
+            //   logger.info("\t songEnded queue song " + path + " -------  " + System.currentTimeMillis());
             soundFeedback.queueSong(path, new SoundFeedback.EndListener() {
               @Override
               public void songStarted() {
@@ -171,16 +171,18 @@ class PlayAudio {
       @Override
       public void songStarted() {
         playFeedback.setVisible(true);
-       // logger.info("playUserAudio songStarted song " + path1 + " -------  " + System.currentTimeMillis());
+        logger.info("playUserAudio songStarted song " + path1 + " -------  " + System.currentTimeMillis());
       }
 
       @Override
       public void songEnded() {
-      //  logger.info("playUserAudio songEnded song " + path1 + " -------  " + System.currentTimeMillis());
+        logger.info("playUserAudio songEnded song " + path1 + " -------  " + System.currentTimeMillis());
         playFeedback.setVisible(false);
       }
     });
   }
 
-  private String getPath(String path) { return CompressedAudio.getPath(path);  }
+  private String getPath(String path) {
+    return CompressedAudio.getPath(path);
+  }
 }

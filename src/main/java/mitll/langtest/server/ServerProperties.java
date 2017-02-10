@@ -319,8 +319,11 @@ public class ServerProperties {
   @NotNull
   private Properties readPropertiesFromFile(String configFileFullPath) throws IOException {
     Properties properties = new Properties();
-    FileInputStream inStream = new FileInputStream(configFileFullPath);
-    properties.load(inStream);
+    if (new File(configFileFullPath).exists()) {
+      FileInputStream inStream = new FileInputStream(configFileFullPath);
+      properties.load(inStream);
+      inStream.close();
+    }
     return properties;
   }
 
@@ -877,10 +880,6 @@ public class ServerProperties {
    */
   public void setLocalPostgres() {
     props.setProperty(DB_CONFIG, POSTGRES);
-  }
-
-  public void setHydraPostgres() {
-    props.setProperty(DB_CONFIG, POSTGRES_HYDRA);
   }
 
   public Properties getProps() {

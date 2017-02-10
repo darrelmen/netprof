@@ -411,7 +411,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @see #gotExtremes(AxisSetExtremesEvent)
    */
   private void setVisibility(long start, long end) {
-    //  logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
+    logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);
@@ -721,7 +721,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
       public boolean onSetExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
         if (axisSetExtremesEvent != null) {
           // logger.info("configureChart window " + firstTime + " " + lastTime);
-
           gotExtremes(axisSetExtremesEvent);
         }
         //else {
@@ -753,11 +752,12 @@ public class AnalysisPlot extends TimeSeriesPlot {
       Number min = axisSetExtremesEvent.getMin();
       Number max = axisSetExtremesEvent.getMax();
 
-      //   logger.info("gotExtremes got min " + min + " max " + max);
+      logger.info("gotExtremes got min " + min + " max " + max);
       if (min != null && min.longValue() > 0) {
-        long end = max.longValue();
-        setVisibility(min.longValue(), end);
-        timeChanged(min.longValue(), end);
+        long end   = max.longValue();
+        long start = min.longValue();
+        setVisibility(start, end);
+        timeChanged(start, end);
       } else {
         long end = System.currentTimeMillis();
         setVisibility(end - YEARS, end);

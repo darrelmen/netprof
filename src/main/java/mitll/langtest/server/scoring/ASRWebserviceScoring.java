@@ -105,7 +105,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   private final String ip;
   private final int port;
-  private boolean available;
+  private boolean available = false;
 
   /**
    * @param deployPath
@@ -126,12 +126,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     ip = project.getWebserviceIP();
     port = project.getWebservicePort();
 
-    setAvailable();
-    if (!available) {
-      logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port);
-    } else {
-      logger.info("\n\nASRWebserviceScoring CAN talk to " + ip + ":" + port);
-
+    if (port != -1) {
+      setAvailable();
+      if (!available) {
+        logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port);
+      } else {
+        logger.info("\n\nASRWebserviceScoring CAN talk to " + ip + ":" + port);
+      }
     }
   }
 
