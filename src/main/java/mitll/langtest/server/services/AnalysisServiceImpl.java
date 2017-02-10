@@ -119,8 +119,8 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     if (projectID == -1) return new ArrayList<>();
 
     IAnalysis analysis = db.getAnalysis(projectID);
-    logger.info("getWordScores for user " +id + " project is "+ projectID + " and " + analysis);
     List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, minRecordings);
+    logger.info("getWordScores for user " +id + " project is "+ projectID + " and " + analysis + " yielded " + wordScoresForUser.size());
 //    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getID() + " " + ws.getNativeAudio());
     return wordScoresForUser;
   }

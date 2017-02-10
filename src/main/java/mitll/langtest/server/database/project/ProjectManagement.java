@@ -653,7 +653,7 @@ public class ProjectManagement implements IProjectManagement {
     Map<String, List<SlickProject>> langToProject = new TreeMap<>();
     Collection<SlickProject> all = db.getProjectDAO().getAll();
 
-    logger.info("getNestedProjectInfo : found " + all.size() + " projects");
+   // logger.info("getNestedProjectInfo : found " + all.size() + " projects");
     for (SlickProject project : all) {
       List<SlickProject> slimProjects = langToProject.get(project.language());
       if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());

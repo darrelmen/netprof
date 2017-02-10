@@ -592,8 +592,8 @@ public class User extends MiniUser {
     return "user " +
         "\n\tid     " + getID() +
         "\n\tuserid " + getUserID() +
-        (first.isEmpty() ? "" : "\n\t first " + first) +
-        (last.isEmpty() ? "" : "\n\t last  " + last) +
+        (first.isEmpty() ? "" : "\n\tfirst " + first) +
+        (last.isEmpty() ? "" : "\n\tlast  " + last) +
         "\n\tis a    " + getRealGender() +
         (getAge() < 99 && getAge() > 0 ? "\n\tage     " + getAge() : "") +
         (isAdmin() ? "\n\tadmin   " + isAdmin() : "") +

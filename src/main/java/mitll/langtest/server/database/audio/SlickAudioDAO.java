@@ -138,7 +138,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param language
    * @see #makeSureAudioIsThere
    */
- // @Override
+  // @Override
   private void validateFileExists(int projid, String installPath, String language) {
     long pastTime = doCheckOnStartup ? now : before;
     logger.debug("validateFileExists before " + new Date(pastTime));
@@ -523,20 +523,20 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   public int getDefaultResult() {
-   // logger.info("\n\n\tdefault id is  " + defaultResult);
+    // logger.info("\n\n\tdefault id is  " + defaultResult);
     return defaultResult;
   }
 
   public void setDefaultResult(int defaultResult) {
     this.defaultResult = defaultResult;
-   // logger.info("\n\n\tdefault id is  " + defaultResult);
+    // logger.info("\n\n\tdefault id is  " + defaultResult);
   }
 
   /**
-   * @see
    * @param projectID
    * @param language
    * @param validateAll
+   * @see
    */
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
     boolean foundFiles = didFindAnyAudioFiles(projectID);
@@ -566,27 +566,93 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
+  /**
+   * For now, default to regular speed audio.
+   * maybe somehow later choose slow?
+   * <p>
+   * Eventually consider concept of preferred voices??
+   *
+   * @param userToGender
+   * @param userid
+   * @param exercise
+   * @return
+   */
   @Nullable
   public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise) {
     String nativeAudio = null;
     if (exercise != null) {
       MiniUser.Gender orDefault = getGender(userToGender, userid);
-      if (orDefault == null) return null;
+      if (orDefault == null) {
+        return null; // no user with this id?
+      }
 
       Map<MiniUser, List<AudioAttribute>> userMap = exercise.getUserMap(orDefault == MiniUser.Gender.Male);
-      Collection<List<AudioAttribute>> values = userMap.values();
-      if (values.isEmpty()) {
+      Collection<List<AudioAttribute>> audioByMatchingGender = userMap.values();
+
+      if (audioByMatchingGender.isEmpty()) { // ok, no audio with matching gender, fall back to other audio
         userMap = exercise.getUserMap(orDefault != MiniUser.Gender.Male);
-        values = userMap.values();
+        audioByMatchingGender = userMap.values();
       }
-      if (values.isEmpty()) {
+
+      if (audioByMatchingGender.isEmpty()) {
+       // logger.warn("no audio for " + userid + " and " + exercise.getID());
         //missing++;
       } else {
-        List<AudioAttribute> next = values.iterator().next();
-        if (next.isEmpty()) logger.error("huh? no audio on " + values);
-        else {
-          nativeAudio = next.get(next.size() - 1).getAudioRef();
+        nativeAudio = getRegularSpeedFromARecorder(audioByMatchingGender);
+
+        if (nativeAudio == null) {
+          nativeAudio = getSlowSpeedFromARecorder(audioByMatchingGender);
         }
+      }
+    }
+    return nativeAudio;
+  }
+
+  @Nullable
+  private String getRegularSpeedFromARecorder(Collection<List<AudioAttribute>> audioByMatchingGender) {
+    String nativeAudio = null;
+    for (List<AudioAttribute> audioByRecorder : audioByMatchingGender) {
+      if (audioByRecorder.isEmpty()) {
+        logger.debug("huh? no audio on " + audioByRecorder);
+      } else {
+        nativeAudio = getRegularSpeed(audioByRecorder);
+        if (nativeAudio != null) break;
+      }
+    }
+    return nativeAudio;
+  }
+
+  private String getRegularSpeed(List<AudioAttribute> audioByRecorder) {
+    String nativeAudio = null;
+    for (AudioAttribute audioAttribute : audioByRecorder) {
+      if (audioAttribute.isRegularSpeed()) {
+        nativeAudio = audioAttribute.getAudioRef();
+        break;
+      }
+    }
+    return nativeAudio;
+  }
+
+  @Nullable
+  private String getSlowSpeedFromARecorder(Collection<List<AudioAttribute>> audioByMatchingGender) {
+    String nativeAudio = null;
+    for (List<AudioAttribute> audioByRecorder : audioByMatchingGender) {
+      if (audioByRecorder.isEmpty()) {
+        logger.debug("huh? no audio on " + audioByRecorder);
+      } else {
+        nativeAudio = getSlowSpeed(audioByRecorder);
+        if (nativeAudio != null) break;
+      }
+    }
+    return nativeAudio;
+  }
+
+  private String getSlowSpeed(List<AudioAttribute> audioByRecorder) {
+    String nativeAudio = null;
+    for (AudioAttribute audioAttribute : audioByRecorder) {
+      if (audioAttribute.isRegularSpeed()) {
+        nativeAudio = audioAttribute.getAudioRef();
+        break;
       }
     }
     return nativeAudio;
@@ -599,9 +665,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       User byID = userDAO.getByID(userid);
       if (byID == null) {
         logger.warn("getNativeAudio huh? can't find " + userid);
-        //return null;
-      }
-      else {
+      } else {
         userToGender.put(userid, byID.getRealGender());
       }
     }
