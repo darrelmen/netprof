@@ -340,14 +340,14 @@ public class ListManager implements RequiresResize {
     listScrollPanel = new ScrollPanel();
 
     if (getAll) {
-      logger.info("viewLessons----> getAll optional " + optionalExercise);
+     // logger.info("viewLessons----> getAll optional " + optionalExercise);
       service.getUserListsForText("", controller.getUser(),
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + "_All",
               false, true,
               userManager, onlyMine, optionalExercise));
     } else {
-      logger.info("viewLessons for user #" + userManager.getUser());
+    //  logger.info("viewLessons for user #" + userManager.getUser());
       service.getListsForUser(getUser(), onlyMine,
           onlyVisited,
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
@@ -380,7 +380,7 @@ public class ListManager implements RequiresResize {
 
         long now = System.currentTimeMillis();
 
-        logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists.size() + " in " + (now - then) + " millis");
+       // logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists.size() + " in " + (now - then) + " millis");
         new UserListCallback(outer, contentPanel, child,
             new ScrollPanel(), REVIEW, false, false, userManager, false, "").onSuccess(reviewLists);
       }

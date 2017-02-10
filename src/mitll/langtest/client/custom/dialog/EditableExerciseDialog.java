@@ -535,12 +535,17 @@ class EditableExerciseDialog extends NewUserExercise {
   }
 
   private <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setContext(S newUserExercise) {
-    context.box.setText(originalContext = newUserExercise.getContext().trim());
+    String context = newUserExercise.getContext();
+    if (context == null) context = "";
+    this.context.box.setText(originalContext = context.trim());
     useAnnotation(newUserExercise, CONTEXT, contextAnno);
   }
 
   private <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setContextTrans(S newUserExercise) {
-    contextTrans.box.setText(originalContextTrans = newUserExercise.getContextTranslation().trim());
+    String contextTranslation = newUserExercise.getContextTranslation();
+    if (contextTranslation == null) contextTranslation = "";
+
+    contextTrans.box.setText(originalContextTrans = contextTranslation.trim());
     useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno);
   }
 

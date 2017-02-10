@@ -77,6 +77,8 @@ import java.util.logging.Logger;
 class NewUserExercise extends BasicDialog {
   public static final String CONTEXT = "context";
   public static final String CONTEXT_TRANSLATION = "context translation";
+  public static final String CONTEXT_LABEL = "Context (optional)";
+  public static final String CONTEXT_TRANSLATION_LABEL = "C. Translation (optional)";
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   protected static final int TEXT_FIELD_WIDTH = 500;
@@ -419,7 +421,7 @@ class NewUserExercise extends BasicDialog {
   }
 
   private <S extends CommonShell & AudioRefExercise & AnnotationExercise> FormField addContext(Panel container, S newUserExercise) {
-    FormField formField = makeBoxAndAnno(container, "Context", "", contextAnno);
+    FormField formField = makeBoxAndAnno(container, CONTEXT_LABEL, "", contextAnno);
 
     TextBoxBase box = formField.box;
     box.setText(originalContext = newUserExercise.getContext());
@@ -446,7 +448,7 @@ class NewUserExercise extends BasicDialog {
 
   private  <S extends CommonShell & AudioRefExercise & AnnotationExercise> FormField addContextTranslation(Panel container,
                                                                                                             S newUserExercise) {
-    FormField formField = makeBoxAndAnno(container, "Context Translation", "", contextTransAnno);
+    FormField formField = makeBoxAndAnno(container, CONTEXT_TRANSLATION_LABEL, "", contextTransAnno);
 
     TextBoxBase box1 = formField.box;
     box1.setText(originalContextTrans = newUserExercise.getContextTranslation());
@@ -575,7 +577,7 @@ class NewUserExercise extends BasicDialog {
                         boolean foreignChanged) {
     if (foreignLang.getSafeText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
-    } else if (english.getSafeText().isEmpty()) {
+    } else if (!isEnglish() && english.getSafeText().isEmpty()) {
       String enterTheEnglishPhrase = isEnglish() ? ENTER_MEANING : ENTER_THE_ENGLISH_PHRASE;
       if (!isEnglish()) {
         markError(english, enterTheEnglishPhrase);
@@ -731,7 +733,7 @@ class NewUserExercise extends BasicDialog {
 
     CommonShell newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
 
-    logger.info("afterItemCreated removed " + newUserExercisePlaceholder);
+ //   logger.info("afterItemCreated removed " + newUserExercisePlaceholder);
 
     ul.addExercise(newExercise);
     originalList.addExercise(newExercise);
@@ -744,7 +746,7 @@ class NewUserExercise extends BasicDialog {
     exerciseList.clearCachedExercise(); // if we don't it will just use the cached exercise, if it's the current one
     String id = toMoveToEnd.getID();
 
-    logger.info("afterItemCreated checkAndAskServer " + id);
+   // logger.info("afterItemCreated checkAndAskServer " + id);
 
     exerciseList.checkAndAskServer(id);
 
@@ -788,7 +790,7 @@ class NewUserExercise extends BasicDialog {
     public CreateFirstRecordAudioPanel(CommonExercise newExercise, Panel row,
                                        boolean recordRegularSpeed, String instance) {
       super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false,
-          Result.AUDIO_TYPE_REGULAR, instance);
+          Result.AUDIO_TYPE_SLOW, instance);
       this.recordRegularSpeed = recordRegularSpeed;
       setExercise(newExercise);
 
