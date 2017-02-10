@@ -191,8 +191,11 @@ distributions {
     main {
         baseName = 'netprof-installation'
         contents {
-            from('war/config/netProfDLI') {
+            from('war/config/netProfDev') {
                 into 'config'
+            }
+            from('war/config/netProfDLI') {
+                into 'configProduction'
             }
             from('scripts/copy.sh') {
                 into 'bin'

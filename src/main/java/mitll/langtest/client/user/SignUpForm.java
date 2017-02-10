@@ -63,6 +63,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class SignUpForm extends UserDialog implements SignUp {
+  public static final String ADD_INFO = "Add info";
+  private final Logger logger = Logger.getLogger("SignUpForm");
+
   private static final String I_M_SORRY = "I'm sorry";
   /**
    *
@@ -70,7 +73,6 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String CHOOSE_AFFILIATION = " -- Choose Affiliation -- ";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
   public static final String SORRY_NO_EMAIL_MATCH = "Sorry, this email is not in this user account.";
-  private final Logger logger = Logger.getLogger("SignUpForm");
 
   public static final int BOGUS_AGE = 99;
   /**
@@ -111,7 +113,6 @@ public class SignUpForm extends UserDialog implements SignUp {
   private Button signUp;
   private final UserPassDialog userPassLogin;
   private static final String CURRENT_USERS = "Please update your name and email.";
-  private String signUpTitle = SIGN_UP;
   private boolean markFieldsWithLabels = false;
   private final UserManager userManager;
   private ListBox affBox;
@@ -185,8 +186,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     // demoHeader.setVisible(b);
     registrationInfo.setVisible(b);
 
-   // registrationInfo.setGenderVisible(true);  // always ask - so then we can display gender matching audio.
-
     FormField firstFocus =
         firstName.isEmpty() ?
             firstName :
@@ -204,7 +203,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
     if (firstFocus != null) {
       setFormAndButtonTitles();
-      markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP, true);
+      markErrorBlur(firstFocus, ADD_INFO, CURRENT_USERS, Placement.TOP, true);
     }
   }
 
@@ -345,8 +344,9 @@ public class SignUpForm extends UserDialog implements SignUp {
 
         @Override
         public void onSuccess(User result) {
-          setSignUpButtonTitle((result == null));
-          setNewUserPrompt((result == null));
+          boolean isNewUser = result == null;
+          setSignUpButtonTitle(isNewUser);
+          setNewUserPrompt(isNewUser);
         }
       });
     }
@@ -453,8 +453,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     //  registrationInfo.setVisible(false);
   }
 
-  // private Button signUp;
-
   /**
    * @param userBox
    * @param emailBox
@@ -462,10 +460,8 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #getSignUpForm
    */
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
-    String buttonID = "SignUp";
-
-    Button signUp = getFormButton(buttonID, this.signUpTitle, eventRegistration);
-    signUp.addClickHandler(getSignUpClickHandler(userBox, emailBox));
+    Button signUp = getFormButton("SignUp", SIGN_UP, eventRegistration);
+    signUp.addClickHandler(getSignUpClickHandler(userBox));
 
     return signUp;
   }
@@ -474,11 +470,11 @@ public class SignUpForm extends UserDialog implements SignUp {
     signUp.setText(isSignUp ? SIGN_UP : "Add Info");
   }
 
-  private ClickHandler getSignUpClickHandler(final TextBoxBase userBox, final TextBoxBase emailBox) {
+  private ClickHandler getSignUpClickHandler(final TextBoxBase userBox) {
     return new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        userEmailCheck(userBox.getValue(), emailBox.getValue());
+        signUpNewOrAddInfoToOld(userBox.getValue());
       }
     };
   }
@@ -487,10 +483,9 @@ public class SignUpForm extends UserDialog implements SignUp {
    * Check email...
    *
    * @param userID
-   * @param email
-   * @see #getSignUpClickHandler(TextBoxBase, TextBoxBase)
+   * @see #getSignUpClickHandler
    */
-  private void userEmailCheck(String userID, String email) {
+  private void signUpNewOrAddInfoToOld(String userID) {
     service.getUserByID(signUpUser.getSafeText(), new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -500,44 +495,40 @@ public class SignUpForm extends UserDialog implements SignUp {
       @Override
       public void onSuccess(User result) {
         if (result == null) {
-          logger.info("valid " + signUpUser.getSafeText());
+          //  logger.info("valid " + signUpUser.getSafeText());
           checkForm(userID);
         } else {
-          //String hash = Md5Hash.getHash(email);
-          //String currentEmailHash = result.getEmailHash();
-          logger.info("userEmailCheck" +
-              "\n\tuser       " + userID);//
-          // +
-          //    "\n\temail hash " + currentEmailHash +
-          //    "\n\tvs form    " + hash);
-
-          // if the email hash is missing, don't compare with the given email.
-//          if (currentEmailHash == null ||
-//              currentEmailHash.isEmpty() ||
-//              currentEmailHash.equals(hash)) {  // don't let someone come along and hijack account with different email.
-            if (isFormValid(userID)) {
-              gotSignUp(userID, emailBox.getValue());
-            } else {
-              logger.info("getSignUpClickHandler form is not valid!!");
-            }
-          //} else { // email hash mismatch -
-          //  String message = signUpEmail.isEmpty() ? "Please enter your email" : isValidEmail(signUpEmail.getSafeText()) ? SORRY_NO_EMAIL_MATCH : VALID_EMAIL;
-          //  markErrorBlur(signUpEmail, message);
-         // }
+          // existing legacy users can have shorter userids than
+          if (isFormValid(userID, true)) {
+            gotSignUp(userID, emailBox.getValue());
+          } else {
+            logger.info("getSignUpClickHandler form is not valid!!");
+          }
         }
       }
     });
   }
 
+  /**
+   * @see #signUpNewOrAddInfoToOld
+   * @param userID
+   */
   private void checkForm(String userID) {
-    if (isFormValid(userID)) {
+    if (isFormValid(userID, false)) {
       gotSignUp(userID, emailBox.getValue());
     } else {
       logger.info("getSignUpClickHandler form is not valid!!");
     }
   }
 
-  private boolean isFormValid(String userID) {
+  /**
+   * @param userID
+   * @param allowShort
+   * @return
+   * @see #signUpNewOrAddInfoToOld
+   * @see #checkForm
+   */
+  private boolean isFormValid(String userID, boolean allowShort) {
     String emailText = signUpEmail.box.getValue();
 
     userID = userID.trim();
@@ -547,33 +538,36 @@ public class SignUpForm extends UserDialog implements SignUp {
       eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "no spaces in userid '" + userID + "'");
       markErrorBlur(signUpUser, "Please no spaces in user id.");
       return false;
-    } else if (userID.length() < MIN_LENGTH_USER_ID) {
-      eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "short user id '" + userID + "'");
-      markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
-      return false;
-    } else if (firstName.getSafeText().isEmpty()) {
-      eventRegistration.logEvent(firstName.getWidget(), "TextBox", "N/A", "short user first name '" + firstName.getSafeText() + "'");
-      markErrorBlur(firstName, "Please enter a first name.");
-      return false;
-    } else if (lastName.getSafeText().isEmpty()) {
-      eventRegistration.logEvent(lastName.getWidget(), "TextBox", "N/A", "short user last name '" + lastName.getSafeText() + "'");
-      markErrorBlur(lastName, "Please enter a last name.");
-      return false;
-    } else if (emailText.isEmpty()) {
-      eventRegistration.logEvent(signUpEmail.box, "TextBox", "N/A", "empty email");
-      markErrorBlur(signUpEmail, "Please enter your email.");
-      return false;
-    } else if (!isValidEmail(emailText)) {
-      markInvalidEmail();
-      return false;
-    } else if (affBox.getSelectedIndex() == 0) {
-      eventRegistration.logEvent(affBox, "Affiliation_ListBox", "N/A", "didn't make choice");
-      markErrorBlur(affBox, "Please choose an affiliation.", Placement.RIGHT);
-      return false;
-    } else if (!registrationInfo.checkValid()) {
-      return false;
     } else {
-      return true;
+      int minLengthUserId = allowShort ? 4 : MIN_LENGTH_USER_ID;
+      if (userID.length() < minLengthUserId) {
+        eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "short user id '" + userID + "'");
+        markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
+        return false;
+      } else if (firstName.getSafeText().isEmpty()) {
+        eventRegistration.logEvent(firstName.getWidget(), "TextBox", "N/A", "short user first name '" + firstName.getSafeText() + "'");
+        markErrorBlur(firstName, "Please enter a first name.");
+        return false;
+      } else if (lastName.getSafeText().isEmpty()) {
+        eventRegistration.logEvent(lastName.getWidget(), "TextBox", "N/A", "short user last name '" + lastName.getSafeText() + "'");
+        markErrorBlur(lastName, "Please enter a last name.");
+        return false;
+      } else if (emailText.isEmpty()) {
+        eventRegistration.logEvent(signUpEmail.box, "TextBox", "N/A", "empty email");
+        markErrorBlur(signUpEmail, "Please enter your email.");
+        return false;
+      } else if (!isValidEmail(emailText)) {
+        markInvalidEmail();
+        return false;
+      } else if (affBox.getSelectedIndex() == 0) {
+        eventRegistration.logEvent(affBox, "Affiliation_ListBox", "N/A", "didn't make choice");
+        markErrorBlur(affBox, "Please choose an affiliation.", Placement.RIGHT);
+        return false;
+      } else if (!registrationInfo.checkValid()) {
+        return false;
+      } else {
+        return true;
+      }
     }
   }
 
