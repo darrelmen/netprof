@@ -67,10 +67,9 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -88,6 +87,10 @@ public class EditItem {
   private final Logger logger = Logger.getLogger("EditItem");
 
   public static final String NEW_ITEM = "*New Item*";
+  /**
+   * @see #getNewItem
+   * @see #makeExerciseList
+   */
   public static final int NEW_EXERCISE_ID = -100;
   private static final String EDIT_ITEM = "editItem";
 
@@ -191,7 +194,7 @@ public class EditItem {
 
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
         new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
-            true, instanceName, false,false, ActivityType.EDIT) {
+            true, instanceName, false, false, ActivityType.EDIT) {
           @Override
           protected void onLastItem() {
             new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
@@ -218,7 +221,7 @@ public class EditItem {
             boolean addNewItem = includeAddItem;
 
             for (final CommonShell es : result) {
-              logger.info("Adding " +es.getID() + " : " + es.getClass());
+              logger.info("Adding " + es.getID() + " : " + es.getClass());
               addExercise(es);
               if (includeAddItem && es.getID() == NEW_EXERCISE_ID) {
                 addNewItem = false;
@@ -228,7 +231,7 @@ public class EditItem {
             if (addNewItem) {
               CommonExercise newItem = getNewItem();
 
-              logger.info("Adding " +newItem.getID()+ " : " + newItem.getClass());
+              logger.info("Adding " + newItem.getID() + " : " + newItem.getClass());
 
               addExercise(newItem);  // TODO : fix this
             }
@@ -249,22 +252,62 @@ public class EditItem {
   }
 
   /**
+   * TODO : don't do it like this!
+   * <p>
    * TODO : consider filling in context and context translation?
    * <p>
-   * TODOx : EVIL how to avoid unchecked cast here???
    *
    * @return
+   * @see #makeExerciseList(Panel, String, UserList, UserList, boolean)
    */
   private CommonExercise getNewItem() {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
-    int projectid = projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
-    return new Exercise(
+    int user = userManager.getUser();
+    Exercise exercise = new Exercise(
         NEW_EXERCISE_ID,
-        userManager.getUser(),
+        user,
         NEW_ITEM,
-        projectid,
+        getProjectid(),
         false);
+
+    addContext(user, exercise);
+
+    return exercise;
+  }
+
+  /**
+   * TODO : Why two ways of creating a new exercise???
+   * <p>
+   * TODO : consider filling in context and context translation?
+   *
+   * @param userid
+   * @return
+   * @see #populatePanel
+   */
+  private Exercise createNewItem(int userid) {
+    Exercise exercise = new Exercise(-1,
+        userid,
+        "",
+        getProjectid(),
+        false);
+
+    addContext(userid, exercise);
+
+    return exercise;
+  }
+
+  private void addContext(int userid, Exercise exercise) {
+    Exercise context = new Exercise(-1,
+        userid,
+        "",
+        getProjectid(),
+        false);
+
+    exercise.addContextExercise(context);
+  }
+
+  private int getProjectid() {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
   }
 
   private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
@@ -278,7 +321,7 @@ public class EditItem {
       public Panel getExercisePanel(CommonExercise e) {
         Panel panel = new ResizableSimple();
         panel.getElement().setId("EditItemPanel");
-        Exercise userExercise = new Exercise(e);
+        Exercise userExercise = new Exercise(e);  // copy exercise??? TODO : why???
         populatePanel(userExercise, panel, ul, originalList, itemMarker, outer);
         return panel;
       }
@@ -307,11 +350,33 @@ public class EditItem {
                                     PagingExerciseList<CommonShell, CommonExercise> npfExerciseList) {
     npfExerciseList.setUserListID(ul.getID());
     List<CommonShell> userExercises = new ArrayList<>();
-    Collection<CommonShell> exercises = ul.getExercises();
+    List<CommonShell> exercises = ul.getExercises();
     for (CommonShell e : exercises) {
       userExercises.add(e);  // TODO something better here
     }
     npfExerciseList.rememberAndLoadFirst(userExercises);
+  }
+
+  private void sortList(List<CommonShell> copy) {
+    boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
+    ExerciseComparator exerciseComparator = new ExerciseComparator(controller.getTypeOrder());
+
+//    for (CommonShell es:copy) {
+//      logger.info("sortList before " +es.getID() + " " + es.getEnglish() + " "+es.getForeignLanguage());
+//    }
+
+    Collections.sort(copy, new Comparator<CommonShell>() {
+      @Override
+      public int compare(CommonShell o1, CommonShell o2) {
+        if (o1.getID() == NEW_EXERCISE_ID) return +1;
+        else if (o2.getID() == NEW_EXERCISE_ID) return -1;
+        else return exerciseComparator.simpleCompare(o1, o2, false, isEnglish);
+      }
+    });
+
+//    for (CommonShell es:copy) {
+//      logger.info("sortList after " +es.getID() + " " + es.getEnglish() + " "+es.getForeignLanguage());
+//    }
   }
 
 
@@ -332,7 +397,7 @@ public class EditItem {
                              final ListInterface<CommonShell> pagingContainer) {
     if (exercise.getID() == NEW_EXERCISE_ID) {
       if (newExercise == null) {
-        newExercise = createNewItem(userManager.getUser(), ul.getName().replaceAll("\\s+", "_"));
+        newExercise = createNewItem(userManager.getUser());
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
       } else {
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, true);
@@ -342,22 +407,6 @@ public class EditItem {
     }
   }
 
-  /**
-   * TODO : consider filling in context and context translation?
-   *
-   * @param userid
-   * @return
-   * @see #populatePanel(CommonExercise, Panel, UserList, UserList, HasText, ListInterface)
-   */
-  private Exercise createNewItem(int userid, String listName) {
-    int projectid = controller.getProjectStartupInfo().getProjectid();
-//    logger.info("project id is " + projectid);
-    return new Exercise(-1,
-        userid,
-        "",
-        projectid,
-        false);
-  }
 
   /**
    * @param newExercise
@@ -476,7 +525,7 @@ public class EditItem {
     }
 
     @Override
-    public <S extends CommonExercise & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
+    public void setFields(CommonExercise newUserExercise) {
     }
   }
 }

@@ -34,6 +34,7 @@ package mitll.langtest.shared.custom;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
@@ -152,7 +153,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    *
    * @return
    */
-  public Collection<T> getExercises() {
+  public List<T> getExercises() {
     return exercises;
   }
 
@@ -265,7 +266,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   /**
    * @param id
-   * @see mitll.langtest.server.database.userexercise.UserExerciseDAO#add(CommonExercise, boolean)
+   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean)
    */
   @Deprecated
   public void setOldID(String id) {

@@ -304,7 +304,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @see #AnalysisPlot
    */
   private void populateExerciseMap(ExerciseServiceAsync service, int userid) {
-   // logger.info("populateExerciseMap : get exercises for user " + userid);
+    // logger.info("populateExerciseMap : get exercises for user " + userid);
 
     service.getExerciseIds(
         new ExerciseListRequest(1, userid)
@@ -431,22 +431,24 @@ public class AnalysisPlot extends TimeSeriesPlot {
         boolean anyBigger = false;
         for (PhoneSession session : phoneSessions) {
           if (session.getStart() >= start && session.getEnd() < end) {
-            //  logger.info("\t " + gran + " session " + session);
+            //logger.info("granularity " + gran + " session " + session);
             size++;
             total += session.getCount();
             if (session.getCount() > MIN_SESSION_COUNT) anyBigger = true;
           }
         }
-        //       String label = granToLabel.get(gran);
-//        String seriesInfo = gran + "/" + label;
-        // logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
+
+
+        String label = granToLabel.get(gran);
+        String seriesInfo = gran + "/" + label;
+     //   logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
 
         if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
           oneSet = true;
           errorSeries = granToError.get(gran);
           averageSeries = granToAverage.get(gran);
           setPhoneSessions(granularityToSessions.get(gran));
-          //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
+       //   logger.info("setVisibility 1 chose " + seriesInfo + " : " + size);// + " visible " + series.isVisible());
         }
         //else {
         //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
@@ -540,8 +542,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
   }
 
   /**
-   * @see #getChart(String)
    * @return
+   * @see #getChart(String)
    */
   private ToolTip getToolTip() {
     return new ToolTip()
@@ -562,8 +564,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   /**
    * On mouse over, show info about the answer.
-   *
+   * <p>
    * So this tooltip could either be for a group or an exercise
+   *
    * @param toolTipData
    * @param exid
    * @param commonShell
@@ -571,7 +574,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @see #getToolTip()
    */
   private String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
-   // logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
+    // logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
     String seriesName = toolTipData.getSeriesName();
 
     if (granToLabel.values().contains(seriesName)) {
@@ -582,8 +585,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
       } else {
         return getErrorBarToolTip(toolTipData, seriesName);
       }
-    }
-    else {
+    } else {
       //else {
       //logger.info("getTooltip series is " + seriesName + " not in " + values);
       // }
@@ -742,6 +744,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * So when the x axis range changes, we get an event here.
    *
    * @param axisSetExtremesEvent
+   * @see #configureChart
    */
   private void gotExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
     for (Series series : detailSeries) {
@@ -754,8 +757,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
       logger.info("gotExtremes got min " + min + " max " + max);
       if (min != null && min.longValue() > 0) {
-        long end   = max.longValue();
         long start = min.longValue();
+        long end = max.longValue();
+
+        logger.info("gotExtremes now min " + min + " max " + max);
         setVisibility(start, end);
         timeChanged(start, end);
       } else {
@@ -773,8 +778,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   /**
    * Remember time window of data (x-axis).
-   *
+   * <p>
    * TODO : When would we ever need to go talk to the server to get the exercises?
+   *
    * @param rawBestScores
    * @see #addChart
    */
@@ -782,7 +788,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     List<Integer> toGet = new ArrayList<>();
 
     Map<Integer, CommonShell> idToEx = getIdToEx();
-   // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size());
+    // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size());
 
     for (TimeAndScore timeAndScore : rawBestScores) {
       Integer id = timeAndScore.getExid();
@@ -792,8 +798,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
       }
     }
 
-    if (toGet.isEmpty())  {
-     // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size() + " - yielded none?");
+    if (toGet.isEmpty()) {
+      // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size() + " - yielded none?");
     }
 
     if (!rawBestScores.isEmpty()) {
@@ -955,6 +961,11 @@ public class AnalysisPlot extends TimeSeriesPlot {
   }
 
   public interface TimeChangeListener {
+    /**
+     * @param from
+     * @param to
+     * @see WordContainer#timeChanged(long, long)
+     */
     void timeChanged(long from, long to);
   }
 
@@ -964,6 +975,11 @@ public class AnalysisPlot extends TimeSeriesPlot {
     listeners.add(listener);
   }
 
+  /**
+   * @param from
+   * @param to
+   * @see #gotExtremes
+   */
   private void timeChanged(long from, long to) {
     for (TimeChangeListener listener : listeners) listener.timeChanged(from, to);
   }

@@ -198,6 +198,13 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return serverProps.getMediaDir();
   }
 
+  /**
+   * Create in bulk, e.g. as import from quizlet export format.
+   *
+   * @param userListID
+   * @param userExerciseText
+   * @return
+   */
   @Override
   public Collection<CommonExercise> reallyCreateNewItems(long userListID, String userExerciseText) {
     String[] lines = userExerciseText.split("\n");

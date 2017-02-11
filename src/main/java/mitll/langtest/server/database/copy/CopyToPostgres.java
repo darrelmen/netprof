@@ -75,6 +75,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.FileInputStream;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -782,12 +783,13 @@ public class CopyToPostgres<T extends CommonShell> {
     int ct = 0;
     List<SlickRelatedExercise> pairs = new ArrayList<>();
 
+    Timestamp now = new Timestamp(System.currentTimeMillis());
     for (CommonExercise ex : exercises) {
       int id = exToInt.get(ex.getOldID());
       for (CommonExercise context : ex.getDirectlyRelated()) {
         context.getMutable().setOldID("c" + id);
         int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, true, importUser, true));
-        pairs.add(new SlickRelatedExercise(-1, id, contextid, projectid));
+        pairs.add(new SlickRelatedExercise(-1, id, contextid, projectid, now));
         ct++;
         if (ct % 400 == 0) logger.debug("addContextExercises inserted " + ct + " context exercises");
       }

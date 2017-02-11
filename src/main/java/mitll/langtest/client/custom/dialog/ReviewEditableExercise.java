@@ -151,14 +151,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private final Set<Widget> audioWasPlayed = new HashSet<>();
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
 
-  //  private BasicDialog.FormField context;
-//  private BasicDialog.FormField contextTrans;
-  private FormField context;
-  private FormField contextTrans;
-  private final HTML contextAnno = new HTML();
-  private final HTML contextTransAnno = new HTML();
-  private String originalContext = "";
-  private String originalContextTrans = "";
   private List<RememberTabAndContent> tabs;
 
   /**
@@ -191,107 +183,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         instanceName);
     this.exerciseList = exerciseList;
   }
-
-  /**
-   * TODO should move this stuff into a class that handles these basic operations
-   *
-   * @param newUserExercise
-   * @param <S>
-   */
-  @Override
-  public <S extends CommonExercise & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
-    super.setFields(newUserExercise);
-
-    addContext(newUserExercise);
-    addContextTranslation(newUserExercise);
-  }
-
-  private <S extends CommonExercise & AudioRefExercise & AnnotationExercise> void addContext(S newUserExercise) {
-    final TextBoxBase box = context.box;
-    context.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
-    context.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-    addBlurHandler(ul.getID(), context);
-
-    if (newUserExercise.hasContext()) {
-      CommonExercise next = newUserExercise.getDirectlyRelated().iterator().next();
-      box.setText(originalContext = next.getForeignLanguage());
-      box.addBlurHandler(new BlurHandler() {
-        @Override
-        public void onBlur(BlurEvent event) {
-          gotBlur();
-          logBlur("ContextBox = ", box);
-        }
-      });
-    }
-
-    useAnnotation(newUserExercise, "context", contextAnno);
-    useAnnotation(newUserExercise, "context translation", contextTransAnno);
-  }
-
-  private void logBlur(String prefix, TextBoxBase box) {
-    try {
-      long uniqueID = originalList.getID();
-      controller.logEvent(box, "TextBox", "UserList_" + uniqueID, prefix + box.getValue());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  private <S extends CommonExercise & AudioRefExercise & AnnotationExercise> void addContextTranslation(S newUserExercise) {
-    TextBoxBase box1 = contextTrans.box;
-
-    contextTrans.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-    addBlurHandler(ul.getID(), contextTrans);
-
-    if (newUserExercise.hasContext()) {
-      CommonExercise next = newUserExercise.getDirectlyRelated().iterator().next();
-      box1.setText(originalContextTrans = next.getEnglish());
-      box1.addBlurHandler(new BlurHandler() {
-        @Override
-        public void onBlur(BlurEvent event) {
-          gotBlur();
-          logBlur("ContextTransBox = ", box1);
-        }
-      });
-    }
-
-    useAnnotation(newUserExercise, "context translation", contextTransAnno);
-  }
-
-  /**
-   * @param mutableExercise
-   * @see #gotBlur(FormField, RecordAudioPanel, ControlGroup, UserList, ListInterface, Panel)
-   */
-  void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
-    super.grabInfoFromFormAndStuffInfoExercise(mutableExercise);
-    mutableExercise.setForeignLanguage(context.getSafeText());
-    mutableExercise.setEnglish(contextTrans.getSafeText());
-  }
-
-  protected void makeOptionalRows(DivWidget upper) {
-    makeContextRow(upper);
-    makeContextTransRow(upper);
-  }
-
-  private void makeContextRow(Panel container) {
-    Panel row = new FluidRow();
-    container.add(row);
-    context = makeBoxAndAnno(row, "Context", "", contextAnno);
-  }
-
-  private void makeContextTransRow(Panel container) {
-    Panel row = new FluidRow();
-    container.add(row);
-    contextTrans = makeBoxAndAnno(row, "Context Translation", "", contextTransAnno);
-  }
-
-  @Override
-  protected boolean anyFieldsDirty() {
-    return super.anyFieldsDirty() ||
-        !originalContext.equals(context.getSafeText()) ||
-        !originalContextTrans.equals(contextTrans.getSafeText());
-  }
-
 
   private int currentTab = 0;
 

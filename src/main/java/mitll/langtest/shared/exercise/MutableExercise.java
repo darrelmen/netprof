@@ -69,6 +69,8 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void addContextExercise(CommonExercise contextExercise);
 
+  Collection<CommonExercise> getDirectlyRelated();
+
   void setOldID(String id);
 
   void setCreator(int id);

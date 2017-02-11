@@ -158,10 +158,11 @@ public class SlickUserExerciseDAO
    *
    * @param shared
    * @param isOverride
+   * @param isContext
    * @return
    */
-  public SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride) {
-    return toSlick(shared, isOverride, shared.getProjectID(), false, BaseUserDAO.DEFAULT_USER_ID, false);
+  public SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride, boolean isContext) {
+    return toSlick(shared, isOverride, shared.getProjectID(), false, BaseUserDAO.DEFAULT_USER_ID, isContext);
   }
 
   /**
@@ -170,7 +171,8 @@ public class SlickUserExerciseDAO
    * @param isPredef
    * @param isContext
    * @return
-   * @see SlickUserExerciseDAO#add(CommonExercise, boolean)
+   * @see #toSlick(CommonExercise, boolean, int, boolean, int, boolean)
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addContextExercises
    */
   public SlickExercise toSlick(CommonExercise shared,
                                @Deprecated boolean isOverride,
@@ -464,11 +466,12 @@ public class SlickUserExerciseDAO
   /**
    * @param userExercise
    * @param isOverride
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, CommonExercise, String)
+   * @param isContext
+   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem
    */
   @Override
-  public int add(CommonExercise userExercise, boolean isOverride) {
-    int insert = insert(toSlick(userExercise, isOverride));
+  public int add(CommonExercise userExercise, boolean isOverride, boolean isContext) {
+    int insert = insert(toSlick(userExercise, isOverride, isContext));
     ((Exercise) userExercise).setID(insert);
     return insert;
   }
@@ -572,13 +575,13 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see DBExerciseDAO#readExercises
    * @param projectid
    * @param typeOrder
    * @param sectionHelper
    * @param exerciseToPhoneForProject
    * @param lookup
    * @return
+   * @see DBExerciseDAO#readExercises
    */
   public List<CommonExercise> getContextByProject(int projectid, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper,
                                                   Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject, PronunciationLookup lookup) {
@@ -598,14 +601,20 @@ public class SlickUserExerciseDAO
   /**
    * @param userExercise
    * @param createIfDoesntExist
-   * @see mitll.langtest.server.database.custom.UserListManager#editItem(CommonExercise, boolean, String)
+   * @param isContext
+   * @see mitll.langtest.server.database.custom.UserListManager#editItem
    */
   @Override
-  public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
-    SlickExercise slickUserExercise = toSlick(userExercise, true);
+  public void update(CommonExercise userExercise, boolean createIfDoesntExist, boolean isContext) {
+    SlickExercise slickUserExercise = toSlick(userExercise, true, false);
     int rows = dao.update(slickUserExercise);
     if (rows == 0 && createIfDoesntExist) {
       dao.insert(slickUserExercise);
+    }
+
+    // recurse on related context exercises
+    for (CommonExercise contextEx : userExercise.getDirectlyRelated()) {
+      update(contextEx, createIfDoesntExist, true);
     }
   }
 
@@ -630,12 +639,20 @@ public class SlickUserExerciseDAO
     };
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addContextExercises(int, SlickUserExerciseDAO, Map, int, Collection)
+   * @param relatedExercises
+   */
   public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
     relatedExerciseDAOWrapper.addBulk(relatedExercises);
   }
 
   public Collection<SlickRelatedExercise> getAllRelated(int projid) {
     return relatedExerciseDAOWrapper.allByProject(projid);
+  }
+
+  public void addContextToExercise(int exid, int contextExid, int projid) {
+    relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, exid, contextExid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
   public Map<String, Integer> getOldToNew(int projectid) {

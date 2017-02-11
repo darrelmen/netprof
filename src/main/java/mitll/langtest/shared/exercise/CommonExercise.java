@@ -47,8 +47,6 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
 
   int getDominoID();
 
- // CommonShell getShell();
-
   /**
    * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
    * @return
@@ -66,6 +64,7 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
    * @return
    */
   String getContext();
+  String getContextTranslation();
 
   Collection<CommonExercise> getDirectlyRelated();
 

@@ -29,10 +29,17 @@ public class FormField {
     group.setVisible(visible);
   }
 
-  public boolean isVisible() { return group.isVisible(); }
+  public boolean isVisible() {
+    return group.isVisible();
+  }
 
+  /**
+   * Somehow it's cleaning the text by translating apostrophe to url encoded form
+   *
+   * @return
+   */
   public String getSafeText() {
-    return sanitize(box.getText());
+    return sanitize(box.getText()).replaceAll("&#39;", "'");
   }
 
   public void setText(String text) {

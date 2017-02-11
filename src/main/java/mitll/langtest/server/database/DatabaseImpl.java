@@ -1078,9 +1078,9 @@ public class DatabaseImpl implements Database {
         getProjectDAO(),
         userExerciseDAO,
         ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),
-        getAudioDAO(),
         getEventDAO(),
         getResultDAO(),
+        getAudioDAO(),
         getAnnotationDAO(),
         getWordDAO(),
         getPhoneDAO(),
@@ -1454,7 +1454,9 @@ public class DatabaseImpl implements Database {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises(projectid) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
-    String language = getLanguage(projectid);
+    Project project = getProject(projectid);
+
+    String language = getLanguage(project);
     new AudioExport(getServerProps())
         .writeZip(out,
             typeToSection,
@@ -1463,7 +1465,8 @@ public class DatabaseImpl implements Database {
             language,
             getAudioDAO(),
             false,
-            options);
+            options,
+            project.isEnglish());
   }
 
   public String getLanguage(CommonExercise ex) {
@@ -1471,7 +1474,12 @@ public class DatabaseImpl implements Database {
   }
 
   public String getLanguage(int projectid) {
-    return getProject(projectid).getLanguage();
+    Project project = getProject(projectid);
+    return getLanguage(project);
+  }
+
+  private String getLanguage(Project project) {
+    return project.getLanguage();
   }
 
   @Override

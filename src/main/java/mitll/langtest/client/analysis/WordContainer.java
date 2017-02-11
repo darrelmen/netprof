@@ -56,14 +56,7 @@ import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -97,6 +90,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   private SortedSet<WordScore> byTime;
 
   /**
+   * What sort order do we want?
    * @param controller
    * @param plot
    * @see AnalysisTab#getWordScores
@@ -104,13 +98,14 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
     super(controller, plot);
     spanish = controller.getLanguage().equalsIgnoreCase("Spanish");
-    sorter = new ExerciseComparator();//controller.getProjectStartupInfo().getTypeOrder());
+    sorter = new ExerciseComparator(controller.getProjectStartupInfo().getTypeOrder());
     plot.addListener(this);
     this.learnTab = learnTab;
     this.heading = w;
   }
 
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
+  private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
   //private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
 
   protected int getPageSize() {
@@ -308,7 +303,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   /**
    * @param from
    * @param to
-   * @see AnalysisPlot#timeChanged(long, long)
+   * @see AnalysisPlot#timeChanged
    */
   @Override
   public void timeChanged(long from, long to) {
@@ -318,7 +313,9 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
     } else {
       // logger.info("Starting from " +from + " : " +to);
       // logger.info("Starting from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
-      heading.setSubtext("Starting " + superShortFormat.format(new Date(from)));
+
+     // Calendar.getInstance().get(Calendar.YEAR);
+      heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " +yearShortFormat.format(new Date(to)));
 
       WordScore fromElement = new WordScore();
       fromElement.setTimestamp(from);

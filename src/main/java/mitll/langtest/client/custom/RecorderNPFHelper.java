@@ -99,11 +99,11 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    * @see Navigation#Navigation
    */
   RecorderNPFHelper(LangTestDatabaseAsync service,
-                           UserFeedback feedback,
-                           UserManager userManager,
-                           ExerciseController controller,
-                           boolean doNormalRecording,
-                           ReloadableContainer exerciseList,
+                    UserFeedback feedback,
+                    UserManager userManager,
+                    ExerciseController controller,
+                    boolean doNormalRecording,
+                    ReloadableContainer exerciseList,
                     ExerciseServiceAsync exerciseServiceAsync) {
     super(service, feedback, userManager, controller, exerciseList, exerciseServiceAsync);
     this.doNormalRecording = doNormalRecording;
@@ -165,7 +165,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
           @Override
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                                   String prefix,
-            int exerciseID, boolean onlyWithAudioAnno,
+                                                  int exerciseID, boolean onlyWithAudioAnno,
                                                   boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
             super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             filterOnly.setText(setCheckboxTitle(userManager));
@@ -186,7 +186,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
                 ";" +
                 SelectionState.ONLY_UNRECORDED +
                 "=" + filterOnly.getValue();
- //           logger.info("RecorderNPFHelper : history token now  " + s);
+            //           logger.info("RecorderNPFHelper : history token now  " + s);
             return s;
           }
 
@@ -204,7 +204,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
   private void addEventHandler(final String instanceName) {
     LangTest.EVENT_BUS.addHandler(AudioChangedEvent.TYPE, authenticationEvent -> {
       if (!authenticationEvent.getSource().equals(instanceName)) {
-       // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
+        // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
         getProgressInfo(instanceName);
       }
     });
@@ -240,25 +240,23 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    */
   private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
     //    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
-    private final CommonExercise e;
 
     /**
-     * @see RecorderNPFHelper#getFactory
      * @param e
      * @param controller1
      * @param exerciseList1
      * @param instance
+     * @see RecorderNPFHelper#getFactory
      */
     MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
-      this.e = e;
     }
 
     @Override
     protected void enableNext() {
       super.enableNext();
       if (isCompleted()) {
-        showRecordedState(e);
+        showRecordedState(exercise);
       }
     }
 
@@ -320,7 +318,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
      * @param field
      * @return
      * @seex #getContext
-     * @see GoodwaveExercisePanel#getQuestionContent(CommonShell)
+     * @see GoodwaveExercisePanel#getQuestionContent
      */
     private Widget getEntry(AnnotationExercise e, final String field, Widget contentWidget) {
       return getEntry(field, e.getAnnotation(field), contentWidget);
