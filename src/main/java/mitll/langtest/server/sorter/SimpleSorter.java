@@ -54,6 +54,7 @@ import java.util.List;
 public class SimpleSorter extends ExerciseComparator {
   protected final Collection<String> typeOrder;
   SimpleSorter(Collection<String> typeOrder) {
+    super(typeOrder);
     this.typeOrder = typeOrder;
   }
 
@@ -63,17 +64,18 @@ public class SimpleSorter extends ExerciseComparator {
    *
    * @param toSort
    * @param recordedLast
+   * @param isEnglish
    * @return
    * @see LangTestDatabaseImpl#sortExercises
    */
-  public void getSortedByUnitThenAlpha(List<? extends CommonShell> toSort, final boolean recordedLast) {
+  public void getSortedByUnitThenAlpha(List<? extends CommonShell> toSort, final boolean recordedLast, boolean isEnglish) {
     if (typeOrder.isEmpty()) {
       sortByTooltip(toSort);
     } else {
       Collections.sort(toSort, new Comparator<CommonShell>() {
         @Override
         public int compare(CommonShell o1, CommonShell o2) {
-          return SimpleSorter.this.simpleCompare(o1, o2, recordedLast);
+          return SimpleSorter.this.simpleCompare(o1, o2, recordedLast,isEnglish);
         }
       });
     }

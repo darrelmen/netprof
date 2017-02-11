@@ -115,10 +115,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * <p>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem
-   * @see #update
+   * @seex UserListManager#reallyCreateNewItem
+   * @see IUserExerciseDAO#update
    */
-  public int add(CommonExercise userExercise, boolean isOverride) {
+  public int add(CommonExercise userExercise, boolean isOverride, boolean isContext) {
     List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
 
     try {
@@ -223,6 +223,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       logException(ee);
     }
     return -1;
+  }
+
+  @Override
+  public void addContextToExercise(int exid, int contextid, int projid) {
+
   }
 
   private String fixSingleQuote(String s) {
@@ -453,7 +458,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   /**
    * @param exids
    * @return
-   * @see UserListManager#getDefectList
+   * @seex UserListManager#getDefectList
    */
   @Override
   public Collection<CommonExercise> getByExID(Collection<Integer> exids) {
@@ -570,10 +575,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   /**
    * @param userExercise
    * @param createIfDoesntExist
+   * @param isContext
    * @see UserListManager#editItem
    */
   @Override
-  public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
+  public void update(CommonExercise userExercise, boolean createIfDoesntExist, boolean isContext) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + USEREXERCISE +
@@ -601,7 +607,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
       if (i == 0) {
         if (createIfDoesntExist) {
-          add(userExercise, true);
+          add(userExercise, true, false);
         } else {
           logger.error("huh? didn't update the userExercise for " + userExercise + "\n\tsql " + sql);
         }

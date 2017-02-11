@@ -48,7 +48,8 @@ import java.util.Map;
 public interface IUserExerciseDAO extends IDAO {
   SlickExercise getUnknownExercise();
 
-  int add(CommonExercise userExercise, boolean isOverride);
+  int add(CommonExercise userExercise, boolean isOverride, boolean isContext);
+  void addContextToExercise(int exid, int contextid, int projid);
 
   List<CommonShell> getOnList(int listID);
   List<CommonExercise> getCommonExercises(int listID);
@@ -69,7 +70,7 @@ public interface IUserExerciseDAO extends IDAO {
 
   Collection<CommonExercise> getByExID(Collection<Integer> exids);
 
-  void update(CommonExercise userExercise, boolean createIfDoesntExist);
+  void update(CommonExercise userExercise, boolean createIfDoesntExist, boolean isContext);
 
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 

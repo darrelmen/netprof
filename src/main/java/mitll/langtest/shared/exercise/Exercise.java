@@ -37,6 +37,7 @@ import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -130,6 +131,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param altcontext
    * @param contextTranslation
    * @param projectid
+   * @see #addContext
    * @Deprecated - use related exercise join table
    */
   @Deprecated
@@ -141,31 +143,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.oldid = id;
   }
 
-  /**
-   * @param id
-   * @param englishSentence
-   * @param foreignLanguage
-   * @param meaning
-   * @param transliteration
-   * @param dominoID
-   * @param projectid
-   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
-   * @see mitll.langtest.server.json.JsonExport#toExercise
-   */
-/*  public Exercise(String id,
-                  String englishSentence,
-                  String foreignLanguage,
-                  String meaning,
-                  String transliteration,
-                  int dominoID,
-                  int projectid) {
-    super(id, -1, projectid);
-    setEnglishSentence(englishSentence);
-    this.meaning = meaning;
-    setForeignLanguage(foreignLanguage);
-    setTransliteration(transliteration);
-    this.dominoID = dominoID;
-  }*/
 
   /**
    * @param exid
@@ -427,6 +404,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   public String getContext() {
     return hasContext() ? getDirectlyRelated().iterator().next().getForeignLanguage() : "";
+  }  public String getContextTranslation() {
+    return hasContext() ? getDirectlyRelated().iterator().next().getEnglish() : "";
   }
 
   public Collection<CommonExercise> getDirectlyRelated() {
@@ -509,7 +488,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @param id
-   * @see UserExerciseDAO#add(CommonExercise, boolean)
+   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean)
    */
   @Deprecated
   public void setOldID(String id) {

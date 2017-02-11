@@ -118,6 +118,10 @@ public class Project implements PronunciationLookup {
     return project == null ? "No project yet" : project.language();
   }
 
+  public boolean isEnglish() {
+    return getLanguage().equalsIgnoreCase("english");
+  }
+
   /**
    * Only public to support deletes...
    *

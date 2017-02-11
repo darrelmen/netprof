@@ -633,11 +633,20 @@ public class UserListManager implements IUserListManager {
     return getCommonUserList(typeOrder, userList, onList);
   }
 
+  /**
+   * TODO : should we worry about sort order for english?
+   *
+   * @param typeOrder
+   * @param userList
+   * @param copy
+   * @param <T>
+   * @return
+   */
   @NotNull
   private <T extends CommonShell> UserList<T> getCommonUserList(Collection<String> typeOrder, UserList<T> userList, List<T> copy) {
     userList.setReview(true);
 
-    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
+    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false, false);
 
     userList.setExercises(copy);
     markState(copy);
@@ -734,7 +743,23 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void reallyCreateNewItem(long userListID, CommonExercise userExercise, String mediaDir) {
-    int add = userExerciseDAO.add(userExercise, false);
+    int add = userExerciseDAO.add(userExercise, false, false);
+    logger.debug("reallyCreateNewItem added exercise " + add  + " from " + userExercise);
+
+    if (!userExercise.getDirectlyRelated().isEmpty()) {
+      for (CommonExercise exercise : userExercise.getDirectlyRelated()) {
+        if (!exercise.getForeignLanguage().isEmpty() ||
+            !exercise.getEnglish().isEmpty()
+            ) {
+          int add1 = userExerciseDAO.add(exercise, false, true);
+
+          int projectID = userExercise.getProjectID();
+          userExerciseDAO.addContextToExercise(add, add1, projectID);
+
+          logger.debug("reallyCreateNewItem added context exercise " + add1 + " tied to " + add + " in " + projectID);
+        }
+      }
+    }
     addItemToList(userListID, userExercise.getOldID(), add);
     fixAudioPaths(userExercise, true, mediaDir);
   }
@@ -774,7 +799,7 @@ public class UserListManager implements IUserListManager {
                        boolean createIfDoesntExist,
                        String mediaDir) {
     fixAudioPaths(userExercise, true, mediaDir);
-    userExerciseDAO.update(userExercise, createIfDoesntExist);
+    userExerciseDAO.update(userExercise, createIfDoesntExist, false);
   }
 
   /**
@@ -826,7 +851,7 @@ public class UserListManager implements IUserListManager {
    * @param overwrite
    * @param mediaDir
    * @see #editItem
-   * @see #reallyCreateNewItem(long, CommonExercise, String)
+   * @see #reallyCreateNewItem
    */
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
@@ -842,14 +867,14 @@ public class UserListManager implements IUserListManager {
     int projectID = userExercise.getProjectID();
 
     if (!regularSpeed.getAudioRef().contains(mediaDir)) {
-      fixAudioPathOfAttribute(userExercise, overwrite, regularSpeed, now, foreignLanguage, id, projectID, FAST);
+      fixAudioPathOfAttribute(userExercise, overwrite, regularSpeed, now, id, projectID, FAST);
       logger.debug("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + regularSpeed.getAudioRef());
     }
 
     AudioAttribute slowSpeed = userExercise.getSlowSpeed();
     if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() &&
         !slowSpeed.getAudioRef().contains(mediaDir)) {
-      fixAudioPathOfAttribute(userExercise, overwrite, slowSpeed, now, foreignLanguage, id, projectID, SLOW);
+      fixAudioPathOfAttribute(userExercise, overwrite, slowSpeed, now, id, projectID, SLOW);
     }
   }
 
@@ -858,7 +883,6 @@ public class UserListManager implements IUserListManager {
    * @param overwrite
    * @param regularSpeed
    * @param now
-   * @param foreignLanguage
    * @param id
    * @param projectID
    * @param prefix
@@ -867,7 +891,6 @@ public class UserListManager implements IUserListManager {
                                        boolean overwrite,
                                        AudioAttribute regularSpeed,
                                        long now,
-                                       String foreignLanguage,
                                        int id,
                                        int projectID,
                                        String prefix) {

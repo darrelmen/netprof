@@ -518,7 +518,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private <T extends CommonShell> void sortExercises(ActivityType role, List<T> commonExercises) {
     int projectID = getProjectID();
     new ExerciseSorter(db.getTypeOrder(projectID))
-        .getSortedByUnitThenAlpha(commonExercises, role == ActivityType.RECORDER);
+        .getSortedByUnitThenAlpha(commonExercises, role == ActivityType.RECORDER, getProject().isEnglish());
   }
 
   private <T extends CommonExercise> Collection<T> getExercisesForSearch(String prefix,

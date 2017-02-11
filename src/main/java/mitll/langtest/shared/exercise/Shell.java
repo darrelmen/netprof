@@ -45,19 +45,17 @@ import java.util.Map;
  */
 public interface Shell extends HasID {
   /**
-   * @see PagingContainer#getEnglishColumn()
+   * @see PagingContainer#getEnglishColumn
    * @return
    */
   STATE getState();
   void setState(STATE state);
 
   /**
-   * @see PagingContainer#getEnglishColumn()
+   * @see PagingContainer#getEnglishColumn
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
    * @return
    */
   STATE getSecondState();
-
   void setSecondState(STATE state);
-
 }

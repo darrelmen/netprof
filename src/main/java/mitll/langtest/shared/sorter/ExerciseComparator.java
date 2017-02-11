@@ -33,9 +33,12 @@
 package mitll.langtest.shared.sorter;
 
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -44,40 +47,39 @@ import org.jetbrains.annotations.NotNull;
  * @since 10/9/15.
  */
 public class ExerciseComparator {
-//  protected final Collection<String> typeOrder;
-//  public ExerciseComparator(Collection<String> typeOrder) { this.typeOrder = typeOrder; }
+  protected final Collection<String> typeOrder;
+
+  public ExerciseComparator(Collection<String> typeOrder) {
+    this.typeOrder = typeOrder;
+  }
 
   protected String removePunct(String t) {
     return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
 
-  /**
-   *
-   * @param o1
-   * @param o2
-   * @param recordedLast
-   * @return
-   */
-  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast) {
+  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean isEnglish) {
     if (recordedLast) {
-      if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
-        return +1;
-      } else if (o1.getState() == STATE.RECORDED && o2.getState() != STATE.RECORDED) {
-        return -1;
-      }
+      Integer x = getRecordedOrder(o1, o2);
+      if (x != null) return x;
     }
 
     // items in same chapter alphabetical by tooltip
-    return tooltipComp(o1, o2);
+    return isEnglish ? flCompare(o1, o2) : tooltipComp(o1, o2);
   }
 
-/*  public int compare(CommonExercise o1, CommonExercise o2, boolean recordedLast) {
+  private Integer getRecordedOrder(CommonShell o1, CommonShell o2) {
+    if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
+      return +1;
+    } else if (o1.getState() == STATE.RECORDED && o2.getState() != STATE.RECORDED) {
+      return -1;
+    }
+    return null;
+  }
+
+  public int compare(CommonExercise o1, CommonExercise o2, boolean recordedLast) {
     if (recordedLast) {
-      if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
-        return +1;
-      } else if (o1.getState() == STATE.RECORDED && o2.getState() != STATE.RECORDED) {
-        return -1;
-      }
+      Integer x = getRecordedOrder(o1, o2);
+      if (x != null) return x;
     }
 
     // compare first by hierarchical order - unit, then chapter, etc.
@@ -85,9 +87,9 @@ public class ExerciseComparator {
 
     // items in same chapter alphabetical by tooltip
     return (i == 0) ? tooltipComp(o1, o2) : i;
-  }*/
+  }
 
-/*  private int getTypeOrder(CommonExercise o1, CommonExercise o2) {
+  private int getTypeOrder(CommonExercise o1, CommonExercise o2) {
     int i = 0;
     for (String type : typeOrder) {
       String type1 = o1.getUnitToValue().get(type);
@@ -107,7 +109,7 @@ public class ExerciseComparator {
       }
     }
     return i;
-  }*/
+  }
 
   protected <T extends CommonShell> int tooltipComp(T o1, T o2) {
     String id1 = o1.getEnglish();
@@ -115,24 +117,17 @@ public class ExerciseComparator {
     return compareStrings(id1, id2);
   }
 
+  private <T extends CommonShell> int flCompare(T o1, T o2) {
+    String id1 = o1.getForeignLanguage();
+    String id2 = o2.getForeignLanguage();
+    return id1.compareTo(id2);
+  }
+
   public int compareStrings(String id1, String id2) {
     String t = id1.toLowerCase();
     if (t.startsWith("a ")) t = t.substring(2);
-
-    t = dropPunct(t);
     String t1 = id2.toLowerCase();
     if (t1.startsWith("a ")) t1 = t1.substring(2);
-    t1 = dropPunct(t1);
-
     return removePunct(t).compareTo(removePunct(t1));
-  }
-
-  @NotNull
-  private String dropPunct(String t) {
-    String first = t.substring(0,1);
-    if (first.equals("\"") || first.equals("\\'")) {
-      t = t.substring(1);
-    }
-    return t;
   }
 }

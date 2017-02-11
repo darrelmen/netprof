@@ -52,6 +52,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.custom.dialog.EditItem.NEW_EXERCISE_ID;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -99,7 +101,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   //    Collection<String> typeOrder = startupInfo.getTypeOrder();
     //  sorter = new ExerciseComparator(typeOrder);
     }
-    sorter = new ExerciseComparator();
+    sorter = new ExerciseComparator(controller.getTypeOrder());
 
     boolean japanese = controller.getLanguage().equalsIgnoreCase("Japanese");
     if (japanese) FLLength = JAPANESE_LENGTH;
@@ -172,6 +174,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
   private ColumnSortEvent.ListHandler<T> getEnglishSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
+    final boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
     columnSortHandler.setComparator(englishCol,
         new Comparator<T>() {
           public int compare(T o1, T o2) {
@@ -183,7 +186,9 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return sorter.simpleCompare(o1, o2, isRecorder);
+                if (o1.getID() == NEW_EXERCISE_ID) return +1;
+                else if (o2.getID() == NEW_EXERCISE_ID) return -1;
+                else return sorter.simpleCompare(o1, o2, isRecorder, isEnglish);
               }
             }
             return -1;

@@ -110,7 +110,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
-    logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
+   // logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
     for (String type : typeOrder) {
       String subtext = exercise.getUnitToValue().get(type);
