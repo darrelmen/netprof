@@ -669,7 +669,7 @@ public class AudioConversion {
   }
 
   private String getOggenc() {
-    String property = System.getProperty("os.name").toLowerCase();
+/*    String property = System.getProperty("os.name").toLowerCase();
     boolean isMac = property.contains("mac");
     boolean isWin = property.contains("win");
 
@@ -677,9 +677,9 @@ public class AudioConversion {
     File file = new File(oggEncPath);
     if (!file.exists()) {
       logger.error("can't find oggenc at " + file.getAbsolutePath());
-    }
-//    oggEncPath = "oggenc";
-    return oggEncPath;
+    }*/
+  //  oggEncPath = "oggenc";
+    return "oggenc";
   }
 
   /**
