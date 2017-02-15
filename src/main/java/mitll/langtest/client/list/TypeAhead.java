@@ -69,7 +69,7 @@ public class TypeAhead {
    * @param waitCursor
    * @param title
    * @param hasFirstFocus
-   * @see mitll.langtest.client.list.PagingExerciseList#addTypeAhead(com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.list.PagingExerciseList#addTypeAhead
    */
   TypeAhead(Panel column, Image waitCursor, String title, boolean hasFirstFocus) {
     makeTypeAhead();
@@ -129,6 +129,11 @@ public class TypeAhead {
     return getControlGroup(title, flow);
   }
 
+  /**
+   * @see #TypeAhead
+   * @param waitCursor
+   * @return
+   */
   private Widget getSearch(Image waitCursor) {
     Panel flow = new HorizontalPanel();
     Icon child = new Icon(IconType.SEARCH);

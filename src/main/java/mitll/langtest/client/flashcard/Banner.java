@@ -395,7 +395,7 @@ public class Banner implements RequiresResize {
           logger.warning("got " + e);
         }
 
-        new ModalInfoDialog(ABOUT_NET_PRO_F, strings, values, null, null, false, true) {
+        new ModalInfoDialog(ABOUT_NET_PRO_F, strings, values, null, null, false, true, 600, 400) {
           @Override
           protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal, boolean bigger) {
             FlexTable flexTable = super.addContent(messages, values, modal, bigger);

@@ -159,8 +159,8 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    */
   public ActivityType getActivityType() {
     return activityType;
@@ -177,8 +177,8 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
   public boolean isOnlyUnrecordedByMe() {
     return onlyUnrecordedByMe;
@@ -256,10 +256,10 @@ public class ExerciseListRequest implements IsSerializable {
    */
   public String toString() {
     return
-        "prefix                  '" + prefix + "'" +
-            "\n\tselection           " + getTypeToSelection() +
+        (prefix.isEmpty() ? "" : "prefix                  '" + prefix + "'") +
+            (getTypeToSelection().isEmpty() ? "" : "\n\tselection           " + getTypeToSelection()) +
             "\n\tuser list id        " + userListID +
-                 "\n\tuser                " + userID +
+            "\n\tuser                " + userID +
             (activityType == ActivityType.UNSET ? "" :
                 "\n\tactivity             " + activityType) +
             (onlyUnrecordedByMe ? "\n\tonly recorded by me" : "") +

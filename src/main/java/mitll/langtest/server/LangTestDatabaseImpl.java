@@ -161,18 +161,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffliations());
   }
 
-  /**
-   * Can't check if it's valid if we don't have a model.
-   *
-   * @param foreign
-   * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
-   */
-  @Override
-  public boolean isValidForeignPhrase(String foreign, String transliteration) {
-    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
-  }
-
   private IUserListManager getUserListManager() {
     return db.getUserListManager();
   }
@@ -375,9 +363,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 //    }
     //  String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
     String installPath = pathHelper.getInstallPath();
-    logger.debug("setInstallPath " + installPath +
-        //" " + lessonPlanFile + " media " +
-        serverProps.getMediaDir());// + " rel media " + mediaDir);
+    logger.debug("setInstallPath " + installPath);
     db.setInstallPath(installPath, "");
   }
 }

@@ -529,6 +529,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param userExercise
    * @param language
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
+   * @return CommonExercise with id from database
    */
   @Override
   public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language) {

@@ -360,7 +360,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     };
   }
 
-  protected void gotClickOnItem(final UserInfo user) {
+  public void gotClickOnItem(final UserInfo user) {
     super.gotClickOnItem(user);
     //MiniUser user1 = user.getUser();
     int id = user.getID();

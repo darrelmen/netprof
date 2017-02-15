@@ -33,6 +33,7 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.safehtml.shared.SafeUri;
@@ -296,6 +297,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     Panel column = new FlowPanel();
     add(column);
     addTypeAhead(column);
+    DivWidget optionalWidget = getOptionalWidget();
+    if (optionalWidget != null) column.add(optionalWidget);
 
     // row 2
     add(pagingContainer.getTableWithPager());
@@ -320,6 +323,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
+  protected DivWidget getOptionalWidget() {
+    return null;
+  }
   /**
    * @param text
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#makeClickableText(String, String, String, boolean)
@@ -576,7 +582,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param itemID
    * @see #useExercise
    */
-  protected void markCurrentExercise(int itemID) {
+  public void markCurrentExercise(int itemID) {
     pagingContainer.markCurrentExercise(itemID);
   }
 

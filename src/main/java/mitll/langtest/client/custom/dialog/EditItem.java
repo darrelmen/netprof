@@ -32,44 +32,18 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.ReloadableContainer;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.services.ExerciseService;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AnnotationExercise;
-import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -86,6 +60,9 @@ import java.util.logging.Logger;
 public class EditItem {
   private final Logger logger = Logger.getLogger("EditItem");
 
+  /**
+   * @deprecated
+   */
   public static final String NEW_ITEM = "*New Item*";
   /**
    * @see #getNewItem
@@ -95,46 +72,34 @@ public class EditItem {
   private static final String EDIT_ITEM = "editItem";
 
   private final ExerciseController controller;
-  private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
-
-  private final LangTestDatabaseAsync service;
-  private final UserManager userManager;
 
   private final ReloadableContainer predefinedContentList;
 
-  private UserFeedback feedback = null;
-  private HasText itemMarker;
+  // private HasText itemMarker;
 
   private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   private final String instanceName;
-  private Exercise newExercise;
+//  private Exercise newExercise;
 
   /**
-   * @param service
-   * @param userManager
    * @param controller
    * @see mitll.langtest.client.custom.ListManager#ListManager
    */
-  public EditItem(final LangTestDatabaseAsync service,
-                  final UserManager userManager, ExerciseController controller,
-                  ReloadableContainer predefinedContentList, UserFeedback feedback
-  ) {
+  public EditItem(ExerciseController controller,
+                  ReloadableContainer predefinedContentList) {
     this.controller = controller;
-    this.service = service;
-    this.userManager = userManager;
     this.predefinedContentList = predefinedContentList;
-    this.feedback = feedback;
     this.instanceName = "EditItem";//instanceName;
   }
 
   /**
    * @param originalList
-   * @param itemMarker
-   * @param includeAddItem
    * @return
+   * @paramx itemMarker
+   * @paramx includeAddItem
    * @see mitll.langtest.client.custom.ListManager#showEditItem
    */
-  public Panel editItem(UserList<CommonShell> originalList, final HasText itemMarker, boolean includeAddItem) {
+  public Panel editItem(UserList<CommonShell> originalList) {//}, final HasText itemMarker, boolean includeAddItem) {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("EditItem_for_" + originalList.getName());
     Panel pagerOnLeft = new SimplePanel();
@@ -145,14 +110,15 @@ public class EditItem {
 
     hp.add(contentOnRight);
 
-    this.itemMarker = itemMarker; // TODO : something less awkward
+    //  this.itemMarker = itemMarker; // TODO : something less awkward
 
-    UserList<CommonShell> copy = makeListOfOnlyYourItems(originalList);
+    // TODO : why a copy here???
+//    UserList<CommonShell> copy = makeListOfOnlyYourItems(originalList);
 
-    exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, copy, originalList, includeAddItem);
+    exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
 
-    rememberAndLoadFirst(copy, exerciseList);
+    rememberAndLoadFirst(originalList, exerciseList);
     return hp;
   }
 
@@ -166,80 +132,40 @@ public class EditItem {
     }*/
   }
 
+/*
   private UserList<CommonShell> makeListOfOnlyYourItems(UserList<CommonShell> toCopy) {
     return toCopy.getCopy();
   }
+*/
 
   /**
    * @param right
    * @param instanceName
-   * @param ul
    * @param originalList
-   * @param includeAddItem
    * @return
+   * @paramz ul
+   * @paramz includeAddItem
    * @see #editItem
    */
   private PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel right,
                                                                            String instanceName,
-                                                                           UserList<CommonShell> ul,
-                                                                           UserList<CommonShell> originalList,
-                                                                           final boolean includeAddItem) {
+                                                                           //UserList<CommonShell> ul,
+                                                                           UserList<CommonShell> originalList
+                                                                           /*,
+                                                                           final boolean includeAddItem*/) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
 
+/*
     if (includeAddItem) {
       CommonExercise newItem = getNewItem();
       //logger.info("makeExerciseList : Adding " + newItem);// + " with " + newItem.getTooltip());
       ul.addExercise(newItem);
     }
+*/
 
-    final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
-        new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
-            true, instanceName, false, false, ActivityType.EDIT) {
-          @Override
-          protected void onLastItem() {
-            new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
-              @Override
-              public void onHidden(HiddenEvent hiddenEvent) {
-                reloadExercises();
-              }
-            });
-          }
-
-          @Override
-          protected void askServerForExercise(int itemID) {
-            if (itemID == NEW_EXERCISE_ID) {
-              useExercise(getNewItem());
-            } else {
-              //     logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
-              super.askServerForExercise(itemID);
-            }
-          }
-
-          @Override
-          public List<CommonShell> rememberExercises(List<CommonShell> result) {
-            clear();
-            boolean addNewItem = includeAddItem;
-
-            for (final CommonShell es : result) {
-              logger.info("Adding " + es.getID() + " : " + es.getClass());
-              addExercise(es);
-              if (includeAddItem && es.getID() == NEW_EXERCISE_ID) {
-                addNewItem = false;
-              }
-            }
-
-            if (addNewItem) {
-              CommonExercise newItem = getNewItem();
-
-              logger.info("Adding " + newItem.getID() + " : " + newItem.getClass());
-
-              addExercise(newItem);  // TODO : fix this
-            }
-            flush();
-            return result;
-          }
-        };
-    setFactory(exerciseList, ul, originalList);
+    exerciseList =
+        new EditableExerciseList(controller, this, right, instanceName, /*includeAddItem,*/ originalList);
+    setFactory(exerciseList, originalList);
     exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -251,6 +177,8 @@ public class EditItem {
     return exerciseList;
   }
 
+//  private EditableExerciseList editableExerciseList;
+
   /**
    * TODO : don't do it like this!
    * <p>
@@ -258,14 +186,14 @@ public class EditItem {
    * <p>
    *
    * @return
-   * @see #makeExerciseList(Panel, String, UserList, UserList, boolean)
+   * @see #makeExerciseList
    */
-  private CommonExercise getNewItem() {
-    int user = userManager.getUser();
+  public CommonExercise getNewItem() {
+    int user = controller.getUserManager().getUser();
     Exercise exercise = new Exercise(
         NEW_EXERCISE_ID,
         user,
-        NEW_ITEM,
+        "",
         getProjectid(),
         false);
 
@@ -281,9 +209,9 @@ public class EditItem {
    *
    * @param userid
    * @return
-   * @see #populatePanel
+   * @seex #populatePanel
    */
-  private Exercise createNewItem(int userid) {
+/*  public Exercise createNewItem(int userid) {
     Exercise exercise = new Exercise(-1,
         userid,
         "",
@@ -293,8 +221,7 @@ public class EditItem {
     addContext(userid, exercise);
 
     return exercise;
-  }
-
+  }*/
   private void addContext(int userid, Exercise exercise) {
     Exercise context = new Exercise(-1,
         userid,
@@ -311,18 +238,35 @@ public class EditItem {
   }
 
   private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
-                          final UserList<CommonShell> ul,
+                          //final UserList<CommonShell> ul,
                           final UserList<CommonShell> originalList) {
     final PagingExerciseList<CommonShell, CommonExercise> outer = exerciseList;
 
-    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(service,
-        feedback, controller, exerciseList) {
+    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(
+        controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
+      public Panel getExercisePanel(CommonExercise exercise) {
         Panel panel = new ResizableSimple();
         panel.getElement().setId("EditItemPanel");
-        Exercise userExercise = new Exercise(e);  // copy exercise??? TODO : why???
-        populatePanel(userExercise, panel, ul, originalList, itemMarker, outer);
+
+        boolean iCreatedThisItem = didICreateThisItem(exercise) ||
+            (controller.getUserManager().isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
+        if (iCreatedThisItem) {  // it's mine!
+          ReloadableContainer predefinedContentList = EditItem.this.predefinedContentList;
+          EditableExerciseDialog editableExercise =
+              new EditableExerciseDialog(controller,
+                  exercise,
+                  originalList,
+                  outer,
+                  predefinedContentList,
+                  getInstance()
+              );
+          panel.add(editableExercise.addNew(outer, panel));
+          editableExercise.setFields(exercise);
+        }
+
+        // Exercise userExercise = new Exercise(e);  // copy exercise??? TODO : why???
+//        populatePanel(exercise, panel,/* ul,*/ originalList, /*itemMarker,*/ outer);
         return panel;
       }
     });
@@ -349,15 +293,15 @@ public class EditItem {
   private void rememberAndLoadFirst(final UserList<CommonShell> ul,
                                     PagingExerciseList<CommonShell, CommonExercise> npfExerciseList) {
     npfExerciseList.setUserListID(ul.getID());
-    List<CommonShell> userExercises = new ArrayList<>();
-    List<CommonShell> exercises = ul.getExercises();
-    for (CommonShell e : exercises) {
-      userExercises.add(e);  // TODO something better here
-    }
-    npfExerciseList.rememberAndLoadFirst(userExercises);
+//    List<CommonShell> userExercises = new ArrayList<>();
+//    List<CommonShell> exercises = ul.getExercises();
+//    for (CommonShell e : exercises) {
+//      userExercises.add(e);  // TODO something better here
+//    }
+    npfExerciseList.rememberAndLoadFirst(ul.getExercises());
   }
 
-  private void sortList(List<CommonShell> copy) {
+/*  private void sortList(List<CommonShell> copy) {
     boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
     ExerciseComparator exerciseComparator = new ExerciseComparator(controller.getTypeOrder());
 
@@ -377,23 +321,23 @@ public class EditItem {
 //    for (CommonShell es:copy) {
 //      logger.info("sortList after " +es.getID() + " " + es.getEnglish() + " "+es.getForeignLanguage());
 //    }
-  }
+  }*/
 
 
   /**
    * @param exercise
    * @param right
-   * @param ul
-   * @param originalList
-   * @param itemMarker
+   * @paramx ul
+   * @paramx originalList
+   * @paramx itemMarker
    * @param pagingContainer
-   * @see #setFactory(mitll.langtest.client.list.PagingExerciseList, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList)
+   * @see #setFactory
    */
-  private void populatePanel(CommonExercise exercise,
+/*  private void populatePanel(CommonExercise exercise,
                              final Panel right,
-                             final UserList<CommonShell> ul,
+                            // final UserList<CommonShell> ul,
                              final UserList<CommonShell> originalList,
-                             final HasText itemMarker,
+                            // final HasText itemMarker,
                              final ListInterface<CommonShell> pagingContainer) {
     if (exercise.getID() == NEW_EXERCISE_ID) {
       if (newExercise == null) {
@@ -405,35 +349,36 @@ public class EditItem {
     } else {
       addEditOrAddPanel(exercise, itemMarker, originalList, right, ul, pagingContainer, false, true);
     }
-  }
+  }*/
 
 
   /**
    * @param newExercise
-   * @param itemMarker
-   * @param originalList
-   * @param right
-   * @param ul
-   * @param pagingContainer
-   * @param doNewExercise
-   * @param setFields
-   * @see #populatePanel
+   * @paramx originalList
+   * @paramx right
+   * @paramx pagingContainer
+   * @paramx setFields
+   * @paramx itemMarker
+   * @paramx ul
+   * @paramx doNewExercise
+   * @seex #populatePanel
    */
-  private void addEditOrAddPanel(CommonExercise newExercise,
-                                 HasText itemMarker,
+/*  private void addEditOrAddPanel(CommonExercise newExercise,
+                               //  HasText itemMarker,
                                  UserList<CommonShell> originalList,
                                  Panel right,
-                                 UserList<CommonShell> ul,
+                                 //UserList<CommonShell> ul,
                                  ListInterface<CommonShell> pagingContainer,
-                                 boolean doNewExercise, boolean setFields) {
-    NewUserExercise editableExercise = getAddOrEditPanel(newExercise, itemMarker, originalList, doNewExercise);
+                                 //boolean doNewExercise,
+                                 boolean setFields) {
+    NewUserExercise editableExercise = getAddOrEditPanel(newExercise, originalList*//*, doNewExercise*//*);
     right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
     if (setFields) editableExercise.setFields(newExercise);
-  }
+  }*/
 
-  void clearNewExercise() {
-    this.newExercise = null;
-  }
+//  void clearNewExercise() {
+//    this.newExercise = null;
+//  }
 
   /**
    * We can go three ways:
@@ -441,38 +386,44 @@ public class EditItem {
    * 1) Make a new item
    * 2) Edit an item that I created
    * 3) Edit an item on the list made by someone else - all I can do then is remove it from my list.
+   * <p>
+   * TODO : don't do the choice - make these come up as dialogs or something
    *
-   * @param exercise
-   * @param itemMarker
-   * @param originalList
-   * @param doNewExercise
    * @return
-   * @see #addEditOrAddPanel(CommonExercise, HasText, UserList, Panel, UserList, ListInterface, boolean, boolean)
+   * @paramx exercise
+   * @paramx originalList
+   * @paramx doNewExercise
+   * @seex #addEditOrAddPanel(CommonExercise, HasText, UserList, Panel, UserList, ListInterface, boolean, boolean)
    */
-  private NewUserExercise getAddOrEditPanel(CommonExercise exercise,
-                                            HasText itemMarker,
-                                            UserList<CommonShell> originalList,
-                                            boolean doNewExercise) {
+ /* private NewUserExercise getAddOrEditPanel(CommonExercise exercise,
+                                            UserList<CommonShell> originalList
+                                            //,
+                                            //                                          boolean doNewExercise
+  ) {
     NewUserExercise editableExercise;
-    if (doNewExercise) { // whole new exercise
-      editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance(), originalList);
+ *//*   if (doNewExercise) { // whole new exercise
+      editableExercise = new NewUserExercise(
+          controller,
+          this,
+          exercise,
+          getInstance(),
+          originalList);
+    } else {*//*
+    boolean iCreatedThisItem = didICreateThisItem(exercise) ||
+        (controller.getUserManager().isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
+    if (iCreatedThisItem) {  // it's mine!
+      editableExercise = new EditableExerciseDialog(controller, this, *//*itemMarker,*//* exercise,
+          originalList,
+          exerciseList,
+          predefinedContentList,
+          getInstance()
+      );
     } else {
-      boolean iCreatedThisItem = didICreateThisItem(exercise) ||
-          (userManager.isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
-      if (iCreatedThisItem) {  // it's mine!
-        editableExercise = new EditableExerciseDialog(service, controller, this, itemMarker, exercise,
-            originalList,
-            exerciseList,
-            predefinedContentList,
-            getInstance()
-        );
-      } else {
-        editableExercise = new RemoveFromListOnlyExercise(itemMarker, exercise, originalList);
-      }
+      editableExercise = new RemoveFromListOnlyExercise(exercise, originalList);
     }
+    // }
     return editableExercise;
-  }
-
+  }*/
   private String getInstance() {
     return instanceName;
   }
@@ -481,20 +432,24 @@ public class EditItem {
    * @param exercise
    * @return
    * @paramx originalList
-   * @see EditItem#getAddOrEditPanel(CommonExercise, HasText, UserList, boolean)
+   * @seex EditItem#getAddOrEditPanel(CommonExercise, UserList, boolean)
    */
   private boolean didICreateThisItem(CommonExercise exercise) {
-    boolean isMine = exercise.getCreator() == controller.getUser();
-    // logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
-    return isMine;
+    return exercise.getCreator() == controller.getUser();
   }
 
   /**
-   * @see #getAddOrEditPanel(CommonExercise, HasText, UserList, boolean)
+   * @see #getAddOrEditPanel(CommonExercise, UserList, boolean)
    */
-  private class RemoveFromListOnlyExercise extends NewUserExercise {
-    RemoveFromListOnlyExercise(HasText itemMarker, CommonExercise exercise, UserList<CommonShell> originalList) {
-      super(EditItem.this.service, EditItem.this.controller, itemMarker, EditItem.this, exercise, EditItem.this.getInstance(), originalList);
+ /* private class RemoveFromListOnlyExercise extends NewUserExercise {
+    RemoveFromListOnlyExercise(CommonExercise exercise, UserList<CommonShell> originalList) {
+      super(
+          EditItem.this.controller,
+          EditItem.this,
+          exercise,
+
+          EditItem.this.getInstance(),
+          originalList);
     }
 
     @Override
@@ -527,5 +482,6 @@ public class EditItem {
     @Override
     public void setFields(CommonExercise newUserExercise) {
     }
-  }
+  }*/
+
 }

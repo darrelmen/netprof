@@ -668,7 +668,7 @@ public class LangTest implements
                   initialUI.setSplash();
                   isMicConnected = false;
                 }
-              }, false, true);
+              }, false, true, 600, 400);
         }
       }
 

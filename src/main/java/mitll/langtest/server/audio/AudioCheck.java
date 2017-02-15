@@ -260,7 +260,7 @@ public class AudioCheck {
       }
 
       float clippedRatio = ((float) countClipped) / (float) frameLength;
-      float clippedRatio2 = ((float) cc) / (float) frameLength;
+    //  float clippedRatio2 = ((float) cc) / (float) frameLength;
       boolean wasClipped = usePercent ? clippedRatio > CLIPPED_RATIO : clippedRatio > CLIPPED_RATIO_TIGHTER;// > CLIPPED_FRAME_COUNT;
       //  boolean wasClipped2 = usePercent ? clippedRatio2 > CLIPPED_RATIO : cc > 1;
 /*      logger.info("of " + total +" got " +countClipped + " out of " + n +"  or " + clippedRatio  + "/" +clippedRatio2+

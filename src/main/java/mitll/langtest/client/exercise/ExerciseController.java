@@ -74,14 +74,15 @@ public interface ExerciseController extends EventRegistration {
 
   UserServiceAsync getUserService();
 
-  UserManager getUserManager();
-
   /**
    * TODO : do we really need to do this?
    *
    * @return
    */
   ScoringServiceAsync getScoringService();
+
+
+  UserManager getUserManager();
 
   UserFeedback getFeedback();
 

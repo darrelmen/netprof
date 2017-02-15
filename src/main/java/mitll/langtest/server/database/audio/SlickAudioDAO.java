@@ -562,7 +562,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         logger.error("configuration error - expecting media directory " + mediaDir + " to be directory.");
       }
     } else {
-      logger.error("configuration error? - expecting a media directory " + mediaDir);
+      logger.warn("makeSureAudioIsThere : configuration error? - expecting a media directory " + mediaDir);
     }
   }
 

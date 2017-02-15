@@ -73,18 +73,21 @@ public class ModalInfoDialog {
     this(title, message, null);
   }
 
-  public ModalInfoDialog(String title, Widget widget, boolean addEnterKeyBinding) {
-    this(title, MESSAGES, Collections.emptyList(), widget, null, false, addEnterKeyBinding);
+  public ModalInfoDialog(String title, Widget widget, boolean addEnterKeyBinding, int width, int height, HiddenHandler hiddenHandler) {
+    this(title, MESSAGES, Collections.emptyList(), widget, null, false, addEnterKeyBinding, width, height);
   }
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
-    this(title, Collections.singleton(message), Collections.emptyList(), null, handler, false, true);
+    this(title, Collections.singleton(message), Collections.emptyList(), null, handler, false, true, 600, 400);
   }
 
   public ModalInfoDialog(String title, Collection<String> messages, Collection<String> values, Widget widget,
-                         HiddenHandler handler, boolean bigger, boolean addEnterKeyBinding) {
+                         HiddenHandler handler, boolean bigger, boolean addEnterKeyBinding, int width, int height) {
     Modal modal = getModal(title, messages, values, widget, handler, bigger, addEnterKeyBinding);
-    modal.setWidth(600);
+    modal.setWidth(width);
+    modal.setHeight(height+"px");
+    modal.setMaxHeigth(height+"px");
+
     modal.show();
   }
 
@@ -98,7 +101,9 @@ public class ModalInfoDialog {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
 
-    addContent(messages, values, modal, bigger);
+    if (!messages.isEmpty()) {
+      addContent(messages, values, modal, bigger);
+    }
 
     if (widget != null) modal.add(widget);
 

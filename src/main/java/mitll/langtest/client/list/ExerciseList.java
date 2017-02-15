@@ -265,7 +265,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   abstract ActivityType getActivityType();
   //{
   //  return  getInstance() == null || getInstance().startsWith("record") ? AudioType.RECORDER.toString() : getInstance();
- // }
+  // }
 
   public String getInstance() {
     return instance;
@@ -465,7 +465,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (exerciseID < 0) {
       loadFirstExercise(searchIfAny);
     } else {
-    //  logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny +"'");
+      //  logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny +"'");
       pushFirstSelection(exerciseID, searchIfAny);
     }
   }
@@ -488,7 +488,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   public T removeExercise(T es) {
     int id = es.getID();
     T current = getCurrentExercise();
-    if (current.getID() ==id) {
+    if (current.getID() == id) {
       if (!onLast(current)) {
         //logger.info(getClass() + " removeExercise - load next after " + id);
         loadNextExercise(current);
@@ -502,14 +502,16 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public void hide() { getParent().setVisible(false);  }
+  public void hide() {
+    getParent().setVisible(false);
+  }
 
   /**
    * If we're not already showing this item, ask there server for the exercise.
    * Does this by pushing a history item and then noticing the history item change.
    *
-   * @see #rememberAndLoadFirst
    * @param searchIfAny
+   * @see #rememberAndLoadFirst
    */
   protected void loadFirstExercise(String searchIfAny) {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
@@ -571,9 +573,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 //      } else {
 //        logger.info("got " + hasExercise(id) + " current " + getCurrentExerciseID() + " vs " + id);
 //      }
-    } else if (id != EditItem.NEW_EXERCISE_ID) {
-      logger.warning("checkAndAskServer : can't load " + id);
     }
+/*    else if (id != EditItem.NEW_EXERCISE_ID) {
+      logger.warning("checkAndAskServer : can't load " + id);
+    }*/
     else {
       logger.warning("checkAndAskServer : skipping request for " + id);
     }
@@ -618,21 +621,21 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     int i = getIndex(itemID);
     if (!isOnLastItem(i)) {
       T next = getAt(i + 1);
-      if (next.getID() != EditItem.NEW_EXERCISE_ID) {
+      //if (next.getID() != EditItem.NEW_EXERCISE_ID) {
       //  logger.info("ask for next " + next);
-        service.getExercise(next.getID(), incorrectFirstOrder, new AsyncCallback<U>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
+      service.getExercise(next.getID(), incorrectFirstOrder, new AsyncCallback<U>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
 
-          @Override
-          public void onSuccess(U result) {
-            cachedNext = result;
-            //if (DEBUG) logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getOldID() + " instance " + instance);
-          }
-        });
-      }
+        @Override
+        public void onSuccess(U result) {
+          cachedNext = result;
+          //if (DEBUG) logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getOldID() + " instance " + instance);
+        }
+      });
     }
+    //}
   }
 
   private int getUser() {
@@ -678,7 +681,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void useExercise(final U commonExercise) {
     //  logger.info("ExerciseList.useExercise : commonExercise " + commonExercise.getOldID());
-   // String itemID = commonExercise.getOldID();
+    // String itemID = commonExercise.getOldID();
     markCurrentExercise(commonExercise.getID());
 
     Scheduler.get().scheduleDeferred(new Command() {
@@ -771,7 +774,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
-  public String reportLocal() {
+  private String reportLocal() {
     return "list " + getInstance() + " id " + getElement().getId();
   }
 
@@ -783,7 +786,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Compare with google response for this state.
    */
   void showEmptyExercise() {
-    createdPanel = new SimplePanel(new Heading(3,"<b>Your search or selection did not match any items.</b>"));
+    createdPanel = new SimplePanel(new Heading(3, "<b>Your search or selection did not match any items.</b>"));
     createdPanel.getElement().setId(EMPTY_PANEL);
     innerContainer.setWidget(createdPanel);
   }
@@ -793,7 +796,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     removeComponents();
   }
 
-  protected abstract void markCurrentExercise(int itemID);
+  public abstract void markCurrentExercise(int itemID);
 
   @Override
   public boolean loadNext() {
@@ -808,7 +811,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public boolean loadNextExercise(HasID current) {
     if (DEBUG) logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + instance);
-   // String id = current.getID();
+    // String id = current.getID();
     int i = getIndex(current.getID());
     boolean onLast = isOnLastItem(i);
 /*    logger.info("ExerciseList.loadNextExercise current is : " + id + " index " + i +

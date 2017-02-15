@@ -73,9 +73,14 @@ import java.util.logging.Logger;
 public class RecordButton extends Button {
   private final Logger logger = Logger.getLogger("RecordButton");
 
-  private static final int PERIOD_MILLIS = 500;
+  /**
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
+   */
   public static final String RECORD1 = "Record      ";
   public static final String STOP1 = "Recording...";
+
+  private static final int PERIOD_MILLIS = 500;
+
   private static final String WINDOWS = "Win32";
   private final String RECORD;
   private final String STOP;
@@ -89,7 +94,7 @@ public class RecordButton extends Button {
   private RecordingListener recordingListener;
   private final PropertyHandler propertyHandler;
   private Timer afterStopTimer = null;
-  int afterStopDelayMillis = 50;
+  private int afterStopDelayMillis;// = 50;
 
   public interface RecordingListener {
     void startRecording();
@@ -173,7 +178,7 @@ public class RecordButton extends Button {
             mouseDown = true;
             doClick();
           } else {
-            logger.info("ignoring mouse down since mouse already down " + mouseDown);
+            logger.info("ignoring mouse down since mouse already down ");
           }
         }
       });

@@ -418,7 +418,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   public abstract Long getItemDate(T shell);
 
-  protected void gotClickOnItem(final T user) {
+  public void gotClickOnItem(final T user) {
     storeSelectedUser(user.getID());
   }
 

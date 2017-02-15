@@ -397,24 +397,12 @@ public class ServerProperties {
   }
 
   /**
-   * @return
-   * @Deprecated each project will have it's types and type order
-   */
-/*  public Collection<String> getTypes() {
-    String property = props.getProperty(TYPE_ORDER, "Unit,Chapter");
-    return Arrays.asList(property.split(","));
-  }*/
-
-  /**
    * Relative to install location
    *
    * @return
    * @see LangTestDatabaseImpl#setInstallPath
    */
-  public String getMediaDir() {
-    String default_best_audio = getAudioBaseDir() + BEST_AUDIO;
-    return props.getProperty(MEDIA_DIR, default_best_audio);
-  }
+  public String getMediaDir() {  return props.getProperty(MEDIA_DIR, getAudioBaseDir() + BEST_AUDIO);  }
 
   /**
    * Relative to install location

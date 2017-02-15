@@ -308,7 +308,7 @@ public class NPFHelper implements RequiresResize {
       final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
       final String instanceName,
       final boolean showQC) {
-    return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
+    return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {

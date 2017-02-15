@@ -49,11 +49,12 @@ import java.io.IOException;
 public class PathWriter {
   private static final Logger logger = LogManager.getLogger(PathWriter.class);
   private final File bestDir;
+  private final boolean foundBestDir;
 
   public PathWriter(ServerProperties properties) {
     bestDir = new File(properties.getMediaDir());
-    if (!bestDir.exists() && !bestDir.mkdir()) {
-      if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
+    if (!(foundBestDir = bestDir.exists())) {
+      logger.warn("Please make reference audio directory " + bestDir.getAbsolutePath());
     }
   }
 
@@ -79,9 +80,9 @@ public class PathWriter {
                                       ServerProperties serverProperties,
                                       TrackInfo trackInfo) {
     File bestDirForExercise = new File(bestDir + File.separator + language.toLowerCase(), "" + exid);
-    if (!bestDirForExercise.exists() && !bestDirForExercise.mkdirs()) {
+    if (!bestDirForExercise.exists() && (foundBestDir && !bestDirForExercise.mkdirs())) {
       if (!bestDirForExercise.exists()) {
-        logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath()); // need chmod, not writeable
+        logger.warn("getPermanentAudioPath huh? couldn't make " + bestDirForExercise.getAbsolutePath()); // need chmod, not writeable
       }
     }
     File destination = new File(bestDirForExercise, destFileName);

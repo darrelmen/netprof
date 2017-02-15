@@ -160,6 +160,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
     table.setRowCount(getList().size());
   }
 
+  public T getSelected() {
+    return selectionModel.getSelectedObject();
+  }
+
   /**
    * @param id2
    * @param header
@@ -236,7 +240,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
     return rows;
   }
 
-  float adjustVerticalRatio(float ratio) {
+  private float adjustVerticalRatio(float ratio) {
     return ratio;
   }
 

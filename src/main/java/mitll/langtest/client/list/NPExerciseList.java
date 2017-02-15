@@ -79,10 +79,10 @@ public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList
             controller,
             getVerticalUnaccountedFor(),
             getActivityType() == ActivityType.RECORDER,
-            showFirstNotCompleted,
-            getInstance()) {
+            showFirstNotCompleted
+        ) {
           @Override
-          protected void gotClickOnItem(CommonShell e) {
+          public void gotClickOnItem(CommonShell e) {
             outer.gotClickOnItem(e);
           }
         };

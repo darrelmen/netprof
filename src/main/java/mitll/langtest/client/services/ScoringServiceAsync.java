@@ -68,4 +68,7 @@ public interface ScoringServiceAsync {
   void getResultASRInfo(int resultID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);
 
   void isHydraRunning(int projid, AsyncCallback<Boolean> async);
+
+  void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Boolean> async);
+
 }
