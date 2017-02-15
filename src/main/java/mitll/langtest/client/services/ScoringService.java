@@ -35,9 +35,11 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -90,4 +92,12 @@ public interface ScoringService extends RemoteService {
                            String device);
 
   boolean isHydraRunning(int projid);
+
+
+  /**
+   * @param foreign
+   * @return
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
+   */
+  boolean isValidForeignPhrase(String foreign, String transliteration);
 }

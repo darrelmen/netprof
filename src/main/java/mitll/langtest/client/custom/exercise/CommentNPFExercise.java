@@ -197,7 +197,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
           for (CommonExercise contextEx : directlyRelated) {
             container.add(getContext(contextEx, foreignLanguage, altFL));
           }
-          new ModalInfoDialog(CONTEXT_SENTENCE, container,false);
+          new ModalInfoDialog(CONTEXT_SENTENCE, container,false, 600, 400, null);
         }
       });
 

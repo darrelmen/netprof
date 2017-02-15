@@ -208,7 +208,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
   }*/
 
   @Override
-  protected void gotClickOnItem(final T project) {
+  public void gotClickOnItem(final T project) {
     super.gotClickOnItem(project);
     rightSide.clear();
 

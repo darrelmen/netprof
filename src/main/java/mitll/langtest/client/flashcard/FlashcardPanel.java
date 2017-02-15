@@ -70,7 +70,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.InitialUI;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.exercise.CommentBox;
@@ -139,13 +138,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   final String instance;
   final ListInterface exerciseList;
   private final DivWidget prevNextRow;
-  final LangTestDatabaseAsync service;
+  //final LangTestDatabaseAsync service;
   boolean showOnlyEnglish = false;
   private Button autoPlay;
 
   /**
    * @param e
-   * @param service
    * @param controller
    * @param soundFeedback
    * @param endListener
@@ -153,12 +151,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @param exerciseList
    * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
-  FlashcardPanel(final T e, final LangTestDatabaseAsync service,
-                        final ExerciseController controller, boolean addKeyBinding,
-                        final ControlState controlState,
-                        MySoundFeedback soundFeedback,
-                        SoundFeedback.EndListener endListener,
-                        String instance, ListInterface exerciseList) {
+  FlashcardPanel(final T e,
+                 final ExerciseController controller,
+                 boolean addKeyBinding,
+                 final ControlState controlState,
+                 MySoundFeedback soundFeedback,
+                 SoundFeedback.EndListener endListener,
+                 String instance, ListInterface exerciseList) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
     this.controller = controller;
@@ -166,7 +165,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     this.endListener = endListener;
     this.instance = instance;
     this.exerciseList = exerciseList;
-    this.service = service;
+   // this.service = service;
     controlState.setStorage(new KeyStorage(controller));
 
     this.soundFeedback = soundFeedback;
@@ -196,7 +195,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     //  logger.info("Adding recording widgets to " + middleVert.getElement().getExID());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-        addRecordingAndFeedbackWidgets(getID(), service, controller, middleVert);
+        addRecordingAndFeedbackWidgets(getID(), controller, middleVert);
       }
     });
     //  logger.info("After adding recording widgets to " + middleVert.getElement().getExID());
@@ -382,7 +381,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     clickToFlipContainer.setHeight("100px");
   }
 
-  void addRecordingAndFeedbackWidgets(int exerciseID, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
+  void addRecordingAndFeedbackWidgets(int exerciseID, ExerciseController controller, Panel contentMiddle) {
     if (controller.getProjectStartupInfo().isHasModel()) {
       logger.warning("addRecordingAndFeedbackWidgets : adding empty recording and feedback widgets " + this.getClass());
     }

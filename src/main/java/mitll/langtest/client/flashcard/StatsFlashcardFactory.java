@@ -128,7 +128,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    */
   public StatsFlashcardFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
                                ListInterface<L> exerciseList, String instance, UserList ul) {
-    super(service, feedback, controller, exerciseList);
+    super(controller, exerciseList);
     controlState = new ControlState();
     this.instance = instance;
     this.ul = ul;
@@ -195,7 +195,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private FlashcardPanel<CommonAnnotatable> getNoRecordFlashcardPanel(final CommonAnnotatable e) {
     return new FlashcardPanel<CommonAnnotatable>(e,
-        StatsFlashcardFactory.this.service,
         StatsFlashcardFactory.this.controller,
         ADD_KEY_BINDING,
         StatsFlashcardFactory.this.controlState,
@@ -294,13 +293,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     public StatsPracticePanel(CommonAnnotatable e, ListInterface<L> exerciseListToUse) {
       super(e,
-          StatsFlashcardFactory.this.service,
           StatsFlashcardFactory.this.controller,
           ADD_KEY_BINDING,
           StatsFlashcardFactory.this.controlState,
           soundFeedback,
           null,
-          StatsFlashcardFactory.this.instance, exerciseListToUse);
+          StatsFlashcardFactory.this.instance,
+          exerciseListToUse);
       soundFeedback.setEndListener(new SoundFeedback.EndListener() {
         @Override
         public void songStarted() {
@@ -345,10 +344,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     protected void gotAutoPlay(boolean b) {
       if (b) {
-     //   logger.info("gotAutoPlay got click...");
+        //   logger.info("gotAutoPlay got click...");
         playRefAndGoToNextIfSet();
       } else {
-     //   logger.info("gotAutoPlay abortPlayback");
+        //   logger.info("gotAutoPlay abortPlayback");
         abortPlayback();
       }
     }
@@ -429,7 +428,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 //      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
 //          " with " + exToCorrect + " and latest " + latestResultID + " and ids " + copies);
 
-      service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getID(), new AsyncCallback<AVPScoreReport>() {
+      controller.getService().getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
           logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
@@ -437,7 +436,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
         @Override
         public void onSuccess(AVPScoreReport scoreReport) {
-         // List<AVPHistoryForList> result = scoreReport.getAvpHistoryForLists();
+          // List<AVPHistoryForList> result = scoreReport.getAvpHistoryForLists();
           showFeedbackCharts(/*result,*/ scoreReport.getSortedHistory());
         }
       });
@@ -459,8 +458,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     /**
-     * @see #showFeedbackCharts
      * @return
+     * @see #showFeedbackCharts
      */
     private Panel getButtonsBelowScoreHistory() {
       Panel child = new HorizontalPanel();
@@ -475,7 +474,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       child.add(repeatButton);
 
       DivWidget lefty = new DivWidget();
-     // lefty.addStyleName("floatLeft");
+      // lefty.addStyleName("floatLeft");
       lefty.add(child);
       return lefty;
     }
@@ -573,14 +572,14 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       makeFlashcardButtonsVisible();
 
 //      String lastID = "";
-      int lastID = allExercises.isEmpty() ? -1:allExercises.get(allExercises.size()-1).getID();
+      int lastID = allExercises.isEmpty() ? -1 : allExercises.get(allExercises.size() - 1).getID();
 //      for (L ex : allExercises) {
 //        lastID = ex.getOldID();
 //      }
 //      String lastID = allExercises.get(allExercises.size() - 1).getOldID();
       int currentExerciseID = sticky.getCurrentExerciseID();
 
-    //  logger.info("startOver : current " + currentExerciseID);
+      //  logger.info("startOver : current " + currentExerciseID);
 
       if (currentExerciseID != -1 && currentExerciseID != lastID) {
         exerciseList.loadExercise(currentExerciseID);

@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.user;
 
+import com.mongodb.MongoTimeoutException;
 import com.mongodb.client.MongoCollection;
 import mitll.hlt.domino.server.user.IGroupDAO;
 import mitll.hlt.domino.server.user.IUserServiceDelegate;
@@ -90,7 +91,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
 
-  private final Mongo pool;
+  private Mongo pool;
 
   private final Map<String, User.Kind> roleToKind = new HashMap<>();
   /**
@@ -112,22 +113,31 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     super(database);
 
     populateRoles();
-    mitll.langtest.server.ServerProperties serverProps = database.getServerProps();
-    Properties props = serverProps.getProps();
+
+    Properties props = database.getServerProps().getProps();
+
+    try {
+      connectToMongo(database, props);
+    } catch (Exception e) {
+      logger.error("Couldn't connect to mongo - is it running and accessible? " + e);
+    }
+  }
+
+  private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
     pool = Mongo.createPool(new DBProperties(props));
 
     if (pool != null) {
       JSONSerializer serializer = Mongo.makeSerializer();
       Mailer mailer = new Mailer(new MailerProperties(props));
-      mitll.hlt.domino.server.util.ServerProperties dominoProps =
+      ServerProperties dominoProps =
           new ServerProperties(props, "1.0", "demo", "0", "now");
 
-      dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, serverProps.getAppTitle());
+      dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, database.getServerProps().getAppTitle());
       //String appName = dominoProps.getAppName();
       //     logger.info("DominoUserDAOImpl app name is " + appName);
 
       ignite = null;
-      if (dominoProps.isCacheEnabled() || true) {
+      if (/*dominoProps.isCacheEnabled() ||*/ true) {
         ignite = getIgnite();
         if (ignite != null) {
           ignite.configuration().setGridLogger(new Slf4jLogger());

@@ -186,7 +186,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   protected ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList) {
     final String instance = exerciseList.getInstance();
-    return new ExercisePanelFactory<T, U>(service, feedback, controller, exerciseList) {
+    return new ExercisePanelFactory<T, U>(controller, exerciseList) {
       @Override
       public Panel getExercisePanel(final U e) {
         return new WaveformExercisePanel<T, U>(e, service, controller, exerciseList, true, instance) {

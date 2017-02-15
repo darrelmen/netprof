@@ -151,11 +151,11 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="mitll.hlt.domino.server.util" level="DEBUG">
+        <logger name="mitll.hlt.domino.server.util" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="mitll.hlt.domino.server.user" level="DEBUG">
+        <logger name="mitll.hlt.domino.server.user" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
 

@@ -76,7 +76,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
-ActivityType activityType;
+  private ActivityType activityType;
+
   /**
    * @param currentExerciseVPanel
    * @param service
@@ -117,8 +118,9 @@ ActivityType activityType;
   }
 
   protected String getInitialHistoryToken() {
-    return getHistoryTokenFromUIState("",-1);
+    return getHistoryTokenFromUIState("", -1);
   }
+
   /**
    * @param search
    * @param id
@@ -185,7 +187,7 @@ ActivityType activityType;
   void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = History.getToken();
     //String idFromToken = ;
- //   int exidFromToken = Integer.parseInt(getIDFromToken(token));
+    //   int exidFromToken = Integer.parseInt(getIDFromToken(token));
     int exidFromToken = getIDFromToken(token);
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
         "' vs new exercise " + exerciseID + " instance " + getInstance());*/
@@ -230,7 +232,7 @@ ActivityType activityType;
   private void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
-    //  logger.info("\tcheckAndAskOrFirst "+ exerciseID);
+      //  logger.info("\tcheckAndAskOrFirst "+ exerciseID);
       checkAndAskServer(toUse);
     }
   }
@@ -318,6 +320,7 @@ ActivityType activityType;
 
   /**
    * For when we want to reload the list, but not by pushing state onto the URL.
+   *
    * @seex mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
    */
   public void reloadFromState() {
@@ -379,7 +382,7 @@ ActivityType activityType;
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected void restoreListBoxState(SelectionState selectionState) {
- //   logger.info("restoreListBoxState restore " + selectionState);
+    //   logger.info("restoreListBoxState restore " + selectionState);
     ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
     Collection<String> typeOrder = startupInfo.getTypeOrder();
     sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
@@ -445,8 +448,9 @@ ActivityType activityType;
   }
 
   protected void simpleLoadExercises(String selectionState, String prefix) {
-    loadExercises(selectionState,prefix,false,false,false,false);
+    loadExercises(selectionState, prefix, false, false, false, false);
   }
+
   /**
    * When we get a history token push, select the exercise type, section, and optionally item.
    *
@@ -507,12 +511,12 @@ ActivityType activityType;
       }
     } else {
       if (DEBUG) {
-        logger.info(getClass() + " skipping request for current list" + "\n" + request + " vs\n" +lastSuccessfulRequest);
+        logger.info(getClass() + " skipping request for current list" + "\n" + request + " vs\n" + lastSuccessfulRequest);
       }
       if (exerciseID != -1) {
         checkAndAskOrFirst(exerciseID);
       } else {
-        logger.warning("Not doing anything as response to request " + request+ "\n\tfor exercise " + exerciseID);
+        logger.warning("Not doing anything as response to request " + request + "\n\tfor exercise " + exerciseID);
       }
     }
   }
@@ -525,10 +529,10 @@ ActivityType activityType;
 //  public void reload(Map<String, Collection<String>> typeToSection) {
 //    loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), false, -1);
 //  }
-
   public SelectionState getSelectionState() {
     return getSelectionState(getHistoryTokenFromUIState("", -1));
   }
+
   private ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
     return getRequest(prefix)
         .setTypeToSelection(typeToSection)

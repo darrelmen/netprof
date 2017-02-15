@@ -213,7 +213,7 @@ public class Navigation implements RequiresResize, ShowTab {
       }
 
       protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-        return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
+        return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
             if (controller.getProps().canPracticeContext()) {

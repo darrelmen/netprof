@@ -188,7 +188,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
   }
 
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
+    return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         return new QCNPFExercise<>(e, controller, exerciseList, ActivityType.MARK_DEFECTS.toString());

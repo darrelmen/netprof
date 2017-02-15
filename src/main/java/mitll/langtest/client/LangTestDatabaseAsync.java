@@ -57,7 +57,6 @@ public interface LangTestDatabaseAsync {
 
   void getEvents(AsyncCallback<Collection<Event>> async);
 
-  void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Boolean> async);
 
   void getUserHistoryForList(int userid,
                              Collection<Integer> ids,

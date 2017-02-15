@@ -35,19 +35,15 @@ package mitll.langtest.client.custom.dialog;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.TabLink;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
@@ -55,12 +51,10 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -77,7 +71,6 @@ import mitll.langtest.client.qc.UserTitle;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -85,11 +78,9 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
-import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.user.MiniUser;
 
@@ -160,25 +151,23 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private CheckBox keepAudio = new CheckBox("Keep Audio even if text changes");
 
   /**
-   * @param itemMarker
    * @param changedUserExercise
    * @param originalList
    * @param exerciseList
    * @paramx predefinedContent   - this should be a reference to the Learn tab exercise list, but it's not getting set.
    * @see mitll.langtest.client.custom.content.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
-  public ReviewEditableExercise(LangTestDatabaseAsync service,
-                                ExerciseController controller,
-                                HasText itemMarker,
+  public ReviewEditableExercise(ExerciseController controller,
                                 CommonExercise changedUserExercise,
 
                                 UserList<CommonShell> originalList,
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                                 ReloadableContainer predefinedContent,
                                 String instanceName) {
-    super(service, controller,
-        null,
-        itemMarker, changedUserExercise, originalList, exerciseList,
+    super(controller,
+        changedUserExercise,
+        originalList,
+        exerciseList,
         predefinedContent,
         instanceName);
     this.exerciseList = exerciseList;
@@ -350,10 +339,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see #makeAudioRow
    */
   private <X extends CommonExercise & AnnotationExercise> void addTabsForUsers(X commonExercise,
-                                                                            TabPanel tabPanel,
-                                                                            Map<MiniUser, List<AudioAttribute>> userToAudio,
-                                                                            List<MiniUser> users,
-                                                                            Collection<AudioAttribute> displayed) {
+                                                                               TabPanel tabPanel,
+                                                                               Map<MiniUser, List<AudioAttribute>> userToAudio,
+                                                                               List<MiniUser> users,
+                                                                               Collection<AudioAttribute> displayed) {
     int me = controller.getUser();
     UserTitle userTitle = new UserTitle();
     for (MiniUser user : users) {
@@ -473,8 +462,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private <X extends CommonExercise & AnnotationExercise> Widget getPanelForAudio(final X exercise,
-                                                                               final AudioAttribute audio,
-                                                                               RememberTabAndContent tabAndContent) {
+                                                                                  final AudioAttribute audio,
+                                                                                  RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
@@ -673,14 +662,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     fixed.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true, true);
+        validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, true, true);
       }
     });
     return fixed;
   }
 
   /**
-   * @param ul
    * @param exerciseList
    * @param toAddTo
    * @param onClick
@@ -688,11 +676,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
    */
   @Override
-  void afterValidForeignPhrase(final UserList<CommonShell> ul,
-                               final ListInterface<CommonShell> exerciseList,
+  void afterValidForeignPhrase(final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
-    super.afterValidForeignPhrase(ul, exerciseList, toAddTo, onClick);
+    super.afterValidForeignPhrase(exerciseList, toAddTo, onClick);
     LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
   }
 
@@ -825,7 +812,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   /**
-   * @see #isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
+   * @see #isValidForeignPhrase
    */
   @Override
   protected void checkIfNeedsRefAudio() {
@@ -887,16 +874,15 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private void userSaidExerciseIsFixed() {
     final int id = newUserExercise.getID();
-    int user = controller.getUser();
+    //   int user = controller.getUser();
 
 //    logger.info("doAfterEditComplete : forgetting exercise " + id + " current user " + user + " before list had " + ul.getExercises().size());
-    if (!ul.remove(newUserExercise)) {
-      logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
-    }
     if (!originalList.remove(newUserExercise)) {
-      //   logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
+      logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + originalList);
     }
-
+//    if (!originalList.remove(newUserExercise)) {
+//      //   logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
+//    }
 
     controller.getQCService().markState(id, STATE.FIXED, new AsyncCallback<Void>() {
       @Override

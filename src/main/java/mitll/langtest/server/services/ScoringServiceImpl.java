@@ -309,4 +309,16 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       logger.error("got " + e, e);
     }
   }
+
+  /**
+   * Can't check if it's valid if we don't have a model.
+   *
+   * @param foreign
+   * @return
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
+   */
+  @Override
+  public boolean isValidForeignPhrase(String foreign, String transliteration) {
+    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
+  }
 }

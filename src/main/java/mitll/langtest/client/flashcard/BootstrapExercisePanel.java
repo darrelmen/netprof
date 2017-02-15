@@ -104,7 +104,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   /**
    * @param e
-   * @param service
    * @param controller
    * @param soundFeedback
    * @param endListener
@@ -113,14 +112,14 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
    */
   BootstrapExercisePanel(final T e,
-                         final LangTestDatabaseAsync service,
                          final ExerciseController controller,
                          boolean addKeyBinding,
                          final ControlState controlState,
                          MySoundFeedback soundFeedback,
                          SoundFeedback.EndListener endListener,
-                         String instance, ListInterface exerciseList) {
-    super(e, service, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
+                         String instance,
+                         ListInterface exerciseList) {
+    super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
   }
 
   /**
@@ -187,14 +186,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * score feedback - pron score
    *
    * @param exerciseID
-   * @param service
    * @param controller used in subclasses for audio control
    * @param toAddTo
    * @see #FlashcardPanel
    */
   @Override
   protected void addRecordingAndFeedbackWidgets(int exerciseID,
-                                                LangTestDatabaseAsync service,
                                                 ExerciseController controller,
                                                 Panel toAddTo) {
     if (logger == null) {
@@ -232,7 +229,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param exerciseID
    * @param controller
    * @return
-   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, LangTestDatabaseAsync, ExerciseController, Panel)
+   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, ExerciseController, Panel)
    */
   private Widget getAnswerAndRecordButtonRow(int exerciseID, ExerciseController controller) {
     // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
@@ -260,7 +257,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param recordButton
    * @return
    * @see #getAnswerAndRecordButtonRow
-   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, LangTestDatabaseAsync, ExerciseController, Panel)
+   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, ExerciseController, Panel)
    */
   private Panel getRecordButtonRow(Widget recordButton) {
     Panel recordButtonRow = getCenteredWrapper(recordButton);

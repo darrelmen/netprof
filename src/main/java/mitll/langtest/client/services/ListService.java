@@ -128,16 +128,6 @@ public interface ListService extends RemoteService {
    */
   void addItemToUserList(long userListID, int exID);
 
-  // Create User Exercises
-  /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
-   * @param userListID
-   * @param userExercise
-   * @param language
-   * @return
-   */
-//  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language);
-
   /**
    * @param userListID
    * @param userExerciseText

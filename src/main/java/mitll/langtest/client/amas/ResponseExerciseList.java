@@ -139,7 +139,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
     final PagingExerciseList<AmasExerciseImpl, AmasExerciseImpl> outer = this;
     pagingContainer = new ClickablePagingContainer<AmasExerciseImpl>(controller) {
       @Override
-      protected void gotClickOnItem(AmasExerciseImpl e) {
+      public void gotClickOnItem(AmasExerciseImpl e) {
         outer.gotClickOnItem(e);
       }
       protected void addColumnsToTable()

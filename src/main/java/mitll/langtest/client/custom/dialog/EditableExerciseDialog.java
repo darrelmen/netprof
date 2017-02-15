@@ -34,19 +34,15 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
@@ -57,7 +53,6 @@ import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AnnotationExercise;
-import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableShell;
@@ -88,29 +83,22 @@ class EditableExerciseDialog extends NewUserExercise {
   private String originalSlowRefAudio;
   private String originalTransliteration;
 
-//  private String originalContext = "";
-//  private String originalContextTrans = "";
-
   private static final boolean DEBUG = false;
 
   /**
-   * @param itemMarker
    * @param changedUserExercise
    * @param originalList
    * @paramx predefinedContent   - so we can tell it to update its tooltip
-   * @see EditItem#getAddOrEditPanel
+   * @see EditItem#setFactory
    */
-  public EditableExerciseDialog(LangTestDatabaseAsync service,
-                                ExerciseController controller,
-                                EditItem editItem,
-                                HasText itemMarker,
+  public EditableExerciseDialog(ExerciseController controller,
                                 CommonExercise changedUserExercise,
                                 UserList<CommonShell> originalList,
 
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                                 ReloadableContainer predefinedContent,
                                 String instanceName) {
-    super(service, controller, itemMarker, editItem, changedUserExercise, instanceName, originalList);
+    super(controller, changedUserExercise, instanceName, originalList);
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
     this.originalList = originalList;
@@ -125,12 +113,12 @@ class EditableExerciseDialog extends NewUserExercise {
                          UserList<CommonShell> ul,
                          ListInterface<CommonShell> pagingContainer,
                          Panel toAddTo) {
-    validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false, foreignChanged());
+    validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, false, foreignChanged());
   }
 
   /**
    * @param container
-   * @see #addNew(UserList, UserList, ListInterface, Panel)
+   * @see #addNew
    */
   @Override
   protected void addItemsAtTop(Panel container) {
@@ -145,7 +133,7 @@ class EditableExerciseDialog extends NewUserExercise {
         flow.add(child);
       }
 
-      Heading child = new Heading(4, "Item", ""+newUserExercise.getID());
+      Heading child = new Heading(4, "Item", "" + newUserExercise.getID());
       child.addStyleName("rightFiveMargin");
       flow.add(child);
 
@@ -180,12 +168,17 @@ class EditableExerciseDialog extends NewUserExercise {
     prevNext.addStyleName("rightFiveMargin");
     row.add(prevNext);
 
-    Button delete = makeDeleteButton(ul.getID());
+    //Button delete = makeDeleteButton();
 
     configureButtonRow(row);
-    row.add(delete);
+    //row.add(delete);
 
     return row;
+  }
+
+  @Override
+  protected Button makeCancelButton() {
+    return null;
   }
 
   /**
@@ -199,24 +192,23 @@ class EditableExerciseDialog extends NewUserExercise {
   }
 
   /**
-   * @param uniqueID
    * @return
    * @see #getCreateButton(UserList, ListInterface, Panel, ControlGroup)
    */
-  private Button makeDeleteButton(final long uniqueID) {
-    Button delete = makeDeleteButton(ul);
+/*  private Button makeDeleteButton() {
+    Button delete = super.makeDeleteButton();
 
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         delete.setEnabled(false);
        // logger.info("makeDeleteButton got click to delete " +id);
-        deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
+        deleteItem(newUserExercise.getID(), originalList, exerciseList, predefinedContentList);
       }
     });
 
     return delete;
-  }
+  }*/
 
   /**
    * @param row
@@ -241,15 +233,13 @@ class EditableExerciseDialog extends NewUserExercise {
   }
 
   /**
-   * @param ul
    * @param exerciseList
    * @param toAddTo
    * @param onClick
    * @see #isValidForeignPhrase
    */
   @Override
-  void afterValidForeignPhrase(final UserList<CommonShell> ul,
-                               final ListInterface<CommonShell> exerciseList,
+  void afterValidForeignPhrase(final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
     //  if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
@@ -297,7 +287,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * If the translation is new but the audio isn't, ask and clear
    *
    * @return
-   * @see #afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
+   * @see NewUserExercise#afterValidForeignPhrase(ListInterface, Panel, boolean)
    */
   boolean checkForForeignChange() {
     boolean didChange = foreignChanged();
@@ -474,7 +464,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
   /**
    * @param newUserExercise
-   * @see EditItem#addEditOrAddPanel
+   * @seex EditItem#addEditOrAddPanel
    */
   @Override
   public void setFields(CommonExercise newUserExercise) {
@@ -525,28 +515,28 @@ class EditableExerciseDialog extends NewUserExercise {
     }
   }
 
-  private  void setTranslit(CommonExercise newUserExercise) {
+  private void setTranslit(CommonExercise newUserExercise) {
     translit.box.setText(originalTransliteration = newUserExercise.getTransliteration());
     setMarginBottom(translit);
     useAnnotation(newUserExercise, "transliteration", translitAnno);
   }
 
-  private  void setFL(CommonExercise newUserExercise) {
+  private void setFL(CommonExercise newUserExercise) {
     foreignLang.box.setText(originalForeign = newUserExercise.getForeignLanguage().trim());
     useAnnotation(newUserExercise, "foreignLanguage", foreignAnno);
   }
 
-  private  void setContext(CommonExercise newUserExercise) {
+  private void setContext(CommonExercise newUserExercise) {
     context.box.setText(originalContext = newUserExercise.getContext().trim());
     useAnnotation(newUserExercise, CONTEXT, contextAnno);
   }
 
-  private  void setContextTrans(CommonExercise newUserExercise) {
+  private void setContextTrans(CommonExercise newUserExercise) {
     contextTrans.box.setText(originalContextTrans = newUserExercise.getContextTranslation().trim());
     useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno);
   }
 
-  private  void setEnglish(CommonExercise newUserExercise) {
+  private void setEnglish(CommonExercise newUserExercise) {
     String english = isEnglish() ? getMeaning(newUserExercise) : newUserExercise.getEnglish();
     this.english.box.setText(originalEnglish = english);
     ((TextBox) this.english.box).setVisibleLength(english.length() + 4);
@@ -557,7 +547,7 @@ class EditableExerciseDialog extends NewUserExercise {
     useAnnotation(newUserExercise, field, englishAnno);
   }
 
-  private  String getMeaning(CommonExercise newUserExercise) {
+  private String getMeaning(CommonExercise newUserExercise) {
     return newUserExercise.getMeaning().isEmpty() ? newUserExercise.getEnglish() : newUserExercise.getMeaning();
   }
 

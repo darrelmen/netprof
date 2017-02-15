@@ -63,17 +63,24 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testDrop() {
+  public void testListTables() {
     DBConnection spanish = getConnection();
-    spanish.dropAll();
-    scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
-    logger.info("after drop " + listOfTables);
-    spanish.close();
+    listAndClose(spanish);
   }
 
   @Test
-  public void testListTables() {
+  public void testDropNetProf() {
     DBConnection spanish = getConnection();
+    spanish.dropAll();
+    listAndClose(spanish);
+  }
+
+  private void listAndClose(DBConnection spanish) {
+    listTables(spanish);
+    spanish.close();
+  }
+
+  private void listTables(DBConnection spanish) {
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
     scala.collection.Iterator<String> iterator = listOfTables.iterator();
     for (; iterator.hasNext();
@@ -81,22 +88,6 @@ public class PostgresTest extends BaseTest {
       logger.info("got " + iterator.next());
     }
     logger.info("list tables " + listOfTables);
-    spanish.close();
-  }
-
-  @Test
-  public void testDropNetProf() {
-    DBConnection spanish = getConnection();
-    spanish.dropAll();
-    scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
-    logger.info("after drop " + listOfTables);
-    spanish.close();
-  }
-
-  @Test
-  public void testListAll() {
-    DBConnection spanish = getConnection();
-    spanish.close();
   }
 
   @Test
@@ -123,11 +114,6 @@ public class PostgresTest extends BaseTest {
   public void testCopyCroatian() {
     copyDev("croatian");
   }
-
-//  @Test
-//  public void testCopyFrench() {
-//    copyDev("french");
-//  }
 
   private void copyDev(String hindi) {
     Info info = new Info(hindi);
@@ -568,9 +554,7 @@ public class PostgresTest extends BaseTest {
   @Test
   public void testUserCount() {
     DatabaseImpl spanish = getDatabaseLight("netprof", false);
-
     Map<User.Kind, Integer> counts = spanish.getUserDAO().getCounts();
-
     logger.info("got " + counts);
   }
 */

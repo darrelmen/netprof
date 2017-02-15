@@ -52,7 +52,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.custom.dialog.EditItem.NEW_EXERCISE_ID;
+//import static mitll.langtest.client.custom.dialog.EditItem.NEW_EXERCISE_ID;
 
 /**
  * Created with IntelliJ IDEA.
@@ -74,7 +74,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   private static final String ENGLISH = "English";
   private final boolean english;
   private final boolean showExerciseState;
-  private final String instance;
+  //private final String instance;
   private int FLLength = MAX_LENGTH_ID;
   boolean showCompleted;
 
@@ -83,23 +83,16 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
    * @param verticalUnaccountedFor
    * @param isRecorder
    * @param showExerciseState
-   * @param instance
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer
    */
   public PagingContainer(ExerciseController controller,
                          int verticalUnaccountedFor,
                          boolean isRecorder,
-                         boolean showExerciseState,
-                         String instance) {
+                         boolean showExerciseState) {
     super(controller);
     ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
     if (startupInfo == null) {
-      logger.warning("huh? no startup info?");
-//      sorter = new ExerciseComparator(Collections.emptyList());
-    }
-    else {
-  //    Collection<String> typeOrder = startupInfo.getTypeOrder();
-    //  sorter = new ExerciseComparator(typeOrder);
+      logger.warning("PagingContainer huh? no startup info?");
     }
     sorter = new ExerciseComparator(controller.getTypeOrder());
 
@@ -110,9 +103,8 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     this.isRecorder = isRecorder;
     english = controller.getLanguage().equals(ENGLISH);
 
-//    showCompleted = controller.showCompleted();
     this.showExerciseState = showExerciseState;
-    this.instance = instance;
+   // this.instance = instance;
    // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
   }
 
@@ -186,9 +178,10 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                if (o1.getID() == NEW_EXERCISE_ID) return +1;
-                else if (o2.getID() == NEW_EXERCISE_ID) return -1;
-                else return sorter.simpleCompare(o1, o2, isRecorder, isEnglish);
+                //if (o1.getID() == NEW_EXERCISE_ID) return +1;
+                //else if (o2.getID() == NEW_EXERCISE_ID) return -1;
+                //else
+                  return sorter.simpleCompare(o1, o2, isRecorder, isEnglish);
               }
             }
             return -1;
@@ -302,7 +295,6 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     };
   }
 
-
   /**
    * Confusing for english - english col should be foreign language for english,
    *
@@ -311,7 +303,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
    */
   private String getEnglishText(CommonShell shell) {
 //    logger.info("getEnglishText " + shell.getOldID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
-    String s = english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
+    String s = english /*&& !shell.getEnglish().equals(EditItem.NEW_ITEM)*/ ? shell.getForeignLanguage() : shell.getEnglish();
     if (s.isEmpty()) s = ""+shell.getID();
     return s;
   }
@@ -325,7 +317,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   private String getFLText(CommonShell shell) {
 //    logger.info("getFLText on " +shell);
     String toShow = shell.getForeignLanguage();
-    if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
+    if (english /*&& !shell.getEnglish().equals(EditItem.NEW_ITEM)*/) {
       String meaning = shell.getMeaning();
       toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
     }

@@ -133,13 +133,13 @@ public class ReviewItemHelper extends NPFHelper {
 
     @Override
     protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> pagingExerciseList) {
-      return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, pagingExerciseList) {
+      return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, pagingExerciseList) {
         @Override
         public Panel getExercisePanel(CommonExercise exercise) {
           CommonExercise userExercise = new Exercise(exercise);
 
           ReviewEditableExercise reviewEditableExercise =
-              new ReviewEditableExercise(service, controller, itemMarker,
+              new ReviewEditableExercise(controller,
                   userExercise, ul,
                   pagingExerciseList,
                   predefinedContent,
@@ -149,8 +149,8 @@ public class ReviewItemHelper extends NPFHelper {
           SimplePanel ignoredContainer = new SimplePanel();
 
           Panel widgets = reviewEditableExercise.addNew(
-              ul,
-              ul,
+              //ul,
+              //ul,
               npfExerciseList,
               ignoredContainer);
           reviewEditableExercise.setFields(exercise);

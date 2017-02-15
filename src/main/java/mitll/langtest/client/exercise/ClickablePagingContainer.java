@@ -58,7 +58,7 @@ import java.util.logging.Logger;
 public abstract class ClickablePagingContainer<T extends HasID> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("ClickablePagingContainer");
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private final Map<Integer, T> idToExercise = new HashMap<>();
 
   public ClickablePagingContainer(ExerciseController controller) {
@@ -158,9 +158,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     table.setSelectionModel(selectionModel);
   }
 
-  abstract protected void gotClickOnItem(final T e);
-  //{
-  // }
+  abstract public void gotClickOnItem(final T e);
 
   @Override
   public void clear() {
