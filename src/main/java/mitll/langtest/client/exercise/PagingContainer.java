@@ -47,6 +47,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.sorter.ExerciseComparator;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.List;
@@ -109,17 +110,11 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   }
 
   protected void addColumnsToTable() {
+    Column<T, SafeHtml> flColumn = addFLColumn();
+
     Column<T, SafeHtml> englishCol = getEnglishColumn();
     englishCol.setSortable(true);
-
     addColumn(englishCol, new TextHeader(ENGLISH));
-
-    Column<T, SafeHtml> flColumn = getFLColumn();
-    flColumn.setSortable(true);
-
-    String language = controller.getLanguage();
-    String headerForFL = language.equals(ENGLISH) ? "Meaning" : language;
-    addColumn(flColumn, new TextHeader(headerForFL));
 
     List<T> dataList = getList();
 
@@ -137,6 +132,17 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     // Set the width of each column.
     table.setColumnWidth(englishCol, 50.0, Style.Unit.PCT);
     table.setColumnWidth(flColumn, 50.0, Style.Unit.PCT);
+  }
+
+  @NotNull
+  private Column<T, SafeHtml> addFLColumn() {
+    Column<T, SafeHtml> flColumn = getFLColumn();
+    flColumn.setSortable(true);
+
+    String language = controller.getLanguage();
+    String headerForFL = language.equals(ENGLISH) ? "Meaning" : language;
+    addColumn(flColumn, new TextHeader(headerForFL));
+    return flColumn;
   }
 
   private ColumnSortEvent.ListHandler<T> getFLSorter(Column<T, SafeHtml> flColumn, List<T> dataList) {
@@ -304,7 +310,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   private String getEnglishText(CommonShell shell) {
 //    logger.info("getEnglishText " + shell.getOldID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
     String s = english /*&& !shell.getEnglish().equals(EditItem.NEW_ITEM)*/ ? shell.getForeignLanguage() : shell.getEnglish();
-    if (s.isEmpty()) s = ""+shell.getID();
+   // if (s.isEmpty()) s = ""+shell.getID();
     return s;
   }
 
@@ -321,9 +327,9 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
       String meaning = shell.getMeaning();
       toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
     }
-    if (toShow.isEmpty()) {
-      toShow = "*Nothing Yet*";//""+shell.getID();
-    }
+//    if (toShow.isEmpty()) {
+//      toShow = "*Nothing Yet*";//""+shell.getID();
+//    }
     return toShow;
   }
 }

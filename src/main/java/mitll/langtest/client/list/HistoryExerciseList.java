@@ -76,7 +76,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
-  private ActivityType activityType;
+  //private ActivityType activityType;
 
   /**
    * @param currentExerciseVPanel
@@ -97,7 +97,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                                 boolean showTypeAhead,
                                 String instance,
                                 boolean incorrectFirst,
-                                boolean showFirstNotCompleted, ActivityType activityType) {
+                                boolean showFirstNotCompleted,
+                                ActivityType activityType) {
     super(currentExerciseVPanel, service, feedback, null, controller, showTypeAhead, instance,
         incorrectFirst, showFirstNotCompleted, activityType);
 //    logger.info("showFirstNotCompleted " + showFirstNotCompleted + " for " + instance + " : " + this.getElement().getId());

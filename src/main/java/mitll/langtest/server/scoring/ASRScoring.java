@@ -77,6 +77,7 @@ import java.util.*;
  * @since 9/10/12
  * Time: 11:16 AM
  * To change this template use File | Settings | File Templates.
+ * @deprecated don't really use this anymore
  */
 public class ASRScoring extends Scoring implements ASR {
   private static final Logger logger = LogManager.getLogger(ASRScoring.class);

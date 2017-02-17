@@ -407,7 +407,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
-      logger.debug("addAnnotationsAndAudio : (" + getLanguage() + ") took " + (now - then) + " millis to attach audio to exercise " + oldID, new Exception());
+      logger.debug("addAnnotationsAndAudio : (" + getLanguage() + ") took " +
+          (now - then) + " millis to attach audio to exercise " + oldID, new Exception());
     }
     then = now;
 

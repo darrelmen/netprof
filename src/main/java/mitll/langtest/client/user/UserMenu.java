@@ -166,7 +166,6 @@ public class UserMenu {
 
         public void onSuccess() {
           ResultManager resultManager = new ResultManager(
-              service,
               // resultService,
               props.getNameForAnswer(),
               lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
