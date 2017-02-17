@@ -123,7 +123,7 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
                                     String instance,
                                     boolean incorrectFirst,
                                     boolean showFirstNotCompleted, ActivityType activityType) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted, activityType);
+    super(currentExerciseVPanel, service, feedback, controller, instance, true, incorrectFirst, showFirstNotCompleted, activityType);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);

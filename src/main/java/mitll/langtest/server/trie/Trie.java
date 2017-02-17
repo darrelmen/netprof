@@ -249,7 +249,7 @@ public class Trie<T> {
    * @see ExerciseTrie#getExercises(String, SmallVocabDecoder)
    * @see Trie#getMatchesLC(String)
    */
-  public Collection<T> getMatches(String lc) {
+  public List<T> getMatches(String lc) {
     List<EmitValue<T>> emits = getEmits(lc);
     Set<T> unique = new HashSet<>();
     List<T> ids = new ArrayList<>();

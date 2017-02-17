@@ -35,7 +35,6 @@ package mitll.langtest.client.custom.content;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -71,7 +70,7 @@ public class ReviewItemHelper extends NPFHelper {
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
 
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
-  private final HasText itemMarker;
+  //private final HasText itemMarker;
   private final ReloadableContainer predefinedContent;
 
   /**
@@ -89,7 +88,7 @@ public class ReviewItemHelper extends NPFHelper {
                           final ReloadableContainer predefinedContent,
                           ExerciseServiceAsync exerciseServiceAsync) {
     super(service, feedback, controller, true,false, exerciseServiceAsync);
-    this.itemMarker = null;
+ //   this.itemMarker = null;
     this.predefinedContent = predefinedContent;
     if (predefinedContent == null) logger.warning("huh? predefinedContent is null");
   }
@@ -184,7 +183,7 @@ public class ReviewItemHelper extends NPFHelper {
         }
 
         @Override
-        protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
+        protected void addTableWithPager(ClickablePagingContainer pagingContainer, boolean sortTable) {
           // row 1
           Panel column = new FlowPanel();
           add(column);
@@ -202,7 +201,7 @@ public class ReviewItemHelper extends NPFHelper {
           add(checkBox);
 
           // row 3
-          add(pagingContainer.getTableWithPager());
+          add(pagingContainer.getTableWithPager(true));
         }
 
         @Override

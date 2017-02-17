@@ -114,9 +114,10 @@ public class ServerProperties {
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
   @Deprecated
   private static final String NP_SERVER = "np.ll.mit.edu";
+  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
 
-  private static final String DOMINO_SERVER = "domino.url";
-  private static final String DOMINO_SERVER_DEFAULT = "http://ltea-data2-dev:8080/domino-ltea/";
+//  private static final String DOMINO_SERVER = "domino.url";
+//  private static final String DOMINO_SERVER_DEFAULT = "http://ltea-data2-dev:8080/domino-ltea/";
   // private static final String HELP = "help";
   // private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
   private static final String USE_SCORE_CACHE = "useScoreCache";
@@ -162,6 +163,7 @@ public class ServerProperties {
   private static final String DO_AUDIO_CHECKS_IN_PRODUCTION = "doAudioChecksInProduction";
   private static final String CHECK_AUDIO_TRANSCRIPT = "checkAudioTranscript";
   private static final String MIN_ANALYSIS_SCORE = "minAnalysisScore";
+  private static final String HYDRA_HOST = "hydraHost";
 
   private static final int MIN_SCORE_TO_SHOW = 20;// 0.20f;
   private static final int USER_INITIAL_SCORES = 20;
@@ -865,6 +867,7 @@ public class ServerProperties {
 
   /**
    * These point to config entries in application.conf in the resources directory in npdata.
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
    */
   public void setLocalPostgres() {
     props.setProperty(DB_CONFIG, POSTGRES);
@@ -872,15 +875,6 @@ public class ServerProperties {
 
   public Properties getProps() {
     return props;
-  }
-
-  /**
-   * @return
-   * @see
-   * @deprecated
-   */
-  public String getNPServer() {
-    return props.getProperty("SERVER_NAME", NP_SERVER);
   }
 
   public String getConfigFileFullPath() {
@@ -899,17 +893,33 @@ public class ServerProperties {
    * @deprecated
    */
   public String getAppURL() {
-    return props.getProperty(APP_URL, "https://np.ll.mit.edu/" +
-        "netProf");
+    return props.getProperty(APP_URL, "https://" +  getNPServer()+ "/" + "netProf");
   }
 
+  /**
+   * @return
+   * @see
+   * @deprecated
+   */
+  public String getNPServer() {
+    return props.getProperty("SERVER_NAME", NP_SERVER);
+  }
+
+  public String getHydraHost() {
+    return props.getProperty(HYDRA_HOST, HYDRA_HOST_URL_DEFAULT);
+  }
+
+/*
   public String getDominoURL() {
     return props.getProperty(DOMINO_SERVER, DOMINO_SERVER_DEFAULT);
   }
+*/
 
+/*
   public String getHelp() {
     return props.getProperty(DOMINO_SERVER, DOMINO_SERVER_DEFAULT);
   }
+*/
 
   public boolean shouldRecalcStudentAudio() {
     return getDefaultTrue("shouldRecalcStudentAudio");

@@ -305,7 +305,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @see #getTableWithPager(PhoneReport)
    */
   private Panel getTableWithPager(List<PhoneAndStats> sortedHistory) {
-    Panel tableWithPager = getTableWithPager();
+    Panel tableWithPager = getTableWithPager(true);
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeft");
     tableWithPager.addStyleName("leftTenMargin");
@@ -514,7 +514,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   @Override
-  protected void addColumnsToTable() {
+  protected void addColumnsToTable(boolean sortEnglish) {
     addReview();
 
     Column<PhoneAndStats, SafeHtml> countColumn = getCountColumn();

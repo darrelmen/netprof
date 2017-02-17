@@ -149,7 +149,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * @return
-   * @see SimplePagingContainer#makeCellTable()
+   * @see SimplePagingContainer#makeCellTable
    */
   protected int getPageSize() {
     return isShort() ? 8 : PAGE_SIZE;
@@ -163,9 +163,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    *
+   * @param sortEnglish
    */
   @Override
-  protected void addColumnsToTable() {
+  protected void addColumnsToTable(boolean sortEnglish) {
     Column<T, SafeHtml> userCol = getItemColumn();
     userCol.setSortable(true);
     table.setColumnWidth(userCol, idWidth + "px");
@@ -186,7 +187,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<T> users) {
-    Panel tableWithPager = getTableWithPager();
+    Panel tableWithPager = getTableWithPager(true);
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeft");
 

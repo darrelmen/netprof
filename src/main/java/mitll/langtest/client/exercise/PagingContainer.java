@@ -42,7 +42,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -109,7 +108,12 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
    // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
   }
 
-  protected void addColumnsToTable() {
+  /**
+   * @see #configureTable
+   * @param sortEnglish
+   */
+
+  protected void addColumnsToTable(boolean sortEnglish) {
     Column<T, SafeHtml> flColumn = addFLColumn();
 
     Column<T, SafeHtml> englishCol = getEnglishColumn();
@@ -125,7 +129,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     table.addColumnSortHandler(columnSortHandler2);
 
     // We know that the data is sorted alphabetically by default.
-    table.getColumnSortList().push(englishCol);
+  if (sortEnglish)  table.getColumnSortList().push(englishCol);
 
     table.setWidth("100%", true);
 
@@ -199,7 +203,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
   /**
    * @return
-   * @see SimplePagingContainer#addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable(int)
    */
   private Column<T, SafeHtml> getEnglishColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {
@@ -281,7 +285,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
   /**
    * @return
-   * @see SimplePagingContainer#addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable(int)
    */
   private Column<T, SafeHtml> getFLColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {

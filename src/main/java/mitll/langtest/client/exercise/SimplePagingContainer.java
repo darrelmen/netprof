@@ -80,12 +80,13 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
 
   /**
    * @return
-   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager(ClickablePagingContainer)
+   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager(ClickablePagingContainer, boolean)
+   * @param sortTable
    */
-  public Panel getTableWithPager() {
+  public Panel getTableWithPager(boolean sortTable) {
     this.dataProvider = new ListDataProvider<T>();
 
-    makeCellTable();
+    makeCellTable(sortTable);
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
@@ -109,9 +110,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
     table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
   }
 
-  private void makeCellTable() {
+  private void makeCellTable(boolean sortTable) {
     this.table = makeCellTable(chooseResources());
-    configureTable();
+    configureTable(sortTable);
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
@@ -135,7 +136,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
     return o;
   }
 
-  private void configureTable() {
+  private void configureTable(boolean sortTable) {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     table.setWidth("100%");
     table.setHeight("auto");
@@ -144,7 +145,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
     addSelectionModel();
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
-    addColumnsToTable();
+    addColumnsToTable(sortTable);
   }
 
   protected void addSelectionModel() {
@@ -152,8 +153,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
 
   /**
    * @see #configureTable
+   * @param sortEnglish
    */
-  abstract protected void addColumnsToTable();
+  abstract protected void addColumnsToTable(boolean sortEnglish);
 
   public void flush() {
     dataProvider.flush();
@@ -167,7 +169,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
   /**
    * @param id2
    * @param header
-   * @see SimplePagingContainer#addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable(int)
    */
   protected void addColumn(Column<T, SafeHtml> id2, Header<?> header) {
     table.addColumn(id2, header);

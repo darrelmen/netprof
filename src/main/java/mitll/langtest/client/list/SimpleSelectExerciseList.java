@@ -84,7 +84,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
                                   String instance,
                                   boolean incorrectFirst,
                                   ActivityType activityType) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, false, activityType);
+    super(currentExerciseVPanel, service, feedback, controller, instance, true, incorrectFirst, false, activityType);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
@@ -102,7 +102,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    */
   @Override
   protected void addComponents() {
-    addTableWithPager(makePagingContainer());
+    addTableWithPager(makePagingContainer(), true);
   }
 
   /**

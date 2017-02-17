@@ -121,9 +121,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               Project project) {
     super(deployPath, properties, langTestDatabase, htkDictionary, project);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
-    alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
+    alignAudioToScore  = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-    ip = project.getWebserviceIP();
+    ip   = project.getWebserviceIP();
     port = project.getWebservicePort();
 
     if (port != -1) {
@@ -136,10 +136,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
-  public void setAvailable() {
-    available = isAvailableCheckNow();
-  }
+  public void setAvailable() {  available = isAvailableCheckNow();  }
 
+  /**
+   * @see AudioFileHelper#isHydraAvailable
+   * @return
+   */
   public boolean isAvailable() {
     return available;
   }

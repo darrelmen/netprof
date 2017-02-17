@@ -1,24 +1,23 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -44,6 +43,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 2/14/17.
  */
 class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
+  public static final int DISPLAY_ITEMS = 5;
+  public static final String ADD = "Add";
   private final Logger logger = Logger.getLogger("EditableExerciseList");
 
   /**
@@ -56,6 +57,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   // private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
   private UserList<CommonShell> list;
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+  private TextBox quickAddText;
 
   /**
    * @param controller
@@ -70,11 +72,10 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
                               EditItem editItem,
                               Panel right,
                               String instanceName,
-                              //  boolean includeAddItem,
                               UserList<CommonShell> list) {
     super(right, GWT.create(ExerciseService.class),
         controller.getFeedback(), controller,
-        false, instanceName, false, false, ActivityType.EDIT);
+        instanceName, false, false, false, ActivityType.EDIT);
     this.editItem = editItem;
     this.list = list;
 
@@ -104,14 +105,8 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     return widgets;
   }
 
-  TextBox quickAddText;
-
-  private Typeahead getTypeahead(final String whichField) {
-    return getTypeaheadUsing(whichField, quickAddText = new TextBox());
-  }
-
-  int req = 0;
-  CommonShell currentExercise = null;
+  private int req = 0;
+  private CommonShell currentExercise = null;
 
   private <T extends CommonShell> Typeahead getTypeaheadUsing(final String whichField, TextBox w) {
     SuggestOracle oracle = new SuggestOracle() {
@@ -119,7 +114,10 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       public void requestSuggestions(final Request request, final Callback callback) {
         logger.info("make requesst for '" + request.getQuery() + "'");
 
-        ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser()).setPrefix(w.getText());
+        ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
+            .setPrefix(w.getText())
+            .setLimit(DISPLAY_ITEMS);
+
         exerciseServiceAsync.getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
               @Override
               public void onFailure(Throwable caught) {
@@ -136,7 +134,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       }
     };
     Typeahead typeahead = new Typeahead(oracle);
-    typeahead.setDisplayItemCount(5);
+    typeahead.setDisplayItemCount(DISPLAY_ITEMS);
     typeahead.setMatcherCallback(new Typeahead.MatcherCallback() {
       @Override
       public boolean compareQueryToItem(String query, String item) {
@@ -156,11 +154,12 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
     w.getElement().setId("TextBox_" + whichField);
     typeahead.setWidget(w);
-    configureTextBox(w);
+//    configureTextBox(w);
     // addCallbacks(typeahead);
     return typeahead;
   }
 
+/*
   private void configureTextBox(final TextBox w) {
     w.addKeyUpHandler(getKeyUpHandler());
   }
@@ -170,6 +169,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       logger.info("got key up");
     };
   }
+*/
 
   /**
    * @param result
@@ -199,7 +199,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
     int numberTruncated = Math.max(0, size - limit);
 
-    logger.info("trunc " + numberTruncated);
+  //  logger.info("trunc " + numberTruncated);
 
     SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), exercises));
     response.setMoreSuggestionsCount(numberTruncated);
@@ -214,17 +214,18 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   @NotNull
   private Collection<SuggestOracle.Suggestion> getSuggestions(String query, List<? extends CommonShell> exercises) {
     Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<>();
-    logger.info("getSuggestions converting " + exercises.size());
+  //  logger.info("getSuggestions converting " + exercises.size());
 
+    message.setText("");
     String before = query;
     query = normalizeSearch(query);
 
-    logger.info("getSuggestions before '" + before + "'");
-    logger.info("getSuggestions after  '" + query + "'");
+  //  logger.info("getSuggestions before '" + before + "'");
+  //  logger.info("getSuggestions after  '" + query + "'");
 
     String[] searchWords = query.split(WHITESPACE_STRING);
 
-    logger.info("getSuggestions searchWords length '" + searchWords.length + "'");
+  //  logger.info("getSuggestions searchWords length '" + searchWords.length + "'");
 
     for (CommonShell resp : exercises) {
       //suggestions.add(new ExerciseSuggestion(resp));
@@ -276,9 +277,9 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
     accum.appendEscaped(formattedSuggestion.substring(cursor));
 
-    logger.info(resp.getID() + " formatted     " + formattedSuggestion);
+   // logger.info(resp.getID() + " formatted     " + formattedSuggestion);
     String displayString = accum.toSafeHtml().asString();
-    logger.info(resp.getID() + " displayString " + displayString);
+   // logger.info(resp.getID() + " displayString " + displayString);
     ExerciseSuggestion suggestion = createSuggestion(resp.getForeignLanguage(),
         displayString,
         resp);
@@ -418,11 +419,13 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     DivWidget delW = new DivWidget();
     delW.addStyleName("floatLeftList");
     delW.addStyleName("leftFiveMargin");
+    delW.getElement().getStyle().setClear(Style.Clear.LEFT);
     Button deleteButton = makeDeleteButton();
     delW.add(deleteButton);
     return delW;
   }
 
+  HTML message;
   @NotNull
   private DivWidget getAddButtonContainer() {
     DivWidget addW = new DivWidget();
@@ -432,68 +435,88 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
     addW.add(exercise);
     Button add = getAddButton();
+    add.addStyleName("leftFiveMargin");
 
     addW.add(add);
+
+    message = new HTML();
+    message.addStyleName("leftFiveMargin");
+    message.addStyleName("serverResponseLabelError");
+    message.getElement().getStyle().setClear(Style.Clear.LEFT);
+    addW.add(message);
     return addW;
   }
 
-  //private CommonExercise currentExercise = null;
+  /**
+   * @see #getAddButtonContainer
+   * @param whichField
+   * @return
+   */
+  private Typeahead getTypeahead(final String whichField) {
+    quickAddText = new TextBox();
+    quickAddText.setMaxLength(100);
+    quickAddText.setVisibleLength(40);
+    quickAddText.addStyleName("topMargin");
+    quickAddText.setWidth(235 +
+        "px");
+    // addControlGroup("",quickAddText);
+
+    return getTypeaheadUsing(whichField, quickAddText);
+  }
 
   @NotNull
   private Button getAddButton() {
-    Button add = new Button("Add", IconType.PLUS);
+    Button add = new Button(ADD, IconType.PLUS);
 
     final ListInterface<CommonShell> outer = this;
     add.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        onClickAdd(outer);
+        add.setEnabled(false);
+        onClickAdd(outer,add);
       }
     });
     add.setType(ButtonType.SUCCESS);
     return add;
   }
 
-  NewUserExercise newExercise;
+//  private  NewUserExercise newExercise;
   protected final ListServiceAsync listService = GWT.create(ListService.class);
 
-
-  private void onClickAdd(ListInterface<CommonShell> outer) {
-    //CommonExercise newItem = currentExercise == null ? editItem.getNewItem() : currentExercise;
+  private void onClickAdd(ListInterface<CommonShell> outer, Button add) {
 
     if (currentExercise != null) {
-      boolean found = false;
-      List<CommonShell> exercises = list.getExercises();
-      for (CommonShell shell:exercises) {
-        if (shell.getID() == currentExercise.getID()) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
+      if (isOnList()) {
+        // TODO : warn user already added.
+        message.setText("This is already in the list.");
+        add.setEnabled(true);
+      } else {
+        message.setText("");
         listService.addItemToUserList(list.getID(), currentExercise.getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
+            add.setEnabled(true);
           }
 
           @Override
           public void onSuccess(Void result) {
+            add.setEnabled(true);
             showNewItem(currentExercise);
           }
         });
-      }
-      else {
-        // warn user already added.
       }
     } else {
       String safeText = getSafeText(quickAddText);
       controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
+          add.setEnabled(true);
         }
 
         @Override
         public void onSuccess(Boolean result) {
+          add.setEnabled(true);
+
 /*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
             " before adding/changing " + newUserExercise + " -> " + result);*/
           if (result) {
@@ -513,6 +536,9 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
               }
             });
           } else {
+            message.setText("The item "+
+               " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
+
 //            markError(foreignLang, "The " + FOREIGN_LANGUAGE +
 //                " text is not in our " + getLanguage() + " dictionary. Please edit.");
           }
@@ -532,17 +558,40 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     // }
   }
 
+  private boolean isOnList() {
+    boolean found = false;
+    List<CommonShell> exercises = list.getExercises();
+    for (CommonShell shell : exercises) {
+      if (shell.getID() == currentExercise.getID()) {
+        found = true;
+        break;
+      }
+    }
+    return found;
+  }
+
   private void showNewItem(CommonShell currentExercise) {
     list.addExercise(currentExercise);
-    addExercise(currentExercise);
 
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+    int before = getSize();
+    addExercise(currentExercise);
+    int after = getSize();
+
+    logger.info("before " + before + " after " +after);
+
+    enableRemove(true);
+
+    gotClickOnItem(currentExercise);
+    markCurrentExercise(currentExercise.getID());
+
+ /*   Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         //logger.info("check init flash");
-        markCurrentExercise(currentExercise.getID());
         gotClickOnItem(currentExercise);
+        markCurrentExercise(currentExercise.getID());
+       // redraw();
       }
-    });
+    });*/
   }
 
   public String getSafeText(TextBox box) {
@@ -553,37 +602,20 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
-//  private void showModal(NewUserExercise newExercise, DivWidget container) {
-//    final Modal modal = new Modal(true);
-//    modal.setWidth(750);
-//    modal.setHeight(750 + "px");
-//    modal.setMaxHeigth(750 + "px");
-//    modal.setTitle("Create new item");
-//    modal.add(container);
-//    newExercise.setModal(modal);
-//    modal.show();
-//
-//    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-//      public void execute() {
-//        newExercise.setFocus();
-//      }
-//    });
-//  }
-
   private Button delete;
 
   private Button makeDeleteButton() {
-
     EditableExerciseList widgets = this;
 
     delete = makeDeleteButtonItself();
 
     delete.addClickHandler(event -> {
+      delete.setEnabled(false);
       CommonShell currentSelection = pagingContainer.getCurrentSelection();
       if (currentSelection != null) {
 //          logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
         NewUserExercise newExercise = new NewUserExercise(controller, null, "newExercise", list);
-        newExercise.deleteItem(currentSelection.getID(), widgets, null, widgets);
+        newExercise.deleteItem(currentSelection.getID(), widgets, null, widgets, delete);
       }
     });
     // delete.addStyleName("topFiftyMargin");
@@ -605,7 +637,9 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     //   delete.addStyleName("floatRight");
     // if (ul == null) logger.warning("no user list");
     // else
-    if (controller == null) logger.warning("no controller??");
+    if (controller == null) {
+      logger.warning("no controller??");
+    }
     else {
       controller.register(delete, "", "");//"Remove from list " + ul.getID() + "/" + ul.getName());
     }
@@ -625,40 +659,4 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   public void enableRemove(boolean enabled) {
     delete.setEnabled(enabled);
   }
-
-/*
-  @Override
-  protected void askServerForExercise(int itemID) {
-    if (itemID == EditItem.NEW_EXERCISE_ID) {
-      useExercise(editItem.getNewItem());
-    } else {
-      //     logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
-      super.askServerForExercise(itemID);
-    }
-  }
-*/
-
-/*  @Override
-  public List<CommonShell> rememberExercises(List<CommonShell> result) {
-    clear();
-    boolean addNewItem = includeAddItem;
-
-    for (final CommonShell es : result) {
-      logger.info("Adding " + es.getID() + " : " + es.getClass());
-      addExercise(es);
-      if (includeAddItem && es.getID() == EditItem.NEW_EXERCISE_ID) {
-        addNewItem = false;
-      }
-    }
-
-    if (addNewItem) {
-      CommonExercise newItem = editItem.getNewItem();
-
-      logger.info("Adding " + newItem.getID() + " : " + newItem.getClass());
-
-      addExercise(newItem);  // TODO : fix this
-    }
-    flush();
-    return result;
-  }*/
 }

@@ -107,7 +107,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param listContainer
    * @param addKeyHandler
    * @param instance
-   * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
+   * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
   public CommentNPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer,
@@ -122,7 +122,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   @Override
   protected Widget getItemContent(final T e) {
     Panel column = new VerticalPanel();
-    column.getElement().setId("QuestionContent");
+ //   Panel column = new DivWidget();
+    column.getElement().setId("CommentNPFExercise_QuestionContent");
     column.setWidth("100%");
 
     DivWidget row = new DivWidget();
@@ -222,18 +223,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     String context = exercise.getForeignLanguage();
     String contextTranslation = exercise.getEnglish();
 
-  /**
-   * @param exercise
-   * @return
-   * @see #addContextButton
-   */
-//  private <U extends CommonShell & AnnotationExercise & AudioRefExercise> Panel getContext(U exercise) {
-//    String context = exercise.getContext() != null && !exercise.getContext().trim().isEmpty() ? exercise.getContext() : "";
-//    String contextTranslation =
-//        exercise.getContextTranslation() != null &&
-//        !exercise.getContextTranslation().trim().isEmpty() ? exercise.getContextTranslation() : "";
-
-
     boolean same = context.equals(contextTranslation);
 
     if (!context.isEmpty()) {
@@ -254,7 +243,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 //
 //      addContextTranslation(exercise, contextTranslation, same, vp);
 
-      String highlightedVocabItemInContext = highlightVocabItemInContext(exercise, context);
+      String highlightedVocabItemInContext = highlightVocabItemInContext(exercise, itemText);
 
       Panel contentWidget = getContentWidget(ExerciseFormatter.CONTEXT, highlightedVocabItemInContext, false);
       String field = QCNPFExercise.CONTEXT;

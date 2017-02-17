@@ -3,6 +3,8 @@ package mitll.langtest.server.json;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.database.exercise.Project;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 
@@ -10,10 +12,19 @@ import java.util.Collection;
  * Created by go22670 on 1/20/17.
  */
 public class ProjectExport {
+  private static final Logger logger = LogManager.getLogger(ProjectExport.class);
+
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getProjects
+   * @param productionProjects
+   * @return
+   */
   public String toJSON(Collection<Project> productionProjects) {
     JsonObject jsonObject = new JsonObject();
     JsonArray value = new JsonArray();
     jsonObject.add("sites", value);
+
+    logger.info("toJSON converting " + productionProjects.size() + " projects");
 
     for (Project project : productionProjects) {
       JsonObject proj = new JsonObject();
@@ -31,6 +42,6 @@ public class ProjectExport {
       proj.addProperty("showOnIOS", Boolean.TRUE);
       proj.addProperty("rtl", project.isRTL());
     }
-    return  jsonObject.toString();
+    return jsonObject.toString();
   }
 }

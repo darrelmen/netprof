@@ -281,7 +281,7 @@ public class NPFHelper implements RequiresResize {
   PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName,
                                                                    boolean showFirstNotCompleted) {
     return new NPExerciseList(right, exerciseServiceAsync, feedback, controller,
-        true, instanceName, false,showFirstNotCompleted, ActivityType.LEARN) {
+        instanceName, true, false,showFirstNotCompleted, ActivityType.LEARN) {
       @Override
       protected void onLastItem() {
         new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {

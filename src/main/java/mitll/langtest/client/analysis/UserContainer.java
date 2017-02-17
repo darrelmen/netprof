@@ -91,10 +91,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
   /**
    * @see SimplePagingContainer#configureTable
+   * @param sortEnglish
    */
   @Override
-  protected void addColumnsToTable() {
-    super.addColumnsToTable();
+  protected void addColumnsToTable(boolean sortEnglish) {
+    super.addColumnsToTable(sortEnglish);
 
     addNumber();
   //  addInitialScore();

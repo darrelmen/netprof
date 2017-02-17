@@ -81,6 +81,9 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String REF_INFO = "refInfo";
   private static final String ROUND_TRIP1 = "roundTrip";
   private static final String PHONE_REPORT = "phoneReport";
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   */
   private static final String PROJECTS = "projects";
 
   private static final String ERROR = "ERROR";
@@ -156,7 +159,6 @@ public class ScoreServlet extends DatabaseServlet {
     int projid = getProject(request);
     if (projid == -1) {
       projid = request.getIntHeader("projid");
-
 
       logger.warn("OK - look for project id from url header " + projid);
    /*   String[] projids = queryString.split("projid=");
@@ -458,6 +460,8 @@ public class ScoreServlet extends DatabaseServlet {
 
   private String getProjects(String queryString) {
     Collection<Project> productionProjects = db.getProjectManagement().getProductionProjects();
+    logger.info("getProjects got " +productionProjects.size() + " projects");
+    for (Project project : productionProjects) logger.info(" project " + project);
     return new ProjectExport().toJSON(productionProjects);
   }
 

@@ -122,7 +122,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
                      boolean showTypeAhead,
                      String instance,
                      boolean incorrectFirst,
-                     boolean showFirstNotCompleted, ActivityType activityType) {
+                     boolean showFirstNotCompleted,
+                     ActivityType activityType) {
     super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
@@ -157,9 +158,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * Add two rows -- the search box and then the item list
    * @see #PagingExerciseList
    */
-  protected void addComponents() {
-    addTableWithPager(makePagingContainer());
-  }
+  protected void addComponents() {   addTableWithPager(makePagingContainer(), true);  }
 
   /**
    * @param selectionState
@@ -290,9 +289,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * add left side components
    *
    * @param pagingContainer
+   * @param sortTable
    * @see #addComponents
    */
-  protected void addTableWithPager(ClickablePagingContainer<T> pagingContainer) {
+  protected void addTableWithPager(ClickablePagingContainer<T> pagingContainer, boolean sortTable) {
     // row 1
     Panel column = new FlowPanel();
     add(column);
@@ -301,7 +301,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     if (optionalWidget != null) column.add(optionalWidget);
 
     // row 2
-    add(pagingContainer.getTableWithPager());
+    add(pagingContainer.getTableWithPager(sortTable));
   }
 
   /**

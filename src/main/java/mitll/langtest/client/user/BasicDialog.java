@@ -83,7 +83,7 @@ public class BasicDialog {
  // private static final int ILR_CHOICE_WIDTH = 80;
   static final String TRY_AGAIN = "Try Again";
 
-  protected FormField addControlFormField(Panel dialogBox, String label) {
+  public FormField addControlFormField(Panel dialogBox, String label) {
     return addControlFormField(dialogBox, label, false, 0, 30, "", -1);
   }
 
@@ -268,7 +268,7 @@ public class BasicDialog {
    * @param header
    * @param message
    */
-  protected void markError(ControlGroup dialectGroup, String header, String message) {
+  public void markError(ControlGroup dialectGroup, String header, String message) {
     markError(dialectGroup, header, message, Placement.RIGHT);
   }
 

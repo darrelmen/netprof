@@ -43,6 +43,7 @@ import java.text.CharacterIterator;
 import java.text.Normalizer;
 import java.text.StringCharacterIterator;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -187,7 +188,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseListWrapperForPrefix
    */
-  public Collection<T> getExercises(String prefix, SmallVocabDecoder smallVocabDecoder) {
+  public List<T> getExercises(String prefix, SmallVocabDecoder smallVocabDecoder) {
     return getMatches(smallVocabDecoder.getTrimmed(prefix.toLowerCase()));
   }
 

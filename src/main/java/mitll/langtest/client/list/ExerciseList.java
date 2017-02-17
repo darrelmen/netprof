@@ -263,9 +263,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @return
    */
   abstract ActivityType getActivityType();
-  //{
-  //  return  getInstance() == null || getInstance().startsWith("record") ? AudioType.RECORDER.toString() : getInstance();
-  // }
+
 
   public String getInstance() {
     return instance;
@@ -870,6 +868,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     leftColumn.getElement().setId("ExerciseList_leftColumn");
     leftColumn.addStyleName("floatLeft");
     addMinWidthStyle(leftColumn);
+
+  //  leftColumn.getElement().getStyle().setProperty("minHeight","300px");
 
     leftColumn.add(getWidget());
     return leftColumn;

@@ -445,7 +445,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   @Override
   public boolean equals(Object other) {
     boolean checkOld = !getOldID().isEmpty();
-    return other instanceof ExerciseShell &&
+    return other instanceof Exercise &&
         (checkOld && getOldID().equals(((Exercise) other).getOldID()) ||
             (getID() == ((ExerciseShell) other).getID())
         );
