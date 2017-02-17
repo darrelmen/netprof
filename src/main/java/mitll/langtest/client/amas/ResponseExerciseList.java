@@ -142,7 +142,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
       public void gotClickOnItem(AmasExerciseImpl e) {
         outer.gotClickOnItem(e);
       }
-      protected void addColumnsToTable()
+      protected void addColumnsToTable(boolean sortEnglish)
       {
         addColumn(getExerciseIdColumn2(), new TextHeader("Item"));
       }

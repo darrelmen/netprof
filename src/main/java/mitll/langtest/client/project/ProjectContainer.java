@@ -138,8 +138,8 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
   }
 
   @Override
-  protected void addColumnsToTable() {
-    super.addColumnsToTable();
+  protected void addColumnsToTable(boolean sortEnglish) {
+    super.addColumnsToTable(sortEnglish);
 
 /*    getNameCol(FIRST, true);
     getNameCol(LAST,  false);*/

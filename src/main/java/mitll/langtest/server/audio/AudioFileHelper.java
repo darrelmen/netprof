@@ -942,7 +942,8 @@ public class AudioFileHelper implements AlignDecode {
       */
 
       if (theFile.exists()) {
-        HTTPClient httpClient = new HTTPClient("https://netprof1-dev.llan.ll.mit.edu/netprof/scoreServlet");
+        String hydraHost = serverProps.getHydraHost();//"https://netprof1-dev.llan.ll.mit.edu/netprof/";
+        HTTPClient httpClient = new HTTPClient(hydraHost + "scoreServlet");
         httpClient.addRequestProperty("request", "align");
         httpClient.addRequestProperty("exercise", "" + exid);
         httpClient.addRequestProperty("projid", "" + projid);
@@ -977,10 +978,7 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#isHydraRunning
    */
-  public boolean isHydraAvailable() {
-    return webserviceScoring.isAvailable();
-  }
-
+  public boolean isHydraAvailable() {  return webserviceScoring.isAvailable();  }
   public boolean isHydraAvailableCheckNow() {
     return webserviceScoring.isAvailableCheckNow();
   }

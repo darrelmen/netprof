@@ -99,9 +99,10 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   /**
    * @return
    * @see SetCompleteDisplay#getScoreHistory
+   * @param sortTable
    */
-  public Panel getTableWithPager() {
-    Panel tableWithPager = super.getTableWithPager();
+  public Panel getTableWithPager(boolean sortTable) {
+    Panel tableWithPager = super.getTableWithPager(sortTable);
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeft");
     return tableWithPager;
@@ -155,7 +156,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   }
 
   @Override
-  protected void addColumnsToTable() {
+  protected void addColumnsToTable(boolean sortEnglish) {
     Column<WordAndScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
     table.setColumnWidth(itemCol, ITEM_WIDTH + "px");
@@ -175,7 +176,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
   /**
    * @return
-   * @see SimplePagingContainer#addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable(int)
    */
   private Column<WordAndScore, SafeHtml> getItemColumn() {
     return new Column<WordAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {

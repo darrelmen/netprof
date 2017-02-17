@@ -118,7 +118,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
    * @see AnalysisTab#getWordScores
    */
   public Panel getTableWithPager(List<WordScore> sortedHistory) {
-    Panel tableWithPager = getTableWithPager();
+    Panel tableWithPager = getTableWithPager(true);
     tableWithPager.getElement().setId("WordContainerScoreHistory");
     int tableHistoryWidth = isNarrow() ? TABLE_HISTORY_WIDTH_NARROW : TABLE_HISTORY_WIDTH;
 
@@ -233,7 +233,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   }
 
   @Override
-  protected void addColumnsToTable() {
+  protected void addColumnsToTable(boolean sortEnglish) {
     addReview();
 
     Column<WordScore, SafeHtml> scoreColumn = getScoreColumn();

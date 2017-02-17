@@ -62,7 +62,7 @@ public interface IProjectManagement {
 
   CommonExercise getExercise(int projectid, int id);
 
-  Collection<CommonExercise> getExercises(int projectid);
+  List<CommonExercise> getExercises(int projectid);
 
   Project getProject(int projectid);
 

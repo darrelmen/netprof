@@ -347,6 +347,7 @@ class NewUserExercise extends BasicDialog {
    * @param exerciseList
    * @param learnContainer
    * @param editableExerciseList
+   * @param button
    * @paramx uniqueID
    * @see EditableExerciseList#makeDeleteButton
    */
@@ -354,14 +355,16 @@ class NewUserExercise extends BasicDialog {
                   // final long uniqueID,
                   final PagingExerciseList<?, ?> exerciseList,
                   final ReloadableContainer learnContainer,
-                  final EditableExerciseList editableExerciseList) {
+                  final EditableExerciseList editableExerciseList, Button button) {
     listService.deleteItemFromList(originalList.getID(), exid, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
+        button.setEnabled(true);
       }
 
       @Override
       public void onSuccess(Boolean result) {
+        button.setEnabled(true);
         if (!result) {
           logger.warning("deleteItem huh? id " + exid + " not in list " + originalList);
         }
@@ -370,15 +373,14 @@ class NewUserExercise extends BasicDialog {
 
         if (!originalList.removeAndCheck(exid)) {
           logger.warning("deleteItem huh? didn't remove the item " + exid + " from " + originalList.getID() +
-              " now "+ originalList.getExercises().size());
+              " now " + originalList.getExercises().size());
         }
         if (learnContainer != null && learnContainer.getReloadable() != null) {
           learnContainer.getReloadable().redraw();   // TODO : or reload???
         }
         logger.warning("deleteItem list size is " + exerciseList.getSize());
-//        if (exerciseList.getSize() == 0) {
-//          editableExerciseList.enableRemove(false);
-//        }
+        editableExerciseList.enableRemove(exerciseList.getSize() > 0);
+
       }
     });
   }

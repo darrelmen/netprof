@@ -173,9 +173,7 @@ public class TypeAhead {
    * @return
    * @see PagingExerciseList#addTypeAhead(Panel)
    */
-  TextBox getTypeAhead() {
-    return typeAhead;
-  }
+  TextBox getTypeAhead() {   return typeAhead;  }
 
   public void setText(String text) {
     typeAhead.setText(text);

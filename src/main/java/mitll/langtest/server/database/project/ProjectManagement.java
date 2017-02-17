@@ -465,7 +465,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see Project#buildExerciseTrie
    */
   @Override
-  public Collection<CommonExercise> getExercises(int projectid) {
+  public List<CommonExercise> getExercises(int projectid) {
     if (isAmas()) {
       return Collections.emptyList();
     }
@@ -541,13 +541,11 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public Collection<Project> getProductionProjects() {
-    List<Project> collect = idToProject
+    return idToProject
         .values()
         .stream()
         .filter(p -> p.getStatus() == ProjectStatus.PRODUCTION)
         .collect(Collectors.toList());
-
-    return collect;
   }
 
   /**

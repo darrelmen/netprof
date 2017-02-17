@@ -137,7 +137,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
 
 
           @Override
-          protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer) {
+          protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer, boolean sortTable) {
             // row 1
             Panel column = new FlowPanel();
             add(column);
@@ -156,7 +156,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
             add(filterOnly);
 
             // row 3
-            add(pagingContainer.getTableWithPager());
+            add(pagingContainer.getTableWithPager(sortTable));
             setOnlyExamples(!doNormalRecording);
 
             addEventHandler(instanceName);

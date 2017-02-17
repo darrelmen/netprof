@@ -104,7 +104,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
    * @see SetCompleteDisplay#getScoreHistory
    */
   public Panel getTableWithPager(List<ExerciseCorrectAndScore> sortedHistory) {
-    Panel tableWithPager = getTableWithPager();
+    Panel tableWithPager = getTableWithPager(true);
     tableWithPager.getElement().setId("TableScoreHistory");
 
     int last = -1;
@@ -267,7 +267,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   }
 
   @Override
-  protected void addColumnsToTable() {
+  protected void addColumnsToTable(boolean sortEnglish) {
     addEnglishAndFL();
 
     Column<ExerciseCorrectAndScore, SafeHtml> column2 = getHistoryColumn();

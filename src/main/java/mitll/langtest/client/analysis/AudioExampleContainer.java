@@ -1,6 +1,5 @@
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -71,7 +70,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends
 
   /**
    * @return
-   * @see SimplePagingContainer#addColumnsToTable()
+   * @see SimplePagingContainer#addColumnsToTable(int)
    */
   private Column<T, SafeHtml> getPlayAudio() {
     return new Column<T, SafeHtml>(new SafeHtmlCell()) {

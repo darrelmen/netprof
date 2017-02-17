@@ -234,7 +234,7 @@ public class Project implements PronunciationLookup {
     return audioFileHelper;
   }
 
-  public ExerciseTrie getFullTrie() {
+  public ExerciseTrie<CommonExercise> getFullTrie() {
     return fullTrie;
   }
 

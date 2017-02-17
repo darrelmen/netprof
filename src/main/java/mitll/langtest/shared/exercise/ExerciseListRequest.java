@@ -34,6 +34,7 @@ package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.answer.ActivityType;
 
 import java.util.Collection;
@@ -64,6 +65,8 @@ public class ExerciseListRequest implements IsSerializable {
   private boolean onlyDefaultAudio = false;
   private boolean onlyUninspected = false;
   private boolean onlyForUser = false;
+  private boolean addFirst = true;
+  private int limit = -1;
 
   public ExerciseListRequest() {
   }
@@ -75,6 +78,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   public boolean isNoFilter() {
     return userListID == -1 &&
+        limit == -1 &&
         typeToSelection.isEmpty() &&
         prefix.isEmpty() &&
         !isFilterActivity(activityType) &&
@@ -246,8 +250,30 @@ public class ExerciseListRequest implements IsSerializable {
     return onlyForUser;
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisPlot#populateExerciseMap
+   * @param onlyForUser
+   * @return
+   */
   public ExerciseListRequest setOnlyForUser(boolean onlyForUser) {
     this.onlyForUser = onlyForUser;
+    return this;
+  }
+
+  public int getLimit() {
+    return limit;
+  }
+
+  public ExerciseListRequest setLimit(int limit) {
+    this.limit = limit;
+    return this;
+  }
+  public boolean isAddFirst() {
+    return addFirst;
+  }
+
+  public ExerciseListRequest setAddFirst(boolean addFirst) {
+    this.addFirst = addFirst;
     return this;
   }
 
@@ -256,7 +282,8 @@ public class ExerciseListRequest implements IsSerializable {
    */
   public String toString() {
     return
-        (prefix.isEmpty() ? "" : "prefix                  '" + prefix + "'") +
+        (limit == -1 ? "" : "limit                  '" + limit + "'") +
+            (prefix.isEmpty() ? "" : "prefix                  '" + prefix + "'") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection           " + getTypeToSelection()) +
             "\n\tuser list id        " + userListID +
             "\n\tuser                " + userID +

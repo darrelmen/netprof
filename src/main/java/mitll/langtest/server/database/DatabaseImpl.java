@@ -524,10 +524,10 @@ public class DatabaseImpl implements Database {
    *
    * @param projectid
    * @return
-   * @see #getExercises(int)
+   * @seex #getExercises(int)
    * @see Project#buildExerciseTrie
    */
-  public Collection<CommonExercise> getExercises(int projectid) {
+  public List<CommonExercise> getExercises(int projectid) {
     return projectManagement.getExercises(projectid);
   }
 

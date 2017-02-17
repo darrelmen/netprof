@@ -65,7 +65,8 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell, V extends SectionWidget>
-    extends PagingExerciseList<T, U> implements ValueChangeHandler<String> {
+    extends PagingExerciseList<T, U>
+    implements ValueChangeHandler<String> {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
 
   public static final String ANY = "Clear";
@@ -76,7 +77,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
-  //private ActivityType activityType;
 
   /**
    * @param currentExerciseVPanel

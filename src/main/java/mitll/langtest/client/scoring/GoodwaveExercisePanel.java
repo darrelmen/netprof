@@ -87,11 +87,14 @@ import java.util.List;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class GoodwaveExercisePanel<T extends CommonExercise>//<CommonShell & AudioRefExercise & ScoredExercise>
+public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
+  /**
+   *
+   */
   public static final String CONTEXT = "Context";
   private static final String SAY = "Say";
   private static final String TRANSLITERATION = "Transliteration";
@@ -169,24 +172,22 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>//<CommonSh
     return isRTLContent(exercise.getForeignLanguage());
   }
 
+  /**
+   * @see #GoodwaveExercisePanel
+   */
   private void addContent() {
-    final Panel center = new VerticalPanel();
+  //  final Panel center = new VerticalPanel();
+    final Panel center = new DivWidget();
     center.getElement().setId("GoodwaveVerticalCenter");
     center.addStyleName("floatLeft");
     // attempt to left justify
 
-  //  ASRScorePanel widgets =
     makeScorePanel(exercise, instance);
 
     addQuestionContentRow(exercise, center);
 
     // content is on the left side
     add(center);
-
-    // score panel with gauge is on the right
-    /*if (widgets != null && controller.hasModel() && controller.isRecordingEnabled()) {
-      add(widgets);
-    }*/
 
     if (controller.isRecordingEnabled()) {
       addUserRecorder(controller.getService(), controller, center, screenPortion, exercise); // todo : revisit screen portion...
@@ -195,6 +196,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>//<CommonSh
     if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
       center.add(navigationHelper);
     }
+
   }
 
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
@@ -253,17 +255,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>//<CommonSh
     DivWidget div = new DivWidget();
     div.getElement().setId("GoodwaveExercisePanel_UserRecorder");
     ScoringAudioPanel answerWidget = getAnswerWidget(controller, screenPortion);
-//    String refAudio = exercise.getRefAudio();
-//    if (refAudio == null) {
-//      refAudio = exercise.getSlowAudioRef();
-//    }
-
     showRecordingHistory(exercise, answerWidget);
     div.add(answerWidget);
 
     addGroupingStyle(div);
-
-    //   addBelowPlaybackWidget(exercise, toAddTo);
     toAddTo.add(div);
   }
 

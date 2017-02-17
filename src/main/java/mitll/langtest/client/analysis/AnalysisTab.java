@@ -337,7 +337,7 @@ public class AnalysisTab extends DivWidget {
         lowerHalf.add(getSoundsContainer(phones));
 
         // #2 - word examples
-        Panel examples = exampleContainer.getTableWithPager();
+        Panel examples = exampleContainer.getTableWithPager(true);
         lowerHalf.add(getWordExamples(examples));
 
         // #3 - phone plot

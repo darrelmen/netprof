@@ -99,14 +99,14 @@ public class AVPHelper extends NPFHelper {
   @Override
   PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName, boolean showFirstNotCompleted) {
     PagingExerciseList<CommonShell,CommonExercise> widgets = new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
-        true, instanceName, true, false, ActivityType.PRACTICE) {
+        instanceName, true, true, false, ActivityType.PRACTICE) {
       @Override
       protected void onLastItem() {
       } // TODO : necessary?
 
       @Override
-      protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
-        pagingContainer.getTableWithPager();
+      protected void addTableWithPager(ClickablePagingContainer pagingContainer, boolean sortTable) {
+        pagingContainer.getTableWithPager(sortTable);
       }
 
       @Override

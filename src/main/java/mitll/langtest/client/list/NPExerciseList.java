@@ -55,8 +55,8 @@ public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList
                            ExerciseServiceAsync service,
                            UserFeedback feedback,
                            ExerciseController controller,
-                           boolean showTypeAhead,
                            String instance,
+                           boolean showTypeAhead,
                            boolean incorrectFirst,
                            boolean showFirstNotCompleted,
                            ActivityType activityType) {
