@@ -436,7 +436,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return dict;
   }
 
-  Set<String> seen = new HashSet<>();
+  private Set<String> seen = new HashSet<>();
 
   /**
    * @param transcript
@@ -501,7 +501,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
                 seen.add(key);
 //                logger.info("attempting to fall back to default pronunciation");
-                if (process.length > 0) {
+                if (process != null && process.length > 0) {
                   dict += getDefaultPronStringForWord(word, process, justPhones);
                 }
               }

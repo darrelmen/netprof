@@ -42,12 +42,12 @@ import mitll.langtest.shared.exercise.Shell;
 @RemoteServiceRelativePath("exercise-manager")
 public interface ExerciseService<T extends CommonShell> extends RemoteService {
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String, boolean)
+   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    * @param request
    * @paramx <T>
    * @return
    */
-  /*<T extends CommonShell>*/ ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request);
+  ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request);
 
   /**
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
@@ -57,5 +57,4 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
    * @return
    */
   <T extends Shell> T getExercise(int exid, boolean isFlashcardReq);
-
 }

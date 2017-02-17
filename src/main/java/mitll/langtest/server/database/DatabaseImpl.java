@@ -309,7 +309,7 @@ public class DatabaseImpl implements Database {
    */
   private void initializeDAOs(PathHelper pathHelper) {
     dbConnection = getDbConnection();
-   // logger.debug("initializeDAOs ---");
+    // logger.debug("initializeDAOs ---");
 
     eventDAO = new SlickEventImpl(dbConnection);
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
@@ -1125,6 +1125,7 @@ public class DatabaseImpl implements Database {
   public Collection<MonitorResult> getMonitorResults(int projid) {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults(projid);
 
+    logger.debug("getMonitorResults got back " + monitorResults.size() + " for project " + projid);
     for (MonitorResult result : monitorResults) {
       int exID = result.getExID();
       CommonShell exercise = isAmas() ? getAMASExercise(exID) : getExercise(projid, exID);
@@ -1133,17 +1134,24 @@ public class DatabaseImpl implements Database {
         result.setDisplayID("" + dominoID);
       }
     }
-    return getMonitorResultsWithText(monitorResults);
+    List<MonitorResult> monitorResultsWithText = getMonitorResultsWithText(monitorResults, projid);
+
+    logger.debug("getMonitorResults got back after join " + monitorResultsWithText.size() + " for project " + projid);
+
+    return monitorResultsWithText;
   }
 
   /**
    * @param monitorResults
+   * @param projid
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getResults
    * @see #getMonitorResults(int)
    */
-  public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
-    addUnitAndChapterToResults(monitorResults, getIdToExerciseMap(1));
+  public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid) {
+    Map<Integer, CommonExercise> idToExerciseMap = getIdToExerciseMap(projid);
+    logger.debug("Got size = " + idToExerciseMap.size() + " id->ex map");
+    addUnitAndChapterToResults(monitorResults, idToExerciseMap);
     return monitorResults;
   }
 
@@ -1157,6 +1165,7 @@ public class DatabaseImpl implements Database {
   private void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults,
                                           Map<Integer, CommonExercise> join) {
     int n = 0;
+    int m = 0;
     Set<Integer> unknownIDs = new HashSet<>();
     for (MonitorResult result : monitorResults) {
       int id = result.getExID();
@@ -1173,18 +1182,20 @@ public class DatabaseImpl implements Database {
       } else {
         result.setUnitToValue(exercise.getUnitToValue());
         result.setForeignText(exercise.getForeignLanguage());
+        m++;
       }
     }
     if (n > 0) {
       logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size() +
           " # bad join ids = " + unknownIDs.size());
     }
+    logger.debug("addUnitAndChapterToResults joined with " + m + " results");
   }
 
   /**
    * @param projectid
    * @return
-   * @see #getMonitorResultsWithText(List)
+   * @see #getMonitorResultsWithText
    */
   private Map<Integer, CommonExercise> getIdToExerciseMap(int projectid) {
     Map<Integer, CommonExercise> join = new HashMap<>();

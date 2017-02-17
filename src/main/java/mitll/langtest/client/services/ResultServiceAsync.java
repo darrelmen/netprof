@@ -48,6 +48,4 @@ public interface ResultServiceAsync {
                              String flText,
                              String which,
                              AsyncCallback<Collection<String>> async);
-
-//  void getResultASRInfo(int resultID, int width, int height, AsyncCallback<PretestScore> async);
 }

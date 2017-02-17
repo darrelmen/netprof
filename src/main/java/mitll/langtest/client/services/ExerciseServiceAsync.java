@@ -39,9 +39,6 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
 
 public interface ExerciseServiceAsync {
-  <T extends CommonShell> void getExerciseIds(
-      ExerciseListRequest request,
-      AsyncCallback<ExerciseListWrapper<T>> async);
-
+  <T extends CommonShell> void getExerciseIds(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
   <T extends Shell> void getExercise(int exid, boolean isFlashcardReq, AsyncCallback<T> async);
 }

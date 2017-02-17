@@ -33,43 +33,24 @@
 package mitll.langtest.client.result;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.ColumnSortList;
-import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.AudioTag;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.list.TypeAhead;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.services.ResultService;
@@ -78,7 +59,6 @@ import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.result.MonitorResult;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -124,7 +104,6 @@ public class ResultManager extends PagerTable {
   private static final int MAX_TO_SHOW = PAGE_SIZE;
 
   private final EventRegistration eventRegistration;
-  //private final LangTestDatabaseAsync service;
   private final ResultServiceAsync resultServiceAsync = GWT.create(ResultService.class);
 
   private final AudioTag audioTag = new AudioTag();
@@ -137,23 +116,20 @@ public class ResultManager extends PagerTable {
   private CellTable<MonitorResult> cellTable;
   private Panel reviewContainer;
 
-  private Map<String, Typeahead> typeToSuggest = new HashMap<String, Typeahead>();
-  private Typeahead userIDSuggest, textSuggest;
+//  private Map<String, Typeahead> typeToSuggest = new HashMap<String, Typeahead>();
+//  private Typeahead userIDSuggest, textSuggest;
 
+ // ResultTypeAhead resultTypeAhead;
   /**
-   * @paramx s
    * @param nameForAnswer
    * @param eventRegistration
-   * @see mitll.langtest.client.InitialUI.ResultsClickHandler#onClick
+   * @paramx s
+   * @seex mitll.langtest.client.InitialUI.ResultsClickHandler#onClick
    */
-  public ResultManager(LangTestDatabaseAsync service,
-                //       ResultServiceAsync s,
-                       String nameForAnswer,
+  public ResultManager(String nameForAnswer,
                        Collection<String> typeOrder,
                        EventRegistration eventRegistration,
                        ExerciseController controller) {
-    //this.service = service;
-   // this.resultServiceAsync = s;
     this.nameForAnswer = nameForAnswer;
     this.typeOrder = typeOrder;
     this.eventRegistration = eventRegistration;
@@ -161,12 +137,9 @@ public class ResultManager extends PagerTable {
   }
 
   /**
-   * @see mitll.langtest.client.InitialUI.ResultsClickHandler#onClick
+   * @see mitll.langtest.client.user.UserMenu.ResultsClickHandler
    */
   public void showResults() {
-    typeToSuggest = new HashMap<>();
-    userIDSuggest = null;
-    textSuggest = null;
     req = 0;
 
     // Create the popup dialog box
@@ -176,9 +149,8 @@ public class ResultManager extends PagerTable {
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
 
-
-    int left = (Window.getClientWidth())  / 200;
-    int top  = (Window.getClientHeight()) / 200;
+    int left = (Window.getClientWidth()) / 200;
+    int top = (Window.getClientHeight()) / 200;
     dialogBox.setPopupPosition(left, top);
 
     final Panel dialogVPanel = new VerticalPanel();
@@ -226,16 +198,19 @@ public class ResultManager extends PagerTable {
    * @param numResults
    * @param dialogVPanel
    * @param dialogBox
-   * @see #showResults()
+   * @see #showResults
    */
   private void populateTable(int numResults, Panel dialogVPanel, DialogBox dialogBox,
                              Button closeButton) {
     dialogVPanel.clear();
 
-    Widget table = getAsyncTable(numResults, getDownloadAnchor());
+    cellTable = new CellTable<>();
+    ResultTypeAhead resultTypeAhead = new ResultTypeAhead(typeOrder, cellTable, resultServiceAsync);
+    Widget table = getAsyncTable(numResults, getDownloadAnchor(),resultTypeAhead);
     table.setWidth("100%");
 
-    dialogVPanel.add(getSearchBoxes());
+
+    dialogVPanel.add(resultTypeAhead.getSearchBoxes());
     dialogVPanel.add(table);
     dialogVPanel.add(reviewContainer); // made in asynctable
     dialogVPanel.add(closeButton);
@@ -243,223 +218,18 @@ public class ResultManager extends PagerTable {
     dialogBox.show();
   }
 
-  private Panel getSearchBoxes() {
-    Panel hp = new HorizontalPanel();
-    hp.getElement().setId("search_container");
-
-    for (final String type : typeOrder) {
-      Typeahead typeahead = getTypeahead(type);
-      typeToSuggest.put(type, typeahead);
-      hp.add(TypeAhead.getControlGroup(type, typeahead.asWidget()));
-    }
-
-    hp.add(getUserIDSuggestWidget());
-    hp.add(getTextSuggestWidget());
-
-    return hp;
-  }
-
-  private Typeahead getTypeahead(final String whichField) {
-    return getTypeaheadUsing(whichField, new TextBox());
-  }
-
-  private Typeahead getTypeaheadUsing(final String whichField, TextBox w) {
-    Typeahead typeahead = new Typeahead(new SuggestOracle() {
-      @Override
-      public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
-        resultServiceAsync.getResultAlternatives(getUnitToValue(), getText(), whichField, new AsyncCallback<Collection<String>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
-
-          @Override
-          public void onSuccess(Collection<String> result) {
-            // logger.info(" request for " + type + " : " + unitToValue + " yielded " + result.size());
-            makeSuggestionResponse(result, callback, request);
-          }
-        });
-      }
-    });
-    w.getElement().setId("TextBox_" + whichField);
-    typeahead.setWidget(w);
-    configureTextBox(w);
-    addCallbacks(typeahead);
-    return typeahead;
-  }
-
-  private ControlGroup getUserIDSuggestWidget() {
-/*    userIDSuggest = new Typeahead(new SuggestOracle() {
-      @Override
-      public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getSafeText() + " " + getUserID());
-
-        resultServiceAsync.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
-
-          @Override
-          public void onSuccess(Collection<String> result) {
-            //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getSafeText() + " " + getUserID() + " yielded " + result.size());
-            makeSuggestionResponse(result, callback, request);
-          }
-        });
-      }
-    });
-
-    TextBox w = new TextBox();
-    w.getElement().setId("TextBox_userIDSuggest");
-    userIDSuggest.setWidget(w);
-    configureTextBox(w);
-    addCallbacks(userIDSuggest);*/
-
-    userIDSuggest = getTypeahead(MonitorResult.USERID);
-    return TypeAhead.getControlGroup(USER_ID, userIDSuggest.asWidget());
-  }
-
-  private ControlGroup getTextSuggestWidget() {
-/*
-    textSuggest = new Typeahead(new SuggestOracle() {
-      @Override
-      public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info(" requestSuggestions got request for txt " + getUnitToValue() + " " + getSafeText() + " " + getUserID());
-
-        resultServiceAsync.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
-
-          @Override
-          public void onSuccess(Collection<String> result) {
-            //logger.info(" requestSuggestions got request for text " + getUnitToValue() + " " + getSafeText() + " " + getUserID() + " yielded " + result.size());
-            makeSuggestionResponse(result, callback, request);
-
-          }
-        });
-      }
-    });
-*/
-    TextBox w1 = new TextBox();
-    w1.setPlaceholder("Word (type or paste) or Item ID");
-    w1.setDirectionEstimator(true);
-/*
-    textSuggest.setWidget(w1);
-    configureTextBox(w1);
-    addCallbacks(textSuggest);
-
-    w1.getElement().setId("TextBox_textSuggest");
-*/
-    textSuggest = getTypeaheadUsing(MonitorResult.TEXT, w1);
-
-    return TypeAhead.getControlGroup("Text", textSuggest.asWidget());
-  }
-
-  private void makeSuggestionResponse(Collection<String> result, SuggestOracle.Callback callback, SuggestOracle.Request request) {
-    Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<SuggestOracle.Suggestion>();
-    for (String resp : result) suggestions.add(new MySuggestion(resp));
-    callback.onSuggestionsReady(request, new SuggestOracle.Response(suggestions));
-  }
-
-  private void configureTextBox(final TextBox w) {
-    w.addKeyUpHandler(getKeyUpHandler(w));
-  }
-
-  private void addCallbacks(final Typeahead user) {
-    user.setUpdaterCallback(getUpdaterCallback());
-  }
-
-  /**
-   * NOTE : we need both a redraw on key up and one on selection!
-   *
-   * @param w
-   * @return
-   */
-  private KeyUpHandler getKeyUpHandler(final TextBox w) {
-    return new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-      //  logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
-        redraw();
-      }
-    };
-  }
-
-  private Typeahead.UpdaterCallback getUpdaterCallback() {
-    return new Typeahead.UpdaterCallback() {
-      @Override
-      public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
-        String replacementString = selectedSuggestion.getReplacementString();
-      //  logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
-
-        // NOTE : we need both a redraw on key up and one on selection!
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-     //       logger.info("--> getUpdaterCallback onSelection REDRAW ");
-            redraw();
-          }
-        });
-
-        return replacementString;
-      }
-    };
-  }
-
-  private void redraw() {
-    RangeChangeEvent.fire(cellTable, cellTable.getVisibleRange());              //2nd way
-  }
-
-  private String getText() {
-    return textSuggest == null ? "" : getTextFromTypeahead(textSuggest);
-  }
-
-  private String getTextFromTypeahead(Typeahead textSuggest) {
-    if (textSuggest == null) return "";
-
-    else {
-      TextBox widget = (TextBox) textSuggest.getWidget();
-      //    logger.info("checking " + widget.getElement().getExID() + " " + widget.getSafeText() +" " + widget.getValue());
-      return widget.getValue();
-    }
-  }
-
-  private int getUserID() {
-    String textFromTypeahead = getTextFromTypeahead(userIDSuggest);
-    try {
-      return userIDSuggest == null ? -1 : textFromTypeahead.isEmpty() ? -1 : Integer.parseInt(textFromTypeahead);
-    } catch (NumberFormatException e) {
-      new PopupHelper().showPopup("Please enter a number", userIDSuggest.getWidget());
-    }
-    return -1;
-  }
-
-  private Map<String, String> getUnitToValue() {
-    Map<String, String> unitToValue = new HashMap<String, String>();
-    for (String type : typeOrder) {
-      Typeahead suggestBox = typeToSuggest.get(type);
-      if (suggestBox != null) {
-        String text = getTextFromTypeahead(suggestBox);
-        if (!text.isEmpty()) {
-          unitToValue.put(type, text);
-        }
-      }
-    }
-    return unitToValue;
-  }
-
-  /**
+   /**
    * Also shows on the bottom a widget for review.
    *
    * @param numResults
    * @return
    * @see #populateTable
    */
-  private Widget getAsyncTable(int numResults, Widget rightOfPager) {
-    cellTable = new CellTable<MonitorResult>();
-
+  private Widget getAsyncTable(int numResults, Widget rightOfPager, ResultTypeAhead resultTypeAhead) {
     reviewContainer = new HorizontalPanel();
     reviewContainer.addStyleName("topFiveMargin");
     reviewContainer.addStyleName("border");
+
     final SingleSelectionModel<MonitorResult> selectionModel = new SingleSelectionModel<>();
     cellTable.setSelectionModel(selectionModel);
     cellTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -468,10 +238,12 @@ public class ResultManager extends PagerTable {
         respondToClick(selectionModel.getSelectedObject());
       }
     });
+
     addColumnsToTable(cellTable);
     cellTable.setRowCount(numResults, true);
     cellTable.setVisibleRange(0, MAX_TO_SHOW);
-    createProvider(numResults, cellTable);
+
+    createProvider(numResults, cellTable, resultTypeAhead);
 
     // Add a ColumnSortEvent.AsyncHandler to connect sorting to the AsyncDataPRrovider.
     cellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(cellTable));
@@ -532,7 +304,9 @@ public class ResultManager extends PagerTable {
    * @return
    * @see #getAsyncTable
    */
-  private void createProvider(final int numResults, final CellTable<MonitorResult> table) {
+  private void createProvider(final int numResults,
+                              final CellTable<MonitorResult> table,
+                              ResultTypeAhead resultTypeAhead) {
     AsyncDataProvider<MonitorResult> dataProvider = new AsyncDataProvider<MonitorResult>() {
       @Override
       protected void onRangeChanged(HasData<MonitorResult> display) {
@@ -542,43 +316,49 @@ public class ResultManager extends PagerTable {
         //logger.info("createProvider asking for " + start +"->" + end);
 
         StringBuilder builder = getColumnSortedState(table);
-        final Map<String, String> unitToValue = getUnitToValue();
+        final Map<String, String> unitToValue = resultTypeAhead.getUnitToValue();
 
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
-     //   logger.info("got " + builder.toString());
+        //   logger.info("got " + builder.toString());
 
-        resultServiceAsync.getResults(start, end, builder.toString(), unitToValue, getText(), val,
+        resultServiceAsync.getResults(
+            start,
+            end,
+            builder.toString(),
+            unitToValue,
+            resultTypeAhead.getText(),
+            val,
             new AsyncCallback<ResultAndTotal>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            Window.alert("Can't contact server.");
-            logger.warning("Got  " + caught);
-          }
+              @Override
+              public void onFailure(Throwable caught) {
+                Window.alert("Can't contact server.");
+                logger.warning("Got  " + caught);
+              }
 
-          @Override
-          public void onSuccess(final ResultAndTotal result) {
-            if (result.req < req - 1) {
+              @Override
+              public void onSuccess(final ResultAndTotal result) {
+                if (result.req < req - 1) {
 /*
               logger.info("->>getResults ignoring response " + result.req + " vs " + req +
                   " --->req " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
 */
-            } else {
-              final int numTotal = result.numTotal;
-              cellTable.setRowCount(numTotal, true);
-              updateRowData(start, result.results);
-              if (numTotal > 0) {
-                MonitorResult object = result.results.get(0);
+                } else {
+                  final int numTotal = result.numTotal;
+                  cellTable.setRowCount(numTotal, true);
+                  updateRowData(start, result.results);
+                  if (numTotal > 0) {
+                    MonitorResult object = result.results.get(0);
 /*
                     logger.info("--->getResults req " + result.req +
                             " " + unitToValue + " user " + userID + " text '" + text + "' : " +
                             "got back " + result.results.size() + " of total " + result.numTotal + " selecting "+ object);
 */
-                cellTable.getSelectionModel().setSelected(object, true);
+                    cellTable.getSelectionModel().setSelected(object, true);
+                  }
+                }
               }
-            }
-          }
-        });
+            });
       }
     };
 
@@ -590,7 +370,7 @@ public class ResultManager extends PagerTable {
   /**
    * @param table
    * @return
-   * @see #createProvider(int, com.google.gwt.user.cellview.client.CellTable)
+   * @see #createProvider
    */
   private StringBuilder getColumnSortedState(CellTable<MonitorResult> table) {
     final ColumnSortList sortList = table.getColumnSortList();
@@ -655,43 +435,13 @@ public class ResultManager extends PagerTable {
    * @see #addColumnsToTable(com.google.gwt.user.cellview.client.CellTable)
    */
   private void addUserPlanExercise(CellTable<MonitorResult> table) {
-    TextColumn<MonitorResult> id = new TextColumn<MonitorResult>() {
-      @Override
-      public String getValue(MonitorResult answer) {
-        if (answer == null) {
-//          System.err.println("huh? answer is null??");
-          return "";
-        } else {
-          return "" + answer.getUserid();
-        }
-      }
-    };
-    id.setSortable(true);
-    table.addColumn(id, USER_ID);
-    colToField.put(id, USERID);
+    addUserID(table);
+    addExercise(table);
+    addText(table);
+    addTypes(table);
+  }
 
-    TextColumn<MonitorResult> exercise = new TextColumn<MonitorResult>() {
-      @Override
-      public String getValue(MonitorResult answer) {
-        return answer == null ? "Unk" : ""+answer.getExID();
-      }
-    };
-    exercise.setSortable(true);
-    table.addColumn(exercise, "Ex.");
-    colToField.put(exercise, ID);
-
-    Column<MonitorResult, SafeHtml> fl = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(MonitorResult answer) {
-        return getNoWrapContent(answer.getForeignText());
-      }
-    };
-
-    fl.setSortable(true);
-    table.addColumn(fl, "Text");
-    colToField.put(fl, TEXT);
-    cellTable.setColumnWidth(fl, "180px");
-
+  private void addTypes(CellTable<MonitorResult> table) {
     for (final String type : typeOrder) {
       TextColumn<MonitorResult> unit = new TextColumn<MonitorResult>() {
         @Override
@@ -704,6 +454,49 @@ public class ResultManager extends PagerTable {
       table.addColumn(unit, type);
       colToField.put(unit, type);
     }
+  }
+
+  private void addText(CellTable<MonitorResult> table) {
+    Column<MonitorResult, SafeHtml> fl = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(MonitorResult answer) {
+        return getNoWrapContent(answer.getForeignText());
+      }
+    };
+
+    fl.setSortable(true);
+    table.addColumn(fl, "Text");
+    colToField.put(fl, TEXT);
+    cellTable.setColumnWidth(fl, "180px");
+  }
+
+  private void addExercise(CellTable<MonitorResult> table) {
+    TextColumn<MonitorResult> exercise = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        return answer == null ? "Unk" : "" + answer.getExID();
+      }
+    };
+    exercise.setSortable(true);
+    table.addColumn(exercise, "Ex.");
+    colToField.put(exercise, ID);
+  }
+
+  private void addUserID(CellTable<MonitorResult> table) {
+    TextColumn<MonitorResult> userid = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        if (answer == null) {
+//          System.err.println("huh? answer is null??");
+          return "";
+        } else {
+          return "" + answer.getUserid();
+        }
+      }
+    };
+    userid.setSortable(true);
+    table.addColumn(userid, USER_ID);
+    colToField.put(userid, USERID);
   }
 
   /**
@@ -851,20 +644,5 @@ public class ResultManager extends PagerTable {
 
   private Panel getPagerAndTable(CellTable<MonitorResult> table, Widget rightOfPager) {
     return getOldSchoolPagerAndTable(table, table, PAGE_SIZE, 1000, rightOfPager);
-  }
-
-  private static class MySuggestion implements SuggestOracle.Suggestion {
-    private final String resp;
-    MySuggestion(String resp) { this.resp = resp; }
-
-    @Override
-    public String getDisplayString() {
-      return resp;
-    }
-
-    @Override
-    public String getReplacementString() {
-      return resp;
-    }
   }
 }

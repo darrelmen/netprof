@@ -116,7 +116,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param factory
    * @param controller
    * @param instance
-   * @seex mitll.langtest.client.LangTest#makeExerciseList
+   * @see PagingExerciseList
    */
   ExerciseList(Panel currentExerciseVPanel,
                ExerciseServiceAsync service,

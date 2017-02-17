@@ -39,6 +39,7 @@ import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.result.MonitorResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -51,7 +52,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   /**
    * NOTE NOTE NOTE - we skip doing ensure ogg/mp3 on files for now - since this service will likely not be
    * on the server that has the audio.  And ideally this will already have been done.
-   *
+   * <p>
    * TODO : consider doing offset/limit on database query.
    * TODO : super expensive on long lists
    * <p>
@@ -62,10 +63,11 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    * @param sortInfo - encoding which fields we want to sort, and ASC/DESC choice
    * @param req      - to echo back -- so that if we get an old request we can discard it
    * @return
-   * @see mitll.langtest.client.result.ResultManager#createProvider(int, com.google.gwt.user.cellview.client.CellTable)
+   * @see mitll.langtest.client.result.ResultManager#createProvider
    */
   @Override
-  public ResultAndTotal getResults(int start, int end,
+  public ResultAndTotal getResults(int start,
+                                   int end,
                                    String sortInfo,
                                    Map<String, String> unitToValue,
                                    String flText,
@@ -89,7 +91,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
     List<MonitorResult> resultList = results.subList(start, min);
     logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
-    int projectID = getProjectID();
+//    int projectID = getProjectID();
 
 // TODO : not doing this - ideally not needed
 
@@ -115,72 +117,61 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    * @param userid
    * @param flText
    * @return
-   * @see #getResults(int, int, String, java.util.Map, int, String, int)
+   * @see #getResults
    */
   private List<MonitorResult> getResults(Map<String, String> unitToValue, int userid, String flText) {
-    logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
+    logger.debug("getResults : request unit to value " + unitToValue + " user " + userid + " text '" + flText + "'");
     int projectID = getProjectID();
 
-    boolean isNumber = false;
-    try {
+    if (isNumber(flText)) {
       int i = Integer.parseInt(flText);
-      isNumber = true;
-    } catch (NumberFormatException e) {
-    }
-    if (isNumber) {
-      int i = Integer.parseInt(flText);
-
-      List<MonitorResult> monitorResultsByID = db.getMonitorResultsWithText(db.getResultDAO().getMonitorResultsByID(i));
-      logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + monitorResultsByID.size() + " results...");
+      List<MonitorResult> monitorResultsByID =
+          db.getMonitorResultsWithText(db.getResultDAO().getMonitorResultsByID(i), projectID);
+      logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText +
+          " returning " + monitorResultsByID.size() + " results...");
       return monitorResultsByID;
     }
 
-    boolean filterByUser = userid > -1;
 
     Collection<MonitorResult> results = getMonitorResults();
 
     Trie<MonitorResult> trie;
 
-    for (String type : db.getTypeOrder(projectID)) {
-      if (unitToValue.containsKey(type)) {
+    // filter on unit->value
+    if (!unitToValue.isEmpty()) {
+      for (String type : db.getTypeOrder(projectID)) {
+        if (unitToValue.containsKey(type)) {
 
-        // logger.debug("getResults making trie for " + type);
-        // make trie from results
-        trie = new Trie<MonitorResult>();
+          // logger.debug("getResults making trie for " + type);
+          // make trie from results
+          trie = new Trie<>();
 
-        trie.startMakingNodes();
-        for (MonitorResult result : results) {
-          String s = result.getUnitToValue().get(type);
-          if (s != null) {
-            trie.addEntryToTrie(new ResultWrapper(s, result));
+          trie.startMakingNodes();
+          for (MonitorResult result : results) {
+            String s = result.getUnitToValue().get(type);
+            if (s != null) {
+              trie.addEntryToTrie(new ResultWrapper(s, result));
+            }
           }
-        }
-        trie.endMakingNodes();
+          trie.endMakingNodes();
 
-        results = trie.getMatchesLC(unitToValue.get(type));
+          results = trie.getMatchesLC(unitToValue.get(type));
+        }
       }
     }
 
+    boolean filterByUser = userid > -1;
     if (filterByUser) { // asking for userid
       // make trie from results
-      //      logger.debug("making trie for userid " + userid);
-
-      trie = new Trie<MonitorResult>();
-      trie.startMakingNodes();
-      for (MonitorResult result : results) {
-        trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
-      }
-      trie.endMakingNodes();
-
-      results = trie.getMatchesLC(Long.toString(userid));
+      results = filterByUser(userid, results);
     }
 
     // must be asking for text
     boolean filterByText = flText != null && !flText.isEmpty();
     if (filterByText) { // asking for text
-      trie = new Trie<MonitorResult>();
+      trie = new Trie<>();
       trie.startMakingNodes();
-      //     logger.debug("searching over " + results.size());
+      logger.debug("filter text searching over " + results.size() + " for " + filterByText);
       for (MonitorResult result : results) {
         String foreignText = result.getForeignText();
         if (foreignText != null) {
@@ -195,6 +186,35 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     return new ArrayList<>(results);
   }
 
+  private Collection<MonitorResult> filterByUser(int userid, Collection<MonitorResult> results) {
+    Trie<MonitorResult> trie;
+    logger.debug("making trie for userid " + userid);
+
+    trie = new Trie<>();
+    trie.startMakingNodes();
+    for (MonitorResult result : results) {
+      trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
+    }
+    trie.endMakingNodes();
+
+    results = trie.getMatchesLC(Long.toString(userid));
+    return results;
+  }
+
+  private boolean isNumber(String flText) {
+    if (flText.isEmpty()) {
+      return false;
+    } else {
+      boolean isNumber = false;
+      try {
+        int i = Integer.parseInt(flText);
+        isNumber = true;
+      } catch (NumberFormatException e) {
+      }
+      return isNumber;
+    }
+  }
+
   private Collection<MonitorResult> getMonitorResults() {
     return db.getMonitorResults(getProjectID());
   }
@@ -206,7 +226,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    * @param flText
    * @param which
    * @return
-   * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing
+   * @see mitll.langtest.client.result.ResultTypeAhead#getTypeaheadUsing
    */
   @Override
   public Collection<String> getResultAlternatives(Map<String, String> unitToValue,
@@ -222,10 +242,9 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
     for (String type : db.getTypeOrder(getProjectID())) {
       if (unitToValue.containsKey(type)) {
-
-        //    logger.debug("getResultAlternatives making trie for " + type);
+        logger.debug("getResultAlternatives making trie for " + type);
         // make trie from results
-        trie = new Trie<MonitorResult>();
+        trie = new Trie<>();
 
         trie.startMakingNodes();
         for (MonitorResult result : results) {
@@ -236,8 +255,8 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
         }
         trie.endMakingNodes();
 
-        String s = unitToValue.get(type);
-        Collection<MonitorResult> matchesLC = trie.getMatchesLC(s);
+        String valueForType = unitToValue.get(type);
+        Collection<MonitorResult> matchesLC = trie.getMatchesLC(valueForType);
 
         // stop!
         if (which.equals(type)) {
@@ -256,20 +275,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
             matches.add(e);
           }
 
-          if (allInt) {
-            List<String> sorted = new ArrayList<String>(matches);
-            Collections.sort(sorted, new Comparator<String>() {
-              @Override
-              public int compare(String o1, String o2) {
-                return compareTwoMaybeInts(o1, o2);
-              }
-            });
-            return sorted;
-          }
-
-          //          logger.debug("returning " + matches);
-
-          return matches;
+          return allInt ? getIntSorted(matches) : matches;
         } else {
           results = matchesLC;
         }
@@ -281,7 +287,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
       logger.debug("making trie for userid " + userid);
 
-      trie = new Trie<MonitorResult>();
+      trie = new Trie<>();
       trie.startMakingNodes();
       for (MonitorResult result : results) {
         trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
@@ -307,37 +313,56 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
 
     // must be asking for text
-    trie = new Trie<MonitorResult>();
-    trie.startMakingNodes();
-    //logger.debug("text searching over " + results.size());
-    for (MonitorResult result : results) {
-      trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
-      trie.addEntryToTrie(new ResultWrapper("" + result.getExID(), result));
-    }
-    trie.endMakingNodes();
+    if (!flText.isEmpty()) {
+      trie = new Trie<MonitorResult>();
+      trie.startMakingNodes();
+      logger.debug("text searching over " + results.size());
+      for (MonitorResult result : results) {
+        trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
+        trie.addEntryToTrie(new ResultWrapper("" + result.getExID(), result));
+      }
+      trie.endMakingNodes();
 
-    Collection<MonitorResult> matchesLC = trie.getMatchesLC(flText);
-    //logger.debug("matchesLC for '" +flText+  "' " + matchesLC);
-
-    boolean isNumber = false;
-    try {
-      Integer.parseInt(flText);
-      isNumber = true;
-    } catch (NumberFormatException e) {
+      results = trie.getMatchesLC(flText);
+      logger.debug("matchesLC for '" + flText + "' " + results);
     }
+
+    boolean isNumber = isNumber(flText);
 
     if (isNumber) {
-      for (MonitorResult result : matchesLC) {
+      for (MonitorResult result : results) {
         matches.add("" + result.getExID());
       }
     } else {
-      for (MonitorResult result : matchesLC) {
+      for (MonitorResult result : results) {
         matches.add(result.getForeignText().trim());
       }
     }
-    //logger.debug("returning text " + matches);
+    logger.debug("returning text " + matches);
 
     return getLimitedSizeList(matches);
+  }
+
+//  private boolean isNumber(String flText) {
+//    boolean isNumber = false;
+//    try {
+//      Integer.parseInt(flText);
+//      isNumber = true;
+//    } catch (NumberFormatException e) {
+//    }
+//    return isNumber;
+//  }
+
+  @NotNull
+  private Collection<String> getIntSorted(Collection<String> matches) {
+    List<String> sorted = new ArrayList<String>(matches);
+    Collections.sort(sorted, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        return compareTwoMaybeInts(o1, o2);
+      }
+    });
+    return sorted;
   }
 
   private Collection<String> getLimitedSizeList(Collection<String> matches) {

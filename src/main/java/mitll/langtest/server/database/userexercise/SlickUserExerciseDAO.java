@@ -90,7 +90,7 @@ public class SlickUserExerciseDAO
   /**
    * @param database
    * @param dbConnection
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public SlickUserExerciseDAO(DatabaseImpl database, DBConnection dbConnection) {
     super(database);
@@ -270,7 +270,8 @@ public class SlickUserExerciseDAO
   private Exercise fromSlickToExercise(SlickExercise slick,
                                        Collection<String> typeOrder,
                                        SectionHelper<CommonExercise> sectionHelper,
-                                       Map<Integer, ExercisePhoneInfo> exToPhones, PronunciationLookup lookup) {
+                                       Map<Integer, ExercisePhoneInfo> exToPhones,
+                                       PronunciationLookup lookup) {
     int id = slick.id();
     Exercise exercise = new Exercise(
         id,
@@ -292,6 +293,7 @@ public class SlickUserExerciseDAO
     exercise.setRefSentences(translations); // ?
     exercise.setUpdateTime(lastModified);
     exercise.setAltFL(slick.altfl());
+
     ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(id);
 
     if (exercisePhoneInfo == null) {

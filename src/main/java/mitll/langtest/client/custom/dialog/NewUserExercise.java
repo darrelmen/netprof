@@ -369,7 +369,8 @@ class NewUserExercise extends BasicDialog {
         exerciseList.forgetExercise(exid);
 
         if (!originalList.removeAndCheck(exid)) {
-          logger.warning("deleteItem huh? didn't remove the item " + exid + " from " + originalList);
+          logger.warning("deleteItem huh? didn't remove the item " + exid + " from " + originalList.getID() +
+              " now "+ originalList.getExercises().size());
         }
         if (learnContainer != null && learnContainer.getReloadable() != null) {
           learnContainer.getReloadable().redraw();   // TODO : or reload???
