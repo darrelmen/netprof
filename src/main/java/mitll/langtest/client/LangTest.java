@@ -214,6 +214,7 @@ import java.util.logging.Logger;
  * - development to master
  * 2.0.2
  * 2.0.3
+ * 2.0.4
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements
@@ -222,7 +223,7 @@ public class LangTest implements
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
-  public static final String VERSION_INFO = "2.0.3";
+  public static final String VERSION_INFO = "2.0.4";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 

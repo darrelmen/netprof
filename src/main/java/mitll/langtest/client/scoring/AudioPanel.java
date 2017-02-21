@@ -104,7 +104,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
-  private float screenPortion = 1.0f;
+  @Deprecated  private float screenPortion = 1.0f;
   private final boolean logMessages;
   protected final ExerciseController controller;
   private boolean showSpectrogram = false;
@@ -327,7 +327,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     audioPositionPopup.reinitialize();
   }
 
-  void setScreenPortion(float screenPortion) {
+  @Deprecated void setScreenPortion(float screenPortion) {
     //  if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }

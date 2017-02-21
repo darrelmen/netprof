@@ -98,7 +98,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   /**
    * TODO : remove me
    */
-  @Deprecated boolean isBusy = false;
+  @Deprecated
+  boolean isBusy = false;
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
@@ -113,11 +114,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
   private AudioPanel contentAudio, answerAudio;
   protected final NavigationHelper navigationHelper;
-  private final float screenPortion;
-  protected final String instance;
+  //  private final float screenPortion;
+//  protected final String instance;
   private boolean hasClickable = false;
   private boolean isJapanese = false;
-  private boolean allowRecording = true;
+  //  private boolean allowRecording = true;
+  protected ExerciseOptions options;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -126,22 +128,28 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @param commonExercise for this exercise
    * @param controller
    * @param listContainer
-   * @param screenPortion
-   * @param instance
-   * @param allowRecording
+   * @paramx screenPortion
+   * @paramx instance
+   * @paramx allowRecording
+   * @paramx includeListButtons
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
   protected GoodwaveExercisePanel(final T commonExercise,
                                   final ExerciseController controller,
                                   final ListInterface<CommonShell> listContainer,
-                                  float screenPortion,
-                                  boolean addKeyHandler,
-                                  String instance, boolean allowRecording) {
+                                  // float screenPortion,
+                                  ExerciseOptions options
+                                  //                                boolean addKeyHandler,
+                                  //                              String instance,
+                                  //                            boolean allowRecording,
+                                  //                          boolean includeListButtons
+  ) {
+    this.options = options;
     this.exercise = commonExercise;
     this.controller = controller;
-    this.screenPortion = screenPortion;
-    this.instance = instance;
-    this.allowRecording = allowRecording;
+//    this.screenPortion = screenPortion;
+//    this.instance = instance;
+//    this.allowRecording = allowRecording;
     String language = controller.getLanguage();
 
     isJapanese = language.equalsIgnoreCase(JAPANESE);
@@ -150,9 +158,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     //   addStyleName("inlineBlockStyle");
     getElement().setId("GoodwaveExercisePanel");
 
-    this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
+    this.navigationHelper = getNavigationHelper(controller, listContainer, options.isAddKeyHandler(), options.isIncludeListButtons());
     this.listContainer = listContainer;
-    navigationHelper.addStyleName("topBarMargin");
 
     addContent();
   }
@@ -165,21 +172,21 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @see #GoodwaveExercisePanel
    */
   private void addContent() {
-  //  final Panel center = new VerticalPanel();
+    //  final Panel center = new VerticalPanel();
     final Panel center = new DivWidget();
     center.getElement().setId("GoodwaveVerticalCenter");
     center.addStyleName("floatLeft");
     // attempt to left justify
 
-    makeScorePanel(exercise, instance);
+    makeScorePanel(exercise, options.getInstance());
 
     addQuestionContentRow(exercise, center);
 
     // content is on the left side
     add(center);
 
-    if (controller.isRecordingEnabled() && allowRecording) {
-      addUserRecorder(controller.getService(), controller, center, screenPortion, exercise); // todo : revisit screen portion...
+    if (controller.isRecordingEnabled() && options.isAllowRecording()) {
+      addUserRecorder(controller.getService(), controller, center, options.getScreenPortion(), exercise); // todo : revisit screen portion...
     }
 
     if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
@@ -189,18 +196,28 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
                                                               final ListInterface<CommonShell> listContainer,
-                                                              boolean addKeyHandler) {
-    return new NavigationHelper<>(getLocalExercise(), controller, new PostAnswerProvider() {
+                                                              boolean addKeyHandler, boolean includeListButtons) {
+    NavigationHelper<CommonShell> widgets = new NavigationHelper<>(getLocalExercise(), controller, new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, HasID completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
-    }, listContainer, true, addKeyHandler, false, false);
+    },
+        listContainer,
+        true,
+        addKeyHandler,
+        false,
+        false);
+    widgets.addStyleName("topBarMargin");
+    return widgets;
   }
 
-  public void wasRevealed() { }
+  public void wasRevealed() {
+  }
 
-  protected ASRScorePanel makeScorePanel(T e, String instance) {  return null;  }
+  protected ASRScorePanel makeScorePanel(T e, String instance) {
+    return null;
+  }
 
   protected void loadNext() {
     listContainer.loadNextExercise(exercise.getID());
@@ -248,9 +265,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
   private void showRecordingHistory(T exercise, ScoringAudioPanel answerWidget) {
 //    answerWidget.setRefAudio(refAudio);
- //  for (CorrectAndScore score : exercise.getScores()) {
-      answerWidget.addScores(exercise.getScores());
-   // }
+    //  for (CorrectAndScore score : exercise.getScores()) {
+    answerWidget.addScores(exercise.getScores());
+    // }
 //    answerWidget.setClassAvg(exercise.getAvgScore());
     answerWidget.showChart();
   }
@@ -316,9 +333,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     //else {
 //      logger.info("getScoringAudioPanel path is " +path +
 //          " for " + e.getAudioAttributes());
-   // }
+    // }
     contentAudio = getAudioPanel(path);
-    contentAudio.setScreenPortion(screenPortion);
+    contentAudio.setScreenPortion(options.getScreenPortion());
     return contentAudio;
   }
 
@@ -334,7 +351,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   }
 
   protected ASRScoringAudioPanel makeFastAndSlowAudio(String path) {
-    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, controller, instance);
+    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, controller, options.getInstance());
   }
 
   /**
@@ -519,7 +536,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    */
   private ScoringAudioPanel getAnswerWidget(final ExerciseController controller, float screenPortion) {
     ScoringAudioPanel widgets =
-        new ASRRecordAudioPanel<T>(this, controller, getLocalExercise(), instance);
+        new ASRRecordAudioPanel<T>(this, controller, getLocalExercise(), options.getInstance());
     //widgets.addScoreListener();
     answerAudio = widgets;
     answerAudio.setScreenPortion(screenPortion);
@@ -539,4 +556,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   public boolean isBusy() {
     return isBusy;
   }
+
+  protected String getInstance() { return options.getInstance(); }
 }

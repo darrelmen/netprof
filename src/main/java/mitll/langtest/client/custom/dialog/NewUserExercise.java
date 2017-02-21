@@ -663,7 +663,10 @@ abstract class NewUserExercise extends BasicDialog {
 
     Collection<CommonExercise> directlyRelated = mutableExercise.getDirectlyRelated();
 
-    if (!directlyRelated.isEmpty()) {
+    if (directlyRelated.isEmpty()) {
+      logger.warning("no context sentence on "+ mutableExercise.getID());
+    }
+    else {
       CommonExercise commonExercise = directlyRelated.iterator().next();
       MutableExercise mutable = commonExercise.getMutable();
 
@@ -674,6 +677,8 @@ abstract class NewUserExercise extends BasicDialog {
       } else {
         mutable.setEnglish(contextTrans.getSafeText());
       }
+
+      logger.info("context now " + mutable.getDirectlyRelated().iterator().next().getForeignLanguage());
     }
   }
 

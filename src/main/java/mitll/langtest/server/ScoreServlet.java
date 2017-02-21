@@ -157,15 +157,25 @@ public class ScoreServlet extends DatabaseServlet {
 
     String passwordFromBody = "";
     int projid = getProject(request);
+
+    // language overrides user id mapping...
+    {
+      String language = request.getHeader("language");
+      if (language != null) {
+        projid = getProjectID(language);
+        if (projid == -1) projid = getProject(request);
+      }
+    }
+
     if (projid == -1) {
       projid = request.getIntHeader("projid");
 
-      if (projid == -1) {
-        String language = request.getHeader("language");
-        if (language != null) {
-          projid = getProjectID(language);
-        }
-      }
+//      if (projid == -1) {
+//        //language = request.getHeader("language");
+//        if (language != null) {
+//          projid = getProjectID(language);
+//        }
+//      }
       logger.warn("OK - look for project id from url header " + projid);
    /*   String[] projids = queryString.split("projid=");
       if (projids.length > 1) {
