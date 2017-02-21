@@ -65,8 +65,8 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
    * @see AMASInitialUI#populateBelowHeader
    */
   AutoCRTChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
-                                 ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
-    super(service, feedback, userManager, controller, null, exerciseServiceAsync);
+                          ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
+    super(controller, null);
   }
 
   /**
@@ -75,13 +75,13 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
    * @see FlexListLayout#getFactory
    */
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-    return new ExercisePanelFactory<AmasExerciseImpl,AmasExerciseImpl>(controller, exerciseList) {
+    return new ExercisePanelFactory<AmasExerciseImpl, AmasExerciseImpl>(controller, exerciseList) {
       @Override
       public Panel getExercisePanel(AmasExerciseImpl e) {
         if (child != null) {
           child.setVisible(true);
         }
-        return new FeedbackRecordPanel(e, service, controller, (ResponseExerciseList) exerciseList, child);
+        return new FeedbackRecordPanel(e, controller, (ResponseExerciseList) exerciseList, child);
       }
     };
   }
@@ -90,26 +90,23 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   public void addNPFToContent(Panel listContent, String instanceName) {
     super.addNPFToContent(listContent, instanceName);
     //if (!controller.getProps().isAdminView()) {
-      hideList();
+    hideList();
     //}
   }
 
   /**
    * TODO : parameterize this
    *
-   * @param userManager
    * @param outer
    * @return
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#SimpleChapterNPFHelper
    */
   @Override
-  protected FlexListLayout getMyListLayout(UserManager userManager,
-                                           SimpleChapterNPFHelper outer) {
-    return new MyFlexListLayout(service, feedback, controller, outer, exerciseServiceAsync) {
+  protected FlexListLayout getMyListLayout(SimpleChapterNPFHelper outer) {
+    return new MyFlexListLayout(controller, outer) {
       @Override
-      protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
-                                                    boolean incorrectFirst) {
-        exerciseList = new ResponseExerciseList(topRow, currentExercisePanel, exerciseServiceAsync, feedback, controller, instanceName);
+      protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
+        exerciseList = new ResponseExerciseList(topRow, currentExercisePanel, controller, instanceName);
         return exerciseList;
       }
 

@@ -44,6 +44,7 @@ import mitll.langtest.client.exercise.DefectEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.HistoryExerciseList;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -84,28 +85,25 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
                               SimpleChapterNPFHelper learnHelper,
                               ExerciseServiceAsync exerciseServiceAsync
   ) {
-    super(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
+    super(controller, learnHelper);
   }
 
   /**
    * Adds two checkboxes to filter for uninspected items and items with audio that's old enough it's not marked
    * by gender.
    *
-   * @param userManager
    * @param outer
    * @return
    */
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(UserManager userManager,
-                                                                        SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer, exerciseServiceAsync) {
+  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
+    return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
-                                                                                 String instanceName,
-                                                                                 boolean incorrectFirst) {
+                                                                                 String instanceName) {
 //        logger.info("instance is " + instanceName);
-        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, ActivityType.MARK_DEFECTS) {
+        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, new ListOptions().setInstance(instanceName)) {
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override

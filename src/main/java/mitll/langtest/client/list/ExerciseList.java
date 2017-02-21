@@ -39,32 +39,16 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.custom.content.NPFHelper;
-import mitll.langtest.client.custom.dialog.EditItem;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -87,7 +71,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
 
   private static final int MAX_MSG_LEN = 200;
-  boolean incorrectFirstOrder = false;
+ // boolean incorrectFirstOrder = false;
 
   protected SimplePanel innerContainer;
   protected final ExerciseServiceAsync service;
@@ -98,7 +82,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   protected Panel createdPanel;
   private int lastReqID = 0;
   final boolean allowPlusInURL;
-  private final String instance;
+ // private final String instance;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
   boolean doShuffle;
 
@@ -108,33 +92,29 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   private static final boolean DEBUG = false;
   private UserState userState;
+  protected ListOptions listOptions;
 
   /**
    * @param currentExerciseVPanel
-   * @param service
-   * @param feedback
    * @param factory
    * @param controller
-   * @param instance
+   * @paramx instance
    * @see PagingExerciseList
    */
   ExerciseList(Panel currentExerciseVPanel,
-               ExerciseServiceAsync service,
-               UserFeedback feedback,
                ExercisePanelFactory<T, U> factory,
                ExerciseController controller,
-               String instance,
-               boolean incorrectFirst) {
-    this.instance = instance;
-    this.service = service;
-    this.feedback = feedback;
+               ListOptions listOptions) {
+    this.listOptions = listOptions;
+    this.service = controller.getExerciseService();
+    this.feedback = controller.getFeedback();
     this.factory = factory;
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.userState = controller.getUserState();
     this.controller = controller;
-    this.incorrectFirstOrder = incorrectFirst;
+    //this.incorrectFirstOrder = listOptions.isIncorrectFirst();
     addWidgets(currentExerciseVPanel);
-    getElement().setId("ExerciseList_" + instance);
+    getElement().setId("ExerciseList_" + listOptions.getInstance());
   }
 
   /**
@@ -178,7 +158,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private ExerciseListRequest getRequest() {
     return new ExerciseListRequest(incrRequest(), getUser())
         .setActivityType(getActivityType())
-        .setIncorrectFirstOrder(incorrectFirstOrder);
+        .setIncorrectFirstOrder(listOptions.isIncorrectFirst());
   }
 
   int incrRequest() {
@@ -187,7 +167,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
-   * @see NPFHelper#reload
+   * @seex NPFHelper#reload
    */
   public void reload() {
     //logger.info("reload -");
@@ -266,7 +246,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
 
   public String getInstance() {
-    return instance;
+    return listOptions.getInstance();
   }
 
   @Override
@@ -513,11 +493,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void loadFirstExercise(String searchIfAny) {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-      if (DEBUG) logger.info("loadFirstExercise (" + instance + ") : current exercises is empty?");
+      if (DEBUG) logger.info("loadFirstExercise (" + getInstance() + ") : current exercises is empty?");
       removeCurrentExercise();
     } else {
       T toLoad = findFirstExercise();
-      if (DEBUG) logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
+      if (DEBUG) logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + getInstance());
       pushFirstSelection(toLoad.getID(), searchIfAny);
     }
   }
@@ -559,7 +539,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public void checkAndAskServer(int id) {
     if (DEBUG) {
-      logger.info(getClass() + " : (" + instance + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
+      logger.info(getClass() + " : (" + getInstance() + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
     }
 
     if (hasExercise(id)) {
@@ -603,12 +583,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     userState.checkUser();
     if (cachedNext != null && cachedNext.getID() == itemID) {
       if (DEBUG)
-        logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
+        logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + getInstance());
       useExercise(cachedNext);
     } else {
       pendingReq = true;
-      if (DEBUG || true) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
-      service.getExercise(itemID, incorrectFirstOrder, new ExerciseAsyncCallback());
+      if (DEBUG || true) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
+      service.getExercise(itemID, listOptions.isIncorrectFirst(), new ExerciseAsyncCallback());
     }
 
     // go get next and cache it
@@ -621,7 +601,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       T next = getAt(i + 1);
       //if (next.getID() != EditItem.NEW_EXERCISE_ID) {
       //  logger.info("ask for next " + next);
-      service.getExercise(next.getID(), incorrectFirstOrder, new AsyncCallback<U>() {
+      service.getExercise(next.getID(), listOptions.isIncorrectFirst(), new AsyncCallback<U>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -629,7 +609,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         @Override
         public void onSuccess(U result) {
           cachedNext = result;
-          //if (DEBUG) logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getOldID() + " instance " + instance);
+          //if (DEBUG) logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getOldID() + " instance " + getInstance());
         }
       });
     }
@@ -704,7 +684,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #useExercise
    */
   private Panel makeExercisePanel(U exercise) {
-    if (DEBUG) logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
+    if (DEBUG) logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + getInstance());
     Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
     return exercisePanel;
@@ -808,7 +788,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   @Override
   public boolean loadNextExercise(HasID current) {
-    if (DEBUG) logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + instance);
+    if (DEBUG) logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + getInstance());
     // String id = current.getID();
     int i = getIndex(current.getID());
     boolean onLast = isOnLastItem(i);
@@ -825,7 +805,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   public boolean loadNextExercise(int id) {
-    if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + instance);
+    if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + getInstance());
     T exerciseByID = byID(id);
     if (exerciseByID == null) logger.warning("huh? couldn't find exercise with id " + id);
     return exerciseByID != null && loadNextExercise(exerciseByID);

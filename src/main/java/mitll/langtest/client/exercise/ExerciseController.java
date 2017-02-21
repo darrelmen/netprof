@@ -38,10 +38,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.services.AudioServiceAsync;
-import mitll.langtest.client.services.QCServiceAsync;
-import mitll.langtest.client.services.ScoringServiceAsync;
-import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.services.*;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -80,6 +77,8 @@ public interface ExerciseController extends EventRegistration {
    * @return
    */
   ScoringServiceAsync getScoringService();
+
+  ExerciseServiceAsync getExerciseService();
 
 
   UserManager getUserManager();

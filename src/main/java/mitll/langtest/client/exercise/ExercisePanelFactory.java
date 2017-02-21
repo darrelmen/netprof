@@ -33,7 +33,6 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.Shell;
 

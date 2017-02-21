@@ -42,18 +42,10 @@ import mitll.langtest.client.bootstrap.SectionNodeItemSorter;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectionWidget> {
@@ -69,25 +61,19 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
   /**
    * @param secondRow             add the section panel to this row
    * @param currentExerciseVPanel
-   * @param service
-   * @param feedback
    * @param controller
-   * @param instance
-   * @param incorrectFirst
-   * @param activityType
+   * @param listOptions
    */
   public SimpleSelectExerciseList(Panel secondRow,
                                   Panel currentExerciseVPanel,
-                                  ExerciseServiceAsync service,
-                                  UserFeedback feedback,
-                                  ExerciseController controller,
-                                  String instance,
-                                  boolean incorrectFirst,
-                                  ActivityType activityType) {
-    super(currentExerciseVPanel, service, feedback, controller, instance, true, incorrectFirst, false, activityType);
+                                  ExerciseController controller, ListOptions listOptions) {
+    super(currentExerciseVPanel, controller,
+        listOptions.setShowTypeAhead(true)
+        .setShowFirstNotCompleted(false)
+         );
 
     sectionPanel = new FluidContainer();
-    sectionPanel.getElement().setId("sectionPanel_" + instance);
+    sectionPanel.getElement().setId("sectionPanel_" + getInstance());
 
     Style style = sectionPanel.getElement().getStyle();
     style.setPaddingLeft(0, Style.Unit.PX);

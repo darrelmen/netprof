@@ -42,12 +42,7 @@ import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -56,24 +51,13 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonAnnotatable;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -118,15 +102,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private Widget contentPanel;
 
   /**
-   * @param service
-   * @param feedback
    * @param controller
    * @param exerciseList
    * @param instance
    * @param ul
    * @see mitll.langtest.client.custom.content.AVPHelper#getFactory
    */
-  public StatsFlashcardFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
+  public StatsFlashcardFactory(ExerciseController controller,
                                ListInterface<L> exerciseList, String instance, UserList ul) {
     super(controller, exerciseList);
     controlState = new ControlState();

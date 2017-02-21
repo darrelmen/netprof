@@ -39,16 +39,11 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,16 +73,15 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
   /**
    * @param e
-   * @param service
    * @param controller
    * @param doNormalRecording
    * @param instance
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
-  public WaveformExercisePanel(T e, LangTestDatabaseAsync service,
+  public WaveformExercisePanel(T e,
                                ExerciseController controller, ListInterface<L> exerciseList,
                                boolean doNormalRecording, String instance) {
-    super(e, service, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance);
+    super(e, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance);
     getElement().setId("WaveformExercisePanel");
 
 
@@ -157,25 +151,24 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
    * @param exercise
-   * @param service
    * @param controller
    * @param index
    * @return
    * @seex ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, ListInterface)
    */
-  protected Widget getAnswerWidget(T exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+  protected Widget getAnswerWidget(T exercise, ExerciseController controller, final int index) {
     audioPanels = new ArrayList<>();
     Panel vp = new VerticalPanel();
 
 
     // add normal speed recording widget
     if (isNormalRecord()) {
-      addRecordAudioPanelNoCaption(exercise, service, controller, index, vp, AudioType.REGULAR);
+      addRecordAudioPanelNoCaption(exercise, controller, index, vp, AudioType.REGULAR);
       // add slow speed recording widget
-      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, service, controller, index + 1, vp, AudioType.SLOW);
+      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, AudioType.SLOW);
       widgets.addStyleName("topFiveMargin");
     } else {
-      addExampleSentenceRecorder(exercise, service, controller, index, vp);
+      addExampleSentenceRecorder(exercise, controller, index, vp);
     }
 
     return vp;
@@ -185,7 +178,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     return !exercise.getDirectlyRelated().isEmpty();// exercise.getContext() != null && !exercise.getContext().isEmpty();
   }
 
-  private void addExampleSentenceRecorder(T exercise, LangTestDatabaseAsync service, ExerciseController controller,
+  private void addExampleSentenceRecorder(T exercise, ExerciseController controller,
                                           int index, Panel vp) {
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, index, false,
         AudioAttribute.CONTEXT_AUDIO_TYPE, instance);
@@ -197,16 +190,15 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   }
 
   /**
-   * @see #getAnswerWidget(CommonShell, LangTestDatabaseAsync, ExerciseController, int)
+   * @see ExercisePanel#getAnswerWidget(CommonShell, ExerciseController, int)
    * @param exercise
-   * @param service
    * @param controller
    * @param index
    * @param vp
    * @param audioType
    * @return
    */
-  private VerticalPanel addRecordAudioPanelNoCaption(T exercise, LangTestDatabaseAsync service,
+  private VerticalPanel addRecordAudioPanelNoCaption(T exercise,
                                             ExerciseController controller, int index, Panel vp, AudioType audioType) {
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, index, false, audioType, instance);
     audioPanels.add(fast);

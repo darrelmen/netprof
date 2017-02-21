@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.custom.UserList;

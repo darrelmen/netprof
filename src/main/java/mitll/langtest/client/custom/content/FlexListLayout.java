@@ -34,18 +34,10 @@ package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
@@ -64,27 +56,16 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   public PagingExerciseList<T, U> npfExerciseList;
 
   final ExerciseController controller;
-  final LangTestDatabaseAsync service;
-  final ExerciseServiceAsync exerciseServiceAsync;
-  final UserFeedback feedback;
   private final boolean incorrectFirst;
 
   /**
-   * @param service
-   * @param feedback
    * @param controller
-   * @param exerciseServiceAsync
    * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
-  public FlexListLayout(LangTestDatabaseAsync service,
-                        UserFeedback feedback,
-                        ExerciseController controller,
-                        ExerciseServiceAsync exerciseServiceAsync) {
+  public FlexListLayout(
+                        ExerciseController controller ) {
     this.controller = controller;
-    this.service = service;
-    this.feedback = feedback;
     this.incorrectFirst = false;
-    this.exerciseServiceAsync = exerciseServiceAsync;
   }
 
   /**
@@ -122,8 +103,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     long uniqueID = ul == null ? -1 : ul.getID();
 
     // TODO : only has to be paging b/c it needs to setUserListID
-    PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID,
-        incorrectFirst);
+    PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID
+    );
     npfExerciseList = widgets;
 
     addThirdColumn(bottomRow);
@@ -159,13 +140,12 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    * @param currentExercisePanel
    * @param instanceName
    * @param userListID
-   * @param incorrectFirst
    * @return
    * @see #doInternalLayout(UserList, String)
    */
   private PagingExerciseList<T, U> makeNPFExerciseList(final Panel topRow, Panel currentExercisePanel, String instanceName,
-                                                       long userListID, boolean incorrectFirst) {
-    final PagingExerciseList<T, U> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
+                                                       long userListID) {
+    final PagingExerciseList<T, U> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName);
     exerciseList.setUserListID(userListID);
 
     exerciseList.setFactory(getFactory(exerciseList));
@@ -179,7 +159,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   }
 
   protected abstract PagingExerciseList<T, U> makeExerciseList(final Panel topRow, Panel currentExercisePanel,
-                                                               final String instanceName, boolean incorrectFirst);
+                                                               final String instanceName);
 
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
 

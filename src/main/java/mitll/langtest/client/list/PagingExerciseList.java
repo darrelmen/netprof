@@ -48,22 +48,10 @@ import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -85,7 +73,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   protected final ExerciseController controller;
   protected ClickablePagingContainer<T> pagingContainer;
-  private final boolean showTypeAhead;
+//  private final boolean showTypeAhead;
 
   private TypeAhead typeAhead;
   long userListID = -1;
@@ -97,41 +85,25 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
-  boolean showFirstNotCompleted = false;
-  private ActivityType activityType;
+  //boolean showFirstNotCompleted = false;
+ // private ActivityType activityType;
 
   /**
    * @param currentExerciseVPanel
-   * @param service
-   * @param feedback
    * @param factory
    * @param controller
-   * @param showTypeAhead
-   * @param instance
-   * @param incorrectFirst
-   * @param showFirstNotCompleted
-   * @param activityType
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList
    */
   PagingExerciseList(Panel currentExerciseVPanel,
-                     ExerciseServiceAsync service,
-                     UserFeedback feedback,
                      ExercisePanelFactory<T, U> factory,
                      ExerciseController controller,
-                     boolean showTypeAhead,
-                     String instance,
-                     boolean incorrectFirst,
-                     boolean showFirstNotCompleted,
-                     ActivityType activityType) {
-    super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
+                     ListOptions listOptions) {
+    super(currentExerciseVPanel, factory, controller, listOptions);
     this.controller = controller;
-    this.showTypeAhead = showTypeAhead;
-    this.showFirstNotCompleted = showFirstNotCompleted;
-    this.activityType = activityType;
 
     addComponents();
-    getElement().setId("PagingExerciseList_" + instance);
+    getElement().setId("PagingExerciseList_" + getInstance());
 //    if (showFirstNotCompleted) logger.info("show first completed for " + instance);
   }
 
@@ -190,7 +162,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         .setActivityType(getActivityType())
         .setOnlyUnrecordedByMe(false)
         .setOnlyExamples(isOnlyExamples())
-        .setIncorrectFirstOrder(incorrectFirstOrder)
+        .setIncorrectFirstOrder(listOptions.isIncorrectFirst())
         .setOnlyDefaultAudio(false)
         .setOnlyUninspected(false);
   }
@@ -231,7 +203,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   @Override
   protected T findFirstExercise() {
-    return showFirstNotCompleted ? getFirstNotCompleted() : super.findFirstExercise();
+    return listOptions.isShowFirstNotCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
   }
 
   /**
@@ -241,7 +213,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param exerciseID
    */
   protected void goToFirst(String searchIfAny, int exerciseID) {
-    if (showFirstNotCompleted) {
+    if (listOptions.isShowFirstNotCompleted()) {
       // logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny +"'");
       loadFirstExercise(searchIfAny);
     } else {
@@ -312,7 +284,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
    */
   protected void addTypeAhead(Panel column) {
-    if (showTypeAhead) {
+    if (listOptions.isShowTypeAhead()) {
       typeAhead = new TypeAhead(column, waitCursor, SEARCH, true) {
         @Override
         public void gotTypeAheadEntry(String text) {
@@ -331,7 +303,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#makeClickableText(String, String, String, boolean)
    */
   public void searchBoxEntry(String text) {
-    if (showTypeAhead) {
+    if (listOptions.isShowTypeAhead()) {
       //   logger.info("searchBoxEntry type ahead '" + text + "'");
       gotTypeAheadEvent(text, true);
     }
@@ -629,6 +601,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public ActivityType getActivityType() {
-    return activityType;
+    return listOptions.getActivityType();
   }
 }

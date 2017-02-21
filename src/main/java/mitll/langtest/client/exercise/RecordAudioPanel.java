@@ -103,7 +103,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @param audioType
    * @param instance
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(CommonExercise, Panel, boolean, String)
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget
+   * @see ExercisePanel#getAnswerWidget
    */
   public RecordAudioPanel(T exercise,
                           ExerciseController controller,

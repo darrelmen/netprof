@@ -42,11 +42,11 @@ import mitll.langtest.client.sound.SoundFeedback;
  * @since 12/23/15.
  */
 class MySoundFeedback extends SoundFeedback {
-  public MySoundFeedback(ExerciseController controller) {
+  MySoundFeedback(ExerciseController controller) {
     super(controller.getSoundManager());
   }
 
-  public synchronized void queueSong(String song) {
+  synchronized void queueSong(String song) {
     destroySound(); // if there's something playing, stop it!
     createSound(song, null);
   }

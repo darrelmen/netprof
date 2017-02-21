@@ -43,33 +43,17 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
-import mitll.langtest.client.list.HistoryExerciseList;
-import mitll.langtest.client.list.NPExerciseList;
-import mitll.langtest.client.list.SectionWidgetContainer;
-import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.list.*;
 import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -107,26 +91,18 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
    * @param secondRow             add the section panel to this row
    * @param currentExerciseVPanel
    * @param service
-   * @param feedback
    * @param controller
-   * @param instance
-   * @param incorrectFirst
-   * @param showFirstNotCompleted
-   * @param activityType
+   * @param listOptions
    * @see NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   protected FlexSectionExerciseList(Panel secondRow,
                                     Panel currentExerciseVPanel,
                                     ExerciseServiceAsync service,
-                                    UserFeedback feedback,
-                                    ExerciseController controller,
-                                    String instance,
-                                    boolean incorrectFirst,
-                                    boolean showFirstNotCompleted, ActivityType activityType) {
-    super(currentExerciseVPanel, service, feedback, controller, instance, true, incorrectFirst, showFirstNotCompleted, activityType);
+                                    ExerciseController controller, ListOptions listOptions) {
+    super(currentExerciseVPanel, controller, listOptions);
 
     sectionPanel = new FluidContainer();
-    sectionPanel.getElement().setId("sectionPanel_" + instance);
+    sectionPanel.getElement().setId("sectionPanel_" + getInstance());
 
     sectionPanel.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
     sectionPanel.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);

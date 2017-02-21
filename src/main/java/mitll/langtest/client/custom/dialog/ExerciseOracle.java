@@ -2,10 +2,6 @@ package mitll.langtest.client.custom.dialog;
 
 //import gwt.material.design.addins.client.autocomplete.base.MaterialSuggestionOracle;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * Created by go22670 on 2/16/17.
  */

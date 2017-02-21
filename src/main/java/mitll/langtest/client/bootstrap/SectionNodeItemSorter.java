@@ -34,11 +34,7 @@ package mitll.langtest.client.bootstrap;
 
 import mitll.langtest.shared.SectionNode;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class SectionNodeItemSorter {
   /**
