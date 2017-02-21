@@ -37,7 +37,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -46,8 +45,6 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -70,23 +67,15 @@ public class ReviewItemHelper extends NPFHelper {
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
 
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
-  //private final HasText itemMarker;
-  private final ReloadableContainer predefinedContent;
+   private final ReloadableContainer predefinedContent;
 
   /**
-   * @param service
-   * @param feedback
    * @param controller
    * @param predefinedContent
-   * @param exerciseServiceAsync
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.ListManager#ListManager
    */
-  public ReviewItemHelper(final LangTestDatabaseAsync service,
-                          final UserFeedback feedback,
-                          final ExerciseController controller,
-                          final ReloadableContainer predefinedContent,
-                          ExerciseServiceAsync exerciseServiceAsync) {
+  public ReviewItemHelper(final ExerciseController controller, final ReloadableContainer predefinedContent) {
     super(controller, true, false);
     //   this.itemMarker = null;
     this.predefinedContent = predefinedContent;
@@ -148,8 +137,6 @@ public class ReviewItemHelper extends NPFHelper {
           SimplePanel ignoredContainer = new SimplePanel();
 
           Panel widgets = reviewEditableExercise.addNew(
-              //ul,
-              //ul,
               npfExerciseList,
               ignoredContainer);
           reviewEditableExercise.setFields(exercise);
@@ -183,7 +170,7 @@ public class ReviewItemHelper extends NPFHelper {
         }
 
         @Override
-        protected void addTableWithPager(ClickablePagingContainer pagingContainer, boolean sortTable) {
+        protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
           // row 1
           Panel column = new FlowPanel();
           add(column);

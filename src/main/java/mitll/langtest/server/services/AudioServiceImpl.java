@@ -527,12 +527,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    *
    * @param userListID
    * @param userExercise
-   * @param language
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @return CommonExercise with id from database
    */
   @Override
-  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language) {
+  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
     if (DEBUG) logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
     getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
     int id = userExercise.getID();

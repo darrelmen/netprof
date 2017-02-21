@@ -114,7 +114,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    */
   @Override
   protected void addComponents() {
-    addTableWithPager(makePagingContainer(), true);
+    addTableWithPager(makePagingContainer());
   }
 
   /**

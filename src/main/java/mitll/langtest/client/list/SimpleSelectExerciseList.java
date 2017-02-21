@@ -69,7 +69,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
                                   ExerciseController controller, ListOptions listOptions) {
     super(currentExerciseVPanel, controller,
         listOptions.setShowTypeAhead(true)
-        .setShowFirstNotCompleted(false)
+//        .setShowFirstNotCompleted(false)
          );
 
     sectionPanel = new FluidContainer();
@@ -88,7 +88,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    */
   @Override
   protected void addComponents() {
-    addTableWithPager(makePagingContainer(), true);
+    addTableWithPager(makePagingContainer());
   }
 
   /**

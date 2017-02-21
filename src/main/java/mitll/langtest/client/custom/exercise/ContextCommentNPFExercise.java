@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -27,8 +26,6 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.exercise.*;
@@ -45,18 +42,16 @@ import java.util.logging.Logger;
  * Date: 12/12/13
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated not really sure if we're doing this
  */
 public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
   private Logger logger = Logger.getLogger("CommentNPFExercise");
 
-  private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String DEFAULT = "Default";
 
   private static final String NO_REFERENCE_AUDIO = "No reference audio";
   private static final String M = "M";
   private static final String F = "F";
-  private static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
-  private static final String SPACE_REGEX = " ";
   private static final String REF_AUDIO = "refAudio";
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
@@ -69,12 +64,12 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
    * @param addKeyHandler
    * @param instance
    * @paramx mutableAnnotation
-   * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
+   * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
   public ContextCommentNPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer,
                                    boolean addKeyHandler, String instance) {
-    super(e, controller, listContainer, 1.0f, addKeyHandler, instance);
+    super(e, controller, listContainer, 1.0f, addKeyHandler, instance, true);
   }
 
   /**
@@ -177,7 +172,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
       Panel hp = new HorizontalPanel();
       Panel vp = new VerticalPanel();
       addGenderChoices(e, hp);
-      String highlightedVocabItemInContext = getHighlightedItemInContext(context,itemText);
+      String highlightedVocabItemInContext = new ContextSupport<>().getHighlightedUnderline(context,itemText);
       Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, highlightedVocabItemInContext);
       vp.add(entry);
 
@@ -195,91 +190,6 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
           contextTranslation);
       vp.add(translationEntry);
     }
-  }
-
-  /**
-   * Add underlines of item tokens in context sentence.
-   * <p>
-   * TODO : don't do this - make spans with different colors
-   * <p>
-   * Worries about lower case/upper case mismatch.
-   *
-   * @param e
-   * @param context
-   * @return
-   * @see #getContext
-   */
-/*
-  private String highlightVocabItemInContext(CommonShell e, String context) {
-    return getHighlightedItemInContext(context, e.getForeignLanguage());
-  }
-*/
-
-  /**
-   * @param context
-   * @param foreignLanguage
-   * @return html with underlines on the item text
-   * @see
-   */
-  private String getHighlightedItemInContext(String context, String foreignLanguage) {
-    String trim = foreignLanguage.trim();
-    String toFind = removePunct(trim);
-
-    // todone split on spaces, find matching words if no contigious overlap
-    int i = context.indexOf(toFind);
-    if (i == -1) { // maybe mixed case - 'where' in Where is the desk?
-      String str = toFind.toLowerCase();
-      i = context.toLowerCase().indexOf(str);
-    }
-    int end = i + toFind.length();
-    if (i > -1) {
-      //log("marking underline from " + i + " to " + end + " for '" + toFind +  "' in '" + trim + "'");
-      context = context.substring(0, i) + "<u>" + context.substring(i, end) + "</u>" + context.substring(end);
-    } else {
-      //log("NOT marking underline from " + i + " to " + end);
-      //log("trim   " + trim + " len " + trim.length());
-      //log("toFind " + toFind + " len " + trim.length());
-
-      Collection<String> tokens = getTokens(trim);
-      int startToken;
-      int endToken = 0;
-      StringBuilder builder = new StringBuilder();
-      for (String token : tokens) {
-        startToken = context.indexOf(token, endToken);
-        if (startToken != -1) {
-          builder.append(context.substring(endToken, startToken));
-          builder.append("<u>");
-          builder.append(context.substring(startToken, endToken = startToken + token.length()));
-          builder.append("</u>");
-        }
-        //else {
-        //log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
-        //}
-      }
-      builder.append(context.substring(endToken));
-      // System.out.println("before " + context + " after " + builder.toString());
-      context = builder.toString();
-    }
-    return context;
-  }
-
-  /**
-   * @param sentence
-   * @return
-   * @see #getHighlightedItemInContext(String, String)
-   */
-  private Collection<String> getTokens(String sentence) {
-    List<String> all = new ArrayList<String>();
-    sentence = removePunct(sentence);
-    for (String untrimedToken : sentence.split(ContextCommentNPFExercise.SPACE_REGEX)) { // split on spaces
-      String tt = untrimedToken.replaceAll(ContextCommentNPFExercise.PUNCT_REGEX, ""); // remove all punct
-      String token = tt.trim();  // necessary?
-      if (token.length() > 0) {
-        all.add(token);
-      }
-    }
-
-    return all;
   }
 
   /**

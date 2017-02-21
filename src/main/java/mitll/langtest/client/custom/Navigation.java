@@ -218,7 +218,7 @@ public class Navigation implements RequiresResize, ShowTab {
             if (controller.getProps().canPracticeContext()) {
               return new ContextCommentNPFExercise<>(e, controller, exerciseList, false, CLASSROOM);
             } else {
-              return new CommentNPFExercise<>(e, controller, exerciseList, false, CLASSROOM);
+              return new CommentNPFExercise<>(e, controller, exerciseList, CLASSROOM, true);
             }
           }
         };
@@ -231,8 +231,8 @@ public class Navigation implements RequiresResize, ShowTab {
 
     markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
     practiceHelper = new PracticeHelper(controller);
-    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper, exerciseServiceAsync);
-    recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper, exerciseServiceAsync);
+    recorderHelper = new RecorderNPFHelper(controller, true, learnHelper);
+    recordExampleHelper = new RecorderNPFHelper(controller, false, learnHelper);
   }
 
   /**
@@ -324,7 +324,7 @@ public class Navigation implements RequiresResize, ShowTab {
     tabPanel = new TabPanel();
     tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     tabPanel.getElement().setId("tabPanel");
-    this.listManager = new ListManager(service, userManager, controller, feedback, tabPanel, learnHelper, exerciseServiceAsync);
+    this.listManager = new ListManager(controller, tabPanel, learnHelper);
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
       @Override

@@ -111,13 +111,13 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
   protected final ListServiceAsync listService = GWT.create(ListService.class);
 
-  //protected ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
   protected final NavigationHelper navigationHelper;
   private final float screenPortion;
   protected final String instance;
   private boolean hasClickable = false;
   private boolean isJapanese = false;
+  private boolean allowRecording = true;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -128,6 +128,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @param listContainer
    * @param screenPortion
    * @param instance
+   * @param allowRecording
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
   protected GoodwaveExercisePanel(final T commonExercise,
@@ -135,11 +136,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
                                   final ListInterface<CommonShell> listContainer,
                                   float screenPortion,
                                   boolean addKeyHandler,
-                                  String instance) {
+                                  String instance, boolean allowRecording) {
     this.exercise = commonExercise;
     this.controller = controller;
     this.screenPortion = screenPortion;
     this.instance = instance;
+    this.allowRecording = allowRecording;
     String language = controller.getLanguage();
 
     isJapanese = language.equalsIgnoreCase(JAPANESE);
@@ -176,14 +178,13 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     // content is on the left side
     add(center);
 
-    if (controller.isRecordingEnabled()) {
+    if (controller.isRecordingEnabled() && allowRecording) {
       addUserRecorder(controller.getService(), controller, center, screenPortion, exercise); // todo : revisit screen portion...
     }
 
     if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
       center.add(navigationHelper);
     }
-
   }
 
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
@@ -197,13 +198,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     }, listContainer, true, addKeyHandler, false, false);
   }
 
-  public void wasRevealed() {
-  }
+  public void wasRevealed() { }
 
-  protected ASRScorePanel makeScorePanel(T e, String instance) {
-
-    return null;
-  }
+  protected ASRScorePanel makeScorePanel(T e, String instance) {  return null;  }
 
   protected void loadNext() {
     listContainer.loadNextExercise(exercise.getID());
@@ -538,6 +535,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     return exercise;
   }
 
+  @Deprecated
   public boolean isBusy() {
     return isBusy;
   }

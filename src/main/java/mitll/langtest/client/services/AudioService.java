@@ -87,10 +87,9 @@ public interface AudioService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
    * @param userListID
    * @param userExercise
-   * @param language
    * @return
    */
-  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language);
+  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise);
 
   void checkAudio(int projectid);
 

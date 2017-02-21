@@ -45,13 +45,22 @@ class ContextSupport<T extends CommonExercise> {
   private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
   private static final String HIGHLIGHT_END = "</span>";
 
+  public String getHighlightedSpan(String context, String foreignLanguage) {
+    return getHighlightedItemInContext(context, foreignLanguage, HIGHLIGHT_START, HIGHLIGHT_END);
+  }
+
+  public String getHighlightedUnderline(String context, String foreignLanguage) {
+    return getHighlightedItemInContext(context, foreignLanguage, "<u>", "</u>");
+  }
+
   /**
    * @param context
    * @param foreignLanguage
-   * @return html with underlines on the item text
+   * @param highlightStart
+   * @param highlightEnd    @return html with underlines on the item text
    * @see
    */
-  String getHighlightedItemInContext(String context, String foreignLanguage) {
+  private String getHighlightedItemInContext(String context, String foreignLanguage, String highlightStart, String highlightEnd) {
     String trim = foreignLanguage.trim();
     String toFind = removePunct(trim);
 
@@ -65,7 +74,7 @@ class ContextSupport<T extends CommonExercise> {
     int end = i + toFind.length();
     if (i > -1) {
       //  if (debug) logger.info("marking underline from " + i + " to " + end + " for '" + toFind + "' in '" + trim + "'");
-      context = context.substring(0, i) + HIGHLIGHT_START + context.substring(i, end) + HIGHLIGHT_END + context.substring(end);
+      context = context.substring(0, i) + highlightStart + context.substring(i, end) + highlightEnd + context.substring(end);
 
       //  if (debug) logger.info("context " + context);
 
@@ -89,9 +98,9 @@ class ContextSupport<T extends CommonExercise> {
         startToken = lowerContext.indexOf(token, endToken);
         if (startToken != -1) {
           builder.append(context.substring(endToken, startToken));
-          builder.append(HIGHLIGHT_START);
+          builder.append(highlightStart);
           builder.append(context.substring(startToken, endToken = startToken + token.length()));
-          builder.append(HIGHLIGHT_END);
+          builder.append(highlightEnd);
         } else {
 //          if (debug)
 //            logger.info("getHighlightedItemInContext from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
@@ -165,7 +174,7 @@ class ContextSupport<T extends CommonExercise> {
   /**
    * @param sentence
    * @return
-   * @see #getHighlightedItemInContext(String, String)
+   * @see #getHighlightedItemInContext(String, String, String, String)
    */
   private Collection<String> getTokens(String sentence) {
     List<String> all = new ArrayList<>();

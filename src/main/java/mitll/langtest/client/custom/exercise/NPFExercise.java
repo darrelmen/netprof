@@ -93,16 +93,25 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
    * @param screenPortion
    * @param addKeyHandler
    * @param instance
+   * @param allowRecording
    * @see mitll.langtest.client.custom.content.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
    */
   NPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer, float screenPortion,
-              boolean addKeyHandler, String instance) {
-    super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
+              boolean addKeyHandler, String instance, boolean allowRecording) {
+    super(e, controller, listContainer, screenPortion, addKeyHandler, instance, allowRecording);
   }
 
+  /**
+   *
+   * @param controller
+   * @param listContainer
+   * @param addKeyHandler
+   * @return
+   */
   @Override
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                              ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
+                                                              ListInterface<CommonShell> listContainer,
+                                                              boolean addKeyHandler) {
     NavigationHelper<CommonShell> navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
     navigationHelper.add(makeAddToList(getLocalExercise().getID(), controller));
     navigationHelper.add(getNextListButton());

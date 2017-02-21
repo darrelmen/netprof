@@ -138,7 +138,7 @@ public class ScoreServlet extends DatabaseServlet {
   private long whenCached = -1;
   private long whenCachedEverything = -1;
 
-  private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
+//  private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
 
   /**
    * Remembers chapters from previous requests...
@@ -160,6 +160,12 @@ public class ScoreServlet extends DatabaseServlet {
     if (projid == -1) {
       projid = request.getIntHeader("projid");
 
+      if (projid == -1) {
+        String language = request.getHeader("language");
+        if (language != null) {
+          projid = getProjectID(language);
+        }
+      }
       logger.warn("OK - look for project id from url header " + projid);
    /*   String[] projids = queryString.split("projid=");
       if (projids.length > 1) {
@@ -309,7 +315,11 @@ public class ScoreServlet extends DatabaseServlet {
     reply(response, x);
   }
 
-  private int getIntValue(String projid) {
+  private int getProjectID(String language) {
+    return db.getProjectDAO().getByLanguage(language);
+  }
+
+/*  private int getIntValue(String projid) {
     int projectid = -1;
     String s = projid.split("&")[0];
     try {
@@ -318,7 +328,7 @@ public class ScoreServlet extends DatabaseServlet {
       logger.error("getIntValue can't parse " + s);
     }
     return projectid;
-  }
+  }*/
 
   /**
    * TODO : put this back - need to add project as an argument

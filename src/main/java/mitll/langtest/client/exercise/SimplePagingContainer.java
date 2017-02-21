@@ -76,13 +76,13 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
 
   /**
    * @return
-   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager(ClickablePagingContainer, boolean)
-   * @param sortTable
+   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
+   * @param sortEnglish
    */
-  public Panel getTableWithPager(boolean sortTable) {
+  public Panel getTableWithPager(boolean sortEnglish) {
     this.dataProvider = new ListDataProvider<T>();
 
-    makeCellTable(sortTable);
+    makeCellTable(sortEnglish);
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
@@ -106,9 +106,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
     table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
   }
 
-  private void makeCellTable(boolean sortTable) {
+  private void makeCellTable(boolean sortEnglish) {
     this.table = makeCellTable(chooseResources());
-    configureTable(sortTable);
+    configureTable(sortEnglish);
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
@@ -132,7 +132,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
     return o;
   }
 
-  private void configureTable(boolean sortTable) {
+  private void configureTable(boolean sortEnglish) {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     table.setWidth("100%");
     table.setHeight("auto");
@@ -141,7 +141,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
     addSelectionModel();
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
-    addColumnsToTable(sortTable);
+    addColumnsToTable(sortEnglish);
   }
 
   protected void addSelectionModel() {
@@ -165,7 +165,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
   /**
    * @param id2
    * @param header
-   * @see SimplePagingContainer#addColumnsToTable(int)
+   * @see SimplePagingContainer#addColumnsToTable
    */
   protected void addColumn(Column<T, SafeHtml> id2, Header<?> header) {
     table.addColumn(id2, header);

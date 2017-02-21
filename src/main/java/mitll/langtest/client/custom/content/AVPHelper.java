@@ -35,16 +35,14 @@ package mitll.langtest.client.custom.content;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -62,15 +60,10 @@ public class AVPHelper extends NPFHelper {
   private UserList ul;
 
   /**
-   * @param service
-   * @param feedback
    * @param controller
-   * @param exerciseServiceAsync
    * @see mitll.langtest.client.custom.Navigation#Navigation
    */
-  public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
-    super(controller, false, false);
-  }
+  public AVPHelper(ExerciseController controller) {  super(controller, false, false);  }
 
   /**
    * @param ul
@@ -91,29 +84,29 @@ public class AVPHelper extends NPFHelper {
    * TODO : parameterize exercise list by different SectionWidget
    *
    * @param right
-   * @param instanceName
+   * @param listOptions
    * @return
    * @see NPFHelper#makeNPFExerciseList(Panel, String, boolean)
    */
   @Override
-  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
+  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
     PagingExerciseList<CommonShell, CommonExercise> widgets =
         new NPExerciseList<ButtonGroupSectionWidget>(right, controller,
-            instanceName) {
+            listOptions) {
           @Override
           protected void onLastItem() {
           } // TODO : necessary?
 
           @Override
-          protected void addTableWithPager(ClickablePagingContainer pagingContainer, boolean sortTable) {
-            pagingContainer.getTableWithPager(sortTable);
+          protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
+            pagingContainer.getTableWithPager(true);
           }
 
           @Override
           protected void addMinWidthStyle(Panel leftColumn) {
           }
         };
-    final ExercisePanelFactory<CommonShell, CommonExercise> factory = getFactory(null, instanceName, true);
+    final ExercisePanelFactory<CommonShell, CommonExercise> factory = getFactory(null, listOptions.getInstance(), true);
     widgets.setFactory(factory);
     return widgets;
   }
