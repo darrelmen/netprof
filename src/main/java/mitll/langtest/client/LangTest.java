@@ -67,14 +67,7 @@ import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
-import mitll.langtest.client.services.AudioService;
-import mitll.langtest.client.services.AudioServiceAsync;
-import mitll.langtest.client.services.QCService;
-import mitll.langtest.client.services.QCServiceAsync;
-import mitll.langtest.client.services.ScoringService;
-import mitll.langtest.client.services.ScoringServiceAsync;
-import mitll.langtest.client.services.UserService;
-import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.services.*;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
@@ -88,12 +81,7 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.user.User;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -253,6 +241,7 @@ public class LangTest implements
   private final UserServiceAsync userService = GWT.create(UserService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
   private final ScoringServiceAsync scoringServiceAsync = GWT.create(ScoringService.class);
+  private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
 
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
@@ -940,6 +929,9 @@ public class LangTest implements
 
   public ScoringServiceAsync getScoringService() {
     return scoringServiceAsync;
+  }
+  public ExerciseServiceAsync getExerciseService() {
+    return exerciseServiceAsync;
   }
 
   public UserFeedback getFeedback() {

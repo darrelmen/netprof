@@ -63,7 +63,8 @@ public class EditItem {
   /**
    * @deprecated
    */
-  public static final String NEW_ITEM = "*New Item*";
+  //public static final String NEW_ITEM = "*New Item*";
+
   /**
    * @see #getNewItem
    * @see #makeExerciseList
@@ -75,11 +76,8 @@ public class EditItem {
 
   private final ReloadableContainer predefinedContentList;
 
-  // private HasText itemMarker;
-
   private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   private final String instanceName;
-//  private Exercise newExercise;
 
   /**
    * @param controller
@@ -110,11 +108,6 @@ public class EditItem {
 
     hp.add(contentOnRight);
 
-    //  this.itemMarker = itemMarker; // TODO : something less awkward
-
-    // TODO : why a copy here???
-//    UserList<CommonShell> copy = makeListOfOnlyYourItems(originalList);
-
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
 
@@ -126,17 +119,8 @@ public class EditItem {
     if (exerciseList != null) {
       //  logger.info("EditItem onResize");
       exerciseList.onResize();
-    } /*else {
-      logger.info("EditItem onResize - no exercise list");
-
-    }*/
+    }
   }
-
-/*
-  private UserList<CommonShell> makeListOfOnlyYourItems(UserList<CommonShell> toCopy) {
-    return toCopy.getCopy();
-  }
-*/
 
   /**
    * @param right
@@ -149,22 +133,11 @@ public class EditItem {
    */
   private PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel right,
                                                                            String instanceName,
-                                                                           //UserList<CommonShell> ul,
                                                                            UserList<CommonShell> originalList
-                                                                           /*,
-                                                                           final boolean includeAddItem*/) {
+                                                                           ) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
 
-/*
-    if (includeAddItem) {
-      CommonExercise newItem = getNewItem();
-      //logger.info("makeExerciseList : Adding " + newItem);// + " with " + newItem.getTooltip());
-      ul.addExercise(newItem);
-    }
-*/
-
-    exerciseList =
-        new EditableExerciseList(controller, this, right, instanceName, /*includeAddItem,*/ originalList);
+    exerciseList = new EditableExerciseList(controller, this, right, instanceName,  originalList);
     setFactory(exerciseList, originalList);
     exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());

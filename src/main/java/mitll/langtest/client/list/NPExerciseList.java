@@ -37,8 +37,6 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SectionWidget;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -52,15 +50,15 @@ import mitll.langtest.shared.exercise.CommonShell;
 public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise, V> {
   //private Logger logger = Logger.getLogger("NPExerciseList");
   protected NPExerciseList(Panel currentExerciseVPanel,
-                           ExerciseServiceAsync service,
-                           UserFeedback feedback,
                            ExerciseController controller,
-                           String instance,
-                           boolean showTypeAhead,
-                           boolean incorrectFirst,
-                           boolean showFirstNotCompleted,
-                           ActivityType activityType) {
-    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance, incorrectFirst, showFirstNotCompleted, activityType);
+                           ListOptions listOptions) {
+    super(currentExerciseVPanel, controller, listOptions);
+  }
+
+  protected  NPExerciseList(Panel currentExerciseVPanel,
+                            ExerciseController controller,
+                            String instance) {
+    super(currentExerciseVPanel, controller, new ListOptions().setInstance(instance));
   }
 
   /**
@@ -79,7 +77,7 @@ public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList
             controller,
             getVerticalUnaccountedFor(),
             getActivityType() == ActivityType.RECORDER,
-            showFirstNotCompleted
+            listOptions.isShowFirstNotCompleted()
         ) {
           @Override
           public void gotClickOnItem(CommonShell e) {

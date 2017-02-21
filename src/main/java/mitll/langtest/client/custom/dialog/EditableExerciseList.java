@@ -1,15 +1,14 @@
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -17,18 +16,21 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -68,19 +70,20 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
    * @paramx includeAddItem
    * @see EditItem#makeExerciseList
    */
-  public EditableExerciseList(ExerciseController controller,
-                              EditItem editItem,
-                              Panel right,
-                              String instanceName,
-                              UserList<CommonShell> list) {
-    super(right, GWT.create(ExerciseService.class),
-        controller.getFeedback(), controller,
-        instanceName, false, false, false, ActivityType.EDIT);
+  EditableExerciseList(ExerciseController controller,
+                       EditItem editItem,
+                       Panel right,
+                       String instanceName,
+                       UserList<CommonShell> list) {
+    super(right,
+        controller,
+        new ListOptions()
+            .setInstance(instanceName)
+            .setSort(false));
     this.editItem = editItem;
     this.list = list;
 
     if (list.isEmpty()) delete.setEnabled(false);
-
   }
 
   protected DivWidget getOptionalWidget() {
@@ -112,7 +115,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     SuggestOracle oracle = new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        logger.info("make requesst for '" + request.getQuery() + "'");
+        logger.info("make request for '" + request.getQuery() + "'");
 
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
             .setPrefix(w.getText())
@@ -199,7 +202,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
     int numberTruncated = Math.max(0, size - limit);
 
-  //  logger.info("trunc " + numberTruncated);
+    //  logger.info("trunc " + numberTruncated);
 
     SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), exercises));
     response.setMoreSuggestionsCount(numberTruncated);
@@ -214,18 +217,18 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   @NotNull
   private Collection<SuggestOracle.Suggestion> getSuggestions(String query, List<? extends CommonShell> exercises) {
     Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<>();
-  //  logger.info("getSuggestions converting " + exercises.size());
+    //  logger.info("getSuggestions converting " + exercises.size());
 
     message.setText("");
     String before = query;
     query = normalizeSearch(query);
 
-  //  logger.info("getSuggestions before '" + before + "'");
-  //  logger.info("getSuggestions after  '" + query + "'");
+    //  logger.info("getSuggestions before '" + before + "'");
+    //  logger.info("getSuggestions after  '" + query + "'");
 
     String[] searchWords = query.split(WHITESPACE_STRING);
 
-  //  logger.info("getSuggestions searchWords length '" + searchWords.length + "'");
+    //  logger.info("getSuggestions searchWords length '" + searchWords.length + "'");
 
     for (CommonShell resp : exercises) {
       //suggestions.add(new ExerciseSuggestion(resp));
@@ -277,9 +280,9 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
     accum.appendEscaped(formattedSuggestion.substring(cursor));
 
-   // logger.info(resp.getID() + " formatted     " + formattedSuggestion);
+    // logger.info(resp.getID() + " formatted     " + formattedSuggestion);
     String displayString = accum.toSafeHtml().asString();
-   // logger.info(resp.getID() + " displayString " + displayString);
+    // logger.info(resp.getID() + " displayString " + displayString);
     ExerciseSuggestion suggestion = createSuggestion(resp.getForeignLanguage(),
         displayString,
         resp);
@@ -426,6 +429,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   }
 
   HTML message;
+
   @NotNull
   private DivWidget getAddButtonContainer() {
     DivWidget addW = new DivWidget();
@@ -448,9 +452,9 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   }
 
   /**
-   * @see #getAddButtonContainer
    * @param whichField
    * @return
+   * @see #getAddButtonContainer
    */
   private Typeahead getTypeahead(final String whichField) {
     quickAddText = new TextBox();
@@ -473,14 +477,14 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       @Override
       public void onClick(ClickEvent event) {
         add.setEnabled(false);
-        onClickAdd(outer,add);
+        onClickAdd(outer, add);
       }
     });
     add.setType(ButtonType.SUCCESS);
     return add;
   }
 
-//  private  NewUserExercise newExercise;
+  //  private  NewUserExercise newExercise;
   protected final ListServiceAsync listService = GWT.create(ListService.class);
 
   private void onClickAdd(ListInterface<CommonShell> outer, Button add) {
@@ -536,8 +540,8 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
               }
             });
           } else {
-            message.setText("The item "+
-               " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
+            message.setText("The item " +
+                " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
 
 //            markError(foreignLang, "The " + FOREIGN_LANGUAGE +
 //                " text is not in our " + getLanguage() + " dictionary. Please edit.");
@@ -577,7 +581,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     addExercise(currentExercise);
     int after = getSize();
 
-    logger.info("before " + before + " after " +after);
+    logger.info("before " + before + " after " + after);
 
     enableRemove(true);
 
@@ -639,8 +643,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     // else
     if (controller == null) {
       logger.warning("no controller??");
-    }
-    else {
+    } else {
       controller.register(delete, "", "");//"Remove from list " + ul.getID() + "/" + ul.getName());
     }
     return delete;

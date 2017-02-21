@@ -46,12 +46,9 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.custom.exercise.CommentBox;
-import mitll.langtest.client.exercise.AudioChangedEvent;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.WaveformExercisePanel;
+import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -61,7 +58,6 @@ import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -105,7 +101,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
                     boolean doNormalRecording,
                     ReloadableContainer exerciseList,
                     ExerciseServiceAsync exerciseServiceAsync) {
-    super(service, feedback, userManager, controller, exerciseList, exerciseServiceAsync);
+    super(controller, exerciseList);
     this.doNormalRecording = doNormalRecording;
   }
 
@@ -121,17 +117,15 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
   }
 
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(final UserManager userManager,
-                                                                        SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer, exerciseServiceAsync) {
+  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
+    return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
 
       final FlexListLayout outerLayout = this;
 
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
-                                                                                 String instanceName,
-                                                                                 boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst, ActivityType.RECORDER) {
+                                                                                 String instanceName) {
+        return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, new ListOptions().setInstance(instanceName)) {
           private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
           private CheckBox filterOnly;
 
@@ -165,14 +159,17 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
           @Override
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                                   String prefix,
-                                                  int exerciseID, boolean onlyWithAudioAnno,
-                                                  boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+                                                  int exerciseID,
+                                                  boolean onlyWithAudioAnno,
+                                                  boolean onlyUnrecorded,
+                                                  boolean onlyDefaultUser,
+                                                  boolean onlyUninspected) {
             super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
-            filterOnly.setText(setCheckboxTitle(userManager));
+            filterOnly.setText(setCheckboxTitle());
           }
 
-          private String setCheckboxTitle(UserManager userManager) {
-            return SHOW_ONLY_UNRECORDED + (userManager.isMale() ? " by Males" : " by Females");
+          private String setCheckboxTitle() {
+            return SHOW_ONLY_UNRECORDED + (controller.getUserManager().isMale() ? " by Males" : " by Females");
           }
 
           /**
@@ -223,7 +220,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    */
   private void getProgressInfo(String instance) {
     //logger.info("Get progress info for " +getClass() + " instance " + instance);
-    service.getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
+    controller.getService().getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -249,7 +246,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
      * @see RecorderNPFHelper#getFactory
      */
     MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
-      super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
+      super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
     }
 
     @Override

@@ -45,89 +45,92 @@ import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 /**
-* Created with IntelliJ IDEA.
+ * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/8/13
-* Time: 5:58 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * Time: 5:58 PM
+ * To change this template use File | Settings | File Templates.
+ */
 public class AVPHelper extends NPFHelper {
   private UserList ul;
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#Navigation
    * @param service
    * @param feedback
    * @param controller
    * @param exerciseServiceAsync
+   * @see mitll.langtest.client.custom.Navigation#Navigation
    */
   public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
-    super(service, feedback, controller, false, false, exerciseServiceAsync);
+    super(controller, false, false);
   }
 
   /**
-   * @see #doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    * @param ul
    * @param instanceName
    * @return
+   * @see #doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   @Override
   protected Panel getRightSideContent(UserList<CommonShell> ul, String instanceName) {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.getElement().setId("AVPHelper_internalLayout_RightSideContent");
     this.ul = ul;
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getID(),false);
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_" + ul.getID(), false);
     return npfContentPanel;
   }
 
   /**
    * TODO : parameterize exercise list by different SectionWidget
-   * @see NPFHelper#makeNPFExerciseList(Panel, String, boolean)
+   *
    * @param right
    * @param instanceName
-   * @param showFirstNotCompleted
    * @return
+   * @see NPFHelper#makeNPFExerciseList(Panel, String, boolean)
    */
   @Override
-  PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName, boolean showFirstNotCompleted) {
-    PagingExerciseList<CommonShell,CommonExercise> widgets = new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
-        instanceName, true, true, false, ActivityType.PRACTICE) {
-      @Override
-      protected void onLastItem() {
-      } // TODO : necessary?
+  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
+    PagingExerciseList<CommonShell, CommonExercise> widgets =
+        new NPExerciseList<ButtonGroupSectionWidget>(right, controller,
+            instanceName) {
+          @Override
+          protected void onLastItem() {
+          } // TODO : necessary?
 
-      @Override
-      protected void addTableWithPager(ClickablePagingContainer pagingContainer, boolean sortTable) {
-        pagingContainer.getTableWithPager(sortTable);
-      }
+          @Override
+          protected void addTableWithPager(ClickablePagingContainer pagingContainer, boolean sortTable) {
+            pagingContainer.getTableWithPager(sortTable);
+          }
 
-      @Override
-      protected void addMinWidthStyle(Panel leftColumn) {
-      }
-    };
-    final ExercisePanelFactory<CommonShell,CommonExercise> factory = getFactory(null, instanceName, true);
+          @Override
+          protected void addMinWidthStyle(Panel leftColumn) {
+          }
+        };
+    final ExercisePanelFactory<CommonShell, CommonExercise> factory = getFactory(null, instanceName, true);
     widgets.setFactory(factory);
     return widgets;
   }
 
   @Override
-  ExercisePanelFactory<CommonShell,CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList, final String instanceName, boolean showQC) {
-    StatsFlashcardFactory<CommonShell,CommonExercise> avpHelper =
-        new StatsFlashcardFactory<>(service, feedback, controller, exerciseList, "AVPHelper", ul);
+  ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList,
+                                                               final String instanceName, boolean showQC) {
+    StatsFlashcardFactory<CommonShell, CommonExercise> avpHelper =
+        new StatsFlashcardFactory<>( controller, exerciseList, "AVPHelper", ul);
     avpHelper.setContentPanel(contentPanel);
     return avpHelper;
   }
 
-  void addExerciseListOnLeftSide(Panel left, Widget exerciseListOnLeftSide) {}
+  void addExerciseListOnLeftSide(Panel left, Widget exerciseListOnLeftSide) {
+  }
 
   @Override
-  public void onResize() {}
+  public void onResize() {
+  }
 }

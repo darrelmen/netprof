@@ -36,8 +36,8 @@ import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SimpleSelectExerciseList;
-import mitll.langtest.shared.answer.ActivityType;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -52,20 +52,17 @@ public class NPFlexSectionExerciseList extends SimpleSelectExerciseList {
   /**
    * @param topRow
    * @param currentExercisePanel
-   * @param instanceName
-   * @param incorrectFirst
-   * @param activityType
+   * @param listOptions
    * @see mitll.langtest.client.custom.Navigation#makePracticeHelper
-   * @see FlexListLayout#makeExerciseList(Panel, Panel, String, boolean)
+   * @see FlexListLayout#makeExerciseList(Panel, Panel, String)
    */
   public NPFlexSectionExerciseList(FlexListLayout flexListLayout,
                                    Panel topRow,
                                    Panel currentExercisePanel,
-                                   String instanceName,
-                                   boolean incorrectFirst, ActivityType activityType) {
-    super(topRow, currentExercisePanel, flexListLayout.exerciseServiceAsync, flexListLayout.feedback,
-        flexListLayout.controller, instanceName, incorrectFirst,/*, showFirstNotCompleted*/
-        activityType);
+                                   ListOptions listOptions) {
+    super(topRow, currentExercisePanel,
+        flexListLayout.controller,  /*, showFirstNotCompleted*/
+        listOptions);
   }
 
   @Override

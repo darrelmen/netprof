@@ -60,9 +60,8 @@ import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.STATE;
 
@@ -96,17 +95,13 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
   /**
    * @param secondRow
    * @param currentExerciseVPanel
-   * @param service
-   * @param feedback
    * @param controller
    * @see SimpleChapterNPFHelper#getMyListLayout
    */
   public ResponseExerciseList(Panel secondRow,
                               Panel currentExerciseVPanel,
-                              ExerciseServiceAsync service,
-                              UserFeedback feedback,
                               final ExerciseController controller, String instance) {
-    super(secondRow, currentExerciseVPanel, service, feedback, controller, instance, false, true);
+    super(secondRow, currentExerciseVPanel, controller, new ListOptions(instance));
     innerContainer.getElement().getStyle().setPadding(5, Style.Unit.PX);
     String responseType = controller.getProps().getResponseType();
     responseTypeChanged(responseType);

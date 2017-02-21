@@ -35,7 +35,6 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -45,9 +44,6 @@ import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -67,48 +63,28 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   private boolean madeNPFContent = false;
 
-  protected final LangTestDatabaseAsync service;
-  protected final ExerciseServiceAsync exerciseServiceAsync;
-
   protected final ExerciseController controller;
-
-  protected final UserFeedback feedback;
   private ExerciseList npfExerciseList;
   private final ReloadableContainer predefinedContentList;
 
- // private final ActivityType activityType;
-
   /**
-   * @param service
-   * @param feedback
-   * @param userManager
    * @param controller
-   * @param exerciseServiceAsync
    * @see Navigation#Navigation
    */
-  public SimpleChapterNPFHelper(LangTestDatabaseAsync service,
-                                UserFeedback feedback,
-                                UserManager userManager,
-                                ExerciseController controller,
-                                ReloadableContainer predefinedContentList,
-                                ExerciseServiceAsync exerciseServiceAsync) {
-    this.service = service;
-    this.exerciseServiceAsync = exerciseServiceAsync;
-    this.feedback = feedback;
+  public SimpleChapterNPFHelper(ExerciseController controller,
+                                ReloadableContainer predefinedContentList) {
     this.controller = controller;
     this.predefinedContentList = predefinedContentList;
 
     final SimpleChapterNPFHelper<T, U> outer = this;
-  //  this.activityType = activityType;
-    this.flexListLayout = getMyListLayout(userManager, outer);
+    this.flexListLayout = getMyListLayout(outer);
   }
 
   Panel getCreatedPanel() {
     return getExerciseList() != null ? getExerciseList().getCreatedPanel() : null;
   }
 
-  protected abstract FlexListLayout<T, U> getMyListLayout(UserManager userManager,
-                                                          SimpleChapterNPFHelper<T, U> outer);
+  protected abstract FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer);
 
   /**
    * Add npf widget to content of a tab - here marked tabAndContent
@@ -189,7 +165,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     return new ExercisePanelFactory<T, U>(controller, exerciseList) {
       @Override
       public Panel getExercisePanel(final U e) {
-        return new WaveformExercisePanel<T, U>(e, service, controller, exerciseList, true, instance) {
+        return new WaveformExercisePanel<T, U>(e, controller, exerciseList, true, instance) {
           @Override
           public void postAnswers(ExerciseController controller, HasID completedExercise) {
             super.postAnswers(controller, completedExercise);
@@ -232,12 +208,8 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonExercise> extends FlexListLayout<T, U> {
     private final SimpleChapterNPFHelper<T, U> outer;
 
-    protected MyFlexListLayout(LangTestDatabaseAsync service,
-                               UserFeedback feedback,
-                               ExerciseController controller,
-                               SimpleChapterNPFHelper<T, U> outer,
-                               ExerciseServiceAsync exerciseServiceAsync) {
-      super(service, feedback, controller, exerciseServiceAsync);
+    protected MyFlexListLayout(ExerciseController controller, SimpleChapterNPFHelper<T, U> outer) {
+      super(controller);
       this.outer = outer;
     }
 

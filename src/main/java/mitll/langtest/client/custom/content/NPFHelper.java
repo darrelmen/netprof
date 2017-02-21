@@ -37,23 +37,16 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -80,36 +73,30 @@ public class NPFHelper implements RequiresResize {
   private static final String COMPLETE = "Complete";
   private boolean madeNPFContent = false;
 
-  final LangTestDatabaseAsync service;
+ // final LangTestDatabaseAsync service;
   final ExerciseController controller;
 
-  final UserFeedback feedback;
+ // final UserFeedback feedback;
   PagingExerciseList<CommonShell, CommonExercise> npfExerciseList = null;
   private final boolean showQC;
   DivWidget contentPanel;
-  ExerciseServiceAsync exerciseServiceAsync;
+  //ExerciseServiceAsync exerciseServiceAsync;
   private final boolean showFirstNotCompleted;
 
   /**
-   * @param service
-   * @param feedback
    * @param controller
    * @param showQC
-   * @param exerciseServiceAsync
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.ListManager#ListManager
    */
-  public NPFHelper(LangTestDatabaseAsync service,
-                   UserFeedback feedback,
-                   ExerciseController controller,
+  public NPFHelper(ExerciseController controller,
                    boolean showQC,
-                   boolean showFirstNotCompleted,
-                   ExerciseServiceAsync exerciseServiceAsync) {
-    this.service = service;
-    this.feedback = feedback;
+                   boolean showFirstNotCompleted) {
+   // this.service = service;
+   // this.feedback = controller.getFeedback();
     this.controller = controller;
     this.showQC = showQC;
-    this.exerciseServiceAsync = exerciseServiceAsync;
+    //this.exerciseServiceAsync = exerciseServiceAsync;
     this.showFirstNotCompleted = showFirstNotCompleted;
  //   logger.info("this " + this.getClass() + " shows first completed = " + showFirstNotCompleted);
   }
@@ -239,7 +226,7 @@ public class NPFHelper implements RequiresResize {
    */
   PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName, boolean showFirstNotCompleted) {
   //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
-    final PagingExerciseList<CommonShell, CommonExercise> exerciseList = makeExerciseList(right, instanceName, showFirstNotCompleted);
+    final PagingExerciseList<CommonShell, CommonExercise> exerciseList = makeExerciseList(right, instanceName);
     setFactory(exerciseList, instanceName, showQC);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -274,14 +261,12 @@ public class NPFHelper implements RequiresResize {
   /**
    * @param right
    * @param instanceName
-   * @param showFirstNotCompleted
    * @return
    * @see #makeNPFExerciseList
    */
-  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName,
-                                                                   boolean showFirstNotCompleted) {
-    return new NPExerciseList(right, exerciseServiceAsync, feedback, controller,
-        instanceName, true, false,showFirstNotCompleted, ActivityType.LEARN) {
+  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
+    return new NPExerciseList<ListSectionWidget>(right, controller,
+        instanceName) {
       @Override
       protected void onLastItem() {
         new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {

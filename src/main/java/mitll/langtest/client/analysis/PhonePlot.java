@@ -35,12 +35,7 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.user.client.Window;
 import mitll.langtest.shared.analysis.PhoneSession;
-import org.moxieapps.gwt.highcharts.client.Axis;
-import org.moxieapps.gwt.highcharts.client.BaseChart;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.Color;
-import org.moxieapps.gwt.highcharts.client.Global;
-import org.moxieapps.gwt.highcharts.client.Highcharts;
+import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 

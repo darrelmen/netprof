@@ -64,6 +64,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
+  public static final double FIFTY = 50.0;
   private final Logger logger = Logger.getLogger("PagingContainer");
   private static final int MAX_LENGTH_ID = 17;
   private static final int JAPANESE_LENGTH = 9;
@@ -74,9 +75,8 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   private static final String ENGLISH = "English";
   private final boolean english;
   private final boolean showExerciseState;
-  //private final String instance;
   private int FLLength = MAX_LENGTH_ID;
-  boolean showCompleted;
+ // boolean showCompleted;
 
   /**
    * @param controller
@@ -117,7 +117,9 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     Column<T, SafeHtml> flColumn = addFLColumn();
 
     Column<T, SafeHtml> englishCol = getEnglishColumn();
-    englishCol.setSortable(true);
+    if (sortEnglish) {
+      englishCol.setSortable(true);
+    }
     addColumn(englishCol, new TextHeader(ENGLISH));
 
     List<T> dataList = getList();
@@ -134,8 +136,8 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     table.setWidth("100%", true);
 
     // Set the width of each column.
-    table.setColumnWidth(englishCol, 50.0, Style.Unit.PCT);
-    table.setColumnWidth(flColumn, 50.0, Style.Unit.PCT);
+    table.setColumnWidth(englishCol, FIFTY, Style.Unit.PCT);
+    table.setColumnWidth(flColumn, FIFTY, Style.Unit.PCT);
   }
 
   @NotNull
@@ -203,7 +205,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
   /**
    * @return
-   * @see SimplePagingContainer#addColumnsToTable(int)
+   * @see SimplePagingContainer#addColumnsToTable
    */
   private Column<T, SafeHtml> getEnglishColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {
@@ -285,7 +287,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
   /**
    * @return
-   * @see SimplePagingContainer#addColumnsToTable(int)
+   * @see SimplePagingContainer#addColumnsToTable
    */
   private Column<T, SafeHtml> getFLColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {

@@ -43,11 +43,11 @@ import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -87,8 +87,8 @@ public class ReviewItemHelper extends NPFHelper {
                           final ExerciseController controller,
                           final ReloadableContainer predefinedContent,
                           ExerciseServiceAsync exerciseServiceAsync) {
-    super(service, feedback, controller, true,false, exerciseServiceAsync);
- //   this.itemMarker = null;
+    super(controller, true, false);
+    //   this.itemMarker = null;
     this.predefinedContent = predefinedContent;
     if (predefinedContent == null) logger.warning("huh? predefinedContent is null");
   }
@@ -126,7 +126,7 @@ public class ReviewItemHelper extends NPFHelper {
     private final UserList<CommonShell> ul;
 
     ReviewFlexListLayout(UserList<CommonShell> ul) {
-      super(ReviewItemHelper.this.service, ReviewItemHelper.this.feedback, ReviewItemHelper.this.controller, ReviewItemHelper.this.exerciseServiceAsync);
+      super(ReviewItemHelper.this.controller);
       this.ul = ul;
     }
 
@@ -161,9 +161,9 @@ public class ReviewItemHelper extends NPFHelper {
 
     @Override
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
-                                                                               String instanceName, boolean incorrectFirst) {
+                                                                               String instanceName) {
       FlexListLayout outer = this;
-      return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst, ActivityType.REVIEW) {
+      return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, new ListOptions(instanceName)) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         /**
@@ -178,7 +178,7 @@ public class ReviewItemHelper extends NPFHelper {
               ";" +
               SelectionState.ONLY_WITH_AUDIO_DEFECTS +
               "=" + checkBox.getValue();
-      //    logger.info("ReviewItemHelper : history token now  " + s);
+          //    logger.info("ReviewItemHelper : history token now  " + s);
           return s;
         }
 

@@ -63,6 +63,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.project.ProjectOps;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -73,7 +74,6 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.analysis.WordScore;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -197,17 +197,16 @@ public class Navigation implements RequiresResize, ShowTab {
     this.lifecycleSupport = lifecycleSupport;
     storage = new KeyStorage(controller);
 
-    learnHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(service, feedback, userManager, controller, null,
-        exerciseServiceAsync) {
+    learnHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(controller, null
+    ) {
       @Override
-      protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(UserManager userManager,
-                                                                            SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-        return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer, exerciseServiceAsync) {
+      protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
+        return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
           @Override
           protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                      Panel currentExercisePanel,
-                                                                                     String instanceName, boolean incorrectFirst) {
-            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, ActivityType.LEARN);
+                                                                                     String instanceName) {
+            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, new ListOptions(instanceName));
           }
         };
       }
@@ -231,7 +230,7 @@ public class Navigation implements RequiresResize, ShowTab {
     }
 
     markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
-    practiceHelper = new PracticeHelper(service, feedback, userManager, controller, exerciseServiceAsync);
+    practiceHelper = new PracticeHelper(controller);
     recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper, exerciseServiceAsync);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper, exerciseServiceAsync);
   }

@@ -48,20 +48,16 @@ import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
+
+import static mitll.langtest.shared.answer.ActivityType.AUTOCRT;
 
 /**
  * Created with IntelliJ IDEA.
@@ -89,26 +85,18 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   /**
    * @param secondRow             add the section panel to this row
    * @param currentExerciseVPanel
-   * @param service
-   * @param feedback
    * @param controller
-   * @param instance
-   * @param incorrectFirst
-   * @param showFirstNotCompleted
+   * @param listOptions
    * @see ResponseExerciseList#ResponseExerciseList
    */
   SingleSelectExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
-                           ExerciseServiceAsync service,
-                           UserFeedback feedback,
                            ExerciseController controller,
-                           String instance,
-                           boolean incorrectFirst,
-                           boolean showFirstNotCompleted) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted, ActivityType.AUTOCRT);
+                           ListOptions listOptions) {
+    super(currentExerciseVPanel, controller, listOptions.setActivityType(AUTOCRT));
 
     sectionPanel = new FluidContainer();
-    sectionPanel.getElement().setId("sectionPanel_" + instance);
+    sectionPanel.getElement().setId("sectionPanel_" + getInstance());
 
     sectionPanel.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
     sectionPanel.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);

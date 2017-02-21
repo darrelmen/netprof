@@ -42,9 +42,6 @@ import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
@@ -80,27 +77,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   /**
    * @param currentExerciseVPanel
-   * @param service
-   * @param feedback
    * @param controller
-   * @param showTypeAhead
-   * @param instance
-   * @param incorrectFirst
-   * @param showFirstNotCompleted
-   * @param activityType
-   * @see FlexSectionExerciseList#FlexSectionExerciseList
    */
   protected HistoryExerciseList(Panel currentExerciseVPanel,
-                                ExerciseServiceAsync service,
-                                UserFeedback feedback,
                                 ExerciseController controller,
-                                boolean showTypeAhead,
-                                String instance,
-                                boolean incorrectFirst,
-                                boolean showFirstNotCompleted,
-                                ActivityType activityType) {
-    super(currentExerciseVPanel, service, feedback, null, controller, showTypeAhead, instance,
-        incorrectFirst, showFirstNotCompleted, activityType);
+                                ListOptions options) {
+    super(currentExerciseVPanel, null, controller, options);
 //    logger.info("showFirstNotCompleted " + showFirstNotCompleted + " for " + instance + " : " + this.getElement().getId());
     sectionWidgetContainer = getSectionWidgetContainer();
     addHistoryListener();

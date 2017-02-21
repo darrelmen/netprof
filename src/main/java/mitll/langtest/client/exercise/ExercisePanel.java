@@ -36,19 +36,13 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -82,7 +76,6 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
 
   /**
    * @param e
-   * @param service
    * @param controller
    * @param exerciseList
    * @param instructionMessage
@@ -90,7 +83,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * @see ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
-  ExercisePanel(final T e, final LangTestDatabaseAsync service,
+  ExercisePanel(final T e,
                 final ExerciseController controller,
                 ListInterface<L> exerciseList, String instructionMessage,
                 String instance) {
@@ -105,7 +98,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     addInstructions();
     add(getQuestionContentRTL(e));
 
-    addQuestions(e, service, controller);
+    addQuestions(e, controller);
 
     // add next and prev buttons
     add(navigationHelper);
@@ -118,7 +111,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    *
    * @param e
    * @return
-   * @see #ExercisePanel(CommonShell, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
+   * @see #ExercisePanel
    */
   private Widget getQuestionContentRTL(T e) {
     HorizontalPanel hp = new HorizontalPanel();
@@ -146,7 +139,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   /**
    * @param e
    * @return
-   * @see #ExercisePanel(T, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
+   * @see #ExercisePanel
    */
   protected Widget getQuestionContent(T e) {
     String content = getExerciseContent(e);
@@ -230,19 +223,18 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * Remember the answer widgets so we can notice which have been answered, and then know when to enable the next button.
    *
    * @param e
-   * @param service
    * @param controller used in subclasses for audio control
    */
-  private void addQuestions(T e, LangTestDatabaseAsync service, ExerciseController controller) {
-    add(getQuestionPanel(e, service, controller, 1
+  private void addQuestions(T e,   ExerciseController controller) {
+    add(getQuestionPanel(e, controller, 1
     ));
   }
 
-  private Panel getQuestionPanel(T exercise, LangTestDatabaseAsync service, ExerciseController controller,
+  private Panel getQuestionPanel(T exercise,  ExerciseController controller,
                                  int questionNumber) {
     Panel vp = new VerticalPanel();
     // add answer widget
-    vp.add(getAnswerWidget(exercise, service, controller, questionNumber));
+    vp.add(getAnswerWidget(exercise, controller, questionNumber));
     vp.addStyleName("userNPFContent2");
     return vp;
   }
@@ -272,7 +264,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   @Override
   public abstract void postAnswers(final ExerciseController controller, final HasID completedExercise);
 
-  Widget getAnswerWidget(final T exercise, final LangTestDatabaseAsync service,
+  Widget getAnswerWidget(final T exercise,
                          ExerciseController controller, final int index) {
     return null;
   }
