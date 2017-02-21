@@ -153,7 +153,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, getCollator(), getLanguage());
         } else {
           commonExercises = new ArrayList<>(exercises);
-          sortExercises(request.getActivityType(), commonExercises);
+          if (predefExercises) {
+            sortExercises(request.getActivityType(), commonExercises);
+          }
         }
 
         ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises);

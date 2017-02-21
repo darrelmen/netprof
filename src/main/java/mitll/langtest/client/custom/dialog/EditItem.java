@@ -39,6 +39,7 @@ import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -61,11 +62,11 @@ import java.util.logging.Logger;
 public class EditItem {
   private final Logger logger = Logger.getLogger("EditItem");
 
-   /**
+  /**
    * @see #getNewItem
    * @see #makeExerciseList
    */
-   private static final int NEW_EXERCISE_ID = -100;
+  private static final int NEW_EXERCISE_ID = -100;
   private static final String EDIT_ITEM = "editItem";
 
   private final ExerciseController controller;
@@ -210,7 +211,8 @@ public class EditItem {
           panel.add(editableExercise.addNew(outer, panel));
           editableExercise.setFields(exercise);
         } else {
-          return new CommentNPFExercise<>(exercise, controller, exerciseList, "editItemInspect", false);
+          return new CommentNPFExercise<>(exercise, controller, exerciseList,
+              new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));
         }
 
         // Exercise userExercise = new Exercise(e);  // copy exercise??? TODO : why???

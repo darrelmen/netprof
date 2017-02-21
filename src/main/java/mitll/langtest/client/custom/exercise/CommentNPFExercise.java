@@ -53,6 +53,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.ExerciseAnnotation;
@@ -105,9 +106,16 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   public CommentNPFExercise(T e,
                             ExerciseController controller,
                             ListInterface<CommonShell> listContainer,
-                            String instance,
-                            boolean allowRecording) {
-    super(e, controller, listContainer, 1.0f, false, instance, allowRecording);
+                            ExerciseOptions options
+  //                          String instance,
+    //                        boolean allowRecording
+  ) {
+    super(e, controller, listContainer,options
+//        new ExerciseOptions()
+//            .setInstance(instance)
+//            .setAllowRecording(allowRecording)
+
+    );
   }
 
   /**
@@ -117,7 +125,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   @Override
   protected Widget getItemContent(final T e) {
     Panel column = new VerticalPanel();
- //   Panel column = new DivWidget();
+    //   Panel column = new DivWidget();
     column.getElement().setId("CommentNPFExercise_QuestionContent");
     column.setWidth("100%");
 
@@ -193,7 +201,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
           for (CommonExercise contextEx : directlyRelated) {
             container.add(getContext(contextEx, foreignLanguage, altFL));
           }
-          new ModalInfoDialog(CONTEXT_SENTENCE, container,false, 600, 400, null);
+          new ModalInfoDialog(CONTEXT_SENTENCE, container, false, 600, 400, null);
         }
       });
 
@@ -208,7 +216,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   }
 
   private ContextSupport<T> contextSupport = new ContextSupport<T>();
-   /**
+
+  /**
    * @param exercise
    * @param altText
    * @return
@@ -587,7 +596,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 //      @Override
 //      protected void addAudioRadioButton(Panel vp, RadioButton fast) {
 //        vp.add(getCommentBox(true).getEntry(audioPath, fast, exercise.getAnnotation(path)));
-    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, instance) {
+    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, options.getInstance()) {
 
       /**
        * @see #addRegularAndSlow

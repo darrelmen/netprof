@@ -795,7 +795,6 @@ public class DatabaseImpl implements Database {
    *
    * @param userExercise
    * @param keepAudio
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#editItem
    * @see mitll.langtest.server.services.ListServiceImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */

@@ -396,29 +396,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     new PopupHelper().showPopup(toShow, toShow2, over);
   }
 
-  /**
-   * @deprecatedx
-   */
-/*
-  private void tellUserPanelIsBusy() {
-    Window.alert("Please stop recording before changing items.");
-  }
-*/
-
   String getHistoryTokenFromUIState(String search, int id) {
     return "search=" + search + ";item=" + id;
   }
 
   public abstract void gotClickOnItem(final T e);
-/*  {
-    if (isExercisePanelBusy()) {
-      tellUserPanelIsBusy();
-      markCurrentExercise(pagingContainer.getCurrentSelection().getID());
-    } else {
-      controller.logEvent(this, "ExerciseList", ""+e.getID(), "Clicked on item '" + e.toString() + "'");
-      pushNewItem(getTypeAheadText(), e.getID());
-    }
-  }*/
 
   public void clear() {
     pagingContainer.clear();

@@ -23,6 +23,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
@@ -61,15 +62,14 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
    * @param e
    * @param controller
    * @param listContainer
-   * @param addKeyHandler
    * @param instance
    * @paramx mutableAnnotation
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
   public ContextCommentNPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer,
-                                   boolean addKeyHandler, String instance) {
-    super(e, controller, listContainer, 1.0f, addKeyHandler, instance, true);
+                                   String instance) {
+    super(e, controller, listContainer, new ExerciseOptions().setInstance(instance));
   }
 
   /**
@@ -161,7 +161,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
   /**
    * @param e
    * @return
-   * @see #addContextButton
+   * @seex #addContextButton
    */
   private <U extends CommonAudioExercise> Panel getContext(U e, String itemText) {
     String context = e.getForeignLanguage();//e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
@@ -326,7 +326,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
    * @param label
    * @param value
    * @return
-   * @see GoodwaveExercisePanel#getQuestionContent(CommonShell)
+   * @see GoodwaveExercisePanel#getQuestionContent
    * @see #getContext
    */
   private Widget getEntry(AnnotationExercise e, final String field, final String label, String value) {
@@ -353,7 +353,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
    */
   @Override
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
-    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, instance) {
+    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, getInstance()) {
       @Override
       protected void addAudioRadioButton(Panel vp, RadioButton fast, AudioAttribute audioAttribute) {
         vp.add(getCommentBox().getEntry(audioPath, fast, exercise.getAnnotation(path)));

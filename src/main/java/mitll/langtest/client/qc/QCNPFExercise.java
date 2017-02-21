@@ -63,6 +63,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
+import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
@@ -111,7 +112,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
-  private static final String APPROVED_BUTTON_TOOLTIP  = "Indicate item has no defects.";
+  private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
   private static final String ATTENTION_LL = "Attention LL";
   private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
@@ -142,8 +143,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
   public QCNPFExercise(T e, ExerciseController controller,
                        ListInterface<CommonShell> listContainer,
                        String instance) {
-    super(e, controller, listContainer, 1.0f, false, instance, true);
-
+    super(e, controller, listContainer, new ExerciseOptions(instance));
     this.listContainer = listContainer;
   }
 
@@ -181,12 +181,13 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
    * @param controller
    * @param listContainer
    * @param addKeyHandler
+   * @param includeListButtons
    * @return
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
                                                               final ListInterface<CommonShell> listContainer,
-                                                              boolean addKeyHandler) {
+                                                              boolean addKeyHandler, boolean includeListButtons) {
     NavigationHelper<CommonShell> navHelper = new NavigationHelper<CommonShell>(exercise, controller,
         new PostAnswerProvider() {
           @Override
@@ -213,7 +214,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
         "Click to indicate item has been reviewed." :
         UNINSPECTED_TOOLTIP);
 
-    if (!instance.contains(Navigation.REVIEW) && !instance.contains(Navigation.COMMENT)) {
+    if (!getInstance().contains(Navigation.REVIEW) && !getInstance().contains(Navigation.COMMENT)) {
       approvedButton = addApprovedButton(listContainer, navHelper);
       if (controller.hasModel()) {
         addAttnLLButton(listContainer, navHelper);
@@ -227,7 +228,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
    * @param listContainer
    * @param widgets
    * @return
-   * @see #getNavigationHelper(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, boolean)
+   * @see GoodwaveExercisePanel#getNavigationHelper(ExerciseController, ListInterface, boolean, boolean)
    */
   private Button addApprovedButton(final ListInterface listContainer, NavigationHelper widgets) {
     Button approved = new Button(APPROVED);
@@ -280,7 +281,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
       boolean allCorrect = incorrectFields.isEmpty();
       listContainer.setState(completedExercise.getID(), allCorrect ? STATE.APPROVED : STATE.DEFECT);
       listContainer.redraw();
-      navigationHelper.clickNext(controller,completedExercise);
+      navigationHelper.clickNext(controller, completedExercise);
     }
   }
 
@@ -306,12 +307,12 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
 
       listContainer.setSecondState(completedExercise.getID(), STATE.ATTN_LL);
       listContainer.redraw();
-      navigationHelper.clickNext(controller,completedExercise);
+      navigationHelper.clickNext(controller, completedExercise);
     }
   }
 
   private boolean isCourseContent() {
-    return !instance.equals(Navigation.REVIEW) && !instance.equals(Navigation.COMMENT);
+    return !getInstance().equals(Navigation.REVIEW) && !getInstance().equals(Navigation.COMMENT);
   }
 
   /**
@@ -395,7 +396,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
   }
 
   private Heading getComment() {
-    boolean isComment = instance.equals(Navigation.COMMENT);
+    boolean isComment = getInstance().equals(Navigation.COMMENT);
     String columnLabel = isComment ? COMMENT : DEFECT;
     Heading heading = new Heading(4, columnLabel);
     heading.addStyleName("borderBottomQC");
@@ -456,7 +457,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
     for (MiniUser user : maleUsers) {
       String tabTitle = userTitle.getUserTitle(me, user);
 
-     // logger.info("addTabsForUsers for user " + user + " got " + tabTitle);
+      // logger.info("addTabsForUsers for user " + user + " got " + tabTitle);
 
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle, true);
       tabPanel.add(tabAndContent.getTab().asTabLink());
@@ -469,7 +470,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
 
       List<AudioAttribute> audioAttributes = malesMap.get(user);
       for (AudioAttribute audio : audioAttributes) {
-     //   logger.info("addTabsForUsers for " + e.getOldID() + " got " + audio);
+        //   logger.info("addTabsForUsers for " + e.getOldID() + " got " + audio);
         if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
         Pair panelForAudio1 = getPanelForAudio(e, audio);
 
@@ -508,8 +509,8 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
   }
 
   /**
-   * @see #addGenderAssignmentButtons(RememberTabAndContent, List, AudioAttribute, Widget)
    * @return
+   * @see #addGenderAssignmentButtons(RememberTabAndContent, List, AudioAttribute, Widget)
    */
   private Button getNextButton() {
     final Button next = new Button("Next");
@@ -631,7 +632,8 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
           GoodwaveExercisePanel.DEFAULT_SPEAKER :
           audioAttribute.isMale() ? MALE : FEMALE);
       if (++i < allByUser.size()) {
-        /*if (audioAttribute != last)*/ builder.append("/");
+        /*if (audioAttribute != last)*/
+        builder.append("/");
       }
     }
     return builder.toString();
@@ -693,8 +695,8 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
       // logger.info("getPanelForAudio path after  " + audioRef);
     }
     String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(),  e.getTransliteration(), controller,
-        controller.getProps().showSpectrogram(), 70, speed, e, instance);
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), e.getTransliteration(), controller,
+        controller.getProps().showSpectrogram(), 70, speed, e, getInstance());
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.addPlayListener(new PlayListener() {
@@ -840,7 +842,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
    */
   private CheckBox makeCheckBox(final String field, final Panel commentRow, final FocusWidget commentEntry,
                                 boolean alreadyMarkedCorrect) {
-    boolean isComment = instance.equals(Navigation.COMMENT);
+    boolean isComment = getInstance().equals(Navigation.COMMENT);
 
     final CheckBox checkBox = new CheckBox("");
     checkBox.getElement().setId("CheckBox_" + field);
@@ -894,7 +896,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
 
       setApproveButtonState();
       markReviewed(exercise);
-      LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
+      LangTest.EVENT_BUS.fireEvent(new DefectEvent(getInstance()));
     }
   }
 
@@ -903,7 +905,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
    */
   private void setApproveButtonState() {
     boolean allCorrect = incorrectFields.isEmpty();
-    boolean allPlayed  = audioWasPlayed.size() == toResize.size();
+    boolean allPlayed = audioWasPlayed.size() == toResize.size();
     //System.out.println("\tsetApproveButtonState : allPlayed= '" +allPlayed +"' allCorrect " + allCorrect + " audio played " + audioWasPlayed.size() + " total " + toResize.size());
 
     String tooltipText = !allPlayed ? "Not all audio has been reviewed" : allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2;

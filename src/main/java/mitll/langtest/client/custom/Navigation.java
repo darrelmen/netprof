@@ -66,6 +66,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.project.ProjectOps;
+import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -216,9 +217,11 @@ public class Navigation implements RequiresResize, ShowTab {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
             if (controller.getProps().canPracticeContext()) {
-              return new ContextCommentNPFExercise<>(e, controller, exerciseList, false, CLASSROOM);
+              return new ContextCommentNPFExercise<>(e, controller, exerciseList, CLASSROOM);
             } else {
-              return new CommentNPFExercise<>(e, controller, exerciseList, CLASSROOM, true);
+              return new CommentNPFExercise<>(e, controller, exerciseList,
+                  new ExerciseOptions()
+                      .setInstance(CLASSROOM));
             }
           }
         };
@@ -366,8 +369,7 @@ public class Navigation implements RequiresResize, ShowTab {
           if (createdPanel1 instanceof FlashcardPanel) {
             //       logger.info("getTabPanel : practice : got shown event : '" + showEvent + "' target '" + targetName + "'");
             ((FlashcardPanel) createdPanel1).wasRevealed();
-          }
-          else {
+          } else {
             logger.warning("huh? flashcard panel was a " + createdPanel1.getClass());
           }
         }

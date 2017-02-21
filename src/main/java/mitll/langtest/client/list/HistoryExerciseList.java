@@ -112,8 +112,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #pushNewSectionHistoryToken()
    */
   protected String getHistoryTokenFromUIState(String search, int id) {
-    String unitAndChapterSelection = sectionWidgetContainer.getHistoryToken();
-
+ //   String unitAndChapterSelection = sectionWidgetContainer.getHistoryToken();
     //logger.info("\tgetHistoryToken for " + id + " is '" +unitAndChapterSelection.toString() + "'");
     if (logger == null) {
       logger = Logger.getLogger("HistoryExerciseList");
@@ -469,9 +468,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                                           int exerciseID,
 
                                           boolean onlyWithAudioAnno,
-//    ExerciseListRequest request = getRequest(prefix)
-//        .setTypeToSelection(typeToSection)
-//        .setOnlyWithAudioAnno(onlyWithAudioAnno);
                                           boolean onlyUnrecorded,
                                           boolean onlyDefaultUser,
                                           boolean onlyUninspected) {

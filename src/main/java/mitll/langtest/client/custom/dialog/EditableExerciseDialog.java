@@ -229,9 +229,17 @@ class EditableExerciseDialog extends NewUserExercise {
    */
   private void postChangeIfDirty(ListInterface<CommonShell> exerciseList, boolean onClick) {
     if (anyFieldsDirty() || onClick) {
-//      if (DEBUG) {
-//        logger.info("postChangeIfDirty:  change " + foreignChanged() + translitChanged() + englishChanged() + refAudioChanged() + slowRefAudioChanged());
-//      }
+      if (DEBUG) {
+        logger.info("postChangeIfDirty:  change" +
+            "\n\tfl         " + foreignChanged() +
+            "\n\ttransliter " + translitChanged() +
+            "\n\tenglish    " + englishChanged() +
+            "\n\tcontext    " + contextChanged() +
+            "\n\tc english  " + contextTransChanged() +
+            "\n\tref        " + refAudioChanged() +
+            "\n\tslow       " + slowRefAudioChanged()
+        );
+      }
       //    logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
       reallyChange(exerciseList, onClick, getKeepAudio());
     }
@@ -243,8 +251,16 @@ class EditableExerciseDialog extends NewUserExercise {
         englishChanged() ||
         refAudioChanged() ||
         slowRefAudioChanged() ||
-        !originalContext.equals(context.getSafeText()) ||
-        !originalContextTrans.equals(contextTrans.getSafeText());
+        contextChanged() ||
+        contextTransChanged();
+  }
+
+  private boolean contextTransChanged() {
+    return !originalContextTrans.equals(contextTrans.getSafeText());
+  }
+
+  private boolean contextChanged() {
+    return !originalContext.equals(context.getSafeText());
   }
 
   protected boolean getKeepAudio() {
@@ -345,7 +361,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @param markFixedClicked
    * @param keepAudio
    * @see #postChangeIfDirty(mitll.langtest.client.list.ListInterface, boolean)
-   * @see #audioPosted()
+   * @see #audioPosted
    */
   void reallyChange(final ListInterface<CommonShell> pagingContainer, final boolean markFixedClicked, boolean keepAudio) {
     newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
@@ -367,7 +383,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
     grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
 
-    listService.editItem(newUserExercise, /*buttonClicked &&*/ keepAudio, new AsyncCallback<Void>() {
+    listService.editItem(newUserExercise, keepAudio, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }

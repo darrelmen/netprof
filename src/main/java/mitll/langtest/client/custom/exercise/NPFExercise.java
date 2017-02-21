@@ -52,6 +52,7 @@ import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -77,6 +78,9 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
   private static final String ADD_ITEM = "Add Item to List";
   private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
   private static final String ADD_TO_LIST = "Add to List";
+  /**
+   * @see #getNextListButton
+   */
   private static final String NEW_LIST = "New List";
   private static final String ITEM_ADDED = "Item Added!";
   private static final String ADDING_TO_LIST = "Adding to list ";
@@ -96,25 +100,35 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
    * @param allowRecording
    * @see mitll.langtest.client.custom.content.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
    */
-  NPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer, float screenPortion,
-              boolean addKeyHandler, String instance, boolean allowRecording) {
-    super(e, controller, listContainer, screenPortion, addKeyHandler, instance, allowRecording);
+  NPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer,
+              ExerciseOptions options
+              //float screenPortion,
+              //boolean addKeyHandler, String instance, boolean allowRecording
+  ) {
+    super(e, controller, listContainer, options);
+//        new ExerciseOptions(screenPortion, addKeyHandler, instance, allowRecording, true));
   }
 
   /**
-   *
    * @param controller
    * @param listContainer
    * @param addKeyHandler
+   * @param includeListButtons
    * @return
+   * @see #GoodwaveExercisePanel
    */
   @Override
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
                                                               ListInterface<CommonShell> listContainer,
-                                                              boolean addKeyHandler) {
-    NavigationHelper<CommonShell> navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
-    navigationHelper.add(makeAddToList(getLocalExercise().getID(), controller));
-    navigationHelper.add(getNextListButton());
+                                                              boolean addKeyHandler, boolean includeListButtons) {
+    NavigationHelper<CommonShell> navigationHelper =
+        super.getNavigationHelper(controller, listContainer, addKeyHandler, includeListButtons);
+
+    if (includeListButtons) {
+      addToList = new DropdownButton(ADD_TO_LIST);
+      navigationHelper.add(makeAddToList(getLocalExercise().getID(), controller, addToList));
+      navigationHelper.add(getNextListButton());
+    }
     return navigationHelper;
   }
 
@@ -122,10 +136,9 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
    * @param exercise
    * @param controller
    * @return
-   * @see #getNavigationHelper(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, boolean)
+   * @see GoodwaveExercisePanel#getNavigationHelper
    */
-  private Panel makeAddToList(int exercise, ExerciseController controller) {
-    addToList = new DropdownButton(ADD_TO_LIST);
+  private Panel makeAddToList(int exercise, ExerciseController controller, DropdownButton addToList) {
     addToList.getElement().setId("NPFExercise_AddToList");
     addToList.setDropup(true);
     addToList.setIcon(IconType.PLUS_SIGN);
@@ -136,6 +149,10 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
     return addToList;
   }
 
+  /**
+   * @see #getNavigationHelper
+   * @return
+   */
   private Widget getNextListButton() {
     final PopupContainer.HidePopupTextBox textBox = new PopupContainer.HidePopupTextBox() {
       @Override

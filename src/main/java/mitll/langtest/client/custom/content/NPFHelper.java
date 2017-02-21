@@ -48,6 +48,7 @@ import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -295,7 +296,7 @@ public class NPFHelper implements RequiresResize {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {
-          return new CommentNPFExercise<>(e, controller, exerciseList, instanceName, true);
+          return new CommentNPFExercise<>(e, controller, exerciseList, new ExerciseOptions(instanceName));
         }
       }
     };
