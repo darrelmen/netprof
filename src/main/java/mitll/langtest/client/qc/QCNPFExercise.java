@@ -142,7 +142,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
   public QCNPFExercise(T e, ExerciseController controller,
                        ListInterface<CommonShell> listContainer,
                        String instance) {
-    super(e, controller, listContainer, 1.0f, false, instance);
+    super(e, controller, listContainer, 1.0f, false, instance, true);
 
     this.listContainer = listContainer;
   }

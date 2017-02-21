@@ -107,7 +107,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override
-          protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer, boolean sortTable) {
+          protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer) {
             // row 1
             Panel column = new FlowPanel();
             add(column);
@@ -118,7 +118,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             add(uninspectedOnly = getUninspectedCheckbox());
 
             // row 3
-            add(pagingContainer.getTableWithPager(sortTable));
+            add(pagingContainer.getTableWithPager(true));
 
             addEventHandler(instanceName, this);
           }

@@ -77,8 +77,8 @@ import java.util.logging.Logger;
 public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
   private Logger logger = Logger.getLogger("CommentNPFExercise");
 
-  private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
-  private static final String HIGHLIGHT_END = "</span>";
+//  private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
+//  private static final String HIGHLIGHT_END = "</span>";
 
   private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String DEFAULT = "Default";
@@ -97,14 +97,17 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param e
    * @param controller
    * @param listContainer
-   * @param addKeyHandler
    * @param instance
+   * @param allowRecording
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
-  public CommentNPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer,
-                            boolean addKeyHandler, String instance) {
-    super(e, controller, listContainer, 1.0f, addKeyHandler, instance);
+  public CommentNPFExercise(T e,
+                            ExerciseController controller,
+                            ListInterface<CommonShell> listContainer,
+                            String instance,
+                            boolean allowRecording) {
+    super(e, controller, listContainer, 1.0f, false, instance, allowRecording);
   }
 
   /**
@@ -284,9 +287,10 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @see #getContext
    */
   private String highlightVocabItemInContext(CommonShell e, String context) {
-    return getHighlightedItemInContext(context, e.getForeignLanguage());
+    return new ContextSupport<>().getHighlightedSpan(context, e.getForeignLanguage());
   }
 
+/*
   private String getHighlightedItemInContext(String context, String foreignLanguage) {
     String trim = foreignLanguage.trim();
     String toFind = removePunct(trim);
@@ -335,8 +339,9 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     }
     return context;
   }
+*/
 
-  private Collection<String> findLongest(String context, Collection<String> tokens) {
+/*  private Collection<String> findLongest(String context, Collection<String> tokens) {
     List<String> tList = new ArrayList<>(tokens);
     List<String> highest = null;
     int score = 0;
@@ -353,9 +358,9 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       }
     }
     return highest == null ? tList : highest;
-  }
+  }*/
 
-  private boolean allMatch(String context, Collection<String> tokens) {
+/*  private boolean allMatch(String context, Collection<String> tokens) {
     int startToken;
     int endToken = 0;
     context = context.toLowerCase();
@@ -371,8 +376,9 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       }
     }
     return true;
-  }
+  }*/
 
+/*
   private int getCharsMatched(String context, Collection<String> tokens) {
     int startToken;
     int endToken = 0;
@@ -392,13 +398,14 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     }
     return total;
   }
+*/
 
   /**
    * @param sentence
    * @return
    * @see #getHighlightedItemInContext(String, String)
    */
-  private Collection<String> getTokens(String sentence) {
+/*  private Collection<String> getTokens(String sentence) {
     List<String> all = new ArrayList<>();
     sentence = removePunct(sentence);
     for (String untrimedToken : sentence.split(CommentNPFExercise.SPACE_REGEX)) { // split on spaces
@@ -410,7 +417,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     }
 
     return all;
-  }
+  }*/
 
   /**
    * For context audio!

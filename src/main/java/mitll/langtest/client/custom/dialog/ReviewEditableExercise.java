@@ -322,9 +322,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
                                                                                List<MiniUser> users,
                                                                                Collection<AudioAttribute> displayed) {
     int me = controller.getUser();
-    UserTitle userTitle = new UserTitle();
+//    UserTitle userTitle = new UserTitle();
     for (MiniUser user : users) {
-
 //      boolean byMe = (user.getID() == me);
 //      if (!byMe) {
 //        String tabTitle = userTitle.getUserTitle(me, user);
@@ -414,7 +413,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private String getUserTitle(MiniUser user) {
-    String suffix = user.getAge() < 99 ? " age " + user.getAge() : "";
+    String suffix = "";//user.getAge() < 99 ? " age " + user.getAge() : "";
     String userid = " (" + user.getUserID() + ")";
     return (user.isMale() ? "male" : "female") +
         userid +
@@ -777,9 +776,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
    */
   @Override
-  protected void audioPosted() {
-    reallyChange(listInterface, false, getKeepAudio());
-  }
+  protected void audioPosted() {   reallyChange(listInterface, false, getKeepAudio());  }
 
   /**
    * @return

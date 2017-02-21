@@ -73,20 +73,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   protected final ExerciseController controller;
   protected ClickablePagingContainer<T> pagingContainer;
-//  private final boolean showTypeAhead;
 
   private TypeAhead typeAhead;
   long userListID = -1;
   private int unaccountedForVertical = 160;
-//  private boolean unrecorded, defaultAudioFilter;
   private boolean onlyExamples;
 
   private Timer waitTimer = null;
   private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
-  //boolean showFirstNotCompleted = false;
- // private ActivityType activityType;
 
   /**
    * @param currentExerciseVPanel
@@ -128,9 +124,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * Add two rows -- the search box and then the item list
+   *
    * @see #PagingExerciseList
    */
-  protected void addComponents() {   addTableWithPager(makePagingContainer(), true);  }
+  protected void addComponents() {
+    addTableWithPager(makePagingContainer());
+  }
 
   /**
    * @param selectionState
@@ -179,7 +178,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    .setIncorrectFirstOrder(incorrectFirstOrder)
    .setOnlyDefaultAudio(defaultAudioFilter);
    }
-  */
+   */
 
   /**
    * @return
@@ -261,10 +260,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * add left side components
    *
    * @param pagingContainer
-   * @param sortTable
    * @see #addComponents
    */
-  protected void addTableWithPager(ClickablePagingContainer<T> pagingContainer, boolean sortTable) {
+  protected void addTableWithPager(ClickablePagingContainer<T> pagingContainer) {
     // row 1
     Panel column = new FlowPanel();
     add(column);
@@ -272,8 +270,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     DivWidget optionalWidget = getOptionalWidget();
     if (optionalWidget != null) column.add(optionalWidget);
 
+    boolean sort = listOptions.isSort();
+    if (sort) logger.warning("sorting table for " + this);
     // row 2
-    add(pagingContainer.getTableWithPager(sortTable));
+    add(pagingContainer.getTableWithPager(sort));
   }
 
   /**
@@ -298,6 +298,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   protected DivWidget getOptionalWidget() {
     return null;
   }
+
   /**
    * @param text
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#makeClickableText(String, String, String, boolean)
@@ -316,7 +317,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
-    loadExercises(getHistoryTokenFromUIState(text, -1), text, false,false, false, false);
+    loadExercises(getHistoryTokenFromUIState(text, -1), text, false, false, false, false);
   }
 
   void scheduleWaitTimer() {

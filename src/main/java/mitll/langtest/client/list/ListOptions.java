@@ -22,7 +22,7 @@ public class ListOptions {
     this.instance = instance;
   }
 
-  public ListOptions(boolean showFirstNotCompleted, boolean showTypeAhead, boolean incorrectFirst,
+/*  public ListOptions(boolean showFirstNotCompleted, boolean showTypeAhead, boolean incorrectFirst,
                      boolean sort, String instance, ActivityType activityType) {
     this.showFirstNotCompleted = showFirstNotCompleted;
     this.showTypeAhead = showTypeAhead;
@@ -30,19 +30,19 @@ public class ListOptions {
     this.sort = sort;
     this.instance = instance;
     this.activityType = activityType;
-  }
+  }*/
 
   public ListOptions setSort(boolean val) {
     this.sort = val;
     return this;
   }
 
-  ListOptions setShowTypeAhead(boolean val) {
+  public ListOptions setShowTypeAhead(boolean val) {
     this.showTypeAhead = val;
     return this;
   }
 
-  ListOptions setShowFirstNotCompleted(boolean val) {
+  public ListOptions setShowFirstNotCompleted(boolean val) {
     this.showFirstNotCompleted = val;
     return this;
   }
@@ -62,6 +62,10 @@ public class ListOptions {
     return this;
   }
 
+  /**
+   *
+   * @return
+   */
   public boolean isSort() {
     return sort;
   }

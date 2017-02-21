@@ -42,7 +42,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.custom.exercise.CommentBox;
@@ -54,9 +53,6 @@ import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -86,21 +82,13 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
   private final RecordingProgressTable flex = new RecordingProgressTable();
 
   /**
-   * @param service
-   * @param feedback
-   * @param userManager
    * @param controller
    * @param doNormalRecording
-   * @param exerciseServiceAsync
    * @see Navigation#Navigation
    */
-  RecorderNPFHelper(LangTestDatabaseAsync service,
-                    UserFeedback feedback,
-                    UserManager userManager,
-                    ExerciseController controller,
+  RecorderNPFHelper(ExerciseController controller,
                     boolean doNormalRecording,
-                    ReloadableContainer exerciseList,
-                    ExerciseServiceAsync exerciseServiceAsync) {
+                    ReloadableContainer exerciseList) {
     super(controller, exerciseList);
     this.doNormalRecording = doNormalRecording;
   }
@@ -125,13 +113,14 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                  String instanceName) {
-        return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, new ListOptions().setInstance(instanceName)) {
+        return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel,
+            new ListOptions().setInstance(instanceName).setShowFirstNotCompleted(true)) {
           private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
           private CheckBox filterOnly;
 
 
           @Override
-          protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer, boolean sortTable) {
+          protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer) {
             // row 1
             Panel column = new FlowPanel();
             add(column);
@@ -150,7 +139,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
             add(filterOnly);
 
             // row 3
-            add(pagingContainer.getTableWithPager(sortTable));
+            add(pagingContainer.getTableWithPager(true));
             setOnlyExamples(!doNormalRecording);
 
             addEventHandler(instanceName);

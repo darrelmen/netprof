@@ -48,7 +48,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.TextArea;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.AVPHelper;
 import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.custom.content.ReviewItemHelper;
@@ -58,10 +57,8 @@ import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.download.DownloadLink;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -82,14 +79,12 @@ import java.util.logging.Logger;
 public class ListManager implements RequiresResize {
   private final Logger logger = Logger.getLogger("ListManager");
   private static final String IMPORT_ITEM = "importItem";
-//  private static final boolean SHOW_IMPORT = true;
 
   private final KeyStorage storage;
   private ScrollPanel listScrollPanel;
 
   private final ExerciseController controller;
-  //private final LangTestDatabaseAsync service;
-  private final ListServiceAsync listService = GWT.create(ListService.class);
+   private final ListServiceAsync listService = GWT.create(ListService.class);
 
   private final UserManager userManager;
   private TabAndContent yourStuff;
@@ -132,25 +127,17 @@ public class ListManager implements RequiresResize {
   private static final String EDIT_ITEM = "editItem";
 
   /**
-   * @param service
-   * @param userManager
    * @param controller
-   * @param feedback
    * @param tabPanel
-   * @param exerciseServiceAsync
    * @see Navigation#getTabPanel
    */
-  public ListManager(final LangTestDatabaseAsync service,
-                     final UserManager userManager,
-                     final ExerciseController controller,
-                     UserFeedback feedback,
+  public ListManager(final ExerciseController controller,
                      TabPanel tabPanel,
-                     ReloadableContainer exerciseList,
-                     ExerciseServiceAsync exerciseServiceAsync) {
+                     ReloadableContainer exerciseList) {
     if (exerciseList == null) logger.warning("huh? exerciselist is null?\n\n\n");
 
    // this.service = service;
-    this.userManager = userManager;
+    this.userManager = controller.getUserManager();
     this.controller = controller;
     storage = new KeyStorage(controller);
 
@@ -166,8 +153,8 @@ public class ListManager implements RequiresResize {
     });
 
     npfHelper = new NPFHelper(controller, false, false);
-    reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList, exerciseServiceAsync);
-    avpHelper = new AVPHelper(service, feedback, controller, exerciseServiceAsync);
+    reviewItem = new ReviewItemHelper(controller, exerciseList);
+    avpHelper = new AVPHelper(controller);
     editItem = new EditItem(controller, exerciseList);
   }
 

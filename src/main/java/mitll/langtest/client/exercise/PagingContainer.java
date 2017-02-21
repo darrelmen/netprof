@@ -76,7 +76,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   private final boolean english;
   private final boolean showExerciseState;
   private int FLLength = MAX_LENGTH_ID;
- // boolean showCompleted;
+  // boolean showCompleted;
 
   /**
    * @param controller
@@ -104,13 +104,13 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     english = controller.getLanguage().equals(ENGLISH);
 
     this.showExerciseState = showExerciseState;
-   // this.instance = instance;
-   // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
+    // this.instance = instance;
+    // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
   }
 
   /**
-   * @see #configureTable
    * @param sortEnglish
+   * @see #configureTable
    */
 
   protected void addColumnsToTable(boolean sortEnglish) {
@@ -118,6 +118,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
     Column<T, SafeHtml> englishCol = getEnglishColumn();
     if (sortEnglish) {
+      logger.warning("sorting " + this);
       englishCol.setSortable(true);
     }
     addColumn(englishCol, new TextHeader(ENGLISH));
@@ -131,7 +132,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     table.addColumnSortHandler(columnSortHandler2);
 
     // We know that the data is sorted alphabetically by default.
-  if (sortEnglish)  table.getColumnSortList().push(englishCol);
+    if (sortEnglish) table.getColumnSortList().push(englishCol);
 
     table.setWidth("100%", true);
 
@@ -193,7 +194,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
                 //if (o1.getID() == NEW_EXERCISE_ID) return +1;
                 //else if (o2.getID() == NEW_EXERCISE_ID) return -1;
                 //else
-                  return sorter.simpleCompare(o1, o2, isRecorder, isEnglish);
+                return sorter.simpleCompare(o1, o2, isRecorder, isEnglish);
               }
             }
             return -1;
@@ -224,14 +225,14 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
         if (!showExerciseState) {
           return getColumnToolTip(columnText);
         } else {
-          String html = ""+shell.getID();
+          String html = "" + shell.getID();
           logger.info("got shell " + shell.getID());
           if (columnText != null) {
             columnText = truncate(columnText);
             STATE state = shell.getState();
 
             boolean isDefect = state == STATE.DEFECT;
-            boolean isFixed  = state == STATE.FIXED;
+            boolean isFixed = state == STATE.FIXED;
             boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
             boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
 
@@ -316,7 +317,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   private String getEnglishText(CommonShell shell) {
 //    logger.info("getEnglishText " + shell.getOldID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
     String s = english /*&& !shell.getEnglish().equals(EditItem.NEW_ITEM)*/ ? shell.getForeignLanguage() : shell.getEnglish();
-   // if (s.isEmpty()) s = ""+shell.getID();
+    // if (s.isEmpty()) s = ""+shell.getID();
     return s;
   }
 

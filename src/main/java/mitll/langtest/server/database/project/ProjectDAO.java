@@ -285,6 +285,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   @Override
   public int getByName(String name) {
     return dao.byName(name);
+  }  @Override
+  public int getByLanguage(String language) {
+    return dao.byLanguage(language);
   }
 
   /**

@@ -86,7 +86,7 @@ public class CommentBox extends PopupContainer {
    * @param exerciseID
    * @param registration
    * @param commentAnnotator
-   * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.exercise.CommonShell)
+   * @see GoodwaveExercisePanel#getQuestionContent
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
   public CommentBox(int exerciseID, EventRegistration registration, CommentAnnotator commentAnnotator,

@@ -43,6 +43,7 @@ import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -73,14 +74,11 @@ public class NPFHelper implements RequiresResize {
   private static final String COMPLETE = "Complete";
   private boolean madeNPFContent = false;
 
- // final LangTestDatabaseAsync service;
   final ExerciseController controller;
 
- // final UserFeedback feedback;
   PagingExerciseList<CommonShell, CommonExercise> npfExerciseList = null;
   private final boolean showQC;
   DivWidget contentPanel;
-  //ExerciseServiceAsync exerciseServiceAsync;
   private final boolean showFirstNotCompleted;
 
   /**
@@ -92,13 +90,10 @@ public class NPFHelper implements RequiresResize {
   public NPFHelper(ExerciseController controller,
                    boolean showQC,
                    boolean showFirstNotCompleted) {
-   // this.service = service;
-   // this.feedback = controller.getFeedback();
     this.controller = controller;
     this.showQC = showQC;
-    //this.exerciseServiceAsync = exerciseServiceAsync;
     this.showFirstNotCompleted = showFirstNotCompleted;
- //   logger.info("this " + this.getClass() + " shows first completed = " + showFirstNotCompleted);
+    //   logger.info("this " + this.getClass() + " shows first completed = " + showFirstNotCompleted);
   }
 
   /**
@@ -225,8 +220,9 @@ public class NPFHelper implements RequiresResize {
    * @see ##getRightSideContent
    */
   PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName, boolean showFirstNotCompleted) {
-  //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
-    final PagingExerciseList<CommonShell, CommonExercise> exerciseList = makeExerciseList(right, instanceName);
+    //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
+    final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
+        makeExerciseList(right, new ListOptions().setInstance(instanceName).setShowFirstNotCompleted(showFirstNotCompleted));
     setFactory(exerciseList, instanceName, showQC);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -260,13 +256,13 @@ public class NPFHelper implements RequiresResize {
 
   /**
    * @param right
-   * @param instanceName
+   * @param listOptions
    * @return
    * @see #makeNPFExerciseList
    */
-  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
+  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
     return new NPExerciseList<ListSectionWidget>(right, controller,
-        instanceName) {
+        listOptions) {
       @Override
       protected void onLastItem() {
         new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
@@ -299,7 +295,7 @@ public class NPFHelper implements RequiresResize {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {
-          return new CommentNPFExercise<>(e, controller, exerciseList, false, instanceName);
+          return new CommentNPFExercise<>(e, controller, exerciseList, instanceName, true);
         }
       }
     };

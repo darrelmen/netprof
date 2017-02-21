@@ -99,10 +99,10 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   /**
    * @return
    * @see SetCompleteDisplay#getScoreHistory
-   * @param sortTable
+   * @param sortEnglish
    */
-  public Panel getTableWithPager(boolean sortTable) {
-    Panel tableWithPager = super.getTableWithPager(sortTable);
+  public Panel getTableWithPager(boolean sortEnglish) {
+    Panel tableWithPager = super.getTableWithPager(sortEnglish);
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeft");
     return tableWithPager;

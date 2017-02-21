@@ -21,12 +21,10 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
+import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ListChangeListener;
-import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.NPExerciseList;
+import mitll.langtest.client.list.*;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.services.ListService;
@@ -220,7 +218,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     //  logger.info("getSuggestions converting " + exercises.size());
 
     message.setText("");
-    String before = query;
+    //String before = query;
     query = normalizeSearch(query);
 
     //  logger.info("getSuggestions before '" + before + "'");
@@ -241,7 +239,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       suggestions.add(suggestion);
     }
 
-    logger.info("getSuggestions returning " + suggestions.size());
+//    logger.info("getSuggestions returning " + suggestions.size());
 
     return suggestions;
   }
@@ -493,18 +491,18 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       if (isOnList()) {
         // TODO : warn user already added.
         message.setText("This is already in the list.");
-        add.setEnabled(true);
+        enableButton(add);
       } else {
         message.setText("");
         listService.addItemToUserList(list.getID(), currentExercise.getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-            add.setEnabled(true);
+            enableButton(add);
           }
 
           @Override
           public void onSuccess(Void result) {
-            add.setEnabled(true);
+            enableButton(add);
             showNewItem(currentExercise);
           }
         });
@@ -514,22 +512,20 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
-          add.setEnabled(true);
+          enableButton(add);
         }
 
         @Override
         public void onSuccess(Boolean result) {
-          add.setEnabled(true);
+          enableButton(add);
 
 /*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
             " before adding/changing " + newUserExercise + " -> " + result);*/
           if (result) {
-            CommonExercise newItem = editItem.getNewItem();
-            newItem.getMutable().setForeignLanguage(safeText);
-            newItem.getMutable().setEnglish("");
-            newItem.getMutable().setMeaning("");
-
-            controller.getAudioService().reallyCreateNewItem(list.getID(), newItem, controller.getLanguage(), new AsyncCallback<CommonExercise>() {
+            controller.getAudioService().reallyCreateNewItem(
+                list.getID(),
+                makeNewExercise(safeText),
+                new AsyncCallback<CommonExercise>() {
               @Override
               public void onFailure(Throwable caught) {
               }
@@ -548,18 +544,20 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
           }
         }
       });
-
-//      //if (newExercise.isCompleted()) {
-//      CommonExercise newItem = editItem.getNewItem();
-//      newExercise = new NewUserExercise(controller, newItem, "newExercise", list);
-//
-//      DivWidget container = new DivWidget();
-//      Panel widgets1 = newExercise.addNew(outer, container);
-//      container.add(widgets1);
-//
-//      showModal(newExercise, container);
     }
-    // }
+  }
+
+  private void enableButton(Button add) {
+    add.setEnabled(true);
+  }
+
+  @NotNull
+  private CommonExercise makeNewExercise(String safeText) {
+    CommonExercise newItem = editItem.getNewItem();
+    newItem.getMutable().setForeignLanguage(safeText);
+    newItem.getMutable().setEnglish("");
+    newItem.getMutable().setMeaning("");
+    return newItem;
   }
 
   private boolean isOnList() {
@@ -614,16 +612,63 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     delete = makeDeleteButtonItself();
 
     delete.addClickHandler(event -> {
-      delete.setEnabled(false);
       CommonShell currentSelection = pagingContainer.getCurrentSelection();
       if (currentSelection != null) {
-//          logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
-        NewUserExercise newExercise = new NewUserExercise(controller, null, "newExercise", list);
-        newExercise.deleteItem(currentSelection.getID(), widgets, null, widgets, delete);
+        delete.setEnabled(false);
+        deleteItem(currentSelection.getID(), widgets, null, widgets, delete);
       }
     });
     // delete.addStyleName("topFiftyMargin");
     return delete;
+  }
+
+  /**
+   * Removes from 4 lists!
+   *
+   * @param exid
+   * @param exerciseList
+   * @param learnContainer
+   * @param editableExerciseList
+   * @param button
+   * @paramx uniqueID
+   * @see EditableExerciseList#makeDeleteButton
+   */
+  void deleteItem(final int exid,
+                  // final long uniqueID,
+                  final PagingExerciseList<?, ?> exerciseList,
+                  final ReloadableContainer learnContainer,
+                  final EditableExerciseList editableExerciseList,
+                  Button button) {
+    listService.deleteItemFromList(list.getID(), exid, new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        enableButton();
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        enableButton();
+        if (!result) {
+          logger.warning("deleteItem huh? id " + exid + " not in list " + list);
+        }
+
+        exerciseList.forgetExercise(exid);
+
+        if (!list.removeAndCheck(exid)) {
+          logger.warning("deleteItem huh? didn't remove the item " + exid + " from " + list.getID() +
+              " now " + list.getExercises().size());
+        }
+        if (learnContainer != null && learnContainer.getReloadable() != null) {
+          learnContainer.getReloadable().redraw();   // TODO : or reload???
+        }
+        logger.warning("deleteItem list size is " + exerciseList.getSize());
+        editableExerciseList.enableRemove(exerciseList.getSize() > 0);
+      }
+
+      private void enableButton() {
+        button.setEnabled(true);
+      }
+    });
   }
 
   /**

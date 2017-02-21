@@ -71,7 +71,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
 
   private static final int MAX_MSG_LEN = 200;
- // boolean incorrectFirstOrder = false;
+  // boolean incorrectFirstOrder = false;
 
   protected SimplePanel innerContainer;
   protected final ExerciseServiceAsync service;
@@ -82,7 +82,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   protected Panel createdPanel;
   private int lastReqID = 0;
   final boolean allowPlusInURL;
- // private final String instance;
+  // private final String instance;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
   boolean doShuffle;
 
@@ -166,8 +166,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
    * @seex NPFHelper#reload
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
    */
   public void reload() {
     //logger.info("reload -");
@@ -599,8 +599,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     int i = getIndex(itemID);
     if (!isOnLastItem(i)) {
       T next = getAt(i + 1);
-      //if (next.getID() != EditItem.NEW_EXERCISE_ID) {
-      //  logger.info("ask for next " + next);
+
       service.getExercise(next.getID(), listOptions.isIncorrectFirst(), new AsyncCallback<U>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -613,7 +612,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         }
       });
     }
-    //}
+
   }
 
   private int getUser() {
@@ -849,7 +848,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     leftColumn.addStyleName("floatLeft");
     addMinWidthStyle(leftColumn);
 
-  //  leftColumn.getElement().getStyle().setProperty("minHeight","300px");
+    //  leftColumn.getElement().getStyle().setProperty("minHeight","300px");
 
     leftColumn.add(getWidget());
     return leftColumn;

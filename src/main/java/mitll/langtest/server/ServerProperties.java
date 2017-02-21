@@ -136,19 +136,15 @@ public class ServerProperties {
   private static final String MIN_PRON_SCORE_DEFAULT = "" + 0.31f;
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
-  //  private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
-  //  private static final String NO_MODEL = "noModel";
   private static final String TIER_INDEX = "tierIndex";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
-//  private static final String CONFIG_FILE = "configFile";
 
   /**
    * @deprecated - we need a per-project set
    */
   private static final String PREFERRED_VOICES = "preferredVoices";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
-  // private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String DO_DECODE = "dodecode";
   private static final String DO_TRIM = "dotrim";
 
@@ -905,6 +901,10 @@ public class ServerProperties {
     return props.getProperty("SERVER_NAME", NP_SERVER);
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkForWebservice
+   * @return
+   */
   public String getHydraHost() {
     return props.getProperty(HYDRA_HOST, HYDRA_HOST_URL_DEFAULT);
   }

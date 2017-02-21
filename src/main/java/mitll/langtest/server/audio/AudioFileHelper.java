@@ -946,7 +946,9 @@ public class AudioFileHelper implements AlignDecode {
         HTTPClient httpClient = new HTTPClient(hydraHost + "scoreServlet");
         httpClient.addRequestProperty("request", "align");
         httpClient.addRequestProperty("exercise", "" + exid);
-        httpClient.addRequestProperty("projid", "" + projid);
+        // USE THE LANGUAGE INSTEAD
+        httpClient.addRequestProperty("projid", "-1");//  + projid);
+        httpClient.addRequestProperty("language", "" + getLanguage());
         httpClient.addRequestProperty("user", "" + userid);
         httpClient.addRequestProperty("full", "full");  // full json returned
 

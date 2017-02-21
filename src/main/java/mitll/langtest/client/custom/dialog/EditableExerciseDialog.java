@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
@@ -108,7 +107,6 @@ class EditableExerciseDialog extends NewUserExercise {
   protected void gotBlur(FormField foreignLang,
                          RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording,
-                         UserList<CommonShell> ul,
                          ListInterface<CommonShell> pagingContainer,
                          Panel toAddTo) {
     validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, false, foreignChanged());
@@ -166,17 +164,9 @@ class EditableExerciseDialog extends NewUserExercise {
     prevNext.addStyleName("rightFiveMargin");
     row.add(prevNext);
 
-    //Button delete = makeDeleteButton();
-
     configureButtonRow(row);
-    //row.add(delete);
 
     return row;
-  }
-
-  @Override
-  protected Button makeCancelButton() {
-    return null;
   }
 
   /**
@@ -188,25 +178,6 @@ class EditableExerciseDialog extends NewUserExercise {
     CommonShell shell = pagingContainer.byID(newUserExercise.getID());
     return new PrevNextList<>(shell, exerciseList, shouldDisableNext(), controller);
   }
-
-  /**
-   * @return
-   * @see #getCreateButton(UserList, ListInterface, Panel, ControlGroup)
-   */
-/*  private Button makeDeleteButton() {
-    Button delete = super.makeDeleteButton();
-
-    delete.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        delete.setEnabled(false);
-       // logger.info("makeDeleteButton got click to delete " +id);
-        deleteItem(newUserExercise.getID(), originalList, exerciseList, predefinedContentList);
-      }
-    });
-
-    return delete;
-  }*/
 
   /**
    * @param row
