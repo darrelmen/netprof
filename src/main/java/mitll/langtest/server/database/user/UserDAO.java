@@ -38,6 +38,7 @@ import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.*;
@@ -66,16 +67,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @param manager
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
+   * public for test access... for now
+   *
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
-/*  public void checkForFavorites(UserListManager manager) {
-    for (User u : getUsers()) {
-      if (manager.getListsForUser(u.getID(), true, false).isEmpty()) {
-        manager.createFavorites(u.getID());
-      }
-    }
-  }*/
+  public void ensureDefaultUsers() {}
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
@@ -172,7 +168,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
       return newID;
     } catch (Exception ee) {
-      logger.error("Got " + ee, ee);
+      logger.error("addUser Got " + ee, ee);
       database.logEvent("unk", "adding user: " + ee.toString(), 0, device);
     }
     return 0;
@@ -629,7 +625,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
       String password = rs.getString(PASS);
       String userID = rs.getString(USER_ID);
-      String emailH = rs.getString(EMAIL);
+//      String emailH = rs.getString(EMAIL);
       String device = rs.getString(DEVICE);
 
       if (userKind == null) {
@@ -638,7 +634,8 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
       // if the user kind is unmarked, we'll make them a student, we can always change it later.
 
-      User.Kind userKind1 = userKind == null ? User.Kind.STUDENT : User.Kind.valueOf(userKind);
+      User.Kind userKind1 = getKind(userKind);
+
       if (admins.contains(userID)) userKind1 = User.Kind.ADMIN;
       String resetKey = rs.getString(RESET_PASSWORD_KEY);
       User newUser = new User(id, //id
@@ -670,6 +667,17 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       }
     }
     return users;
+  }
+
+  @NotNull
+  private User.Kind getKind(String userKind) {
+    User.Kind userKind1;
+    try {
+      userKind1 = userKind == null ? User.Kind.STUDENT : User.Kind.valueOf(userKind);
+    } catch (IllegalArgumentException e) {
+      userKind1 = User.Kind.UNSET;
+    }
+    return userKind1;
   }
 
   private Collection<User.Permission> getPermissions(ResultSet rs, String userid) throws SQLException {

@@ -141,10 +141,29 @@ gwt {
     gwtVersion = '2.8.0'
     modules 'mitll.langtest.LangTest'
 
-  //  logLevel = 'ERROR'
+    logLevel = 'INFO'
 
     minHeapSize = "512M";
     maxHeapSize = "4G";
+
+    compiler {
+//        * Script output style. (OBF, PRETTY, DETAILED)
+        style = "OBF"
+  //      * Sets the optimization level used by the compiler. 0=none 9=maximum.
+        // optimize = 5
+    //    * Fail compilation if any input file contains an error.
+        //failOnError = true
+      //  * Specifies Java source level. ("1.6", "1.7")
+        sourceLevel = "1.8"
+        //* The number of local workers to use when compiling permutations.
+        localWorkers = 5
+
+//        * The level of logging detail (ERROR, WARN, INFO, TRACE, DEBUG, SPAM, ALL)
+        logLevel = "INFO"
+
+  //      * shown all compile errors
+        strict = true
+    }
 
     superDev {
         noPrecompile = true

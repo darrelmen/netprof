@@ -47,9 +47,10 @@ import java.util.*;
 public abstract class BaseUserDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseUserDAO.class);
 
-  private static final String DEFECT_DETECTOR = "defectDetector";
+  protected static final String DEFECT_DETECTOR = "defectDetector";
   protected static final String BEFORE_LOGIN_USER = "beforeLogin";
   protected static final String IMPORT_USER = "importUser";
+
   public static final String USERS = "users";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
@@ -103,7 +104,7 @@ public abstract class BaseUserDAO extends DAO {
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
   protected final Collection<String> admins;
-  private HashSet<String> defaultUsers;
+  protected Set<String> defaultUsers;
 
   BaseUserDAO(Database database) {
     super(database);
@@ -224,7 +225,8 @@ public abstract class BaseUserDAO extends DAO {
    *
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
-  public void ensureDefaultUsers() {
+  abstract public void ensureDefaultUsers();
+/*  {
     this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", User.Kind.QAQC);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", User.Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", "User", User.Kind.CONTENT_DEVELOPER);
@@ -233,13 +235,13 @@ public abstract class BaseUserDAO extends DAO {
     this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, "Default", "Female", User.Kind.AUDIO_RECORDER);
 
     this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
-  }
+  }*/
 
   public boolean isDefaultUser(String userid) {
     return defaultUsers.contains(userid);
   }
 
-  private int getOrAdd(String beforeLoginUser, String first, String last, User.Kind kind) {
+  protected int getOrAdd(String beforeLoginUser, String first, String last, User.Kind kind) {
     int beforeLoginUserID = getIdForUserID(beforeLoginUser);
     if (beforeLoginUserID == -1) {
       beforeLoginUserID = addShellUser(beforeLoginUser, first, last, kind);
