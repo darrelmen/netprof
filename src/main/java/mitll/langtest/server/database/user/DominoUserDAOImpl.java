@@ -715,7 +715,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     String email = dominoUser.getEmail();
 
-    logger.info("toUser : user " + dominoUser.getUserId() + " email " + email);//, new Exception());
+ //   logger.debug("toUser : user " + dominoUser.getUserId() + " email " + email);//, new Exception());
 
     Set<User.Permission> permissionSet = new HashSet<>();
 //    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;

@@ -136,7 +136,7 @@ public class ReviewItemHelper extends NPFHelper {
 
           SimplePanel ignoredContainer = new SimplePanel();
 
-          Panel widgets = reviewEditableExercise.addNew(
+          Panel widgets = reviewEditableExercise.addFields(
               npfExerciseList,
               ignoredContainer);
           reviewEditableExercise.setFields(exercise);

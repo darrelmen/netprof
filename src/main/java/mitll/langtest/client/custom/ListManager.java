@@ -459,10 +459,12 @@ public class ListManager implements RequiresResize {
     String previousList = storage.getValue(CLICKED_USER_LIST);
     String currentValue = storeCurrentClickedList(ul);
 
+/*
     Collection exercises = ul.getExercises();
     for (Object ex : exercises) {
       logger.info(ul.getID() + " has " + ex);
     }
+    */
 
     // if select a new list, clear the subtab selection
     if (previousList != null && !previousList.equals(currentValue)) {

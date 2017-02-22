@@ -522,7 +522,7 @@ public class ReportTest {
     testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     assertTrue(!testList.getExercises().contains(english));
 
-    userListManager.reallyCreateNewItem(listid, english, "");
+    userListManager.newExercise(listid, english, "");
     testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     CommonUserExercise next = testList.getExercises().iterator().next();
     assertTrue(next.getEnglish().equals(ENGLISH));
@@ -558,7 +558,7 @@ public class ReportTest {
 
 /*  private Exercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
     Exercise english = createNewItem(owner.getId());
-    userListManager.reallyCreateNewItem(listid, english, "");
+    userListManager.newExercise(listid, english, "");
 
     // have to go back to database to get user list
     assertTrue(!testList.getExercises().contains(english));

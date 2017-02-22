@@ -438,7 +438,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     CommonExercise currentExercise = getExercise(idOfNewExercise);
 
     if (currentExercise == null) {
-      logger.error("addOverlay : huh? can't find " + userExercise);
+      logger.info("addOverlay : huh? can't find " + userExercise);
     } else {
       //logger.debug("addOverlay at " +userExercise.getOldID() + " found " +currentExercise);
       synchronized (this) {

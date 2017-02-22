@@ -796,9 +796,9 @@ public class DatabaseImpl implements Database {
    * @param userExercise
    * @param keepAudio
    * @see mitll.langtest.server.services.ListServiceImpl#editItem
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#postEditItem
    */
-  public void editItem(CommonExercise userExercise, boolean keepAudio) {
+  public CommonExercise editItem(CommonExercise userExercise, boolean keepAudio) {
     int id = userExercise.getID();
     logger.debug("editItem exercise #" + id +
         " keep audio " + keepAudio +
@@ -815,27 +815,27 @@ public class DatabaseImpl implements Database {
     logger.debug("editItem originally had " + original.size() + " attribute, and " + defects.size() + " defects");
 
     int projectID = userExercise.getProjectID();
-    CommonExercise exercise = getExerciseDAO(projectID).addOverlay(userExercise);
-    boolean notOverlay = exercise == null;
-    if (notOverlay) {
-      // not an overlay! it's a new user exercise
-      exercise = getUserExerciseByExID(userExercise.getID());
-      logger.debug("not an overlay " + exercise);
-    } else {
-      exercise = userExercise;
+
+    boolean isPredef = userExercise.isPredefined();
+    CommonExercise exercise = isPredef ? getExerciseDAO(projectID).addOverlay(userExercise) : null;
+    //boolean notOverlay = exercise == null;
+    if (isPredef) {
+     // exercise = userExercise;
       logger.debug("\teditItem made overlay " + exercise);
+    } else {
+// not an overlay! it's a new user exercise
+      exercise = getUserExerciseByExID(userExercise.getID());
+      logger.debug("editItem made user custom exercise " + exercise);
     }
 
-    if (notOverlay) {
-      logger.error("huh? couldn't make overlay or find user exercise for " + userExercise);
-    } else {
+    if (isPredef) {
       boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
       logger.debug(b ? "editItem removed defects " + original.size() + " now" : "editItem didn't remove any defects - " + defects.size());
 
       MutableAudioExercise mutableAudio = exercise.getMutableAudio();
       for (AudioAttribute attribute : defects) {
         if (!mutableAudio.removeAudio(attribute)) {
-          logger.warn("huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
+          logger.warn("editItem huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
         }
       }
 
@@ -851,9 +851,15 @@ public class DatabaseImpl implements Database {
         logger.debug("\t copying " + toCopy);
         audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDurationInMillis());
       }*/
+
+    } else if (exercise == null) {
+      logger.error("editItem huh? couldn't make overlay or find user exercise for " + userExercise);
     }
 
-    getSectionHelper(projectID).refreshExercise(exercise);
+    if (isPredef) {
+      getSectionHelper(projectID).refreshExercise(exercise);
+    }
+    return exercise;
   }
 
   /**
@@ -1431,9 +1437,7 @@ public class DatabaseImpl implements Database {
    * @see #editItem
    * @see #getCustomOrPredefExercise(int, int)
    */
-  private CommonExercise getUserExerciseByExID(int id) {
-    return userExerciseDAO.getByExID(id);
-  }
+  private CommonExercise getUserExerciseByExID(int id) {  return userExerciseDAO.getByExID(id);  }
 
   @Override
   public ServerProperties getServerProps() {

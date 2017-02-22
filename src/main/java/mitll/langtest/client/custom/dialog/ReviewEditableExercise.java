@@ -57,7 +57,6 @@ import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
-import mitll.langtest.client.qc.UserTitle;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
@@ -155,7 +154,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   /**
    * @return
-   * @see #addNew
+   * @see #addFields
    */
   @Override
   protected Panel makeAudioRow() {
@@ -593,7 +592,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param toAddTo
    * @param normalSpeedRecording
    * @return
-   * @see #addNew
+   * @see #addFields
    */
   @Override
   protected Panel getCreateButton(final UserList<CommonShell> ul,

@@ -58,7 +58,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
    * @param listContainer
    * @param disableNext
    * @param controller
-   * @see EditableExerciseDialog#addNew
+   * @see EditableExerciseDialog#addFields
    */
   PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext, ExerciseController controller) {
     this.container = listContainer;

@@ -44,6 +44,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.logging.Logger;
@@ -170,7 +171,7 @@ public class EditItem {
     return exercise;
   }
 
-  private void addContext(int userid, Exercise exercise) {
+  public void addContext(int userid, MutableExercise exercise) {
     Exercise context = new Exercise(-1,
         userid,
         "",
@@ -208,15 +209,13 @@ public class EditItem {
                   predefinedContentList,
                   getInstance()
               );
-          panel.add(editableExercise.addNew(outer, panel));
+          panel.add(editableExercise.addFields(outer, panel));
           editableExercise.setFields(exercise);
         } else {
           return new CommentNPFExercise<>(exercise, controller, exerciseList,
               new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));
         }
 
-        // Exercise userExercise = new Exercise(e);  // copy exercise??? TODO : why???
-//        populatePanel(exercise, panel,/* ul,*/ originalList, /*itemMarker,*/ outer);
         return panel;
       }
     });

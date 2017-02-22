@@ -742,25 +742,32 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
-  public void reallyCreateNewItem(long userListID, CommonExercise userExercise, String mediaDir) {
-    int add = userExerciseDAO.add(userExercise, false, false);
-    logger.debug("reallyCreateNewItem added exercise " + add  + " from " + userExercise);
+  public void newExercise(long userListID, CommonExercise userExercise, String mediaDir) {
+    int newExerciseID = userExerciseDAO.add(userExercise, false, false);
+    logger.debug("newExercise added exercise " + newExerciseID  + " from " + userExercise);
 
-    if (!userExercise.getDirectlyRelated().isEmpty()) {
-      for (CommonExercise exercise : userExercise.getDirectlyRelated()) {
-        if (!exercise.getForeignLanguage().isEmpty() ||
-            !exercise.getEnglish().isEmpty()
-            ) {
-          int add1 = userExerciseDAO.add(exercise, false, true);
+    // TODO : this will never happen
+//    if (!userExercise.getDirectlyRelated().isEmpty()) {
+//      for (CommonExercise exercise : userExercise.getDirectlyRelated()) {
+//        if (!exercise.getForeignLanguage().isEmpty() ||
+//            !exercise.getEnglish().isEmpty()
+//            ) {
+          int contextID = userExerciseDAO.add(new Exercise(), false, true);
 
           int projectID = userExercise.getProjectID();
-          userExerciseDAO.addContextToExercise(add, add1, projectID);
+          userExerciseDAO.addContextToExercise(newExerciseID, contextID, projectID);
 
-          logger.debug("reallyCreateNewItem added context exercise " + add1 + " tied to " + add + " in " + projectID);
-        }
-      }
-    }
-    addItemToList(userListID, userExercise.getOldID(), add);
+          logger.debug("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
+  //      }
+//     }
+//    }
+//    else {
+//      logger.info("newExercise no directly related exercises added");
+//    }
+
+    addItemToList(userListID, userExercise.getOldID(), newExerciseID);
+
+    // TODO : necessary?
     fixAudioPaths(userExercise, true, mediaDir);
   }
 
@@ -789,7 +796,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param userExercise
-   * @param createIfDoesntExist
+   * @param createIfDoesntExist always true
    * @param mediaDir
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
@@ -851,7 +858,7 @@ public class UserListManager implements IUserListManager {
    * @param overwrite
    * @param mediaDir
    * @see #editItem
-   * @see #reallyCreateNewItem
+   * @see #newExercise
    */
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();

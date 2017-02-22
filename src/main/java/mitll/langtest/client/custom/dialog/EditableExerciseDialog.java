@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -45,14 +44,12 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableShell;
 
 import java.util.logging.Logger;
 
@@ -70,15 +67,8 @@ class EditableExerciseDialog extends NewUserExercise {
 
   private final HTML fastAnno = new HTML();
   private final HTML slowAnno = new HTML();
-  private String originalForeign = "";
-  private String originalEnglish = "";
 
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
-  final ReloadableContainer predefinedContentList;
-
-  private String originalRefAudio;
-  private String originalSlowRefAudio;
-  private String originalTransliteration;
 
   private static final boolean DEBUG = false;
 
@@ -95,14 +85,21 @@ class EditableExerciseDialog extends NewUserExercise {
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                                 ReloadableContainer predefinedContent,
                                 String instanceName) {
-    super(controller, changedUserExercise, instanceName, originalList);
+    super(controller, changedUserExercise, instanceName, originalList, predefinedContent, exerciseList);
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
     this.originalList = originalList;
     this.exerciseList = exerciseList;
-    this.predefinedContentList = predefinedContent;
   }
 
+  /**
+   * @see
+   * @param foreignLang
+   * @param rap
+   * @param normalSpeedRecording
+   * @param pagingContainer
+   * @param toAddTo
+   */
   @Override
   protected void gotBlur(FormField foreignLang,
                          RecordAudioPanel rap,
@@ -114,7 +111,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
   /**
    * @param container
-   * @see #addNew
+   * @see #addFields
    */
   @Override
   protected void addItemsAtTop(Panel container) {
@@ -149,7 +146,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @param toAddTo
    * @param normalSpeedRecording
    * @return
-   * @see NewUserExercise#addNew
+   * @see NewUserExercise#addFields
    */
   @Override
   protected Panel getCreateButton(UserList<CommonShell> ul,
@@ -182,7 +179,7 @@ class EditableExerciseDialog extends NewUserExercise {
   /**
    * @param row
    * @return
-   * @see NewUserExercise#addNew
+   * @see NewUserExercise#addFields
    */
   @Override
   protected ControlGroup makeRegularAudioPanel(Panel row) {
@@ -219,52 +216,6 @@ class EditableExerciseDialog extends NewUserExercise {
   @Override
   protected void formInvalid() {
     postChangeIfDirty(exerciseList, false);
-  }
-
-  /**
-   * Don't post anything to server unless text actually changed - could get lots of blur events that should be ignored.
-   *
-   * @param exerciseList
-   * @param onClick
-   */
-  private void postChangeIfDirty(ListInterface<CommonShell> exerciseList, boolean onClick) {
-    if (anyFieldsDirty() || onClick) {
-      if (DEBUG) {
-        logger.info("postChangeIfDirty:  change" +
-            "\n\tfl         " + foreignChanged() +
-            "\n\ttransliter " + translitChanged() +
-            "\n\tenglish    " + englishChanged() +
-            "\n\tcontext    " + contextChanged() +
-            "\n\tc english  " + contextTransChanged() +
-            "\n\tref        " + refAudioChanged() +
-            "\n\tslow       " + slowRefAudioChanged()
-        );
-      }
-      //    logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
-      reallyChange(exerciseList, onClick, getKeepAudio());
-    }
-  }
-
-  private boolean anyFieldsDirty() {
-    return foreignChanged() ||
-        translitChanged() ||
-        englishChanged() ||
-        refAudioChanged() ||
-        slowRefAudioChanged() ||
-        contextChanged() ||
-        contextTransChanged();
-  }
-
-  private boolean contextTransChanged() {
-    return !originalContextTrans.equals(contextTrans.getSafeText());
-  }
-
-  private boolean contextChanged() {
-    return !originalContext.equals(context.getSafeText());
-  }
-
-  protected boolean getKeepAudio() {
-    return false;
   }
 
   /**
@@ -322,129 +273,6 @@ class EditableExerciseDialog extends NewUserExercise {
    */
   String getWarningForFL() {
     return "Is the audio consistent with \"" + foreignLang.getSafeText() + "\" ?";
-  }
-
-  private boolean englishChanged() {
-    return !english.box.getText().equals(originalEnglish);
-  }
-
-  private boolean foreignChanged() {
-    return !foreignLang.box.getText().equals(originalForeign);
-  }
-
-  /**
-   * @return
-   * @see #checkForForeignChange()
-   * @see #postChangeIfDirty(ListInterface, boolean)
-   */
-  private boolean translitChanged() {
-    String transliteration = newUserExercise.getTransliteration();
-    String originalTransliteration = this.originalTransliteration;
-    //  logger.info("translitChanged : translit '" + transliteration + "' vs original '" + originalTransliteration + "' changed  = " + changed);
-    return !transliteration.equals(originalTransliteration);
-  }
-
-  private boolean refAudioChanged() {
-    String refAudio = newUserExercise.getRefAudio();
-    return (refAudio == null && originalRefAudio != null) || (refAudio != null && !refAudio.equals(originalRefAudio));
-  }
-
-  private boolean slowRefAudioChanged() {
-    String slowAudioRef = newUserExercise.getSlowAudioRef();
-    return
-        (slowAudioRef == null && originalSlowRefAudio != null) ||
-            (slowAudioRef != null && !slowAudioRef.equals(originalSlowRefAudio));
-  }
-
-  /**
-   * @param pagingContainer
-   * @param markFixedClicked
-   * @param keepAudio
-   * @see #postChangeIfDirty(mitll.langtest.client.list.ListInterface, boolean)
-   * @see #audioPosted
-   */
-  void reallyChange(final ListInterface<CommonShell> pagingContainer, final boolean markFixedClicked, boolean keepAudio) {
-    newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
-    postEditItem(pagingContainer, markFixedClicked, keepAudio);
-  }
-
-  /**
-   * Wait for edit to succeed before altering original fields.
-   * <p>
-   * If the keep audio check box is checked, keep the audio!
-   *
-   * @param pagingContainer
-   * @param buttonClicked
-   * @param keepAudio
-   * @see #reallyChange(ListInterface, boolean, boolean)
-   */
-  private void postEditItem(final ListInterface<CommonShell> pagingContainer, final boolean buttonClicked, boolean keepAudio) {
-    if (DEBUG) logger.info("postEditItem : edit item " + buttonClicked + " keep audio " + keepAudio);
-
-    grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
-
-    listService.editItem(newUserExercise, keepAudio, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Void newExercise) {
-        originalForeign = newUserExercise.getForeignLanguage();
-        originalEnglish = newUserExercise.getEnglish();
-        originalTransliteration = newUserExercise.getTransliteration();
-        originalRefAudio = newUserExercise.getRefAudio();
-        originalSlowRefAudio = newUserExercise.getSlowAudioRef();
-        // if (DEBUG) logger.info("postEditItem : onSuccess " + newUserExercise.getTooltip());
-        doAfterEditComplete(pagingContainer, buttonClicked);
-      }
-    });
-  }
-
-  /**
-   * Tell predefined list to update itself... since maybe a pre def item changed...
-   *
-   * @param pagingContainer
-   * @param buttonClicked
-   * @see #reallyChange(ListInterface, boolean, boolean)
-   */
-  void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
-    changeTooltip(pagingContainer);
-    if (predefinedContentList != null) {
-      if (DEBUG)
-        logger.info("doAfterEditComplete : predef content list not null");// + " id " + predefinedContentList.getCurrentExerciseID());
-
-      Reloadable reloadable = predefinedContentList.getReloadable();
-      if (reloadable == null) {
-        logger.warning("doAfterEditComplete : reloadable null????");// + " id " + predefinedContentList.getCurrentExerciseID());
-      } else {
-        reloadable.reloadWithCurrent();
-      }
-    }
-    //else {
-    //   if (DEBUG || true) logger.warning("doAfterEditComplete : no predef content " + buttonClicked);// + " id " + predefinedContentList.getCurrentExerciseID());
-    //}
-  }
-
-  /**
-   * Update the exercise shell in the exercise list with the changes to it's english/fl fields.
-   *
-   * @param pagingContainer
-   * @see #doAfterEditComplete(ListInterface, boolean)
-   */
-  void changeTooltip(ListInterface<CommonShell> pagingContainer) {
-    CommonShell byID = pagingContainer.byID(newUserExercise.getID());
-    if (DEBUG) logger.info("changeTooltip " + byID);
-    if (byID == null) {
-      logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
-    } else {
-      MutableShell mutableShell = byID.getMutableShell();
-      mutableShell.setEnglish(newUserExercise.getEnglish());
-      mutableShell.setForeignLanguage(newUserExercise.getForeignLanguage());
-      mutableShell.setMeaning(getMeaning(newUserExercise));
-//      if (DEBUG || true) logger.info("\tchangeTooltip : for " + newUserExercise.getID() + " now " + newUserExercise);
-      pagingContainer.redraw();   // show change to tooltip!
-    }
   }
 
   /**
@@ -530,10 +358,6 @@ class EditableExerciseDialog extends NewUserExercise {
     }
     String field = isEnglish() ? "meaning" : "english";
     useAnnotation(newUserExercise, field, englishAnno);
-  }
-
-  private String getMeaning(CommonExercise newUserExercise) {
-    return newUserExercise.getMeaning().isEmpty() ? newUserExercise.getEnglish() : newUserExercise.getMeaning();
   }
 
   /**

@@ -48,6 +48,13 @@ import java.util.Map;
 public interface IUserExerciseDAO extends IDAO {
   SlickExercise getUnknownExercise();
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#newExercise(long, CommonExercise, String)
+   * @param userExercise
+   * @param isOverride
+   * @param isContext
+   * @return
+   */
   int add(CommonExercise userExercise, boolean isOverride, boolean isContext);
   void addContextToExercise(int exid, int contextid, int projid);
 

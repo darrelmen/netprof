@@ -25,8 +25,6 @@ import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.*;
-import mitll.langtest.client.services.ExerciseService;
-import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
@@ -43,9 +41,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 2/14/17.
  */
 class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
-  public static final int DISPLAY_ITEMS = 5;
-  public static final String ADD = "Add";
   private final Logger logger = Logger.getLogger("EditableExerciseList");
+
+  private static final int DISPLAY_ITEMS = 10;
+  private static final String ADD = "Add";
 
   /**
    * @see #makeDeleteButton
@@ -53,10 +52,8 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   private static final String REMOVE_FROM_LIST = "Remove from list";
 
   private EditItem editItem;
-  //  private final boolean includeAddItem;
-  // private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
   private UserList<CommonShell> list;
-  private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+  //private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
   private TextBox quickAddText;
 
   /**
@@ -77,6 +74,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
         controller,
         new ListOptions()
             .setInstance(instanceName)
+            .setShowTypeAhead(false)
             .setSort(false));
     this.editItem = editItem;
     this.list = list;
@@ -119,7 +117,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
             .setPrefix(w.getText())
             .setLimit(DISPLAY_ITEMS);
 
-        exerciseServiceAsync.getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
+        controller.getExerciseService().getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
               @Override
               public void onFailure(Throwable caught) {
 
@@ -522,19 +520,19 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 /*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
             " before adding/changing " + newUserExercise + " -> " + result);*/
           if (result) {
-            controller.getAudioService().reallyCreateNewItem(
+            listService.newExercise(
                 list.getID(),
                 makeNewExercise(safeText),
                 new AsyncCallback<CommonExercise>() {
-              @Override
-              public void onFailure(Throwable caught) {
-              }
+                  @Override
+                  public void onFailure(Throwable caught) {
+                  }
 
-              @Override
-              public void onSuccess(CommonExercise newExercise) {
-                showNewItem(newExercise);
-              }
-            });
+                  @Override
+                  public void onSuccess(CommonExercise newExercise) {
+                    showNewItem(newExercise);
+                  }
+                });
           } else {
             message.setText("The item " +
                 " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");

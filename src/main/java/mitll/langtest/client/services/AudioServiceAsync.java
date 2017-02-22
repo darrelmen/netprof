@@ -57,7 +57,6 @@ public interface AudioServiceAsync {
                             String exerciseID,
                             AsyncCallback<ImageResponse> async);
 
-  void reallyCreateNewItem(long userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
 
   void checkAudio(int projectid, AsyncCallback<Void> async);
 

@@ -1268,7 +1268,7 @@ public class AudioFileHelper implements AlignDecode {
     logger.info("makeDict :" +
         "\n\tinstall path " + installPath +
         "\n\tmodelsDir    " + modelsDir);
-    String scoringDir = Scoring.getScoringDir(serverProps.getAudioBaseDir());
+    String scoringDir = Scoring.getScoringDir(serverProps.getDcodrBaseDir());
     String dictFile =
         new ConfigFileCreator(serverProps.getProperties(), null, scoringDir, modelsDir).getDictFile();
 
