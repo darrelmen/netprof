@@ -195,7 +195,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public void ensureDefaultUsers() {
-    super.ensureDefaultUsers();
+    ensureDefaultUsersLocal();
     String userId = dominoAdminUser.getUserId();
     adminUser = delegate.getUser(userId);//BEFORE_LOGIN_USER);
     // logger.info("ensureDefaultUsers got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
@@ -207,6 +207,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
 
     dominoImportUser = delegate.getUser(IMPORT_USER);
+  }
+
+  /**
+   * public for test access... for now
+   *
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   */
+  public void ensureDefaultUsersLocal() {
+    this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", User.Kind.QAQC);
+    this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", User.Kind.STUDENT);
+    this.importUser = getOrAdd(IMPORT_USER, "Import", "User", User.Kind.CONTENT_DEVELOPER);
+    this.defaultUser = getOrAdd(DEFAULT_USER1, "Default", "User", User.Kind.AUDIO_RECORDER);
+    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, "Default", "Male", User.Kind.AUDIO_RECORDER);
+    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, "Default", "Female", User.Kind.AUDIO_RECORDER);
+
+    this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
   }
 
   public void createTable() {
