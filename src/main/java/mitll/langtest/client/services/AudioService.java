@@ -83,14 +83,6 @@ public interface AudioService extends RemoteService {
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
                                      String exerciseID);
 
-  /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
-   * @param userListID
-   * @param userExercise
-   * @return
-   */
-  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise);
-
   void checkAudio(int projectid);
 
   void recalcRefAudio(int projectid);

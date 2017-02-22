@@ -173,29 +173,59 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
  /* @Override
-  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language) {
-    if (DEBUG) logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
-    getUserListManager().reallyCreateNewItem(userListID, userExercise, getMediaDir());
+  public CommonExercise newExercise(long userListID, CommonExercise userExercise, String language) {
+    if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
+    getUserListManager().newExercise(userListID, userExercise, getMediaDir());
     int id = userExercise.getID();
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
-      if (DEBUG) logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + id);
+      if (DEBUG) logger.debug("\tnewExercise : update " + audioAttribute + " to " + id);
       db.getAudioDAO().updateExerciseID(
           audioAttribute.getUniqueID(),
           id,
           audioAttribute.getAudioRef());
     }
-    if (DEBUG) logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+    if (DEBUG) logger.debug("\tnewExercise : made user exercise " + userExercise + " on list " + userListID);
 
     return userExercise;
   }*/
 
   /**
    * @return
-   * @seex #reallyCreateNewItem
+   * @seex #newExercise
    */
   String getMediaDir() {
     return serverProps.getMediaDir();
+  }
+
+  /**
+   * Put the new item in the database,
+   * copy the audio under bestAudio
+   * assign the item to a user list
+   * <p>
+   * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
+   *
+   * @param userListID
+   * @param userExercise
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
+   * @return CommonExercise with id from database
+   */
+  @Override
+  public CommonExercise newExercise(long userListID, CommonExercise userExercise) {
+    if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
+    getUserListManager().newExercise(userListID, userExercise, serverProps.getMediaDir());
+   // int id = userExercise.getID();
+
+/*    for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
+      if (DEBUG) logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + id);
+      db.getAudioDAO().updateExerciseID(
+          audioAttribute.getUniqueID(),
+          id,
+          audioAttribute.getAudioRef());
+    }*/
+    if (DEBUG) logger.debug("\tnewExercise : made user exercise " + userExercise + " on list " + userListID);
+
+    return userExercise;
   }
 
   /**
@@ -253,7 +283,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       String foreignLanguage = candidate.getForeignLanguage();
       if (!currentKnownFL.contains(foreignLanguage)) {
         if (isValidForeignPhrase(foreignLanguage, candidate.getTransliteration())) {
-          getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
+          getUserListManager().newExercise(userListID, candidate, serverProps.getMediaDir());
           actualItems.add(candidate);
         } else {
           logger.info("item #" + candidate.getID() + " '" + candidate.getForeignLanguage() + "' is invalid");
@@ -280,7 +310,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param foreign
    * @param transliteration
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
   private boolean isValidForeignPhrase(String foreign, String transliteration) {
     return getProject().getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
@@ -288,11 +318,11 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
   /**
    * @param userExercise
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override
   public void editItem(CommonExercise userExercise, boolean keepAudio) {
-    db.editItem(userExercise, keepAudio);
+      db.editItem(userExercise, keepAudio);
     if (DEBUG) logger.debug("editItem : now user exercise " + userExercise);
   }
 

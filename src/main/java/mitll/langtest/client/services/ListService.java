@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.custom.UserList;
@@ -127,6 +128,13 @@ public interface ListService extends RemoteService {
    */
   void addItemToUserList(long userListID, int exID);
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
+   * @param userListID
+   * @param userExercise
+   * @return
+   */
+  CommonExercise newExercise(long userListID, CommonExercise userExercise);
   /**
    * @param userListID
    * @param userExerciseText

@@ -33,6 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -61,9 +62,16 @@ public interface ListServiceAsync {
 
   void setPublicOnList(long userListID, boolean isPublic, AsyncCallback<Void> async);
 
+  void newExercise(long userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
 
   void reallyCreateNewItems(long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
+   * @param userExercise
+   * @param keepAudio
+   * @param async
+   */
   void editItem(CommonExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 
   void deleteList(long id, AsyncCallback<Boolean> async);

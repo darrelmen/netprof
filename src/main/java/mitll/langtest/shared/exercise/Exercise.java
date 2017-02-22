@@ -72,6 +72,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private transient long safeToDecodeLastChecked;
 
   private int creator = UNDEFINED_USER;
+
   private boolean isPredef;
   private boolean isOverride;
 
@@ -430,6 +431,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.safeToDecode = safeToDecode;
   }
 
+  /**
+   * @deprecated we don't do overrides any more
+   * @return
+   */
   public boolean isOverride() {
     return isOverride;
   }

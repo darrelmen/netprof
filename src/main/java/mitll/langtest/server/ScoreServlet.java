@@ -599,6 +599,7 @@ public class ScoreServlet extends DatabaseServlet {
     String deviceType = getOrUnk(request, DEVICE_TYPE);
     String device = getOrUnk(request, DEVICE);
 
+
     JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
       Request realRequest = getRequest(requestType);
@@ -850,6 +851,15 @@ public class ScoreServlet extends DatabaseServlet {
     int project = getProject(request);
     if (project == -1) {
       project = request.getIntHeader("projid");
+    }
+
+    // language overrides user id mapping...
+    {
+      String language = request.getHeader("language");
+      if (language != null) {
+        project = getProjectID(language);
+        if (project == -1) project = getProject(request);
+      }
     }
 
     String user = request.getHeader(USER);

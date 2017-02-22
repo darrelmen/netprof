@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.userexercise;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
@@ -113,7 +112,7 @@ public class SlickUserExerciseDAO
    * @param shared
    * @param projectID
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUserExercises(DatabaseImpl, Map, int, SlickUserExerciseDAO)
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUserExercises
    */
   public SlickExercise toSlick(Exercise shared, int projectID) {
     Map<String, String> unitToValue = shared.getUnitToValue();
@@ -161,23 +160,31 @@ public class SlickUserExerciseDAO
    * @param isContext
    * @return
    */
-  public SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride, boolean isContext) {
-    return toSlick(shared, isOverride, shared.getProjectID(), false, BaseUserDAO.DEFAULT_USER_ID, isContext);
+  private SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride, boolean isContext) {
+    return toSlick(shared, isOverride, BaseUserDAO.DEFAULT_USER_ID, isContext);
   }
 
+  public SlickExercise toSlick(CommonExercise shared,
+                               @Deprecated boolean isOverride,
+                           //     int projectID,
+                               // boolean isPredef,
+                               int importUser,
+                               boolean isContext) {
+    return toSlick(shared,isOverride,shared.getProjectID(),importUser,isContext);
+  }
   /**
    * @param shared
    * @param isOverride
-   * @param isPredef
+   * @paramx isPredef
    * @param isContext
    * @return
-   * @see #toSlick(CommonExercise, boolean, int, boolean, int, boolean)
+   * @see #toSlick
    * @see mitll.langtest.server.database.copy.CopyToPostgres#addContextExercises
    */
   public SlickExercise toSlick(CommonExercise shared,
                                @Deprecated boolean isOverride,
                                int projectID,
-                               boolean isPredef,
+                              // boolean isPredef,
                                int importUser,
                                boolean isContext) {
     Map<String, String> unitToValue = shared.getUnitToValue();
@@ -194,7 +201,7 @@ public class SlickUserExerciseDAO
 
     long updateTime = shared.getUpdateTime();
     if (updateTime == 0) updateTime = lastModified;
-    return new SlickExercise(-1,
+    return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),
         new Timestamp(updateTime),
@@ -206,8 +213,8 @@ public class SlickUserExerciseDAO
         isOverride,
         unitToValue.getOrDefault(first, ""),
         unitToValue.getOrDefault(second, ""),
-        projectID,  // project id fk
-        isPredef,
+        projectID,//shared.getProjectID(),  // project id fk
+        shared.isPredefined(),
         isContext,
         false,
         -1,
@@ -469,7 +476,7 @@ public class SlickUserExerciseDAO
    * @param userExercise
    * @param isOverride
    * @param isContext
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem
+   * @see mitll.langtest.server.database.custom.UserListManager#newExercise
    */
   @Override
   public int add(CommonExercise userExercise, boolean isOverride, boolean isContext) {
@@ -601,6 +608,8 @@ public class SlickUserExerciseDAO
   }
 
   /**
+   * TODO : Why so complicated?
+   *
    * @param userExercise
    * @param createIfDoesntExist
    * @param isContext
@@ -608,10 +617,13 @@ public class SlickUserExerciseDAO
    */
   @Override
   public void update(CommonExercise userExercise, boolean createIfDoesntExist, boolean isContext) {
-    SlickExercise slickUserExercise = toSlick(userExercise, true, false);
+    SlickExercise slickUserExercise = toSlick(userExercise, true, isContext);
+
     int rows = dao.update(slickUserExercise);
+
     if (rows == 0 && createIfDoesntExist) {
-      dao.insert(slickUserExercise);
+      int insert = dao.insert(slickUserExercise);
+     // userExercise.
     }
 
     // recurse on related context exercises
@@ -642,8 +654,8 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addContextExercises(int, SlickUserExerciseDAO, Map, int, Collection)
    * @param relatedExercises
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addContextExercises(int, SlickUserExerciseDAO, Map, int, Collection)
    */
   public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
     relatedExerciseDAOWrapper.addBulk(relatedExercises);

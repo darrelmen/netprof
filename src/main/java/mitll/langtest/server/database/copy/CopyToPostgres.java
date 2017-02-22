@@ -777,8 +777,11 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param exercises
    * @see #copyUserAndPredefExercises
    */
-  private void addContextExercises(int projectid, SlickUserExerciseDAO slickUEDAO, Map<String, Integer> exToInt,
-                                   int importUser, Collection<CommonExercise> exercises) {
+  private void addContextExercises(int projectid,
+                                   SlickUserExerciseDAO slickUEDAO,
+                                   Map<String, Integer> exToInt,
+                                   int importUser,
+                                   Collection<CommonExercise> exercises) {
     int n = 0;
     int ct = 0;
     List<SlickRelatedExercise> pairs = new ArrayList<>();
@@ -788,7 +791,7 @@ public class CopyToPostgres<T extends CommonShell> {
       int id = exToInt.get(ex.getOldID());
       for (CommonExercise context : ex.getDirectlyRelated()) {
         context.getMutable().setOldID("c" + id);
-        int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, true, importUser, true));
+        int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid,  importUser, true));
         pairs.add(new SlickRelatedExercise(-1, id, contextid, projectid, now));
         ct++;
         if (ct % 400 == 0) logger.debug("addContextExercises inserted " + ct + " context exercises");
@@ -808,7 +811,12 @@ public class CopyToPostgres<T extends CommonShell> {
     List<SlickExercise> bulk = new ArrayList<>();
     logger.info("addPredefExercises copying   " + exercises.size() + " exercises");
     for (CommonExercise ex : exercises) {
-      bulk.add(slickUEDAO.toSlick(ex, false, projectid, true, importUser, false));
+      bulk.add(slickUEDAO.toSlick(ex,
+          false,
+          projectid,
+        //  true,
+          importUser,
+          false));
     }
     logger.info("addPredefExercises add   bulk  " + bulk.size() + " exercises");
     slickUEDAO.addBulk(bulk);

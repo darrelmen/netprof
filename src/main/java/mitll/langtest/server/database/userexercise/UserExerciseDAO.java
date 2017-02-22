@@ -115,7 +115,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * <p>
    * Uses return generated keys to get the user id
    *
-   * @seex UserListManager#reallyCreateNewItem
+   * @seex UserListManager#newExercise
    * @see IUserExerciseDAO#update
    */
   public int add(CommonExercise userExercise, boolean isOverride, boolean isContext) {

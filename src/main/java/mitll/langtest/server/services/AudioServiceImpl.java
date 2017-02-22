@@ -518,35 +518,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-  /**
-   * Put the new item in the database,
-   * copy the audio under bestAudio
-   * assign the item to a user list
-   * <p>
-   * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
-   *
-   * @param userListID
-   * @param userExercise
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
-   * @return CommonExercise with id from database
-   */
-  @Override
-  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
-    if (DEBUG) logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
-    getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
-    int id = userExercise.getID();
-
-    for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
-      if (DEBUG) logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + id);
-      db.getAudioDAO().updateExerciseID(
-          audioAttribute.getUniqueID(),
-          id,
-          audioAttribute.getAudioRef());
-    }
-    if (DEBUG) logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
-
-    return userExercise;
-  }
 
   @Override
   public void checkAudio(int projectid) {
