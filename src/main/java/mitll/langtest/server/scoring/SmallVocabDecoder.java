@@ -182,7 +182,7 @@ public class SmallVocabDecoder {
    * @return
    * @see #getTokens(String)
    * @see mitll.langtest.server.trie.ExerciseTrie#getExercises(String, SmallVocabDecoder)
-   * @see ASRScoring#getScoresFromHydec(Audio, String, String)
+   * @see ASRScoring#getScoresFromHydec
    */
   public String getTrimmed(String sentence) {
     //String orig = sentence;
@@ -202,7 +202,7 @@ public class SmallVocabDecoder {
   /**
    * @param phrase
    * @return
-   * @see mitll.langtest.server.scoring.CheckLTS#checkLTS(LTS, String)
+   * @see mitll.langtest.server.scoring.CheckLTS#checkLTS
    */
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it
   //back in

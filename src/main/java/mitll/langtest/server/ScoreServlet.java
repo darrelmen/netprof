@@ -848,18 +848,19 @@ public class ScoreServlet extends DatabaseServlet {
                                      String device) throws IOException {
     int realExID = Integer.parseInt(request.getHeader(EXERCISE));
     int reqid = getReqID(request);
-    int project = getProject(request);
-    if (project == -1) {
-      project = request.getIntHeader("projid");
+    int projid = getProject(request);
+
+    logger.debug("getJsonForAudio got projid from session " + projid);
+    if (projid == -1) {
+      projid = request.getIntHeader("projid");
+      logger.debug("getJsonForAudio got projid from request " + projid);
+
     }
 
     // language overrides user id mapping...
     {
-      String language = request.getHeader("language");
-      if (language != null) {
-        project = getProjectID(language);
-        if (project == -1) project = getProject(request);
-      }
+      projid = getProjidFromLanguage(request, projid);
+      realExID = getExerciseIDFromText(request, realExID, projid);
     }
 
     String user = request.getHeader(USER);
@@ -868,14 +869,16 @@ public class ScoreServlet extends DatabaseServlet {
 
     logger.debug("getJsonForAudio got" +
         "\n\trequest  " + requestType +
+        "\n\trequest  " + requestType +
         "\n\tfor user " + user +
-        "\n\tproject  " + project +
-        "\n\texercise " + realExID +
+        "\n\tprojid  " + projid +
+        "\n\texercise id   " + realExID +
+        //"\n\texercise text " + realExID +
         "\n\treq      " + reqid +
         "\n\tfull     " + fullJSONFormat +
         "\n\tdevice   " + deviceType + "/" + device);
 
-    File saveFile = writeAudioFile(request.getInputStream(), project, realExID, userid);
+    File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
 
     // TODO : put back trim silence? or is it done somewhere else
 //    new AudioConversion(null).trimSilence(saveFile);
@@ -889,6 +892,35 @@ public class ScoreServlet extends DatabaseServlet {
         new DecoderOptions()
             .setAllowAlternates(getAllowAlternates(request))
             .setUsePhoneToDisplay(getUsePhoneToDisplay(request)), fullJSONFormat != null);
+  }
+
+  private int getProjidFromLanguage(HttpServletRequest request, int projid) {
+    String language = request.getHeader("language");
+    logger.debug("getJsonForAudio got langauge from request " + language);
+
+    if (language != null) {
+      projid = getProjectID(language);
+      logger.debug("getJsonForAudio got projid from language " + projid);
+
+      if (projid == -1) {
+        projid = getProject(request);
+        logger.debug("getJsonForAudio got projid from request again " + projid);
+      }
+    }
+    return projid;
+  }
+
+  private int getExerciseIDFromText(HttpServletRequest request, int realExID, int projid) {
+    String exerciseText = request.getHeader("exercise");
+    if (exerciseText != null && projid > 0) {
+      Project project1 = db.getProject(projid);
+      CommonExercise exercise = project1.getExercise(exerciseText);
+      if (exercise != null) {
+        logger.info("using exercise id " + exercise.getID());
+        realExID = exercise.getID();
+      }
+    }
+    return realExID;
   }
 
   @NotNull

@@ -51,10 +51,7 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Has everything associated with a project
@@ -79,8 +76,6 @@ public class Project implements PronunciationLookup {
   private boolean isRTL;
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
-
-  //private boolean wasConfigured = false;
 
   /**
    * @param exerciseDAO
@@ -267,6 +262,17 @@ public class Project implements PronunciationLookup {
 
   public CommonExercise getExercise(int id) {
     return exerciseDAO.getExercise(id);
+  }
+
+  /**
+   * Only accept an exact match
+   * @param prefix
+   * @return
+   */
+  public CommonExercise getExercise(String prefix) {
+    List<CommonExercise> exercises1 = fullTrie.getExercises(prefix, getSmallVocabDecoder());
+    Optional<CommonExercise> first = exercises1.stream().filter(p -> p.getForeignLanguage().equalsIgnoreCase(prefix)).findFirst();
+    return (first.isPresent()) ? first.get() : null;
   }
 
 /*  public void setPhoneTrie(ExerciseTrie<CommonExercise> phoneTrie) {
