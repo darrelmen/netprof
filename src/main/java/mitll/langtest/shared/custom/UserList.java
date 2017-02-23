@@ -69,6 +69,8 @@ public class UserList<T extends HasID> extends BaseExercise {
   private boolean isPrivate;
   private boolean isReview;
   private long modified;
+  private String contextURL;
+
   private List<T> exercises = new ArrayList<>();
 
   public UserList() {
@@ -86,28 +88,29 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @see UserListDAO#getWhere(long, boolean)
    */
   public UserList(int uniqueID,
-                  //User user,
-                  int userid, String userChosenID, String name, String description, String classMarker, boolean isPrivate,
-                  long modified) {
+                   int userid, String userChosenID, String name, String description, String classMarker, boolean isPrivate,
+                  long modified,
+                  String contextURL) {
     super(uniqueID);
-  //  this.creator = user;
-    this.userid = userid;
+     this.userid = userid;
     this.userChosenID = userChosenID;
     this.name = name;
     this.description = description;
     this.classMarker = classMarker;
     this.isPrivate = isPrivate;
     this.modified = modified;
+    this.contextURL = contextURL;
   }
 
   public int getUserID() { return userid; }
 
   /**
    * @param ul
-   * @see mitll.langtest.client.custom.dialog.EditItem#makeListOfOnlyYourItems(UserList)
+   * @see mitll.langtest.shared.custom.UserList#getCopy
    */
   public UserList(UserList<T> ul) {
-    this(ul.getID(),/* ul.getCreator(),*/ ul.getUserID() , ul.getUserChosenID(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified());
+    this(ul.getID(), ul.getUserID() , ul.getUserChosenID(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified(),
+        ul.getContextURL());
   }
 
   public UserList<T> getCopy() {
@@ -120,7 +123,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   /**
    * @param toAdd
-   * @see mitll.langtest.client.custom.dialog.EditItem#makeExerciseList(Panel, String, UserList, UserList, boolean)
+   * @see mitll.langtest.client.custom.dialog.EditItem#makeExerciseList
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterItemCreated
    */
   public void addExercise(T toAdd) {
@@ -274,5 +277,9 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   public String getUserChosenID() {
     return userChosenID;
+  }
+
+  public String getContextURL() {
+    return contextURL;
   }
 }

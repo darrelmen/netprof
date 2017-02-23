@@ -94,9 +94,7 @@ public class TabAndContent implements RequiresResize {
     return tab;
   }
 
-  public DivWidget getContent() {
-    return content;
-  }
+  public DivWidget getContent() {   return content;  }
 
   public void clickOnTab() {
     getTab().fireEvent(new ButtonClickEvent());

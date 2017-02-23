@@ -125,7 +125,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.description(),
         slick.classmarker(),
         slick.isprivate(),
-        slick.modified().getTime());
+        slick.modified().getTime(),
+        slick.contexturl());
   }
 
   private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
@@ -137,7 +138,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.description(),
         slick.classmarker(),
         slick.isprivate(),
-        slick.modified().getTime());
+        slick.modified().getTime(),
+        slick.contexturl());
   }
 
   public void insert(SlickUserExerciseList UserExercise) {
@@ -165,10 +167,14 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public void updateModified(long uniqueID) {  dao.updateModified((int) uniqueID);  }
+  public void updateModified(long uniqueID) {
+    dao.updateModified((int) uniqueID);
+  }
 
   @Override
-  public void updateContext(long uniqueID, String context) {  dao.updateContext((int) uniqueID, context);  }
+  public void updateContext(long uniqueID, String context) {
+    dao.updateContext((int) uniqueID, context);
+  }
 
   @Override
   public int getCount() {
@@ -221,6 +227,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
   /**
    * Add the exercises to the list.
+   *
    * @param where
    */
   private void populateListEx(UserList<CommonExercise> where) {

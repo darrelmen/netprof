@@ -65,7 +65,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/8/14.
  */
-public class CommentBox extends PopupContainer {
+public class CommentBox extends PopupContainerFactory {
   private final Logger logger = Logger.getLogger("CommentBox");
 
   private static final int MAX_LENGTH = 500;

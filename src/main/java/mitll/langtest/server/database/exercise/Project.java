@@ -229,9 +229,7 @@ public class Project implements PronunciationLookup {
     return audioFileHelper;
   }
 
-  public ExerciseTrie<CommonExercise> getFullTrie() {
-    return fullTrie;
-  }
+  public ExerciseTrie<CommonExercise> getFullTrie() {  return fullTrie;  }
 
   public void stopDecode() {
     refResultDecoder.setStopDecode(true);

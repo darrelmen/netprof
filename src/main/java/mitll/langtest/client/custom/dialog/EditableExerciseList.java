@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
 
-  private static final int DISPLAY_ITEMS = 10;
+  private static final int DISPLAY_ITEMS = 15;
   private static final String ADD = "Add";
 
   /**
@@ -55,7 +55,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   private UserList<CommonShell> list;
   protected final ListServiceAsync listService = GWT.create(ListService.class);
   private TextBox quickAddText;
-  HTML message;
+  private HTML message;
 
   /**
    * @param controller

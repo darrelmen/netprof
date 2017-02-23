@@ -50,7 +50,6 @@ public class DownloadIFrame extends Frame {
 	public static final String DOWNLOAD_AREA_ID = "netProfDownloadArea";
 	
 	DownloadIFrame(String url) {
-	//	super();
 		addStyleName("hidden-download-frame");
 		removeOldFrames();
 		setUrl(url);
@@ -61,5 +60,4 @@ public class DownloadIFrame extends Frame {
 	private void removeOldFrames() {
 		RootPanel.get(DOWNLOAD_AREA_ID).clear();
 	}
-
 }

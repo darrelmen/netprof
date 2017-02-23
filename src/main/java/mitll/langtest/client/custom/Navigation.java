@@ -686,7 +686,13 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (clickedTab.equals(STUDY_LISTS)) {
         listManager.clickOnYourStuff();
         DivWidget content = studyLists.getContent();
-        Widget widget = content.getWidget(0);
+        Widget widget = null;
+        for (int i = 0; i < content.getWidgetCount(); i++) {
+          if (content.getWidget(i) instanceof TabPanel) {
+            widget = (TabPanel) content.getWidget(i);
+          }
+        }
+        // Widget widget = content.getWidget(0);
 
         int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 : orig.equals(CREATE) ? 2 : orig.equals(BROWSE) ? 3 : 0;
         //  logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);

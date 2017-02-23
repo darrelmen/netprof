@@ -35,7 +35,9 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TabPanel;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
@@ -53,6 +55,7 @@ import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
+import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.download.DownloadLink;
@@ -65,6 +68,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.user.User;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -77,6 +81,8 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class ListManager implements RequiresResize {
+  public static final String COLLAPSIBLE_DOCUMENT_VIEWER = "collapsibleDocumentViewer";
+  public static final String LIST_OPERATIONS = "listOperations";
   private final Logger logger = Logger.getLogger("ListManager");
   private static final String IMPORT_ITEM = "importItem";
 
@@ -84,7 +90,7 @@ public class ListManager implements RequiresResize {
   private ScrollPanel listScrollPanel;
 
   private final ExerciseController controller;
-   private final ListServiceAsync listService = GWT.create(ListService.class);
+  private final ListServiceAsync listService = GWT.create(ListService.class);
 
   private final UserManager userManager;
   private TabAndContent yourStuff;
@@ -135,8 +141,6 @@ public class ListManager implements RequiresResize {
                      TabPanel tabPanel,
                      ReloadableContainer exerciseList) {
     if (exerciseList == null) logger.warning("huh? exerciselist is null?\n\n\n");
-
-   // this.service = service;
     this.userManager = controller.getUserManager();
     this.controller = controller;
     storage = new KeyStorage(controller);
@@ -158,10 +162,18 @@ public class ListManager implements RequiresResize {
     editItem = new EditItem(controller, exerciseList);
   }
 
+  //DivWidget docContainer;
+  Collapse collapse;
+
+  /**
+   * @param studyLists
+   * @see Navigation#addStudyLists
+   */
   void addStudyLists(final TabAndContent studyLists) {
     subListTabPanel = new TabPanel();
-    studyLists.getContent().add(subListTabPanel);
 
+    DivWidget content = studyLists.getContent();
+    content.add(subListTabPanel);
     addListTabs(subListTabPanel);
 
     studyLists.getTab().addClickHandler(new ClickHandler() {
@@ -189,7 +201,6 @@ public class ListManager implements RequiresResize {
   public void clickOnYourStuff() {
     yourStuff.clickOnTab();
   }
-
   public void clickOnCreate() {
     create.clickOnTab();
   }
@@ -315,20 +326,6 @@ public class ListManager implements RequiresResize {
 
   /**
    * @param contentPanel
-   * @param getAllPredef
-   * @param onlyMine
-   * @param onlyVisited
-   * @param optionalExercise
-   * @see #viewBrowse()
-   * @see #refreshViewLessons(boolean, boolean)
-   */
-/*  private void viewLessons(final Panel contentPanel, boolean getAllPredef, boolean onlyMine, boolean onlyVisited,
-                           String optionalExercise) {
-    viewLessons(contentPanel, getAllPredef, onlyMine, onlyVisited, optionalExercise);
-  }*/
-
-  /**
-   * @param contentPanel
    * @param getAll
    * @param onlyMine
    * @param onlyVisited
@@ -336,7 +333,8 @@ public class ListManager implements RequiresResize {
    * @see #viewBrowse()
    * @see #refreshViewLessons(boolean, boolean)
    */
-  private void viewLessons(final Panel contentPanel, boolean getAll, boolean onlyMine, boolean onlyVisited,
+  private void viewLessons(final Panel contentPanel,
+                           boolean getAll, boolean onlyMine, boolean onlyVisited,
                            int optionalExercise) {
     contentPanel.clear();
     contentPanel.getElement().setId("contentPanel");
@@ -385,7 +383,6 @@ public class ListManager implements RequiresResize {
 
       @Override
       public void onSuccess(List<UserList<CommonShell>> reviewLists) {
-
         long now = System.currentTimeMillis();
 
         logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists.size() + " in " + (now - then) + " millis");
@@ -495,17 +492,33 @@ public class ListManager implements RequiresResize {
     container.getElement().getStyle().setPaddingLeft(2, Style.Unit.PX);
     container.getElement().getStyle().setPaddingRight(2, Style.Unit.PX);
 
-    Panel firstRow = getFirstInfoRow(ul);
-    container.add(firstRow);
-
-    Panel secondRow = new FluidRow();    // TODO : this is wacky -- clean up...
+    container.add(getFirstInfoRow(ul));
 
     String userID = ul.getUserChosenID();
     if (!userID.equals(User.NOT_SET)) {
+      Panel secondRow = new FluidRow();    // TODO : this is wacky -- clean up...
       addCreatedBy(container, secondRow, userID);
     }
 
     container.add(gwtDownloadLinkRow(ul, instanceName));
+
+    collapse = new Collapse();
+    collapse.setId(COLLAPSIBLE_DOCUMENT_VIEWER);
+    collapse.setDefaultOpen(false);
+    collapse.setExistTrigger(true);
+
+    if (!ul.getContextURL().isEmpty()) {
+      addDocContainer(ul.getContextURL());
+    }
+    else {
+      DivWidget docContainer = new DivWidget();
+     // docContainer.setHeight("300px");
+      docContainer.setWidth("100%");
+      collapse.setWidget(docContainer);
+    }
+
+    container.add(collapse);
+
     container.add(getListOperations(ul, instanceName, toSelect));
 
     return container;
@@ -513,15 +526,111 @@ public class ListManager implements RequiresResize {
 
   private Panel gwtDownloadLinkRow(UserList ul, String instanceName) {
     Panel r1 = new FluidRow();
+    r1.getElement().setId(LIST_OPERATIONS);
+    r1.addStyleName("bottomFiveMargin");
     r1.addStyleName("userListDarkerBlueColor");
     Anchor downloadLink = getDownloadLink(ul, instanceName);
     downloadLink.addStyleName("floatLeftList");
     r1.add(downloadLink);
-    Button child = new Button("Add Media", IconType.PLUS);
+    // Button child = new Button("Add Media", IconType.PLUS);
+
+    Button child = getButton(ul.getID());
     child.addStyleName("floatLeftList");
 
     r1.add(child);
+
+    Button child1 = new Button("Show/Hide Media");
+    configureNewListButton(child1);
+
+    CollapseTrigger trigger = new CollapseTrigger("#"+COLLAPSIBLE_DOCUMENT_VIEWER);
+    trigger.setWidget(child1);
+/*    child1.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        collapse.setToggle(!collapse.isToggle());
+      }
+    });
+    child1.setVisible(!ul.getContextURL().isEmpty());
+    r1.add(child1);
+    */
+
+    r1.add(trigger);
     return r1;
+  }
+
+  private Button getButton(int id) {
+    String buttonTitle = "Add Media";
+
+    final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList(id);
+
+    final Button newListButton = new Button(buttonTitle);
+    configureNewListButton(newListButton);
+
+    Tooltip tooltip = new TooltipHelper().addTooltip(newListButton, buttonTitle);
+    // final DecoratedPopupPanel thePopup =
+    new PopupContainerFactory().makePopupAndButton(textBox, newListButton, tooltip, new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        makeANewList(textBox, id);
+      }
+    });
+
+    return newListButton;
+  }
+
+  @NotNull
+  private PopupContainerFactory.HidePopupTextBox getTextBoxForNewList(int id) {
+    final PopupContainerFactory.HidePopupTextBox textBox = new PopupContainerFactory.HidePopupTextBox() {
+      @Override
+      protected void onEnter() {
+        makeANewList(this, id);
+      }
+    };
+
+    textBox.getElement().setId("NewList");
+    textBox.setVisibleLength(60);
+    return textBox;
+  }
+
+  private void makeANewList(TextBox textEntry, int id) {
+    String newListName = textEntry.getValue();
+    if (!newListName.isEmpty()) {
+      //  controller.logEvent(textEntry, "NewList_TextBox", exercise.getID(), "make new list called '" + newListName + "'");
+      logger.info("got " + newListName);
+      listService.updateContext(id, newListName, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          addDocContainer(newListName);
+          collapse.setToggle(true);
+        }
+      });
+    }
+  }
+
+  private void addDocContainer(String newListName) {
+    DivWidget docContainer = new DivWidget();
+   // docContainer.setHeight("300px");
+    docContainer.setWidth("100%");
+
+    Frame frame = new Frame(newListName);
+    frame.setHeight("300px");
+    frame.setWidth("100%");
+    docContainer.add(frame);
+
+    collapse.setWidget(docContainer);
+  }
+
+  private void configureNewListButton(final Button popupButton) {
+    popupButton.setIcon(IconType.FOLDER_OPEN);
+    popupButton.setType(ButtonType.PRIMARY);
+    popupButton.addStyleName("leftFiveMargin");
+    // popupButton.getElement().setId("NPFExercise_popup");
+    controller.register(popupButton, "N/A", "added document");
   }
 
   private Anchor getDownloadLink(UserList ul, String instanceName) {
