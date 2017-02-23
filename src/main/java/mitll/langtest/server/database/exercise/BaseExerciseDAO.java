@@ -175,7 +175,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     Set<Integer> transcriptChanged = new HashSet<>();
 
     logger.info("attachAudio afterReadingExercises trying to attach audio to " + exercises.size() + " with project id " + id);
-   // Map<Integer, List<AudioAttribute>> exToAudio = ;
     attachAudio.attachAllAudio(exercises, audioDAO.getExToAudio(id), transcriptChanged);
 
     //consistencyCheck();
@@ -251,7 +250,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
     logger.info("setAudioDAO exToAudio " + exToAudio.size());
-    this.attachAudio = new AttachAudio(exToAudio, language, serverProps.shouldCheckAudioTranscript(), serverProps);
+    this.attachAudio = new AttachAudio(language, serverProps.shouldCheckAudioTranscript(), serverProps);
   }
 
   /**

@@ -58,7 +58,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   private final RefResultDAOWrapper dao;
 
   public SlickRefResultDAO(Database database, DBConnection dbConnection, boolean dropTable) {
-    super(database, dropTable);
+    super(database);
     dao = new RefResultDAOWrapper(dbConnection);
   }
 
@@ -78,7 +78,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   public void addBulk(List<SlickRefResult> bulk) {
     dao.addBulk(bulk);
   }
-
 
   public boolean isEmpty() {
     return dao.getNumRows() == 0;
@@ -161,18 +160,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    */
   @Override
   public List<Result> getResults() {
-//    logger.info("getResults --- ");
     List<Result> results = new ArrayList<>();
     for (SlickRefResult refResult : dao.getAll()) results.add(fromSlick(refResult));
     return results;
   }
-
-/*
-  private List<SlickRefResultJson> getJsonResults() {
-    //  logger.info("getJsonResults --- ");
-    return dao.getAllSlim();
-  }
-*/
 
   public List<String> getAllFilesForProject(int projid) {
     return dao.getAllFiles(projid);
@@ -259,8 +250,5 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   @Override
-  public int getNumResults() {
-  //  logger.info("getNumResults ---");
-    return dao.getNumRows();
-  }
+  public int getNumResults() {    return dao.getNumRows();  }
 }

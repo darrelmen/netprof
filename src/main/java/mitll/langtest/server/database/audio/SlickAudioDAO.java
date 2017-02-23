@@ -408,19 +408,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    * @see #toAudioAttribute(List)
    */
-  private AudioAttribute toAudioAttribute(SlickAudio s, MiniUser miniUser) {//Map<Integer, MiniUser> idToMini2) {
-    // MiniUser miniUser = idToMini.get(s.userid());
-
+  private AudioAttribute toAudioAttribute(SlickAudio s, MiniUser miniUser) {
     if (miniUser == null && spew++ < 20) {
       logger.error("toAudioAttribute : no user for " + s.userid());
     }
 
     String audiotype = s.audiotype();
 
-    // logger.info("got slick " + s);
-    // for the enum!
     if (audiotype.contains("=")) {
-      // logger.info("Was " + audiotype);
       audiotype = audiotype.replaceAll("=", "_");
     }
     return new AudioAttribute(
@@ -438,7 +433,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.resultid());
   }
 
-  int c = 0;
+  private int c = 0;
 
   /**
    * @param orig
@@ -495,7 +490,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
     if (all.isEmpty()) {
-      logger.warn("toAudioAttribute table has " + dao.getNumRows());
+      logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows?");
     }
     Map<Integer, MiniUser> idToMini = new HashMap<>();
     for (SlickAudio s : all) {

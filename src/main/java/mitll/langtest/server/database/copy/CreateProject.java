@@ -31,8 +31,7 @@ class CreateProject {
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
 
-    logger.info("createProjectIfNotExists create project " + name);
-
+   // logger.info("createProjectIfNotExists create project " + name);
     int byName = projectDAO.getByName(name);
 
     if (byName == -1) {

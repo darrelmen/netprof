@@ -52,6 +52,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.util.*;
 
 public abstract class BaseAudioDAO extends DAO {
@@ -144,8 +145,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param firstExercise
    * @param language
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
-   * @see DatabaseImpl#attachAudio
-   * @see DatabaseImpl#writeZip
+   * @see DatabaseImpl#writeUserListAudio(OutputStream, long, int, AudioExport.AudioExportOptions)
    */
   public int attachAudioToExercise(CommonExercise firstExercise, String language) {
     long then = System.currentTimeMillis();

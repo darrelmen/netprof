@@ -158,7 +158,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     int userIDFromSession = getUserIDFromSession();
 
     PrecalcScores precalcScores =
-        getAudioFileHelper().checkForWebservice(exerciseID, getProjectID(), userIDFromSession, absoluteAudioFile);
+        getAudioFileHelper().checkForWebservice(exerciseID, sentence, getProjectID(), userIDFromSession, absoluteAudioFile);
 
     return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, transliteration, imageOptions,
         exerciseID, usePhonemeMap, precalcScores);
@@ -271,6 +271,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return audioAnswer;
   }
 
+  /**
+   * @see mitll.langtest.client.project.ProjectEditForm#getUserForm
+   * @param projid
+   * @return
+   */
   @Override
   public boolean isHydraRunning(int projid) {
     Project project = db.getProject(projid);
@@ -310,7 +315,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    *
    * @param foreign
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
   @Override
   public boolean isValidForeignPhrase(String foreign, String transliteration) {

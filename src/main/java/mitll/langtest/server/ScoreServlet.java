@@ -122,6 +122,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
   private static final String EXERCISE = "exercise";
   public static final boolean TRY_TO_DO_ALIGNMENT = false;
+  public static final String EXERCISE_TEXT = "exerciseText";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -480,7 +481,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   private String getProjects(String queryString) {
     Collection<Project> productionProjects = db.getProjectManagement().getProductionProjects();
-    logger.info("getProjects got " +productionProjects.size() + " projects");
+    logger.info("getProjects got " + productionProjects.size() + " projects");
     for (Project project : productionProjects) logger.info(" project " + project);
     return new ProjectExport().toJSON(productionProjects);
   }
@@ -854,7 +855,6 @@ public class ScoreServlet extends DatabaseServlet {
     if (projid == -1) {
       projid = request.getIntHeader("projid");
       logger.debug("getJsonForAudio got projid from request " + projid);
-
     }
 
     // language overrides user id mapping...
@@ -883,12 +883,16 @@ public class ScoreServlet extends DatabaseServlet {
     // TODO : put back trim silence? or is it done somewhere else
 //    new AudioConversion(null).trimSilence(saveFile);
 
-    return getJsonForAudioForUser(reqid,
+    return getJsonForAudioForUser(
+        reqid,
+        projid,
         realExID,
         userid,
         requestType,
-        saveFile.getAbsolutePath(), saveFile,
-        deviceType, device,
+        saveFile.getAbsolutePath(),
+        saveFile,
+        deviceType,
+        device,
         new DecoderOptions()
             .setAllowAlternates(getAllowAlternates(request))
             .setUsePhoneToDisplay(getUsePhoneToDisplay(request)), fullJSONFormat != null);
@@ -911,7 +915,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private int getExerciseIDFromText(HttpServletRequest request, int realExID, int projid) {
-    String exerciseText = request.getHeader("exercise");
+    String exerciseText = request.getHeader(EXERCISE_TEXT);
     if (exerciseText != null && projid > 0) {
       Project project1 = db.getProject(projid);
       CommonExercise exercise = project1.getExercise(exerciseText);
@@ -947,6 +951,7 @@ public class ScoreServlet extends DatabaseServlet {
   private boolean getUsePhoneToDisplay(HttpServletRequest request) {
     return getParam(request, USE_PHONE_TO_DISPLAY);
   }
+
   private boolean getAllowAlternates(HttpServletRequest request) {
     return getParam(request, ALLOW_ALTERNATES);
   }
@@ -976,6 +981,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * @param reqid      label response with req id so the client can tell if it got a stale response
+   * @param projid
    * @param exerciseID for this exercise
    * @param user       by this user
    * @param request    mostly decode, could be record if doing appen corpora recording
@@ -984,13 +990,13 @@ public class ScoreServlet extends DatabaseServlet {
    * @param deviceType iPad,iPhone, or browser
    * @param device     id for device - helpful for iPads, etc.
    * @param options
-   * @param fullJSON
-   * @return score json
+   * @param fullJSON   @return score json
    * @paramx allowAlternates   decode against multiple alternatives (e.g. male and female spanish words for the same english word)
    * @paramx usePhoneToDisplay should we remap the phones to different labels for display
    * @see #getJsonForAudio
    */
   private JSONObject getJsonForAudioForUser(int reqid,
+                                            int projid,
                                             int exerciseID,
                                             int user,
                                             Request request,
@@ -1000,7 +1006,7 @@ public class ScoreServlet extends DatabaseServlet {
                                             DecoderOptions options,
                                             boolean fullJSON) {
     long then = System.currentTimeMillis();
-    int mostRecentProjectByUser = getMostRecentProjectByUser(user);
+    int mostRecentProjectByUser = projid == -1 ? getMostRecentProjectByUser(user) : projid;
     CommonExercise exercise = db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);  // allow custom items to mask out non-custom items
 
     JSONObject jsonForScore = new JSONObject();

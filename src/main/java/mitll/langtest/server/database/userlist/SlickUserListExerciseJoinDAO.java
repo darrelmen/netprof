@@ -42,8 +42,7 @@ import org.apache.logging.log4j.Logger;
 
 public class SlickUserListExerciseJoinDAO
     extends DAO implements IUserListExerciseJoinDAO {
-  private static final Logger logger = LogManager.getLogger(SlickUserListExerciseJoinDAO.class);
-
+//  private static final Logger logger = LogManager.getLogger(SlickUserListExerciseJoinDAO.class);
   private final UserExerciseListJoinDAOWrapper dao;
 
   public SlickUserListExerciseJoinDAO(Database database, DBConnection dbConnection) {
@@ -67,7 +66,7 @@ public class SlickUserListExerciseJoinDAO
    * @see mitll.langtest.server.database.custom.UserListManager#addItemToList
    */
   @Override
-  public void add(UserList userList, String uniqueID, int exid) { addPair(userList.getID(), /*uniqueID,*/ exid);  }
+  public void add(UserList userList, String uniqueID, int exid) { addPair(userList.getID(),  exid);  }
 
   /**
    * Just for copying from h2 initially
@@ -78,9 +77,7 @@ public class SlickUserListExerciseJoinDAO
   public void addPair(int userlistid, int exid) {  dao.insert(userlistid, exid);  }
 
   @Override
-  public void removeListRefs(long listid) {
-
-  }
+  public void removeListRefs(long listid) {}
 
   @Override
   public boolean remove(long listid, int exid) {

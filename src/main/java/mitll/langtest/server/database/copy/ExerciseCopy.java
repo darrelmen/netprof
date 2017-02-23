@@ -79,7 +79,9 @@ class ExerciseCopy {
 
     Timestamp now = new Timestamp(System.currentTimeMillis());
     for (CommonExercise ex : exercises) {
-      int id = exToInt.get(ex.getOldID());
+      String oldID = ex.getOldID();
+      if (oldID == null) logger.error("huh? old id is null for " + ex);
+      int id = exToInt.get(oldID);
       for (CommonExercise context : ex.getDirectlyRelated()) {
         context.getMutable().setOldID("c" + id);
         int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true));

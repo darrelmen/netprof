@@ -109,6 +109,7 @@ public interface ListService extends RemoteService {
   Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited);
 
   /**
+   * TODO : not filled in yet
    * @param search
    * @return
    * @see mitll.langtest.client.custom.ListManager#viewLessons
@@ -129,7 +130,7 @@ public interface ListService extends RemoteService {
   void addItemToUserList(long userListID, int exID);
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @param userListID
    * @param userExercise
    * @return
@@ -155,4 +156,6 @@ public interface ListService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   void editItem(CommonExercise userExercise, boolean keepAudio);
+
+  void updateContext(long userListID, String context);
 }

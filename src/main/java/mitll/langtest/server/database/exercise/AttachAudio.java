@@ -59,8 +59,8 @@ public class AttachAudio {
   private String language;
   private boolean checkAudioTranscript = true;
   private final AudioCheck audioCheck;
-  //  private final AudioDAO audioDAO;
   private Map<String, List<AudioAttribute>> transcriptToAudio;
+
   /**
    * This needs to be consistent with reporting and filtering, let's turn it off for now.
    */
@@ -69,20 +69,16 @@ public class AttachAudio {
   /**
    * TODO : is it OK not to do setExToAudio initially???
    *
-   * @param exToAudio
    * @param language
    * @see BaseExerciseDAO#setAudioDAO
    */
-  AttachAudio(Map<Integer, List<AudioAttribute>> exToAudio,
-              String language,
+  AttachAudio(String language,
               boolean checkAudioTranscript,
               ServerProperties serverProperties) {
     this.language = language;
-    //  this.setExToAudio(exToAudio);
     this.checkAudioTranscript = checkAudioTranscript;
     this.audioCheck = new AudioCheck(serverProperties);
   }
-
 
   /**
    * Go looking for audio in the media directory ("bestAudio") and if there's a file there
@@ -294,12 +290,12 @@ public class AttachAudio {
   }
 
   /**
-   * @see BaseExerciseDAO#attachAudio()
+   * @see BaseExerciseDAO#attachAudio
    * @param exercises
    * @param exToAudio
    * @param transcriptChanged
    */
-  public void attachAllAudio(List<CommonExercise> exercises,
+  void attachAllAudio(List<CommonExercise> exercises,
                              Map<Integer, List<AudioAttribute>> exToAudio,
                              Set<Integer> transcriptChanged) {
     int c = 0;

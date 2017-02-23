@@ -192,6 +192,11 @@ import java.util.List;
   }
 
   @Override
+  public void updateContext(long uniqueID, String context) {
+
+  }
+
+  @Override
   public int getCount() {
     return getCount(USER_EXERCISE_LIST);
   }

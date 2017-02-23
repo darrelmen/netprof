@@ -160,6 +160,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     markRegular();
   }
 
+  /**
+   * @see AudioExercise#addAudioForUser
+   * @param audioRef
+   * @param miniUser
+   */
   public AudioAttribute(String audioRef, MiniUser miniUser) {
     this(audioRef);
     this.setUser(miniUser);
@@ -284,9 +289,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     }
   }
 
-  public MiniUser getUser() {
-    return user;
-  }
+  public MiniUser getUser() {   return user;  }
 
   /**
    * @param user
@@ -338,10 +341,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    */
   public boolean hasMatchingTranscript(String foreignLanguage) {
     try {
-
 //      String before = foreignLanguage;
 //      String fixedAgainst = StringUtils.stripAccents(before);
-
 //      if (!before.equals(fixedAgainst)) {
 //        logger.info("attachAudio before '" + before +
 //            "' after '" + fixedAgainst +
@@ -363,7 +364,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param foreignLanguage
    * @param transcript
    * @return
-   * @see
+   * @see mitll.langtest.server.database.exercise.AttachAudio#attachAudio(CommonExercise, int, Collection, Collection, Set)
    */
   public boolean matchTranscript(String foreignLanguage, String transcript) {
     return transcript == null ||
@@ -413,6 +414,14 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return actualPath;
   }
 
+  public float getDnr() {
+    return dnr;
+  }
+
+  public int getResultid() {
+    return resultid;
+  }
+
   @Override
   public String toString() {
     return "Audio" +
@@ -425,13 +434,5 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
         "\n\tby         " + userid + "/" + user +
         "\n\ttranscript '" + transcript +
         "'\n\tdnr\t" + dnr;
-  }
-
-  public float getDnr() {
-    return dnr;
-  }
-
-  public int getResultid() {
-    return resultid;
   }
 }

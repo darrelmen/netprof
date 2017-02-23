@@ -78,37 +78,6 @@ public class ProjectTest extends BaseTest {
         ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es", 0);
   }
 
-/*
-  @Test
-  public void testTestProject() {
-    DatabaseImpl database = getDatabase("netProf");
-
-    IProjectDAO projectDAO = database.getProjectDAO();
-
-    IUserDAO userDAO = database.getUserDAO();
-    User gvidaver = userDAO.getUserByID("gvidaver");
-
-    int i = projectDAO.addTest(
-        gvidaver.getID(),
-        "my Spanish",
-        "Spanish",
-        "Unit", "Chapter", "es");
-
-    IUserListManager userListManager = database.getUserListManager();
-
-    UserManagement userManagement = database.getUserManagement();
-    String test345 = "test345";
-//    User user = userManagement.addUser(test345, "test123", "1234", "", "", "");
-//    if (user == null) {
-//      user = userDAO.getUserByID(test345);
-//    }
-//    if (user != null) {
-//      Collection<UserList<CommonShell>> myLists = userListManager.getMyLists(user.getID(), i);
-//      logger.info("lists for " + user + " " + myLists);
-//    }
-  }
-*/
-
   @Test
   public void testListProjects() {
     DatabaseImpl spanish = getDatabase("spanish");
@@ -238,7 +207,7 @@ public class ProjectTest extends BaseTest {
   @Test
   public void testDrop() {
     IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
-    projectDAO.delete(6);
+    projectDAO.delete(3);
   }
 
   @Test
@@ -286,13 +255,16 @@ public class ProjectTest extends BaseTest {
     getAndPopulate();
   }
 
+  @Test
+  public void testDropCroatian() {  doDrop( "croatian");  }
 
   @Test
-  public void testDropCroatian() {
+  public void testDropSpanish() {  doDrop( "spanish");  }
+
+  private void doDrop(String croatian) {
     DatabaseImpl andPopulate = getAndPopulate();
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
-    int croatian = projectDAO.getByName("croatian");
-    projectDAO.delete(croatian);
+    projectDAO.delete(projectDAO.getByName(croatian));
     andPopulate.close();
   }
 

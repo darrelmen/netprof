@@ -146,7 +146,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
 
     if (exercise1 == null && isExistingExercise) {
-      logger.warn(getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
+      logger.warn("writeAudioFile " + getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
     String audioTranscript = getAudioTranscript(audioContext.getAudioType(), commonExercise);
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash, audioTranscript);
@@ -157,7 +157,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         .setRefRecording(addToAudioTable)
         .setAllowAlternates(allowAlternates);
 
-    logger.info("recording info " + recordingInfo);
+    logger.info("writeAudioFile recording info " + recordingInfo);
 
     AudioAnswer audioAnswer = amas ?
         audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
@@ -169,7 +169,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
             options);
 
-    logger.info("recording audioAnswer " + audioAnswer.getTranscript());
+    logger.info("writeAudioFile recording audioAnswer " + audioAnswer.getTranscript());
 
 
     int user = audioContext.getUserid();

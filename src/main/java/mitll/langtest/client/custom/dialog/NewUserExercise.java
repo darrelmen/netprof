@@ -674,76 +674,6 @@ abstract class NewUserExercise extends BasicDialog {
                                  ListInterface<CommonShell> pagingContainer,
                                  Panel toAddTo,
                                  ControlGroup normalSpeedRecording);
-/*  {
-    Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording);
-    Style style = submit.getElement().getStyle();
-    style.setMarginBottom(5, Style.Unit.PX);
-    style.setMarginRight(15, Style.Unit.PX);
-
-    Panel row = new DivWidget();
-    row.addStyleName("marginBottomTen");
-
-    configureButtonRow(row);
-    row.add(submit);
-    return row;
-  }*/
-
-  /**
-   *
-   * @param ul
-   * @param pagingContainer
-   * @param toAddTo
-   * @param foreignLang
-   * @param rap
-   * @param normalSpeedRecording
-   * @return
-   */
-/*
-  private Button makeCreateButton(final UserList<CommonShell> ul,
-                                  final ListInterface<CommonShell> pagingContainer,
-                                  final Panel toAddTo,
-                                  final FormField foreignLang,
-                                  final RecordAudioPanel rap,
-                                  final ControlGroup normalSpeedRecording) {
-    final Button submit = new Button(NewUserExercise.CREATE);
-    submit.setType(ButtonType.SUCCESS);
-    submit.getElement().setId("CreateButton_NewExercise_for_" + ul.getID());
-    controller.register(submit, "UserList_" + ul.getID());
-    submit.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        startCreatingExercise(rap, foreignLang, normalSpeedRecording, pagingContainer, toAddTo);
-      }
-    });
-    submit.addStyleName("rightFiveMargin");
-    submit.addStyleName("floatRight");
-
-    return submit;
-  }
-*/
-
-  /**
-   * @param rap
-   * @param foreignLang
-   * @param normalSpeedRecording
-   * @param pagingContainer
-   * @param toAddTo
-   */
-/*  private void startCreatingExercise(RecordAudioPanel rap,
-                                     FormField foreignLang,
-                                     ControlGroup normalSpeedRecording,
-                                     ListInterface<CommonShell> pagingContainer,
-                                     Panel toAddTo) {
-    if (rap.isRecording()) {
-      clickedCreate = true;
-      rap.clickStop();
-    } else if (rapSlow.isRecording()) {
-      clickedCreate = true;
-      rapSlow.clickStop();
-    } else {
-      validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, true, true);
-    }
-  }*/
 
   /**
    * @param foreignLang
@@ -838,6 +768,7 @@ abstract class NewUserExercise extends BasicDialog {
 
     Collection<CommonExercise> directlyRelated = mutableExercise.getDirectlyRelated();
 
+ /*
     if (directlyRelated.isEmpty()) {
       if (!context.getSafeText().isEmpty() ||
           !contextTrans.getSafeText().isEmpty()
@@ -846,6 +777,7 @@ abstract class NewUserExercise extends BasicDialog {
         addContext(controller.getUser(), mutableExercise, projectID);
       }
     }
+    */
     updateContextExercise(mutableExercise);
   }
 
@@ -869,7 +801,7 @@ abstract class NewUserExercise extends BasicDialog {
     }
   }
 
-  private void addContext(int userid, MutableExercise exercise, int projectID) {
+/*  private void addContext(int userid, MutableExercise exercise, int projectID) {
     Exercise newContext = new Exercise(-1,
         userid,
         contextTrans.getSafeText(),
@@ -891,7 +823,7 @@ abstract class NewUserExercise extends BasicDialog {
             // updateContextExercise(newExercise.getMutable());
           }
         });
-  }
+  }*/
 
   /**
    * @see #isValidForeignPhrase(ListInterface, Panel, boolean)

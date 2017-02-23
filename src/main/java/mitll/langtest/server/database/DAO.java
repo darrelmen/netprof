@@ -364,12 +364,9 @@ public class DAO {
   protected String getVarchar() {
     return isMYSQL ? "VARCHAR(256)" : "VARCHAR";
   }
-
-  //protected String getPrimaryKey() { return getPrimaryKey(ID); }
   protected String getPrimaryKey(String col) {
     return isMYSQL ? "PRIMARY KEY (" + col + "), " : "";
   }
-
 
   /**
    * Does not seem to work with h2

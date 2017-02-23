@@ -82,6 +82,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(DominoUserDAOImpl.class);
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
+  private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
   private static final String PRIMARY = "primary";
   private static final String DEFAULT_AFFILIATION = "";//"OTHER";
   public static final String MALE = "male";
@@ -245,10 +246,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#addUser
    */
-  public ClientUserDetail addAndGet(ClientUserDetail user,
-                                    String encodedPass) {
+  public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass) {
     invalidateCache();
     //logger.info("addAndGet really adding " + user);
+    if (user.getGender() != UNSPECIFIED) {
+      logger.info("going in " + user.getGender() + " for " + user.getUserId());
+    }
+
     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
     boolean b = !clientUserDetailSResult1.isError();
     if (!b) {
@@ -256,7 +260,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
           clientUserDetailSResult1.getResponseMessage());
       return null;
     } else {
-      return clientUserDetailSResult1.get();
+      ClientUserDetail clientUserDetail = clientUserDetailSResult1.get();
+      if (clientUserDetail.getGender() == UNSPECIFIED) {
+        logger.info("huh? " +clientUserDetail.getUserId() + " is " + clientUserDetail.getGender());
+      }
+      return clientUserDetail;
     }
   }
 
@@ -563,16 +571,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     long now = System.currentTimeMillis();
 
     long diff = now - then;
-    if (diff > 50) {
-      logger.warn("getUserIfMatchPass : took " + diff + " to check for password match.");
-    }
+//    if (diff > 50) {
+//      logger.warn("getUserIfMatchPass : took " + diff + " to check for password match.");
+//    }
     if (dominoPassword != null && (match || dominoPassword.equals(encodedPassword))) {//dominoPassword.equals(encodedPassword)) {//netProfDelegate.isPasswordMatch(user.getID(), encodedPassword) || magicMatch) {
-      logger.warn("getUserIfMatch match in of " + dominoPassword + " vs encoded " + encodedPassword.length() + " match " + match);
+      logger.warn("getUserIfMatch match in of " + dominoPassword + " vs encoded " + encodedPassword.length() + " match " + match + " took " + diff + " millis");
       boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
       user.setAdmin(isadmin);
       return user;
     } else {
-      logger.warn("getUserIfMatch no match in db " + dominoPassword + " vs encoded " + encodedPassword.length());
+      logger.warn("getUserIfMatch no match in db " + dominoPassword + " vs encoded " + encodedPassword.length() + " took " + diff);
       return null;
     }
   }
@@ -628,9 +636,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public User getUserWhere(int userid) { return getByID(userid);  }
 
-  private DBUser lookupUser(int id) {
-    return delegate.lookupDBUser(id);
-  }
+  private DBUser lookupUser(int id) {   return delegate.lookupDBUser(id);  }
 
   @Override
   public List<User> getUsers() {
@@ -669,15 +675,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 //      email = user.getEmailHash();
 //    }
 
-    //Group primaryGroup = ;
-    Group secondary = getGroupOrMake(projectName);
-
-
     User.Kind userKind = user.getUserKind();
-
 
     Set<String> roleAbbreviations = Collections.singleton(userKind.getRole());
     // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
+
+    mitll.hlt.domino.shared.model.user.User.Gender gender = userKind ==
+        STUDENT ? UNSPECIFIED :
+        user.isMale() ? DMALE : DFEMALE;
+
+    if (gender == UNSPECIFIED) {
+      logger.info("toClientUserDetail for " + user.getID() + " " + user.getUserID() + " "+ user.getUserKind() + " gender is unspecified.");
+    }
+    else {
+      logger.info("toClientUserDetail for " + user.getID() + " " + user.getUserID() + " "+ user.getUserKind() + " gender is "+gender);
+
+    }
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
         user.getUserID(),
@@ -685,18 +698,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         last,
         email,
         DEFAULT_AFFILIATION,
-        userKind ==
-            STUDENT ? mitll.hlt.domino.shared.model.user.User.Gender.Unspecified :
-            user.isMale() ? DMALE : DFEMALE,
+        gender,
         roleAbbreviations,
         getGroup()
     );
-    AccountDetail acctDetail = new AccountDetail(
-        dominoImportUser,
-        new Date(user.getTimestampMillis()));
 
-    clientUserDetail.addSecondaryGroup(secondary);
-    clientUserDetail.setAcctDetail(acctDetail);
+    if (clientUserDetail.getGender() != gender) logger.error("huh? wrote "+ gender + " but got back " +clientUserDetail.getGender());
+
+    clientUserDetail.addSecondaryGroup(getGroupOrMake(projectName));
+    clientUserDetail.setAcctDetail(new AccountDetail(
+        dominoImportUser,
+        new Date(user.getTimestampMillis())));
     //logger.info("toClientUserDetail " + " groups for\n\t" + clientUserDetail + " : \n\t" + clientUserDetail.getSecondaryGroups());
 
     return clientUserDetail;

@@ -923,13 +923,13 @@ public class AudioFileHelper implements AlignDecode {
    * GOOD for local testing!
    *
    * @param exid
-   * @param projid
+   * @param foreignLanguage
+   *@param projid
    * @param userid
-   * @param theFile
-   * @return
+   * @param theFile    @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#getASRScoreForAudio
    */
-  public PrecalcScores checkForWebservice(int exid, int projid, int userid, File theFile) {
+  public PrecalcScores checkForWebservice(int exid, String foreignLanguage, int projid, int userid, File theFile) {
     boolean available = isHydraAvailable();
     if (!available) logger.debug("local webservice not available for " + theFile.getName());
     if (!available && !theFile.getName().endsWith("ogg") && serverProps.isLaptop()) {
@@ -946,9 +946,10 @@ public class AudioFileHelper implements AlignDecode {
         HTTPClient httpClient = new HTTPClient(hydraHost + "scoreServlet");
         httpClient.addRequestProperty("request", "align");
         httpClient.addRequestProperty("exercise", "" + exid);
+        httpClient.addRequestProperty("exerciseText", foreignLanguage);
         // USE THE LANGUAGE INSTEAD
         httpClient.addRequestProperty("projid", "-1");//  + projid);
-        httpClient.addRequestProperty("language", "" + getLanguage());
+        httpClient.addRequestProperty("language", getLanguage());
         httpClient.addRequestProperty("user", "" + userid);
         httpClient.addRequestProperty("full", "full");  // full json returned
 
@@ -1016,7 +1017,6 @@ public class AudioFileHelper implements AlignDecode {
                                           ImageOptions imageOptions,
 
                                           String prefix,
-                                          // Result precalcResult,
                                           PrecalcScores precalcScores,
 
                                           DecoderOptions options) {
@@ -1187,7 +1187,9 @@ public class AudioFileHelper implements AlignDecode {
     if (decoderOptions.isDoFlashcard()) {
 
       PrecalcScores precalcScores =
-          checkForWebservice(exercise.getID(),
+          checkForWebservice(
+              exercise.getID(),
+              exercise.getForeignLanguage(),
               project.getID(),
               userID,
               file);

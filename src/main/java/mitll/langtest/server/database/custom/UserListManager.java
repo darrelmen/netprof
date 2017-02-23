@@ -744,7 +744,7 @@ public class UserListManager implements IUserListManager {
   @Override
   public void newExercise(long userListID, CommonExercise userExercise, String mediaDir) {
     int newExerciseID = userExerciseDAO.add(userExercise, false, false);
-    logger.debug("newExercise added exercise " + newExerciseID  + " from " + userExercise);
+    logger.debug("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
     // TODO : this will never happen
 //    if (!userExercise.getDirectlyRelated().isEmpty()) {
@@ -752,13 +752,19 @@ public class UserListManager implements IUserListManager {
 //        if (!exercise.getForeignLanguage().isEmpty() ||
 //            !exercise.getEnglish().isEmpty()
 //            ) {
-          int contextID = userExerciseDAO.add(new Exercise(), false, true);
+    int contextID = 0;
+    int projectID = userExercise.getProjectID();
+    try {
+      Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
+      contextID = userExerciseDAO.add(userExercise1, false, true);
+      userExerciseDAO.addContextToExercise(newExerciseID, contextID, projectID);
+      userExercise.getDirectlyRelated().add(userExercise1);
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+    }
 
-          int projectID = userExercise.getProjectID();
-          userExerciseDAO.addContextToExercise(newExerciseID, contextID, projectID);
-
-          logger.debug("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
-  //      }
+    logger.debug("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
+    //      }
 //     }
 //    }
 //    else {
@@ -863,13 +869,13 @@ public class UserListManager implements IUserListManager {
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
     if (regularSpeed == null) {
-      logger.warn("fixAudioPaths huh? no ref audio for " + userExercise);
+      logger.info("fixAudioPaths no audio yet for " + userExercise);
       return;
     }
     long now = System.currentTimeMillis();
     logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" + mediaDir + "'");
 
-    String foreignLanguage = userExercise.getForeignLanguage();
+   // String foreignLanguage = userExercise.getForeignLanguage();
     int id = userExercise.getID();
     int projectID = userExercise.getProjectID();
 
