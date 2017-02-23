@@ -574,12 +574,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   /**
    * @param userExercise
-   * @param createIfDoesntExist
    * @param isContext
    * @see UserListManager#editItem
    */
   @Override
-  public void update(CommonExercise userExercise, boolean createIfDoesntExist, boolean isContext) {
+  public void update(CommonExercise userExercise, boolean isContext) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + USEREXERCISE +
@@ -606,11 +605,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       int i = statement.executeUpdate();
 
       if (i == 0) {
-        if (createIfDoesntExist) {
-          add(userExercise, true, false);
-        } else {
+       // if (createIfDoesntExist) {
+       //   add(userExercise, true, false);
+        //} else {
           logger.error("huh? didn't update the userExercise for " + userExercise + "\n\tsql " + sql);
-        }
+        //}
       }
 
       finish(connection, statement);

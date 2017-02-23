@@ -95,8 +95,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.index = index;
     this.exerciseID = exerciseID;
     this.controller = controller;
-//    this.service = service;
-//    this.audioServiceAsync = audioService;
+
     this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
     controller.register(this, exerciseID);
@@ -145,13 +144,15 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     final int user = getUser();
+
     AudioContext audioContext = new AudioContext(
         reqid,
         user,
         projectStartupInfo.getProjectid(),
         projectStartupInfo.getLanguage(),
         getExerciseID(),
-        index, getAudioType());
+        index,
+        getAudioType());
 
     logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
 

@@ -255,7 +255,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   public void logMessage(String message) {
     if (message.length() > 10000) message = message.substring(0, 10000);
-    String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
+    String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client : " + message;
     logger.debug(prefixedMessage);
 
     if (message.startsWith("got browser exception")) {

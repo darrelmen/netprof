@@ -234,7 +234,7 @@ public class UserSecurityManager implements IUserSecurityManager {
       session.removeAttribute(USER_SESSION_ATT);
       session.invalidate();
     } else {
-      log.error(">Session Activity> No session found on logout for id " + userId);
+      log.warn(">Session Activity> No session found on logout for id " + userId);
     }
 
 //    request.getSession(true);

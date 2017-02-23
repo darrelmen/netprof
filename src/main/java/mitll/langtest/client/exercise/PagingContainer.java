@@ -118,7 +118,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
     Column<T, SafeHtml> englishCol = getEnglishColumn();
     if (sortEnglish) {
-      logger.warning("sorting " + this);
+      //logger.warning("sorting " + this);
       englishCol.setSortable(true);
     }
     addColumn(englishCol, new TextHeader(ENGLISH));
@@ -132,7 +132,9 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     table.addColumnSortHandler(columnSortHandler2);
 
     // We know that the data is sorted alphabetically by default.
-    if (sortEnglish) table.getColumnSortList().push(englishCol);
+    if (sortEnglish) {
+      table.getColumnSortList().push(englishCol);
+    }
 
     table.setWidth("100%", true);
 

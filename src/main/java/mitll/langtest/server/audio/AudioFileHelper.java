@@ -306,7 +306,7 @@ public class AudioFileHelper implements AlignDecode {
 
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, file.getPath());
 
-    //logger.info("tr " + recordingInfo.getTranscript());
+    logger.info("tr = " + recordingInfo.getTranscript());
     return getAudioAnswerDecoding(exercise1,
         audioContext,
         recordingInfo,
@@ -319,6 +319,7 @@ public class AudioFileHelper implements AlignDecode {
     );
   }
 
+  @Deprecated
   public AudioAnswer writeAMASAudioFile(String base64EncodedString,
                                         AmasExerciseImpl exercise1,
                                         AudioContext audioContext,
@@ -446,6 +447,9 @@ public class AudioFileHelper implements AlignDecode {
       }
       logger.debug("getAudioAnswerDecoding recordInResults answer " + answer + " " + answer.getTranscript());
       recordInResults(context, recordingInfo, validity, answer);
+    }
+    else {
+      answer.setTranscript(recordingInfo.getTranscript());
     }
     //logger.debug("getAudioAnswerDecoding answer " + answer);
     return answer;
@@ -1185,7 +1189,6 @@ public class AudioFileHelper implements AlignDecode {
                                      int userID) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     if (decoderOptions.isDoFlashcard()) {
-
       PrecalcScores precalcScores =
           checkForWebservice(
               exercise.getID(),
@@ -1202,11 +1205,10 @@ public class AudioFileHelper implements AlignDecode {
           precalcScores);
 
       audioAnswer.setPretestScore(flashcardAnswer);
-//      }
-//      else audioAnswer.setPretestScore(precalcScores);
 
       return audioAnswer;
     }
+
     return audioAnswer;
   }
 

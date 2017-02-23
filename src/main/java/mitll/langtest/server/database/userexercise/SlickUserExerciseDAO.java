@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.PronunciationLookup;
 import mitll.langtest.server.database.exercise.SectionHelper;
@@ -166,25 +167,23 @@ public class SlickUserExerciseDAO
 
   public SlickExercise toSlick(CommonExercise shared,
                                @Deprecated boolean isOverride,
-                           //     int projectID,
-                               // boolean isPredef,
                                int importUser,
                                boolean isContext) {
-    return toSlick(shared,isOverride,shared.getProjectID(),importUser,isContext);
+    return toSlick(shared, isOverride, shared.getProjectID(), importUser, isContext);
   }
+
   /**
    * @param shared
    * @param isOverride
-   * @paramx isPredef
    * @param isContext
    * @return
+   * @paramx isPredef
    * @see #toSlick
    * @see mitll.langtest.server.database.copy.CopyToPostgres#addContextExercises
    */
   public SlickExercise toSlick(CommonExercise shared,
                                @Deprecated boolean isOverride,
                                int projectID,
-                              // boolean isPredef,
                                int importUser,
                                boolean isContext) {
     Map<String, String> unitToValue = shared.getUnitToValue();
@@ -531,7 +530,16 @@ public class SlickUserExerciseDAO
   @Override
   public CommonExercise getByExID(int exid) {
     Seq<SlickExercise> byExid = dao.byID(exid);
-    return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
+
+    CommonExercise exercise = byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
+
+
+    if (exercise != null) {
+   //   for (SlickExercise ex:relatedExerciseDAOWrapper.contextExercises(exid)) exercise.getDirectlyRelated().add(fromSlick(ex));
+      relatedExerciseDAOWrapper.contextExercises(exid)
+          .forEach(ex -> exercise.getDirectlyRelated().add(fromSlick(ex)));
+    }
+    return exercise;
   }
 
   @Override
@@ -614,25 +622,29 @@ public class SlickUserExerciseDAO
    * TODO : Why so complicated?
    *
    * @param userExercise
-   * @param createIfDoesntExist
    * @param isContext
-   * @see mitll.langtest.server.database.custom.UserListManager#editItem
+   * @see IUserListManager#editItem
    */
   @Override
-  public void update(CommonExercise userExercise, boolean createIfDoesntExist, boolean isContext) {
+  public void update(CommonExercise userExercise, boolean isContext) {
+    //logger.info("update : " + userExercise.getID() + " has " + userExercise.getDirectlyRelated().size() + " context");
     SlickExercise slickUserExercise = toSlick(userExercise, true, isContext);
 
     int rows = dao.update(slickUserExercise);
+    String idLabel = userExercise.getID() + "/" + slickUserExercise.id();
 
-    if (rows == 0 && createIfDoesntExist) {
-      int insert = dao.insert(slickUserExercise);
-     // userExercise.
+    if (rows == 0 /*&& createIfDoesntExist*/) {
+//      int insert = dao.insert(slickUserExercise);
+//      logger.info("update inserted exercise #" + insert);
+      logger.error("update didn't update exercise #" + idLabel);
+    } else {
+      logger.info("update : updated exercise #" + idLabel);
     }
 
     // recurse on related context exercises
     for (CommonExercise contextEx : userExercise.getDirectlyRelated()) {
-      logger.info("with context exercise " + contextEx.getID() + " context " + contextEx.getForeignLanguage() + " " + contextEx.getEnglish());
-      update(contextEx, createIfDoesntExist, true);
+      logger.info("update with context exercise " + contextEx.getID() + " context " + contextEx.getForeignLanguage() + " " + contextEx.getEnglish());
+      update(contextEx, true);
     }
   }
 
@@ -646,8 +658,8 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see DatabaseImpl#createTables
    * @return
+   * @see DatabaseImpl#createTables
    */
   public IDAO getRelatedExercise() {
     return new IDAO() {
@@ -680,7 +692,7 @@ public class SlickUserExerciseDAO
   public Map<String, Integer> getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
     for (SlickExercise exercise : dao.getAllPredefByProject(projectid)) oldToNew.put(exercise.exid(), exercise.id());
-    logger.info("old->new for project #" +projectid + " has  " + oldToNew.size());
+    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
     return oldToNew;
   }
 

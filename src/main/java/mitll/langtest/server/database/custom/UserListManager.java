@@ -86,13 +86,7 @@ public class UserListManager implements IUserListManager {
   private static final String REVIEW = "Defects";
   private static final String ATTENTION = "AttentionLL";
   private static final String ITEMS_TO_REVIEW = "Possible defects to fix";
-//  public static final int REVIEW_MAGIC_ID = -100;
-//  public static final int COMMENT_MAGIC_ID = -200;
-//  private static final int ATTN_LL_MAGIC_ID = -300;
-
   private static final boolean DEBUG = false;
-
-//  private static final String DUP = "_dup_";
 
   private final IUserDAO userDAO;
   private final IReviewedDAO reviewedDAO, secondStateDAO;
@@ -738,7 +732,7 @@ public class UserListManager implements IUserListManager {
    * @param userListID
    * @param userExercise notional until now!
    * @param mediaDir
-   * @see mitll.langtest.server.services.AudioServiceImpl#reallyCreateNewItem
+   * @seex mitll.langtest.server.services.AudioServiceImpl#newExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
@@ -802,21 +796,19 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param userExercise
-   * @param createIfDoesntExist always true
    * @param mediaDir
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override
-  public void editItem(CommonExercise userExercise,
-                       boolean createIfDoesntExist,
-                       String mediaDir) {
+  public void editItem(CommonExercise userExercise, String mediaDir) {
     fixAudioPaths(userExercise, true, mediaDir);
-    userExerciseDAO.update(userExercise, createIfDoesntExist, false);
+    userExerciseDAO.update(userExercise, false);
   }
 
   /**
    * TODO : why all this foolishness with the id?
+   * TODO : put this back?
    *
    * @param userExercise
    * @return
@@ -990,7 +982,8 @@ public class UserListManager implements IUserListManager {
   /**
    * @param id
    * @param projid
-   * @param typeOrder @return
+   * @param typeOrder
+   * @return
    * @param ids
    * @see mitll.langtest.server.database.DatabaseImpl#getUserListByIDExercises
    */

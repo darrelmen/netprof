@@ -137,19 +137,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   protected GoodwaveExercisePanel(final T commonExercise,
                                   final ExerciseController controller,
                                   final ListInterface<CommonShell> listContainer,
-                                  // float screenPortion,
                                   ExerciseOptions options
-                                  //                                boolean addKeyHandler,
-                                  //                              String instance,
-                                  //                            boolean allowRecording,
-                                  //                          boolean includeListButtons
   ) {
     this.options = options;
     this.exercise = commonExercise;
     this.controller = controller;
-//    this.screenPortion = screenPortion;
-//    this.instance = instance;
-//    this.allowRecording = allowRecording;
     String language = controller.getLanguage();
 
     isJapanese = language.equalsIgnoreCase(JAPANESE);

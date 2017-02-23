@@ -500,7 +500,7 @@ abstract class NewUserExercise extends BasicDialog {
 
       Reloadable reloadable = predefinedContentList.getReloadable();
       if (reloadable == null) {
-        logger.warning("doAfterEditComplete : reloadable null????");// + " id " + predefinedContentList.getCurrentExerciseID());
+        //logger.warning("doAfterEditComplete : reloadable null????");// + " id " + predefinedContentList.getCurrentExerciseID());
       } else {
         reloadable.reloadWithCurrent();
       }
@@ -936,8 +936,8 @@ abstract class NewUserExercise extends BasicDialog {
       postAudioButton =
           new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this,
               recordRegularSpeed ? 0 : 1,
-              false // don't record in results table
-              ,
+              false, // don't record in results table????
+
               RecordButton.RECORD1,
               RecordButton.STOP1,
               audioType) {

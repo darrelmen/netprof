@@ -31,11 +31,9 @@
 
 package mitll.langtest.server.audio;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.answer.AudioAnswer;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,10 +42,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-public class AudioConversion {
+public class AudioConversion extends AudioBase {
   private static final Logger logger = LogManager.getLogger(AudioConversion.class);
   private static final String LAME_PATH_WINDOWS = "lame.exe";
   private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
@@ -59,25 +55,24 @@ public class AudioConversion {
   public static final String SIXTEEN_K_SUFFIX = "_16K";
   public static final String FILE_MISSING = "FILE_MISSING";
   private static final float SIXTEEN_K = 16000f;
-  private static final String T_VALUE = "" + 7;
   private static final String LAME = "lame";
-  private static final double DIFF_THRESHOLD = 0.2;
   private static final boolean SPEW = true;
   private static final String MP3 = ".mp3";
   public static final String WAV = ".wav";
-  public static final String OGG = ".ogg";
+  private static final String OGG = ".ogg";
   private final AudioCheck audioCheck;
-  private static final boolean DEBUG = false;
   private static final int MIN_WARN_DUR = 30;
 
   private final String soxPath;
   private final long trimMillisBefore;
   private final long trimMillisAfter;
-  ServerProperties props;
+  private ServerProperties props;
+
+  private static final boolean DEBUG = true;
 
   /**
    * @param props
-   * @see mitll.langtest.server.DatabaseServlet#ensureMP3(String, PathHelper, String, String, String)
+   * @see mitll.langtest.server.DatabaseServlet#ensureMP3
    */
   public AudioConversion(ServerProperties props) {
     trimMillisBefore = props.getTrimBefore();
@@ -250,69 +245,7 @@ public class AudioConversion {
    * @see #convertBase64ToAudioFiles
    */
   public TrimInfo trimSilence(final File wavFile) {
-    if (DEBUG) logger.info("trimSilence " + wavFile.getAbsolutePath());
-    if (!wavFile.exists()) {
-      logger.error("trimSilence " + wavFile + " doesn't exist");
-      return new TrimInfo();
-    }
-    try {
-      long then = System.currentTimeMillis();
-      String trimmed = doTrimSilence(wavFile.getAbsolutePath());
-
-      double durationInSeconds = audioCheck.getDurationInSeconds(wavFile);
-      double durationInSecondsTrimmed = audioCheck.getDurationInSeconds(trimmed);
-      double diff = durationInSeconds - durationInSecondsTrimmed;
-      if (durationInSecondsTrimmed > 0.1 && diff > DIFF_THRESHOLD) {
-        copyAndDeleteOriginal(trimmed, wavFile);
-
-        if (DEBUG) logger.debug("trimSilence (" + //props.getLanguage() +
-            ")  convert original " + wavFile.getName() +
-            " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
-
-        long now = System.currentTimeMillis();
-        if (now - then > 0) {
-          logger.debug("trimSilence (" + //props.getLanguage() +
-              "): took " + (now - then) + " millis to convert original " + wavFile.getName() +
-              " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
-        }
-        return new TrimInfo(durationInSecondsTrimmed, true);
-      } else {
-        logger.info("trimSilence : took " + (System.currentTimeMillis() - then) + " millis to NOT convert original " + wavFile.getName() +
-            " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
-
-        return new TrimInfo(durationInSeconds, false);
-      }
-    } catch (IOException e) {
-      logger.error("trimSilence on " + wavFile.getAbsolutePath() + " got " + e, e);
-      return new TrimInfo();
-    }
-  }
-
-  public static class TrimInfo {
-    private final double duration;
-    private final boolean didTrim;
-
-    TrimInfo() {
-      duration = 0;
-      didTrim = false;
-    }
-
-    TrimInfo(double duration, boolean didTrim) {
-      this.duration = duration;
-      this.didTrim = didTrim;
-    }
-
-    public double getDuration() {
-      return duration;
-    }
-
-    public boolean didTrim() {
-      return didTrim;
-    }
-
-    public String toString() {
-      return " dur " + duration + " did trim " + didTrim;
-    }
+    return new Trimmer().trimSilence(audioCheck, wavFile);
   }
 
   private File copyFileAndDeleteOriginal(final File wavFile, final String sourceFile, final String suffix) throws IOException {
@@ -326,41 +259,6 @@ public class AudioConversion {
     copyAndDeleteOriginal(srcFile, replacement);
 
     return replacement;
-  }
-
-  private void copyAndDeleteOriginal(String srcFile, File replacement) throws IOException {
-    copyAndDeleteOriginal(new File(srcFile), replacement);
-  }
-
-  private void copyAndDeleteOriginal(File srcFile, File replacement) throws IOException {
-    FileUtils.copyFile(srcFile, replacement);
-    if (DEBUG)
-      logger.debug("copyAndDeleteOriginal " + srcFile.getAbsolutePath() + " to " + replacement.getAbsolutePath());
-    // cleanup
-    deleteParentTempDir(srcFile);
-  }
-
-  /**
-   * @param prefix
-   * @return
-   * @throws IOException
-   * @see #makeTempFile(String)
-   */
-  private File makeTempDir(String prefix) throws IOException {
-    String prefix1 = "AudioConversion_makeTempDir_for_" + prefix;
-    if (DEBUG) logger.info("makeTempDir " + prefix);
-    Path audioConversion = Files.createTempDirectory(prefix1);
-    if (DEBUG) logger.info("makeTempDir made " + audioConversion);
-
-    File file = audioConversion.toFile();
-
-    if (DEBUG) logger.info("makeTempDir made " + file.getAbsolutePath());
-
-    return file;
-  }
-
-  private void deleteParentTempDir(File srcFile) throws IOException {
-    FileUtils.deleteDirectory(new File(srcFile.getParent()));
   }
 
   /**
@@ -413,50 +311,6 @@ public class AudioConversion {
     }
 
     return tempForWavz;
-  }
-
-  private String makeTempFile(String prefix) throws IOException {
-    return makeTempDir(prefix) + File.separator + "temp" + prefix + WAV;
-  }
-
-  /**
-   * TODO: Why all the stuff with a temp dir???
-   * creating and deleting???
-   * <p>
-   * sox $sourcewav $outputwav vad -t 6 -p 0.20 reverse vad -t 6 -p 0.20 reverse
-   *
-   * @param pathToAudioFile
-   * @return file that should be cleaned up
-   * @throws IOException
-   */
-  private String doTrimSilence(String pathToAudioFile) throws IOException {
-    final String tempTrimmed = makeTempFile("doTrimSilence");
-
-    if (DEBUG)
-      logger.info("doTrimSilence running sox on " + new File(pathToAudioFile).getAbsolutePath() + " to produce " + new File(tempTrimmed).getAbsolutePath());
-    String trimBefore = "0.30";// + trimMillisBefore;
-    String trimAfter = "0.30";// + trimMillisAfter;
-    ProcessBuilder soxFirst = new ProcessBuilder(
-        getSox(),
-        pathToAudioFile,
-        tempTrimmed,
-        "vad", "-t", T_VALUE, "-p", trimBefore, "reverse", "vad", "-t", T_VALUE, "-p", trimAfter, "reverse");
-
-//    logger.error("doTrimSilence trim silence on " + pathToAudioFile);
-//    String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
-    if (DEBUG) logger.info("doTrimSilence " + soxFirst.command());
-
-    if (!new ProcessRunner().runProcess(soxFirst)) {
-      //logger.info("tempDir Exists " + exists);
-      logger.info("pathToAudioFile exists " + new File(pathToAudioFile).exists());
-      logger.info("tempTrimmed exists     " + new File(tempTrimmed).exists());
-      logger.error("couldn't do trim silence on " + pathToAudioFile);
-      String asRunnable2 = soxFirst.command().toString().replaceAll(",", " ");
-      logger.info("path " + asRunnable2);
-    }
-    if (DEBUG) logger.info("doTrimSilence finished " + soxFirst.command());
-
-    return tempTrimmed;
   }
 
   /**
@@ -547,36 +401,33 @@ public class AudioConversion {
    * @see PathWriter#getPermanentAudioPath
    */
   public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {
-    String mp3File = absolutePathToWav.getAbsolutePath().replace(WAV, MP3);
+    try {
+      String mp3File = absolutePathToWav.getAbsolutePath().replace(WAV, MP3);
+      if (!writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)) return FILE_MISSING;
+      if (!new ConvertToOGG().writeOGG(absolutePathToWav, overwrite, trackInfo)) return FILE_MISSING;
+      return mp3File;
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+      return FILE_MISSING;
+    }
+  }
+
+  private boolean writeMP3(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo, String mp3File) {
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
       if (DEBUG)
         logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav);
 
-      if (DEBUG) logger.debug("run lame on " + absolutePathToWav + " making " + mp3File);
+      if (DEBUG) logger.debug("writeMP3 run lame on " + absolutePathToWav + " making " + mp3File);
 
       if (!convertToMP3FileAndCheck(getLame(), absolutePathToWav.getAbsolutePath(), mp3File, trackInfo)) {
-        if (spew2++ < 10) logger.error("File missing for " + absolutePathToWav + " for " + trackInfo.getArtist());
-        return FILE_MISSING;
+        if (spew2++ < 10)
+          logger.error("writeMP3 File missing for " + absolutePathToWav + " for " + trackInfo.getArtist());
+        return false;
       }
-      logger.info("writeMP3Easy path is " + mp3.getAbsolutePath() + " : " + mp3.exists());
+      logger.info("writeMP3 path is " + mp3.getAbsolutePath() + " : exists = " + mp3.exists());
     }
-
-    String oggFile = absolutePathToWav.getAbsolutePath().replace(WAV, OGG);
-    File ogg = new File(oggFile);
-    if (!ogg.exists() || overwrite) {
-      if (DEBUG)
-        logger.debug("writeMP3 : doing ogg conversion for " + absolutePathToWav);
-
-      if (DEBUG) logger.debug("run ogg on " + absolutePathToWav + " making " + oggFile);
-
-      if (!convertToOGGFileAndCheck(getOggenc(), absolutePathToWav.getAbsolutePath(), oggFile, trackInfo)) {
-        logger.error("ogg File missing for " + absolutePathToWav);
-        return FILE_MISSING;
-      }
-    }
-
-    return mp3File;
+    return true;
   }
 
   private String getSox() {
@@ -610,7 +461,7 @@ public class AudioConversion {
    *
    * @param absolutePathToWav
    * @seex mitll.langtest.server.LangTestDatabaseImpl#normalizeLevel
-   * @see PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, File, String, boolean, String, ServerProperties, TrackInfo)
+   * @see PathWriter#getPermanentAudioPath
    */
   void normalizeLevels(File absolutePathToWav) {
     try {
@@ -668,19 +519,6 @@ public class AudioConversion {
     this.lamePath = lamePath;
   }
 
-  private String getOggenc() {
-/*    String property = System.getProperty("os.name").toLowerCase();
-    boolean isMac = property.contains("mac");
-    boolean isWin = property.contains("win");
-
-    String oggEncPath = isMac ? "bin/macos/oggenc" : isWin ? "bin\\win32\\oggenc.exe" : "/usr/bin/oggenc";
-    File file = new File(oggEncPath);
-    if (!file.exists()) {
-      logger.error("can't find oggenc at " + file.getAbsolutePath());
-    }*/
-  //  oggEncPath = "oggenc";
-    return "oggenc";
-  }
 
   /**
    * @param pathToWav
@@ -726,7 +564,7 @@ public class AudioConversion {
    * @see #writeMP3
    */
   private boolean convertToMP3FileAndCheck(String lamePath, String pathToAudioFile, String mp3File, TrackInfo trackInfo) {
-    if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + mp3File);
+    if (DEBUG) logger.debug("convertToMP3FileAndCheck convert " + pathToAudioFile + " to " + mp3File);
     String title = trackInfo.getTitle();
     String author = trackInfo.getArtist();
     if (title != null && title.length() > 30) {
@@ -768,56 +606,4 @@ public class AudioConversion {
     }
     return true;
   }
-
-  /**
-   * @param oggPath
-   * @param pathToAudioFile
-   * @param oggFile
-   * @param trackInfo
-   * @return
-   * @see #writeCompressedVersions
-   */
-  private boolean convertToOGGFileAndCheck(String oggPath, String pathToAudioFile, String oggFile, TrackInfo trackInfo) {
-    if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + oggFile);
-    String title = trackInfo.getTitle();
-    String author = trackInfo.getArtist();
-    if (title != null && title.length() > 30) {
-      title = title.substring(0, 30);
-    }
-    if (title == null) title = "";
-    ProcessBuilder oggProx = new ProcessBuilder(oggPath, pathToAudioFile,
-        "-o", oggFile,
-        "-t", title,
-        "-a", author,
-        "-c", trackInfo.getComment());
-    try {
-      //logger.debug("running lame" + oggProx.command());
-      new ProcessRunner().runProcess(oggProx);
-    } catch (IOException e) {
-      //  logger.error("Couldn't run " + oggProx);
-      logger.error("for " + oggProx + " got " + e, e);
-    }
-
-    File testFile = new File(oggFile);
-    if (!testFile.exists()) {
-      if (!new File(pathToAudioFile).exists()) {
-        if (SPEW) logger.error("huh? source file " + pathToAudioFile + " doesn't exist?");
-      } else {
-        logger.error("didn't write OGG : " + testFile.getAbsolutePath() +
-            " exe path " + oggPath +
-            " command was " + oggProx.command());
-        try {
-          if (!new ProcessRunner().runProcess(oggProx, true)) {
-            return false;
-          }
-        } catch (IOException e) {
-          logger.error("for " + oggProx + " got " + e, e);
-        }
-
-      }
-      return false;
-    }
-    return true;
-  }
-
 }

@@ -103,18 +103,14 @@ public class PathWriter {
       }
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
     }
-//    ensureMP3(bestAudioPath, overwrite, title, artist, serverProperties);
-
     String s = new AudioConversion(serverProperties).writeCompressedVersions(destination, overwrite, trackInfo);
 
     String relPath = destination.getAbsolutePath().substring(serverProperties.getAudioBaseDir().length());
     logger.info("getPermanentAudioPath " +
-        "\n\twrote to " + s +
-        "\n\trel path " + relPath
+        "\n\twrote to  " + s +
+        "\n\trel path  " + relPath
     );
     return relPath;
-//    ensureMP3(pathHelper, bestAudioPath, overwrite, serverProperties, trackInfo);
-//    return bestAudioPath;
   }
 
   /**

@@ -99,7 +99,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         dao.addOrUpdate(
             info.getUserid(),
             info.getExerciseID(),
-            info.getProjid(), info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(), info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID()),
+            info.getProjid(),
+            info.getAudioType().toString(),
+            info.getAudioRef(),
+            info.getTimestamp(),
+            info.getDurationInMillis(),
+            info.getTranscript(),
+            info.getDnr(),
+            info.getResultID()),
         miniUser);
   }
 
@@ -159,7 +166,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     long then = System.currentTimeMillis();
     List<SlickAudio> byExerciseID = dao.getByExerciseID(exid);
     long now = System.currentTimeMillis();
-    if (now - then > 20)
+    if (now - then > 20 || true)
       logger.warn("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() + " attr for " + exid);
     return toAudioAttributes(byExerciseID);
   }

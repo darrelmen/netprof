@@ -218,9 +218,7 @@ public class AudioAnswer implements IsSerializable {
     this.score = pretestScore.getHydecScore();
   }
 
-  public String getTranscript() {
-    return transcript;
-  }
+  public String getTranscript() {    return transcript;  }
 
   public void setTranscript(String transcript) {
     this.transcript = transcript;
