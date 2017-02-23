@@ -42,13 +42,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BaseRefResultDAO extends DAO {
+class BaseRefResultDAO extends DAO {
   private static final String SCORE_JSON = "scoreJSON";
-  protected final boolean dropTable;
+//  private final boolean dropTable;
 
-  BaseRefResultDAO(Database database, boolean dropTable) {
+  BaseRefResultDAO(Database database) {
     super(database);
-    this.dropTable = dropTable;
+ //   this.dropTable = dropTable;
   }
 
   void addToJSONs(Map<Integer, List<String>> idToJSONs, Integer exid, String json) {
@@ -89,7 +89,7 @@ public class BaseRefResultDAO extends DAO {
     return jsonObject;
   }
 
-  protected String trimPathForWebPage2(String path) {
+  String trimPathForWebPage2(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
     return (answer == -1) ? path : path.substring(answer);
   }

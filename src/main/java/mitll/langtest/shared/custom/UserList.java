@@ -63,7 +63,6 @@ public class UserList<T extends HasID> extends BaseExercise {
   private String userChosenID;
   @Deprecated protected String oldid = "";
 
-//  private User creator;
   private String name;
   private String description;
   private String classMarker;

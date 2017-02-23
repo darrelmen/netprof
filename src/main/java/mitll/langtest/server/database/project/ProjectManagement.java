@@ -340,7 +340,7 @@ public class ProjectManagement implements IProjectManagement {
     logger.info("setDependencies - " + projid);
     IAudioDAO audioDAO = db.getAudioDAO();
 
-    if (audioDAO == null) logger.error("no audio dao ", new Exception());
+    if (audioDAO == null) logger.error("setDependencies no audio dao ", new Exception());
 
     exerciseDAO.setDependencies(
         db.getUserExerciseDAO(),

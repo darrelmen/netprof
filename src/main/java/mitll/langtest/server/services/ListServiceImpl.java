@@ -76,7 +76,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param listid
    * @param exid
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseList#deleteItem
    */
   @Override
   public boolean deleteItemFromList(long listid, int exid) {
@@ -325,6 +325,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       db.editItem(userExercise, keepAudio);
     if (DEBUG) logger.debug("editItem : now user exercise " + userExercise);
   }
+
+  public void updateContext(long id, String context) { getUserListManager().getUserListDAO().updateContext(id,context); }
 
   IUserListManager getUserListManager() {
     return db.getUserListManager();

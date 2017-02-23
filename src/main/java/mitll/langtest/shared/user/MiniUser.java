@@ -49,14 +49,6 @@ public class MiniUser implements HasID, Comparable<HasID> {
   private boolean isAdmin;
   protected long timestamp;
 
-  public Gender getRealGender() {
-    return realGender;
-  }
-
-  public void setRealGender(Gender realGender) {
-    this.realGender = realGender;
-  }
-
   public enum Gender implements IsSerializable {
     Unspecified,
     Male,
@@ -74,13 +66,14 @@ public class MiniUser implements HasID, Comparable<HasID> {
    * @param isAdmin
    */
   public MiniUser(int id, int age, boolean isMale, String userID, boolean isAdmin) {
-    setFields(id, age, isMale, userID, isAdmin);
-  }
-
-  protected void setFields(int id, int age, boolean isMale, String userID, boolean isAdmin) {
+//    setFields(id, age, isMale, userID, isAdmin);
+//  }
+//
+//  private void setFields(int id, int age, boolean isMale, String userID, boolean isAdmin) {
     this.id = id;
     this.age = age;
     this.isMale = isMale;
+
     this.userID = userID;
     this.isAdmin = isAdmin;
   }
@@ -102,10 +95,6 @@ public class MiniUser implements HasID, Comparable<HasID> {
    */
   public MiniUser(User user) {
     this(user.getID(), user.getAge(), user.isMale(), new String(user.getUserID()), user.isAdmin());
-  }
-
-  public boolean isMale() {
-    return isMale;
   }
 
   @Override
@@ -176,11 +165,7 @@ public class MiniUser implements HasID, Comparable<HasID> {
   }
 
   public String getOldID() {return "";}
-  public String toString() {
-    return "mini-user " + id + " : " + age + " yr old " +
-        (isMale() ? "male" : "female") +
-        (isAdmin() ? "ADMIN" : "");
-  }
+  public boolean isMale() {  return isMale;  }
 
   public void setMale(boolean male) {
     isMale = male;
@@ -188,5 +173,17 @@ public class MiniUser implements HasID, Comparable<HasID> {
 
   public void setAge(int age) {
     this.age = age;
+  }
+
+  public Gender getRealGender() {   return realGender;  }
+
+  public void setRealGender(Gender realGender) {
+    this.realGender = realGender;
+  }
+
+  public String toString() {
+    return "mini-user " + id + " : " + age + " yr old " +
+        (isMale() ? "male" : "female") +
+        (isAdmin() ? "ADMIN" : "");
   }
 }

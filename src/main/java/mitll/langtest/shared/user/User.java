@@ -466,12 +466,6 @@ public class User extends MiniUser {
     return passwordHash;
   }
 
-  /**
-   * @return
-   */
-/*  public String getEmailHash() {
-    return emailHash;
-  }*/
   public Kind getUserKind() {
     return userKind;
   }
@@ -519,9 +513,9 @@ public class User extends MiniUser {
     this.email = email;
   }
 
-  public void setUserKind(Kind userKind) {
-    this.userKind = userKind;
-  }
+//  public void setUserKind(Kind userKind) {
+//    this.userKind = userKind;
+//  }
 
   public void setDialect(String dialect) {
     this.dialect = dialect;
@@ -580,21 +574,21 @@ public class User extends MiniUser {
     return email != null && !email.isEmpty();
   }
 
-  public String toStringShort() {
+/*  public String toStringShort() {
     return "user " + getID() + "/" + getUserID() +
         "\n\tis a " + getGender() + "/" + getRealGender() +
-        "\n\tage " + getAge() +
+        "\n\tage  " + getAge() +
         "\n\tkind " + getUserKind() +
         "\n\tperms " + getPermissions();
-  }
+  }*/
 
   public String toString() {
     return "user " +
         "\n\tid     " + getID() +
         "\n\tuserid " + getUserID() +
         (first.isEmpty() ? "" : "\n\tfirst " + first) +
-        (last.isEmpty() ? "" : "\n\tlast  " + last) +
-        "\n\tis a    " + getRealGender() +
+        (last.isEmpty()  ? "" : "\n\tlast  " + last) +
+        "\n\tis a    " + getGender() +"/"+getRealGender() +
         (getAge() < 99 && getAge() > 0 ? "\n\tage     " + getAge() : "") +
         (isAdmin() ? "\n\tadmin   " + isAdmin() : "") +
         (!isEnabled() ? "\n\tenabled   " + isEnabled() : "") +

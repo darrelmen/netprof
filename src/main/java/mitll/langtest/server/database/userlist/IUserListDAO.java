@@ -53,6 +53,8 @@ public interface IUserListDAO extends IDAO {
 
   void updateModified(long uniqueID);
 
+  void updateContext(long uniqueID, String context);
+
   int getCount();
 
   List<UserList<CommonShell>> getAllByUser(long userid, int projectID);

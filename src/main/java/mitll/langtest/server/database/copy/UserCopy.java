@@ -164,18 +164,22 @@ public class UserCopy {
                                    User toImport,
                                    String projectName) throws Exception {
     logger.info("addUser " + toImport + " with " + toImport.getPermissions());
-    ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, projectName);
+    //logger.info("addUser " + toImport.getID()+ " gender " + toImport.getGender() + " " + toImport.getRealGender());
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(
-        user,
+        dominoUserDAO.toClientUserDetail(toImport, projectName),
         toImport.getPasswordHash()
     );
+    rememberUser(oldToNew, toImport.getID(), addedUser);
+    return addedUser;
+  }
+
+  private void rememberUser(Map<Integer, Integer> oldToNew, int id, ClientUserDetail addedUser) throws Exception {
     if (addedUser == null) {
       logger.error("addUser no error returned from domino.");
-      throw new Exception("couldn't import " + toImport);
+      throw new Exception("rememberUser couldn't import " + id);
     } else {
-      oldToNew.put(toImport.getID(), addedUser.getDocumentDBID());
+      oldToNew.put(id, addedUser.getDocumentDBID());
     }
-    return addedUser;
   }
 
   private void addDefaultUsers(Map<Integer, Integer> oldToNew, BaseUserDAO dominoUserDAO) {

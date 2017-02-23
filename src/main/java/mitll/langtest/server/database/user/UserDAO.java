@@ -71,7 +71,8 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    *
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
-  public void ensureDefaultUsers() {}
+  public void ensureDefaultUsers() {
+  }
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
@@ -606,10 +607,10 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @see #getUsers(String)
    * @param rs
    * @return
    * @throws SQLException
+   * @see #getUsers(String)
    */
   private List<User> getUsers(ResultSet rs) throws SQLException {
     List<User> users = new ArrayList<>();
@@ -631,7 +632,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       if (userKind == null) {
         logger.warn("getUsers user kind for " + id + " " + userID + " is null?");
       }
-
       // if the user kind is unmarked, we'll make them a student, we can always change it later.
 
       User.Kind userKind1 = getKind(userKind);
@@ -660,6 +660,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           //  "",
           rs.getTimestamp(TIMESTAMP).getTime(), "OTHER");
 
+      newUser.setRealGender(newUser.getGender() == 0 ? MiniUser.Gender.Male: MiniUser.Gender.Female);
       users.add(newUser);
 
       if (newUser.getUserID() == null) {
@@ -673,7 +674,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   private User.Kind getKind(String userKind) {
     User.Kind userKind1;
     try {
-      userKind1 = userKind == null ? User.Kind.STUDENT : User.Kind.valueOf(userKind);
+      userKind1 = userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind);
     } catch (IllegalArgumentException e) {
       userKind1 = User.Kind.UNSET;
     }
@@ -769,7 +770,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return idToUser;
   }
 */
-
   @Override
   public boolean changePassword(int user, String newHashPassword, String baseURL) {
     try {
@@ -844,9 +844,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }*/
 
   /**
+   * @return
    * @paramx user
    * @paramx resetKey
-   * @return
    * @seex mitll.langtest.server.services.UserServiceImpl#changePFor
    */
 /*  @Override
@@ -858,12 +858,13 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public Map<User.Kind, Integer> getCounts() {
     return null;
   }*/
+  @Override
+  public void update(User toUpdate) {
+  }
 
   @Override
-  public void update(User toUpdate) {}
-
-  @Override
-  public void close() {}
+  public void close() {
+  }
 
   @Override
   public boolean forgotPassword(String user
@@ -899,7 +900,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return false;
   }
 
-  *//**
+  */
+
+  /**
    * @param id
    * @return
    * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
@@ -908,4 +911,14 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public boolean enableUser(int id) {
     return changeEnabled(id, true);
   }*/
+
+  public static void main(String[] arg) {
+    User.Kind kind = User.Kind.valueOf("STUDENT");
+    logger.info("got " + kind);
+
+    kind = User.Kind.valueOf("TEACHER");
+    logger.info("got " + kind);
+    kind = User.Kind.valueOf("CONTENT_DEVELOPER");
+    logger.info("got " + kind);
+  }
 }

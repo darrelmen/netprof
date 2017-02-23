@@ -61,7 +61,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   protected String oldid = "";
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores;
-  // private float avgScore;
 
   private transient List<String> firstPron = new ArrayList<String>();
   private long updateTime = 0;
@@ -107,6 +106,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.oldid = id;
     this.meaning = meaning;
     this.updateTime = updateTime;
+    this.isPredef = true;
     addContext(context, altcontext, contextTranslation);
     //   this.dominoID = dominoID;
   }

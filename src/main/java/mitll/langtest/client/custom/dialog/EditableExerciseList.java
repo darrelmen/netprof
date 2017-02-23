@@ -53,8 +53,9 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
   private EditItem editItem;
   private UserList<CommonShell> list;
-  //private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+  protected final ListServiceAsync listService = GWT.create(ListService.class);
   private TextBox quickAddText;
+  HTML message;
 
   /**
    * @param controller
@@ -424,7 +425,6 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     return delW;
   }
 
-  HTML message;
 
   @NotNull
   private DivWidget getAddButtonContainer() {
@@ -440,7 +440,9 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     addW.add(add);
 
     message = new HTML();
+    message.setHeight("20px");
     message.addStyleName("leftFiveMargin");
+    message.addStyleName("bottomFiveMargin");
     message.addStyleName("serverResponseLabelError");
     message.getElement().getStyle().setClear(Style.Clear.LEFT);
     addW.add(message);
@@ -457,9 +459,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     quickAddText.setMaxLength(100);
     quickAddText.setVisibleLength(40);
     quickAddText.addStyleName("topMargin");
-    quickAddText.setWidth(235 +
-        "px");
-    // addControlGroup("",quickAddText);
+    quickAddText.setWidth(235 + "px");
 
     return getTypeaheadUsing(whichField, quickAddText);
   }
@@ -473,18 +473,15 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       @Override
       public void onClick(ClickEvent event) {
         add.setEnabled(false);
-        onClickAdd(outer, add);
+        onClickAdd(add);
       }
     });
     add.setType(ButtonType.SUCCESS);
     return add;
   }
 
-  //  private  NewUserExercise newExercise;
-  protected final ListServiceAsync listService = GWT.create(ListService.class);
 
-  private void onClickAdd(ListInterface<CommonShell> outer, Button add) {
-
+  private void onClickAdd(Button add) {
     if (currentExercise != null) {
       if (isOnList()) {
         // TODO : warn user already added.
@@ -507,41 +504,46 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       }
     } else {
       String safeText = getSafeText(quickAddText);
-      controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          enableButton(add);
-        }
+      if (safeText.trim().isEmpty()) {
+        enableButton(add);
+        message.setText("Please enter some text.");
+      } else {
+        controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            enableButton(add);
+          }
 
-        @Override
-        public void onSuccess(Boolean result) {
-          enableButton(add);
+          @Override
+          public void onSuccess(Boolean result) {
+            enableButton(add);
 
 /*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
             " before adding/changing " + newUserExercise + " -> " + result);*/
-          if (result) {
-            listService.newExercise(
-                list.getID(),
-                makeNewExercise(safeText),
-                new AsyncCallback<CommonExercise>() {
-                  @Override
-                  public void onFailure(Throwable caught) {
-                  }
+            if (result) {
+              listService.newExercise(
+                  list.getID(),
+                  makeNewExercise(safeText),
+                  new AsyncCallback<CommonExercise>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
 
-                  @Override
-                  public void onSuccess(CommonExercise newExercise) {
-                    showNewItem(newExercise);
-                  }
-                });
-          } else {
-            message.setText("The item " +
-                " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
+                    @Override
+                    public void onSuccess(CommonExercise newExercise) {
+                      showNewItem(newExercise);
+                    }
+                  });
+            } else {
+              message.setText("The item " +
+                  " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
 
 //            markError(foreignLang, "The " + FOREIGN_LANGUAGE +
 //                " text is not in our " + getLanguage() + " dictionary. Please edit.");
+            }
           }
-        }
-      });
+        });
+      }
     }
   }
 

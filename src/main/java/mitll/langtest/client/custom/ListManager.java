@@ -514,7 +514,13 @@ public class ListManager implements RequiresResize {
   private Panel gwtDownloadLinkRow(UserList ul, String instanceName) {
     Panel r1 = new FluidRow();
     r1.addStyleName("userListDarkerBlueColor");
-    r1.add(getDownloadLink(ul, instanceName));
+    Anchor downloadLink = getDownloadLink(ul, instanceName);
+    downloadLink.addStyleName("floatLeftList");
+    r1.add(downloadLink);
+    Button child = new Button("Add Media", IconType.PLUS);
+    child.addStyleName("floatLeftList");
+
+    r1.add(child);
     return r1;
   }
 

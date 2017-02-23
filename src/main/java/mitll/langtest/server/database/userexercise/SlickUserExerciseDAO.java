@@ -447,7 +447,10 @@ public class SlickUserExerciseDAO
   private List<CommonExercise> getUserExercises(Collection<SlickExercise> all) {
 //    logger.info("getUserExercises for " + all.size()+ " exercises");
     List<CommonExercise> copy = new ArrayList<>();
-    for (SlickExercise userExercise : all) copy.add(fromSlick(userExercise));
+
+    for (SlickExercise userExercise : all) {
+      copy.add(fromSlick(userExercise));
+    }
     //  logger.info("getUserExercises returned " + copy.size()+ " user exercises");
     return copy;
   }
@@ -628,6 +631,7 @@ public class SlickUserExerciseDAO
 
     // recurse on related context exercises
     for (CommonExercise contextEx : userExercise.getDirectlyRelated()) {
+      logger.info("with context exercise " + contextEx.getID() + " context " + contextEx.getForeignLanguage() + " " + contextEx.getEnglish());
       update(contextEx, createIfDoesntExist, true);
     }
   }
@@ -641,6 +645,10 @@ public class SlickUserExerciseDAO
     return dao.isProjectEmpty(projectid);
   }
 
+  /**
+   * @see DatabaseImpl#createTables
+   * @return
+   */
   public IDAO getRelatedExercise() {
     return new IDAO() {
       public void createTable() {
@@ -655,7 +663,7 @@ public class SlickUserExerciseDAO
 
   /**
    * @param relatedExercises
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addContextExercises(int, SlickUserExerciseDAO, Map, int, Collection)
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addContextExercises
    */
   public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
     relatedExerciseDAOWrapper.addBulk(relatedExercises);
@@ -672,6 +680,7 @@ public class SlickUserExerciseDAO
   public Map<String, Integer> getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
     for (SlickExercise exercise : dao.getAllPredefByProject(projectid)) oldToNew.put(exercise.exid(), exercise.id());
+    logger.info("old->new for project #" +projectid + " has  " + oldToNew.size());
     return oldToNew;
   }
 

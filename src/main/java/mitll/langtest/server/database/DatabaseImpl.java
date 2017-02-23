@@ -820,7 +820,7 @@ public class DatabaseImpl implements Database {
     CommonExercise exercise = isPredef ? getExerciseDAO(projectID).addOverlay(userExercise) : null;
     //boolean notOverlay = exercise == null;
     if (isPredef) {
-     // exercise = userExercise;
+      // exercise = userExercise;
       logger.debug("\teditItem made overlay " + exercise);
     } else {
 // not an overlay! it's a new user exercise
@@ -1437,7 +1437,9 @@ public class DatabaseImpl implements Database {
    * @see #editItem
    * @see #getCustomOrPredefExercise(int, int)
    */
-  private CommonExercise getUserExerciseByExID(int id) {  return userExerciseDAO.getByExID(id);  }
+  private CommonExercise getUserExerciseByExID(int id) {
+    return userExerciseDAO.getByExID(id);
+  }
 
   @Override
   public ServerProperties getServerProps() {
@@ -1615,7 +1617,8 @@ public class DatabaseImpl implements Database {
   public UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid) {
     return getUserListManager().getUserListByIDExercises(listid,
         projectid,
-        getSectionHelper(projectid).getTypeOrder(), getIDs(projectid));
+        getSectionHelper(projectid).getTypeOrder(),
+        listid < 0 ? getIDs(projectid) : Collections.emptySet());
   }
 
   public Set<Integer> getIDs(int projectid) {

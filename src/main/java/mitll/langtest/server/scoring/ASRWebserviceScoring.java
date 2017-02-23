@@ -472,9 +472,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             String word1 = word.toLowerCase();
             String[][] process = getLTS().process(word1);
             if (!ltsOutputOk(process)) {
-              logger.warn("getPronunciations couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
+              String key = transcript + "-" + transliteration;
               if (canUseTransliteration) {
                 //              logger.info("trying transliteration LTS");
+                if (!seen.contains(key)) {
+                  logger.warn("getPronunciations (transliteration) couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
+                }
 
                 String[][] translitprocess = (transcriptTokens.length == 1) ?
                     getLTS().process(StringUtils.join(translitTokens, "")) :
@@ -496,7 +499,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               } else {
 //                logger.info("can't use transliteration");
 
-                String key = transcript + "-" + transliteration;
                 if (!seen.contains(key)) {
                   logger.warn("getPronunciations couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
                 }

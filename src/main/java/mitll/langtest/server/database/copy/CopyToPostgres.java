@@ -67,6 +67,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -339,16 +340,11 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see PostgresTest#testCopy
    */
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {
-    logger.info("copyOneConfig type order is " + db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID));
-    //if (true) return;
-
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev);  // TODO : course?
 
-    logger.info("copyOneConfig project is " + projectID);
+    logger.info("copyOneConfig project is " + projectID + " type order is " + db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID));
 
     // first add the user table
-    IUserDAO userDAO = db.getUserDAO();
-    SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
     // check once if we've added it before
@@ -361,6 +357,7 @@ public class CopyToPostgres<T extends CommonShell> {
       Map<Integer, String> idToFL = new HashMap<>();
       Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL);
 
+      SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
       copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL);
 
       logger.info("oldToNewUser " + oldToNewUser.size() + " exToID " + exToID.size());
@@ -369,41 +366,50 @@ public class CopyToPostgres<T extends CommonShell> {
       copyAudio(db, oldToNewUser, exToID, projectID);
 
       // add event table
-      int defectDetector = db.getUserDAO().getDefectDetector();
+      copyEvents(db, projectID, oldToNewUser, exToID);
 
-      if (COPY_EVENTS) {
-        {
-          EventDAO other = new EventDAO(db, defectDetector);
-          ((SlickEventImpl) db.getEventDAO()).copyTableOnlyOnce(other, projectID, oldToNewUser, exToID);
-        }
-      }
-
+      // copy results, words, and phones
       {
         Map<Integer, Integer> oldToNewResult = slickResultDAO.getOldToNew();
 
         if (oldToNewResult.isEmpty()) {
           logger.error("\n\n\nold to new result is EMPTY!");
         }
-        logger.info("oldToNewResult " + oldToNewResult.size());
-        SlickWordDAO slickWordDAO = (SlickWordDAO) db.getWordDAO();
-        copyWord(db, oldToNewResult, slickWordDAO);
-
-        Map<Integer, Integer> oldToNewWordID = slickWordDAO.getOldToNew();
-        logger.info("old to new word id  " + oldToNewWordID.size());
+        Map<Integer, Integer> oldToNewWordID = copyWordsAndGetIDMap(db, oldToNewResult);
 
         // phone DAO
         copyPhone(db, oldToNewResult, oldToNewWordID);
       }
 
-
       // anno DAO
-      copyAnno(db, userDAO, oldToNewUser, exToID);
+      copyAnno(db, db.getUserDAO(), oldToNewUser, exToID);
 
       copyReviewed(db, oldToNewUser, exToID, true);
       copyReviewed(db, oldToNewUser, exToID, false);
       copyRefResult(db, oldToNewUser, exToID);
     } else {
-      logger.info("\n\nProject " + projectID + " already has exercises in it.  Not loading again...");
+      logger.info("\n\nProject #" + projectID + " (" +optName+ ") already has exercises in it.  Not loading again...\n\n");
+    }
+  }
+
+  @NotNull
+  private Map<Integer, Integer> copyWordsAndGetIDMap(DatabaseImpl db, Map<Integer, Integer> oldToNewResult) {
+    logger.info("oldToNewResult " + oldToNewResult.size());
+    SlickWordDAO slickWordDAO = (SlickWordDAO) db.getWordDAO();
+    copyWord(db, oldToNewResult, slickWordDAO);
+
+    Map<Integer, Integer> oldToNewWordID = slickWordDAO.getOldToNew();
+    logger.info("old to new word id  " + oldToNewWordID.size());
+    return oldToNewWordID;
+  }
+
+  private void copyEvents(DatabaseImpl db, int projectID, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID) {
+    if (COPY_EVENTS) {
+      {
+        int defectDetector = db.getUserDAO().getDefectDetector();
+        EventDAO other = new EventDAO(db, defectDetector);
+        ((SlickEventImpl) db.getEventDAO()).copyTableOnlyOnce(other, projectID, oldToNewUser, exToID);
+      }
     }
   }
 

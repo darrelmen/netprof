@@ -101,7 +101,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @see DatabaseImpl#initializeDAOs(PathHelper)
    */
   public RefResultDAO(Database database, boolean dropTable) {
-    super(database, dropTable);
+    super(database);
     this.dropTable = dropTable;
     currentModel = database.getServerProps().getCurrentModel();
   }

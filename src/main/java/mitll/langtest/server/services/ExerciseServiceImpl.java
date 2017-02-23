@@ -59,10 +59,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final Logger logger = LogManager.getLogger(ExerciseServiceImpl.class);
 
   private static final int SLOW_EXERCISE_EMAIL = 2000;
-  private static final int SLOW_MILLIS = 40;
+  private static final int SLOW_MILLIS = 50;
   private static final int WARN_DUR = 100;
-  //public static final String MARK_DEFECTS = "markDefects";
-  //private ExerciseTrie<?> amasFullTrie = null;
   private static final boolean DEBUG = false;
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
@@ -424,7 +422,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
       logger.debug("addAnnotationsAndAudio : (" + getLanguage() + ") took " +
-          (now - then) + " millis to attach audio to exercise " + oldID, new Exception());
+          (now - then) + " millis to attach audio to exercise " + oldID);
     }
     then = now;
 
@@ -596,7 +594,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       try {
         exid = Integer.parseInt(prefix);
       } catch (NumberFormatException e) {
-        logger.info("getExercisesForSearchWithTrie can't parse search number '" + prefix + "'");
+       // logger.info("getExercisesForSearchWithTrie can't parse search number '" + prefix + "'");
       }
     }
     return exid;

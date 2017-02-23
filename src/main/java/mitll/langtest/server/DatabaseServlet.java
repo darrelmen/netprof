@@ -124,11 +124,9 @@ public class DatabaseServlet extends HttpServlet {
   /**
    * @param id
    * @return
-   * @see #getProject(HttpServletRequest)
+   * @see #getProject
    */
-  int getMostRecentProjectByUser(int id) {
-    return getDatabase().getUserProjectDAO().mostRecentByUser(id);
-  }
+  int getMostRecentProjectByUser(int id) {  return getDatabase().getUserProjectDAO().mostRecentByUser(id);  }
 
   /**
    * @see #getProject

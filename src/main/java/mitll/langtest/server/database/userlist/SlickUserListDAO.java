@@ -124,10 +124,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return new UserList<>(
         slick.id(),
         slick.userid(),
-        userDAO.getUserChosenID(slick.userid()), slick.name(),
+        userDAO.getUserChosenID(slick.userid()),
+        slick.name(),
         slick.description(),
         slick.classmarker(),
-        slick.isprivate(), slick.modified().getTime());
+        slick.isprivate(),
+        slick.modified().getTime());
   }
 
   public void insert(SlickUserExerciseList UserExercise) {
@@ -161,9 +163,10 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public void updateModified(long uniqueID) {
-    dao.updateModified((int) uniqueID);
-  }
+  public void updateModified(long uniqueID) {  dao.updateModified((int) uniqueID);  }
+
+  @Override
+  public void updateContext(long uniqueID, String context) {  dao.updateContext((int) uniqueID, context);  }
 
   @Override
   public int getCount() {
@@ -281,12 +284,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   @Override
   public UserList<CommonExercise> getWithExercisesEx(long unique) {
     Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID((int) unique);
-    UserList<CommonExercise> exlist = null;
+    UserList<CommonExercise> exlist;
 
     if (slickUserExerciseListOption.isDefined()) {
       exlist = fromSlickEx(slickUserExerciseListOption.get());
     } else {
-      if (true) logger.error("getByExID : huh? no user list with id " + unique);
+      logger.error("getByExID : huh? no user list with id " + unique);
       return null;
     }
     populateListEx(exlist);
