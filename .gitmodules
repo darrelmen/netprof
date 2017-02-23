@@ -5,7 +5,7 @@
 [submodule "npdata"]
 	path = npdata
 	url = https://gh.ll.mit.edu/DLI-LTEA/npdata
-	branch = devDomino
+	branch = master
 [submodule "gradle-common"]
 	path = gradle-common
 	url = https://gh.ll.mit.edu/Domino/gradle-common.git
