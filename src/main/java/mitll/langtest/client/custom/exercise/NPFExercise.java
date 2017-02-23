@@ -32,10 +32,7 @@
 
 package mitll.langtest.client.custom.exercise;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.DropdownButton;
-import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -44,9 +41,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -57,6 +52,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -71,9 +67,10 @@ import java.util.logging.Logger;
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExercise & ScoredExercise>
-    extends GoodwaveExercisePanel<T> {
+abstract class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
   private final Logger logger = Logger.getLogger("NPFExercise");
+
+  public static final String MAKE_A_NEW_LIST = "Make a new list";
 
   private static final String ADD_ITEM = "Add Item to List";
   private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
@@ -87,7 +84,7 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
 
   private DropdownButton addToList;
   private int activeCount = 0;
-  private final PopupContainer popupContainer = new PopupContainer();
+  private final PopupContainerFactory popupContainer = new PopupContainerFactory();
   private Collection<UserList<CommonShell>> listsForUser = Collections.emptyList();
 
   /**
@@ -150,11 +147,32 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
   }
 
   /**
-   * @see #getNavigationHelper
    * @return
+   * @see #getNavigationHelper
    */
   private Widget getNextListButton() {
-    final PopupContainer.HidePopupTextBox textBox = new PopupContainer.HidePopupTextBox() {
+    String buttonTitle = NEW_LIST;
+
+    final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList();
+
+    final Button newListButton = new Button(buttonTitle);
+    configureNewListButton(newListButton);
+
+    Tooltip tooltip = addTooltip(newListButton, MAKE_A_NEW_LIST);
+    // final DecoratedPopupPanel thePopup =
+    new PopupContainerFactory().makePopupAndButton(textBox, newListButton, tooltip, new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        makeANewList(textBox);
+      }
+    });
+
+    return newListButton;
+  }
+
+  @NotNull
+  private PopupContainerFactory.HidePopupTextBox getTextBoxForNewList() {
+    final PopupContainerFactory.HidePopupTextBox textBox = new PopupContainerFactory.HidePopupTextBox() {
       @Override
       protected void onEnter() {
         makeANewList(this);
@@ -173,48 +191,19 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
     });
     textBox.getElement().setId("NewList");
     textBox.setVisibleLength(60);
-
-    PopupContainer popupContainer = new PopupContainer();
-    final DecoratedPopupPanel commentPopup = popupContainer.makePopupAndButton(textBox, new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        makeANewList(textBox);
-      }
-    });
-
-    final Button newListButton = new Button(NEW_LIST);
-    commentPopup.addAutoHidePartner(newListButton.getElement()); // fix for bug Wade found where click didn't toggle comment
-    popupContainer.configureTextBox("", textBox, commentPopup);
-
-    configureNewListButton(newListButton,
-        commentPopup,
-        textBox);
-    return newListButton;
+    return textBox;
   }
 
   /**
    * @param popupButton
-   * @param popup
-   * @param textEntry
    * @return
    */
-  private void configureNewListButton(final Button popupButton,
-                                      final PopupPanel popup,
-                                      final TextBox textEntry) {
+  private void configureNewListButton(final Button popupButton) {
     popupButton.setIcon(IconType.LIST_UL);
     popupButton.setType(ButtonType.PRIMARY);
     popupButton.addStyleName("leftFiveMargin");
     popupButton.getElement().setId("NPFExercise_popup");
     controller.register(popupButton, exercise.getID(), "show new list");
-
-    new PopupContainer().configurePopupButton(popupButton, popup, textEntry, addTooltip(popupButton, "Make a new list"));
-    popupButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        makeANewList(textEntry);
-
-      }
-    });
   }
 
   private void makeANewList(TextBox textEntry) {
@@ -225,7 +214,7 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
       if (duplicateName) {
         logger.info("---> not adding duplicate list " + newListName);
       } else {
-        addUserList(getUser(), newListName, textEntry);
+        addUserList(newListName, textEntry);
       }
     }
   }
@@ -242,12 +231,11 @@ abstract class NPFExercise<T extends CommonExercise>// CommonShell & AudioRefExe
   }
 
   /**
-   * @param userID
    * @param title
    * @param textBox
    * @see #makeANewList(com.github.gwtbootstrap.client.ui.TextBox)
    */
-  private void addUserList(int userID, String title, final TextBox textBox) {
+  private void addUserList(String title, final TextBox textBox) {
 //    logger.info("user " + userID + " adding list " + title);
     boolean isPublic = !controller.getUserState().getCurrent().isStudent();
     listService.addUserList(

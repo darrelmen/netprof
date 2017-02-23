@@ -51,8 +51,8 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/8/14.
  */
-class PopupContainer {
-  private final Logger logger = Logger.getLogger("PopupContainer");
+public class PopupContainerFactory {
+  //private final Logger logger = Logger.getLogger("PopupContainerFactory");
 
   private final PopupHelper popupHelper = new PopupHelper();
 
@@ -61,16 +61,26 @@ class PopupContainer {
    * @return
    * @see NPFExercise#getNextListButton
    */
-  DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText, ClickHandler clickHandler) {
-    final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
-    commentPopup.setAutoHideEnabled(true);
+  public DecoratedPopupPanel makePopupAndButton(PopupContainerFactory.HidePopupTextBox commentEntryText,
+                                                Button triggerButton,
+                                                Tooltip triggerButtonTooltip,
+                                                ClickHandler clickHandler) {
+    final DecoratedPopupPanel thePopup = new DecoratedPopupPanel();
+    thePopup.setAutoHideEnabled(true);
 
     Panel hp = new HorizontalPanel();
     hp.add(commentEntryText);
-    hp.add(getOKButton(commentPopup, clickHandler));
+    hp.add(getOKButton(thePopup, clickHandler));
 
-    commentPopup.add(hp);
-    return commentPopup;
+    thePopup.add(hp);
+
+    configureTextBox("", commentEntryText, thePopup);
+
+    thePopup.addAutoHidePartner(triggerButton.getElement()); // fix for bug Wade found where click didn't toggle comment
+
+    configurePopupButton(triggerButton, thePopup, commentEntryText, triggerButtonTooltip);
+
+    return thePopup;
   }
 
   /**
@@ -109,7 +119,7 @@ class PopupContainer {
                             final PopupPanel popup,
                             final TextBox textEntry,
                             final Tooltip tooltip) {
-  //  logger.info("configurePopupButton for " + textEntry.getElement().getId());
+    //  logger.info("configurePopupButton for " + textEntry.getElement().getId());
     popupButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -164,7 +174,7 @@ class PopupContainer {
   /**
    * @see CommentBox#getEntry(String, Widget, ExerciseAnnotation)
    */
-  static class HidePopupTextBox extends TextBox {
+  public static class HidePopupTextBox extends TextBox {
     void configure(final PopupPanel popup) {
       addKeyPressHandler(new KeyPressHandler() {
         @Override
@@ -180,7 +190,7 @@ class PopupContainer {
       });
     }
 
-    void onEnter() {
+    protected void onEnter() {
     }
   }
 }

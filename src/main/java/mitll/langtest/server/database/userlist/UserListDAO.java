@@ -50,7 +50,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-@Deprecated public class UserListDAO extends DAO implements IUserListDAO {
+@Deprecated
+public class UserListDAO extends DAO implements IUserListDAO {
   private static final String CREATORID = "creatorid";
   private static final Logger logger = LogManager.getLogger(UserListDAO.class);
 
@@ -416,14 +417,14 @@ import java.util.List;
       int uniqueid = rs.getInt("uniqueid");
       User userWhere = userDAO.getUserWhere(rs.getInt(CREATORID));
       lists.add(new UserList<>(
-              uniqueid, //id
-          userWhere.getID() , // age
+          uniqueid, //id
+          userWhere.getID(), // age
           // exp
           userWhere.getUserID(), rs.getString(NAME), // exp
           rs.getString("description"), // exp
           rs.getString("classmarker"),
           rs.getBoolean(ISPRIVATE),
-          rs.getTimestamp("modified").getTime())
+          rs.getTimestamp("modified").getTime(), "")
       );
     }
     //logger.debug("getWhere : got " + lists);

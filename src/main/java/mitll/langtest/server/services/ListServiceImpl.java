@@ -161,36 +161,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   /**
-   * Put the new item in the database,
-   * copy the audio under bestAudio
-   * assign the item to a user list
-   * <p>
-   * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
-   *
-   * @param userListID
-   * @param userExercise
-   * @param language
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
-   */
- /* @Override
-  public CommonExercise newExercise(long userListID, CommonExercise userExercise, String language) {
-    if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
-    getUserListManager().newExercise(userListID, userExercise, getMediaDir());
-    int id = userExercise.getID();
-
-    for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
-      if (DEBUG) logger.debug("\tnewExercise : update " + audioAttribute + " to " + id);
-      db.getAudioDAO().updateExerciseID(
-          audioAttribute.getUniqueID(),
-          id,
-          audioAttribute.getAudioRef());
-    }
-    if (DEBUG) logger.debug("\tnewExercise : made user exercise " + userExercise + " on list " + userListID);
-
-    return userExercise;
-  }*/
-
-  /**
    * @return
    * @seex #newExercise
    */
@@ -200,32 +170,29 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
   /**
    * Put the new item in the database,
-   * copy the audio under bestAudio
+   * copy the audio under bestAudio ??
    * assign the item to a user list
    * <p>
    * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
    *
    * @param userListID
    * @param userExercise
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @return CommonExercise with id from database
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
   public CommonExercise newExercise(long userListID, CommonExercise userExercise) {
     if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
-    getUserListManager().newExercise(userListID, userExercise, serverProps.getMediaDir());
-   // int id = userExercise.getID();
 
-/*    for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
-      if (DEBUG) logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + id);
-      db.getAudioDAO().updateExerciseID(
-          audioAttribute.getUniqueID(),
-          id,
-          audioAttribute.getAudioRef());
-    }*/
-    if (DEBUG) logger.debug("\tnewExercise : made user exercise " + userExercise + " on list " + userListID);
-
-    return userExercise;
+    CommonExercise exercise = db.getProject(userExercise.getProjectID()).getExercise(userExercise.getForeignLanguage().trim());
+    if (exercise != null) {
+      addItemToUserList(userListID, exercise.getID());
+      return exercise;
+    } else {
+      getUserListManager().newExercise(userListID, userExercise, serverProps.getMediaDir());
+      if (DEBUG) logger.debug("\tnewExercise : made user exercise " + userExercise + " on list " + userListID);
+      return userExercise;
+    }
   }
 
   /**
@@ -322,11 +289,13 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public void editItem(CommonExercise userExercise, boolean keepAudio) {
-      db.editItem(userExercise, keepAudio);
-  //  if (DEBUG) logger.debug("editItem : now user exercise " + userExercise);
+    db.editItem(userExercise, keepAudio);
+    //  if (DEBUG) logger.debug("editItem : now user exercise " + userExercise);
   }
 
-  public void updateContext(long id, String context) { getUserListManager().getUserListDAO().updateContext(id,context); }
+  public void updateContext(long id, String context) {
+    getUserListManager().getUserListDAO().updateContext(id, context);
+  }
 
   IUserListManager getUserListManager() {
     return db.getUserListManager();
