@@ -89,6 +89,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return dao.getName();
   }
 
+  private List<UserList<CommonShell>> fromSlick(Collection<SlickUserExerciseList> all) {
+    List<UserList<CommonShell>> copy = new ArrayList<>();
+    for (SlickUserExerciseList list : all) copy.add(fromSlick(list));
+    return copy;
+  }
+
   public SlickUserExerciseList toSlick(UserList<CommonShell> shared, int projid) {
     return toSlick2(shared, shared.getUserID(), projid);
   }
@@ -114,10 +120,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return new UserList<>(
         slick.id(),
         slick.userid(),
-        userDAO.getUserChosenID(slick.userid()), slick.name(),
+        userDAO.getUserChosenID(slick.userid()),
+        slick.name(),
         slick.description(),
         slick.classmarker(),
-        slick.isprivate(), slick.modified().getTime());
+        slick.isprivate(),
+        slick.modified().getTime());
   }
 
   private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
@@ -138,12 +146,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
   public void addBulk(List<SlickUserExerciseList> bulk) {
     dao.addBulk(bulk);
-  }
-
-  private List<UserList<CommonShell>> fromSlick(Collection<SlickUserExerciseList> all) {
-    List<UserList<CommonShell>> copy = new ArrayList<>();
-    for (SlickUserExerciseList list : all) copy.add(fromSlick(list));
-    return copy;
   }
 
   @Override
@@ -217,6 +219,10 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     }*/
   }
 
+  /**
+   * Add the exercises to the list.
+   * @param where
+   */
   private void populateListEx(UserList<CommonExercise> where) {
     List<CommonExercise> onList = userExerciseDAO.getCommonExercises(where.getID());
     where.setExercises(onList);

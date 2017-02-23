@@ -75,6 +75,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @param playButtonSuffix
    * @param stopButtonText
    * @param audioType
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
    */
   protected WaveformPostAudioRecordButton(int exerciseID,
                                           ExerciseController controller,

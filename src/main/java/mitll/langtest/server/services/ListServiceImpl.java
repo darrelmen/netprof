@@ -323,7 +323,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @Override
   public void editItem(CommonExercise userExercise, boolean keepAudio) {
       db.editItem(userExercise, keepAudio);
-    if (DEBUG) logger.debug("editItem : now user exercise " + userExercise);
+  //  if (DEBUG) logger.debug("editItem : now user exercise " + userExercise);
   }
 
   public void updateContext(long id, String context) { getUserListManager().getUserListDAO().updateContext(id,context); }

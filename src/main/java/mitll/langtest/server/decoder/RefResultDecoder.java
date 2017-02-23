@@ -35,10 +35,7 @@ package mitll.langtest.server.decoder;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.TrackInfo;
+import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
@@ -996,7 +993,7 @@ public class RefResultDecoder {
           } catch (IOException e) {
             logger.error("got " + e, e);
           }
-          AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile);
+          TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile);
           if (trimInfo.didTrim()) {
             // drop ref result info
             logger.debug("trimmed " + exid + " " + attribute + " audio " + bestAudio);

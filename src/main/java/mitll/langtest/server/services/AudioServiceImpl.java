@@ -129,6 +129,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         "\n\tallowAlternates " + allowAlternates +
         "\n\tpayload bytes   " + base64EncodedString.length());
 
+    if (addToAudioTable && !recordInResults) { // we have a foreign key from audio into result table - must record in results
+      recordInResults = true;
+    }
     boolean amas = serverProps.isAMAS();
 
     CommonExercise commonExercise = amas || isExistingExercise ?
@@ -169,8 +172,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
             options);
 
-    logger.info("writeAudioFile recording audioAnswer " + audioAnswer.getTranscript());
-
+    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
 
     int user = audioContext.getUserid();
     if (addToAudioTable && audioAnswer.isValid()) {
@@ -183,30 +185,38 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     // normalizeLevel(audioAnswer);
     // }
 
-    if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
-      logger.warn("huh? got zero length recording " + user + " " + exerciseID);
-      logEvent("audioRecording", "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
-    } else {
-      ensureCompressedAudio(user, commonExercise, audioAnswer.getPath(), audioContext.getAudioType(), language);
+    try {
+      if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
+        logger.warn("huh? got zero length recording " + user + " " + exerciseID);
+        logEvent("audioRecording", "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
+      } else {
+        ensureCompressedAudio(user, commonExercise, audioAnswer.getPath(), audioContext.getAudioType(), language);
+        logger.info("wrote compressed...");
+      }
+    } catch (Exception e) {
+      logger.error("Got " +e, e);
     }
 
     return audioAnswer;
   }
 
-  private void ensureCompressedAudio(int user, CommonExercise commonShell, String path, AudioType audioType,
+  private void ensureCompressedAudio(int user,
+                                     CommonExercise commonShell,
+                                     String path,
+                                     AudioType audioType,
                                      String language) {
-    //String foreignLanguage = commonShell == null ? "unknown" : commonShell.getForeignLanguage();
     String userID = getUserID(user);
     if (userID == null) {
       logger.warn("ensureCompressedEquivalent huh? no user for " + user);
     }
 
-    String title = commonShell == null ? "unknown" : commonShell.getForeignLanguage();
-    String comment = commonShell == null ? "unknown" : commonShell.getEnglish();
-    if (audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) && commonShell != null) {
+    boolean noExerciseYet = commonShell == null;
+    String title   = noExerciseYet ? "unknown" : commonShell.getForeignLanguage();
+    String comment = noExerciseYet ? "unknown" : commonShell.getEnglish();
+    if (audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) && !noExerciseYet) {
       if (commonShell.hasContext()) {
         CommonExercise contextSentence = commonShell.getDirectlyRelated().iterator().next();
-        title = contextSentence.getForeignLanguage();
+        title   = contextSentence.getForeignLanguage();
         comment = contextSentence.getEnglish();
       }
     }
@@ -315,20 +325,25 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             serverProps,
             new TrackInfo(audioTranscript, getArtist(user), context, language));
 
-    AudioInfo info = new AudioInfo(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
-        audioAnswer.getDurationInMillis(), audioTranscript, (float) audioAnswer.getDynamicRange(), audioAnswer.getResultID());
+    AudioAttribute audioAttribute = null;
+    try {
+      AudioInfo info = new AudioInfo(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
+          audioAnswer.getDurationInMillis(), audioTranscript, (float) audioAnswer.getDynamicRange(), audioAnswer.getResultID());
 
-    AudioAttribute audioAttribute = db.getAudioDAO().addOrUpdate(info);
+      audioAttribute = db.getAudioDAO().addOrUpdate(info);
 
-    audioAnswer.setPath(audioAttribute.getAudioRef());
-    logger.debug("addToAudioTable" +
-        "\n\tuser " + user +
-        "\n\tex " + exerciseID + "/" + idToUse +
-        "\n\tfor " + audioType +
-        "\n\taudio answer has " + audioAttribute);
+      audioAnswer.setPath(audioAttribute.getAudioRef());
+      logger.debug("addToAudioTable" +
+          "\n\tuser " + user +
+          "\n\tex " + exerciseID + "/" + idToUse +
+          "\n\tfor " + audioType +
+          "\n\taudio answer has " + audioAttribute);
 
-    // what state should we mark recorded audio?
-    setExerciseState(idToUse, user, exercise1);
+      // what state should we mark recorded audio?
+      setExerciseState(idToUse, user, exercise1);
+    } catch (Exception e) {
+      logger.error("got "+e,e);
+    }
     return audioAttribute;
   }
 

@@ -69,18 +69,8 @@ public abstract class BaseAudioDAO extends DAO {
   public static final String FEMALE_SLOW = "femaleSlow";
   public static final String MALE_CONTEXT = "maleContext";
   public static final String FEMALE_CONTEXT = "femaleContext";
-
-//  @Deprecated
-//  protected static final String REGULAR = "regular";
-//  @Deprecated
-//  protected static final String SLOW = "slow";
-//  @Deprecated
-//  private static final String AUDIO_TYPE1 = "context=" + REGULAR;
-//  @Deprecated
-//  private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
-
   private static final String TRANSLITERATION = "transliteration";
-  private static final boolean DEBUG_ATTACH = false;
+  private static final boolean DEBUG_ATTACH = true;
   private static final int WARN_DURATION = 30;
 
   protected final IUserDAO userDAO;
@@ -558,6 +548,12 @@ public abstract class BaseAudioDAO extends DAO {
         -1);
   }
 
+  /**
+   * @see DatabaseImpl#editItem(CommonExercise, boolean)
+   * @param userExercise
+   * @param fieldToAnnotation
+   * @return
+   */
   public Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
                                                Map<String, ExerciseAnnotation> fieldToAnnotation) {
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();

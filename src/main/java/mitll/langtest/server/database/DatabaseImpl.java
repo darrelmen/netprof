@@ -796,23 +796,25 @@ public class DatabaseImpl implements Database {
    * @param userExercise
    * @param keepAudio
    * @see mitll.langtest.server.services.ListServiceImpl#editItem
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#postEditItem
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   public CommonExercise editItem(CommonExercise userExercise, boolean keepAudio) {
     int id = userExercise.getID();
     logger.debug("editItem exercise #" + id +
         " keep audio " + keepAudio +
         " mediaDir : " + getServerProps().getMediaDir() +
-        " initially audio was\n\t " + userExercise.getAudioAttributes());
+        " audio " + userExercise.getAudioAttributes());
 
     getUserListManager().editItem(userExercise,
-        true, // create if doesn't exist
+        // create if doesn't exist
         getServerProps().getMediaDir());
 
     Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
-    logger.debug("editItem originally had " + original.size() + " attribute, and " + defects.size() + " defects");
+    if (!original.isEmpty()) {
+      logger.debug("editItem originally had " + original.size() + " attributes, and " + defects.size() + " defects");
+    }
 
     int projectID = userExercise.getProjectID();
 
@@ -825,7 +827,7 @@ public class DatabaseImpl implements Database {
     } else {
 // not an overlay! it's a new user exercise
       exercise = getUserExerciseByExID(userExercise.getID());
-      logger.debug("editItem made user custom exercise " + exercise);
+      logger.debug("editItem user custom exercise is " + exercise);
     }
 
     if (isPredef) {
@@ -1396,7 +1398,7 @@ public class DatabaseImpl implements Database {
   public CommonExercise getCustomOrPredefExercise(int projid, int id) {
     CommonExercise toRet = getExercise(projid, id);
     if (toRet == null) {
-      if (warns++ < 50)
+     // if (warns++ < 50)
         logger.info("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }

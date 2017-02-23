@@ -42,7 +42,7 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
    * @param other
    * @param projid
    * @param exToInt
-   * @see mitll.langtest.server.database.CopyToPostgres#copyOneConfig(DatabaseImpl, String, String)
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfig
    */
   public void copyTableOnlyOnce(IEventDAO other,
                                 int projid,
@@ -172,7 +172,7 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
   /**
    * @param event
    * @param projid
-   * @param oldToNewUser
+   * @paramx oldToNewUser
    * @param exToID
    * @return
    * @see #copyTableOnlyOnce(IEventDAO, int, Map, Map)

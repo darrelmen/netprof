@@ -61,7 +61,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   private static final int SLOW_MILLIS = 50;
   private static final int WARN_DUR = 100;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
+
+  public static final int MIN_DEBUG_DURATION = 30;
+  public static final int MIN_WARN_DURATION  = 1000;
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
@@ -999,9 +1002,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       String threadInfo = threadGroup.getName() + " = " + threadGroup.activeCount();
       logger.error(message + " thread count " + threadInfo);
       sendEmailWhenSlow(id, language, diff, threadInfo);
-    } else if (diff > 1000) {
+    } else if (diff > MIN_WARN_DURATION) {
       logger.warn(message);
-    } else if (diff > 15) {
+    } else if (diff > MIN_DEBUG_DURATION) {
       logger.debug(message);
     }
   }
