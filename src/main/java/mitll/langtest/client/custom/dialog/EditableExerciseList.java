@@ -12,6 +12,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
@@ -96,19 +98,20 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 //    MaterialAutoComplete acList = new MaterialAutoComplete(new ExerciseOracle());
 //    widgets.add(acList);
 
-    addListChangedListener(new ListChangeListener<CommonShell>() {
-      @Override
-      public void listChanged(List<CommonShell> items, String selectionID) {
-//        logger.warning("got list changed - list is " + isEmpty());
-        enableRemove(!isEmpty());
-      }
-    });
+    addListChangedListener((items, selectionID) -> enableRemove(!isEmpty()));
     return widgets;
   }
 
   private int req = 0;
   private CommonShell currentExercise = null;
 
+  /**
+   * @param whichField
+   * @param w
+   * @param <T>
+   * @return
+   * @see #getTypeahead
+   */
   private <T extends CommonShell> Typeahead getTypeaheadUsing(final String whichField, TextBox w) {
     SuggestOracle oracle = new SuggestOracle() {
       @Override
@@ -122,7 +125,6 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
         controller.getExerciseService().getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
               @Override
               public void onFailure(Throwable caught) {
-
               }
 
               @Override
@@ -146,8 +148,6 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       @Override
       public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
         ExerciseSuggestion exerciseSuggestion = (ExerciseSuggestion) selectedSuggestion;
-
-        //  logger.info("Got " +exerciseSuggestion.getID());
         currentExercise = exerciseSuggestion.getShell();
         return selectedSuggestion.getReplacementString();
       }
@@ -155,8 +155,6 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
     w.getElement().setId("TextBox_" + whichField);
     typeahead.setWidget(w);
-//    configureTextBox(w);
-    // addCallbacks(typeahead);
     return typeahead;
   }
 
@@ -203,7 +201,6 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   private Collection<SuggestOracle.Suggestion> getSuggestions(String query, List<? extends CommonShell> exercises) {
     Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<>();
     //  logger.info("getSuggestions converting " + exercises.size());
-
     message.setText("");
     //String before = query;
     query = normalizeSearch(query);
@@ -212,7 +209,6 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     //  logger.info("getSuggestions after  '" + query + "'");
 
     String[] searchWords = query.split(WHITESPACE_STRING);
-
     //  logger.info("getSuggestions searchWords length '" + searchWords.length + "'");
 
     for (CommonShell resp : exercises) {
@@ -225,9 +221,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
       */
       suggestions.add(suggestion);
     }
-
 //    logger.info("getSuggestions returning " + suggestions.size());
-
     return suggestions;
   }
 
@@ -449,6 +443,12 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     quickAddText.addStyleName("topMargin");
     quickAddText.setWidth(235 + "px");
 
+    quickAddText.addKeyUpHandler(new KeyUpHandler() {
+      @Override
+      public void onKeyUp(KeyUpEvent event) {
+        currentExercise = null;
+      }
+    });
     return getTypeaheadUsing(whichField, quickAddText);
   }
 
@@ -456,7 +456,6 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   private Button getAddButton() {
     Button add = new Button(ADD, IconType.PLUS);
 
-    final ListInterface<CommonShell> outer = this;
     add.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
