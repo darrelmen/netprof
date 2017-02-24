@@ -700,7 +700,9 @@ public class InitialUI implements UILifecycle {
   private void addBreadcrumbs() {
     int childCount = verticalContainer.getElement().getChildCount();
     boolean found = false;
-    logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+
+    // logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+
     if (childCount > 0) {
       for (int i = 0; i < childCount; i++) {
         Node child = verticalContainer.getElement().getChild(i);

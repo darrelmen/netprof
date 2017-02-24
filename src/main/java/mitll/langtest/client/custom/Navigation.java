@@ -695,8 +695,12 @@ public class Navigation implements RequiresResize, ShowTab {
         // Widget widget = content.getWidget(0);
 
         int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 : orig.equals(CREATE) ? 2 : orig.equals(BROWSE) ? 3 : 0;
-        //  logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
-        listManager.showFirstUserListTab((TabPanel) widget, tab);
+
+        logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
+
+     //   listManager.showFirstUserListTab((TabPanel) widget, tab);
+
+        listManager.selectTab((TabPanel) widget, tab);
         if (tab == 0) {
           listManager.showMyLists(true, false);
         } else if (tab == 1) {
@@ -714,10 +718,6 @@ public class Navigation implements RequiresResize, ShowTab {
         dialogWindow.viewDialog(dialog.getContent());
       } else if (clickedTab.equals(CHAPTERS)) {
         learnHelper.showNPF(chapters, LEARN);
-//      } else if (clickedTab.equals(USERS)) {
-//        UserOps userOps = new UserOps(controller, userManager);
-//        userOps.showUsers(users);
-//        users.setResizeable(userOps);
       } else if (clickedTab.equals(PROJECTS)) {
         ProjectOps ops = new ProjectOps(controller, lifecycleSupport);
         ops.show(projects);
