@@ -42,6 +42,13 @@ import java.util.Collection;
 import java.util.List;
 
 public interface IUserListDAO extends IDAO {
+  void updateModified(long uniqueID);
+
+  void updateContext(long uniqueID, String context);
+
+  void updateName(long id, String name);
+
+
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#addVisitor(long, long)
    * @param listid
@@ -50,10 +57,6 @@ public interface IUserListDAO extends IDAO {
   void addVisitor(long listid, long userid);
 
   void add(UserList<CommonShell> userList, int projid);
-
-  void updateModified(long uniqueID);
-
-  void updateContext(long uniqueID, String context);
 
   int getCount();
 
@@ -77,4 +80,5 @@ public interface IUserListDAO extends IDAO {
   void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);
 
   void setPublicOnList(long userListID, boolean isPublic);
+
 }

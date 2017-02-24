@@ -43,8 +43,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -83,6 +82,7 @@ import java.util.logging.Logger;
 public class ListManager implements RequiresResize {
   public static final String COLLAPSIBLE_DOCUMENT_VIEWER = "collapsibleDocumentViewer";
   public static final String LIST_OPERATIONS = "listOperations";
+  public static final String ADD_MEDIA = "Add Media";
   private final Logger logger = Logger.getLogger("ListManager");
   private static final String IMPORT_ITEM = "importItem";
 
@@ -500,29 +500,28 @@ public class ListManager implements RequiresResize {
 
     String userID = ul.getUserChosenID();
     if (!userID.equals(User.NOT_SET)) {
-      Panel secondRow = new FluidRow();    // TODO : this is wacky -- clean up...
-      addCreatedBy(listOperationsContainer, secondRow, userID);
+      addCreatedBy(listOperationsContainer, userID);
     }
 
     listOperationsContainer.add(gwtDownloadLinkRow(ul, instanceName));
-
     listOperationsContainer.add(mediaContainer = new DivWidget());
 
     if (!ul.getContextURL().isEmpty()) {
       addDocContainer(ul.getContextURL(), mediaContainer);
-    } else {
+    }
+//    else {
 //      DivWidget docContainer = new DivWidget();
 //     // docContainer.setHeight("300px");
 //      docContainer.setWidth("100%");
 //      collapse.setWidget(docContainer);
-    }
+//    }
 
     listOperationsContainer.add(getListOperations(ul, instanceName, toSelect));
 
     return listOperationsContainer;
   }
 
-  Button showHideMedia;
+  private Button showHideMedia;
 
   private Panel gwtDownloadLinkRow(UserList ul, String instanceName) {
     Panel r1 = new FluidRow();
@@ -534,7 +533,7 @@ public class ListManager implements RequiresResize {
     downloadLink.addStyleName("floatLeftList");
     r1.add(downloadLink);
 
-    Button child = getButton(ul.getID());
+    Button child = getButton(ul.getID(), ul.getContextURL());
     child.addStyleName("floatLeftList");
 
     r1.add(child);
@@ -559,11 +558,11 @@ public class ListManager implements RequiresResize {
     return r1;
   }
 
-  private Button getButton(int id) {
-    String buttonTitle = "Add Media";
+  private Button getButton(int id, String current) {
+    String buttonTitle = ADD_MEDIA;
 
-    final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList(id);
-
+    final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList(id, 150);
+    textBox.setText(current);
     final Button newListButton = new Button(buttonTitle);
     configureNewListButton(newListButton);
 
@@ -580,7 +579,7 @@ public class ListManager implements RequiresResize {
   }
 
   @NotNull
-  private PopupContainerFactory.HidePopupTextBox getTextBoxForNewList(int id) {
+  private PopupContainerFactory.HidePopupTextBox getTextBoxForNewList(int id, int length) {
     final PopupContainerFactory.HidePopupTextBox textBox = new PopupContainerFactory.HidePopupTextBox() {
       @Override
       protected void onEnter() {
@@ -589,7 +588,7 @@ public class ListManager implements RequiresResize {
     };
 
     textBox.getElement().setId("NewList");
-    textBox.setVisibleLength(60);
+    textBox.setVisibleLength(length);
     return textBox;
   }
 
@@ -618,26 +617,41 @@ public class ListManager implements RequiresResize {
     logger.info("Add doc container with " + mediaURL);
     logger.info("Add doc container mediaContainer " + mediaContainer);
 
-   // if (frame == null) {
-      DivWidget docContainer = new DivWidget();
+    // if (frame == null) {
+    DivWidget docContainer = new DivWidget();
 
-      docContainer.setWidth("100%");
+    docContainer.setWidth("100%");
 
-      Frame  frame = new Frame(mediaURL);
-      frame.setHeight("300px");
+    if (mediaURL.startsWith("<iframe")) {
+      docContainer.add(new HTML(mediaURL));
+    } else {
+      Frame frame = new Frame(mediaURL);
+      frame.setHeight("315px");
       frame.setWidth("100%");
       docContainer.add(frame);
+    }
 
-      collapse = new Collapse();
-      collapse.setId(COLLAPSIBLE_DOCUMENT_VIEWER);
-      collapse.setDefaultOpen(false);
-      collapse.setExistTrigger(true);
-      collapse.setWidget(docContainer);
+    //   String test = "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/dkcY6pv7ALk\" frameborder=\"0\" allowfullscreen></iframe>";
 
-      mediaContainer.add(collapse);
+/*      Frame  frame = new Frame(mediaURL);
+      frame.setHeight("315px");
+      frame.setWidth("100%");
+
+      docContainer.add(frame);*/
+
+    // docContainer.add(new HTML(test));
+
+    collapse = new Collapse();
+    collapse.setId(COLLAPSIBLE_DOCUMENT_VIEWER);
+    collapse.setDefaultOpen(false);
+    collapse.setExistTrigger(true);
+    collapse.setWidget(docContainer);
+
+    mediaContainer.clear();
+    mediaContainer.add(collapse);
 //    } else {
- //     frame.setUrl(mediaURL);
- //   }
+    //     frame.setUrl(mediaURL);
+    //   }
   }
 
   private void configureNewListButton(final Button popupButton) {
@@ -657,7 +671,13 @@ public class ListManager implements RequiresResize {
     return downloadLink;
   }
 
-  private void addCreatedBy(FluidContainer container, Panel secondRow, String userID) {
+  /**
+   * @param container
+   * @param userID
+   * @see #makeTabContent
+   */
+  private void addCreatedBy(FluidContainer container, String userID) {
+    Panel secondRow = new FluidRow();
     Heading child1 = new Heading(5, "created by " + userID);
     secondRow.add(child1);
     child1.addStyleName("leftFiveMargin");
@@ -672,20 +692,92 @@ public class ListManager implements RequiresResize {
   private Panel getFirstInfoRow(UserList ul) {
     Panel firstRow = new FluidRow();    // TODO : this is wacky -- clean up...
     firstRow.getElement().setId("container_first_row");
+
+    DivWidget container = new DivWidget();
+    HTML heading = getNameHeading(ul, container);
+
+    firstRow.add(container);
+    container.add(heading);
+
     firstRow.add(getListInfo(ul));
     firstRow.addStyleName("userListDarkerBlueColor");
     return firstRow;
   }
 
+  @NotNull
+  private HTML getNameHeading(UserList ul, DivWidget container) {
+    HTML heading = new HTML("<h1>" + ul.getName() + "</h1>");
+    heading.getElement().getStyle().setCursor(Style.Cursor.TEXT);
+
+    heading.addClickHandler(getClickHandler(ul, container, heading));
+    styleListInfo(heading);
+
+    return heading;
+  }
+
+  @NotNull
+  private ClickHandler getClickHandler(final UserList ul, final DivWidget container, final HTML heading) {
+    return new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        container.remove(heading);
+        TextBox editableHeading = new TextBox();
+
+        editableHeading.setText(ul.getName());
+        Style style = editableHeading.getElement().getStyle();
+        style.setFontSize(38, Style.Unit.PX);
+        style.setFontWeight(Style.FontWeight.BOLD);
+        style.setLineHeight(40, Style.Unit.PX);
+        style.setMarginTop(5, Style.Unit.PX);
+        style.setMarginBottom(5, Style.Unit.PX);
+        editableHeading.setHeight("40px");
+        editableHeading.setWidth("400px");
+        editableHeading.setVisibleLength(150);
+
+        editableHeading.addKeyPressHandler(event1 -> {
+          int keyCode = event1.getNativeEvent().getKeyCode();
+          if (keyCode == KeyCodes.KEY_ENTER) {
+            finishedEditing(ul, container, editableHeading);
+          }
+        });
+
+        editableHeading.addBlurHandler(event12 -> finishedEditing(ul, container, editableHeading));
+        editableHeading.addMouseOutHandler(event123 -> finishedEditing(ul, container, editableHeading));
+        container.add(editableHeading);
+      }
+    };
+  }
+
+  private void finishedEditing(final UserList ul, final DivWidget container, TextBox editableHeading) {
+    listService.updateName(ul.getID(), editableHeading.getText(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        ul.setName(editableHeading.getText());
+        container.remove(editableHeading);
+        HTML nameHeading = getNameHeading(ul, container);
+        container.add(nameHeading);
+      }
+    });
+  }
 
   private Panel getListInfo(UserList ul) {
     String subtext = ul.getDescription() + " " + ul.getClassMarker();
-    Heading widgets = new Heading(1, ul.getName(), subtext);    // TODO : better color for subtext h1->small
 
+    Heading widgets = new Heading(1, "", subtext);    // TODO : better color for subtext h1->small
+
+    styleListInfo(widgets);
+    return widgets;
+  }
+
+  private void styleListInfo(UIObject widgets) {
     widgets.addStyleName("floatLeft");
     widgets.addStyleName("leftFiveMargin");
     widgets.getElement().getStyle().setMarginBottom(3, Style.Unit.PX);
-    return widgets;
   }
 
   private String storeCurrentClickedList(HasID ul) {

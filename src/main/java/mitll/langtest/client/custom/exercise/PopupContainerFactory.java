@@ -42,8 +42,6 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.shared.ExerciseAnnotation;
 
-import java.util.logging.Logger;
-
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -52,8 +50,8 @@ import java.util.logging.Logger;
  * @since 9/8/14.
  */
 public class PopupContainerFactory {
+  public static final int VISIBLE_LENGTH = 70;
   //private final Logger logger = Logger.getLogger("PopupContainerFactory");
-
   private final PopupHelper popupHelper = new PopupHelper();
 
   /**
@@ -163,7 +161,7 @@ public class PopupContainerFactory {
     if (initialText != null && !initialText.isEmpty()) {
       textBox.setText(initialText);
       if (textBox.getVisibleLength() < initialText.length()) {
-        textBox.setVisibleLength(70);
+        textBox.setVisibleLength(VISIBLE_LENGTH);
       }
     }
 
@@ -181,8 +179,6 @@ public class PopupContainerFactory {
         public void onKeyPress(KeyPressEvent event) {
           int keyCode = event.getNativeEvent().getKeyCode();
           if (keyCode == KeyCodes.KEY_ENTER) {
-            // System.out.println("HidePopupTextBox : got key press on " + getElement().getExID());
-            //popupAboutToBeHidden();
             popup.hide();
             onEnter();
           }

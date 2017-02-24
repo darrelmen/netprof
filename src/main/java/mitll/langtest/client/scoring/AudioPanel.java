@@ -71,6 +71,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
+  public static final String RECORD = "Record";
   private final Logger logger = Logger.getLogger("AudioPanel");
   public static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
 
@@ -103,7 +104,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private AudioPositionPopup audioPositionPopup;
 
   protected final SoundManagerAPI soundManager;
-  private PlayAudioPanel playAudio;
+  protected PlayAudioPanel playAudio;
   @Deprecated  private float screenPortion = 1.0f;
   private final boolean logMessages;
   protected final ExerciseController controller;
@@ -137,7 +138,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     this(controller, showSpectrogram, 1.0f, rightMargin, exercise, exerciseID, instance);
     this.audioPath = path;
 
-    addWidgets(playButtonSuffix, "Record");
+    addWidgets(playButtonSuffix, RECORD);
     if (playAudio != null) {
       if (exercise == null) {
         logger.warning("hmm exercise is null for " + instance);
@@ -212,7 +213,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param recordButtonTitle
    * @return
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
-   * @see mitll.langtest.client.scoring.AudioPanel#AudioPanel
+   * @see #AudioPanel
    */
   protected void addWidgets(String playButtonSuffix, String recordButtonTitle) {
 //    logger.info("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle +

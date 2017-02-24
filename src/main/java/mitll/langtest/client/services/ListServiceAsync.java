@@ -81,4 +81,6 @@ public interface ListServiceAsync {
   void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
 
   void updateContext(long userListID, String context, AsyncCallback<Void> async);
+
+  void updateName(long userListID, String name, AsyncCallback<Void> async);
 }

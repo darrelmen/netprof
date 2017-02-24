@@ -35,6 +35,7 @@ package mitll.langtest.server.services;
 import com.github.gwtbootstrap.client.ui.Button;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -294,9 +295,17 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   public void updateContext(long id, String context) {
-    getUserListManager().getUserListDAO().updateContext(id, context);
+    getUserListDAO().updateContext(id, context);
   }
 
+  private IUserListDAO getUserListDAO() {
+    return getUserListManager().getUserListDAO();
+  }
+
+  public void updateName(long id, String name) {
+    getUserListDAO().updateName(id, name);
+
+  }
   IUserListManager getUserListManager() {
     return db.getUserListManager();
   }

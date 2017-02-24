@@ -198,6 +198,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
+  public void updateName(long id, String name) {
+
+  }
+
+  @Override
   public int getCount() {
     return getCount(USER_EXERCISE_LIST);
   }

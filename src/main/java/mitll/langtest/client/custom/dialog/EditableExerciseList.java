@@ -42,6 +42,7 @@ import java.util.logging.Logger;
  */
 class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
+  public static final String STRONG = "strong";
 
   private static final int DISPLAY_ITEMS = 15;
   private static final String ADD = "Add";
@@ -250,9 +251,9 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
             wordBounds.endIndex);
         cursor = wordBounds.endIndex;
         accum.appendEscaped(part1);
-        accum.appendHtmlConstant("<strong>");
+        accum.appendHtmlConstant("<" + STRONG + ">");
         accum.appendEscaped(part2);
-        accum.appendHtmlConstant("</strong>");
+        accum.appendHtmlConstant("</" + STRONG + ">");
       }
       index = wordBounds.endIndex;
     }

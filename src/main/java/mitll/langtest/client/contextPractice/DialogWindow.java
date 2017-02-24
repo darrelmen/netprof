@@ -639,6 +639,11 @@ public class DialogWindow implements  DialogViewer {
         }
 
         @Override
+        public void repeatSegment(float startInSeconds, float endInSeconds) {
+
+        }
+
+        @Override
         public void songLoaded(double duration) {
           // TODO Auto-generated method stub
 

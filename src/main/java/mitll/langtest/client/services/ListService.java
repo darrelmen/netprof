@@ -158,4 +158,5 @@ public interface ListService extends RemoteService {
   void editItem(CommonExercise userExercise, boolean keepAudio);
 
   void updateContext(long userListID, String context);
+  void updateName(long userListID, String name);
 }
