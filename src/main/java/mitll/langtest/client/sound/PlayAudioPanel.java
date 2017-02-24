@@ -277,6 +277,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param endInSeconds
    * @see mitll.langtest.client.scoring.AudioPanel#playSegment
    */
+  @Override
   public void repeatSegment(float startInSeconds, float endInSeconds) {
     playing = true;
     setPlayButtonText();

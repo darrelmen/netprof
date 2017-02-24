@@ -86,6 +86,11 @@ public class SoundFeedback {
       }
 
       @Override
+      public void repeatSegment(float startInSeconds, float endInSeconds) {
+
+      }
+
+      @Override
       public void songLoaded(double duration) {
         //  System.out.println("songLoaded " +song);
         if (soft) {

@@ -59,13 +59,15 @@ import java.util.Map;
 public class UserList<T extends HasID> extends BaseExercise {
   public static final String MY_LIST = "Favorites";
 
+  @Deprecated protected String oldid = "";
+
   private int userid;
   private String userChosenID;
-  @Deprecated protected String oldid = "";
 
   private String name;
   private String description;
   private String classMarker;
+
   private boolean isPrivate;
   private boolean isReview;
   private long modified;
@@ -73,8 +75,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   private List<T> exercises = new ArrayList<>();
 
-  public UserList() {
-  }
+  public UserList() {}
 
   /**
    * @param uniqueID
@@ -105,14 +106,15 @@ public class UserList<T extends HasID> extends BaseExercise {
   public int getUserID() { return userid; }
 
   /**
-   * @param ul
-   * @see mitll.langtest.shared.custom.UserList#getCopy
+   * @paramx ul
+   * @seex mitll.langtest.shared.custom.UserList#getCopy
    */
-  public UserList(UserList<T> ul) {
+/*  public UserList(UserList<T> ul) {
     this(ul.getID(), ul.getUserID() , ul.getUserChosenID(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified(),
         ul.getContextURL());
-  }
+  }*/
 
+/*
   public UserList<T> getCopy() {
     UserList<T> copy = new UserList<>(this);
     for (T ue : getExercises()) {
@@ -120,23 +122,24 @@ public class UserList<T extends HasID> extends BaseExercise {
     }
     return copy;
   }
-
-  /**
-   * @param toAdd
-   * @see mitll.langtest.client.custom.dialog.EditItem#makeExerciseList
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterItemCreated
-   */
-  public void addExercise(T toAdd) {
-    exercises.add(toAdd);
-  }
+*/
 
   public void addExerciseAfter(T after, T toAdd) {
     int index = exercises.indexOf(after);
     if (index == -1) {
-      exercises.add(toAdd);
+      addExercise(toAdd);
     } else {
       exercises.add(index + 1, toAdd);
     }
+  }
+
+  /**
+   * @param toAdd
+   * @see mitll.langtest.client.custom.dialog.EditItem#makeExerciseList
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseList#showNewItem
+   */
+  public void addExercise(T toAdd) {
+    exercises.add(toAdd);
   }
 
   public String getName() {
@@ -174,14 +177,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.exercises = exercises;
   }
 
-  public boolean remove(T newUserExercise) {
-    int before = exercises.size();
-    boolean remove = exercises.remove(newUserExercise);
-    int after = exercises.size();
-   // if (after-before != 1) System.err.println("huh? before " + before + " after " + after);
-    return remove;
-  }
-
+  public boolean remove(T newUserExercise) { return exercises.remove(newUserExercise); }
   public boolean removeAndCheck(int id) {
     return remove(id) != null;
   }
@@ -196,24 +192,20 @@ public class UserList<T extends HasID> extends BaseExercise {
     }
     return toRemove != null && exercises.remove(toRemove) ? toRemove : null;
   }
-
-/*  public User getCreator() {
-    return creator;
-  }*/
-
   /**
-   * @paramx uniqueID
+   * @param uniqueID
    * @see IUserListDAO#add(UserList, int)
-   * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(Collection)
+   * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList
    */
-
   public void setUniqueID(int uniqueID) {
     this.id = uniqueID;
   }
 
+/*
   public boolean contains(T userExercise) {
     return getExercises().contains(userExercise);
   }
+*/
 
   public boolean containsByID(int id) {
     for (T ex : getExercises()) {
@@ -244,15 +236,6 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.isReview = isReview;
   }
 
-  @Override
-  public String toString() {
-    long id =
-        getUserID();
-    return "UserList #" + getID() + " '" + name + "' by " + id +
-        " : " + (isReview ? " REVIEW " : "") +
-        " : with " +  getNumItems()  + " exercises.";
-  }
-
   public long getModified() {
     return modified;
   }
@@ -281,5 +264,16 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   public String getContextURL() {
     return contextURL;
+  }
+
+  @Override
+  public String toString() {
+    return "UserList #" + getID() + " '" + name + "' by " + getUserID() +
+        " : " + (isReview ? " REVIEW " : "") +
+        " : with " +  getNumItems()  + " exercises.";
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 }

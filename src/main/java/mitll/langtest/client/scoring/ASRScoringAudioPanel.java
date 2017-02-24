@@ -79,7 +79,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
                        String playButtonSuffix,
                        T exercise,
                        String instance) {
-    super(refSentence, transliteration, controller, gaugePanel, playButtonSuffix, exercise, instance);
+    super(refSentence, transliteration, controller, playButtonSuffix, exercise, instance);
   }
 
   /**

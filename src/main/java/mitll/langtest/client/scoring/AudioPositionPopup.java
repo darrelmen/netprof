@@ -50,7 +50,7 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
   private int id = 0;
 
   private float durationInMillis;
-  private static final boolean debugPartial = false;
+//  private static final boolean debugPartial = false;
 //  private static final boolean debug = false;
   private final Panel imageContainer;
 
@@ -83,6 +83,11 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
   }
 
   public void songFirstLoaded(double durationEstimate) {}
+
+  @Override
+  public void repeatSegment(float startInSeconds, float endInSeconds) {
+
+  }
 
   /**
    * @param durationInMillisIgnored
