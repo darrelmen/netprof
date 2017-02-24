@@ -288,10 +288,6 @@ public class ProjectTest extends BaseTest {
 
     logger.info("Got " + precalcScores);
   }
-  private DatabaseImpl getAndPopulate() {
-    DatabaseImpl database = getDatabase();
-    database.setInstallPath("war", "");
-    database.populateProjects();
-    return database;
-  }
+
+  private DatabaseImpl getAndPopulate() { return getDatabase().setInstallPath("war", "").populateProjects();  }
 }

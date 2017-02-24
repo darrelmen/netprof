@@ -111,9 +111,7 @@ public class BaseTest {
     File file = new File("/opt/netprof/config/netprof.properties");
     String name = file.getName();
     String parent = file.getParentFile().getAbsolutePath();
-
-    ServerProperties serverProps = new ServerProperties(parent, name);
-    return  serverProps;
+    return new ServerProperties(parent, name);
   }
 
   protected void finish(Statement statement, ResultSet rs) throws SQLException {
