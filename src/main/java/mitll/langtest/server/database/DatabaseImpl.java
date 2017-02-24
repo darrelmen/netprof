@@ -284,13 +284,14 @@ public class DatabaseImpl implements Database {
    * @see DatabaseImpl#DatabaseImpl
    * @see LangTestDatabaseImpl#init
    */
-  public void populateProjects() {
+  public DatabaseImpl populateProjects() {
     if (projectManagement == null) {
       logger.info("populateProjects no project management yet...");
     } else {
       logger.info("populateProjects --- ");
       projectManagement.populateProjects();
     }
+    return this;
   }
 
   private Connection getConnection() {
@@ -450,11 +451,12 @@ public class DatabaseImpl implements Database {
    * @param lessonPlanFile
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
-  public void setInstallPath(String installPath, String lessonPlanFile) {
+  public DatabaseImpl setInstallPath(String installPath, String lessonPlanFile) {
     logger.debug("setInstallPath got install path " + installPath);// + " media " + mediaDir);
     this.installPath = installPath;
     this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this);
     makeDAO(lessonPlanFile);
+    return this;
   }
 
   /**

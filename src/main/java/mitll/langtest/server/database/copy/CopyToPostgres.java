@@ -80,17 +80,17 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final boolean COPY_EVENTS = true;
   private static final int WARN_MISSING_THRESHOLD = 10;
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
-  //  public static final String NETPROF_PROPERTIES = "domino.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
 
-  private static final boolean DEBUG = false;
+ // private static final boolean DEBUG = false;
   private static final String DROP = "drop";
   private static final String COPY = "copy";
+  private static final String NETPROF_PROPERTIES_FULL = "/opt/netprof/config/netprof.properties";
 
   /**
    * @param config
    * @param optionalProperties
-   * @see #main(String[])
+   * @see #main
    */
   private void copyOneConfigCommand(String config, String optionalProperties) throws Exception {
     DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, ".");
@@ -101,20 +101,11 @@ public class CopyToPostgres<T extends CommonShell> {
     databaseLight.close();
   }
 
-  private void dropOneConfig(String config) /*throws Exception */{
-    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null, ".");
-    //  String language = databaseLight.getLanguage();
-    IProjectDAO projectDAO = databaseLight.getProjectDAO();
-
-    logger.debug("byname " + projectDAO.getByName(config));
-    List<SlickProject> collect = projectDAO.getAll().stream().filter(p -> p.name().equalsIgnoreCase(config)).collect(Collectors.toList());
-
-    for (SlickProject project : collect) {
-      logger.info("dropping " + project.name());
-      projectDAO.delete(project.id());
-    }
-
-    databaseLight.close();
+  private void dropOneConfig(String config) {
+    DatabaseImpl andPopulate = getAndPopulate();
+    IProjectDAO projectDAO = andPopulate.getProjectDAO();
+    projectDAO.delete(projectDAO.getByName(config));
+    andPopulate.close();
   }
 
   /**
@@ -188,35 +179,26 @@ public class CopyToPostgres<T extends CommonShell> {
     return cc;
   }
 
-/*  private void testDrop(String config, boolean inTest) {
-    DBConnection connection = getConnection(config, inTest);
-    connection.dropAll();
-  }*/
+  private DatabaseImpl getAndPopulate() { return getDatabase().setInstallPath("war", "").populateProjects();  }
 
-  /**
-   * @see #testDrop
-   * @param config
-   * @param inTest
-   * @return
-   */
-/*  private static DBConnection getConnection(String config, boolean inTest) {
-    File file = getConfigFile(config, null, inTest);
+  private static DatabaseImpl getDatabase() {
+    File file = new File(NETPROF_PROPERTIES_FULL);
+    String name = file.getName();
     String parent = file.getParentFile().getAbsolutePath();
-    ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    return new DBConnection(serverProps.getDBConfig());
-  }*/
 
-/*  private static DatabaseImpl getDatabaseLight(String config, boolean inTest) {
-    File file = getConfigFile(config, null, inTest);
-    String parent = file.getParentFile().getAbsolutePath();
-    ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    serverProps.setH2(true);
-    DatabaseImpl database = getDatabaseVeryLight(config, inTest);
-    String installPath = getInstallPath(inTest);
-    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan());
+    ServerProperties serverProps = getProps();
+
+    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
+        new PathHelper("war", serverProps), false, null, false);
     return database;
-  }*/
+  }
 
+  private static ServerProperties getProps() {
+    File file = new File(NETPROF_PROPERTIES_FULL);
+    String name = file.getName();
+    String parent = file.getParentFile().getAbsolutePath();
+    return new ServerProperties(parent, name);
+  }
 
   /**
    * @param config
@@ -303,33 +285,6 @@ public class CopyToPostgres<T extends CommonShell> {
       return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
     }
   }
-
-/*
-  private static File getConfigFile(String config, String optPropsFile, boolean inTest) {
-    String propsFile = "quizlet.properties";
-    return new File((inTest ? "war" + File.separator : "") + "config" + File.separator + config + File.separator + propsFile);
-  }
-*/
-
-/*
-  private static String getInstallPath(boolean inTest) {
-    return inTest ? "war" : ".";
-  }
-*/
-
-/*
-  private static DatabaseImpl getDatabaseVeryLight(String config, boolean inTest) {
-    File file = getConfigFile(config, null, inTest);
-    String name = file.getName();
-    String parent = file.getParentFile().getAbsolutePath();
-
-    logger.info("path is " + parent);
-    ServerProperties serverProps = new ServerProperties(parent, name);
-    serverProps.setH2(true);
-    return new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper(getInstallPath(inTest), serverProps), false, null, true);
-  }
-*/
 
   /**
    * @param db
@@ -872,10 +827,6 @@ public class CopyToPostgres<T extends CommonShell> {
     if (missing > 0) logger.warn("copyRefResult missing " + missing + " due to missing ex id fk");
 
     logger.info("copyRefResult added " + dao.getNumResults());
-    // } else {
-    //   logger.info("copyRefResult already has " + dao.getNumResults());
-
-    // }
   }
 
   /**
