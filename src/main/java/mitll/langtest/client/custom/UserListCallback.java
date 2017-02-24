@@ -101,7 +101,8 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
                           UserManager userManager,
                           boolean showIsPublic,
                           int optionalExercise) {
-    //logger.info("UserListCallback instance '" + instanceName + "' only my lists " + onlyMyLists);
+    logger.info("UserListCallback instance '" + instanceName + "' only my lists " + onlyMyLists);
+
     this.listManager = listManager;
     this.contentPanel = contentPanel;
     this.insideContentPanel = insideContentPanel;
@@ -120,7 +121,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
 
   @Override
   public void onSuccess(final Collection<UserList<CommonShell>> result) {
-    //logger.info("\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
+    logger.info("\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
     if (result.isEmpty()) {
       //logger.info("\t\tUserListCallback.onSuccess : Displaying empty set");
 
@@ -176,6 +177,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   private void selectPreviousList(Collection<UserList<CommonShell>> result) {
     String clickedUserList = listManager.getStorage().getValue(Navigation.CLICKED_USER_LIST);
     if (clickedUserList != null && !clickedUserList.isEmpty()) {
+      logger.info("selectPreviousList show previous list " + clickedUserList);
       showList(result, Long.parseLong(clickedUserList));
     }
   }
@@ -254,6 +256,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     widgets.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        logger.info("clicked on a list bar... " + ul.getName());
         listManager.showList(ul, contentPanel, instanceName, null);
       }
     });

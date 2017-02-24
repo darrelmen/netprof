@@ -126,7 +126,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
               @Override
               public void onSuccess(ExerciseListWrapper<T> result) {
-                logger.info("got req back " + result.getReqID() + " vs " + req);
+                logger.info("getTypeaheadUsing got req back " + result.getReqID() + " vs " + req);
                 makeSuggestionResponse(result, callback, request);
               }
             }
@@ -159,18 +159,6 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     return typeahead;
   }
 
-/*
-  private void configureTextBox(final TextBox w) {
-    w.addKeyUpHandler(getKeyUpHandler());
-  }
-
-  private KeyUpHandler getKeyUpHandler() {
-    return event -> {
-      logger.info("got key up");
-    };
-  }
-*/
-
   /**
    * @param result
    * @param callback
@@ -198,7 +186,6 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
     }
 
     int numberTruncated = Math.max(0, size - limit);
-
     //  logger.info("trunc " + numberTruncated);
 
     SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), exercises));
@@ -562,6 +549,8 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
   private boolean isOnList() {
     boolean found = false;
+    if (currentExercise == null) return false;
+
     List<CommonShell> exercises = list.getExercises();
     for (CommonShell shell : exercises) {
       if (shell.getID() == currentExercise.getID()) {
