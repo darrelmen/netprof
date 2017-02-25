@@ -1270,17 +1270,18 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param userID
-   * @param exerciseID
+   * @param projid
+   *@param exerciseID
    * @param audioFile
    * @param durationInMillis
    * @param correct
    * @param isMale
    * @param speed
-   * @param model
-   * @return
+   * @param model        @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    */
   public long addRefAnswer(int userID,
+                           int projid,
                            int exerciseID,
                            String audioFile,
                            long durationInMillis,
@@ -1294,7 +1295,7 @@ public class DatabaseImpl implements Database {
                            boolean isMale,
                            String speed,
                            String model) {
-    return refresultDAO.addAnswer(userID, exerciseID, audioFile, durationInMillis, correct,
+    return refresultDAO.addAnswer(userID, projid, exerciseID, audioFile, durationInMillis, correct,
         alignOutput, decodeOutput,
         alignOutputOld, decodeOutputOld,
         isMale, speed, model);

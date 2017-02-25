@@ -47,7 +47,7 @@ public interface IRefResultDAO extends IDAO {
   boolean removeForExercise(int exid);
 
   long addAnswer(int userID,
-                 int exid,
+                 int projid, int exid,
                  String audioFile,
                  long durationInMillis,
                  boolean correct,
@@ -71,7 +71,7 @@ public interface IRefResultDAO extends IDAO {
   // have sort order of items be smarter
 
   /**
-   * @see RefResultDecoder#getDecodedFiles()
+   * @see RefResultDecoder#getDecodedFiles
    * @return
    * @deprecated
    */
@@ -82,7 +82,7 @@ public interface IRefResultDAO extends IDAO {
 
   Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, int, String, String, int, int, boolean, int, boolean)
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
    * @param exid
    * @param answer
    * @return
@@ -92,10 +92,12 @@ public interface IRefResultDAO extends IDAO {
   JSONObject getJSONScores(Collection<Integer> ids);
 
   /**
-   * @see mitll.langtest.server.decoder.RefResultDecoder#trimRef(int, Collection, String)
+   * @see mitll.langtest.server.decoder.RefResultDecoder#trimRef
    * @return
    */
   int getNumResults();
 
   List<String> getAllFilesForProject(int projid);
+
+  void deleteForProject(int projid);
 }

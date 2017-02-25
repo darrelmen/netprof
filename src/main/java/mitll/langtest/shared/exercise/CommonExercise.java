@@ -84,8 +84,6 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
 
   int getProjectID();
 
-  //Map<String, String> getUnitToValue();
-
   String getTransliteration();
 
   long getLastChecked();

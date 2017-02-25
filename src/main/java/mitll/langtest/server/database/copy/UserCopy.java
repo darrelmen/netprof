@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.copy;
 
+import com.google.gwt.user.client.DOM;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.IResultDAO;
@@ -28,6 +29,7 @@ public class UserCopy {
   private static final boolean DEBUG = true;
   private static final boolean MAKE_COLLISION_ACCOUNT = false;
   private static final boolean WARN_ON_COLLISION = true;
+  //public static final String UNSET_USER_ID = "unsetUserID";
 
   /**
    * What can happen:
@@ -77,6 +79,7 @@ public class UserCopy {
 
       int importID = toImport.getID();
       String importUserID = toImport.getUserID();
+      if (importUserID.isEmpty()) importUserID = "unknown";
       if (importID != defectDetector && !dominoUserDAO.isDefaultUser(importUserID)) {
 
         if (importUserID.isEmpty() && idToCount.get(importID) != null && idToCount.get(importID) == 0) {

@@ -246,7 +246,7 @@ public class AudioFileHelper implements AlignDecode {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase
+   * @see mitll.langtest.server.services.ScoringServiceImpl#isValidForeignPhrase
    */
   public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
     return asrScoring.validLTS(foreignLanguagePhrase, transliteration);
@@ -631,7 +631,7 @@ public class AudioFileHelper implements AlignDecode {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(duration);
     // logger.debug("validity dur " + validity.durationInMillis);
 
-    db.addRefAnswer(user, exercise1.getID(), file.getPath(),
+    db.addRefAnswer(user, exercise1.getProjectID(), exercise1.getID(), file.getPath(),
         validity.durationInMillis,
 
         decodeOutput.isCorrect(),

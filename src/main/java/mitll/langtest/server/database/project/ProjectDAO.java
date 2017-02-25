@@ -56,6 +56,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
   private final UserProjectDAO userProjectDAO;
+  private SlickProject first;
 
   /**
    * @param database
@@ -172,7 +173,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         firstType, secondType, countryCode, displayOrder);
   }
 
-  private SlickProject first;
 
   public SlickProject getFirst() {
     if (first == null) {
@@ -250,28 +250,10 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         firstType,
         secondType,
         countryCode,
-        "", -1, displayOrder));
-  }
-
-/*  @Override
-  public int addTest(int userid, String name, String language,
-                     String firstType, String secondType, String countryCode) {
-    Timestamp created = new Timestamp(System.currentTimeMillis());
-    return dao.insert(new SlickProject(
-        -1,
-        userid,
-        created,
-        created,
-        name,
-        language,
         "",
-        ProjectType.TESTING.toString(),
-        ProjectStatus.DEVELOPMENT.name(),
-        firstType,
-        secondType,
-        countryCode,
-        "", -1, 0));
-  }*/
+        -1,
+        displayOrder));
+  }
 
   @Override
   public Collection<SlickProject> getAll() {
@@ -285,7 +267,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   @Override
   public int getByName(String name) {
     return dao.byName(name);
-  }  @Override
+  }
+
+  @Override
   public int getByLanguage(String language) {
     return dao.byLanguage(language);
   }

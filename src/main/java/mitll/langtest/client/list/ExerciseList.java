@@ -64,6 +64,7 @@ import java.util.logging.Logger;
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize {
+  public static final int LIST_HEIGHT = 450;
   private final Logger logger = Logger.getLogger("ExerciseList");
   /**
    * @see #showEmptyExercise
@@ -848,7 +849,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     leftColumn.addStyleName("floatLeft");
     addMinWidthStyle(leftColumn);
 
-    //  leftColumn.getElement().getStyle().setProperty("minHeight","300px");
+    leftColumn.getElement().getStyle().setProperty("minHeight", LIST_HEIGHT +
+        "px");
 
     leftColumn.add(getWidget());
     return leftColumn;
