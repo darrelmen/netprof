@@ -115,18 +115,18 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
   /**
    * @param userID
-   * @param exid
+   * @param projid
+   *@param exid
    * @param audioFile
    * @param correct
    * @param isMale
    * @param speed
-   * @param model
-   * @return id of new row in result table
+   * @param model       @return id of new row in result table
    * @see DatabaseImpl#addRefAnswer
    */
   @Override
   public long addAnswer(int userID,
-                        int exid,
+                        int projid, int exid,
                         String audioFile,
                         long durationInMillis,
                         boolean correct,
@@ -459,6 +459,11 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   @Override
   public List<String> getAllFilesForProject(int projid) {
     return null;
+  }
+
+  @Override
+  public void deleteForProject(int projid) {
+
   }
 
   /**

@@ -88,7 +88,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public Collection<AudioAttribute> getAudioAttributesByProject(int projid) {
     List<SlickAudio> all = dao.getAll(projid);
-    logger.info("getAudioAttributesByProject " + projid + " " + all.size());
+    logger.info("getAudioAttributesByProject " + projid + " found " + all.size() + " that has been checked to exist.");
     return toAudioAttribute(all);
   }
 
@@ -497,7 +497,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
     if (all.isEmpty()) {
-      logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows?");
+      logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows but no audio?");
     }
     Map<Integer, MiniUser> idToMini = new HashMap<>();
     for (SlickAudio s : all) {

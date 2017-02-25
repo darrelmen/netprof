@@ -269,6 +269,19 @@ public class ProjectTest extends BaseTest {
   }
 
   @Test
+  public void testDropSpanishRef() {  doDropRef( "spanish");  }
+
+  private void doDropRef(String croatian) {
+    DatabaseImpl andPopulate = getAndPopulate();
+
+    IProjectDAO projectDAO = andPopulate.getProjectDAO();
+    int projid = projectDAO.getByName(croatian);
+    andPopulate.getRefResultDAO().deleteForProject(projid);
+
+    andPopulate.close();
+  }
+
+  @Test
   public void testEnglishHydra() {
     DatabaseImpl andPopulate = getAndPopulate();
     int english = andPopulate.getProjectDAO().getByName("english");

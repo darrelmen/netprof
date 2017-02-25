@@ -123,12 +123,12 @@ public class Project implements PronunciationLookup {
    * @see mitll.langtest.server.services.QCServiceImpl#deleteItem
    */
   public <T extends CommonShell> void buildExerciseTrie() {
-    fullTrie = new ExerciseTrie<>(getExercisesForUser(), project.language(), getSmallVocabDecoder());
+    fullTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder());
   }
 
-  private Collection<CommonExercise> getExercisesForUser() {
-    return getRawExercises();
-  }
+//  private Collection<CommonExercise> getExercisesForUser() {
+//    return getRawExercises();
+//  }
 
   private SmallVocabDecoder getSmallVocabDecoder() {
     return getAudioFileHelper() == null ? null : getAudioFileHelper().getSmallVocabDecoder();
@@ -207,7 +207,7 @@ public class Project implements PronunciationLookup {
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
     String language = project == null ? "unk" : project.language();
-    fullTrie = new ExerciseTrie<>(getExercisesForUser(), language, getSmallVocabDecoder());
+    fullTrie = new ExerciseTrie<>(getRawExercises(), language, getSmallVocabDecoder());
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper(), hasModel());
 //    refResultDecoder.doRefDecode(getExercisesForUser());
   }
@@ -216,9 +216,9 @@ public class Project implements PronunciationLookup {
    * @see mitll.langtest.server.services.AudioServiceImpl#recalcRefAudio
    */
   public void recalcRefAudio() {
-    Collection<CommonExercise> exercisesForUser = getExercisesForUser();
+    Collection<CommonExercise> exercisesForUser = getRawExercises();
     logger.info("recalcRefAudio " + project + " " + exercisesForUser.size() + " exercises.");
-    refResultDecoder.writeRefDecode(exercisesForUser, project.id());
+    refResultDecoder.writeRefDecode(getLanguage(), exercisesForUser, project.id());
   }
 
   public SlickAnalysis getAnalysis() {

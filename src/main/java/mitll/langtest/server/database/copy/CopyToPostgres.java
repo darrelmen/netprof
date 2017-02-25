@@ -72,7 +72,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
@@ -86,6 +85,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String DROP = "drop";
   private static final String COPY = "copy";
   private static final String NETPROF_PROPERTIES_FULL = "/opt/netprof/config/netprof.properties";
+  public static final String OPT_NETPROF = "/opt/netprof/import";
 
   /**
    * @param config
@@ -93,18 +93,41 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see #main
    */
   private void copyOneConfigCommand(String config, String optionalProperties) throws Exception {
-    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, ".");
-    String language = databaseLight.getLanguage();
-    boolean hasModel = databaseLight.getServerProps().hasModel();
-    logger.info("loading " + language + " " + hasModel);
-    new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), language, 0, !hasModel);
-    databaseLight.close();
+    DatabaseImpl databaseLight = null;
+    try {
+      databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
+      String language = databaseLight.getLanguage();
+      boolean hasModel = databaseLight.getServerProps().hasModel();
+      logger.info("loading " + language + " " + hasModel);
+      new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), language, 0, !hasModel);
+    } catch (Exception e) {
+      logger.error("got "+e,e);
+    } finally {
+      databaseLight.close();
+    }
   }
 
   private void dropOneConfig(String config) {
     DatabaseImpl andPopulate = getAndPopulate();
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
-    projectDAO.delete(projectDAO.getByName(config));
+    int byName = projectDAO.getByName(config);
+    if (byName == -1) {
+      logger.warn("\n\n\ncouldn't find config " + config);
+    }
+    else {
+      logger.info("Dropping " + config + " please wait...");
+      long then = System.currentTimeMillis();
+      projectDAO.delete(byName);
+      long now = System.currentTimeMillis();
+
+      Collection<SlickProject> all = projectDAO.getAll();
+      logger.info("Took " + (now-then) + " millis to drop " + config + ", now there are " + all.size() + " projects:");
+
+      for (SlickProject project : all) {
+        logger.info(" " + project);
+      }
+
+    }
     andPopulate.close();
   }
 
@@ -216,7 +239,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                               boolean useLocal,
                                               String optPropsFile,
                                               String installPath) {
-    logger.info("getDatabaseLight db " + config + " props " + optPropsFile);
+   // logger.info("getDatabaseLight db " + config + " optional props " + optPropsFile);
 
     String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
@@ -341,7 +364,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
       copyReviewed(db, oldToNewUser, exToID, true);
       copyReviewed(db, oldToNewUser, exToID, false);
-      copyRefResult(db, oldToNewUser, exToID);
+      copyRefResult(db, oldToNewUser, exToID, projectID);
     } else {
       logger.info("\n\nProject #" + projectID + " (" +optName+ ") already has exercises in it.  Not loading again...\n\n");
     }
@@ -797,12 +820,12 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewUser
    * @param exToID
+   * @param projid
    * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
    */
-  private void copyRefResult(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID) {
+  private void copyRefResult(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID, int projid) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
-    //if (dao.isEmpty()) {
-    RefResultDAO originalDAO = new RefResultDAO(db, false);
+     RefResultDAO originalDAO = new RefResultDAO(db, false);
     List<SlickRefResult> bulk = new ArrayList<>();
     Collection<Result> all = originalDAO.getResults();
     logger.info("copyRefResult found " + all.size());
@@ -819,7 +842,7 @@ public class CopyToPostgres<T extends CommonShell> {
         Integer exid = exToID.get(result.getOldExID());
         if (exid != null) {
           result.setExid(exid);
-          bulk.add(dao.toSlick(result));
+          bulk.add(dao.toSlick(projid,result));
         } else missing++;
       }
     }

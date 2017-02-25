@@ -98,7 +98,7 @@ public abstract class BaseAudioDAO extends DAO {
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
 
-    logger.info("getExToAudio - for " +projid);
+    logger.info("getExToAudio - for project #" +projid);
     Collection<AudioAttribute> attributesByProject = getAudioAttributesByProject(projid);
     //  logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
 

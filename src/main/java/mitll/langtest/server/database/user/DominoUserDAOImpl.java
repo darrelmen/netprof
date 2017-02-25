@@ -248,9 +248,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass) {
     invalidateCache();
-    //logger.info("addAndGet really adding " + user);
     if (user.getGender() != UNSPECIFIED) {
-      logger.info("going in " + user.getGender() + " for " + user.getUserId());
+      logger.info("addAndGet going in " + user.getGender() + " for user '" + user.getUserId() + "'");
     }
 
     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
@@ -667,7 +666,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public ClientUserDetail toClientUserDetail(User user, String projectName) {
     String first = user.getFirst();
-    if (first == null) first = user.getUserID();
+    String userID = user.getUserID();
+    if (userID.isEmpty()) {
+      userID = UNKNOWN;
+    }
+    if (first == null) first = userID;
     String last = user.getLast();
     if (last == null) last = "Unknown";
     String email = user.getEmail();
@@ -685,15 +688,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.isMale() ? DMALE : DFEMALE;
 
     if (gender == UNSPECIFIED) {
-      logger.info("toClientUserDetail for " + user.getID() + " " + user.getUserID() + " "+ user.getUserKind() + " gender is unspecified.");
+      logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' "+ user.getUserKind() + " gender is unspecified.");
     }
     else {
-      logger.info("toClientUserDetail for " + user.getID() + " " + user.getUserID() + " "+ user.getUserKind() + " gender is "+gender);
+      logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' "+ user.getUserKind() + " gender is "+gender);
 
     }
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
-        user.getUserID(),
+        userID,
         first,
         last,
         email,
