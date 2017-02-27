@@ -59,7 +59,7 @@ description = 'NetProF pronunciation feedback'
 dependencies {
     compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT')   { changing = true }
     compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT') { changing = true }
-    compile('mitll.hlt:audioimage:1.0.0')   { changing = true }
+//    compile('mitll.hlt:audioimage:1.0.0')   { changing = true }
     compile('mitll.hlt:imagewriter:1.0.0')   { changing = true }
     compile('mitll.hlt:npdata:1.0.0')   { changing = true }
 
@@ -257,5 +257,20 @@ publishing {
         distribution(IvyPublication) {
             artifact distZip
         }
+    }
+}
+
+// add eclipse preferences.
+tasks.eclipse.doLast {
+    def ewf = new File("build/eclipse-war");
+    ewf.mkdirs();
+
+    // write settings file 'com.google.gdt.eclipse.core.prefs'
+    ant.propertyfile(file: ".settings/com.google.gdt.eclipse.core.prefs") {
+        ant.entry(key: "eclipse.preferences.version", value: "1")
+        ant.entry(key: "jarsExcludedFromWebInfLib", value: "")
+        ant.entry(key: "lastWarOutDir", value: ewf.getAbsoluteFile())
+        ant.entry(key: "warSrcDir", value: "src/main/webapp")
+        ant.entry(key: "warSrcDirIsOutput", value: "false")
     }
 }
