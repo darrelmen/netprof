@@ -24,10 +24,10 @@ src/test/resources
    #+END_SRC
  * ignore warning about gwt-servlet jar for now
  
-** Right click on root folder
- * choose Properties->Google->Web application
-  * Browse to war directory
-  * Click on launch and deploy from this directory
+** set the war directory
+ * Right click on root folder, choose Properties->Google->Web application
+ * Browse to war directory
+ * Click on launch and deploy from this directory
 
 ** on the top button bar - choose Green arrow – run as super dev mode
  * Choose langtest.html
