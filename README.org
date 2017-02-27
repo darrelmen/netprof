@@ -17,9 +17,9 @@ gradle war
 ** import the project into eclipse - open projects from filesystem
  * Fix build path so it’s just the following (right click on root folder, properties, java build path)
    #+BEGIN_SRC shell
-Src/main/java
-Src/main/resources
-Src/test/resources
+src/main/java
+src/main/resources
+src/test/resources
    #+END_SRC
 
 ** Right click on root folder
