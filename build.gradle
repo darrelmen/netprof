@@ -56,13 +56,12 @@ repositories {
 
 description = 'NetProF pronunciation feedback'
 
-//evaluationDependsOn(':imagewriter')
-
 dependencies {
     compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT')   { changing = true }
     compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT') { changing = true }
     compile('mitll.hlt:audioimage:1.0.0')   { changing = true }
     compile('mitll.hlt:imagewriter:1.0.0')   { changing = true }
+    compile('mitll.hlt:npdata:1.0.0')   { changing = true }
 
     compile 'com.google.gwt:gwt-user:2.8.0'
     compile 'com.google.gwt:gwt-servlet:2.8.0'
@@ -91,8 +90,6 @@ dependencies {
 
     testCompile 'org.hamcrest:hamcrest-all:latest.integration'
     testRuntime 'org.slf4j:slf4j-api:1.7.10'
-
-    compile project(':npdata')
 
     compile 'net.sf.uadetector:uadetector-core:0.9.22'
     compile 'net.sf.uadetector:uadetector-resources:2013.04'
