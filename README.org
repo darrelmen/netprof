@@ -22,7 +22,8 @@ src/main/java
 src/main/resources
 src/test/resources
    #+END_SRC
-
+ * ignore warning about gwt-servlet jar for now
+ 
 ** Right click on root folder
  * choose Properties->Google->Web application
   * Browse to war directory
