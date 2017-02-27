@@ -2,6 +2,7 @@
 
 Here are the steps to get netprof to run for development.
 
+Assumes you have already gotten it running with [[https://gh.ll.mit.edu/Domino/domino-collaboration/blob/master/servers/production-system-setup/netprof_mac_setup.org][mac setup]]
 ** clone repo
 
    #+BEGIN_SRC shell
