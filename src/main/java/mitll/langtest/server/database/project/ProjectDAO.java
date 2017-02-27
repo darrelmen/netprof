@@ -43,6 +43,7 @@ import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import scala.collection.Iterator;
 import scala.collection.Seq;
 
 import java.sql.Timestamp;
@@ -136,8 +137,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   private SlickProject getDefaultProject() {
-    Seq<SlickProject> aDefault = dao.getDefault();
-    return aDefault.isEmpty() ? null : aDefault.iterator().next();
+    Collection<SlickProject> aDefault = dao.getDefault();
+    if (aDefault.isEmpty()) {
+      return null;
+    }
+    else {
+      return aDefault.iterator().next();
+    }
+//    return aDefault.isEmpty() ? null : aDefault.iterator().next();
   }
 
   public ProjectPropertyDAO getProjectPropertyDAO() {
@@ -283,6 +290,10 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   @Override
   public SlickProject mostRecentByUser(int user) {
     int i = userProjectDAO.mostRecentByUser(user);
-    return i == -1 ? null : dao.byID(i).headOption().getOrElse(null);
+    if (i == -1) return null;
+    else {
+      Collection<SlickProject> slickProjectSeq = dao.byID(i);
+      return slickProjectSeq.isEmpty() ? null : slickProjectSeq.iterator().next();
+    }
   }
 }

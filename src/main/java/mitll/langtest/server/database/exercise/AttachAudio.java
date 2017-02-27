@@ -230,7 +230,7 @@ public class AttachAudio {
             Collection<CommonExercise> directlyRelated = exercise.getDirectlyRelated();
             if (directlyRelated.isEmpty()) {
               if (m++ < 50) {
-                logger.warn(language + " : no context exercise on " + exercise);
+//                logger.warn(language + " : no context exercise on " + exercise);
               }
               if (totalMissingContext++ % 100 == 0) {
                 logger.warn(language + " (total = " + totalMissingContext + ") no context exercise on " + exercise);
