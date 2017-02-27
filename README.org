@@ -14,7 +14,7 @@ gradle eclipse
 gradle war
    #+END_SRC
 
- *** make sure the gradle war step runs cleanly
+ * make sure the gradle war step runs cleanly
 ** import the project into eclipse - open projects from filesystem
  * Fix build path so it’s just the following (right click on root folder, properties, java build path)
    #+BEGIN_SRC shell
