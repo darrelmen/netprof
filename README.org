@@ -6,8 +6,8 @@ Assumes you have already gotten it running with [[https://gh.ll.mit.edu/Domino/d
 ** clone repo
 
    #+BEGIN_SRC shell
-git clone git@gh.ll.mit.edu:DLI-LTEA/netprof2SlimAllBranches.git 
-cd netprof2SlimAllBranches
+git clone git@gh.ll.mit.edu:DLI-LTEA/netprof2.git 
+cd netprof2
 git checkout development
 git submodule update —init —recursive
 gradle eclipse
