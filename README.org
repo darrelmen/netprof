@@ -1,21 +1,44 @@
-* netPron2 : Prononciation scoring, data collection, testing, and grading
+#+STARTUP: showall
 
-** Prerequisites
+Here are the steps to get netprof to run for development.
 
-*** Ant installed
+** clone repo
 
-** Deployment
+   #+BEGIN_SRC shell
+git clone git@gh.ll.mit.edu:DLI-LTEA/netprof2SlimAllBranches.git 
+cd netprof2SlimAllBranches
+git checkout development
+git submodule update —init —recursive
+gradle eclipse
+gradle war
+   #+END_SRC
 
-*** 1) git submodule update --init –recursive
-*** 2) in war/WEB-INF/web.xml choose which config you would like to use, e.g. urdu
+** make sure the gradle war step runs cleanly
+** import the project into eclipse - open projects from filesystem
+ * Fix build path so it’s just the following (right click on root folder, properties, java build path)
+   #+BEGIN_SRC shell
+Src/main/java
+Src/main/resources
+Src/test/resources
+   #+END_SRC
 
-This will control which of config directory under war/config/<name> will be used
+** Right click on root folder
+ * choose Properties->Google->Web application
+  * Browse to war directory
+  * Click on launch and deploy from this directory
 
-*** 3) ant warUrdu (or other config target), this will produce npUrduData.war
-*** 4) copy the war 
-Either copy the war directly into the webapps directory of the webserver OR 
-jar xf npUrduDara.war into another directory and then cp -r <other dir> <webapps dir>
-The second option would be good if you want to rename the webapp to be something else.
-If so, also change the title property in config.properties in war/config/urdu/config.properties (or equivalent)
+** on the top button bar - choose Green arrow – run as super dev mode
+ * Choose langtest.html
+ * Double click on langtest.html when it appears
+ * Notice it dies – out of memory
+ * Click the red stop box.
 
-
+** Choose green arrow - run configurations
+ * Go to arguments, set it to
+   #+BEGIN_SRC shell
+-Xmx3512m –XstartOnFirstThread
+   #+END_SRC
+ * Click run button
+ * Ignore the warning about a missing gwt-servlet jar in war/WEB-INF/lib
+ * Click on the langtest.html link when it appears.
+ * application should come up in a browser (e.g. firefox)
