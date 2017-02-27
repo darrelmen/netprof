@@ -30,6 +30,7 @@ src/test/resources
  * Click on launch and deploy from this directory
 
 ** on the top button bar - choose Green arrow – run as super dev mode
+ * ignore warning about gwt-servlet jar for now
  * Choose langtest.html
  * Double click on langtest.html when it appears
  * Notice it dies – out of memory
