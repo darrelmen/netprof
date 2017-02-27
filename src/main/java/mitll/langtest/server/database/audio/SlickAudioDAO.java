@@ -188,13 +188,20 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
                          Map<Integer, String> exToTranscript,
                          Set<Integer> idsOfRecordedExercisesForMales,
                          Set<Integer> idsOfRecordedExercisesForFemales) {
-    Map<Object, Seq<Tuple2<Object, Object>>> countForGender4 =
+
+
+    Map<Integer, Collection<Tuple2<Integer, Integer>>> countForGender4 =
         dao.getCountForGender(audioSpeed.toString(), uniqueIDs, exToTranscript, true, projid);
 
-    for (Object key : countForGender4.keySet()) {
-      boolean male = userDAO.isMale((Integer) key);
-      scala.collection.Iterator<Tuple2<Object, Object>> iterator = countForGender4.get(key).iterator();
-      Set<Integer> exIDs = getExIDs(iterator);
+
+    for (Integer key : countForGender4.keySet()) {
+      boolean male = userDAO.isMale(key);
+      Collection<Tuple2<Integer, Integer>> tuple2s = countForGender4.get(key);
+
+      Iterator<Tuple2<Integer, Integer>> iterator1 = tuple2s.iterator();
+   //   scala.collection.Iterator<Tuple2<Object, Object>> iterator = tuple2s.iterator();
+
+      Set<Integer> exIDs = getExIDs(iterator1);
 
       if (male) {
         idsOfRecordedExercisesForMales.addAll(exIDs);
@@ -256,8 +263,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
     }
 
-    Map<Object, Seq<Tuple2<Object, Object>>> audioForGender = dao.getAudioForGender(audioSpeed, projid);
-    Set<Pair> genderMatch = getGenderMatch(isMale, audioForGender);
+    Map<Integer, Collection<Tuple2<Integer, Integer>>> audioForGender1 = dao.getAudioForGender(audioSpeed, projid);
+     Set<Pair> genderMatch = getGenderMatch(isMale, audioForGender1);
     return getExercises(genderMatch);
 
 //    Seq<Tuple2<Object, Object>> audioForGender1 = (Seq<Tuple2<Object, Object>>) audioForGender;
@@ -296,17 +303,19 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
     }
 
-    Tuple2<Map<Object, Seq<Tuple2<Object, Object>>>, Map<Object, Seq<Tuple2<Object, Object>>>> audioForGenderBothRecorded = dao.getAudioForGenderBothRecorded(regSpeed, slowSpeed, projid);
+    Tuple2<Map<Integer, Collection<Tuple2<Integer, Integer>>>,
+        Map<Integer, Collection<Tuple2<Integer, Integer>>>> audioForGenderBothRecorded = dao.getAudioForGenderBothRecorded(regSpeed, slowSpeed, projid);
 
-    Map<Object, Seq<Tuple2<Object, Object>>> regSpeedPairs = audioForGenderBothRecorded._1();
-    Map<Object, Seq<Tuple2<Object, Object>>> slowSpeedPairs = audioForGenderBothRecorded._2();
 
-    Set<Pair> regSpeedGenderMatch = getGenderMatch(isMale, regSpeedPairs);
+    Map<Integer, Collection<Tuple2<Integer, Integer>>> regSpeedPairs  = audioForGenderBothRecorded._1();
+    Map<Integer, Collection<Tuple2<Integer, Integer>>> slowSpeedPairs = audioForGenderBothRecorded._2();
+
+    Set<Pair> regSpeedGenderMatch  = getGenderMatch(isMale, regSpeedPairs);
     Set<Pair> slowSpeedGenderMatch = getGenderMatch(isMale, slowSpeedPairs);
 
     // now find overlap
 
-    Set<Integer> regExids = getExercises(regSpeedGenderMatch);
+    Set<Integer> regExids  = getExercises(regSpeedGenderMatch);
     Set<Integer> slowExids = getExercises(slowSpeedGenderMatch);
 
     regExids.retainAll(slowExids);
@@ -321,26 +330,24 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return regExids;
   }
 
-  private Set<Pair> getGenderMatch(boolean isMale, Map<Object, Seq<Tuple2<Object, Object>>> regSpeedPairs) {
+  private Set<Pair> getGenderMatch(boolean isMale, Map<Integer, Collection<Tuple2<Integer, Integer>>> regSpeedPairs) {
     Set<Pair> regSpeedGenderMatch = new HashSet<>();
-    for (Object key : regSpeedPairs.keySet()) {
-      boolean male = userDAO.isMale((Integer) key);
+    for (Integer key : regSpeedPairs.keySet()) {
+      boolean male = userDAO.isMale(key);
       if (male == isMale) {
-        scala.collection.Iterator<Tuple2<Object, Object>> iterator = regSpeedPairs.get(key).iterator();
+         Iterator<Tuple2<Integer, Integer>> iterator = regSpeedPairs.get(key).iterator();
         regSpeedGenderMatch.addAll(getPairs(iterator));
       }
     }
     return regSpeedGenderMatch;
   }
 
-  private Set<Pair> getPairs(scala.collection.Iterator<Tuple2<Object, Object>> iterator) {
-    HashSet<Pair> pairs = new HashSet<>();
-    while (iterator.hasNext()
-        ) {
-      Tuple2<Object, Object> next = iterator.next();
-      Object o = next._1();
-      Integer exid = (Integer) o;
-      Integer userid = (Integer) next._2();
+  private Set<Pair> getPairs( Iterator<Tuple2<Integer, Integer>> iterator) {
+   Set<Pair> pairs = new HashSet<>();
+    while (iterator.hasNext()   ) {
+      Tuple2<Integer, Integer> next = iterator.next();
+      Integer exid = next._1();
+      Integer userid = next._2();
       Pair pair = new Pair(exid, userid);
       pairs.add(pair);
     }
@@ -348,15 +355,19 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
 
-  private Set<Integer> getExIDs(scala.collection.Iterator<Tuple2<Object, Object>> iterator) {
+  /**
+   * TODO : why do we return a tuple when we don't use the second one?
+   * @param iterator
+   * @return
+   */
+  private Set<Integer> getExIDs(Iterator<Tuple2<Integer, Integer>> iterator) {
     Set<Integer> pairs = new HashSet<>();
     while (iterator.hasNext()
         ) {
-      Tuple2<Object, Object> next = iterator.next();
-      Object o = next._1();
-      Integer exid = (Integer) o;
+      Tuple2<Integer, Integer> next = iterator.next();
+    //  Integer o = next._1();
       //Integer userid = (Integer) next._2();
-      pairs.add(exid);
+      pairs.add(next._1());
     }
     return pairs;
   }

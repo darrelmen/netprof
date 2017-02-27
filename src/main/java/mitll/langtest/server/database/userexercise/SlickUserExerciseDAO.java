@@ -529,10 +529,8 @@ public class SlickUserExerciseDAO
 
   @Override
   public CommonExercise getByExID(int exid) {
-    Seq<SlickExercise> byExid = dao.byID(exid);
-
+    Collection<SlickExercise> byExid = dao.byID(exid);
     CommonExercise exercise = byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
-
 
     if (exercise != null) {
    //   for (SlickExercise ex:relatedExerciseDAOWrapper.contextExercises(exid)) exercise.getDirectlyRelated().add(fromSlick(ex));
@@ -545,7 +543,7 @@ public class SlickUserExerciseDAO
   @Override
   public CommonExercise getTemplateExercise(int projID) {
     if (templateExercise == null) {
-      Seq<SlickExercise> byExid = dao.getByExid(NEW_USER_EXERCISE, projID);
+      Collection<SlickExercise> byExid = dao.getByExid(NEW_USER_EXERCISE, projID);
       templateExercise = byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
     }
     return templateExercise;
@@ -562,11 +560,11 @@ public class SlickUserExerciseDAO
       insertDefault(projID);
     }
 
-    Seq<SlickExercise> byExid = dao.getByExid(UNKNOWN, projID);
+    Collection<SlickExercise> byExid = dao.getByExid(UNKNOWN, projID);
     if (byExid.isEmpty()) {
       insertDefault(projID, UNKNOWN);
     }
-    Seq<SlickExercise> again = dao.getByExid(UNKNOWN, projID);
+    Collection<SlickExercise> again = dao.getByExid(UNKNOWN, projID);
     if (!again.isEmpty()) {
       unknownExercise = again.iterator().next();
       id = unknownExercise.id();
