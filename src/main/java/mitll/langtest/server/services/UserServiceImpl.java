@@ -237,10 +237,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 */
 
-  public Map<String, Integer> getInvitationCounts(User.Kind requestRole) {
-    return db.getInviteDAO().getInvitationCounts(requestRole);
-  }
-
   /**
    * @return
    * @see mitll.langtest.client.dliclass.DLIClassOps#showUsers

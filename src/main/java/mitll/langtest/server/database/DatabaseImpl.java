@@ -188,7 +188,7 @@ public class DatabaseImpl implements Database {
   private PathHelper pathHelper;
   private IProjectManagement projectManagement;
   private RecordWordAndPhone recordWordAndPhone;
-  private IInviteDAO inviteDAO;
+ // private IInviteDAO inviteDAO;
   private IUserSecurityManager userSecurityManager;
 
   /**
@@ -316,7 +316,7 @@ public class DatabaseImpl implements Database {
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
     this.userDAO = new DominoUserDAOImpl(this);
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
-    this.inviteDAO = new SlickInviteDAOImpl(this, dbConnection);
+   // this.inviteDAO = new SlickInviteDAOImpl(this, dbConnection);
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
@@ -1813,10 +1813,6 @@ public class DatabaseImpl implements Database {
    */
   public IUserSessionDAO getUserSessionDAO() {
     return userSessionDAO;
-  }
-
-  public IInviteDAO getInviteDAO() {
-    return inviteDAO;
   }
 
   public IUserSecurityManager getUserSecurityManager() {
