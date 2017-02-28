@@ -1,28 +1,5 @@
 // Build-time dependencies
 
-/*
-buildscript {
-    repositories {
-        maven {
-            url "${artifactory_contextUrl}/libs-release"
-        }
-        jcenter()
-        // Alternatively use:
-//        maven {
-//            url 'http://dl.bintray.com/steffenschaefer/maven'
-//        }
-    }
-    dependencies {
-        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
-//        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
- //       classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
-   //     classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7"
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
-    }
-}
-*/
-
-
 // ********************************* Plugins **************************************
 buildscript {
     repositories {
@@ -31,10 +8,7 @@ buildscript {
         }
     }
     dependencies {
-        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
-//        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
         //       classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
-        //     classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7"
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
     }
 }
@@ -62,9 +36,8 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'distribution'
 
 putnami {
-    //module 'mitll.hlt.langtest.LangTest'
-    gwtVersion = '2.8.0'
     module 'mitll.langtest.LangTest'
+    gwtVersion = '2.8.0'
     /** add gwt nature on eclipse project */
     googlePluginEclipse = true
 
@@ -120,7 +93,7 @@ dependencies {
     compile('org.apache.logging.log4j:log4j-api:' + log4jVers) { transitive = false; }
     runtime('org.apache.logging.log4j:log4j-core:' + log4jVers) { transitive = false; }
     runtime('org.apache.logging.log4j:log4j-jcl:' + log4jVers) { transitive = false; }
-//    runtime('org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVers) { transitive = false; }
+    runtime('org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVers) { transitive = false; }
     runtime('org.apache.logging.log4j:log4j-web:' + log4jVers) { transitive = false; }
 
     compile('commons-io:commons-io:2.5') { transitive = false; }
@@ -137,7 +110,7 @@ dependencies {
 //    compile('org.apache.commons:commons-collections4:4+') { transitive = false; }
     compile('org.apache.commons:commons-email:1+') { transitive = true; }
     compile('org.apache.ignite:ignite-core:1.7.0')
-//    runtime('org.apache.ignite:ignite-slf4j:1.7.0')
+    runtime('org.apache.ignite:ignite-slf4j:1.7.0')
 //    compile('commons-fileupload:commons-fileupload:1+') { transitive = false; }
 
     def poiVers = '3.15'
@@ -326,7 +299,7 @@ publishing {
 
 // add eclipse preferences.
 tasks.eclipse.doLast {
-    def ewf = new File("build/eclipse-war");
+    def ewf = new File("${project.projectDir}/build/eclipse-war");
     ewf.mkdirs();
 
     // write settings file 'com.google.gdt.eclipse.core.prefs'
@@ -336,5 +309,20 @@ tasks.eclipse.doLast {
         ant.entry(key: "lastWarOutDir", value: ewf.getAbsoluteFile())
         ant.entry(key: "warSrcDir", value: "src/main/webapp")
         ant.entry(key: "warSrcDirIsOutput", value: "false")
+    }
+
+    ant.propertyfile(file: ".settings/org.eclipse.wst.validation.prefs") {
+        ant.entry(key: "DELEGATES_PREFERENCE", value: "delegateValidatorList")
+
+        ant.entry(key: "USER_BUILD_PREFERENCE", value: "enabledBuildValidatorListorg.eclipse.jst.j2ee.internal.web.validation.UIWarValidator;org.eclipse.jst.j2ee.internal.classpathdep.ClasspathDependencyValidator;")
+        ant.entry(key: "USER_MANUAL_PREFERENCE", value: "enabledManualValidatorListorg.eclipse.jst.j2ee.internal.web.validation.UIWarValidator;org.eclipse.jst.j2ee.internal.classpathdep.ClasspathDependencyValidator;")
+        ant.entry(key: "USER_PREFERENCE", value: "overrideGlobalPreferencestruedisableAllValidationfalseversion1.2.700.v201508251749")
+        ant.entry(key: "eclipse.preferences.version", value: "1")
+        ant.entry(key: "override", value: "true")
+        ant.entry(key: "suspend", value: "false")
+        ant.entry(key: "vals/org.eclipse.wst.html.core.HTMLValidator/groups", value: "0107include06111contentType136org.eclipse.wst.html.core.htmlsourceT07fileext04htmlF07fileext05xhtmlF07fileext03htmF07fileext04htplF07fileext03wmlF0107exclude0404file131src/test/resources/import/GLOSSF0204file05buildF0204file139html-cleaner-word-pasted-no-suffix.htmlF0104file129html-cleaner-word-pasted.htmlF01")
+        ant.entry(key: "vals/org.eclipse.wst.json.core.json/groups", value: "0107include02111contentType136org.eclipse.wst.json.core.jsonsourceT07fileext04jsonF0107exclude0404file110empty.jsonF0104file114invalid-1.jsonF0104file114invalid-2.jsonF0104file05buildF02")
+        ant.entry(key: "vals/org.eclipse.wst.xml.core.xml/groups", value: "0107include05111contentType128org.eclipse.core.runtime.xmlT111contentType134org.eclipse.wst.xml.core.xmlsourceT111contentType134org.eclipse.wst.xml.core.xslsourceT111contentType134org.eclipse.jst.jsp.core.tldsourceT07fileext03xmlF0107exclude08113projectNature134org.eclipse.jst.j2ee.ejb.EJBNature113projectNature130org.eclipse.jst.j2ee.EARNature04file08.projectT0104file110.classpathT0104file110.settings/T0204file05buildF0204file112test-workingF0204file131src/test/resources/import/GLOSSF02")
+        ant.entry(key: "vf.version", value: "3")
     }
 }
