@@ -1078,7 +1078,9 @@ public class DatabaseImpl implements Database {
   /**
    * the User info lives in domino...
    *
-   * @see #initializeDAOs(PathHelper)
+   * This is a little more sophisticated in that it will recreate individual tables that might get dropped.
+   *
+   * @see #initializeDAOs
    */
   public void createTables() {
     //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
