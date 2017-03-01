@@ -54,7 +54,7 @@ import java.util.*;
  * @since 10/8/12
  * Time: 3:35 PM
  * To change this template use File | Settings | File Templates.
- * @deprecated we don't do this any more... maybe just in AMAS
+ * NOTE : we don't do this any more... maybe just in AMAS
  */
 public class FileExerciseDAO<T extends CommonShell & HasUnitChapter> implements SimpleExerciseDAO<T> {
   private static final Logger logger = LogManager.getLogger(FileExerciseDAO.class);

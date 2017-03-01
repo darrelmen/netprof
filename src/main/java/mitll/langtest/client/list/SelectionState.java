@@ -35,8 +35,6 @@ package mitll.langtest.client.list;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.bootstrap.ButtonGroupSectionWidget.ITEM_SEPARATOR;
-
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -53,6 +51,7 @@ public class SelectionState {
   public static final String ONLY_UNRECORDED = "onlyUnrecorded";
   public static final String ONLY_DEFAULT = "onlyDefault";
   public static final String ONLY_UNINSPECTED = "onlyUninspected";
+  public static final String ITEM_SEPARATOR = "&#44";
 
   static final String INSTANCE = "instance";
   private int item = -1;

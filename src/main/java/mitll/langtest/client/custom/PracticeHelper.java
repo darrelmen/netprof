@@ -60,10 +60,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
 
-  PracticeHelper(
-      ExerciseController controller) {
-    super(controller, null);
-  }
+  PracticeHelper(ExerciseController controller) { super(controller, null);  }
 
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {

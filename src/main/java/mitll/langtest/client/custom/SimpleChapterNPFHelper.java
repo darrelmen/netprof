@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.custom.content.FlexListLayout;
+import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -60,7 +61,6 @@ import mitll.langtest.shared.exercise.HasID;
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonExercise>
     implements ReloadableContainer, RequiresResize {
 //  private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
-
   private boolean madeNPFContent = false;
 
   protected final ExerciseController controller;
@@ -180,9 +180,9 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * TODO : make sure this is doing something helpful
    *
    * @param e
-   * @see mitll.langtest.client.custom.RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, HasID)
+   * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, HasID)
    */
-  void tellOtherListExerciseDirty(HasID e) {
+  protected void tellOtherListExerciseDirty(HasID e) {
     if (predefinedContentList != null &&
         predefinedContentList.getReloadable() != null &&
         predefinedContentList.getReloadable().getCurrentExerciseID() != -1 &&

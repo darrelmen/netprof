@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SuggestOracle;
-import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -42,10 +41,10 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 2/14/17.
  */
-class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
+class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
-  public static final String STRONG = "strong";
 
+  private static final String STRONG = "strong";
   private static final int DISPLAY_ITEMS = 15;
   private static final String ADD = "Add";
 
@@ -56,7 +55,7 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
   private EditItem editItem;
   private UserList<CommonShell> list;
-  protected final ListServiceAsync listService = GWT.create(ListService.class);
+  private final ListServiceAsync listService = GWT.create(ListService.class);
   private TextBox quickAddText;
   private HTML message;
 
@@ -88,15 +87,13 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
   protected DivWidget getOptionalWidget() {
     DivWidget widgets = new DivWidget();
+    widgets.addStyleName("bottomFiveMargin");
 
     DivWidget addW = getAddButtonContainer();
     widgets.add(addW);
 
     DivWidget delW = getRemoveButtonContainer();
     widgets.add(delW);
-
-//    MaterialAutoComplete acList = new MaterialAutoComplete(new ExerciseOracle());
-//    widgets.add(acList);
 
     addListChangedListener((items, selectionID) -> enableRemove(!isEmpty()));
     return widgets;
@@ -120,7 +117,8 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
 
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
             .setPrefix(w.getText())
-            .setLimit(DISPLAY_ITEMS);
+            .setLimit(DISPLAY_ITEMS)
+            .setAddFirst(false);
 
         controller.getExerciseService().getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
               @Override
@@ -408,6 +406,10 @@ class EditableExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   }
 
 
+  /**
+   * @see #getOptionalWidget
+   * @return
+   */
   @NotNull
   private DivWidget getAddButtonContainer() {
     DivWidget addW = new DivWidget();

@@ -58,6 +58,7 @@ import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.exercise.ContextCommentNPFExercise;
+import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -104,7 +105,6 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String CHAPTERS = "Learn Pronunciation";
 
   //private static final String CLASSES = "Classes";
-
   private static final String PROJECTS = "Projects";
 
   private static final String YOUR_LISTS = "Study Your Lists";
@@ -234,7 +234,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
     practiceHelper = new PracticeHelper(controller);
-    recorderHelper = new RecorderNPFHelper(controller, true, learnHelper);
+    recorderHelper      = new RecorderNPFHelper(controller, true,  learnHelper);
     recordExampleHelper = new RecorderNPFHelper(controller, false, learnHelper);
   }
 

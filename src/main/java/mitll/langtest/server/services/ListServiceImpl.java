@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -113,7 +114,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    return getUserListManager().getListsForUser(getUserIDFromSession(), onlyCreated, visited, getProjectID());
+    try {
+      return getUserListManager().getListsForUser(getUserIDFromSession(), onlyCreated, visited, getProjectID());
+    } catch (Exception e) {
+      logger.error("Got " +e,e);
+      return Collections.emptyList();
+    }
   }
 
   /**
@@ -289,14 +295,16 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override
-  public void editItem(CommonExercise userExercise, boolean keepAudio) {
-    db.editItem(userExercise, keepAudio);
-    //  if (DEBUG) logger.debug("editItem : now user exercise " + userExercise);
-  }
+  public void editItem(CommonExercise userExercise, boolean keepAudio) { db.editItem(userExercise, keepAudio);  }
 
-  public void updateContext(long id, String context) {
-    getUserListDAO().updateContext(id, context);
-  }
+  /**
+   * @see mitll.langtest.client.custom.ListManager#attachMedia
+   * @param id
+   * @param context
+   */
+  public void updateContext(long id, String context) { getUserListDAO().updateContext(id, context);  }
+
+  public void updateRichText(long id, String richText) { getUserListDAO().updateRichText(id, richText);  }
 
   private IUserListDAO getUserListDAO() {
     return getUserListManager().getUserListDAO();

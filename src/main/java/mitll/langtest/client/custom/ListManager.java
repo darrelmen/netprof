@@ -56,6 +56,7 @@ import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.custom.tabs.TabAndContent;
+import mitll.langtest.client.custom.userlist.ListOperations;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.download.DownloadLink;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -80,10 +81,11 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class ListManager implements RequiresResize {
-  public static final String COLLAPSIBLE_DOCUMENT_VIEWER = "collapsibleDocumentViewer";
-  public static final String LIST_OPERATIONS = "listOperations";
-  public static final String ADD_MEDIA = "Add Media";
   private final Logger logger = Logger.getLogger("ListManager");
+
+  private static final String COLLAPSIBLE_DOCUMENT_VIEWER = "collapsibleDocumentViewer";
+  private static final String LIST_OPERATIONS = "listOperations";
+  private static final String ADD_MEDIA = "Add Media";
   private static final String IMPORT_ITEM = "importItem";
 
   private final KeyStorage storage;
@@ -480,7 +482,7 @@ public class ListManager implements RequiresResize {
     return storage;
   }
 
-  private DivWidget mediaContainer;
+  //private DivWidget mediaContainer;
 
   /**
    * @param ul
@@ -503,11 +505,13 @@ public class ListManager implements RequiresResize {
       addCreatedBy(listOperationsContainer, userID);
     }
 
-    listOperationsContainer.add(gwtDownloadLinkRow(ul, instanceName));
-    listOperationsContainer.add(mediaContainer = new DivWidget());
+    ListOperations listOperations = new ListOperations(controller,
+        listService);
+    listOperationsContainer.add(listOperations.getDownloadLinkRow(ul, instanceName));
+    listOperationsContainer.add(listOperations.getMediaContainer());
 
     if (!ul.getContextURL().isEmpty()) {
-      addDocContainer(ul.getContextURL(), mediaContainer);
+      listOperations.addDocContainer(ul.getContextURL());
     }
 //    else {
 //      DivWidget docContainer = new DivWidget();
@@ -519,156 +523,6 @@ public class ListManager implements RequiresResize {
     listOperationsContainer.add(getListOperations(ul, instanceName, toSelect));
 
     return listOperationsContainer;
-  }
-
-  private Button showHideMedia;
-
-  private Panel gwtDownloadLinkRow(UserList ul, String instanceName) {
-    Panel r1 = new FluidRow();
-    r1.getElement().setId(LIST_OPERATIONS);
-    r1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-
-    r1.addStyleName("userListDarkerBlueColor");
-    Anchor downloadLink = getDownloadLink(ul, instanceName);
-    downloadLink.addStyleName("floatLeftList");
-    r1.add(downloadLink);
-
-    Button child = getButton(ul.getID(), ul.getContextURL());
-    child.addStyleName("floatLeftList");
-
-    r1.add(child);
-
-    showHideMedia = new Button("Show/Hide Media");
-    configureNewListButton(showHideMedia);
-
-    CollapseTrigger trigger = new CollapseTrigger("#" + COLLAPSIBLE_DOCUMENT_VIEWER);
-    trigger.setWidget(showHideMedia);
-
-    /*    showHideMedia.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        collapse.setToggle(!collapse.isToggle());
-      }
-    });
-    r1.add(showHideMedia);
-    */
-
-    showHideMedia.setVisible(!ul.getContextURL().isEmpty());
-    r1.add(trigger);
-    return r1;
-  }
-
-  private Button getButton(int id, String current) {
-    String buttonTitle = ADD_MEDIA;
-
-    final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList(id, 150);
-    textBox.setText(current);
-    final Button newListButton = new Button(buttonTitle);
-    configureNewListButton(newListButton);
-
-    Tooltip tooltip = new TooltipHelper().addTooltip(newListButton, buttonTitle);
-
-    new PopupContainerFactory().makePopupAndButton(textBox, newListButton, tooltip, new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        attachMedia(textBox, id);
-      }
-    });
-
-    return newListButton;
-  }
-
-  @NotNull
-  private PopupContainerFactory.HidePopupTextBox getTextBoxForNewList(int id, int length) {
-    final PopupContainerFactory.HidePopupTextBox textBox = new PopupContainerFactory.HidePopupTextBox() {
-      @Override
-      protected void onEnter() {
-        attachMedia(this, id);
-      }
-    };
-
-    textBox.getElement().setId("NewList");
-    textBox.setVisibleLength(length);
-    return textBox;
-  }
-
-  private void attachMedia(TextBox textEntry, int id) {
-    String newListName = textEntry.getValue();
-    if (!newListName.isEmpty()) {
-      //  controller.logEvent(textEntry, "NewList_TextBox", exercise.getID(), "make new list called '" + newListName + "'");
-      logger.info("got " + newListName);
-      listService.updateContext(id, newListName, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-          addDocContainer(newListName, mediaContainer);
-          collapse.setToggle(true);
-          showHideMedia.setVisible(true);
-        }
-      });
-    }
-  }
-
-  private void addDocContainer(String mediaURL, DivWidget mediaContainer) {
-    logger.info("Add doc container with " + mediaURL);
-    logger.info("Add doc container mediaContainer " + mediaContainer);
-
-    // if (frame == null) {
-    DivWidget docContainer = new DivWidget();
-
-    docContainer.setWidth("100%");
-
-    if (mediaURL.startsWith("<iframe")) {
-      docContainer.add(new HTML(mediaURL));
-    } else {
-      Frame frame = new Frame(mediaURL);
-      frame.setHeight("315px");
-      frame.setWidth("100%");
-      docContainer.add(frame);
-    }
-
-    //   String test = "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/dkcY6pv7ALk\" frameborder=\"0\" allowfullscreen></iframe>";
-
-/*      Frame  frame = new Frame(mediaURL);
-      frame.setHeight("315px");
-      frame.setWidth("100%");
-
-      docContainer.add(frame);*/
-
-    // docContainer.add(new HTML(test));
-
-    collapse = new Collapse();
-    collapse.setId(COLLAPSIBLE_DOCUMENT_VIEWER);
-    collapse.setDefaultOpen(false);
-    collapse.setExistTrigger(true);
-    collapse.setWidget(docContainer);
-
-    mediaContainer.clear();
-    mediaContainer.add(collapse);
-//    } else {
-    //     frame.setUrl(mediaURL);
-    //   }
-  }
-
-  private void configureNewListButton(final Button popupButton) {
-    popupButton.setIcon(IconType.FOLDER_OPEN);
-    popupButton.setType(ButtonType.PRIMARY);
-    popupButton.addStyleName("leftFiveMargin");
-    // popupButton.getElement().setId("NPFExercise_popup");
-    controller.register(popupButton, "N/A", "added document");
-  }
-
-  private Anchor getDownloadLink(UserList ul, String instanceName) {
-    long listID = ul.getID();
-    String linkid = instanceName + "_" + listID;
-    Anchor downloadLink = new DownloadLink(controller).getDownloadLink(listID, linkid, ul.getName());
-    Node child = downloadLink.getElement().getChild(0);
-    AnchorElement.as(child).getStyle().setColor("#333333");
-    return downloadLink;
   }
 
   /**

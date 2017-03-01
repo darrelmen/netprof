@@ -64,7 +64,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final boolean DEBUG = true;
 
   public static final int MIN_DEBUG_DURATION = 30;
-  public static final int MIN_WARN_DURATION  = 1000;
+  public static final int MIN_WARN_DURATION = 1000;
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
@@ -131,15 +131,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         if (!request.getPrefix().isEmpty()) {
           // now do a trie over matches
           exercises = getExercisesForSearch(request.getPrefix(), exercises, predefExercises);
-          if (request.getLimit() > 0) {
-            Collections.sort(exercises, new Comparator<CommonExercise>() {
-              @Override
-              public int compare(CommonExercise o1, CommonExercise o2) {
-                return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
-              }
-            });
-            exercises = exercises.subList(0, Math.min(exercises.size(), request.getLimit()));
-          }
+          exercises = getLimitedMatches(request, exercises);
         }
         exercises = filterExercises(request, exercises, projectID);
 
@@ -191,7 +183,29 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       return new ExerciseListWrapper<T>();
     }
   }
-//  private boolean didCheckLTS = false;
+
+  /**
+   * Return shortest matches first.
+   *
+   * @param request
+   * @param exercises
+   * @return
+   */
+  private List<CommonExercise> getLimitedMatches(ExerciseListRequest request, List<CommonExercise> exercises) {
+    if (request.getLimit() > 0) {
+      Collections.sort(exercises, (o1, o2) -> {
+        String foreignLanguage = o1.getForeignLanguage();
+        String foreignLanguage1 = o2.getForeignLanguage();
+        int length = foreignLanguage.length();
+        int length1 = foreignLanguage1.length();
+        int i = Integer.valueOf(length).compareTo(length1);
+
+        return i == 0 ? foreignLanguage.compareTo(foreignLanguage1) : i;
+      });
+      exercises = exercises.subList(0, Math.min(exercises.size(), request.getLimit()));
+    }
+    return exercises;
+  }
 
   /**
    * TODO : this doesn't make sense - we need to do this on all projects, once.
@@ -597,7 +611,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       try {
         exid = Integer.parseInt(prefix);
       } catch (NumberFormatException e) {
-       // logger.info("getExercisesForSearchWithTrie can't parse search number '" + prefix + "'");
+        // logger.info("getExercisesForSearchWithTrie can't parse search number '" + prefix + "'");
       }
     }
     return exid;
