@@ -107,6 +107,8 @@ dependencies {
     //runtime('commons-codec:commons-codec:1+') //{ transitive = false; }
 
     compile('org.apache.commons:commons-collections4:4+')
+    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.2'
+
     compile('org.apache.commons:commons-email:1+')
     compile('org.apache.ignite:ignite-core:1.7.0')
     runtime('org.apache.ignite:ignite-slf4j:1.7.0')
