@@ -74,24 +74,32 @@ public class UserList<T extends HasID> extends BaseExercise {
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
+  private String richText;
 
   public UserList() {}
 
   /**
    * @param uniqueID
-   * @paramx user
    * @param userid
    * @param userChosenID
    * @param name
    * @param description
    * @param classMarker
+   * @param richText
+   * @paramx user
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see UserListDAO#getWhere(long, boolean)
    */
   public UserList(int uniqueID,
-                   int userid, String userChosenID, String name, String description, String classMarker, boolean isPrivate,
+                  int userid,
+                  String userChosenID,
+                  String name,
+                  String description,
+                  String classMarker,
+                  boolean isPrivate,
                   long modified,
-                  String contextURL) {
+                  String contextURL,
+                  String richText) {
     super(uniqueID);
      this.userid = userid;
     this.userChosenID = userChosenID;
@@ -101,6 +109,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.isPrivate = isPrivate;
     this.modified = modified;
     this.contextURL = contextURL;
+    this.richText =richText;
   }
 
   public int getUserID() { return userid; }
@@ -266,14 +275,18 @@ public class UserList<T extends HasID> extends BaseExercise {
     return contextURL;
   }
 
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getRichText() {
+    return richText;
+  }
+
   @Override
   public String toString() {
     return "UserList #" + getID() + " '" + name + "' by " + getUserID() +
         " : " + (isReview ? " REVIEW " : "") +
         " : with " +  getNumItems()  + " exercises.";
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 }

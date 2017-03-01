@@ -36,6 +36,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -100,7 +101,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
-  protected void addEntryForExercise(SmallVocabDecoder smallVocabDecoder,
+  private void addEntryForExercise(SmallVocabDecoder smallVocabDecoder,
                                    boolean includeForeign,
                                    boolean isMandarin,
                                    boolean hasClickableCharacters,
@@ -127,13 +128,18 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
                           T exercise) {
     String fl = exercise.getForeignLanguage();
     if (fl != null && !fl.isEmpty()) {
-      addEntryToTrie(new ExerciseWrapper<T>(exercise, false));
+      addEntryToTrie(new ExerciseWrapper<>(exercise, false));
 
       Collection<String> tokens = isMandarin ?
           getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(fl);
       for (String token : tokens) {
         addEntry(exercise, token);
-        addEntry(exercise, removeDiacritics(token));
+       // String noAccents = removeDiacritics(token);
+        String noAccents = StringUtils.stripAccents(token);
+
+        if (!token.equals(noAccents)) {
+          addEntry(exercise, noAccents);
+        }
       }
 
       if (hasClickableCharacters) {
@@ -142,9 +148,14 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
       String transliteration = exercise.getTransliteration();
 
-      for (String t : smallVocabDecoder.getTokens(transliteration)) {
-        addEntry(exercise, t);
-        addEntry(exercise, removeDiacritics(t));
+      for (String token : smallVocabDecoder.getTokens(transliteration)) {
+        addEntry(exercise, token);
+        String noAccents = StringUtils.stripAccents(token);
+
+        if (!token.equals(noAccents)) {
+          addEntry(exercise, noAccents);
+        }
+        //addEntry(exercise, removeDiacritics(token));
       }
     }
   }
@@ -152,7 +163,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private void addEnglish(SmallVocabDecoder smallVocabDecoder, T exercise) {
     String english = exercise.getEnglish();
     if (english != null && !english.isEmpty()) {
-      addEntryToTrie(new ExerciseWrapper<T>(exercise, true));
+      addEntryToTrie(new ExerciseWrapper<>(exercise, true));
       Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
       if (tokens.size() > 1) {
         for (String token : tokens) {
@@ -173,8 +184,8 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
-  protected boolean addEntry(T exercise, String token) {
-    return addEntryToTrie(new ExerciseWrapper<T>(token.toLowerCase(), exercise));
+  private boolean addEntry(T exercise, String token) {
+    return addEntryToTrie(new ExerciseWrapper<>(token.toLowerCase(), exercise));
   }
 
   private Collection<String> getMandarinTokens(SmallVocabDecoder smallVocabDecoder, T e) {
@@ -231,7 +242,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    * @param input
    * @return
    */
-  private String removeDiacritics(String input) {
+/*  private String removeDiacritics(String input) {
     String nrml = Normalizer.normalize(input, Normalizer.Form.NFD);
     StringBuilder stripped = new StringBuilder();
     for (int i = 0; i < nrml.length(); ++i) {
@@ -240,5 +251,5 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
       }
     }
     return stripped.toString();
-  }
+  }*/
 }

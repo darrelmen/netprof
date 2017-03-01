@@ -147,7 +147,6 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final int STUDY_LISTS_INDEX = 2;
 
   private final ExerciseController controller;
-  private final LangTestDatabaseAsync service;
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
 
   private final UserManager userManager;
@@ -191,7 +190,6 @@ public class Navigation implements RequiresResize, ShowTab {
                     final ExerciseController controller,
                     UserFeedback feedback,
                     LifecycleSupport lifecycleSupport) {
-    this.service = service;
     this.userManager = userManager;
     this.controller = controller;
     this.feedback = feedback;
@@ -490,23 +488,6 @@ public class Navigation implements RequiresResize, ShowTab {
     studyLists = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, STUDY_LISTS);
     listManager.addStudyLists(studyLists);
   }
-
-  /**
-   * @see #addTabs
-   */
-/*  private void addUserMaintenance() {
-    users = makeFirstLevelTab(tabPanel, IconType.GROUP, USERS);
-    users.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTabAndLogEvent(USERS, users);
-
-        UserOps userOps = new UserOps(controller, userManager);
-        userOps.showUsers(users);
-        users.setResizeable(userOps);
-      }
-    });
-  }*/
 
   /**
    * Add a way to make a new project

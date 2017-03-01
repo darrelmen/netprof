@@ -51,6 +51,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.recorder.RecordButton;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,17 +71,17 @@ public class BasicDialog {
 
   private static final boolean DEBUG = false;
 
- // private static final int ILR_CHOICE_WIDTH = 80;
+  // private static final int ILR_CHOICE_WIDTH = 80;
   static final String TRY_AGAIN = "Try Again";
 
-  public FormField addControlFormField(Panel dialogBox, String label) {
-    return addControlFormField(dialogBox, label, false, 0, 30, "", -1);
+  protected FormField addControlFormField(Panel dialogBox, String label) {
+    return addControlFormField(dialogBox, label, false, 0, 30, -1);
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword,
-                                          int minLength, int maxLength, String hint, int optWidth) {
+  private FormField addControlFormField(Panel dialogBox, String label, boolean isPassword,
+                                        int minLength, int maxLength, int optWidth) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-    if (optWidth>0) user.setWidth(optWidth + "px");
+    if (optWidth > 0) user.setWidth(optWidth + "px");
     user.setMaxLength(maxLength);
     return getSimpleFormField(dialogBox, label, user, minLength);
   }
@@ -93,17 +94,29 @@ public class BasicDialog {
                                                     Widget rightSide,
                                                     int labelWidth,
                                                     int optWidth) {
-    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-    if (optWidth>0) user.setWidth(optWidth + "px");
+    final TextBox textBox = isPassword ? new PasswordTextBox() : new TextBox();
+    return getFormField(dialogBox, label, subtext, minLength, rightSide, labelWidth, optWidth, textBox);
+  }
 
-    user.getElement().setId("textBox");
+  @NotNull
+  protected FormField getFormField(Panel dialogBox,
+                                 String label,
+                                 String subtext,
+                                 int minLength,
+                                 Widget rightSide,
+                                 int labelWidth,
+                                 int optWidth,
+                                 TextBoxBase textBox) {
+    if (optWidth > 0) textBox.setWidth(optWidth + "px");
+
+    textBox.getElement().setId("textBox");
     Panel row = new HorizontalPanel();
-    row.add(user);
+    row.add(textBox);
     row.add(rightSide);
     final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, row, labelWidth, subtext);
 
-    FormField formField = new FormField(user, userGroup, minLength);
-   // formField.setRightSide(rightSide);
+    FormField formField = new FormField(textBox, userGroup, minLength);
+    // formField.setRightSide(rightSide);
     return formField;
   }
 
@@ -116,10 +129,10 @@ public class BasicDialog {
   }
 
   /**
-   * @see #getSimpleFormField(Panel, TextBox, int)
    * @param dialogBox
    * @param widget
    * @return
+   * @see #getSimpleFormField(Panel, TextBox, int)
    */
   private ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
@@ -187,11 +200,11 @@ public class BasicDialog {
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeRegularAudioPanel(Panel)
-   * @paramx dialogBox
    * @param label
-   * @paramx widget
    * @return
+   * @paramx dialogBox
+   * @paramx widget
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeRegularAudioPanel(Panel)
    */
   private Heading getLabel(String label, int labelWidth, String subtext) {
     Heading labelHeading = new Heading(6, label, subtext);
@@ -253,10 +266,10 @@ public class BasicDialog {
   }
 
   /**
-   * @seex EditableExerciseDialog#checkForForeignChange
    * @param dialectGroup
    * @param header
    * @param message
+   * @seex EditableExerciseDialog#checkForForeignChange
    */
   public void markError(ControlGroup dialectGroup, String header, String message) {
     markError(dialectGroup, header, message, Placement.RIGHT);
@@ -273,7 +286,6 @@ public class BasicDialog {
   }
 
   /**
-   *
    * @param dialectGroup
    * @param dialect
    * @param header
@@ -282,7 +294,7 @@ public class BasicDialog {
    * @param setFocus
    */
   void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right, boolean setFocus) {
-    if (DEBUG) logger.info("markErrorBlur " +header + " message " +message);
+    if (DEBUG) logger.info("markErrorBlur " + header + " message " + message);
 
     dialectGroup.setType(ControlGroupType.ERROR);
     if (setFocus) dialect.setFocus(true);
@@ -380,7 +392,8 @@ public class BasicDialog {
   }
 
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message, Placement placement) {
-    if (DEBUG) logger.info("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
+    if (DEBUG)
+      logger.info("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
     setupPopover(w, heading, message, placement);
   }
 
@@ -450,7 +463,8 @@ public class BasicDialog {
    * @seex UserPassLogin#getSignUpForm
    */
   void setupPopover(final FocusWidget w, String heading, final String message, Placement placement, boolean isHTML, boolean requestFocus) {
-    if (DEBUG) logger.info(" : setupPopover (bad)   : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message);
+    if (DEBUG)
+      logger.info(" : setupPopover (bad)   : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message);
     final Popover popover = new Popover();
     configurePopup(popover, w, heading, message, placement, isHTML, requestFocus);
 
@@ -458,7 +472,8 @@ public class BasicDialog {
   }
 
   private void configurePopup(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML, boolean requestFocus) {
-    if (DEBUG) logger.info("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
+    if (DEBUG)
+      logger.info("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
 
     if (requestFocus && w instanceof Focusable) {
       requestFocus((Focusable) w);
@@ -475,18 +490,17 @@ public class BasicDialog {
   }
 
   /**
-   * @see RecordButton#showTooLoud()
    * @param w
    * @param heading
    * @param message
    * @param placement
+   * @see RecordButton#showTooLoud()
    */
   public void showPopover(Widget w, String heading, String message, Placement placement) {
     showPopover(new Popover(), w, heading, message, placement, true);
   }
 
   /**
-   *
    * @param popover
    * @param w
    * @param heading
@@ -495,14 +509,16 @@ public class BasicDialog {
    * @param isHTML
    */
   private void showPopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
-    if (DEBUG) logger.info("showPopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
+    if (DEBUG)
+      logger.info("showPopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
 
     simplePopover(popover, w, heading, message, placement, isHTML);
     popover.show();
   }
 
   private void simplePopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
-    if (DEBUG) logger.info("simplePopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
+    if (DEBUG)
+      logger.info("simplePopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
     popover.setWidget(w);
     popover.setHtml(isHTML);
     popover.setText(message);
@@ -553,6 +569,7 @@ public class BasicDialog {
   static class MyPopover extends Popover {
     public MyPopover() {
     }
+
     public void dontFireAgain() {
       hide();
       setTrigger(Trigger.MANUAL);

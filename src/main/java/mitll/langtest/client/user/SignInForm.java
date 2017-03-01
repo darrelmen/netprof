@@ -183,66 +183,9 @@ public class SignInForm extends UserDialog implements SignIn {
       }
     });
 
-   /* userField.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        //logger.info("makeSignInUserName : got blur ");
-        onUserIDBlur();
-      }
-    });*/
-
     sendEmail = new SendEmail(eventRegistration, userField);
-
   }
 
-/*  private void onUserIDBlur() {
-    final String text = userField.getSafeText();
-
-    if (!text.isEmpty()) {
-      eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + text + "'");
-      //logger.info("\tchecking makeSignInUserName " + text);
-      service.getUserByID(text, new AsyncCallback<User>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          logger.warning("\tgot FAILURE on userExists " + text);
-        }
-
-        @Override
-        public void onSuccess(User result) {
-          gotUserExists(result);
-        }
-      });
-    }
-  }*/
-
-  /**
-   * Skip case where really old users didn't have passwords.  Kind of a bad idea - what were we thinking?
-   *
-   * @param loginUser
-   */
-/*  private void gotUserExists(User loginUser) {
-    if (loginUser != null) {
-      if (loginUser.isValid()) {
-*//*
-        logger.info("login user " + loginUser.getID() + " is valid");
-        logger.info("login user " + loginUser.getPermissions() );
-        logger.info("login user " + loginUser.getRealGender() );
-*//*
-      } else {
-*//*        logger.info("login user " + loginUser.getID() + " is NOT valid");
-        logger.info("login user " + loginUser.getID() + " perms " + loginUser.getPermissions());
-        logger.info("login user " + loginUser.getID() + " gender " + loginUser.getRealGender());
-        logger.info("login user " + loginUser.getID() + " email " + loginUser.getEmail());
-        logger.info("login user " + loginUser.getID() + " email hash " + loginUser.getEmailHash());*//*
-
-        eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + loginUser.toStringShort());
-        copyInfoToSignUp(loginUser.getUserID(), loginUser);
-      }
-    }
-    //else {
-//      logger.info("makeSignInUserName : for " + userField.getText() + " - no user with that id");
-    // }
-  }*/
   private FormField addPasswordField(Fieldset fieldset, Panel hp) {
     FormField password;
     password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);

@@ -37,11 +37,8 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
@@ -54,11 +51,9 @@ import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
-import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.custom.userlist.ListOperations;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.download.DownloadLink;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
@@ -505,14 +500,13 @@ public class ListManager implements RequiresResize {
       addCreatedBy(listOperationsContainer, userID);
     }
 
-    ListOperations listOperations = new ListOperations(controller,
-        listService);
-    listOperationsContainer.add(listOperations.getDownloadLinkRow(ul, instanceName));
+    ListOperations listOperations = new ListOperations(controller, listService, ul);
+    listOperationsContainer.add(listOperations.getOperations(instanceName));
     listOperationsContainer.add(listOperations.getMediaContainer());
 
-    if (!ul.getContextURL().isEmpty()) {
+  //  if (!ul.getContextURL().isEmpty()) {
       listOperations.addDocContainer(ul.getContextURL());
-    }
+   // }
 //    else {
 //      DivWidget docContainer = new DivWidget();
 //     // docContainer.setHeight("300px");
