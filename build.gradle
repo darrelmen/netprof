@@ -106,7 +106,6 @@ dependencies {
     runtime('commons-logging:commons-logging-api:1+')
     //runtime('commons-codec:commons-codec:1+') //{ transitive = false; }
 
-
     compile('org.apache.commons:commons-collections4:4+')
     compile('org.apache.commons:commons-email:1+')
     compile('org.apache.ignite:ignite-core:1.7.0')
@@ -218,7 +217,7 @@ gwt {
 war {
     archiveName "netprof.war"
     // somehow the domino tests jars are getting in if I don't do this
-  //  rootSpec.exclude("**/*tests.jar")
+    rootSpec.exclude("**/*tests.jar")
     rootSpec.exclude("**/log4j2-test.xml")
 
     // needed???
