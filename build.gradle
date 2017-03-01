@@ -29,8 +29,8 @@ plugins {
 apply from: 'gradle-common/common.gradle'
 apply from: 'gradle-common/common-java.gradle'
 //apply plugin: 'gwt'
-//apply plugin: 'war'
-apply plugin: 'java'
+//apply plugin: 'java'
+apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'distribution'
@@ -73,52 +73,53 @@ description = 'NetProF pronunciation feedback'
 
 dependencies {
     // our modules
-    compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT')   { changing = true }
-    compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT') { changing = true }
-    compile('mitll.hlt:imagewriter:1.0.0')   { changing = true }
-    compile('mitll.hlt:npdata:1.0.0')   { changing = true }
+    compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT') { changing = true;   }
+    //compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT') { changing = true }
+    compile('mitll.hlt:imagewriter:1.0.0') { changing = true }
+    compile('mitll.hlt:npdata:1.0.0') { changing = true }
 
     // gwt stuff
-    providedCompile('com.google.gwt:gwt-dev:2.8.0') { transitive = false; }
-    providedCompile('com.google.gwt:gwt-user:2.8.0') { transitive = false; }
-    runtime('com.google.gwt:gwt-servlet:2.8.0') { transitive = true; }
-    testRuntime('com.google.gwt:gwt-codeserver:2.8.0') { transitive = true; }
+    providedCompile('com.google.gwt:gwt-dev:2.8.0')
+    providedCompile('com.google.gwt:gwt-user:2.8.0')
+    runtime('com.google.gwt:gwt-servlet:2.8.0')
+    testRuntime('com.google.gwt:gwt-codeserver:2.8.0')
 
 //    compile 'org.mongodb:mongo-java-driver:3.3.0'
-
 //    compile 'org.apache.commons:commons-lang3:latest.integration'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
 
     def log4jVers = '2+'
-    compile('org.apache.logging.log4j:log4j-api:' + log4jVers) { transitive = false; }
-    runtime('org.apache.logging.log4j:log4j-core:' + log4jVers) { transitive = false; }
-    runtime('org.apache.logging.log4j:log4j-jcl:' + log4jVers) { transitive = false; }
-    runtime('org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVers) { transitive = false; }
-    runtime('org.apache.logging.log4j:log4j-web:' + log4jVers) { transitive = false; }
+    compile('org.apache.logging.log4j:log4j-api:' + log4jVers) 
+    runtime('org.apache.logging.log4j:log4j-core:' + log4jVers)
+    runtime('org.apache.logging.log4j:log4j-jcl:' + log4jVers)
+    runtime('org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVers) 
+    runtime('org.apache.logging.log4j:log4j-web:' + log4jVers)
 
-    compile('commons-io:commons-io:2.5') { transitive = false; }
+    compile('commons-io:commons-io:2.5')
 //    compile('commons-beanutils:commons-beanutils:1+') { transitive = false; }
-    compile('org.apache.commons:commons-lang3:3+') { transitive = false; }
+    compile('org.apache.commons:commons-lang3:3+')
 
     // RHB 2014.0723: Replacing normal commons logging with the log4j jcl bridge. This relies on the commons-logging-api
     // and solves several issues related to integration of commons and log4j2. FOP requires commons, but all commons
     // resources are skipped with an exceude below.
     //     <dependency org="commons-logging" name="commons-logging" rev="1.1.3" transitive="false" conf="runtime->default"/>
-    runtime('commons-logging:commons-logging-api:1+') { transitive = false; }
-    runtime('commons-codec:commons-codec:1+') { transitive = false; }
+    runtime('commons-logging:commons-logging-api:1+')
+    //runtime('commons-codec:commons-codec:1+') //{ transitive = false; }
 
-//    compile('org.apache.commons:commons-collections4:4+') { transitive = false; }
-    compile('org.apache.commons:commons-email:1+') { transitive = true; }
+
+    compile('org.apache.commons:commons-collections4:4+')
+    compile('org.apache.commons:commons-email:1+')
     compile('org.apache.ignite:ignite-core:1.7.0')
     runtime('org.apache.ignite:ignite-slf4j:1.7.0')
-//    compile('commons-fileupload:commons-fileupload:1+') { transitive = false; }
+    compile('commons-fileupload:commons-fileupload:1+')
 
     def poiVers = '3.15'
-    compile('org.apache.poi:poi:' + poiVers) { transitive = false; }
-    compile('org.apache.poi:poi-ooxml:' + poiVers) { transitive = false; }
-    compile('org.apache.poi:ooxml-schemas:1.3') { transitive = false; }
+    compile('org.apache.poi:poi:' + poiVers)
+    compile('org.apache.poi:poi-ooxml:' + poiVers)
+    compile('org.apache.poi:ooxml-schemas:1.3')
+    // runtime('org.apache.poi:ooxml-schemas:1.3') { transitive = false; }
 //    compile('org.apache.poi:poi-scratchpad:' + poiVers) { transitive = false; }
-    compile('org.apache.xmlbeans:xmlbeans:2.6.0') { transitive = false; }
+    compile('org.apache.xmlbeans:xmlbeans:2.6.0')
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
@@ -126,6 +127,7 @@ dependencies {
 //    testRuntime 'org.slf4j:slf4j-api:1.7.10'
 
     compile 'net.sf.uadetector:uadetector-core:0.9.22'
+
     compile 'net.sf.uadetector:uadetector-resources:2013.04'
 
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
@@ -142,12 +144,16 @@ dependencies {
     compile name: 'pronz_2.11-1.0'
     compile name: 'hydec_2.11-1.0'
     compile name: 'utils_2.11-1.0.0-SNAPSHOT'
+    compile name: 'commons-codec-1.10'
 
     // TODO : use gson instead
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
 
     compile group: 'com.google.guava', name: 'guava', version: '21.0'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
+
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+    runtime group: 'commons-codec', name: 'commons-codec', version: '1.10'
 
 //    compile group: 'org.apache.shiro', name: 'shiro-core', version: '1.3.2'
 //    compile group: 'org.apache.shiro', name: 'shiro-web', version: '1.3.2'
@@ -212,10 +218,11 @@ gwt {
 war {
     archiveName "netprof.war"
     // somehow the domino tests jars are getting in if I don't do this
-    rootSpec.exclude("**/*tests.jar")
+  //  rootSpec.exclude("**/*tests.jar")
     rootSpec.exclude("**/log4j2-test.xml")
 
     // needed???
+/*
     from('war/scoring/bin.linux64') {
         into 'scoring/bin.linux64'
     }
@@ -229,6 +236,7 @@ war {
     from 'war/docs/NetProf_Manual.pdf'
 
     webXml = file('war/WEB-INF/web.xml')
+    */
 
     from('src') {
         include '**/log4j2.xml'
