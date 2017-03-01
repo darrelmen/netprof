@@ -79,7 +79,7 @@ abstract class NewUserExercise extends BasicDialog {
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   public static final String CONTEXT = "context";
-  public static final String CONTEXT_TRANSLATION = "context translation";
+  static final String CONTEXT_TRANSLATION = "context translation";
   private static final String CONTEXT_LABEL = "Context (optional)";
   private static final String CONTEXT_TRANSLATION_LABEL = "C. Translation (optional)";
 
@@ -87,7 +87,6 @@ abstract class NewUserExercise extends BasicDialog {
   private static final int LABEL_WIDTH = 105;
 
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
-  //  private static final String CREATE = "Create";
   private static final String ENGLISH_LABEL = "English (optional)";// (optional)";
   private static final String ENGLISH_LABEL_2 = "Meaning (optional)";
   private static final String TRANSLITERATION_OPTIONAL = "Transliteration (optional)";
@@ -208,7 +207,6 @@ abstract class NewUserExercise extends BasicDialog {
     upper.add(makeAudioRow());
 
     this.toAddTo = toAddTo;
-    // this.originalList = originalList;
     this.listInterface = listInterface;
 
     Panel buttonRow = getCreateButton(originalList, listInterface, toAddTo, normalSpeedRecording);
@@ -225,12 +223,6 @@ abstract class NewUserExercise extends BasicDialog {
     addBlurHandler(originalList.getID(), english);
     return container;
   }
-//
-//  private Modal modal;
-//
-//  public void setModal(Modal modal) {
-//    this.modal = modal;
-//  }
 
   private void addBlurHandler(final int id1, FormField field) {
     field.box.addBlurHandler(event -> {
@@ -238,10 +230,6 @@ abstract class NewUserExercise extends BasicDialog {
       controller.logEvent(field.box, "TextBox", "UserList_" + id1, "ForeignLangBox = " + field.box.getValue());
     });
   }
-
-//  public boolean isCompleted() {
-//    return completed;
-//  }
 
   private class ResizableFluid extends FluidContainer implements RequiresResize {
     @Override
@@ -299,10 +287,6 @@ abstract class NewUserExercise extends BasicDialog {
                         ControlGroup normalSpeedRecording,
                         ListInterface<CommonShell> pagingContainer,
                         Panel toAddTo);
-/* {
-    grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable(), newUserExercise.getProjectID());
-    postChangeIfDirty(listInterface, false);
-  }*/
 
   /**
    * @param row
@@ -323,54 +307,6 @@ abstract class NewUserExercise extends BasicDialog {
     row.addStyleName("buttonGroupInset");
   }
 
-  /**
-   * Removes from 4 lists!
-   *
-   * @paramx exid
-   * @paramx exerciseList
-   * @paramx learnContainer
-   * @paramx editableExerciseList
-   * @paraxm button
-   * @paramx uniqueID
-   * @see EditableExerciseList#makeDeleteButton
-   */
- /* void deleteItem(final int exid,
-                  // final long uniqueID,
-                  final PagingExerciseList<?, ?> exerciseList,
-                  final ReloadableContainer learnContainer,
-                  final EditableExerciseList editableExerciseList,
-                  Button button) {
-    listService.deleteItemFromList(originalList.getID(), exid, new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        enableButton();
-      }
-
-      @Override
-      public void onSuccess(Boolean result) {
-        enableButton();
-        if (!result) {
-          logger.warning("deleteItem huh? id " + exid + " not in list " + originalList);
-        }
-
-        exerciseList.forgetExercise(exid);
-
-        if (!originalList.removeAndCheck(exid)) {
-          logger.warning("deleteItem huh? didn't remove the item " + exid + " from " + originalList.getID() +
-              " now " + originalList.getExercises().size());
-        }
-        if (learnContainer != null && learnContainer.getReloadable() != null) {
-          learnContainer.getReloadable().redraw();   // TODO : or reload???
-        }
-        logger.warning("deleteItem list size is " + exerciseList.getSize());
-        editableExerciseList.enableRemove(exerciseList.getSize() > 0);
-      }
-
-      private void enableButton() {
-        button.setEnabled(true);
-      }
-    });
-  }*/
   private void makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
@@ -619,7 +555,7 @@ abstract class NewUserExercise extends BasicDialog {
    */
   void reallyChange(final ListInterface<CommonShell> pagingContainer, final boolean markFixedClicked, boolean keepAudio) {
     newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
-    grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable(), newUserExercise.getProjectID());
+    grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
     editItem(pagingContainer, markFixedClicked, keepAudio);
   }
 
@@ -738,7 +674,7 @@ abstract class NewUserExercise extends BasicDialog {
             " before adding/changing " + newUserExercise + " -> " + result);*/
         if (result) {
           checkIfNeedsRefAudio();
-          grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable(), newUserExercise.getProjectID());
+          grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
           afterValidForeignPhrase(pagingContainer, toAddTo, onClick);
         } else {
           markError(foreignLang, "The " + FOREIGN_LANGUAGE +
@@ -750,10 +686,10 @@ abstract class NewUserExercise extends BasicDialog {
 
   /**
    * @param mutableExercise
-   * @param projectID
-   * @see EditableExerciseDialog#postEditItem
+   * @see #isValidForeignPhrase(ListInterface, Panel, boolean)
+   * @see #reallyChange(ListInterface, boolean, boolean)
    */
-  private void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise, int projectID) {
+  private void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
     String text = english.getSafeText();
 
     //   logger.info("so english  field is " + text + " fl " + foreignLang.getSafeText());
@@ -766,7 +702,7 @@ abstract class NewUserExercise extends BasicDialog {
     mutableExercise.setForeignLanguage(foreignLang.getSafeText());
     mutableExercise.setTransliteration(translit.getSafeText());
 
-    Collection<CommonExercise> directlyRelated = mutableExercise.getDirectlyRelated();
+//    Collection<CommonExercise> directlyRelated = mutableExercise.getDirectlyRelated();
 
  /*
     if (directlyRelated.isEmpty()) {
@@ -800,30 +736,6 @@ abstract class NewUserExercise extends BasicDialog {
       logger.info("grabInfoFromFormAndStuffInfoExercise context now " + directlyRelated1.iterator().next().getForeignLanguage());
     }
   }
-
-/*  private void addContext(int userid, MutableExercise exercise, int projectID) {
-    Exercise newContext = new Exercise(-1,
-        userid,
-        contextTrans.getSafeText(),
-        projectID,
-        false);
-    newContext.setForeignLanguage(context.getSafeText());
-
-    listService.newExercise(
-        originalList.getID(),
-        newContext,
-        new AsyncCallback<CommonExercise>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
-
-          @Override
-          public void onSuccess(CommonExercise newExercise) {
-            exercise.addContextExercise(newContext);
-            // updateContextExercise(newExercise.getMutable());
-          }
-        });
-  }*/
 
   /**
    * @see #isValidForeignPhrase(ListInterface, Panel, boolean)
@@ -979,7 +891,6 @@ abstract class NewUserExercise extends BasicDialog {
                   result.getAudioAttribute().markSlow();
                 }
 
-                // newUserExercise.getCombinedMutableUserExercise().addAudio(result.getAudioAttribute());
                 newUserExercise.getMutableAudio().addAudio(result.getAudioAttribute());
 
               } else {

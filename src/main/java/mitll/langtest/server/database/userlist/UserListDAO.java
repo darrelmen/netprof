@@ -198,6 +198,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
+  public void updateRichText(long uniqueID, String richText) {
+
+  }
+
+  @Override
   public void updateName(long id, String name) {
 
   }

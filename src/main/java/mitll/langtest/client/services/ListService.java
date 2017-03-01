@@ -35,6 +35,7 @@ package mitll.langtest.client.services;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextArea;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
@@ -59,7 +60,7 @@ public interface ListService extends RemoteService {
    * @param dliClass
    * @param isPublic
    * @return
-   * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList(BasicDialog.FormField, TextArea, BasicDialog.FormField, boolean)
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
   long addUserList(String name, String description, String dliClass, boolean isPublic);
 
@@ -83,7 +84,7 @@ public interface ListService extends RemoteService {
    * @param listid
    * @param exid
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem(String, long, UserList, PagingExerciseList, ReloadableContainer)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem
    */
   boolean deleteItemFromList(long listid, int exid);
   /**
@@ -158,5 +159,7 @@ public interface ListService extends RemoteService {
   void editItem(CommonExercise userExercise, boolean keepAudio);
 
   void updateContext(long userListID, String context);
+  void updateRichText(long userListID, String richText);
+
   void updateName(long userListID, String name);
 }

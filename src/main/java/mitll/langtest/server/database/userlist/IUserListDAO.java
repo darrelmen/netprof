@@ -44,7 +44,14 @@ import java.util.List;
 public interface IUserListDAO extends IDAO {
   void updateModified(long uniqueID);
 
+  /**
+   * @see mitll.langtest.server.services.ListServiceImpl#updateContext(long, String)
+   * @param uniqueID
+   * @param context
+   */
   void updateContext(long uniqueID, String context);
+
+  void updateRichText(long uniqueID, String richText);
 
   void updateName(long id, String name);
 

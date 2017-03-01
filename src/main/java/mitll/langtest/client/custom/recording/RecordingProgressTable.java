@@ -30,9 +30,10 @@
  *
  */
 
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.recording;
 
 import com.google.gwt.user.client.ui.FlexTable;
+import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.server.database.audio.BaseAudioDAO;
 
 import java.util.Arrays;

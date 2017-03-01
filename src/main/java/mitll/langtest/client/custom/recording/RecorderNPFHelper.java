@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -42,6 +42,9 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.custom.ReloadableContainer;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.custom.exercise.CommentBox;
@@ -73,7 +76,7 @@ import java.util.logging.Logger;
  * <p>
  * <T extends CommonShell & AudioRefExercise>
  */
-class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   //private final Logger logger = Logger.getLogger("RecorderNPFHelper");
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
@@ -86,7 +89,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    * @param doNormalRecording
    * @see Navigation#Navigation
    */
-  RecorderNPFHelper(ExerciseController controller,
+  public RecorderNPFHelper(ExerciseController controller,
                     boolean doNormalRecording,
                     ReloadableContainer exerciseList) {
     super(controller, exerciseList);

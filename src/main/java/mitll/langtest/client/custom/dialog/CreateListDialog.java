@@ -213,7 +213,7 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic) {
-    int user = userManager.getUser();
+   // int user = userManager.getUser();
     final String safeText = titleBox.getSafeText();
 
     listService.addUserList(

@@ -126,8 +126,21 @@ public class ExerciseComparator {
   public int compareStrings(String id1, String id2) {
     String t = id1.toLowerCase();
     if (t.startsWith("a ")) t = t.substring(2);
+
+    t = dropPunct(t);
     String t1 = id2.toLowerCase();
     if (t1.startsWith("a ")) t1 = t1.substring(2);
+    t1 = dropPunct(t1);
+
     return removePunct(t).compareTo(removePunct(t1));
+  }
+
+  @NotNull
+  private String dropPunct(String t) {
+    String first = t.substring(0,1);
+    if (first.equals("\"") || first.equals("\\'")) {
+      t = t.substring(1);
+    }
+    return t;
   }
 }
