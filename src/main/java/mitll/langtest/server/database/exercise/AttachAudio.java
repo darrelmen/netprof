@@ -232,8 +232,8 @@ public class AttachAudio {
               if (m++ < 50) {
 //                logger.warn(language + " : no context exercise on " + exercise);
               }
-              if (totalMissingContext++ % 100 == 0) {
-                logger.warn(language + " (total = " + totalMissingContext + ") no context exercise on " + exercise);
+              if (totalMissingContext++ % 1000 == 0) {
+                logger.info(language + " (total = " + totalMissingContext + ") no context exercise on " + exercise);
               }
             } else {
               // TODO : not sure why this is needed - wouldn't we do this on context exercises?

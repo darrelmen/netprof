@@ -33,17 +33,16 @@ class ConvertToOGG extends AudioBase {
   }
 
   private String getOggenc() {
-/*    String property = System.getProperty("os.name").toLowerCase();
+    String property = System.getProperty("os.name").toLowerCase();
     boolean isMac = property.contains("mac");
     boolean isWin = property.contains("win");
 
-    String oggEncPath = isMac ? "bin/macos/oggenc" : isWin ? "bin\\win32\\oggenc.exe" : "/usr/bin/oggenc";
+    String oggEncPath = isMac ? "/usr/local/bin/oggenc" : isWin ? "bin\\win32\\oggenc.exe" : "/usr/bin/oggenc";
     File file = new File(oggEncPath);
     if (!file.exists()) {
-      logger.error("can't find oggenc at " + file.getAbsolutePath());
-    }*/
-    //  oggEncPath = "oggenc";
-    return "oggenc";
+      logger.error("getOggenc : can't find oggenc at " + file.getAbsolutePath());
+    }
+    return oggEncPath;
   }
 
   /**
