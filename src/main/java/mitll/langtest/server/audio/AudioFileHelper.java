@@ -56,6 +56,7 @@ import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -64,6 +65,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
+
+import static mitll.langtest.server.ScoreServlet.EXERCISE_TEXT;
 
 /**
  * Created with IntelliJ IDEA.
@@ -935,7 +938,14 @@ public class AudioFileHelper implements AlignDecode {
    */
   public PrecalcScores checkForWebservice(int exid, String foreignLanguage, int projid, int userid, File theFile) {
     boolean available = isHydraAvailable();
-    if (!available) logger.debug("local webservice not available for " + theFile.getName());
+    if (!available) {
+      logger.debug("checkForWebservice local webservice not available" +
+          "\n\tfor " + theFile.getName() +
+          "\n\tproject " + projid +
+          "\n\texid " + exid +
+          "\n\titem " + foreignLanguage +
+          "\n\tuser " + userid);
+    }
     if (!available && !theFile.getName().endsWith("ogg") && serverProps.isLaptop()) {
  /*
       logger.info("checkForWebservice exid    " + exid);
@@ -950,7 +960,7 @@ public class AudioFileHelper implements AlignDecode {
         HTTPClient httpClient = new HTTPClient(hydraHost + "scoreServlet");
         httpClient.addRequestProperty("request", "align");
         httpClient.addRequestProperty("exercise", "" + exid);
-        httpClient.addRequestProperty("exerciseText", foreignLanguage);
+        httpClient.addRequestProperty(EXERCISE_TEXT, StringUtils.stripAccents(foreignLanguage));
         // USE THE LANGUAGE INSTEAD
         httpClient.addRequestProperty("projid", "-1");//  + projid);
         httpClient.addRequestProperty("language", getLanguage());

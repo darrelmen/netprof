@@ -88,6 +88,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public static final String MALE = "male";
   private static final String UID_F = "userId";
   private static final String PASS_F = "pass";
+  public static final String LOCALHOST = "127.0.0.1";
 
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
@@ -144,7 +145,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
           ignite.configuration().setGridLogger(new Slf4jLogger());
         }
 
-        logger.info("DominoUserDAOImpl cache - ignite!");
+        //logger.debug("DominoUserDAOImpl cache - ignite!");
         // newContext.setAttribute(IGNITE, ignite);
       } else {
         logger.debug("DominoUserDAOImpl no cache");
@@ -179,7 +180,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private Ignite getIgnite() {
     TcpDiscoverySpi spi = new TcpDiscoverySpi();
     TcpDiscoveryVmIpFinder ipFinder = new TcpDiscoveryVmIpFinder();
-    ipFinder.setAddresses(Arrays.asList("127.0.0.1"));
+    ipFinder.setAddresses(Collections.singletonList(LOCALHOST));
     spi.setIpFinder(ipFinder);
     IgniteConfiguration cfg = new IgniteConfiguration();
     cfg.setDeploymentMode(DeploymentMode.PRIVATE);
@@ -189,10 +190,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return Ignition.start(cfg);
   }
 
-  private MyMongoUserServiceDelegate makeMyServiceDelegate() {
-    MyMongoUserServiceDelegate d = new MyMongoUserServiceDelegate();
-    return d;
-  }
+  private MyMongoUserServiceDelegate makeMyServiceDelegate() {  return new MyMongoUserServiceDelegate();  }
 
   @Override
   public void ensureDefaultUsers() {

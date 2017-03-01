@@ -920,8 +920,11 @@ public class ScoreServlet extends DatabaseServlet {
       Project project1 = db.getProject(projid);
       CommonExercise exercise = project1.getExercise(exerciseText);
       if (exercise != null) {
-        logger.info("using exercise id " + exercise.getID());
+        logger.info("getExerciseIDFromText for '" + exerciseText + "' found exercise id " + exercise.getID());
         realExID = exercise.getID();
+      }
+      else {
+        logger.warn("getExerciseIDFromText can't find exercise for '" + exerciseText +"'");
       }
     }
     return realExID;
@@ -1012,6 +1015,7 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject jsonForScore = new JSONObject();
     if (exercise == null) {
       jsonForScore.put(VALID, "bad_exercise_id");
+      return jsonForScore;
     }
     boolean doFlashcard = request == Request.DECODE;
     options.setDoFlashcard(doFlashcard);
@@ -1069,7 +1073,8 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonForAudioForUser
    */
-  private AudioAnswer getAudioAnswer(int reqid, int exerciseID, int user,
+  private AudioAnswer getAudioAnswer(int reqid,
+                                     int exerciseID, int user,
                                      String wavPath, File saveFile,
                                      String deviceType, String device,
                                      CommonExercise exercise,
