@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -51,6 +52,7 @@ import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -85,7 +87,7 @@ class EditableExerciseDialog extends NewUserExercise {
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                                 ReloadableContainer predefinedContent,
                                 String instanceName) {
-    super(controller, changedUserExercise, instanceName, originalList, predefinedContent, exerciseList);
+    super(controller, changedUserExercise, instanceName, originalList, predefinedContent);
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
     this.originalList = originalList;
@@ -115,15 +117,19 @@ class EditableExerciseDialog extends NewUserExercise {
    */
   @Override
   protected void addItemsAtTop(Panel container) {
-    if (!newUserExercise.getUnitToValue().isEmpty()) {
+    Map<String, String> unitToValue = newUserExercise.getUnitToValue();
+    if (!unitToValue.isEmpty()) {
       Panel flow = new HorizontalPanel();
       flow.getElement().setId("addItemsAtTop_unitLesson");
       flow.addStyleName("leftFiveMargin");
 
       for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
-        Heading child = new Heading(4, type, newUserExercise.getUnitToValue().get(type));
-        child.addStyleName("rightFiveMargin");
-        flow.add(child);
+        String subtext = unitToValue.get(type);
+        if (subtext != null && !subtext.isEmpty()) {
+          Heading child = new Heading(4, type, subtext);
+          child.addStyleName("rightFiveMargin");
+          flow.add(child);
+        }
       }
 
       Heading child = new Heading(4, "Item", "" + newUserExercise.getID());
@@ -329,7 +335,11 @@ class EditableExerciseDialog extends NewUserExercise {
   }
 
   private void setTranslit(CommonExercise newUserExercise) {
-    translit.box.setText(originalTransliteration = newUserExercise.getTransliteration());
+    TextBoxBase box = translit.box;
+    box.setText(originalTransliteration = newUserExercise.getTransliteration());
+    if (originalTransliteration.isEmpty()) {
+      box.setPlaceholder("optional");
+    }
     setMarginBottom(translit);
     useAnnotation(newUserExercise, "transliteration", translitAnno);
   }

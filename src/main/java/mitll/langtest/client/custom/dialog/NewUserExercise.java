@@ -49,7 +49,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.services.ListService;
@@ -75,21 +74,25 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 abstract class NewUserExercise extends BasicDialog {
+  public static final String OPTIONAL = "optional";
   final ReloadableContainer predefinedContentList;
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   public static final String CONTEXT = "context";
   static final String CONTEXT_TRANSLATION = "context translation";
-  private static final String CONTEXT_LABEL = "Context (optional)";
-  private static final String CONTEXT_TRANSLATION_LABEL = "C. Translation (optional)";
+  /**
+   * @see #addContext
+   */
+  private static final String CONTEXT_LABEL = "Context";
+  private static final String CONTEXT_TRANSLATION_LABEL = "C. Translation";
 
   private static final int TEXT_FIELD_WIDTH = 500;
   private static final int LABEL_WIDTH = 105;
 
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
-  private static final String ENGLISH_LABEL = "English (optional)";// (optional)";
-  private static final String ENGLISH_LABEL_2 = "Meaning (optional)";
-  private static final String TRANSLITERATION_OPTIONAL = "Transliteration (optional)";
+  private static final String ENGLISH_LABEL = "English";// (optional)";
+  private static final String ENGLISH_LABEL_2 = "Meaning";
+  private static final String TRANSLITERATION_OPTIONAL = "Transliteration";
   static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
   static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
@@ -148,7 +151,6 @@ abstract class NewUserExercise extends BasicDialog {
    * @param newExercise
    * @param instance
    * @param originalList
-   * @param exerciseList
    * @paramx editableExerciseList
    * @paramx service
    * @paramx itemMarker
@@ -159,7 +161,7 @@ abstract class NewUserExercise extends BasicDialog {
       CommonExercise newExercise,
       String instance,
       UserList<CommonShell> originalList,
-      ReloadableContainer predefinedContent, PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+      ReloadableContainer predefinedContent) {
     this.controller = controller;
     this.newUserExercise = newExercise;
     this.instance = instance;
@@ -311,6 +313,7 @@ abstract class NewUserExercise extends BasicDialog {
     Panel row = new FluidRow();
     container.add(row);
     english = makeBoxAndAnno(row, getEnglishLabel(), "", englishAnno);
+    markPlaceholder(english.box, isEnglish() ? newUserExercise.getMeaning() : newUserExercise.getEnglish());
   }
 
   String getEnglishLabel() {
@@ -348,11 +351,18 @@ abstract class NewUserExercise extends BasicDialog {
     return TRANSLITERATION_OPTIONAL;
   }
 
+  /**
+   * @param container
+   * @param newUserExercise
+   * @return
+   * @see #makeContextRow
+   */
   private FormField addContext(Panel container, CommonExercise newUserExercise) {
-    FormField formField = makeBoxAndAnno(container, CONTEXT_LABEL, "", contextAnno);
+    FormField formField = makeBoxAndAnnoArea(container, CONTEXT_LABEL, "", contextAnno);
 
     TextBoxBase box = formField.box;
     box.setText(originalContext = newUserExercise.getContext());
+    markPlaceholder(box, originalContext);
     final String prefix = "ContextBox = ";
     addOnBlur(box, prefix);
 
@@ -360,12 +370,18 @@ abstract class NewUserExercise extends BasicDialog {
     return formField;
   }
 
+  private void markPlaceholder(TextBoxBase box, String content) {
+    if (content.isEmpty()) box.setPlaceholder(OPTIONAL);
+  }
+
   private FormField addContextTranslation(Panel container,
                                           CommonExercise newUserExercise) {
-    FormField formField = makeBoxAndAnno(container, CONTEXT_TRANSLATION_LABEL, "", contextTransAnno);
+    FormField formField = makeBoxAndAnnoArea(container, CONTEXT_TRANSLATION_LABEL, "", contextTransAnno);
 
     TextBoxBase box1 = formField.box;
     box1.setText(originalContextTrans = newUserExercise.getContextTranslation());
+    markPlaceholder(box1, originalContextTrans);
+
     addOnBlur(box1, "ContextTransBox = ");
     useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno);
     return formField;
@@ -766,11 +782,31 @@ abstract class NewUserExercise extends BasicDialog {
     FormField formField = addControlFormFieldHorizontal(row, label, subtext,
         false, 1, annoBox,
         LABEL_WIDTH, TEXT_FIELD_WIDTH);
+    styleBox(annoBox, formField);
+    return formField;
+  }
+
+  private FormField makeBoxAndAnnoArea(Panel row, String label, String subtext, HTML annoBox) {
+    TextArea textBox = new TextArea();
+    textBox.setVisibleLines(2);
+    FormField formField = getFormField(
+        row,
+        label,
+        subtext,
+        1,
+        annoBox,
+        LABEL_WIDTH,
+        TEXT_FIELD_WIDTH,
+        textBox);
+    styleBox(annoBox, formField);
+    return formField;
+  }
+
+  private void styleBox(HTML annoBox, FormField formField) {
     setMarginBottom(formField);
 
     annoBox.addStyleName("leftFiveMargin");
     annoBox.addStyleName("editComment");
-    return formField;
   }
 
   /**

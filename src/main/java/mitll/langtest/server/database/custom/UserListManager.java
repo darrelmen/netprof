@@ -345,7 +345,7 @@ public class UserListManager implements IUserListManager {
         return null;
       } else {
         long now = System.currentTimeMillis();
-        UserList e = new UserList(i++, userid, userWhere.getUserID(), name, description, dliClass, isPrivate, now, "");
+        UserList e = new UserList(i++, userid, userWhere.getUserID(), name, description, dliClass, isPrivate, now, "", "");
         userListDAO.add(e, projid);
         logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
         return e;
@@ -600,7 +600,7 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User qcUser = getQCUser();
     UserList<CommonShell> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(),"");
+        false, System.currentTimeMillis(),"", "");
 
     List<CommonShell> copy = new ArrayList<>();
     for (CommonShell orig : onList) copy.add(orig.getShell());
@@ -619,7 +619,7 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User qcUser = getQCUser();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(),"");
+        false, System.currentTimeMillis(),"", "");
 
 //    List<CommonShell> copy = new ArrayList<>();
 //    for (CommonShell orig : onList) copy.add(orig.getShell());
