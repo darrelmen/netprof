@@ -107,7 +107,11 @@ dependencies {
     //runtime('commons-codec:commons-codec:1+') //{ transitive = false; }
 
     compile('org.apache.commons:commons-collections4:4+')
+//    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.2'
+
+    // OK so the war plugin totally sucks - I include this explicitly and it bounces it out of the jar
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.2'
+    runtime group: 'commons-collections', name: 'commons-collections', version: '3.2.2'
 
     compile('org.apache.commons:commons-email:1+')
     compile('org.apache.ignite:ignite-core:1.7.0')
@@ -145,7 +149,10 @@ dependencies {
     compile name: 'pronz_2.11-1.0'
     compile name: 'hydec_2.11-1.0'
     compile name: 'utils_2.11-1.0.0-SNAPSHOT'
+
+    // the only way I can get war to accept my explicit command to include these jars
     compile name: 'commons-codec-1.10'
+    compile name: 'commons-collections-3.2.2'
 
     // TODO : use gson instead
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
