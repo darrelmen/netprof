@@ -44,4 +44,5 @@ package mitll.langtest.server.trie;
 public interface TextEntityValue<T> {
   String getNormalizedValue();
   T getValue();
+  boolean isEmpty();
 }

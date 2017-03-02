@@ -175,13 +175,13 @@ public class Trie<T> {
    */
   private List<String> getSpaceSeparatedTokens(String normalizedValue) {
     int findex = 0;
-    int nindex = 0;
+    int nindex;
     List<String> split = new ArrayList<>();
     while ((nindex = normalizedValue.indexOf(' ', findex)) != -1) {
       if (nindex > findex) {
         String token = normalizedValue.substring(findex, nindex);
-        split.add(token);
-      }
+          split.add(token);
+        }
       findex = nindex + 1;
     }
     nindex = normalizedValue.length();
@@ -234,12 +234,14 @@ public class Trie<T> {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives(Map, long, String, String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(Map, long, String)
    * @param toMatch
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives(Map, long, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(Map, long, String)
    */
-  public Collection<T> getMatchesLC(String toMatch) { return getMatches(toMatch.toLowerCase());  }
+  public Collection<T> getMatchesLC(String toMatch) {
+    return getMatches(toMatch.toLowerCase());
+  }
 
   /**
    *
@@ -248,11 +250,12 @@ public class Trie<T> {
    * @see ExerciseTrie#getExercises(String, SmallVocabDecoder)
    * @see Trie#getMatchesLC(String)
    */
-  public Collection<T> getMatches(String lc) {
+  Collection<T> getMatches(String lc) {
     List<EmitValue<T>> emits = getEmits(lc);
     Set<T> unique = new HashSet<>();
     List<T> ids = new ArrayList<>();
     for (EmitValue<T> ev : emits) {
+
       T exercise = ev.getValue();
       if (!unique.contains(exercise)) {
         ids.add(exercise);
@@ -260,7 +263,7 @@ public class Trie<T> {
       }
     }
 
-  //  logger.debug("getExercises : for '" +lc + "' (" +lc+ ") got " + ids.size() + " matches");
+    //  logger.debug("getExercises : for '" +lc + "' (" +lc+ ") got " + ids.size() + " matches");
     return ids;
   }
 }

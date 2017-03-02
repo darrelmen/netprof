@@ -54,7 +54,9 @@ public class EmitValue<T> {
   public String getNormalizedValue() { return textEntityDescription.getNormalizedValue(); }
   public T getValue() { return textEntityDescription.getValue(); }
 
+  public boolean isEmpty() { return getNormalizedValue().isEmpty(); }
+
   public String toString() {
-    return textEntityDescription == null ? "huh?" : "'" + textEntityDescription.getNormalizedValue() + "'";
+    return textEntityDescription == null ? "huh?" : "'" + getNormalizedValue() + "'";
   }
 }

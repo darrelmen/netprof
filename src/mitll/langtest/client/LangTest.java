@@ -215,12 +215,16 @@ import java.util.logging.Logger;
  * - Fixed bug where did alignment after recording ref audio.
  * 1.5.18
  * - fixes for meaning in english, consistency in ui for new and edit dialogs, allows you to do user defined context sentences and translations, fixed bug with sort order of user lists
+ * 1.5.19
+ * - report comes out on Sunday early morning
+ * 1.5.20
+ * - fix for issue with trie where might insert an empty character as a match value
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.5.18";
+  public static final String VERSION_INFO = "1.5.20";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 

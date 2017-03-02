@@ -114,13 +114,19 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
                           T exercise) {
     String fl = exercise.getForeignLanguage();
     if (fl != null && !fl.isEmpty()) {
-      addEntryToTrie(new ExerciseWrapper<T>(exercise, false));
+      ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(exercise, false);
+      addEntryToTrie(textEntityDescription);
 
       Collection<String> tokens = isMandarin ?
           getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(fl);
+
       for (String token : tokens) {
         addEntry(exercise, token);
-        addEntry(exercise, removeDiacritics(token));
+        String token1 = removeDiacritics(token);
+
+        if (!token1.equals(token) && !token1.isEmpty()) {
+          addEntry(exercise, token1);
+        }
       }
 
       if (hasClickableCharacters) {
@@ -139,7 +145,10 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
   private void addEnglish(SmallVocabDecoder smallVocabDecoder, T exercise) {
     String english = exercise.getEnglish();
     if (english != null && !english.isEmpty()) {
-      addEntryToTrie(new ExerciseWrapper<T>(exercise, true));
+      ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(exercise, true);
+
+      //if (textEntityDescription.isEmpty()) logger.error("huh? for " +exercise.getID() + " entry is empty?");
+      addEntryToTrie(textEntityDescription);
       Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
       if (tokens.size() > 1) {
         for (String token : tokens) {
@@ -161,7 +170,12 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
   }
 
   private boolean addEntry(T exercise, String token) {
-    return addEntryToTrie(new ExerciseWrapper<T>(token.toLowerCase(), exercise));
+    //boolean debug = exercise.getID().equals("14");
+    //if (debug) logger.warn("adding '" + token + "' : '" + token.toLowerCase() + "'");
+
+    ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(token.toLowerCase(), exercise);
+    //if (textEntityDescription.isEmpty()) logger.error("addEntry - huh? "+textEntityDescription.getNormalizedValue() + " is empty " + exercise.getID());
+    return addEntryToTrie(textEntityDescription);
   }
 
   private Collection<String> getMandarinTokens(SmallVocabDecoder smallVocabDecoder, T e) {
@@ -206,6 +220,8 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
     public String getNormalizedValue() {
       return value;
     }
+
+    public boolean isEmpty() { return value.isEmpty(); }
 
     public String toString() {
       return "e " + e.getID() + " : " + value;
