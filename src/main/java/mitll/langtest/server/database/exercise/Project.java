@@ -126,14 +126,9 @@ public class Project implements PronunciationLookup {
     fullTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder());
   }
 
-//  private Collection<CommonExercise> getExercisesForUser() {
-//    return getRawExercises();
-//  }
-
   private SmallVocabDecoder getSmallVocabDecoder() {
     return getAudioFileHelper() == null ? null : getAudioFileHelper().getSmallVocabDecoder();
   }
-
 
   public boolean isNoModel() {
     return getModelsDir() == null;
