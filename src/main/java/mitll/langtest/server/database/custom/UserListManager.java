@@ -600,7 +600,7 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User qcUser = getQCUser();
     UserList<CommonShell> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(),"", "");
+        false, System.currentTimeMillis(), "", "");
 
     List<CommonShell> copy = new ArrayList<>();
     for (CommonShell orig : onList) copy.add(orig.getShell());
@@ -619,7 +619,7 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User qcUser = getQCUser();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(),"", "");
+        false, System.currentTimeMillis(), "", "");
 
 //    List<CommonShell> copy = new ArrayList<>();
 //    for (CommonShell orig : onList) copy.add(orig.getShell());
@@ -730,6 +730,9 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * Really create a new exercise and associated context exercise in database.
+   * Add newly created exercise to the user list.
+   *
    * @param userListID
    * @param userExercise notional until now!
    * @param mediaDir
@@ -738,38 +741,40 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void newExercise(long userListID, CommonExercise userExercise, String mediaDir) {
+    UserList where = getUserList(userListID);
+    newExerciseOnList(where, userExercise, mediaDir);
+  }
+
+  public UserList getUserList(long userListID) {
+    return userListDAO.getWhere(userListID, true);
+  }
+
+  public void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir) {
     int newExerciseID = userExerciseDAO.add(userExercise, false, false);
     logger.debug("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
-    // TODO : this will never happen
-//    if (!userExercise.getDirectlyRelated().isEmpty()) {
-//      for (CommonExercise exercise : userExercise.getDirectlyRelated()) {
-//        if (!exercise.getForeignLanguage().isEmpty() ||
-//            !exercise.getEnglish().isEmpty()
-//            ) {
     int contextID = 0;
     int projectID = userExercise.getProjectID();
     try {
-      Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
-      contextID = userExerciseDAO.add(userExercise1, false, true);
-      userExerciseDAO.addContextToExercise(newExerciseID, contextID, projectID);
-      userExercise.getDirectlyRelated().add(userExercise1);
+      contextID = makeContextExercise(userExercise, newExerciseID, contextID, projectID);
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
 
     logger.debug("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
-    //      }
-//     }
-//    }
-//    else {
-//      logger.info("newExercise no directly related exercises added");
-//    }
 
-    addItemToList(userListID, userExercise.getOldID(), newExerciseID);
+    addItemToGivenList(userList, userExercise.getOldID(), newExerciseID);
 
     // TODO : necessary?
     fixAudioPaths(userExercise, true, mediaDir);
+  }
+
+  private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int contextID, int projectID) {
+    Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
+    contextID = userExerciseDAO.add(userExercise1, false, true);
+    userExerciseDAO.addContextToExercise(newExerciseID, contextID, projectID);
+    userExercise.getDirectlyRelated().add(userExercise1);
+    return contextID;
   }
 
   /**
@@ -780,19 +785,20 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void addItemToList(long userListID, @Deprecated String exerciseID, int exid) {
-    UserList where = userListDAO.getWhere(userListID, true);
-
-    if (where == null) {
-      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + exerciseID + "'");
-    }
+    UserList where = getUserList(userListID);
 
     if (where != null) {
-      userListExerciseJoinDAO.add(where, exerciseID, exid);
-      userListDAO.updateModified(userListID);
+      addItemToGivenList(where, exerciseID, exid);
+    } else {
+      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + exerciseID + "'");
     }
-    if (where == null) {
-      logger.error("\n\naddItemToList : couldn't find ul with id " + userListID);
-    }
+  }
+
+  private void addItemToGivenList(UserList where, @Deprecated String exerciseID, int exid) {
+    long userListID = where.getID();
+
+    userListExerciseJoinDAO.add(where, exerciseID, exid);
+    userListDAO.updateModified(userListID);
   }
 
   /**
@@ -868,7 +874,7 @@ public class UserListManager implements IUserListManager {
     long now = System.currentTimeMillis();
     logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" + mediaDir + "'");
 
-   // String foreignLanguage = userExercise.getForeignLanguage();
+    // String foreignLanguage = userExercise.getForeignLanguage();
     int id = userExercise.getID();
     int projectID = userExercise.getProjectID();
 
@@ -984,8 +990,8 @@ public class UserListManager implements IUserListManager {
    * @param id
    * @param projid
    * @param typeOrder
-   * @return
    * @param ids
+   * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUserListByIDExercises
    */
   @Override
@@ -1011,7 +1017,7 @@ public class UserListManager implements IUserListManager {
   @Override
   public void addVisitor(long userListID, long user) {
     //logger.debug("addVisitor - user " + user + " visits " + userList.getRealID());
-    UserList where = userListDAO.getWhere(userListID, true);
+    UserList where = getUserList(userListID);
     if (where != null) {
       userListDAO.addVisitor(where.getID(), user);
     } else if (userListID > 0) {

@@ -141,7 +141,7 @@ public class ListOperations {
       }
     };
 
-    logger.info("text box is " + textBox);
+//    logger.info("text box is " + textBox);
 
     textBox.getElement().setId("NewList");
     textBox.setVisibleLength(length);
@@ -189,9 +189,12 @@ public class ListOperations {
         w.addStyleName("floatLeftList");
       } else {
         Frame frame = new Frame(mediaURL);
-        frame.setHeight("315px");
-//      frame.setWidth("100%");
-        docContainer.add(frame);
+        frame.setHeight(315 +          "px");
+        frame.setWidth(615+"px");
+        DivWidget container = new DivWidget();
+        container.addStyleName("floatLeftList");
+        container.add(frame);
+        docContainer.add(container);
       }
     }
 

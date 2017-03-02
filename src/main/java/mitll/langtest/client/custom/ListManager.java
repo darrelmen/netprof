@@ -76,11 +76,11 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class ListManager implements RequiresResize {
+  public static final int IMPORT_WIDTH = 600;
+  public static final int VISIBLE_LINES = 20;
+  public static final int CHARACTER_WIDTH = 150;
   private final Logger logger = Logger.getLogger("ListManager");
 
-  private static final String COLLAPSIBLE_DOCUMENT_VIEWER = "collapsibleDocumentViewer";
-  private static final String LIST_OPERATIONS = "listOperations";
-  private static final String ADD_MEDIA = "Add Media";
   private static final String IMPORT_ITEM = "importItem";
 
   private final KeyStorage storage;
@@ -159,9 +159,6 @@ public class ListManager implements RequiresResize {
     editItem = new EditItem(controller, exerciseList);
   }
 
-  //DivWidget docContainer;
-  Collapse collapse;
-
   /**
    * @param studyLists
    * @see Navigation#addStudyLists
@@ -209,7 +206,7 @@ public class ListManager implements RequiresResize {
 
   /**
    * @param tabPanel
-   * @see #addStudyLists(TabAndContent)
+   * @see #addStudyLists
    */
   private void addListTabs(TabPanel tabPanel) {
     // your list tab
@@ -552,6 +549,13 @@ public class ListManager implements RequiresResize {
     return firstRow;
   }
 
+  /**
+   * Text that you can click on and edit.
+   *
+   * @param ul
+   * @param container
+   * @return
+   */
   @NotNull
   private HTML getNameHeading(UserList ul, DivWidget container) {
     HTML heading = new HTML("<h1>" + ul.getName() + "</h1>");
@@ -565,35 +569,38 @@ public class ListManager implements RequiresResize {
 
   @NotNull
   private ClickHandler getClickHandler(final UserList ul, final DivWidget container, final HTML heading) {
-    return new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        container.remove(heading);
-        TextBox editableHeading = new TextBox();
+    return event -> {
+      container.remove(heading);
 
-        editableHeading.setText(ul.getName());
-        Style style = editableHeading.getElement().getStyle();
-        style.setFontSize(38, Style.Unit.PX);
-        style.setFontWeight(Style.FontWeight.BOLD);
-        style.setLineHeight(40, Style.Unit.PX);
-        style.setMarginTop(5, Style.Unit.PX);
-        style.setMarginBottom(5, Style.Unit.PX);
-        editableHeading.setHeight("40px");
-        editableHeading.setWidth("400px");
-        editableHeading.setVisibleLength(150);
+      TextBox editableHeading = getEditableTextBox(ul);
 
-        editableHeading.addKeyPressHandler(event1 -> {
-          int keyCode = event1.getNativeEvent().getKeyCode();
-          if (keyCode == KeyCodes.KEY_ENTER) {
-            finishedEditing(ul, container, editableHeading);
-          }
-        });
+      editableHeading.addKeyPressHandler(event1 -> {
+        if (event1.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+          finishedEditing(ul, container, editableHeading);
+        }
+      });
 
-        editableHeading.addBlurHandler(event12 -> finishedEditing(ul, container, editableHeading));
-        editableHeading.addMouseOutHandler(event123 -> finishedEditing(ul, container, editableHeading));
-        container.add(editableHeading);
-      }
+      editableHeading.addBlurHandler(event12 -> finishedEditing(ul, container, editableHeading));
+      editableHeading.addMouseOutHandler(event123 -> finishedEditing(ul, container, editableHeading));
+      container.add(editableHeading);
     };
+  }
+
+  @NotNull
+  private TextBox getEditableTextBox(UserList ul) {
+    TextBox editableHeading = new TextBox();
+
+    editableHeading.setText(ul.getName());
+    Style style = editableHeading.getElement().getStyle();
+    style.setFontSize(38, Style.Unit.PX);
+    style.setFontWeight(Style.FontWeight.BOLD);
+    style.setLineHeight(40, Style.Unit.PX);
+    style.setMarginTop(5, Style.Unit.PX);
+    style.setMarginBottom(5, Style.Unit.PX);
+    editableHeading.setHeight("40px");
+    editableHeading.setWidth("400px");
+    editableHeading.setVisibleLength(150);
+    return editableHeading;
   }
 
   private void finishedEditing(final UserList ul, final DivWidget container, TextBox editableHeading) {
@@ -903,19 +910,24 @@ public class ListManager implements RequiresResize {
    * @param tabPanel
    * @see #getImportTab(UserList, TabPanel, TabAndContent, String)
    */
-  private void showImportItem(final UserList ul, final TabAndContent container, final TabAndContent learnTab, final String instanceName,
+  private void showImportItem(final UserList<CommonShell> ul,
+                              final TabAndContent container,
+                              final TabAndContent learnTab,
+                              final String instanceName,
                               final TabPanel tabPanel) {
     container.getContent().clear();
     DivWidget inner = new DivWidget();
     DivWidget upper = new DivWidget();
-    upper.setWidth("600px");
+    String width = IMPORT_WIDTH +
+        "px";
+    upper.setWidth(width);
     final TextArea w = new TextArea();
-    w.setWidth("600px");
+    w.setWidth(width);
 
     upper.add(w);
     inner.add(upper);
-    w.setVisibleLines(20);
-    w.setCharacterWidth(150);
+    w.setVisibleLines(VISIBLE_LINES);
+    w.setCharacterWidth(CHARACTER_WIDTH);
 
     inner.add(new Heading(4, "Copy and paste tab separated lines with pairs of " + controller.getLanguage() + " item and its translation."));
     inner.add(new Heading(4, "(Quizlet export format.)"));
@@ -931,9 +943,11 @@ public class ListManager implements RequiresResize {
 
               @Override
               public void onSuccess(Collection<CommonExercise> newExercise) {
-                logger.info("before " + ul.getExercises().size());
-                for (CommonExercise exercise : newExercise) ul.addExercise(exercise);
-                logger.info("after  " + ul.getExercises().size());
+                //logger.info("before " + ul.getExercises().size());
+                for (CommonExercise exercise : newExercise) {
+                  ul.addExercise(exercise);
+                }
+                //logger.info("after  " + ul.getExercises().size());
 
                 reallyShowLearnTab(tabPanel, learnTab, ul, instanceName);
               }
