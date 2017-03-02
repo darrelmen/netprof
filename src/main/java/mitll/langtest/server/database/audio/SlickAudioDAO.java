@@ -34,7 +34,6 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -49,7 +48,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import scala.Tuple2;
-import scala.collection.Seq;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -63,7 +61,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private final long before = now - (24 * 60 * 60 * 1000);
   private final boolean doCheckOnStartup;
   private int defaultResult;
-  ServerProperties serverProps;
+  private ServerProperties serverProps;
 
   public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
@@ -143,11 +141,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param projid
    * @param installPath
    * @param language
+   * @param checkAll
    * @see #makeSureAudioIsThere
    */
-  // @Override
-  private void validateFileExists(int projid, String installPath, String language) {
-    long pastTime = doCheckOnStartup ? now : before;
+  private void validateFileExists(int projid, String installPath, String language, boolean checkAll) {
+    long pastTime = doCheckOnStartup || checkAll ? now : before;
     logger.debug("validateFileExists before " + new Date(pastTime));
     dao.validateFileExists(projid, pastTime, installPath, language.toLowerCase());
   }
@@ -166,7 +164,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     long then = System.currentTimeMillis();
     List<SlickAudio> byExerciseID = dao.getByExerciseID(exid);
     long now = System.currentTimeMillis();
-    if (now - then > 20 || true)
+    if (now - then > 20)
       logger.warn("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() + " attr for " + exid);
     return toAudioAttributes(byExerciseID);
   }
@@ -557,7 +555,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     File file = new File(mediaDir);
     logger.info("makeSureAudioIsThere " + projectID + " " + language + " " + validateAll);
     if (file.exists()) {
-      logger.debug("makeSureAudioIsThere " + file + " exists ");
+      logger.debug("makeSureAudioIsThere media dir " + file + " exists ");
       if (file.isDirectory()) {
         String[] list = file.list();
         if (list == null) {
@@ -568,7 +566,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
               (serverProps.doAudioChecksInProduction() &&
                   (serverProps.doAudioFileExistsCheck() || !foundFiles))) {
             logger.debug("makeSureAudioIsThere validateFileExists ");
-            validateFileExists(projectID, mediaDir, language);
+            validateFileExists(projectID, mediaDir, language, validateAll);
           }
         }
       } else {
