@@ -5,9 +5,12 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -355,14 +358,35 @@ public class DecodeTest extends BaseTest {
   public void testMSAProgress2() {
     doProgressReport("msa");
   }
+
   @Test
   public void testHindi() {
     doProgressReport("hindi");
   }
 
   @Test
-  public void testMandarinProgress() {
+  public void testMandarinTProgress() {
     doProgressReport("mandarin", "traditional.properties");
+  }
+
+  @Test
+  public void testMandarinProgress() {
+    doProgressReport("mandarin");
+  }
+
+  @Test
+  public void testLevantine() {
+    doProgressReport("levantine");
+  }
+
+  @Test
+  public void testFarsi() {
+    doProgressReport("farsi");
+  }
+
+  @Test
+  public void testJapanese() {
+    doProgressReport("japanese");
   }
 
   @Test
@@ -374,6 +398,19 @@ public class DecodeTest extends BaseTest {
     database.attachAudio(exercise);
     logger.info("ex " + exercise);
     logger.info("ex " + exercise.getAudioAttributes());
+  }
+
+  @Test
+  public void testMSAPrefix() {
+    DatabaseImpl<CommonExercise> database = getDatabase("msa");
+
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+
+    SmallVocabDecoder smallVocabDecoder = audioFileHelper.getSmallVocabDecoder();
+    ExerciseTrie<CommonExercise> fullTrie = new ExerciseTrie<CommonExercise>(database.getExercises(), "msa", smallVocabDecoder);
+    Collection<CommonExercise> walk = fullTrie.getExercises("walk", smallVocabDecoder);
+
+    for (CommonExercise w : walk) logger.info("got " + w);
   }
 
   @Test
@@ -394,7 +431,7 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testPashto1() {
-    DatabaseImpl database = getDatabaseWithConfig("pashto","pashtoQuizlet1.properties");
+    DatabaseImpl database = getDatabaseWithConfig("pashto", "pashtoQuizlet1.properties");
     database.getSectionHelper().report();
   }
 
