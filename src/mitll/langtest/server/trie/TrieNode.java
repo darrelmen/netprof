@@ -41,13 +41,13 @@ import java.util.Map;
 
 /**
  * A node in a trie.
- *
+ * <p>
  * If there is just one transition from this node to the next, doesn't make a gotoMap.
  * If there are no emit values, doesn't make an emit values array.
- *
+ * <p>
  * Nodes represent states in a state machine, e.g., (root)--"joe"-->(node1)--"blow"-->(node2)
- *
- *  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ * <p>
+ * * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 11/13/13
@@ -74,24 +74,24 @@ public class TrieNode<T> {
   }
 
   /**
-   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @return
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
   public List<EmitValue<T>> getEmitList() {
     return emitList;
   }
 
   /**
-   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @return
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
   public TrieNode<T> getFailureNode() {
     return failureNode;
   }
 
   /**
-   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @return
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
   public boolean hasTransitionLabel(String transitionLabel) {
     return getNextState(transitionLabel) != null;
@@ -99,6 +99,7 @@ public class TrieNode<T> {
 
   /**
    * Doesn't assume label is already in map.
+   *
    * @param transitionLabel
    * @return node for label or null if not known
    */
@@ -116,8 +117,7 @@ public class TrieNode<T> {
     }
     if (singleNode != null) {
       emits.addAll(singleNode.getEmitsBelow());
-    }
-    else if (gotoMap != null) {
+    } else if (gotoMap != null) {
       for (TrieNode<T> child : gotoMap.values()) {
         emits.addAll(child.getEmitsBelow());
       }
@@ -128,20 +128,20 @@ public class TrieNode<T> {
   // everything below is used just during trie construction ---------------------------------------------------------
 
   /**
+   * @return
    * @see Trie#addEntryToTrie(TextEntityValue, java.util.Map)
    * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
-   * @return
    */
   List<EmitValue<T>> getAndCreateEmitList() {
-    if (emitList == null)  {
+    if (emitList == null) {
       emitList = new ArrayList<EmitValue<T>>(1);
     }
     return emitList;
   }
 
   /**
-   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @param failureNode
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
   void setFailureNode(TrieNode<T> failureNode) {
     this.failureNode = failureNode;
@@ -152,66 +152,61 @@ public class TrieNode<T> {
   }*/
 
   /**
-   * @see Trie#addEntryToTrie(TextEntityValue, java.util.Map)
    * @param label
    * @param node
+   * @see Trie#addEntryToTrie
    */
   void addTransition(String label, TrieNode<T> node) {
     if (singleTransition == null && gotoMap == null) {
       singleTransition = label;
       singleNode = node;
-    }
-    else { // either we have a single entry or multiple
-      if (gotoMap == null)  { // if single, make multiple storage
+    } else { // either we have a single entry or multiple
+      if (gotoMap == null) { // if single, make multiple storage
         gotoMap = new HashMap<String, TrieNode<T>>(2);
         gotoMap.put(singleTransition, singleNode);
         singleTransition = null;
         singleNode = null;
       }
-      gotoMap.put(label,node);
+      gotoMap.put(label, node);
     }
   }
 
   /**
-   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @return
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
   Collection<String> getTransitionLabels() {
     if (singleTransition != null) {
       return Collections.singleton(singleTransition);
-    }
-    else if (gotoMap != null) {
+    } else if (gotoMap != null) {
       return gotoMap.keySet();
-    }
-    else {
+    } else {
       return Collections.emptySet();
     }
   }
 
   /**
-   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @return
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
   Collection<TrieNode<T>> getTransitionValues() {
     if (singleNode != null) {
       return Collections.singleton(singleNode);
-    }
-    else if (gotoMap != null) {
+    } else if (gotoMap != null) {
       return gotoMap.values();
-    }
-    else {
+    } else {
       return Collections.emptySet();
     }
   }
 
   /**
    * Assumes label is a known label (one already added).
-   *
+   * <p>
    * ONLY use this during building the tree!
    *
-   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    * @param transitionLabel
    * @return node for label
+   * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
   TrieNode<T> getKnownNextState(String transitionLabel) {
     if (singleNode != null) {
@@ -221,7 +216,7 @@ public class TrieNode<T> {
   }
 
   public String toString() {
-    return singleTransition != null ? (singleTransition + "=[" + singleNode +"]") : gotoMap != null ? gotoMap.toString() : "" + "" +
-        (hasEmitValues() ? emitList.size() == 1 ? emitList.iterator().next() : emitList : "");
+    return singleTransition != null ? (singleTransition + "=[" + singleNode + "]") : gotoMap != null ? gotoMap.toString() : "" + "" +
+        (hasEmitValues() ? emitList.size() == 1 ? emitList.iterator().next() : (emitList.size() < 10 ? emitList : emitList.size()) : "");
   }
 }

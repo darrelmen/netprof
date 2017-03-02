@@ -2279,6 +2279,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       return value;
     }
 
+    @Override
+    public boolean isEmpty() {
+      return value.isEmpty();
+    }
+
     public String toString() {
       return "result " + e.getExID() + " : " + value;
     }

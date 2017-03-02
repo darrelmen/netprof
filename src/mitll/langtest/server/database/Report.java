@@ -81,7 +81,7 @@ public class Report {
   private static final String MONTH = "By Month";
   private static final String WEEK = "By Week";
   private static final String top = "<td style='vertical-align: top;'>";
-  private static final String DEVICE_RECORDINGS = "Device Recordings";
+  private static final String DEVICE_RECORDINGS = "iPhone/iPad Recordings";
   private static final String ALL_RECORDINGS = "All Recordings";
   private static final String MM_DD_YY = "MM_dd_yy";
   //  public static final String MM_DD_YY_HH_MM_SS = "MM_dd_yy_hh_mm_ss";
@@ -176,10 +176,11 @@ public class Report {
     List<String> reportEmails = serverProps.getReportEmails();
 
     // check if it's a monday
-    if (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY &&
+    if (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY &&
         !reportEmails.isEmpty()) {
       writeAndSendReport(serverProps.getLanguage(), site, mailSupport, pathHelper, reportEmails, getThisYear());
-    } else {
+    }
+    else {
 //      logger.debug("not sending email report since this is not monday");
     }
   }
