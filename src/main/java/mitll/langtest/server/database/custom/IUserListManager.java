@@ -86,7 +86,9 @@ public interface IUserListManager {
 
   List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
 
+  UserList getUserList(long userListID);
   void newExercise(long userListID, CommonExercise userExercise, String mediaDir);
+  void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir);
 
   void addItemToList(long userListID, String exerciseID, int exid);
 

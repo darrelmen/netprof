@@ -249,7 +249,11 @@ public class CopyToPostgres<T extends CommonShell> {
 
     logger.info("getDatabaseLight path " + configFile.getAbsolutePath());
 
-    ServerProperties serverProps = getServerProperties(config, propsFile, installPath);
+    ServerProperties serverProps  = getServerProperties(config, propsFile, installPath);
+    if (serverProps == null) {
+      return null;
+    }
+
     ServerProperties serverProps2 = getServerProperties("", NETPROF_PROPERTIES, "/opt/netprof");
 
     readProps(serverProps, serverProps2);
@@ -300,9 +304,8 @@ public class CopyToPostgres<T extends CommonShell> {
         propsFile);
 
     if (!file.exists()) {
-      logger.error("getServerProperties can't find config file " + file.getAbsolutePath());
+      logger.error("\n\ngetServerProperties can't find config file " + file.getAbsolutePath());
       // no recovery!
-      // return new ServerProperties();
       return null;
     } else {
       return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
