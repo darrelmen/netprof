@@ -137,7 +137,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
        // String noAccents = removeDiacritics(token);
         String noAccents = StringUtils.stripAccents(token);
 
-        if (!token.equals(noAccents)) {
+        if (!token.equals(noAccents) && !noAccents.isEmpty()) {
           addEntry(exercise, noAccents);
         }
       }
@@ -152,7 +152,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
         addEntry(exercise, token);
         String noAccents = StringUtils.stripAccents(token);
 
-        if (!token.equals(noAccents)) {
+        if (!token.equals(noAccents) && !noAccents.isEmpty()) {
           addEntry(exercise, noAccents);
         }
         //addEntry(exercise, removeDiacritics(token));
