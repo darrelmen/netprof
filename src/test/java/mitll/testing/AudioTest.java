@@ -1,4 +1,4 @@
-package testing;
+package mitll.testing;
 
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
