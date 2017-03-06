@@ -492,7 +492,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                   logger.info("transliteration LTS failed");
                   logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
                   logger.info("attempting to fall back to default pronunciation");
-                  if ((translitprocess.length > 0) && (translitprocess[0].length > 1)) {
+                  if (translitprocess != null && (translitprocess.length > 0) && (translitprocess[0].length > 1)) {
                     dict += getDefaultPronStringForWord(word, translitprocess, justPhones);
                   }
                 }

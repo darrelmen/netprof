@@ -83,5 +83,4 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
   public Long getItemDate(T shell) {
     return shell.getTimestampMillis();
   }
-
 }

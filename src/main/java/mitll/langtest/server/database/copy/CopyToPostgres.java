@@ -81,54 +81,55 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
 
- // private static final boolean DEBUG = false;
   private static final String DROP = "drop";
   private static final String COPY = "copy";
   private static final String NETPROF_PROPERTIES_FULL = "/opt/netprof/config/netprof.properties";
-  public static final String OPT_NETPROF = "/opt/netprof/import";
+  private static final String OPT_NETPROF = "/opt/netprof/import";
 
   /**
    * @param config
    * @param optionalProperties
+   * @param optionalName
+   * @param displayOrder
    * @see #main
    */
-  private void copyOneConfigCommand(String config, String optionalProperties) throws Exception {
+  private void copyOneConfigCommand(String config, String optionalProperties, String optionalName, int displayOrder) throws Exception {
     DatabaseImpl databaseLight = null;
     try {
       databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
       String language = databaseLight.getLanguage();
       boolean hasModel = databaseLight.getServerProps().hasModel();
       logger.info("loading " + language + " " + hasModel);
-      new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), language, 0, !hasModel);
+      String nameToUse = optionalName.isEmpty() ? language : optionalName;
+      new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), nameToUse, displayOrder, !hasModel);
     } catch (Exception e) {
-      logger.error("got "+e,e);
+      logger.error("got " + e, e);
     } finally {
       databaseLight.close();
     }
   }
 
   private void dropOneConfig(String config) {
-    DatabaseImpl andPopulate = getAndPopulate();
-    IProjectDAO projectDAO = andPopulate.getProjectDAO();
+    DatabaseImpl database = getDatabase();
+    IProjectDAO projectDAO = database.getProjectDAO();
     int byName = projectDAO.getByName(config);
     if (byName == -1) {
       logger.warn("\n\n\ncouldn't find config " + config);
-    }
-    else {
+    } else {
       logger.info("Dropping " + config + " please wait...");
       long then = System.currentTimeMillis();
       projectDAO.delete(byName);
       long now = System.currentTimeMillis();
 
       Collection<SlickProject> all = projectDAO.getAll();
-      logger.info("Took " + (now-then) + " millis to drop " + config + ", now there are " + all.size() + " projects:");
+      logger.info("Took " + (now - then) + " millis to drop " + config + ", now there are " + all.size() + " projects:");
 
       for (SlickProject project : all) {
         logger.info(" " + project);
       }
 
     }
-    andPopulate.close();
+    database.close();
   }
 
   /**
@@ -140,69 +141,57 @@ public class CopyToPostgres<T extends CommonShell> {
    * @return
    */
   public String getCC(String config) {
-    String cc = "";
+    List<Pair> languages = Arrays.asList(
+        new Pair("croatian", "hr"),
+        new Pair("dari", "af"),
+        new Pair("egyptian", "eg"),
+        new Pair("english", "us"),
+        new Pair("farsi", "ir"),
+        new Pair("french", "fr"),
+        new Pair("german", "de"),
+        new Pair("hindi", "in"),
+        new Pair("korean", "kr"),
+        new Pair("iraqi", "iq"),
+        new Pair("japanese", "jp"),
+        new Pair("levantine", "sy"),
+        new Pair("mandarin", "cn"),
+        new Pair("msa", "al"),
+        new Pair("pashto", "af"),
+        new Pair("portuguese", "pt"),
+        new Pair("russian", "ru"),
+        new Pair("serbian", "rs"),
+        new Pair("sorani", "ku"),
+        new Pair("spanish", "es"),
+        new Pair("sudanese", "ss"),
+        new Pair("tagalog", "ph"),
+        new Pair("turkish", "tr"),
+        new Pair("urdu", "pk"));
 
-    List<String> languages = Arrays.asList(
-        "croatian",
-        "dari",
-        "egyptian",
-        "english",
-        "farsi",
-        "french",
-        "german",
-        "hindi",
-        "korean",
-        "iraqi",
-        "japanese",
-        "levantine",
-        "mandarin",
-        "msa",
-        "pashto",
-        "portuguese",
-        "russian",
-        "serbian",
-        "spanish",
-        "sudanese",
-        "tagalog",
-        "turkish",
-        "urdu");
 
-    List<String> flags = Arrays.asList(
-        "hr",
-        "af",
-        "eg",
-        "us",
-        "ir",
-        "fr",
-        "de",
-        "in",
-        "kr",
-        "iq",
-        "jp",
-        "sy",
-        "cn",
-        "al",
-        "af",
-        "pt",
-        "ru",
-        "rs",
-        "es",
-        "ss",
-        "ph",
-        "tr",
-        "pk");
+    Map<String, String> langToCode = new HashMap<>();
+    for (Pair pair : languages) langToCode.put(pair.language, pair.cc);
 
-    int i = languages.indexOf(config.toLowerCase());
-    if (i == -1) {
+    String cc = langToCode.get(config.toLowerCase());
+    if (cc == null) {
       logger.error("can't find a flag for " + config);
       cc = "us";
-    } else {
-      cc = flags.get(i);
     }
     return cc;
   }
 
-  private DatabaseImpl getAndPopulate() { return getDatabase().setInstallPath("war", "").populateProjects();  }
+  private static class Pair {
+    String language;
+    String cc;
+
+    public Pair(String language, String cc) {
+      this.language = language;
+      this.cc = cc;
+    }
+  }
+
+  private DatabaseImpl getAndPopulate() {
+    return getDatabase().setInstallPath("war", "").populateProjects();
+  }
 
   private static DatabaseImpl getDatabase() {
     File file = new File(NETPROF_PROPERTIES_FULL);
@@ -239,7 +228,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                               boolean useLocal,
                                               String optPropsFile,
                                               String installPath) {
-   // logger.info("getDatabaseLight db " + config + " optional props " + optPropsFile);
+    // logger.info("getDatabaseLight db " + config + " optional props " + optPropsFile);
 
     String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
@@ -249,7 +238,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     logger.info("getDatabaseLight path " + configFile.getAbsolutePath());
 
-    ServerProperties serverProps  = getServerProperties(config, propsFile, installPath);
+    ServerProperties serverProps = getServerProperties(config, propsFile, installPath);
     if (serverProps == null) {
       return null;
     }
@@ -369,7 +358,7 @@ public class CopyToPostgres<T extends CommonShell> {
       copyReviewed(db, oldToNewUser, exToID, false);
       copyRefResult(db, oldToNewUser, exToID, projectID);
     } else {
-      logger.info("\n\nProject #" + projectID + " (" +optName+ ") already has exercises in it.  Not loading again...\n\n");
+      logger.info("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
     }
   }
 
@@ -828,7 +817,7 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   private void copyRefResult(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID, int projid) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
-     RefResultDAO originalDAO = new RefResultDAO(db, false);
+    RefResultDAO originalDAO = new RefResultDAO(db, false);
     List<SlickRefResult> bulk = new ArrayList<>();
     Collection<Result> all = originalDAO.getResults();
     logger.info("copyRefResult found " + all.size());
@@ -845,7 +834,7 @@ public class CopyToPostgres<T extends CommonShell> {
         Integer exid = exToID.get(result.getOldExID());
         if (exid != null) {
           result.setExid(exid);
-          bulk.add(dao.toSlick(projid,result));
+          bulk.add(dao.toSlick(projid, result));
         } else missing++;
       }
     }
@@ -864,13 +853,33 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   public static void main(String[] arg) {
     if (arg.length < 2) {
-      logger.error("expecting either copy or drop followed by config, e.g. copy spanish");
+      logger.error("Usage : expecting either copy or drop followed by config, e.g. copy spanish");
+      logger.error("Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary");
       return;
     }
     String action = arg[0];
     String config = arg[1];
     String optconfig = arg.length > 2 ? arg[2] : null;
-    //boolean inTest = arg.length > 2;
+    String optDisplayOrder = arg.length > 3 ? arg[3] : null;
+
+    StringBuilder builder = new StringBuilder();
+    List<String> name = Collections.emptyList();
+
+    if (arg.length > 3) {
+      name = Arrays.asList(arg);
+      name = name.subList(optconfig == null ? 2 : optDisplayOrder == null ? 3 : 4, name.size());
+    }
+
+    for (String n : name) builder.append(n).append(" ");
+    String optName = builder.toString().trim();
+
+    int displayOrder = 0;
+    try {
+      displayOrder = optDisplayOrder == null ? 0 : Integer.parseInt(optDisplayOrder);
+    } catch (NumberFormatException e) {
+      logger.error("couldn't parse display order " +optDisplayOrder);
+    }
+
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     if (action.equals(DROP)) {
@@ -881,9 +890,9 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.error("couldn't drop config " + config, e);
       }
     } else if (action.equals(COPY)) {
-      logger.info("copying " + config);
+      logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
       try {
-        copyToPostgres.copyOneConfigCommand(config, optconfig);
+        copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder);
       } catch (Exception e) {
         logger.error("couldn't copy config " + config, e);
       }
