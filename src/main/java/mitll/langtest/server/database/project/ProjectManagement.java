@@ -323,7 +323,10 @@ public class ProjectManagement implements IProjectManagement {
     for (SlickProject project : all) idToSlickProject.put(project.id(), project);
 
     for (Project project : idToProject.values()) {
-      int id = project.getProject().id();
+      SlickProject project1 = project.getProject();
+
+      int id = project1.id();
+
       SlickProject update = idToSlickProject.get(id);
       //  logger.info("Was " + project.getProject());
       project.setProject(update);
