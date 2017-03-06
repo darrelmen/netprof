@@ -76,11 +76,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final Logger logger = Logger.getLogger("UserContainer");
   private final String header;
 
-  protected static final int ID_WIDTH = 130;
+  static final int ID_WIDTH = 130;
   private static final int SIGNED_UP = 95;
   private static final String SIGNED_UP1 = "Started";
   private static final int STUDENT_WIDTH = 300;
-  private String storageKey = "selectedUser";
+  private static final String storageKey = "selectedUser";
   private int idWidth = ID_WIDTH;
 
   /**

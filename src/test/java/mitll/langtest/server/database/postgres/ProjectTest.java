@@ -271,8 +271,10 @@ public class ProjectTest extends BaseTest {
   @Test
   public void testDropSpanishRef() {  doDropRef( "spanish");  }
 
+  @Test
+  public void testDropPashto() {  doDrop( "pashto");  }
   private void doDropRef(String croatian) {
-    DatabaseImpl andPopulate = getAndPopulate();
+    DatabaseImpl andPopulate = getDatabase().setInstallPath("war", "");
 
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
     int projid = projectDAO.getByName(croatian);

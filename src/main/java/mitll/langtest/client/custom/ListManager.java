@@ -474,8 +474,6 @@ public class ListManager implements RequiresResize {
     return storage;
   }
 
-  //private DivWidget mediaContainer;
-
   /**
    * @param ul
    * @param instanceName
@@ -502,7 +500,7 @@ public class ListManager implements RequiresResize {
     listOperationsContainer.add(listOperations.getMediaContainer());
 
   //  if (!ul.getContextURL().isEmpty()) {
-      listOperations.addDocContainer(ul.getContextURL());
+    listOperations.addDocContainer(ul.getContextURL());
    // }
 //    else {
 //      DivWidget docContainer = new DivWidget();
@@ -555,6 +553,7 @@ public class ListManager implements RequiresResize {
    * @param ul
    * @param container
    * @return
+   * @see #getFirstInfoRow
    */
   @NotNull
   private HTML getNameHeading(UserList ul, DivWidget container) {
@@ -598,8 +597,8 @@ public class ListManager implements RequiresResize {
     style.setMarginTop(5, Style.Unit.PX);
     style.setMarginBottom(5, Style.Unit.PX);
     editableHeading.setHeight("40px");
-    editableHeading.setWidth("400px");
-    editableHeading.setVisibleLength(150);
+    editableHeading.setWidth(400+ "px");
+    editableHeading.setVisibleLength(250);
     return editableHeading;
   }
 

@@ -277,7 +277,7 @@ public class PostgresTest extends BaseTest {
     return new Info("english");
   }
 
-  boolean justReport = false;
+  private boolean justReport = false;
 
   private void testCopy(Info info) {
     testCopy(Collections.singletonList(info));
@@ -336,7 +336,7 @@ public class PostgresTest extends BaseTest {
       this(language, language, null, 0, false);
     }
 
-    public Info(String language, String name, String props, int displayOrder, boolean isDev) {
+     Info(String language, String name, String props, int displayOrder, boolean isDev) {
       this.language = language;
       this.name = name;
       this.props = props;
@@ -348,11 +348,11 @@ public class PostgresTest extends BaseTest {
       return language + " : " + name + " : " + props;
     }
 
-    public boolean isDev() {
+    boolean isDev() {
       return isDev;
     }
 
-    public Info setDev(boolean dev) {
+    Info setDev(boolean dev) {
       isDev = dev;
       return this;
     }

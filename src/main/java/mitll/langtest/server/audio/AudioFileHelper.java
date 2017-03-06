@@ -98,8 +98,8 @@ public class AudioFileHelper implements AlignDecode {
 
   private AutoCRT autoCRT;
 
-  private final DatabaseImpl db;
-  private final LogAndNotify logAndNotify;
+  private DatabaseImpl db;
+  private LogAndNotify logAndNotify;
   private boolean checkedLTS = false;
 
   /**
@@ -108,9 +108,12 @@ public class AudioFileHelper implements AlignDecode {
   private Map<String, Integer> phoneToCount;
 
   private boolean useOldSchoolServiceOnly = false;
-  private final AudioConversion audioConversion;
-  private final boolean isNoModel;
-  private final String language;
+  private AudioConversion audioConversion;
+  private boolean isNoModel;
+  private String language;
+
+//  public AudioFileHelper() {
+//  }
 
   /**
    * @param pathHelper
@@ -450,8 +453,7 @@ public class AudioFileHelper implements AlignDecode {
       }
       logger.debug("getAudioAnswerDecoding recordInResults answer " + answer + " " + answer.getTranscript());
       recordInResults(context, recordingInfo, validity, answer);
-    }
-    else {
+    } else {
       answer.setTranscript(recordingInfo.getTranscript());
     }
     //logger.debug("getAudioAnswerDecoding answer " + answer);
@@ -931,9 +933,9 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param exid
    * @param foreignLanguage
-   *@param projid
+   * @param projid
    * @param userid
-   * @param theFile    @return
+   * @param theFile         @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#getASRScoreForAudio
    */
   public PrecalcScores checkForWebservice(int exid, String foreignLanguage, int projid, int userid, File theFile) {
@@ -957,31 +959,8 @@ public class AudioFileHelper implements AlignDecode {
 
       if (theFile.exists()) {
         String hydraHost = serverProps.getHydraHost();//"https://netprof1-dev.llan.ll.mit.edu/netprof/";
-        HTTPClient httpClient = new HTTPClient(hydraHost + "scoreServlet");
-        httpClient.addRequestProperty("request", "align");
-        httpClient.addRequestProperty("exercise", "" + exid);
-        httpClient.addRequestProperty(EXERCISE_TEXT, StringUtils.stripAccents(foreignLanguage));
-        // USE THE LANGUAGE INSTEAD
-        httpClient.addRequestProperty("projid", "-1");//  + projid);
-        httpClient.addRequestProperty("language", getLanguage());
-        httpClient.addRequestProperty("user", "" + userid);
-        httpClient.addRequestProperty("full", "full");  // full json returned
-
-        try {
-          String s = httpClient.sendAndReceiveAndClose(theFile);
-
-          PrecalcScores precalcScores = new PrecalcScores(serverProps, s);
-
-/*
-          logger.info("checkForWebservice" +
-              "\n\tGot back      " + s +
-              "\n\tprecalcScores " + precalcScores);
-*/
-
-          return precalcScores;
-        } catch (IOException e) {
-          logger.error("checkForWebservice got " + e);
-        }
+        PrecalcScores precalcScores = getPrecalcScores(exid, getLanguage(), foreignLanguage, userid, theFile, hydraHost);
+        if (precalcScores != null) return precalcScores;
         return null;
       } else {
         return null;
@@ -991,11 +970,41 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
+  private String getEasyScores(String language, String foreignLanguage, File theFile) {
+    PrecalcScores easyScores = getPrecalcScores(-1, language, foreignLanguage, 1, theFile, "https://netprof1-dev.llan.ll.mit.edu/netprof/");
+    return easyScores.getJsonObject().toString();
+  }
+
+  @Nullable
+  private PrecalcScores getPrecalcScores(int exid, String language, String foreignLanguage, int userid, File theFile, String hydraHost) {
+    HTTPClient httpClient = new HTTPClient(hydraHost + "scoreServlet");
+    httpClient.addRequestProperty("request", "align");
+    httpClient.addRequestProperty("exercise", "" + exid);
+    httpClient.addRequestProperty(EXERCISE_TEXT, StringUtils.stripAccents(foreignLanguage));
+    // USE THE LANGUAGE INSTEAD
+    httpClient.addRequestProperty("projid", "-1");//  + projid);
+    httpClient.addRequestProperty("language", getLanguage());
+    httpClient.addRequestProperty("user", "" + userid);
+    httpClient.addRequestProperty("full", "full");  // full json returned
+
+    try {
+      String s = httpClient.sendAndReceiveAndClose(theFile);
+      PrecalcScores precalcScores = new PrecalcScores(serverProps, s);
+      return precalcScores;
+    } catch (IOException e) {
+      logger.error("checkForWebservice got " + e);
+    }
+    return null;
+  }
+
   /**
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#isHydraRunning
    */
-  public boolean isHydraAvailable() {  return webserviceScoring.isAvailable();  }
+  public boolean isHydraAvailable() {
+    return webserviceScoring.isAvailable();
+  }
+
   public boolean isHydraAvailableCheckNow() {
     return webserviceScoring.isAvailableCheckNow();
   }
@@ -1258,7 +1267,7 @@ public class AudioFileHelper implements AlignDecode {
       //    String installPath = serverProps.getAudioBaseDir();
       HTKDictionary htkDictionary = readDictionary(project, installPath);
       webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
-      oldschoolScoring  = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
+      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
     }
     asrScoring = oldschoolScoring;
   }
@@ -1384,4 +1393,13 @@ public class AudioFileHelper implements AlignDecode {
       return this;
     }
   }
+
+/*  public static void main(String[] arg) {
+    if (arg.length != 3) {
+      System.out.println("Usage: language text file");
+    }
+    else {
+      System.out.println(new AudioFileHelper().getEasyScores(arg[0], arg[1], new File(arg[2])));
+    }
+  }*/
 }
