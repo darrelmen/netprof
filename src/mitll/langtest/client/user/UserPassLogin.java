@@ -79,6 +79,7 @@ import java.util.logging.Logger;
 public class UserPassLogin extends UserDialog {
   private static final String USERNAME_BOX_SIGN_IN = "Username_Box_SignIn";
   public static final String USER_NAME_BOX = "UserNameBox";
+  public static final int MAX_LENGTH = 25;
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
@@ -305,7 +306,7 @@ public class UserPassLogin extends UserDialog {
 
     makeSignInUserName(fieldset);
 
-    password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, MAX_LENGTH, PASSWORD);
     password.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -777,7 +778,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void makeSignUpPassword(Fieldset fieldset, final UIObject emailBox) {
-    signUpPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    signUpPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, MAX_LENGTH, PASSWORD);
     signUpPassword.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
