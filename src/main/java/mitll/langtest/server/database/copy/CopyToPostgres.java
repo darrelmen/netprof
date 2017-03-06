@@ -101,11 +101,13 @@ public class CopyToPostgres<T extends CommonShell> {
       boolean hasModel = databaseLight.getServerProps().hasModel();
       logger.info("loading " + language + " " + hasModel);
       String nameToUse = optionalName.isEmpty() ? language : optionalName;
-      new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), nameToUse, displayOrder, !hasModel);
+      new CopyToPostgres().copyOneConfig(databaseLight, getCC(language), nameToUse, displayOrder, !hasModel);
     } catch (Exception e) {
       logger.error("got " + e, e);
     } finally {
-      databaseLight.close();
+      if (databaseLight != null) {
+        databaseLight.close();
+      }
     }
   }
 
@@ -137,10 +139,10 @@ public class CopyToPostgres<T extends CommonShell> {
    * <p>
    * TODO : make t
    *
-   * @param config
+   * @param language
    * @return
    */
-  public String getCC(String config) {
+  public String getCC(String language) {
     List<Pair> languages = Arrays.asList(
         new Pair("croatian", "hr"),
         new Pair("dari", "af"),
@@ -171,9 +173,9 @@ public class CopyToPostgres<T extends CommonShell> {
     Map<String, String> langToCode = new HashMap<>();
     for (Pair pair : languages) langToCode.put(pair.language, pair.cc);
 
-    String cc = langToCode.get(config.toLowerCase());
+    String cc = langToCode.get(language.toLowerCase());
     if (cc == null) {
-      logger.error("can't find a flag for " + config);
+      logger.error("\n\n\n\ncan't find a flag for " + language);
       cc = "us";
     }
     return cc;
@@ -877,7 +879,7 @@ public class CopyToPostgres<T extends CommonShell> {
     try {
       displayOrder = optDisplayOrder == null ? 0 : Integer.parseInt(optDisplayOrder);
     } catch (NumberFormatException e) {
-      logger.error("couldn't parse display order " +optDisplayOrder);
+      logger.error("couldn't parse display order " + optDisplayOrder);
     }
 
     CopyToPostgres copyToPostgres = new CopyToPostgres();
