@@ -140,7 +140,7 @@ public class ImportCourseExamples {
             " result = " + r.getUniqueID() + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.getAnswer());
         }
 
-        audioDAO.add(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());
+       //audioDAO.add(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());
 
         try {
           File destFile = new File(destAudioDir, r.getAnswer());

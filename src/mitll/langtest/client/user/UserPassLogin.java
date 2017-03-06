@@ -83,7 +83,7 @@ public class UserPassLogin extends UserDialog {
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
- // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
+  // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
@@ -216,7 +216,7 @@ public class UserPassLogin extends UserDialog {
    */
   private void showSuggestApp() {
     List<String> messages = Arrays.asList(IPAD_LINE_1,
-       // IPAD_LINE_2,
+        // IPAD_LINE_2,
         IPAD_LINE_3);
     Modal modal = new ModalInfoDialog().getModal(
         "Install App?",
@@ -277,7 +277,6 @@ public class UserPassLogin extends UserDialog {
   }
 
   private Panel getLinksToSites() {
-    //Panel hp = new HorizontalPanel();
     DivWidget hp = new DivWidget();
     hp.getElement().setId("UserPassLogin_linksToSites");
     hp.getElement().getStyle().setMarginTop(40, Style.Unit.PX);
@@ -285,7 +284,8 @@ public class UserPassLogin extends UserDialog {
 
     String sitePrefix = props.getSitePrefix();
     for (String site : props.getSites()) {
-      Anchor w = new Anchor(site, sitePrefix + site.replaceAll("Mandarin", "CM"));
+      String s = site.equals("Mandarin") ? site.replaceAll("Mandarin", "CM") : site;
+      Anchor w = new Anchor(site, sitePrefix + s);
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       w.addStyleName("floatLeftList");
 
@@ -293,7 +293,6 @@ public class UserPassLogin extends UserDialog {
     }
     return hp;
   }
-
 
   /**
    * @param signInForm
@@ -930,7 +929,7 @@ public class UserPassLogin extends UserDialog {
             } else {
               if (result.isEnabled()) {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
-               // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
+                // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
 
                 storeUser(result);
               } else {
@@ -1051,7 +1050,7 @@ public class UserPassLogin extends UserDialog {
       copyInfoToSignUp(result);
       signIn.setEnabled(true);
     } else {
-     // logger.info("Got valid user " + result);
+      // logger.info("Got valid user " + result);
       if (emptyPassword) {
         eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
 
@@ -1060,7 +1059,7 @@ public class UserPassLogin extends UserDialog {
       } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
         if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER || props.enableAllUsers()) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
-      //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
+          //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
 
           storeUser(result);
         } else {
