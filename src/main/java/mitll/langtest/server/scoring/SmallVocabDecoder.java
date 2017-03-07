@@ -33,10 +33,8 @@
 package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
-import corpus.LTS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pronz.speech.Audio;
 
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
