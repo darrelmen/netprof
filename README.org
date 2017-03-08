@@ -18,8 +18,12 @@ gradle war
 ** import the project into eclipse - open projects from filesystem
 ** set the war directory
  * Right click on root folder, choose Properties->Google->Web application
- * Browse to war directory
  * Click on launch and deploy from this directory
+ * (May want to confirm your Arguments/Program Arguments looks like:)
+   #+BEGIN_SRC shell
+ -war "${project_loc}/build/eclipse-war" -remoteUI "${gwt_remote_ui_server_port}:${unique_id}" -startupUrl LangTest.html -logLevel INFO -codeServerPort 9997 -port 8888 mitll.langtest.LangTest
+    #+END_SRC
+      
 
 ** on the top button bar - choose Green arrow – run as super dev mode
  * Choose langtest.html
