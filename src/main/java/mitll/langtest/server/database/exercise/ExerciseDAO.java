@@ -40,7 +40,6 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 

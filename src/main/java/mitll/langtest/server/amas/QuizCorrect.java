@@ -33,6 +33,7 @@
 package mitll.langtest.server.amas;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
@@ -50,9 +51,9 @@ public class QuizCorrect {
 //  private static final String QUIZ = "Quiz";
 //  private static final String ILR_LEVEL = "ILR Level";
 //  private static final String TEST_TYPE = "Test type";
-  private final DatabaseImpl db;
+  private final DatabaseServices db;
 
-  public QuizCorrect(DatabaseImpl db) {
+  public QuizCorrect(DatabaseServices db) {
     this.db = db;
   }
   /**

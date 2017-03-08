@@ -71,9 +71,7 @@ import java.util.*;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
-import static mitll.langtest.shared.user.User.Kind.ADMIN;
-import static mitll.langtest.shared.user.User.Kind.PROJECT_ADMIN;
-import static mitll.langtest.shared.user.User.Kind.STUDENT;
+import static mitll.langtest.shared.user.User.Kind.*;
 
 /**
  * Store user info in domino tables.

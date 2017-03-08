@@ -51,6 +51,8 @@ public class JsonScoring {
     this.serverProps = db.getServerProps();
   }
 
+
+
   /**
    * @param reqid      label response with req id so the client can tell if it got a stale response
    * @param projid
@@ -62,10 +64,11 @@ public class JsonScoring {
    * @param deviceType iPad,iPhone, or browser
    * @param device     id for device - helpful for iPads, etc.
    * @param options
-   * @param fullJSON   @return score json
+   * @param fullJSON
+   * @return score json
    * @paramx allowAlternates   decode against multiple alternatives (e.g. male and female spanish words for the same english word)
    * @paramx usePhoneToDisplay should we remap the phones to different labels for display
-   * @see #getJsonForAudio
+   * @see ScoreServlet#getJsonForAudio
    */
   public JSONObject getJsonForAudioForUser(int reqid,
                                            int projid,

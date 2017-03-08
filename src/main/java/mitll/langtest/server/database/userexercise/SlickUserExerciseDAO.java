@@ -53,7 +53,6 @@ import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.collection.Seq;
 
 import java.sql.Timestamp;
 import java.util.*;

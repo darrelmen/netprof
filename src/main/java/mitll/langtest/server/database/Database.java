@@ -64,6 +64,7 @@ public interface Database extends AutoCloseable {
 
   ServerProperties getServerProps();
 
+  @Deprecated
   String getLanguage();
 
   Project getProject(int projectid);

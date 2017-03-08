@@ -43,8 +43,6 @@ import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import scala.collection.Iterator;
-import scala.collection.Seq;
 
 import java.sql.Timestamp;
 import java.util.Collection;

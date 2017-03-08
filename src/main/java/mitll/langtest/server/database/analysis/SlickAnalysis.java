@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.SlickResultDAO;
@@ -58,14 +57,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final boolean DEBUG = true;
   private String language;
   private int projid;
-//  private IUserDAO userDAO;
   private Project project;
 
   /**
    * @param database
    * @param phoneDAO
    * @param projid
-   * @see DatabaseImpl#configureProject
+   * @see mitll.langtest.server.database.DatabaseImpl#configureProject
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
    */
   public SlickAnalysis(Database database,
@@ -77,7 +75,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     this.resultDAO = resultDAO;
     this.language = language;
     this.projid = projid;
-  //  this.userDAO = userDAO;
     project = database.getProject(projid);
   }
 

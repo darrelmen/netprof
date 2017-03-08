@@ -30,59 +30,54 @@
  *
  */
 
-package mitll.langtest.server.database.userlist;
+package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.DAO;
-import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.custom.UserList;
-import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;
+import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.phone.IPhoneDAO;
+import mitll.langtest.server.database.phone.Phone;
+import mitll.langtest.server.database.project.IProjectDAO;
+import mitll.langtest.server.database.refaudio.IRefResultDAO;
+import mitll.langtest.server.database.result.IAnswerDAO;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.IUserProjectDAO;
+import mitll.langtest.server.database.user.IUserSessionDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.server.database.word.IWordDAO;
 
-public class SlickUserListExerciseJoinDAO
-    extends DAO implements IUserListExerciseJoinDAO {
-//  private static final Logger logger = LogManager.getLogger(SlickUserListExerciseJoinDAO.class);
-  private final UserExerciseListJoinDAOWrapper dao;
+/**
+ * Created with IntelliJ IDEA.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 6/26/12
+ * Time: 3:54 PM
+ * To change this template use File | Settings | File Templates.
+ */
+public interface DAOContainer {
+  IResultDAO getResultDAO();
 
-  public SlickUserListExerciseJoinDAO(Database database, DBConnection dbConnection) {
-    super(database);
-    dao = new UserExerciseListJoinDAOWrapper(dbConnection);
-  }
+  IRefResultDAO getRefResultDAO();
 
-  public void createTable() {
-    dao.createTable();
-  }
+  IUserDAO getUserDAO();
 
-  @Override
-  public String getName() {
-    return dao.dao().name();
-  }
+  IUserExerciseDAO getUserExerciseDAO();
 
-  /**
-   * @param userList
-   * @param uniqueID
-   * @param exid
-   * @see mitll.langtest.server.database.custom.UserListManager#addItemToList
-   */
-  @Override
-  public void add(UserList userList, String uniqueID, int exid) { addPair(userList.getID(),  exid);  }
+  IProjectDAO getProjectDAO();
 
-  /**
-   * Just for copying from h2 initially
-   *
-   * @param userlistid
-   * @paramz exerciseID
-   */
-  public void addPair(int userlistid, int exid) {  dao.insert(userlistid, exid);  }
+  IUserProjectDAO getUserProjectDAO();
 
-  @Override
-  public void removeListRefs(long listid) {}
+  IUserSessionDAO getUserSessionDAO();
 
-  @Override
-  public boolean remove(long listid, int exid) {
-    return dao.remove((int) listid, exid) == 1;
-  }
+  IWordDAO getWordDAO();
 
-  public boolean isEmpty() {
-    return dao.getNumRows() == 0;
-  }
+  IPhoneDAO<Phone> getPhoneDAO();
+
+  IAnswerDAO getAnswerDAO();
+
+  IEventDAO getEventDAO();
+
+  IAudioDAO getAudioDAO();
+
 }

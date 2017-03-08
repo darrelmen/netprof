@@ -1,6 +1,5 @@
 package mitll.langtest.server.database.copy;
 
-import com.google.gwt.user.client.DOM;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.IResultDAO;

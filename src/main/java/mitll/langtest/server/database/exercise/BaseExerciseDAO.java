@@ -40,7 +40,6 @@ import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import org.apache.logging.log4j.LogManager;

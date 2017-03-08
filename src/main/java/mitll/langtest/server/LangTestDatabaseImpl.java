@@ -35,6 +35,7 @@ package mitll.langtest.server;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.security.UserSecurityManager;
@@ -161,10 +162,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffliations());
   }
 
-  private IUserListManager getUserListManager() {
-    return db.getUserListManager();
-  }
-
   /**
    * @param id
    * @param widgetType
@@ -197,7 +194,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * Filter out the default audio recordings...
    *
    * @return
-   * @see mitll.langtest.client.custom.RecorderNPFHelper#getProgressInfo
+   * @see mitll.langtest.client.custom.recording.RecorderNPFHelper#getProgressInfo
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress() {
@@ -273,7 +270,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (db == null) {
       logger.warn("DatabaseImpl was never made properly...");
     } else {
-      db.close(); // TODO : redundant with h2 shutdown hook?
+      try {
+        db.getDatabase().close(); // TODO : redundant with h2 shutdown hook?
+      } catch (Exception e) {
+        logger.error("Got " + e, e);
+      }
       db.stopDecode();
     }
   }
@@ -298,7 +299,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     this.configDir = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
 
-    logger.info("readProperties relativeConfigDir " + relativeConfigDir +" configDir         " + configDir);
+    logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
     try {
       this.serverProps = serverProps;
@@ -313,7 +314,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
       logger.info("readProperties shareDB ");
     } catch (Exception e) {
-      logger.error("Got "+e,e);
+      logger.error("Got " + e, e);
     }
 
     shareDB(servletContext);
@@ -354,7 +355,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @return
    * @see LangTestDatabaseImpl#init()
    */
-  private void setInstallPath(DatabaseImpl db) {
+  private void setInstallPath(DatabaseServices db) {
 //    String lessonPlanFile = getLessonPlan();
 //    if (lessonPlanFile != null &&
 //        !serverProps.getLessonPlan().startsWith("http") &&

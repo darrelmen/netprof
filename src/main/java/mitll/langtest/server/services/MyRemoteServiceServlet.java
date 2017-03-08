@@ -39,6 +39,8 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
@@ -62,7 +64,7 @@ import java.io.IOException;
 public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
   private static final Logger logger = LogManager.getLogger(MyRemoteServiceServlet.class);
 
-  protected DatabaseImpl db;
+  protected DatabaseServices db;
   protected ServerProperties serverProps;
   protected IUserSecurityManager securityManager;
   protected PathHelper pathHelper;
@@ -534,5 +536,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       }
       return project.getAudioFileHelper();
     }
+  }
+
+  protected IUserListManager getUserListManager() {
+    return db.getUserListManager();
   }
 }
