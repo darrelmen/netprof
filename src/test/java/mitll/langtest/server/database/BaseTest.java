@@ -174,4 +174,8 @@ public class BaseTest {
   protected H2Connection getH2Connection(String path) {
     return new H2Connection(".", path, true, null, false);
   }
+
+  protected DatabaseImpl getAndPopulate() {
+    return getDatabase().setInstallPath("war", "").populateProjects();
+  }
 }

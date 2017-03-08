@@ -91,7 +91,7 @@ public abstract class BaseAudioDAO extends DAO {
    *
    * @see AudioExport#attachAudio(Collection, IAudioDAO, String)
    * @see DatabaseImpl#attachAllAudio
-   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#attachAudio()
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#attachAudio
    */
   public Map<Integer, List<AudioAttribute>> getExToAudio(int projid) {
     long then = System.currentTimeMillis();

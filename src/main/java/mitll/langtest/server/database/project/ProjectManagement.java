@@ -67,6 +67,8 @@ public class ProjectManagement implements IProjectManagement {
   private static final boolean ADD_DEFECTS = false;
 
   private static final boolean DEBUG_ONE_PROJECT = false;
+  private static final String ONE_TO_LOAD = "korean";
+
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
@@ -134,7 +136,7 @@ public class ProjectManagement implements IProjectManagement {
     for (SlickProject slickProject : all) {
       if (!idToProject.containsKey(slickProject.id())) {
         if (DEBUG_ONE_PROJECT) {
-          if (slickProject.language().equalsIgnoreCase("english")) {
+          if (slickProject.language().equalsIgnoreCase(ONE_TO_LOAD)) {
             rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
           }
         } else {
