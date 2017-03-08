@@ -33,7 +33,7 @@
 package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAnnotation;
 import mitll.npdata.dao.annotation.AnnotationDAOWrapper;

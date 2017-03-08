@@ -61,51 +61,7 @@ public class DominoUserTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(DominoUserTest.class);
   public static final int MAX = 200;
 
-  @Test
-  public void testProject() {
-    DatabaseImpl spanish = getDatabase("spanish");
-    IProjectDAO projectDAO = spanish.getProjectDAO();
-    User gvidaver = spanish.getUserDAO().getUserByID("gvidaver");
 
-    Iterator<String> iterator = spanish.getTypeOrder(-1).iterator();
-    projectDAO.add(
-        gvidaver.getID(),
-        System.currentTimeMillis(),
-        "my Spanish",
-        spanish.getLanguage(),
-        "ALL",
-        ProjectType.NP,
-        ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es", 0);
-  }
-
-/*  @Test
-  public void testTestProject() {
-    DatabaseImpl database = getDatabase("netProf");
-
-    IProjectDAO projectDAO = database.getProjectDAO();
-
-    IUserDAO userDAO = database.getUserDAO();
-    User gvidaver = userDAO.getUserByID("gvidaver");
-
-    int i = projectDAO.addTest(
-        gvidaver.getID(),
-        "my Spanish",
-        "Spanish",
-        "Unit", "Chapter", "es");
-
-    IUserListManager userListManager = database.getUserListManager();
-
-    UserManagement userManagement = database.getUserManagement();
-    String test345 = "test345";
-//    User user = userManagement.addUser(test345, "test123", "1234", "", "", "");
-//    if (user == null) {
-//      user = userDAO.getUserByID(test345);
-//    }
-//    if (user != null) {
-//      Collection<UserList<CommonShell>> myLists = userListManager.getMyLists(user.getID(), i);
-//      logger.info("lists for " + user + " " + myLists);
-//    }
-  }*/
 
   @Test
   public void testListProjects() {
@@ -121,40 +77,8 @@ public class DominoUserTest extends BaseTest {
     }
   }
 
-  @Test
-  public void testAddProperty() {
-    DatabaseImpl spanish = getDatabaseVeryLight("spanish", "quizlet.properties", false);
 
-    IProjectDAO projectDAO = spanish.getProjectDAO();
-    SlickProject next = projectDAO.getAll().iterator().next();
 
-    projectDAO.addProperty(next.id(), "key", "value");
-
-    testListProjects();
-//    next.addProp(new SlickProjectProperty(-1, new Timestamp(System.currentTimeMillis()), next.id(), "test", "test"));
-  }
-
-  @Test
-  public void testByName() {
-    DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
-    IProjectDAO projectDAO = spanish.getProjectDAO();
-
-    String english1 = "english";
-    int english = projectDAO.getByName(english1);
-
-    logger.info("found " + english + " for " + english1);
-  }
-
-  @Test
-  public void testPhones() {
-    DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
-    IProjectDAO projectDAO = spanish.getProjectDAO();
-
-    String english1 = "english";
-    int english = projectDAO.getByName(english1);
-
-    logger.info("found " + english + " for " + english1);
-  }
 
   @Test
   public void testOneEditNeighbors() {
@@ -206,26 +130,7 @@ public class DominoUserTest extends BaseTest {
     }*/
   }
 
-  @Test
-  public void testAgain() {
-    DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
-    IProjectDAO projectDAO = spanish.getProjectDAO();
 
-    String english1 = "mandarin";
-    int english = projectDAO.getByName(english1);
-
-    logger.info("found " + english + " for " + english1);
-
-    spanish.populateProjects();
-
-    spanish.setInstallPath("", "");
-
-    Project project = spanish.getProject(english);
-
-    logger.info("project " + project);
-
-    project.getSectionHelper().report();
-  }
 
   @Test
   public void testListProjects2() {

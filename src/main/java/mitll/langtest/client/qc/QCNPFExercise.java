@@ -68,7 +68,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;

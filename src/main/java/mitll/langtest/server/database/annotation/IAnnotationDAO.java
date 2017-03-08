@@ -33,7 +33,7 @@
 package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 
 import java.util.Collection;
 import java.util.Map;

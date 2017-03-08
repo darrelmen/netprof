@@ -50,7 +50,7 @@ import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.User;

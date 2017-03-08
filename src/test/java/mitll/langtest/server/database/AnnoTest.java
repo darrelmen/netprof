@@ -35,8 +35,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.user.UserDAO;
-import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.apache.logging.log4j.*;
 import org.junit.Test;
 

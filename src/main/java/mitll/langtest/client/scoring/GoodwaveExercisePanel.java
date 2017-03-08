@@ -56,7 +56,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.CompressedAudio;
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -349,7 +349,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   /**
    * @param commentToPost
    * @param field
-   * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, mitll.langtest.shared.ExerciseAnnotation)
+   * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
    */
   @Override
   public void addIncorrectComment(final String commentToPost, final String field) {

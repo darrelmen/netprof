@@ -56,11 +56,8 @@ import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.AnnotationExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -336,7 +333,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     /**
      * @param commentToPost
      * @param field
-     * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, mitll.langtest.shared.ExerciseAnnotation)
+     * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
      */
     @Override
     public void addIncorrectComment(final String commentToPost, final String field) {

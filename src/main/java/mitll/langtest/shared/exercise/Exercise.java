@@ -500,9 +500,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.oldid = id;
   }
 
-
   /**
-   * TODO move down
+   *
    *
    * @return
    */
@@ -541,4 +540,3 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return safeToDecodeLastChecked;
   }
 }
-

@@ -27,7 +27,7 @@ import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.exercise.*;
 
