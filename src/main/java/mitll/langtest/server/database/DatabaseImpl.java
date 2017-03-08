@@ -88,7 +88,10 @@ import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableAudioExercise;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.result.MonitorResult;
@@ -128,7 +131,7 @@ import java.util.*;
  * Time: 11:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DatabaseImpl implements Database {
+public class DatabaseImpl implements Database, DatabaseServices {
   private static final Logger logger = LogManager.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
@@ -188,7 +191,7 @@ public class DatabaseImpl implements Database {
   private PathHelper pathHelper;
   private IProjectManagement projectManagement;
   private RecordWordAndPhone recordWordAndPhone;
- // private IInviteDAO inviteDAO;
+
   private IUserSecurityManager userSecurityManager;
 
   /**
@@ -316,7 +319,7 @@ public class DatabaseImpl implements Database {
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
     this.userDAO = new DominoUserDAOImpl(this);
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
-   // this.inviteDAO = new SlickInviteDAOImpl(this, dbConnection);
+    // this.inviteDAO = new SlickInviteDAOImpl(this, dbConnection);
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
@@ -381,6 +384,7 @@ public class DatabaseImpl implements Database {
     return new AudioDAO(this, new UserDAO(this));
   }
 
+  @Override
   public IResultDAO getResultDAO() {
     return resultDAO;
   }
@@ -389,14 +393,17 @@ public class DatabaseImpl implements Database {
    * @param projectid
    * @return
    */
+  @Override
   public IAnalysis getAnalysis(int projectid) {
     return getProject(projectid).getAnalysis();
   }
 
+  @Override
   public IRefResultDAO getRefResultDAO() {
     return refresultDAO;
   }
 
+  @Override
   public IUserDAO getUserDAO() {
     return userDAO;
   }
@@ -451,6 +458,7 @@ public class DatabaseImpl implements Database {
    * @param lessonPlanFile
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
+  @Override
   public DatabaseImpl setInstallPath(String installPath, String lessonPlanFile) {
     logger.debug("setInstallPath got install path " + installPath);// + " media " + mediaDir);
     this.installPath = installPath;
@@ -477,6 +485,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet
    * @see Database#getTypeOrder
    */
+  @Override
   public SectionHelper<CommonExercise> getSectionHelper(int projectid) {
     if (isAmas()) {
       return new SectionHelper<>();
@@ -507,6 +516,7 @@ public class DatabaseImpl implements Database {
    * @see #deleteItem(int, int)
    * @see #getCustomOrPredefExercise(int, int)
    */
+  @Override
   public CommonExercise getExercise(int projectid, int id) {
     return projectManagement.getExercise(projectid, id);
   }
@@ -529,10 +539,12 @@ public class DatabaseImpl implements Database {
    * @seex #getExercises(int)
    * @see Project#buildExerciseTrie
    */
+  @Override
   public List<CommonExercise> getExercises(int projectid) {
     return projectManagement.getExercises(projectid);
   }
 
+  @Override
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
     Project project = getProject(projectid);
     //logger.debug("getExerciseDAO " + projectid + " found project " + project);
@@ -541,20 +553,23 @@ public class DatabaseImpl implements Database {
     return exerciseDAO;
   }
 
+  @Override
   public Project getProjectForUser(int userid) {
     return projectManagement.getProjectForUser(userid);
   }
 
+  @Override
   public void stopDecode() {
     projectManagement.stopDecode();
   }
 
   /**
-   * Just for import
+   * Mainly for import
    *
    * @param projectid
    * @see mitll.langtest.server.database.copy.CreateProject#createProjectIfNotExists
    */
+  @Override
   public void rememberProject(int projectid) {
     projectManagement.rememberProject(projectid);
   }
@@ -567,12 +582,14 @@ public class DatabaseImpl implements Database {
    * @param projectid
    * @see mitll.langtest.server.services.UserServiceImpl#setProject
    */
+  @Override
   public void rememberProject(int userid, int projectid) {
     //  logger.info("rememberProject user " + userid + " -> " + projectid);
     getUserProjectDAO().add(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
   }
 
+  @Override
   public void forgetProject(int userid) {
     getUserProjectDAO().forget(userid);
   }
@@ -592,6 +609,7 @@ public class DatabaseImpl implements Database {
    * @see #setStartupInfo(User)
    * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
    */
+  @Override
   public void setStartupInfo(User userWhere, int projid) {
     projectManagement.setStartupInfo(userWhere, projid);
   }
@@ -601,14 +619,17 @@ public class DatabaseImpl implements Database {
    *
    * @return
    */
+  @Override
   public List<AmasExerciseImpl> getAMASExercises() {
     return fileExerciseDAO.getRawExercises();
   }
 
+  @Override
   public AmasExerciseImpl getAMASExercise(int id) {
     return fileExerciseDAO.getExercise(id);
   }
 
+  @Override
   public SectionHelper<AmasExerciseImpl> getAMASSectionHelper() {
     return fileExerciseDAO.getSectionHelper();
   }
@@ -663,29 +684,11 @@ public class DatabaseImpl implements Database {
           if (serverProps.useH2()) {
             userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
           }
-//          else {
-//            configureProjects();
-//          }
         }
         userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);//, userPermissionDAO);
       }
     }
   }
-
-  /**
-   * Why a separate, later step???
-   *
-   * @see #makeDAO
-   */
-/*
-  private void configureProjects() {
-    // TODOx : this seems like a bad idea --
-//    Map<Integer, ExercisePhoneInfo> exerciseToPhone = new ExerciseToPhone().getExerciseToPhone(refresultDAO);
-//    logger.info("configureProjects - ex to phone size " + exerciseToPhone.size());
-//    userExerciseDAO.useExToPhones(exerciseToPhone);
-    projectManagement.configureProjects();
-  }
-*/
 
   /**
    * For when a new project is added or changes state.
@@ -762,6 +765,7 @@ public class DatabaseImpl implements Database {
     return numExercises;
   }
 
+  @Override
   public void reloadExercises(int projectid) {
     ExerciseDAO<CommonExercise> exerciseDAO = getExerciseDAO(projectid);
     if (exerciseDAO != null) {
@@ -800,6 +804,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.ListServiceImpl#editItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
+  @Override
   public CommonExercise editItem(CommonExercise userExercise, boolean keepAudio) {
     int id = userExercise.getID();
     logger.debug("editItem exercise #" + id +
@@ -874,6 +879,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.QCServiceImpl#markAudioDefect
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
    */
+  @Override
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
       logger.error("markAudioDefect huh? couldn't mark error on " + audioAttribute);
@@ -951,6 +957,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
+  @Override
   public AVPScoreReport getUserHistoryForList(int userid,
                                               Collection<Integer> ids,
                                               int latestResultID,
@@ -970,6 +977,7 @@ public class DatabaseImpl implements Database {
   /**
    * @see LangTestDatabaseImpl#init()
    */
+  @Override
   public void preloadContextPractice() {
     makeContextPractice(getServerProps().getDialogFile(), installPath);
   }
@@ -978,6 +986,7 @@ public class DatabaseImpl implements Database {
    * @return
    * @see LangTestDatabaseImpl#getContextPractice()
    */
+  @Override
   public ContextPractice getContextPractice() {
     if (this.contextPractice == null) {
       makeContextPractice(getServerProps().getDialogFile(), installPath);
@@ -1028,6 +1037,7 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.ScoreServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
+  @Override
   public boolean logEvent(String id, String widgetType, String exid, String context, int userid, String device) {
     if (userid == -1) {
       if (widgetType.equals(UserPassLogin.USER_NAME_BOX)) {
@@ -1059,25 +1069,10 @@ public class DatabaseImpl implements Database {
     getLogAndNotify().logAndNotifyServerException(e);
   }
 
-  public IEventDAO getEventDAO() {
-    return eventDAO;
-  }
-
-  public IAudioDAO getAudioDAO() {
-    return audioDAO;
-  }
-
-  public IWordDAO getWordDAO() {
-    return wordDAO;
-  }
-
-  public IPhoneDAO<Phone> getPhoneDAO() {
-    return phoneDAO;
-  }
 
   /**
    * the User info lives in domino...
-   *
+   * <p>
    * This is a little more sophisticated in that it will recreate individual tables that might get dropped.
    *
    * @see #initializeDAOs
@@ -1133,6 +1128,7 @@ public class DatabaseImpl implements Database {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getResults
    */
+  @Override
   public Collection<MonitorResult> getMonitorResults(int projid) {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults(projid);
 
@@ -1159,6 +1155,7 @@ public class DatabaseImpl implements Database {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getResults
    * @see #getMonitorResults(int)
    */
+  @Override
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid) {
     Map<Integer, CommonExercise> idToExerciseMap = getIdToExerciseMap(projid);
     logger.debug("Got size = " + idToExerciseMap.size() + " id->ex map");
@@ -1266,22 +1263,22 @@ public class DatabaseImpl implements Database {
       logger.warn("populateIDToRefAudio huh? no ref audio on " + all.size() + " exercises???");
     }
   }*/
-  public IAnswerDAO getAnswerDAO() {
-    return answerDAO;
-  }
+
 
   /**
    * @param userID
    * @param projid
-   *@param exerciseID
+   * @param exerciseID
    * @param audioFile
    * @param durationInMillis
    * @param correct
    * @param isMale
    * @param speed
-   * @param model        @return
+   * @param model
+   * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    */
+  @Override
   public long addRefAnswer(int userID,
                            int projid,
                            int exerciseID,
@@ -1319,9 +1316,6 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  public IUserListManager getUserListManager() {
-    return userListManager;
-  }
 
   /**
    * @param exercise
@@ -1329,6 +1323,7 @@ public class DatabaseImpl implements Database {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
    */
+  @Override
   public CommonExercise duplicateExercise(CommonExercise exercise) {
     logger.debug("to duplicate  " + exercise);
 
@@ -1372,6 +1367,7 @@ public class DatabaseImpl implements Database {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#deleteItem
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
+  @Override
   @Deprecated
   public boolean deleteItem(int exid, int projectid) {
     AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
@@ -1403,12 +1399,16 @@ public class DatabaseImpl implements Database {
   public CommonExercise getCustomOrPredefExercise(int projid, int id) {
     CommonExercise toRet = getExercise(projid, id);
     if (toRet == null) {
-     // if (warns++ < 50)
-        logger.info("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
+      // if (warns++ < 50)
+      logger.info("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }
 
     return toRet;
+  }
+
+  public CommonExercise getExerciseByID(int id) {
+    return getProjectManagement().getExerciseByID(id);
   }
 
 /*
@@ -1491,10 +1491,12 @@ public class DatabaseImpl implements Database {
             project.isEnglish());
   }
 
+  @Override
   public String getLanguage(CommonExercise ex) {
     return getLanguage(ex.getProjectID());
   }
 
+  @Override
   public String getLanguage(int projectid) {
     Project project = getProject(projectid);
     return getLanguage(project);
@@ -1617,10 +1619,12 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  @Override
   public UserList<CommonShell> getUserListByID(long listid, int projectid) {
     return getUserListManager().getUserListByID(listid, getSectionHelper(projectid).getTypeOrder(), getIDs(projectid));
   }
 
+  @Override
   public UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid) {
     return getUserListManager().getUserListByIDExercises(listid,
         projectid,
@@ -1628,6 +1632,7 @@ public class DatabaseImpl implements Database {
         listid < 0 ? getIDs(projectid) : Collections.emptySet());
   }
 
+  @Override
   public Set<Integer> getIDs(int projectid) {
     ExerciseDAO<CommonExercise> exerciseDAO = getExerciseDAO(projectid);
     return exerciseDAO == null ? Collections.emptySet() : exerciseDAO.getIDs();
@@ -1652,6 +1657,7 @@ public class DatabaseImpl implements Database {
    * @param pathHelper
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
+  @Override
   public void doReport(ServerProperties serverProps, String site, MailSupport mailSupport, PathHelper pathHelper) {
     getReport("").doReport(serverProps, site, mailSupport, pathHelper);
   }
@@ -1711,6 +1717,7 @@ public class DatabaseImpl implements Database {
    * @param isCorrect
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
    */
+  @Override
   public void rememberScore(int resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(), isCorrect);
     recordWordAndPhone.recordWordAndPhoneInfo(resultID, asrScoreForAudio);
@@ -1722,6 +1729,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
    */
 
+  @Override
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     recordWordAndPhone.recordWordAndPhoneInfo(answer, answerID);
   }
@@ -1734,6 +1742,7 @@ public class DatabaseImpl implements Database {
    * @return
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
+  @Override
   public Map<String, Float> getMaleFemaleProgress(int projectid) {
     // IUserDAO userDAO = getUserDAO();
     logger.info("getMaleFemaleProgress getting exercises -- " + projectid);
@@ -1782,6 +1791,7 @@ public class DatabaseImpl implements Database {
     return logAndNotify;
   }
 
+  @Override
   public IUserExerciseDAO getUserExerciseDAO() {
     return userExerciseDAO;
   }
@@ -1798,14 +1808,43 @@ public class DatabaseImpl implements Database {
     return userListManager.getSecondStateDAO();
   }
 
+  @Override
   public IProjectDAO getProjectDAO() {
     return projectDAO;
   }
 
+  @Override
   public IUserProjectDAO getUserProjectDAO() {
     return userProjectDAO;
   }
 
+  @Override
+  public IAnswerDAO getAnswerDAO() {   return answerDAO;  }
+
+  @Override
+  public IEventDAO getEventDAO() { return eventDAO;  }
+
+  public IAudioDAO getAudioDAO() {
+    return audioDAO;
+  }
+
+  @Override
+  public IWordDAO getWordDAO() {
+    return wordDAO;
+  }
+
+  @Override
+  public IPhoneDAO<Phone> getPhoneDAO() {
+    return phoneDAO;
+  }
+
+
+  @Override
+  public IUserListManager getUserListManager() {
+    return userListManager;
+  }
+
+  @Override
   public mitll.langtest.server.database.user.UserManagement getUserManagement() {
     return userManagement;
   }
@@ -1813,21 +1852,27 @@ public class DatabaseImpl implements Database {
   /**
    * @return
    */
+  @Override
   public IUserSessionDAO getUserSessionDAO() {
     return userSessionDAO;
   }
 
+  @Override
   public IUserSecurityManager getUserSecurityManager() {
     return userSecurityManager;
   }
 
+  @Override
   public void setUserSecurityManager(IUserSecurityManager userSecurityManager) {
     this.userSecurityManager = userSecurityManager;
   }
 
+  @Override
   public IProjectManagement getProjectManagement() {
     return projectManagement;
   }
+
+  public Database getDatabase() { return this; }
 
   public String toString() {
     return "Database : " + this.getClass().toString();

@@ -61,6 +61,7 @@ public interface IProjectManagement {
   void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO);
 
   CommonExercise getExercise(int projectid, int id);
+  CommonExercise getExerciseByID(int id);
 
   List<CommonExercise> getExercises(int projectid);
 

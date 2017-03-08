@@ -6,8 +6,6 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.JsonSupport;
-import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.word.WordDAO;

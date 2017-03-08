@@ -42,6 +42,7 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.Result;
@@ -85,7 +86,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String SLOW = "slow";
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
-  private static final boolean USE_HYDEC_FALLBACK = false;
+//  private static final boolean USE_HYDEC_FALLBACK = false;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -98,7 +99,7 @@ public class AudioFileHelper implements AlignDecode {
 
   private AutoCRT autoCRT;
 
-  private DatabaseImpl db;
+  private DatabaseServices db;
   private LogAndNotify logAndNotify;
   private boolean checkedLTS = false;
 
@@ -112,9 +113,6 @@ public class AudioFileHelper implements AlignDecode {
   private boolean isNoModel;
   private String language;
 
-//  public AudioFileHelper() {
-//  }
-
   /**
    * @param pathHelper
    * @param serverProperties
@@ -126,7 +124,7 @@ public class AudioFileHelper implements AlignDecode {
    */
   public AudioFileHelper(PathHelper pathHelper,
                          ServerProperties serverProperties,
-                         DatabaseImpl db,
+                         DatabaseServices db,
                          LogAndNotify langTestDatabase,
                          Project project) {
     this.pathHelper = pathHelper;
@@ -149,7 +147,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#getCollator
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getCollator
    */
   public Collator getCollator() {
     return asrScoring.getCollator();
@@ -369,7 +367,7 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @paramx doFlashcard     determines whether we do decoding or alignment
    * @paramx allowAlternates
-   * @see mitll.langtest.server.ScoreServlet#getAnswer
+   * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
   public AudioAnswer getAnswer(
       CommonShell exercise,

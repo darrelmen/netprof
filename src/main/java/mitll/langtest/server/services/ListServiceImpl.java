@@ -226,7 +226,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     if (DEBUG) logger.info("got " + lines.length + " lines");
 
     UserList<CommonShell> userListByID =
-        db.getUserListManager().getUserListByID(userListID, Collections.emptyList(), Collections.emptySet());
+        getUserListManager().getUserListByID(userListID, Collections.emptyList(), Collections.emptySet());
     Set<String> currentKnownFL = getCurrentOnList(userListByID);
 
     Set<CommonExercise> knownAlready = new HashSet<>();
@@ -384,10 +384,5 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
   public void updateName(long id, String name) {
     getUserListDAO().updateName(id, name);
-
-  }
-
-  IUserListManager getUserListManager() {
-    return db.getUserListManager();
   }
 }

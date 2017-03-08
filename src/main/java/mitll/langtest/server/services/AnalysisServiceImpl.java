@@ -97,7 +97,8 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     if (projectID == -1) return new UserPerformance();
 
     SlickAnalysis slickAnalysis =
-        new SlickAnalysis(db,
+        new SlickAnalysis(
+            db.getDatabase(),
             db.getPhoneDAO(),
             (SlickResultDAO) db.getResultDAO(),
             db.getProject(projectID).getLanguage(),

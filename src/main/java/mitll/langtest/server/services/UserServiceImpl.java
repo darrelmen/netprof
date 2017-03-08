@@ -228,14 +228,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see mitll.langtest.client.user.UserTable#showDialog
    */
   public List<User> getUsers() {
-    return db.getUsers();
+    return db.getUserManagement().getUsers();
   }
-
-/*
-  public Map<User.Kind, Integer> getCounts() {
-    return db.getUserDAO().getCounts();
-  }
-*/
 
   /**
    * @return

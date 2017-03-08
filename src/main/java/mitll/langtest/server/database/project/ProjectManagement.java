@@ -412,24 +412,6 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * @see DatabaseImpl#makeExerciseDAO(String, boolean)
-   * @see IProjectManagement#populateProjects()
-   */
-  //@Override
-/*
-  public void setExerciseDAOs() {
-    Collection<Project> projects = getProjects();
-    logger.info("setExerciseDAOs on " + projects.size());
-    for (Project project : projects) {
-      // if (project.getProject().id() == 3)
-      logger.info("makeExerciseDAO project     " + project);
-      setExerciseDAO(project);
-      //    logger.info("makeExerciseDAO project now " + project);
-    }
-  }
-*/
-
-  /**
    * @param project
    * @see #rememberProject(PathHelper, ServerProperties, LogAndNotify, SlickProject, DatabaseImpl)
    */
@@ -455,9 +437,8 @@ public class ProjectManagement implements IProjectManagement {
    * @see DatabaseImpl#getExercise
    */
   @Override
-  public CommonExercise getExercise(int projectid, int id) {
-    return getProjectOrFirst(projectid).getExercise(id);
-  }
+  public CommonExercise getExercise(int projectid, int id) { return getProjectOrFirst(projectid).getExercise(id);  }
+  public CommonExercise getExerciseByID(int id) { return getFirstProject().getExercise(id);  }
 
   /**
    * exercises are in the context of a project

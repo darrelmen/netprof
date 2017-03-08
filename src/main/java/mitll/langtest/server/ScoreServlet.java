@@ -890,6 +890,13 @@ public class ScoreServlet extends DatabaseServlet {
     return projid;
   }
 
+  /**
+   * @see #getJsonForAudio
+   * @param request
+   * @param realExID
+   * @param projid
+   * @return
+   */
   private int getExerciseIDFromText(HttpServletRequest request, int realExID, int projid) {
     String exerciseText = request.getHeader(EXERCISE_TEXT);
     if (exerciseText != null && projid > 0) {

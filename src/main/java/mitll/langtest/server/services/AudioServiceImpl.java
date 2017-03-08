@@ -383,11 +383,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-  IUserListManager getUserListManager() {
-    return db.getUserListManager();
-  }
-
-/*
+  /*
   private AudioFileHelper getAudioFileHelper() {
     if (serverProps.isAMAS()) {
       return audioFileHelper;

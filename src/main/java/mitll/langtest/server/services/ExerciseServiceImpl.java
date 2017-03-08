@@ -403,10 +403,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 
-  private IUserListManager getUserListManager() {
-    return db.getUserListManager();
-  }
-
   /**
    * 0) Add annotations to fields on exercise
    * 1) Attach audio recordings to exercise.

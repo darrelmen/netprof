@@ -170,8 +170,4 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
     }
     return b;
   }
-
-  IUserListManager getUserListManager() {
-    return db.getUserListManager();
-  }
 }
