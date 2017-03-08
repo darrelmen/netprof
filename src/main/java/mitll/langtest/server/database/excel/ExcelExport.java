@@ -33,7 +33,7 @@
 package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
@@ -204,7 +204,7 @@ public class ExcelExport {
                                 Collection<AudioAttribute> defaultUserAudio) {
     if (maleUsers.isEmpty() && defaultUserAudio.isEmpty()) {
       row.createCell(j++).setCellValue("");
-      row.createCell(j++).setCellValue("");//sCorrect() ? "":annotation.getComment());
+      row.createCell(j++).setCellValue("");//sCorrect() ? "":annotation.getValue());
     } else {
       Collection<AudioAttribute> audioAttributes = maleUsers.isEmpty() ? defaultUserAudio : malesMap.get(maleUsers.iterator().next());
 //      logger.debug("for ex " + exercise.getID() + " first male " + maleUsers.get(0) +  " = " + audioAttributes);

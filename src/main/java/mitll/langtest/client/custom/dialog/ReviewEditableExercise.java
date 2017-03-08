@@ -60,7 +60,7 @@ import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.custom.UserList;

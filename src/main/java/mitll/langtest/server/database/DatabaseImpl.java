@@ -1083,6 +1083,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         getProjectDAO(),
         userExerciseDAO,
         ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),
+        ((SlickUserExerciseDAO) userExerciseDAO).getExerciseAttribute(),
         getEventDAO(),
         getResultDAO(),
         getAudioDAO(),

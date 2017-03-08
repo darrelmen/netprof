@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -43,51 +43,37 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Time: 7:47 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseAnnotation implements IsSerializable {
-  private String status;
-  private String comment;
+public class ExerciseAttribute implements IsSerializable {
+  private String property;
+  private String value;
+  private int id;
 
-  public enum TYPICAL {
-    CORRECT, INCORRECT;
-
-    public String toString() {
-      return name().toLowerCase();
-    }
+  public ExerciseAttribute() {
   }
 
-  public ExerciseAnnotation() {
+  public ExerciseAttribute(int id, String status, String value) {
+    this.id = id;
+    this.property = status;
+    this.value = value;
   }
 
-  public ExerciseAnnotation(String status, String comment) {
-    this.status = status;
-    this.comment = comment;
+  public String getProperty() {
+    return property;
   }
 
-  public boolean isCorrect() {
-    return getStatus().equals("correct");
+  public String getValue() {
+    return value;
   }
 
-  public boolean isDefect() {
-    return !isCorrect();
+  public void setValue(String value) {
+    this.value = value;
   }
 
-  public String getStatus() {
-    return status;
-  }
-
-  public String getComment() {
-    return comment;
-  }
-
-  public void setComment(String comment) {
-    this.comment = comment;
+  public void setProperty(String property) {
+    this.property = property;
   }
 
   public String toString() {
-    return "[" + getStatus() + " : '" + getComment() + "']";
-  }
-
-  public void setStatus(String status) {
-    this.status = status;
+    return "[" + getProperty() + " : '" + getValue() + "']";
   }
 }

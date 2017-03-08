@@ -32,28 +32,62 @@
 
 package mitll.langtest.shared.exercise;
 
-import java.util.Collection;
-import java.util.Map;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
+ * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 1/5/16.
+ * @since 12/12/13
+ * Time: 7:47 PM
+ * To change this template use File | Settings | File Templates.
  */
-public interface AnnotationExercise {
-  /**
-   * @see mitll.langtest.server.database.custom.UserListManager#duplicate(CommonExercise)
-   * @return
-   */
-  Map<String, ExerciseAnnotation> getFieldToAnnotation();
+public class ExerciseAnnotation implements IsSerializable {
+  private String status;
+  private String comment;
 
-  /**
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#setFields(CommonShell)
-   * @param field
-   * @return
-   */
-  ExerciseAnnotation getAnnotation(String field);
+  public enum TYPICAL {
+    CORRECT, INCORRECT;
 
-  Collection<String> getFields();
+    public String toString() {
+      return name().toLowerCase();
+    }
+  }
+
+  public ExerciseAnnotation() {
+  }
+
+  public ExerciseAnnotation(String status, String comment) {
+    this.status = status;
+    this.comment = comment;
+  }
+
+  public boolean isCorrect() {
+    return getStatus().equals("correct");
+  }
+
+  public boolean isDefect() {
+    return !isCorrect();
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public String getComment() {
+    return comment;
+  }
+
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
+
+  public String toString() {
+    return "[" + getStatus() + " : '" + getComment() + "']";
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
 }

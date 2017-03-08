@@ -50,8 +50,8 @@ import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.ExerciseAnnotation.TYPICAL;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.ExerciseAnnotation.TYPICAL;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 
@@ -272,7 +272,7 @@ public class CommentBox extends PopupContainerFactory {
    * @param commentEntryText
    * @param clearButton
    * @return
-   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, ExerciseAnnotation)
    */
   private DecoratedPopupPanel makeCommentPopup(String field,
                                                Button commentButton,
@@ -379,7 +379,7 @@ public class CommentBox extends PopupContainerFactory {
    * @param comment
    * @param commentEntry
    * @return
-   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, ExerciseAnnotation)
    */
   private void configureCommentButton(final Button commentButton,
                                       final boolean alreadyMarkedCorrect,
