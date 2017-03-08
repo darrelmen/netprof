@@ -41,7 +41,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.text.CharacterIterator;
-import java.text.Normalizer;
 import java.text.StringCharacterIterator;
 import java.util.Collection;
 import java.util.List;
@@ -51,9 +50,9 @@ import java.util.List;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @see Project#fullTrie
  * @since 11/13/13
  * Time: 4:42 PM
- * @see Project#fullTrie
  */
 public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private static final Logger logger = LogManager.getLogger(ExerciseTrie.class);
@@ -63,6 +62,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private static final String ENGLISH = "English";
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
+  private SmallVocabDecoder smallVocabDecoder;
 
   /**
    * Tokens are normalized to lower case.
@@ -81,6 +81,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
                       String language,
                       SmallVocabDecoder smallVocabDecoder) {
     boolean includeForeign = !language.equals(ENGLISH);
+    this.smallVocabDecoder = smallVocabDecoder;
     startMakingNodes();
 
     long then = System.currentTimeMillis();
@@ -91,7 +92,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
     //logger.debug("lang " + language + " looking at " + exercisesForState.size());
     for (T exercise : exercisesForState) {
-      addEntryForExercise(smallVocabDecoder, includeForeign, isMandarin, hasClickableCharacters, exercise);
+      addEntryForExercise(includeForeign, isMandarin, hasClickableCharacters, exercise);
     }
     endMakingNodes();
     long now = System.currentTimeMillis();
@@ -101,16 +102,19 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
-  private void addEntryForExercise(SmallVocabDecoder smallVocabDecoder,
-                                   boolean includeForeign,
-                                   boolean isMandarin,
-                                   boolean hasClickableCharacters,
-                                   T exercise) {
-    addEnglish(smallVocabDecoder, exercise);
+  private void addEntryForExercise(
+      boolean includeForeign,
+      boolean isMandarin,
+      boolean hasClickableCharacters,
+      T exercise) {
+    addEnglish(exercise);
     if (includeForeign) {
-      addForeign(smallVocabDecoder, isMandarin, hasClickableCharacters, exercise);
+      addForeign(isMandarin, hasClickableCharacters, exercise);
     } else {
-      for (String t : smallVocabDecoder.getTokens(exercise.getMeaning())) {
+      String meaning = exercise.getMeaning();
+      String trimmed = getTrimmed(meaning);
+
+      for (String t : smallVocabDecoder.getTokens(trimmed)) {
         addEntry(exercise, t);
       }
     }
@@ -124,17 +128,17 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    * @param hasClickableCharacters
    * @param exercise
    */
-  private void addForeign(SmallVocabDecoder smallVocabDecoder, boolean isMandarin, boolean hasClickableCharacters,
+  private void addForeign(boolean isMandarin, boolean hasClickableCharacters,
                           T exercise) {
     String fl = exercise.getForeignLanguage();
     if (fl != null && !fl.isEmpty()) {
-      addEntryToTrie(new ExerciseWrapper<>(exercise, false));
+      fl = getTrimmed(fl);
+      addEntryToTrie(new ExerciseWrapper<>(fl, exercise));
 
-      Collection<String> tokens = isMandarin ?
-          getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(fl);
+      Collection<String> tokens = isMandarin ? getMandarinTokens(exercise) : smallVocabDecoder.getTokens(fl);
       for (String token : tokens) {
         addEntry(exercise, token);
-       // String noAccents = removeDiacritics(token);
+        // String noAccents = removeDiacritics(token);
         String noAccents = StringUtils.stripAccents(token);
 
         if (!token.equals(noAccents) && !noAccents.isEmpty()) {
@@ -160,17 +164,24 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
-  private void addEnglish(SmallVocabDecoder smallVocabDecoder, T exercise) {
+  private void addEnglish(T exercise) {
     String english = exercise.getEnglish();
+
     if (english != null && !english.isEmpty()) {
-      addEntryToTrie(new ExerciseWrapper<>(exercise, true));
-      Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
+      String trimmed = getTrimmed(english);
+
+      addEntryToTrie(new ExerciseWrapper<>(trimmed, exercise));
+      Collection<String> tokens = smallVocabDecoder.getTokens(trimmed);
       if (tokens.size() > 1) {
         for (String token : tokens) {
           addEntry(exercise, token);
         }
       }
     }
+  }
+
+  private String getTrimmed(String english) {
+    return smallVocabDecoder.getTrimmed(english.toLowerCase());
   }
 
   private void addClickableCharacters(T exercise, String fl) {
@@ -185,22 +196,24 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private boolean addEntry(T exercise, String token) {
+    //logger.info("add token '" + token + "' for  " + exercise.getID());
     return addEntryToTrie(new ExerciseWrapper<>(token.toLowerCase(), exercise));
   }
 
-  private Collection<String> getMandarinTokens(SmallVocabDecoder smallVocabDecoder, T e) {
+  private Collection<String> getMandarinTokens(T e) {
     return smallVocabDecoder.getMandarinTokens(e.getForeignLanguage());
   }
 
   /**
    * @param prefix
-   * @param smallVocabDecoder
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseListWrapperForPrefix
    */
-  public List<T> getExercises(String prefix, SmallVocabDecoder smallVocabDecoder) {
-    return getMatches(smallVocabDecoder.getTrimmed(prefix.toLowerCase()));
+  public List<T> getExercises(String prefix) {
+    String trimmed = getTrimmed(prefix);
+  //  logger.info("trim '" + prefix.toLowerCase() + "' = '" + trimmed + "'");
+    return getMatches(trimmed);
   }
 
   private static class ExerciseWrapper<T extends CommonShell> implements TextEntityValue<T> {

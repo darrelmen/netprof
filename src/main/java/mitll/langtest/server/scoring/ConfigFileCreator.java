@@ -32,12 +32,10 @@
 
 package mitll.langtest.server.scoring;
 
-import corpus.LTS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -50,48 +48,49 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ConfigFileCreator {
-  private static Logger logger = LogManager.getLogger(ConfigFileCreator.class);
+  private static final Logger logger = LogManager.getLogger(ConfigFileCreator.class);
 
-  private final String platform = Utils.package$.MODULE$.platform();
+  //private final String platform = Utils.package$.MODULE$.platform();
   private final Map<String, String> properties;
-  private final LTS letterToSoundClass;
   private final String scoringDir;
   private final String modelsDir;
 
   private static final String DICT_WO_SP = "dict-wo-sp";
-  private static final String TEMP_DIR = "TEMP_DIR";
-  private static final String MODELS_DIR_VARIABLE = "MODELS_DIR";
-  private static final String N_OUTPUT = "N_OUTPUT";
-  private static final String LEVANTINE_N_OUTPUT = "" + 38;
+//  private static final String TEMP_DIR = "TEMP_DIR";
+//  private static final String MODELS_DIR_VARIABLE = "MODELS_DIR";
+//  private static final String N_OUTPUT = "N_OUTPUT";
+//  private static final String LEVANTINE_N_OUTPUT = "" + 38;
+//
+//  private static final String N_HIDDEN = "N_HIDDEN";
+//  private static final String N_HIDDEN_DEFAULT = "" + 2500;
+//  private static final String OPT_SIL = "OPT_SIL";
+//  private static final String OPT_SIL_DEFAULT = "true";   // rsi-sctm-hlda
 
-  private static final String N_HIDDEN = "N_HIDDEN";
-  private static final String N_HIDDEN_DEFAULT = "" + 2500;
-  private static final String OPT_SIL = "OPT_SIL";
-  private static final String OPT_SIL_DEFAULT = "true";   // rsi-sctm-hlda
   private static final String HLDA_DIR = "HLDA_DIR";
-  private static final String LM_TO_USE = "LM_TO_USE";
-  private static final String LTS_CLASS = "LTS_CLASS";
+
+  //  private static final String LM_TO_USE = "LM_TO_USE";
+//  private static final String LTS_CLASS = "LTS_CLASS";
 
   private static final String HLDA_DIR_DEFAULT = "rsi-sctm-hlda";
-  private static final String SMALL_LM_SLF = "smallLM.slf";
 
-  private static final String CFG_TEMPLATE_PROP = "configTemplate";
-  private static final String CFG_TEMPLATE_DEFAULT = "generic-nn-model.cfg.template";
-
-  private static final String DECODE_CFG_TEMPLATE_PROP = "decodeConfigTemplate";
-  private static final String DECODE_CFG_TEMPLATE_DEFAULT = "arabic-nn-model-decode.cfg.template";
+  //  private static final String SMALL_LM_SLF = "smallLM.slf";
+//
+//  private static final String CFG_TEMPLATE_PROP = "configTemplate";
+//  private static final String CFG_TEMPLATE_DEFAULT = "generic-nn-model.cfg.template";
+//
+//  private static final String DECODE_CFG_TEMPLATE_PROP = "decodeConfigTemplate";
+//  private static final String DECODE_CFG_TEMPLATE_DEFAULT = "arabic-nn-model-decode.cfg.template";
 
   // private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
 
   /**
    * @param properties
-   * @param letterToSoundClass
    * @param scoringDir
    * @see Scoring#Scoring
    */
-  public ConfigFileCreator(Map<String, String> properties, LTS letterToSoundClass, String scoringDir, String modelsDir) {
+  public ConfigFileCreator(Map<String, String> properties, String scoringDir, String modelsDir) {
     this.properties = properties;
-    this.letterToSoundClass = letterToSoundClass;
+   // LTS letterToSoundClass1 = letterToSoundClass;
     this.scoringDir = scoringDir;
     this.modelsDir = modelsDir;
   }
@@ -106,7 +105,7 @@ public class ConfigFileCreator {
    * @return path to config file
    * @see ASRScoring#computeRepeatExerciseScores
    */
-  public String getHydecConfigFile(String tmpDir, String modelsDir, boolean decode) {
+  /*public String getHydecConfigFile(String tmpDir, String modelsDir, boolean decode) {
     boolean onWindows = platform.startsWith("win");
     Map<String, String> kv = new HashMap<String, String>();
 
@@ -155,11 +154,11 @@ public class ConfigFileCreator {
     //logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
     new FileReplace().doTemplateReplace(pathToConfigTemplate, configFile, kv);
     return configFile;
-  }
+  }*/
 
   /**
    * @return null if no model dir defined
-   * @see mitll.langtest.server.scoring.ASRScoring#makeDict()
+   * @see mitll.langtest.server.audio.AudioFileHelper#makeDict
    */
   public String getDictFile() {
     String modelsDir = getModelsDir();
@@ -185,7 +184,7 @@ public class ConfigFileCreator {
   /**
    * @return null if no model dir defined
    */
-  String getModelsDir() {
+  private String getModelsDir() {
 //    String modelsDirProp = getProp(MODELS_DIR_VARIABLE);
     return modelsDir == null ? null : getModelsDir(modelsDir);
 //    return modelsDir;
@@ -193,7 +192,9 @@ public class ConfigFileCreator {
 
   private String getModelsDir(String modelsDirProp) {
     String modelsDir = scoringDir + File.separator + modelsDirProp;
-    if (platform.startsWith("win")) {
+    String property = System.getProperty("os.name").toLowerCase();
+    boolean isWin = property.contains("win");
+    if (isWin) {
       modelsDir = doWindowsSlashReplace(modelsDir);
     }
     return modelsDir;
@@ -207,7 +208,9 @@ public class ConfigFileCreator {
     return properties.containsKey(var) ? properties.get(var) : defaultValue;
   }
 
+/*
   private String getProp(String var) {
     return properties.get(var);
   }
+*/
 }

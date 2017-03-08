@@ -143,9 +143,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
     scheduleWaitTimer();
-/*    logger.info("PagingExerciseList.loadExercises : looking for " +
+    logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
-        */
+
     ExerciseListRequest request = getRequest(prefix);
     service.getExerciseIds(
         request,
@@ -153,7 +153,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   ExerciseListRequest getRequest(String prefix) {
-
     return new ExerciseListRequest(incrRequest(),
         controller.getUserState().getUser())
         .setPrefix(prefix)
@@ -305,7 +304,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   public void searchBoxEntry(String text) {
     if (listOptions.isShowTypeAhead()) {
-      //   logger.info("searchBoxEntry type ahead '" + text + "'");
+      logger.info("searchBoxEntry type ahead '" + text + "'");
       gotTypeAheadEvent(text, true);
     }
   }
@@ -313,7 +312,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private Stack<Long> pendingRequests = new Stack<>();
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
-    //  logger.info("got type ahead '" + text + "' at " + new Date(keypressTimestamp));
+      logger.info("got type ahead '" + text + " set text " + setTypeAheadText);// + "' at " + new Date(keypressTimestamp));
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
@@ -397,7 +396,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   String getHistoryTokenFromUIState(String search, int id) {
-    return "search=" + search + ";item=" + id;
+    return "search=" + search + SelectionState.SECTION_SEPARATOR +
+        "item=" + id;
   }
 
   public abstract void gotClickOnItem(final T e);

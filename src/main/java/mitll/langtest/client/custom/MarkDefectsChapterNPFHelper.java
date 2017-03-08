@@ -148,8 +148,8 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
            * @return
            */
           protected String getHistoryTokenFromUIState(String search, int id) {
-            String s = super.getHistoryTokenFromUIState(search, id) + ";" +
-                SelectionState.ONLY_DEFAULT + "=" + filterOnly.getValue() + ";" +
+            String s = super.getHistoryTokenFromUIState(search, id) + SelectionState.SECTION_SEPARATOR +
+                SelectionState.ONLY_DEFAULT + "=" + filterOnly.getValue() +  SelectionState.SECTION_SEPARATOR +
                 SelectionState.ONLY_UNINSPECTED + "=" + uninspectedOnly.getValue();
             return s;
           }

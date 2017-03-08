@@ -73,9 +73,9 @@ public abstract class Scoring {
 
   private static final float SCORE_SCALAR = 1.0f;
   private static final String SCORING = "scoring";
-  public static final String MANDARIN = "mandarin";
-  public static final String PHONES_LAB = ".phones.lab";
-  public static final String WORDS_LAB = ".words.lab";
+  private static final String MANDARIN = "mandarin";
+  private static final String PHONES_LAB = ".phones.lab";
+  private static final String WORDS_LAB = ".words.lab";
 
   private static final String START_SIL = "<s>";
   private static final String END_SIL = "</s>";
@@ -83,8 +83,7 @@ public abstract class Scoring {
   private static final String CAP_SIL = "SIL";
   private final Collection<String> toSkip = new HashSet<>(Arrays.asList(START_SIL, END_SIL, SIL, CAP_SIL));
 
-  final String scoringDir;
-  final String deployPath;
+  private final String deployPath;
   final ServerProperties props;
   final LogAndNotify langTestDatabase;
 
@@ -106,20 +105,20 @@ public abstract class Scoring {
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
   final HTKDictionary htkDictionary;
-  final ConfigFileCreator configFileCreator;
+  //private final ConfigFileCreator configFileCreator;
   final boolean isMandarin;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
-  double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
+  //private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
   private LTSFactory ltsFactory;
   final String languageProperty;
 
   /**
    * @param deployPath
-   * @see ASRScoring#ASRScoring
+   * @see ASRWebserviceScoring#ASRWebserviceScoring(String, ServerProperties, LogAndNotify, HTKDictionary, Project)
    */
   Scoring(String deployPath,
           ServerProperties props,
@@ -128,14 +127,14 @@ public abstract class Scoring {
     this.deployPath = deployPath;
 
     String persistentLocation = props.getAudioBaseDir();
-    this.scoringDir = getScoringDir(persistentLocation);
+    String scoringDir = getScoringDir(persistentLocation);
 
     this.props = props;
     this.langTestDatabase = langTestDatabase;
     this.htkDictionary = htkDictionary;
 
-    // logger.debug("Creating ASRScoring object");
-    lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
+    // logger.debug("Creating Scoring object");
+  //  lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 
     // Map<String, String> properties = props.getProperties();
     // languageProperty = properties.get("language");
@@ -153,7 +152,7 @@ public abstract class Scoring {
       ltsFactory = null;
       logger.error("\n" + this + " : Scoring for " + languageProperty + " got " + e);
     }
-    this.configFileCreator = new ConfigFileCreator(props.getProperties(), getLTS(), scoringDir, project.getModelsDir());
+//    this.configFileCreator = new ConfigFileCreator(props.getProperties(), getLTS(), scoringDir, project.getModelsDir());
 
     // readDictionary();
     makeDecoder();
@@ -174,7 +173,7 @@ public abstract class Scoring {
    * @param longPhrase
    * @return
    * @seex AutoCRT#getRefs
-   * @see ASRScoring#getScoreForAudio
+   * @see ASRWebserviceScoring#runHydra(String, String, String, Collection, String, boolean, int)
    */
   public static String getSegmented(String longPhrase) {
     Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
@@ -262,9 +261,9 @@ public abstract class Scoring {
    * @param useWebservice
    * @param usePhoneToDisplay
    * @return
-   * @see ASRScoring#getPretestScore
+   * @seex ASRScoring#getPretestScore
    */
-  EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
+ /* EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
                                     String prefix, String suffix, boolean decode, boolean useWebservice,
                                     boolean usePhoneToDisplay) {
@@ -314,7 +313,7 @@ public abstract class Scoring {
           usePhoneToDisplay || props.usePhoneToDisplay(),
           props.getPhoneToDisplay());
     }
-  }
+  }*/
 
   /**
    * TODO : actually use the json to
@@ -330,7 +329,7 @@ public abstract class Scoring {
    * @param useWebservice
    * @param object
    * @return
-   * @see ASRScoring#getPretestScore
+   * @see ASRWebserviceScoring#getPretestScore
    */
   EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
                                           String audioFileNoSuffix, boolean useScoreToColorBkg,
@@ -476,9 +475,9 @@ public abstract class Scoring {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.scoring.Scoring#validLTS(String)
+   * @see mitll.langtest.server.scoring.Scoring#validLTS
    */
-  Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
+  private Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
     return checkLTSHelper.checkLTS(foreignLanguagePhrase, transliteration);
   }
 

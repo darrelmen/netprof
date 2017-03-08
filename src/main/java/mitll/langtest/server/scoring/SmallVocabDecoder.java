@@ -179,7 +179,7 @@ public class SmallVocabDecoder {
    * @param sentence
    * @return
    * @see #getTokens(String)
-   * @see mitll.langtest.server.trie.ExerciseTrie#getExercises(String, SmallVocabDecoder)
+   * @see mitll.langtest.server.trie.ExerciseTrie#getExercises(String)
    * @see ASRScoring#getScoresFromHydec
    */
   public String getTrimmed(String sentence) {

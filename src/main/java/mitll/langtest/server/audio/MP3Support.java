@@ -54,7 +54,6 @@ class MP3Support {
 
   /**
    * @param pathHelper
-   * @param serverProperties
    * @see AudioFileHelper#AudioFileHelper
    */
   MP3Support(PathHelper pathHelper) {

@@ -237,7 +237,7 @@ public class JsonSupport {
    *
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
-   * @see DatabaseImpl#getJsonPhoneReport(long, int, Map)
+   * @see DatabaseImpl#getJsonPhoneReport
    */
   JSONObject getJsonPhoneReport(int userid, Map<String, Collection<String>> typeToValues, String language) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);

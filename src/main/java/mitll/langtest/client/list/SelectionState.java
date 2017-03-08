@@ -47,6 +47,8 @@ import java.util.logging.Logger;
 public class SelectionState {
   private final Logger logger = Logger.getLogger("SelectionState");
 
+  public static final String SECTION_SEPARATOR = "###";
+
   public static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
   public static final String ONLY_UNRECORDED = "onlyUnrecorded";
   public static final String ONLY_DEFAULT = "onlyDefault";
@@ -77,7 +79,7 @@ public class SelectionState {
   }
 
   private String unencodeToken2(String token) {
-    return token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ");
+    return token.replaceAll("%3D", "=").replaceAll("%3B", SECTION_SEPARATOR).replaceAll("%2", " ");
   }
 
   /**
@@ -99,7 +101,7 @@ public class SelectionState {
   private void parseToken(String token) {
     //token = token.contains("###") ? token.split("###")[0] : token;
     // token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
-    String[] parts = token.split(";");
+    String[] parts = token.split(SECTION_SEPARATOR);
 
     for (String part : parts) {
       if (DEBUG) logger.info("parseToken : part " + part + " : " + Arrays.asList(parts));
@@ -148,7 +150,7 @@ public class SelectionState {
   /*  if (token.contains("item")) {
       int item1 = token.indexOf("item=");
       String itemValue = token.substring(item1+"item=".length());
-      itemValue = itemValue.split(";")[0];
+      itemValue = itemValue.split(SEPARATOR)[0];
       if (debug) logger.info("parseToken : got item = '" + itemValue +"'");
       setItem(itemValue);
     }*/

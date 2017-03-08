@@ -224,7 +224,9 @@ public class Project implements PronunciationLookup {
     return audioFileHelper;
   }
 
-  public ExerciseTrie<CommonExercise> getFullTrie() {  return fullTrie;  }
+  public ExerciseTrie<CommonExercise> getFullTrie() {
+    return fullTrie;
+  }
 
   public void stopDecode() {
     refResultDecoder.setStopDecode(true);
@@ -259,12 +261,14 @@ public class Project implements PronunciationLookup {
 
   /**
    * Only accept an exact match
+   *
    * @param prefix
    * @return
    */
   public CommonExercise getExercise(String prefix) {
-    List<CommonExercise> exercises1 = fullTrie.getExercises(prefix, getSmallVocabDecoder());
-    Optional<CommonExercise> first = exercises1.stream().filter(p -> p.getForeignLanguage().equalsIgnoreCase(prefix)).findFirst();
+    List<CommonExercise> exercises1 = fullTrie.getExercises(prefix);
+    Optional<CommonExercise> first = exercises1.stream().filter(p -> p.getForeignLanguage().equalsIgnoreCase(prefix) ||
+        p.getEnglish().equalsIgnoreCase(prefix)).findFirst();
     return (first.isPresent()) ? first.get() : null;
   }
 

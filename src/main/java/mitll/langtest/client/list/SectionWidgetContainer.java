@@ -189,7 +189,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
         String section = getCurrentSelection(type);
         //   logger.info("getHistoryTokenFromUIState type " + type + " section " + section);
         if (!section.equals(getAnySelectionValue())) {
-          unitAndChapterSelection.append(type + "=" + section + ";");
+          unitAndChapterSelection.append(type + "=" + section + SelectionState.SECTION_SEPARATOR);
         }
       }
       //  logger.info("getHistoryTokenFromUIState unitAndChapterSelection " + unitAndChapterSelection);

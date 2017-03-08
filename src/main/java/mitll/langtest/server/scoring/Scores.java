@@ -37,7 +37,6 @@ package mitll.langtest.server.scoring;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pronz.speech.Audio;
 
 import java.util.*;
 
@@ -46,54 +45,54 @@ import java.util.*;
  * Depending on the function passed in to Audio.sv and Audio.multisv,
  * these scores might just be raw or might be transformed to be in the range 0.0-1.0.
  * Some values may be null if they have not been computed.
- *
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class Scores {
   private static final Logger logger = LogManager.getLogger(Scores.class);
 
-  public static final String PHONES = "phones";
-  public static final String WORDS  = "words";
-  public float hydraScore = 0f;
-  public final Map<String, Map<String, Float>> eventScores;
+  static final String PHONES = "phones";
+  static final String WORDS = "words";
+  float hydraScore = 0f;
+  final Map<String, Map<String, Float>> eventScores;
   private int processDur = 0;
 
   public Scores() {
     eventScores = Collections.emptyMap();
   }
 
-  public Scores(int processDur) {
+/*  private Scores(int processDur) {
     eventScores = Collections.emptyMap();
     this.processDur = processDur;
-  }
+  }*/
 
   /**
    * @param hydecScore
    * @param eventScores
    * @param processDur
    * @see PrecalcScores#getCachedScores
-   * @see ASRScoring#getScoresFromHydec(Audio, String, String)
    */
-  public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores, int processDur) {
-    this.hydraScore  = hydecScore;
+  Scores(float hydecScore, Map<String, Map<String, Float>> eventScores, int processDur) {
+    this.hydraScore = hydecScore;
     this.eventScores = eventScores;
-    this.processDur  = processDur;
+    this.processDur = processDur;
   }
 
-  public boolean isValid() { return hydraScore > -0.01; }
+  public boolean isValid() {
+    return hydraScore > -0.01;
+  }
 
   /**
    * TODO : do we need word scores?
    *
    * @param scoreSplit
-   * @see ASRWebserviceScoring#runHydra(String, String, Collection, String, boolean, int)
+   * @see ASRWebserviceScoring#runHydra
    */
-  public Scores(String[] scoreSplit) {
-    this.eventScores = new HashMap<String, Map<String, Float>>();
-    eventScores.put(PHONES, new HashMap<String, Float>());
+  Scores(String[] scoreSplit) {
+    this.eventScores = new HashMap<>();
+    eventScores.put(PHONES, new HashMap<>());
 
     try {
       float s = Float.parseFloat(scoreSplit[0]);
@@ -106,9 +105,9 @@ public class Scores {
     }
   }
 
-  public int getProcessDur() {
+/*  public int getProcessDur() {
     return processDur;
-  }
+  }*/
 
   public String toString() {
     return "Scores score " + hydraScore + " events " + eventScores + " took " + processDur + " millis";

@@ -172,7 +172,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
            */
           protected String getHistoryTokenFromUIState(String search, int id) {
             String s = super.getHistoryTokenFromUIState(search, id) +
-                ";" +
+                SelectionState.SECTION_SEPARATOR +
                 SelectionState.ONLY_UNRECORDED +
                 "=" + filterOnly.getValue();
             //           logger.info("RecorderNPFHelper : history token now  " + s);

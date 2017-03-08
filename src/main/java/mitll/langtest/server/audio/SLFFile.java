@@ -32,7 +32,7 @@
 
 package mitll.langtest.server.audio;
 
-import mitll.langtest.server.scoring.ASRScoring;
+import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 
 import java.io.*;
@@ -50,7 +50,6 @@ import java.util.List;
  */
 public class SLFFile {
   //private static final Logger logger = LogManager.getLogger(SLFFile.class);
-
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
   private static final String ENCODING = "UTF8";
 
@@ -131,7 +130,7 @@ public class SLFFile {
   }
 
   private String getSLFPath(String tmpDir) {
-    return tmpDir + File.separator + ASRScoring.SMALL_LM_SLF;
+    return tmpDir + File.separator + Scoring.SMALL_LM_SLF;
   }
 
   /**

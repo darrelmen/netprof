@@ -92,7 +92,7 @@ public class AudioFileHelper implements AlignDecode {
   private final MP3Support mp3Support;
   private final Project project;
   private ASR asrScoring;
-  private ASRScoring oldschoolScoring;
+  //private ASRScoring oldschoolScoring;
   private ASRWebserviceScoring webserviceScoring;
   private DecodeCorrectnessChecker decodeCorrectnessChecker;
 
@@ -1113,7 +1113,7 @@ public class AudioFileHelper implements AlignDecode {
     sentence = getSentenceToUse(sentence);
     sentence = sentence.trim();
 
-    ASR asrScoring = options.isUseOldSchool() || isOldSchoolService() ? oldschoolScoring : getASRScoring();
+    ASR asrScoring = /*options.isUseOldSchool() || isOldSchoolService() ? oldschoolScoring :*/ getASRScoring();
 //    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
     boolean isWebservice = isWebservice(asrScoring);
@@ -1126,7 +1126,7 @@ public class AudioFileHelper implements AlignDecode {
         precalcScores,
         options.isUsePhoneToDisplay());
 
-    if (!pretestScore.isRanNormally() && isWebservice && USE_HYDEC_FALLBACK) {
+/*    if (!pretestScore.isRanNormally() && isWebservice && USE_HYDEC_FALLBACK) {
       logger.warn("getASRScoreForAudio Using hydec as fallback for " + (options.isDoFlashcard() ? " decoding " : " aligning ") + testAudioFile + " against '" +
           sentence +
           "'");
@@ -1144,7 +1144,7 @@ public class AudioFileHelper implements AlignDecode {
           prefix,
           precalcScores,
           options.isUsePhoneToDisplay());
-    }
+    }*/
     pretestScore.setReqid(reqid);
 
     String json = new ScoreToJSON().asJson(pretestScore);
@@ -1154,10 +1154,10 @@ public class AudioFileHelper implements AlignDecode {
     return pretestScore;
   }
 
-  @Deprecated
+/*  @Deprecated
   private boolean isOldSchoolService() {
     return serverProps.getOldSchoolService();
-  }
+  }*/
 
   /**
    * Hack for percent sign in english - must be a better way.
@@ -1267,9 +1267,9 @@ public class AudioFileHelper implements AlignDecode {
       //    String installPath = serverProps.getAudioBaseDir();
       HTKDictionary htkDictionary = readDictionary(project, installPath);
       webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
-      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
+    //  oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
     }
-    asrScoring = oldschoolScoring;
+    asrScoring = webserviceScoring;
   }
 
   @Nullable
@@ -1293,7 +1293,7 @@ public class AudioFileHelper implements AlignDecode {
         "\n\tmodelsDir    " + modelsDir);
     String scoringDir = Scoring.getScoringDir(serverProps.getDcodrBaseDir());
     String dictFile =
-        new ConfigFileCreator(serverProps.getProperties(), null, scoringDir, modelsDir).getDictFile();
+        new ConfigFileCreator(serverProps.getProperties(), scoringDir, modelsDir).getDictFile();
 
     logger.info("makeDict :" +
         "\n\tscoringDir :'" + installPath + "'" +

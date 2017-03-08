@@ -75,8 +75,12 @@ public class Trie<T> {
    */
   private List<EmitValue<T>> getEmits(String toMatch) {
     TrieNode<T> start = root;
-    for (String c : getChars(toMatch)) {
-      start = start.getNextState(c);
+    List<String> chars = getChars(toMatch);
+    for (String c : chars) {
+//      logger.info("char " + toMatch+ " = '" +c +"'");
+      TrieNode<T> nextState = start.getNextState(c);
+  //    logger.info(" explain "+ start.explain(c));
+      start = nextState;
       if (start == null) break;
     }
     if (start == null) {
@@ -120,6 +124,7 @@ public class Trie<T> {
    */
   private boolean addEntryToTrie(TextEntityValue<T> textEntityDescription, Map<String, String> stringCache) {
     String normalizedValue = textEntityDescription.getNormalizedValue();
+//    logger.info("addEntryToTrie adding '" + normalizedValue + "'");
     List<String> split = SPLIT_ON_CHARACTERS ? getChars(normalizedValue) : getSpaceSeparatedTokens(normalizedValue);
 
     int n = split.size();
@@ -132,9 +137,11 @@ public class Trie<T> {
     TrieNode<T> currentState = root;
     for (String aSplit : split) {
       String upperCaseToken = convertToUpper ? aSplit.toUpperCase() : aSplit;
+   //   logger.info("addEntryToTrie upperCaseToken '" + upperCaseToken + "'");
 
       // avoid keeping references to duplicate strings
       String uniqueCopy = getUnique(stringCache, upperCaseToken);
+   //   logger.info("addEntryToTrie uniqueCopy '" + uniqueCopy + "'");
 
       TrieNode<T> nextState = currentState.getNextState(uniqueCopy);
 
@@ -162,8 +169,11 @@ public class Trie<T> {
     List<String> toAdd = new ArrayList<>();
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < entry.length(); i++) {
-      builder.append(entry.charAt(i));
-      toAdd.add(builder.toString());
+      char c = entry.charAt(i);
+      if (!Character.isWhitespace(c)) {
+        builder.append(c);
+        toAdd.add(builder.toString());
+      }
     }
     return toAdd;
   }
@@ -246,7 +256,7 @@ public class Trie<T> {
    *
    * @param lc
    * @return
-   * @see ExerciseTrie#getExercises(String, SmallVocabDecoder)
+   * @see ExerciseTrie#getExercises(String)
    * @see Trie#getMatchesLC(String)
    */
   public List<T> getMatches(String lc) {

@@ -44,9 +44,12 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
@@ -216,20 +219,21 @@ public class ProjectTest extends BaseTest {
     Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(3);
     logger.info(maleFemaleProgress.toString());
   }
+
   @Test
   public void testMaleFemaleFilterBySameGender() {
     DatabaseImpl database = getAndPopulate();
     IAudioDAO audioDAO = database.getAudioDAO();
-    Collection<Integer> recordedBy = audioDAO.getRecordedBySameGender(2, Collections.emptyMap(),3);
+    Collection<Integer> recordedBy = audioDAO.getRecordedBySameGender(2, Collections.emptyMap(), 3);
     logger.info("found english " + recordedBy.size());
 
-    Collection<Integer> frecordedBy = audioDAO.getRecordedBySameGender(133, Collections.emptyMap(),3);
+    Collection<Integer> frecordedBy = audioDAO.getRecordedBySameGender(133, Collections.emptyMap(), 3);
     logger.info("found female english " + frecordedBy.size());
 
-    Collection<Integer> recordedBy2 = audioDAO.getRecordedBySameGender(2, Collections.emptyMap(),2);
+    Collection<Integer> recordedBy2 = audioDAO.getRecordedBySameGender(2, Collections.emptyMap(), 2);
     logger.info("found hindi   " + recordedBy2.size());
 
-    Collection<Integer> frecordedBy2 = audioDAO.getRecordedBySameGender(133, Collections.emptyMap(),2);
+    Collection<Integer> frecordedBy2 = audioDAO.getRecordedBySameGender(133, Collections.emptyMap(), 2);
     logger.info("found female hindi   " + frecordedBy2.size());
 
     Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(3);
@@ -245,7 +249,7 @@ public class ProjectTest extends BaseTest {
 
     List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(6, 5);
 
-    for (WordScore wordScore:wordScoresForUser) logger.info("ws " +wordScore);
+    for (WordScore wordScore : wordScoresForUser) logger.info("ws " + wordScore);
 
     for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
   }
@@ -256,24 +260,60 @@ public class ProjectTest extends BaseTest {
   }
 
   @Test
-  public void testDropCroatian() {  doDrop( "croatian");  }
+  public void testDropCroatian() {
+    doDrop("croatian");
+  }
 
   @Test
-  public void testDropSpanish() {  doDrop( "spanish");  }
+  public void testDropSpanish() {
+    doDrop("spanish");
+  }
 
   private void doDrop(String croatian) {
     DatabaseImpl andPopulate = getAndPopulate();
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
     projectDAO.delete(projectDAO.getByLanguage(croatian));
-    projectDAO.delete(projectDAO.getByLanguage("sorani"));
+    // projectDAO.delete(projectDAO.getByLanguage("sorani"));
     andPopulate.close();
   }
 
   @Test
-  public void testDropSpanishRef() {  doDropRef( "spanish");  }
+  public void testTrie() {
+    Collection<CommonExercise> exercises = new ArrayList<>();
+    Exercise e = new Exercise(1, 1, "habit; custom", 1, false);
+    e.setForeignLanguage("soemthing korean");
+    exercises.add(e);
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
+    ExerciseTrie<CommonExercise> korean = new ExerciseTrie<>(exercises, "korean", smallVocabDecoder);
+
+
+    logger.info("got " + korean.getExercises("habit"));
+    logger.info("got " + korean.getExercises("habit;"));
+
+    logger.info("got " + korean.getExercises("habit; custom"));
+    logger.info("got " + korean.getExercises("habit; c"));
+    logger.info("got " + korean.getExercises("habit ; custom"));
+
+
+    logger.info("2 got " + korean.getMatches("habit"));
+    logger.info("2 got " + korean.getMatches("habit;"));
+
+    logger.info("2 got " + korean.getMatches("habit; custom"));
+    logger.info("2 got " + korean.getMatches("habit; c"));
+    logger.info("2 got " + korean.getMatches("habit ; custom"));
+    // korean.addEntryToTrie()
+  }
 
   @Test
-  public void testDropPashto() {  doDrop( "pashto");  }
+  public void testDropSpanishRef() {
+    doDropRef("spanish");
+  }
+
+  @Test
+  public void testDropPashto() {
+    doDrop("pashto");
+  }
+
   private void doDropRef(String croatian) {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("war", "");
 
@@ -289,7 +329,7 @@ public class ProjectTest extends BaseTest {
     DatabaseImpl andPopulate = getAndPopulate();
     int english = andPopulate.getProjectDAO().getByName("english");
     Project project = andPopulate.getProject(english);
-    logger.info("project " +project.getAudioFileHelper().isHydraAvailableCheckNow());
+    logger.info("project " + project.getAudioFileHelper().isHydraAvailableCheckNow());
     andPopulate.close();
   }
 
@@ -297,7 +337,7 @@ public class ProjectTest extends BaseTest {
   public void testParse() {
     ServerProperties serverProperties = new ServerProperties();
 
-    String json ="{\"words\":[{\"id\":\"0\",\"w\":\"<s>\",\"s\":\"0.977\",\"str\":\"0.0\",\"end\":\"0.71\",\"phones\":[]},{\"id\":\"1\",\"w\":\"abbreviation\",\"s\":\"0.995\",\"str\":\"0.71\",\"end\":\"1.75\",\"phones\":[{\"id\":\"0\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"0.71\",\"end\":\"0.81\"},{\"id\":\"1\",\"p\":\"b\",\"s\":\"1.0\",\"str\":\"0.81\",\"end\":\"0.89\"},{\"id\":\"2\",\"p\":\"r\",\"s\":\"1.0\",\"str\":\"0.89\",\"end\":\"0.97\"},{\"id\":\"3\",\"p\":\"iy\",\"s\":\"0.943\",\"str\":\"0.97\",\"end\":\"1.03\"},{\"id\":\"4\",\"p\":\"v\",\"s\":\"1.0\",\"str\":\"1.03\",\"end\":\"1.1\"},{\"id\":\"5\",\"p\":\"iy\",\"s\":\"1.0\",\"str\":\"1.1\",\"end\":\"1.21\"},{\"id\":\"6\",\"p\":\"ey\",\"s\":\"1.0\",\"str\":\"1.21\",\"end\":\"1.36\"},{\"id\":\"7\",\"p\":\"sh\",\"s\":\"1.0\",\"str\":\"1.36\",\"end\":\"1.49\"},{\"id\":\"8\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"1.49\",\"end\":\"1.58\"},{\"id\":\"9\",\"p\":\"n\",\"s\":\"0.987\",\"str\":\"1.58\",\"end\":\"1.75\"}]},{\"id\":\"2\",\"w\":\"<\\/s>\",\"s\":\"0.932\",\"str\":\"1.75\",\"end\":\"2.1\",\"phones\":[]}],\"score\":0.9984356,\"exid\":9255,\"valid\":\"OK\",\"reqid\":\"1\"}\n";
+    String json = "{\"words\":[{\"id\":\"0\",\"w\":\"<s>\",\"s\":\"0.977\",\"str\":\"0.0\",\"end\":\"0.71\",\"phones\":[]},{\"id\":\"1\",\"w\":\"abbreviation\",\"s\":\"0.995\",\"str\":\"0.71\",\"end\":\"1.75\",\"phones\":[{\"id\":\"0\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"0.71\",\"end\":\"0.81\"},{\"id\":\"1\",\"p\":\"b\",\"s\":\"1.0\",\"str\":\"0.81\",\"end\":\"0.89\"},{\"id\":\"2\",\"p\":\"r\",\"s\":\"1.0\",\"str\":\"0.89\",\"end\":\"0.97\"},{\"id\":\"3\",\"p\":\"iy\",\"s\":\"0.943\",\"str\":\"0.97\",\"end\":\"1.03\"},{\"id\":\"4\",\"p\":\"v\",\"s\":\"1.0\",\"str\":\"1.03\",\"end\":\"1.1\"},{\"id\":\"5\",\"p\":\"iy\",\"s\":\"1.0\",\"str\":\"1.1\",\"end\":\"1.21\"},{\"id\":\"6\",\"p\":\"ey\",\"s\":\"1.0\",\"str\":\"1.21\",\"end\":\"1.36\"},{\"id\":\"7\",\"p\":\"sh\",\"s\":\"1.0\",\"str\":\"1.36\",\"end\":\"1.49\"},{\"id\":\"8\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"1.49\",\"end\":\"1.58\"},{\"id\":\"9\",\"p\":\"n\",\"s\":\"0.987\",\"str\":\"1.58\",\"end\":\"1.75\"}]},{\"id\":\"2\",\"w\":\"<\\/s>\",\"s\":\"0.932\",\"str\":\"1.75\",\"end\":\"2.1\",\"phones\":[]}],\"score\":0.9984356,\"exid\":9255,\"valid\":\"OK\",\"reqid\":\"1\"}\n";
 //    String json = "{\"words\":[{\"id\":\"0\",\"w\":\"<s>\",\"s\":\"0.977\",\"str\":\"0.0\",\"end\":\"0.71\",\"phones\":[]},{\"id\":\"1\",\"w\":\"abbreviation\",\"s\":\"0.995\",\"str\":\"0.71\",\"end\":\"1.75\",\"phones\":[{\"id\":\"0\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"0.71\",\"end\":\"0.81\"},{\"id\":\"1\",\"p\":\"b\",\"s\":\"1.0\",\"str\":\"0.81\",\"end\":\"0.89\"},{\"id\":\"2\",\"p\":\"r\",\"s\":\"1.0\",\"str\":\"0.89\",\"end\":\"0.97\"},{\"id\":\"3\",\"p\":\"iy\",\"s\":\"0.943\",\"str\":\"0.97\",\"end\":\"1.03\"},{\"id\":\"4\",\"p\":\"v\",\"s\":\"1.0\",\"str\":\"1.03\",\"end\":\"1.1\"},{\"id\":\"5\",\"p\":\"iy\",\"s\":\"1.0\",\"str\":\"1.1\",\"end\":\"1.21\"},{\"id\":\"6\",\"p\":\"ey\",\"s\":\"1.0\",\"str\":\"1.21\",\"end\":\"1.36\"},{\"id\":\"7\",\"p\":\"sh\",\"s\":\"1.0\",\"str\":\"1.36\",\"end\":\"1.49\"},{\"id\":\"8\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"1.49\",\"end\":\"1.58\"},{\"id\":\"9\",\"p\":\"n\",\"s\":\"0.987\",\"str\":\"1.58\",\"end\":\"1.75\"}]},{\"id\":\"2\",\"w\":\"<\\/s>\",\"s\":\"0.932\",\"str\":\"1.75\",\"end\":\"2.1\",\"phones\":[]}],\"exid\":9255,\"valid\":\"OK\",\"reqid\":\"1\"}\n";
 //    String json = "{\"score\":0.7233214,\"WORD_TRANSCRIPT\":[{\"event\":\"<s>\",\"start\":0,\"end\":0.51,\"score\":0.9104534},{\"event\":\"abbreviation\",\"start\":0.51,\"end\":1.34,\"score\":0.7858934},{\"event\":\"<\\/s>\",\"start\":1.34,\"end\":1.35,\"score\":0.88590395}],\"PHONE_TRANSCRIPT\":[{\"event\":\"sil\",\"start\":0,\"end\":0.51,\"score\":0.9104534},{\"event\":\"ah\",\"start\":0.51,\"end\":0.62,\"score\":0.690349},{\"event\":\"b\",\"start\":0.62,\"end\":0.7,\"score\":0.94709295},{\"event\":\"r\",\"start\":0.7,\"end\":0.77,\"score\":1},{\"event\":\"iy\",\"start\":0.77,\"end\":0.84,\"score\":1},{\"event\":\"v\",\"start\":0.84,\"end\":0.9,\"score\":0.5870326},{\"event\":\"iy\",\"start\":0.9,\"end\":1.02,\"score\":0.96210086},{\"event\":\"ey\",\"start\":1.02,\"end\":1.1,\"score\":0.94535315},{\"event\":\"sh\",\"start\":1.1,\"end\":1.27,\"score\":0.7260531},{\"event\":\"ah\",\"start\":1.27,\"end\":1.31,\"score\":0.25677478},{\"event\":\"n\",\"start\":1.31,\"end\":1.34,\"score\":0.019446973},{\"event\":\"sil\",\"start\":1.34,\"end\":1.35,\"score\":0.8859039}],\"exid\":9255,\"valid\":\"OK\",\"reqid\":\"1\"}";
     PrecalcScores precalcScores = new PrecalcScores(serverProperties, json);
@@ -305,5 +345,7 @@ public class ProjectTest extends BaseTest {
     logger.info("Got " + precalcScores);
   }
 
-  private DatabaseImpl getAndPopulate() { return getDatabase().setInstallPath("war", "").populateProjects();  }
+  private DatabaseImpl getAndPopulate() {
+    return getDatabase().setInstallPath("war", "").populateProjects();
+  }
 }
