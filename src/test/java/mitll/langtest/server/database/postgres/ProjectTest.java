@@ -278,33 +278,6 @@ public class ProjectTest extends BaseTest {
   }
 
   @Test
-  public void testTrie() {
-    Collection<CommonExercise> exercises = new ArrayList<>();
-    Exercise e = new Exercise(1, 1, "habit; custom", 1, false);
-    e.setForeignLanguage("soemthing korean");
-    exercises.add(e);
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
-    ExerciseTrie<CommonExercise> korean = new ExerciseTrie<>(exercises, "korean", smallVocabDecoder);
-
-
-    logger.info("got " + korean.getExercises("habit"));
-    logger.info("got " + korean.getExercises("habit;"));
-
-    logger.info("got " + korean.getExercises("habit; custom"));
-    logger.info("got " + korean.getExercises("habit; c"));
-    logger.info("got " + korean.getExercises("habit ; custom"));
-
-
-    logger.info("2 got " + korean.getMatches("habit"));
-    logger.info("2 got " + korean.getMatches("habit;"));
-
-    logger.info("2 got " + korean.getMatches("habit; custom"));
-    logger.info("2 got " + korean.getMatches("habit; c"));
-    logger.info("2 got " + korean.getMatches("habit ; custom"));
-    // korean.addEntryToTrie()
-  }
-
-  @Test
   public void testDropSpanishRef() {
     doDropRef("spanish");
   }
@@ -343,9 +316,5 @@ public class ProjectTest extends BaseTest {
     PrecalcScores precalcScores = new PrecalcScores(serverProperties, json);
 
     logger.info("Got " + precalcScores);
-  }
-
-  private DatabaseImpl getAndPopulate() {
-    return getDatabase().setInstallPath("war", "").populateProjects();
   }
 }
