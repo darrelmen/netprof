@@ -72,6 +72,11 @@ dependencies {
     runtime('com.google.gwt:gwt-servlet:2.8.0')
     testRuntime('com.google.gwt:gwt-codeserver:2.8.0')
 
+    runtime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    testCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    testRuntime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+
 //    compile 'org.apache.commons:commons-lang3:latest.integration'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
 
@@ -133,7 +138,7 @@ dependencies {
 
     // TODO : get these as artifactory dependencies
 
-    compile name: 'pronz_2.11-1.0'
+//    compile name: 'pronz_2.11-1.0'
     compile name: 'hydec_2.11-1.0'
     compile name: 'utils_2.11-1.0.0-SNAPSHOT'
 

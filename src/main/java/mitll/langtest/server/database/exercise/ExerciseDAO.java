@@ -90,10 +90,10 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
                        int projid);
 
   /**
-   * @param all
-   * @see DatabaseImpl#getExerciseIDToRefAudio(int)
+   * @paramx all
+   * @seex DatabaseImpl#getExerciseIDToRefAudio
    */
-  void attachAudio(Collection<CommonExercise> all);
+  //void attachAudio(Collection<CommonExercise> all);
 
   Map<Integer,String> getIDToFL(int projid);
 

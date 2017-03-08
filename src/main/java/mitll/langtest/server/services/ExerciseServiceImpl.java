@@ -322,7 +322,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     if (hasPrefix) {
       ExerciseTrie<CommonExercise> trie = new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder());
-      exercisesForState = trie.getExercises(prefix, getSmallVocabDecoder());
+      exercisesForState = trie.getExercises(prefix);
     }
 
     if (exercisesForState.isEmpty()) { // allow lookup by id
@@ -590,7 +590,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                            boolean predefExercises,
                                                                            ExerciseTrie<T> fullTrie) {
     ExerciseTrie<T> trie = predefExercises ? fullTrie : new ExerciseTrie<T>(exercises, getLanguage(), getSmallVocabDecoder());
-    List<T> exercises1 = trie.getExercises(prefix, getSmallVocabDecoder());
+    List<T> exercises1 = trie.getExercises(prefix);
 
     if (exercises1.isEmpty()) { // allow lookup by id
       int exid = getExid(prefix);

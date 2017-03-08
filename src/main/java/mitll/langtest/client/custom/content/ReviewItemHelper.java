@@ -162,7 +162,7 @@ public class ReviewItemHelper extends NPFHelper {
         @Override
         protected String getHistoryTokenFromUIState(String search, int id) {
           String s = super.getHistoryTokenFromUIState(search, id) +
-              ";" +
+              SelectionState.SECTION_SEPARATOR +
               SelectionState.ONLY_WITH_AUDIO_DEFECTS +
               "=" + checkBox.getValue();
           //    logger.info("ReviewItemHelper : history token now  " + s);

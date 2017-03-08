@@ -65,13 +65,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     implements ValueChangeHandler<String> {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
 
+  public static final String SECTION_SEPARATOR = SelectionState.SECTION_SEPARATOR;
   public static final String ANY = "Clear";
 
   private HandlerRegistration handlerRegistration;
   protected long userID;
   protected final SectionWidgetContainer<V> sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
   private static final boolean DEBUG = false;
 
   /**
@@ -117,12 +118,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       logger = Logger.getLogger("HistoryExerciseList");
     }
 //    logger.info("\tgetHistoryToken for " + id );
-    String instanceSuffix = getInstance().isEmpty() ? "" : ";" + SelectionState.INSTANCE + "=" + getInstance();
+    String instanceSuffix = getInstance().isEmpty() ? "" : SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
     boolean hasItemID = id != -1;//id != null && id.length() > 0;
 
     String s = (hasItemID ?
-        super.getHistoryTokenFromUIState(search, id) + ";" :
-        "search=" + search + ";") +
+        super.getHistoryTokenFromUIState(search, id) + SECTION_SEPARATOR :
+        "search=" + search + SECTION_SEPARATOR) +
         sectionWidgetContainer.getHistoryToken() +
         instanceSuffix;
 
@@ -526,6 +527,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                               ExerciseListRequest request) {
     scheduleWaitTimer();
     String selectionID = userListID + "_" + typeToSection.toString();
+    logger.info("getExerciseIDs for '" + prefix+ "'");
     service.getExerciseIds(
         request,
         new SetExercisesCallback(selectionID, prefix, exerciseID, request));

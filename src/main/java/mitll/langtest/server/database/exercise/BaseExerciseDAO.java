@@ -161,7 +161,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     // add new items
     addNewExercises();
 
-    attachAudio();
+   // attachAudio();
   }
 
   /**
@@ -171,18 +171,21 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see #setAudioDAO
    * @see #afterReadingExercises
    */
-  private void attachAudio() {
+ /* private void attachAudio() {
     Set<Integer> transcriptChanged = new HashSet<>();
 
     logger.info("attachAudio afterReadingExercises trying to attach audio to " + exercises.size() + " with project id " + id);
-    attachAudio.attachAllAudio(exercises, audioDAO.getExToAudio(id), transcriptChanged);
+
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(id);
+
+    attachAudio.attachAllAudio(exercises, exToAudio, transcriptChanged);
 
     //consistencyCheck();
 
     if (!transcriptChanged.isEmpty()) {
       logger.info("attachAudio afterReadingExercises : found " + transcriptChanged.size() + " changed transcripts in set of " + exercises.size() + " items");
     }
-  }
+  }*/
 
  /* private void attachAllAudio(Set<Integer> transcriptChanged) {
     int c = 0;
@@ -248,8 +251,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       audioDAO.makeSureAudioIsThere(projectID, language, false);
     }
 
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
-    logger.info("setAudioDAO exToAudio " + exToAudio.size());
+//    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
+//    logger.info("setAudioDAO exToAudio " + exToAudio.size());
     this.attachAudio = new AttachAudio(language, serverProps.shouldCheckAudioTranscript(), serverProps);
   }
 
@@ -281,9 +284,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * TODO : also, this a lot of work just to get the one ref audio recording.
    *
    * @param all
-   * @see DatabaseImpl#getExerciseIDToRefAudio
+   * @seex DatabaseImpl#getExerciseIDToRefAudio
    */
-  public void attachAudio(Collection<CommonExercise> all) {
+/*  public void attachAudio(Collection<CommonExercise> all) {
     int projectid = all.isEmpty() ? -1 : all.iterator().next().getProjectID();
     logger.info("attachAudio (" + projectid +
         ")" +
@@ -313,7 +316,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       logger.info("attachAudio : found " + transcriptChanged.size() + " changed transcripts in set of " +
           exercises.size() + " items");
     }
-  }
+  }*/
 
   /**
    * Get set of fl words have multiple english equivalents.

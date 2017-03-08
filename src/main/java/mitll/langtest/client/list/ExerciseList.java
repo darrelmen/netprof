@@ -91,9 +91,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private boolean pendingReq = false;
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private UserState userState;
-  protected ListOptions listOptions;
+  ListOptions listOptions;
 
   /**
    * @param currentExerciseVPanel
@@ -414,7 +414,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         "'" +
         "\n\tremembering " + exercises.size() + " exercises," +
         "\n\tselection   " + selectionID +
-        "\n\tfirst       " + exerciseID);
+        "\n\tsearchIfAny " + searchIfAny +
+        "\n\tfirst       " + exerciseID
+    );
 
     exercises = rememberExercises(exercises);
     for (ListChangeListener<T> listener : listeners) {
@@ -444,7 +446,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (exerciseID < 0) {
       loadFirstExercise(searchIfAny);
     } else {
-      //  logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny +"'");
+      logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny +"'");
       pushFirstSelection(exerciseID, searchIfAny);
     }
   }
