@@ -37,6 +37,5 @@ gradle war
 -Xmx3512m –XstartOnFirstThread
    #+END_SRC
  * Click run button
- * Ignore the warning about a missing gwt-servlet jar in war/WEB-INF/lib
  * Click on the langtest.html link when it appears.
  * application should come up in a browser (e.g. firefox)
