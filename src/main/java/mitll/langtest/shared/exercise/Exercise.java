@@ -81,7 +81,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
   protected Map<String, String> unitToValue = new HashMap<>(3);
 
   protected String transliteration = "";
+
   private int dominoID = -1;
+
+  private transient List<ExerciseAttribute> attributes;
 
   // for serialization
   public Exercise() {
@@ -295,6 +298,16 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
+  @Override
+  public void setAttributes(List<ExerciseAttribute> exerciseAttributes) {
+    this.attributes = exerciseAttributes;
+  }
+
+  @Override
+  public List<ExerciseAttribute> getAttributes() {
+    return attributes;
+  }
+
   /**
    * @param context
    * @param altcontext
@@ -483,7 +496,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
         "' context " + getDirectlyRelated() +
         " audio count = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
-        " unit->lesson " + getUnitToValue();
+        " unit->lesson " + getUnitToValue() +
+        " attr " +getAttributes();
   }
 
   @Deprecated

@@ -95,4 +95,8 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   MutableAnnotationExercise getMutableAnnotation();
 
   CommonAnnotatable getCommonAnnotatable();
+
+  void setAttributes(List<ExerciseAttribute> exerciseAttributes);
+
+  List<ExerciseAttribute> getAttributes();
 }

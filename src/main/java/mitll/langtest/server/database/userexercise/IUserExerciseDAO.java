@@ -36,6 +36,7 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.SlickExercise;
 
 import java.util.Collection;
@@ -84,4 +85,7 @@ public interface IUserExerciseDAO extends IDAO {
   CommonExercise getPredefExercise(int exid);
 
   void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones);
+
+  int addAttribute(int projid, long now,
+                   int userid, ExerciseAttribute attribute);
 }
