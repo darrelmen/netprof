@@ -16,21 +16,16 @@ gradle war
 
  * make sure the gradle war step runs cleanly
 ** import the project into eclipse - open projects from filesystem
- * Fix build path so it’s just the following (right click on root folder, properties, java build path)
-   #+BEGIN_SRC shell
-src/main/java
-src/main/resources
-src/test/resources
-   #+END_SRC
- * ignore warning about gwt-servlet jar for now
- 
 ** set the war directory
  * Right click on root folder, choose Properties->Google->Web application
- * Browse to war directory
  * Click on launch and deploy from this directory
+ * (May want to confirm your Arguments/Program Arguments looks like:)
+   #+BEGIN_SRC shell
+ -war "${project_loc}/build/eclipse-war" -remoteUI "${gwt_remote_ui_server_port}:${unique_id}" -startupUrl LangTest.html -logLevel INFO -codeServerPort 9997 -port 8888 mitll.langtest.LangTest
+    #+END_SRC
+      
 
 ** on the top button bar - choose Green arrow – run as super dev mode
- * ignore warning about gwt-servlet jar for now
  * Choose langtest.html
  * Double click on langtest.html when it appears
  * Notice it dies – out of memory
