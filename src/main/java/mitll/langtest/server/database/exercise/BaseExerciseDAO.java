@@ -76,7 +76,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    */
   private IUserExerciseDAO userExerciseDAO;
   /**
-   * @see #attachAudio()
+   * TODO : what's the story here?
+   * @see #attachAudio
+   *
    */
   private AttachAudio attachAudio;
   private IAudioDAO audioDAO;
@@ -89,7 +91,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param language
    * @see DBExerciseDAO#DBExerciseDAO
    */
-  BaseExerciseDAO(ServerProperties serverProps, IUserListManager userListManager, boolean addDefects,
+  BaseExerciseDAO(ServerProperties serverProps,
+                  IUserListManager userListManager,
+                  boolean addDefects,
                   String language,
                   int id) {
     this.serverProps = serverProps;
@@ -97,6 +101,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     this.language = language;
     this.addDefects = addDefects;
     this.id = id;
+    logger.debug("\n\n\nlanguage is " + language);
   }
 
   /**

@@ -45,6 +45,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
 import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
@@ -680,6 +681,7 @@ public class SlickUserExerciseDAO
       public void createTable() {
         attributeDAOWrapper.createTable();
       }
+
       public String getName() {
         return attributeDAOWrapper.getName();
       }
@@ -691,6 +693,7 @@ public class SlickUserExerciseDAO
       public void createTable() {
         attributeJoinDAOWrapper.createTable();
       }
+
       public String getName() {
         return attributeJoinDAOWrapper.getName();
       }
@@ -713,6 +716,11 @@ public class SlickUserExerciseDAO
     relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, exid, contextExid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
+  public int addAttribute(int projid, long now,
+                          int userid, ExerciseAttribute attribute) {
+    return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue());
+  }
+
   public int insertAttribute(int projid,
                              long now,
                              int userid,
@@ -726,10 +734,10 @@ public class SlickUserExerciseDAO
   }
 
   public int insertAttributeJoin(
-                             long now,
-                             int userid,
-                             int exid,
-                             int attrid) {
+      long now,
+      int userid,
+      int exid,
+      int attrid) {
     return attributeJoinDAOWrapper.insert(new SlickExerciseAttributeJoin(-1,
         userid,
         new Timestamp(now),
@@ -747,10 +755,29 @@ public class SlickUserExerciseDAO
     return attributeDAOWrapper.allByProject(projid);
   }
 
-  Map<Integer, SectionHelper.Pair> getIDToPair(int projid) {
-    Map<Integer, SectionHelper.Pair> pairMap = new HashMap<>();
-    getAllByProject(projid).forEach(p -> pairMap.put(p.id(), new SectionHelper.Pair(p.property(), p.value())));
+  public Map<Integer, Collection<SlickExerciseAttributeJoin>> getAllJoinByProject(int projid) {
+    Map<Integer, Collection<SlickExerciseAttributeJoin>> objectCollectionMap = attributeJoinDAOWrapper.allByProject(projid);
+    return objectCollectionMap;
+  }
+
+  public Map<Integer, ExerciseAttribute> getIDToPair(int projid) {
+    Map<Integer, ExerciseAttribute> pairMap = new HashMap<>();
+    Map<String, ExerciseAttribute> known = new HashMap<>();
+    getAllByProject(projid).forEach(p -> pairMap.put(p.id(), makeOrGet(known, p)));
     return pairMap;
+  }
+
+  @NotNull
+  private ExerciseAttribute makeOrGet(Map<String, ExerciseAttribute> known, SlickExerciseAttribute p) {
+    String key = p.property() + "-" + p.value();
+    ExerciseAttribute attribute;
+    if (known.containsKey(key)) {
+      attribute = known.get(key);
+    } else {
+      attribute = new ExerciseAttribute(p.property(), p.value());
+      known.put(key, attribute);
+    }
+    return attribute;
   }
 
   public Map<String, Integer> getOldToNew(int projectid) {
@@ -817,5 +844,9 @@ public class SlickUserExerciseDAO
 
   public ExerciseDAOWrapper getDao() {
     return dao;
+  }
+
+  public void addBulkAttributes(List<SlickExerciseAttributeJoin> joins) {
+    attributeJoinDAOWrapper.addBulk(joins);
   }
 }

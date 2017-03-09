@@ -34,6 +34,8 @@ package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.Arrays;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -57,6 +59,10 @@ public class ExerciseAttribute implements IsSerializable {
     this.value = value;
   }
 
+  public ExerciseAttribute(String status, String value) {
+    this(-1, status, value);
+  }
+
   public String getProperty() {
     return property;
   }
@@ -75,5 +81,22 @@ public class ExerciseAttribute implements IsSerializable {
 
   public String toString() {
     return "[" + getProperty() + " : '" + getValue() + "']";
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(new Object[]{property, value});
+  }
+
+  public boolean equals(Object other) {
+    if (!(other instanceof ExerciseAttribute)) return false;
+    else {
+      ExerciseAttribute ea = (ExerciseAttribute) other;
+      return property.equals(ea.property) && value.equals(ea.property);
+    }
+  }
+
+  public int getId() {
+    return id;
   }
 }

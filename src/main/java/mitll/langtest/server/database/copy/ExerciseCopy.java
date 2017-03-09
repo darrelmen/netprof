@@ -6,17 +6,16 @@ import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.SlickExercise;
+import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickRelatedExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by go22670 on 2/22/17.
@@ -44,8 +43,22 @@ class ExerciseCopy {
 
       // TODO : why not add it to interface?
       int importUser = ((DominoUserDAOImpl) db.getUserDAO()).getImportUser();
-      addPredefExercises(projectid, slickUEDAO, importUser, exercises);
+      Map<String, List<Integer>> exToJoins = addPredefExercises(projectid, slickUEDAO, importUser, exercises);
       exToInt = slickUEDAO.getOldToNew(projectid);
+
+      Timestamp nowT = new Timestamp(System.currentTimeMillis());
+      List<SlickExerciseAttributeJoin> joins = new ArrayList<>();
+      for (Map.Entry<String, List<Integer>> pair : exToJoins.entrySet()) {
+        Integer dbID = exToInt.get(pair.getKey());
+        for (Integer attrid : pair.getValue()) {
+          joins.add(new SlickExerciseAttributeJoin(-1, importUser, nowT, dbID, attrid));
+        }
+      }
+
+      logger.info("adding " + joins.size() + " attribute joins");
+      slickUEDAO.addBulkAttributes(joins);
+      //joins.add(new SlickExerciseAttributeJoin(-1, importUser, nowT, ))
+
 
       idToFL.putAll(slickUEDAO.getIDToFL(projectid));
 
@@ -97,12 +110,28 @@ class ExerciseCopy {
     logger.info("imported " + n + " predef exercises and " + ct + " context exercises");
   }
 
-  private void addPredefExercises(int projectid,
-                                  SlickUserExerciseDAO slickUEDAO,
-                                  int importUser,
-                                  Collection<CommonExercise> exercises) {
+  /**
+   * @param projectid
+   * @param slickUEDAO
+   * @param importUser
+   * @param exercises
+   * @see #copyUserAndPredefExercises(DatabaseImpl, Map, int, Map)
+   */
+  private Map<String, List<Integer>> addPredefExercises(int projectid,
+                                                        SlickUserExerciseDAO slickUEDAO,
+
+                                                        int importUser,
+                                                        Collection<CommonExercise> exercises) {
     List<SlickExercise> bulk = new ArrayList<>();
     logger.info("addPredefExercises copying   " + exercises.size() + " exercises");
+    Set<ExerciseAttribute> known = new HashSet<>();
+    long now = System.currentTimeMillis();
+
+    Map<ExerciseAttribute, Integer> attrToID = new HashMap<>();
+
+//    List<SlickExerciseAttributeJoin> joins = new ArrayList<>();
+    Map<String, List<Integer>> exToJoins = new HashMap<>();
+
     for (CommonExercise ex : exercises) {
       bulk.add(slickUEDAO.toSlick(ex,
           false,
@@ -110,11 +139,32 @@ class ExerciseCopy {
           //  true,
           importUser,
           false));
+      List<ExerciseAttribute> attributes = ex.getAttributes();
+
+      List<Integer> joins = null;
+      if (!attributes.isEmpty()) {
+        exToJoins.put(ex.getOldID(), joins = new ArrayList<Integer>());
+        for (ExerciseAttribute attribute : attributes) {
+          boolean contains = known.contains(attribute);
+          int id;
+          if (!contains) {
+            known.add(attribute);
+            id = slickUEDAO.addAttribute(projectid, now, importUser, attribute);
+            attrToID.put(attribute, id);
+            logger.info("addPredef " + attribute + " = " + id);
+          } else {
+            id = attrToID.get(attribute);
+          }
+          joins.add(id);
+          //joins.add(new SlickExerciseAttributeJoin(-1, importUser, nowT, ))
+        }
+      }
     }
     logger.info("addPredefExercises add   bulk  " + bulk.size() + " exercises");
     slickUEDAO.addBulk(bulk);
     logger.info("addPredefExercises added bulk  " + bulk.size() + " exercises");
-
+    logger.info("addPredefExercises will add    " + exToJoins.size() + " attributes");
+    return exToJoins;
   }
 
 

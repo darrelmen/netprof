@@ -37,10 +37,14 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.npdata.dao.SlickExerciseAttribute;
+import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickRelatedExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import scala.tools.cmd.gen.AnyVals;
 
 import java.util.*;
 
@@ -117,6 +121,29 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       List<CommonExercise> allNonContextExercises =
           userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject, fullProject);
+
+      Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
+
+      logger.info("found " + allByProject.size() + " attributes");
+
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
+
+      // Set<ExerciseAttribute> attributes = new HashSet<>();
+
+      for (CommonExercise exercise : allNonContextExercises) {
+        int id = exercise.getID();
+        Collection<SlickExerciseAttributeJoin> slickExerciseAttributeJoins = exToAttrs.get(id);
+
+        List<ExerciseAttribute> attributes = new ArrayList<>();
+        if (slickExerciseAttributeJoins != null) {
+          for (SlickExerciseAttributeJoin join : slickExerciseAttributeJoins) {
+            ExerciseAttribute attribute = allByProject.get(join.attrid());
+            attributes.add(attribute);
+          }
+          exercise.setAttributes(attributes);
+          logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
+        }
+      }
       logger.info("readExercises project " + project +
           " readExercises got " + allNonContextExercises.size() + " predef exercises");
 

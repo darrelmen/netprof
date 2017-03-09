@@ -36,6 +36,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.POIXMLProperties;
@@ -49,6 +50,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.XmlException;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -101,7 +103,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   public ExcelImport(String file, ServerProperties serverProps,
                      IUserListManager userListManager,
                      boolean addDefects) {
-    super(serverProps, userListManager, addDefects, serverProps.getLanguage(),-1);
+    super(serverProps, userListManager, addDefects, serverProps.getLanguage(), -1);
     this.file = file;
 
     //  logger.info("Reading from " + file);
@@ -113,7 +115,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     // from the tier index property
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
-    this.weekIndex    = serverProps.getUnitChapterWeek()[2];
+    this.weekIndex = serverProps.getUnitChapterWeek()[2];
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
@@ -128,6 +130,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   /**
    * Ask the excel file for when it was modified
+   *
    * @param file
    * @return
    * @see #readExercises
@@ -157,7 +160,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
       String lastModifiedBy = ppropsPart.getLastModifiedByProperty().getValue();
 
       logger.info("lastModifiedBy:   " + lastModifiedBy);
-      logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " +modified);
+      logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " + modified);
 
       return modified.getTime();
     } catch (IOException | OpenXML4JException | XmlException e) {
@@ -221,7 +224,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         Sheet sheet = wb.getSheetAt(i);
         int physicalNumberOfRows = sheet.getPhysicalNumberOfRows();
 
-        if (DEBUG) logger.info("readExercises sheet " + sheet.getSheetName() + " had " + physicalNumberOfRows+ " rows.");
+        if (DEBUG)
+          logger.info("readExercises sheet " + sheet.getSheetName() + " had " + physicalNumberOfRows + " rows.");
 
         if (physicalNumberOfRows > 0) {
           Collection<CommonExercise> exercises1 = readFromSheet(sheet);
@@ -287,13 +291,17 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     int skipped = 0;
     int deleted = 0;
     int englishSkipped = 0;
-int rows = 0;
+    int rows = 0;
     String unitName = null, chapterName = null, weekName = null;
     try {
       Iterator<Row> iter = sheet.rowIterator();
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       boolean gotUCW = unitIndex != -1;
       List<String> columns;
+
+      Map<Integer, String> colToHeader = new HashMap<>();
+      Map<String, ExerciseAttribute> pairToAttr = new HashMap<>();
+      Map<String, List<ExerciseAttribute>> attrToItself = new HashMap<>();
 
       for (; iter.hasNext(); ) {
         Row next = iter.next();
@@ -307,50 +315,60 @@ int rows = 0;
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
+            int i = columns.indexOf(col);
             if (colNormalized.startsWith(WORD)) {
               gotHeader = true;
-              colIndexOffset = columns.indexOf(col);
+              colIndexOffset = i;
             } else if (colNormalized.contains("transliteration")) {
-              transliterationIndex = columns.indexOf(col);
+              transliterationIndex = i;
             } else if (colNormalized.contains(MEANING)) {
-              meaningIndex = columns.indexOf(col);
+              meaningIndex = i;
             } else if (colNormalized.contains(ID)) {
-              idIndex = columns.indexOf(col);
+              idIndex = i;
             } else if (contextColMatch(colNormalized) && colNormalized.contains("alt")) {
-              altcontextIndex = columns.indexOf(col);
+              altcontextIndex = i;
             } else if (colNormalized.contains("alt")) {
-              altIndex = columns.indexOf(col);
+              altIndex = i;
             } else if (contextTransMatch(colNormalized)) { //be careful of ordering wrt this and the next item
-              contextTranslationIndex = columns.indexOf(col);
+              contextTranslationIndex = i;
             } else if (contextColMatch(colNormalized)) {
-              contextIndex = columns.indexOf(col);
+              contextIndex = i;
             } else if (colNormalized.contains("audio_index")) {
-              audioIndex = columns.indexOf(col);
+              audioIndex = i;
               hasAudioIndex = true;
             } else if (gotUCW) {
-//              logger.debug("using predef unit/chapter/week ");
-              if (columns.indexOf(col) == unitIndex) {
+              if (DEBUG) logger.debug("using predef unit/chapter/week ");
+              if (i == unitIndex) {
                 predefinedTypeOrder.add(col);
                 unitName = col;
-              } else if (columns.indexOf(col) == chapterIndex) {
+              } else if (i == chapterIndex) {
                 predefinedTypeOrder.add(col);
                 chapterName = col;
-              } else if (columns.indexOf(col) == weekIndex) {
+              } else if (i == weekIndex) {
                 predefinedTypeOrder.add(col);
                 weekName = col;
+              } else {
+                if (col.toLowerCase().contains(language.toLowerCase())) {
+                  logger.debug("skipping col " + col);
+                } else {
+                  //  logger.debug("adding col '" + col + "' at  " +i + " vs '" +language+ "'");
+                  colToHeader.put(i, col);
+                }
               }
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
-              unitIndex = columns.indexOf(col);
+              unitIndex = i;
               predefinedTypeOrder.add(col);
               unitName = col;
             } else if (colNormalized.contains("chapter") || colNormalized.contains("lesson")) {
-              chapterIndex = columns.indexOf(col);
+              chapterIndex = i;
               predefinedTypeOrder.add(col);
               chapterName = col;
             } else if (colNormalized.contains("week")) {
-              weekIndex = columns.indexOf(col);
+              weekIndex = i;
               predefinedTypeOrder.add(col);
               weekName = col;
+            } else {
+              colToHeader.put(i, col);
             }
           }
           if (usePredefinedTypeOrder) {
@@ -368,7 +386,8 @@ int rows = 0;
               " contextIndex " + contextIndex +
               " altcontext " + altcontextIndex +
               " id " + idIndex +
-              " audio " + audioIndex
+              " audio " + audioIndex +
+              " other " + colToHeader
           );
         } else {
           int colIndex = colIndexOffset;
@@ -419,12 +438,17 @@ int rows = 0;
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
 
+              List<ExerciseAttribute> exerciseAttributes = getExerciseAttributes(colToHeader, pairToAttr, attrToItself, next);
+
               CommonExercise imported = isDelete ? null :
                   getExercise(idToUse, english, foreignLanguagePhrase, altfl, translit,
                       meaning,
                       context, altcontext, contextTranslation,
                       hasAudioIndex ? getCell(next, audioIndex) : "");
 
+              imported.setAttributes(exerciseAttributes);
+
+//              logger.info("attr for " + imported.getOldID() + " are " + imported.getAttributes());
               String id1 = imported == null ? idToUse : imported.getOldID();
 
               if (!isDelete &&
@@ -475,6 +499,38 @@ int rows = 0;
     Collection<CommonExercise> Ts = readFromSheetSkips(sheet, id);
     exercises.addAll(Ts);
     return exercises;
+  }
+
+  @NotNull
+  private List<ExerciseAttribute> getExerciseAttributes(Map<Integer, String> colToHeader,
+                                                        Map<String, ExerciseAttribute> pairToAttr,
+                                                        Map<String, List<ExerciseAttribute>> attrToItself,
+                                                        Row next) {
+    List<ExerciseAttribute> toAdd = new ArrayList<>();
+    for (Map.Entry<Integer, String> pair : colToHeader.entrySet()) {
+      Integer key = pair.getKey();
+      String value = getCell(next, key);
+      if (!value.isEmpty()) {
+        String property = pair.getValue();
+
+        String key1 = property + "-" + value;
+        ExerciseAttribute exerciseAttribute1 = pairToAttr.get(key1);
+        if (exerciseAttribute1 == null) {
+          exerciseAttribute1 = new ExerciseAttribute(property, value);
+     //     logger.info("Remember attr " + exerciseAttribute1);
+          pairToAttr.put(key1, exerciseAttribute1);
+        }
+        toAdd.add(exerciseAttribute1);
+      }
+    }
+
+    String key = toAdd.toString();
+    List<ExerciseAttribute> exerciseAttributes = attrToItself.get(key);
+    if (exerciseAttributes == null) {
+      attrToItself.put(key, exerciseAttributes = toAdd);
+     // logger.info("Remember attr list " + exerciseAttributes);
+    }
+    return exerciseAttributes;
   }
 
   private List<String> getHeader(Row next) {
@@ -739,7 +795,7 @@ int rows = 0;
     String week = getCell(next, weekIndex);
 
     if (unit.isEmpty() && chapter.isEmpty() && week.isEmpty()) {
-      unit    = "Other";
+      unit = "Other";
       chapter = "Other";
     }
 
@@ -758,8 +814,7 @@ int rows = 0;
     SectionHelper<CommonExercise> sectionHelper = getSectionHelper();
     if (unit.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
-    }
-    else if (unitName != null) {
+    } else if (unitName != null) {
       unit = chapter;
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
     }
@@ -768,7 +823,7 @@ int rows = 0;
         chapter = (unitIndex == -1 ? "" : unit + "-") + chapter; // hack for now to get unique chapters...
       }
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
-    } else if (chapterName != null){
+    } else if (chapterName != null) {
       chapter = unit;
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
 //      logger.info("skip unit '" +unit + "' and chapter '" +chapter+ "'");

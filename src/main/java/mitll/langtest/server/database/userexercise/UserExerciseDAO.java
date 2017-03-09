@@ -39,6 +39,7 @@ import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.SlickExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -621,6 +622,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   @Override
   public void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones) {
 
+  }
+
+  @Override
+  public int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute) {
+    return 0;
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {
