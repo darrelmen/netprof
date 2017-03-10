@@ -33,6 +33,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.phone.IPhoneDAO;
@@ -61,7 +62,7 @@ import java.util.*;
 public class JsonSupport {
   private static final Logger logger = LogManager.getLogger(JsonSupport.class);
 
-  private final SectionHelper<CommonExercise> sectionHelper;
+  private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
   private final IRefResultDAO refResultDAO;
   private final IAudioDAO audioDAO;
@@ -78,7 +79,7 @@ public class JsonSupport {
    * @param phoneDAO
    * @see IProjectManagement#configureProject
    */
-  public JsonSupport(SectionHelper<CommonExercise> sectionHelper,
+  public JsonSupport(ISection<CommonExercise> sectionHelper,
                      IResultDAO resultDAO,
                      IRefResultDAO refResultDAO,
                      IAudioDAO audioDAO,

@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -68,7 +69,7 @@ class AmasSupport {
   public Collection<AmasExerciseImpl> getExercisesForSelectionState(
       Map<String, Collection<String>> typeToSection, String prefix,
       long userID,
-      SectionHelper<AmasExerciseImpl> sectionHelper,
+      ISection<AmasExerciseImpl> sectionHelper,
       IResultDAO resultDAO
   ) {
     Collection<AmasExerciseImpl> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);

@@ -152,7 +152,7 @@ public class Project implements PronunciationLookup {
    * @return
    */
   public List<String> getTypeOrder() {
-    SectionHelper<CommonExercise> sectionHelper = getSectionHelper();
+    ISection<CommonExercise> sectionHelper = getSectionHelper();
 
     List<String> types = sectionHelper == null ? Collections.EMPTY_LIST : sectionHelper.getTypeOrder();
     if (project != null && (types == null || types.isEmpty())) {
@@ -183,7 +183,7 @@ public class Project implements PronunciationLookup {
     return exerciseDAO.getRawExercises();
   }
 
-  public SectionHelper<CommonExercise> getSectionHelper() {
+  public ISection<CommonExercise> getSectionHelper() {
     return exerciseDAO == null ? null : exerciseDAO.getSectionHelper();
   }
 
@@ -197,7 +197,7 @@ public class Project implements PronunciationLookup {
 
   /**
    * @param analysis
-   * @see IProjectManagement#configureProject
+   * @see ProjectManagement#configureProject
    */
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
@@ -292,7 +292,12 @@ public class Project implements PronunciationLookup {
     return hasModel() ? audioFileHelper.getPronunciations(transcript, transliteration) : "";
   }
 
-/*
+  @Override
+  public int getNumPhones(String transcript, String transliteration) {
+    return  hasModel() ? audioFileHelper.getNumPhones(transcript, transliteration):0;
+  }
+
+  /*
   public Map<Integer, ExercisePhoneInfo> getExToPhone() {
     return exToPhone;
   }

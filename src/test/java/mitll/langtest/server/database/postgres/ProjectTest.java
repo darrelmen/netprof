@@ -272,7 +272,8 @@ public class ProjectTest extends BaseTest {
   private void doDrop(String croatian) {
     DatabaseImpl andPopulate = getAndPopulate();
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
-    projectDAO.delete(projectDAO.getByLanguage(croatian));
+    int byLanguage = projectDAO.getByLanguage(croatian);
+    projectDAO.delete(byLanguage);
     // projectDAO.delete(projectDAO.getByLanguage("sorani"));
     andPopulate.close();
   }

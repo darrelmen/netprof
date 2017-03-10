@@ -36,7 +36,7 @@ public class DominoReaderTest {
   }
 
 //  public StartupInfo getProjectStartupInfo() {
-//    return new StartupInfo(database.getServerProps().getProperties(), database.getTypeOrder(projectid), database.getSectionNodes());
+//    return new StartupInfo(database.getServerProps().getProperties(), database.getTypeOrder(projectid), database.getSectionNodesForTypes());
 //  }
 
   @Test
@@ -54,7 +54,7 @@ public class DominoReaderTest {
 
 //    StartupInfo startupInfo = getProjectStartupInfo();
   //  logger.info("Got " + startupInfo);
-   // SectionNode next = startupInfo.getSectionNodes().iterator().next();
+   // SectionNode next = startupInfo.getSectionNodesForTypes().iterator().next();
   //  Map<String, Collection<String>> typeToSection = new HashMap<>();
   //  typeToSection.put(next.getType(), Collections.singleton(next.getName()));
   //  Collection exercisesForSelectionState = database.getSectionHelper().getExercisesForSelectionState(typeToSection);

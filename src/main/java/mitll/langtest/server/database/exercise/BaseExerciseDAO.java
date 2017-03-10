@@ -61,7 +61,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final boolean DEBUG = false;
 
   private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
-  private final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
+
+  private final ISection<CommonExercise> sectionHelper = new SectionHelper<>();
+
+  //private final ISection<CommonExercise> section = new SectionImpl<>();
+
   protected final String language;
   protected final ServerProperties serverProps;
   private final IUserListManager userListManager;
@@ -233,7 +237,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see #addNewExercises()
    * @see #populateSections(Collection)
    */
-  public SectionHelper<CommonExercise> getSectionHelper() {
+  public ISection<CommonExercise> getSectionHelper() {
     return sectionHelper;
   }
 
@@ -694,13 +698,13 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    *
    * @param exercises
    */
-  private void populateSections(Collection<CommonExercise> exercises) {
+/*  private void populateSections(Collection<CommonExercise> exercises) {
     for (CommonExercise ex : exercises) {
-      Collection<SectionHelper.Pair> pairs = new ArrayList<>();
+      Collection<Pair> pairs = new ArrayList<>();
       for (Map.Entry<String, String> pair : ex.getUnitToValue().entrySet()) {
         pairs.add(getSectionHelper().addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
       }
       getSectionHelper().addAssociations(pairs);
     }
-  }
+  }*/
 }

@@ -37,7 +37,7 @@ import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.contextPractice.ContextServices;
 import mitll.langtest.server.database.exercise.ExerciseServices;
-import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.report.ReportingServices;
@@ -89,7 +89,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   DatabaseImpl setInstallPath(String installPath, String lessonPlanFile);
 
-  SectionHelper<CommonExercise> getSectionHelper(int projectid);
+  ISection<CommonExercise> getSectionHelper(int projectid);
 
   void markAudioDefect(AudioAttribute audioAttribute);
 

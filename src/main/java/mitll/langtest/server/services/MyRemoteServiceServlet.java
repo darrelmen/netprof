@@ -41,8 +41,8 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
@@ -521,9 +521,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
   }
 
-  protected SectionHelper<CommonExercise> getSectionHelper() {
-    return db.getSectionHelper(getProjectID());
-  }
+  protected ISection<CommonExercise> getSectionHelper() { return db.getSectionHelper(getProjectID());  }
 
   protected AudioFileHelper getAudioFileHelper() {
     if (serverProps.isAMAS()) {

@@ -145,6 +145,10 @@ public class AudioFileHelper implements AlignDecode {
     return webserviceScoring.getPronunciations(transcript, transliteration, true);
   }
 
+  public int getNumPhones(String transcript, String transliteration) {
+    return webserviceScoring.getNumPhones(transcript, transliteration);
+  }
+
   /**
    * @return
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getCollator

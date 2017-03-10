@@ -121,9 +121,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               Project project) {
     super(deployPath, properties, langTestDatabase, htkDictionary, project);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
-    alignAudioToScore  = CacheBuilder.newBuilder().maximumSize(1000).build();
+    alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-    ip   = project.getWebserviceIP();
+    ip = project.getWebserviceIP();
     port = project.getWebservicePort();
 
     if (port != -1) {
@@ -136,11 +136,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
-  public void setAvailable() {  available = isAvailableCheckNow();  }
+  public void setAvailable() {
+    available = isAvailableCheckNow();
+  }
 
   /**
-   * @see AudioFileHelper#isHydraAvailable
    * @return
+   * @see AudioFileHelper#isHydraAvailable
    */
   public boolean isAvailable() {
     return available;
@@ -441,6 +443,58 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private Set<String> seen = new HashSet<>();
 
   /**
+   * TODO : add failure case back in
+   * @param transcript
+   * @param transliteration
+   * @return
+   */
+  public int getNumPhones(String transcript, String transliteration) {
+    String[] translitTokens = transliteration.toLowerCase().split(" ");
+    String[] transcriptTokens = transcript.split(" ");
+    boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
+    int index = 0;
+
+    int total = 0;
+    for (String word : transcriptTokens) {
+      //String trim = word.trim();
+      if (htkDictionary.contains(word)) {
+        scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
+
+        int numForThisWord = 0;
+        for (int i = 0; i < prons.size(); i++) {
+          String[] apply = prons.apply(i);
+          numForThisWord = Math.max(numForThisWord, apply.length);
+
+/*
+          StringBuilder builder = new StringBuilder();
+          for (String s:apply) builder.append(s).append("-");
+          logger.info("\t" +word + " = " + builder);
+*/
+        }
+        total += numForThisWord;
+
+//        logger.info(transcript + " token "+ word + " num " + numForThisWord + " total " + total);
+      } else {
+        String word1 = word.toLowerCase();
+        String[][] process = getLTS().process(word1);
+
+        if (ltsOutputOk(process)) {
+          int max = 0;
+          for (String[] pc : process) {
+//            int c = 0;
+//            for (String p : pc) {
+//              if (!p.contains("#")) c++;
+//            }
+            max = Math.max(max, pc.length);
+          }
+          total += max;
+        }
+      }
+    }
+    return total;
+  }
+
+  /**
    * @param transcript
    * @param transliteration
    * @param justPhones
@@ -509,7 +563,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                   dict += getDefaultPronStringForWord(word, process, justPhones);
                 }
               }
-            } else {
+            } else { // it's ok -use it
               for (String[] pron : process) {
                 dict += getPronStringForWord(word, pron, justPhones);
               }

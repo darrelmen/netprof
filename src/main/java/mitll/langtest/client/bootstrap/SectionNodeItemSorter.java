@@ -32,7 +32,7 @@
 
 package mitll.langtest.client.bootstrap;
 
-import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.SectionNode;
 
 import java.util.*;
 

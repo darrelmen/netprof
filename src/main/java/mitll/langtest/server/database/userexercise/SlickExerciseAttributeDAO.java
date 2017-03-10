@@ -2,6 +2,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Pair;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickExerciseAttribute;
@@ -43,9 +44,9 @@ public class SlickExerciseAttributeDAO extends DAO implements IExerciseAttribute
     return dao.allByProject(projid);
   }
 
-  Map<Integer, SectionHelper.Pair> getIDToPair(int projid) {
-    Map<Integer, SectionHelper.Pair> pairMap = new HashMap<>();
-    getAllByProject(projid).forEach(p -> pairMap.put(p.id(), new SectionHelper.Pair(p.property(), p.value())));
+  Map<Integer, Pair> getIDToPair(int projid) {
+    Map<Integer, Pair> pairMap = new HashMap<>();
+    getAllByProject(projid).forEach(p -> pairMap.put(p.id(), new Pair(p.property(), p.value())));
     return pairMap;
   }
 }

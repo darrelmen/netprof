@@ -47,7 +47,7 @@ import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.table.ListSelect;
 import mitll.langtest.client.table.TableSelect;
-import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.SectionNode;
 
 import java.util.*;
 import java.util.logging.Logger;

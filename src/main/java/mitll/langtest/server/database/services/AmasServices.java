@@ -1,6 +1,6 @@
 package mitll.langtest.server.database.services;
 
-import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 
 import java.util.List;
@@ -13,5 +13,5 @@ public interface AmasServices {
 
   AmasExerciseImpl getAMASExercise(int id);
 
-  SectionHelper<AmasExerciseImpl> getAMASSectionHelper();
+  ISection<AmasExerciseImpl> getAMASSectionHelper();
 }

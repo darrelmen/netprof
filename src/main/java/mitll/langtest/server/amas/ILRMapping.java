@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.amas;
 
+import mitll.langtest.server.database.exercise.Pair;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.exercise.Shell;
@@ -149,25 +150,26 @@ public class ILRMapping<T extends Shell & HasUnitChapter> {
    * @see mitll.langtest.server.amas.FileExerciseDAO#readExercises(String, String, String, InputStream)
    */
   public void addMappingAssoc(String exid, T e) {
-    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+    List<Pair> pairs = new ArrayList<Pair>();
 
-    SectionHelper.Pair ilrAssoc = sectionHelper.addExerciseToLesson(e, ILR_LEVEL, exerciseToLevel.get(exid));
+    Pair ilrAssoc = sectionHelper.addExerciseToLesson(e, ILR_LEVEL, exerciseToLevel.get(exid));
     pairs.add(ilrAssoc);
 
     String type = listeningExercises.contains(exid) ? LISTENING : readingExercises.contains(exid) ? READING : "other";
-    SectionHelper.Pair typeAssoc = sectionHelper.addExerciseToLesson(e, TEST_TYPE, type);
+    Pair typeAssoc = sectionHelper.addExerciseToLesson(e, TEST_TYPE, type);
     pairs.add(typeAssoc);
 
-    List<SectionHelper.Pair> pairs2 = new ArrayList<SectionHelper.Pair>(pairs);
+    List<Pair> pairs2 = new ArrayList<Pair>(pairs);
 
-    SectionHelper.Pair quiz = sectionHelper.addExerciseToLesson(e, QUIZ, exerciseToQuiz.get(exid));
+    Pair quiz = sectionHelper.addExerciseToLesson(e, QUIZ, exerciseToQuiz.get(exid));
     pairs.add(quiz);
 
-    //   SectionHelper.Pair quiz2 = sectionHelper.addExerciseToLesson(e, QUIZ, "Test");
+    //   Pair quiz2 = sectionHelper.addExerciseToLesson(e, QUIZ, "Test");
     //   pairs2.add(quiz2);
 
-    sectionHelper.addAssociations(pairs);
-    sectionHelper.addAssociations(pairs2);
+    // TODO : consider putting this back?
+//    sectionHelper.addAssociations(pairs);
+//    sectionHelper.addAssociations(pairs2);
   }
 
   private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {

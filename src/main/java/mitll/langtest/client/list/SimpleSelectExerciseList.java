@@ -42,7 +42,7 @@ import mitll.langtest.client.bootstrap.SectionNodeItemSorter;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
-import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
@@ -139,11 +139,12 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    * @param rootNodes
    * @param container
    * @param types
-   * @see #getTypeOrder(FluidContainer)
+   * @see #getTypeOrder
    */
   private void addChoiceRow(Collection<SectionNode> rootNodes, final FluidContainer container, List<String> types) {
-/*    logger.info("addChoiceRow for user = " + controller.getUser() + " got types " +
-        types + " num root nodes " + rootNodes.size());*/
+    logger.info("addChoiceRow for user = " + controller.getUser() + " got types " +
+        types + " num root nodes " + rootNodes.size());
+
     if (types.isEmpty()) {
       logger.warning("addChoiceRow : huh? types is empty?");
       return;
@@ -193,7 +194,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
       }
       parent = value;
       sectionWidgetContainer.setWidget(type, value);
-      //   logger.info("for " + type + " : " + sectionsInType);
+      logger.info("for " + type + " : " + sectionsInType.size());
       value.addChoices(firstTypeRow, type, sectionsInType);
 
       if (types.indexOf(type) < types.size() - 1) {
@@ -207,8 +208,9 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
   private List<SectionNode> getChildSectionNodes(Collection<SectionNode> rootNodes) {
     List<SectionNode> newNodes = new ArrayList<>();
     for (SectionNode node : rootNodes) {
-      //  logger.info("getChildSectionNodes " + node.getType() + " "+ node.getName());
+       logger.info("getChildSectionNodes " + node.getType() + " "+ node.getName());
 
+     // Collection<SectionNode> children = node.getChildren();
       Collection<SectionNode> children = node.getChildren();
 
       if (!children.isEmpty() && !children.iterator().next().getType().equals("Sound")) {
