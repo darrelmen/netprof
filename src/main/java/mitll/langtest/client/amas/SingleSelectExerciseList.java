@@ -50,7 +50,7 @@ import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.custom.UserList;
 

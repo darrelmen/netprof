@@ -810,8 +810,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         ")" + unitIndex + "/" + unit + " chapter " + chapterIndex + "/(" +chapterName+
         ")" + chapter + " week (" + weekName+ ") : " + week);*/
 
-    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
-    SectionHelper<CommonExercise> sectionHelper = getSectionHelper();
+    List<Pair> pairs = new ArrayList<>();
+    ISection<CommonExercise> sectionHelper = getSectionHelper();
     if (unit.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
     } else if (unitName != null) {
@@ -831,7 +831,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (week.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, week));
     }
-    sectionHelper.addAssociations(pairs);
+
+  //  sectionHelper.addAssociations(pairs);
   }
 
   private String getCell(Row next, int col) {

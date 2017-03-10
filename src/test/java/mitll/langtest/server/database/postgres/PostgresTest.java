@@ -36,6 +36,7 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.copy.CopyToPostgres;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.project.IProjectDAO;
@@ -297,7 +298,7 @@ public class PostgresTest extends BaseTest {
         logger.info("\n\n\n-------- Got  databaseLight " + databaseLight);
 
         if (justReport) {
-          SectionHelper<CommonExercise> sectionHelper = databaseLight.getSectionHelper();
+          ISection<CommonExercise> sectionHelper = databaseLight.getSectionHelper();
           sectionHelper.report();
         } else {
           cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
@@ -452,7 +453,7 @@ public class PostgresTest extends BaseTest {
       if (language.equalsIgnoreCase(spanish)) {
         Project project1 = database.getProject(project.id());
 
-        SectionHelper<CommonExercise> sectionHelper = project1.getSectionHelper();
+        ISection<CommonExercise> sectionHelper = project1.getSectionHelper();
         logger.info("type order " + sectionHelper.getTypeOrder());
         sectionHelper.report();
 

@@ -49,6 +49,7 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.SlimProject;
@@ -189,8 +190,8 @@ public class ProjectManagement implements IProjectManagement {
     boolean isConfigured = project.getExerciseDAO().isConfigured();
     if (skipRetired || isConfigured) {
       if (isConfigured) {
-       // logger.debug("configureProject project already configured " + project.getProject().id());
-      } else  {
+        // logger.debug("configureProject project already configured " + project.getProject().id());
+      } else {
         logger.info("skipping fully loading project " + project + " since it's retired");
       }
       return;
@@ -255,6 +256,8 @@ public class ProjectManagement implements IProjectManagement {
 //      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
 //      Map<Integer, ExercisePhoneInfo> exToPhonePerProject = new ExerciseToPhone().getExToPhonePerProject(exids, jsonResults);
 //      project.setExToPhone(exToPhonePerProject);
+
+      //   db.getUserExerciseDAO().useExToPhones();
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       logMemory();
     } else {
@@ -437,8 +440,13 @@ public class ProjectManagement implements IProjectManagement {
    * @see DatabaseImpl#getExercise
    */
   @Override
-  public CommonExercise getExercise(int projectid, int id) { return getProjectOrFirst(projectid).getExercise(id);  }
-  public CommonExercise getExerciseByID(int id) { return getFirstProject().getExercise(id);  }
+  public CommonExercise getExercise(int projectid, int id) {
+    return getProjectOrFirst(projectid).getExercise(id);
+  }
+
+  public CommonExercise getExerciseByID(int id) {
+    return getFirstProject().getExercise(id);
+  }
 
   /**
    * exercises are in the context of a project
@@ -535,10 +543,10 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
+   * @return
    * @see #getProject(int)
    * @see #getProjectOrFirst(int)
    * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
-   * @return
    */
   @Override
   public Project getFirstProject() {
@@ -553,7 +561,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-    //logger.info("setStartupInfo : For user " + userWhere + " projid " + projid);
+    logger.info("setStartupInfo : For user " + userWhere + " projid " + projid);
 
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
@@ -573,17 +581,23 @@ public class ProjectManagement implements IProjectManagement {
         SlickProject project1 = project.getProject();
         List<String> typeOrder = getTypeOrder(project);
 
+//        Collection<SectionNode> sectionNodesForTypes =
+//            project.getSectionHelper().getSectionNodesForTypes(typeOrder);
+
+        Collection<SectionNode> sectionNodesForTypes =
+            project.getSectionHelper().getSectionNodesForTypes();
+
         ProjectStartupInfo startupInfo = new ProjectStartupInfo(
             serverProps.getProperties(),
             typeOrder,
-            project.getSectionHelper().getSectionNodes(typeOrder),
+            sectionNodesForTypes,
             project1.id(),
             project1.language(),
             hasModel(project1));
 
-    /*    logger.info("setStartupInfo : For " + userWhere +
+        logger.info("setStartupInfo : For " + userWhere +
             "\n\t " + typeOrder +
-            "\n\tSet startup info " + startupInfo);*/
+            "\n\tSet startup info " + startupInfo);
 
         userWhere.setStartupInfo(startupInfo);
       }
@@ -593,19 +607,25 @@ public class ProjectManagement implements IProjectManagement {
   @NotNull
   private List<String> getTypeOrder(Project project) {
     List<String> typeOrder = project.getTypeOrder();
-    //logger.info("project " + projid + " type order " + typeOrder);
+    logger.info("project " + project.getID() + " type order " + typeOrder);
 
     boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
     boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
-    if (!sound) logger.warn("getTypeOrder : sound hierarchy missing for " + project);
-    else {
-      typeOrder.add(SlickUserExerciseDAO.SOUND);
-    }
+
+    //if (!sound) {
+    //   logger.warn("getTypeOrder : sound hierarchy missing for " + project);
+    // }
+    //else {
+    typeOrder.add(SlickUserExerciseDAO.SOUND);
+    // }
 
     if (!diff) {
-    } else {
-      //typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
+    } else if (SlickUserExerciseDAO.ADD_PHONE_LENGTH) {
+      typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
     }
+    logger.info("project " + project.getID() + " type order " + typeOrder);
+
+
     return typeOrder;
   }
 
@@ -637,7 +657,7 @@ public class ProjectManagement implements IProjectManagement {
     Map<String, List<SlickProject>> langToProject = new TreeMap<>();
     Collection<SlickProject> all = db.getProjectDAO().getAll();
 
-   // logger.info("getNestedProjectInfo : found " + all.size() + " projects");
+    // logger.info("getNestedProjectInfo : found " + all.size() + " projects");
     for (SlickProject project : all) {
       List<SlickProject> slimProjects = langToProject.get(project.language());
       if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());

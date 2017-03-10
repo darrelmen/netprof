@@ -34,6 +34,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.excel.ExcelExport;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -82,7 +83,7 @@ public class AudioExport {
    */
   public void writeZip(OutputStream out,
                        Map<String, Collection<String>> typeToSection,
-                       SectionHelper<?> sectionHelper,
+                       ISection<?> sectionHelper,
                        Collection<CommonExercise> exercisesForSelectionState,
                        String language1,
                        IAudioDAO audioDAO,
@@ -109,7 +110,7 @@ public class AudioExport {
    */
   public void writeUserListAudio(OutputStream out,
                                  String prefix,
-                                 SectionHelper<?> sectionHelper,
+                                 ISection<?> sectionHelper,
                                  Collection<? extends CommonExercise> exercisesForSelectionState,
                                  String language1,
                                  IAudioDAO audioDAO,
@@ -127,7 +128,7 @@ public class AudioExport {
    * @param exercisesForSelectionState
    * @return
    */
-  private List<CommonExercise> getSortedExercises(SectionHelper<?> sectionHelper,
+  private List<CommonExercise> getSortedExercises(ISection<?> sectionHelper,
                                                   Collection<CommonExercise> exercisesForSelectionState,
                                                   boolean isEnglish) {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
@@ -135,7 +136,7 @@ public class AudioExport {
     return copy;
   }
 
-  private List<CommonExercise> getSortableExercises(SectionHelper<?> sectionHelper,
+  private List<CommonExercise> getSortableExercises(ISection<?> sectionHelper,
                                                     Collection<? extends CommonExercise> exercisesForSelectionState) {
     this.typeOrder = sectionHelper.getTypeOrder();
     return new ArrayList<>(exercisesForSelectionState);
@@ -151,7 +152,7 @@ public class AudioExport {
    * @see mitll.langtest.server.database.DatabaseImpl#writeUserListAudio
    */
   public void writeZipJustOneAudio(OutputStream out,
-                                   SectionHelper<?> sectionHelper,
+                                   ISection<?> sectionHelper,
                                    Collection<? extends CommonExercise> exercisesForSelectionState,
                                    String audioDirectory,
                                    String language) throws Exception {
@@ -166,7 +167,7 @@ public class AudioExport {
    * @return
    * @see DatabaseImpl#getPrefix(Map, int)
    */
-  public String getPrefix(SectionHelper<?> sectionHelper, Map<String, Collection<String>> typeToSection) {
+  public String getPrefix(ISection<?> sectionHelper, Map<String, Collection<String>> typeToSection) {
     return getPrefix(typeToSection, sectionHelper.getTypeOrder());
   }
 
@@ -175,7 +176,7 @@ public class AudioExport {
    * @param typeOrder
    * @return
    * @seex #writeZip(OutputStream, Map, SectionHelper, Collection, String, AudioDAO, String, String, boolean, AudioExportOptions)
-   * @see #getPrefix(SectionHelper, Map)
+   * @see #getPrefix(ISection, Map)
    */
   private String getPrefix(Map<String, Collection<String>> typeToSection, Collection<String> typeOrder) {
     String prefix = "";

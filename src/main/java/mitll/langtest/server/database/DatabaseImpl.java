@@ -473,7 +473,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    */
   @Deprecated
-  public SectionHelper<CommonExercise> getSectionHelper() {
+  public ISection<CommonExercise> getSectionHelper() {
     return getSectionHelper(-1);
   }
 
@@ -486,7 +486,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see Database#getTypeOrder
    */
   @Override
-  public SectionHelper<CommonExercise> getSectionHelper(int projectid) {
+  public ISection<CommonExercise> getSectionHelper(int projectid) {
     if (isAmas()) {
       return new SectionHelper<>();
     }
@@ -500,7 +500,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   public Collection<String> getTypeOrder(int projectid) {
-    SectionHelper sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
+    ISection sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
     if (sectionHelper == null) logger.warn("no section helper for " + this);
     List<String> objects = Collections.emptyList();
     Collection<String> strings = (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
@@ -630,7 +630,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @Override
-  public SectionHelper<AmasExerciseImpl> getAMASSectionHelper() {
+  public ISection<AmasExerciseImpl> getAMASSectionHelper() {
     return fileExerciseDAO.getSectionHelper();
   }
 
@@ -1336,14 +1336,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.warn("huh? got non-predef " + exercise);
     }
 
-    SectionHelper sectionHelper = getSectionHelper(exercise.getProjectID());
+    ISection sectionHelper = getSectionHelper(exercise.getProjectID());
 
-    List<SectionHelper.Pair> pairs = new ArrayList<>();
+    List<Pair> pairs = new ArrayList<>();
     for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
       pairs.add(sectionHelper.addExerciseToLesson(duplicate, pair.getKey(), pair.getValue()));
     }
-    sectionHelper.addAssociations(pairs);
-
+    //  sectionHelper.addAssociations(pairs);
+    sectionHelper.rememberTypesFor(Collections.singletonList(pairs));
     AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
     if (addRemoveDAO != null) {
       logger.warn("call domino to add the new item");
@@ -1367,7 +1367,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param projectid
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#deleteItem
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
+   * @seex mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
   @Override
   @Deprecated
@@ -1821,10 +1821,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @Override
-  public IAnswerDAO getAnswerDAO() {   return answerDAO;  }
+  public IAnswerDAO getAnswerDAO() {
+    return answerDAO;
+  }
 
   @Override
-  public IEventDAO getEventDAO() { return eventDAO;  }
+  public IEventDAO getEventDAO() {
+    return eventDAO;
+  }
 
   public IAudioDAO getAudioDAO() {
     return audioDAO;
@@ -1874,7 +1878,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return projectManagement;
   }
 
-  public Database getDatabase() { return this; }
+  public Database getDatabase() {
+    return this;
+  }
 
   public String toString() {
     return "Database : " + this.getClass().toString();

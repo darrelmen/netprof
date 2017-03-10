@@ -33,9 +33,9 @@
 package mitll.langtest.server.json;
 
 import mitll.langtest.server.ScoreServlet;
-import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.exercise.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -74,7 +74,7 @@ public class JsonExport {
   private static final String UNIT_CHAPTER_NESTING = "UnitChapterNesting";
 
   private final Map<String, Integer> phoneToCount;
-  private final SectionHelper<CommonExercise> sectionHelper;
+  private final ISection<CommonExercise> sectionHelper;
   private final Collection<Long> preferredVoices;
   private final boolean isEnglish;
 
@@ -86,7 +86,7 @@ public class JsonExport {
    * @see mitll.langtest.server.ScoreServlet#getJsonNestedChapters
    */
   public JsonExport(Map<String, Integer> phoneToCount,
-                    SectionHelper<CommonExercise> sectionHelper,
+                    ISection<CommonExercise> sectionHelper,
                     Collection<Long> preferredVoices,
                     boolean isEnglish) {
     this.phoneToCount = phoneToCount;
@@ -132,7 +132,7 @@ public class JsonExport {
   public <T extends CommonExercise> void addJSONExerciseExport(JSONObject jsonObject, Collection<T> exercises) {
     jsonObject.put(COUNT, exercises.size());
     jsonObject.put(UNIT_ORDER, addUnitsInOrder());
-    jsonObject.put(UNIT_CHAPTER_NESTING, addSections(sectionHelper.getSectionNodes()));
+    jsonObject.put(UNIT_CHAPTER_NESTING, addSections(sectionHelper.getSectionNodesForTypes()));
     jsonObject.put(ScoreServlet.CONTENT, getExercisesAsJson(exercises));
   }
 
@@ -216,7 +216,7 @@ public class JsonExport {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<>();
 
-    for (SectionNode node : sectionHelper.getSectionNodes()) {
+    for (SectionNode node : sectionHelper.getSectionNodesForTypes()) {
       String type = node.getType();
       typeToValues.put(type, Collections.singletonList(node.getName()));
       JSONObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio);

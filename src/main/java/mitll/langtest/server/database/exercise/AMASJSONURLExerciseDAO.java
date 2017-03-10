@@ -128,16 +128,19 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
   }
 
   /**
+   *
+   * TODO : put this back???
+   *
    * Use the unit/chapter meta data on exercies to build a hierarchy
    * @param exercises
    */
   private void recordHierarchy(Collection<AmasExerciseImpl> exercises) {
     for (AmasExerciseImpl ex : exercises) {
-      Collection<SectionHelper.Pair> pairs = new ArrayList<>();
+      Collection<Pair> pairs = new ArrayList<>();
       for (Map.Entry<String, String> pair : ex.getUnitToValue().entrySet()) {
         pairs.add(sectionHelper.addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
       }
-      sectionHelper.addAssociations(pairs);
+      //sectionHelper.addAssociations(pairs);
     }
   }
 
@@ -273,7 +276,7 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
    * @return
    */
   @Override
-  public SectionHelper<AmasExerciseImpl> getSectionHelper() {
+  public ISection<AmasExerciseImpl> getSectionHelper() {
     return sectionHelper;
   }
 

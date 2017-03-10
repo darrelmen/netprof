@@ -220,7 +220,7 @@ public class JSONExportTest extends JsonExport {
 //    List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
 //
 //    logger.info("Got " + rawExercises.size());
-//    for (SectionNode node : exerciseDAO.getSectionHelper().getSectionNodes()) {
+//    for (SectionNode node : exerciseDAO.getSectionHelper().getSectionNodesForTypes()) {
 //      Collection<CommonExercise> exercisesForSelectionState = exerciseDAO.getSectionHelper().getExercisesForSelectionState(node.getType(), node.getName());
 //      logger.info("for " + node + " got " + exercisesForSelectionState.size());
 //    }

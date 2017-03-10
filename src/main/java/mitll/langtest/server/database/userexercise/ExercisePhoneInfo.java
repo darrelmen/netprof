@@ -43,6 +43,7 @@ public class ExercisePhoneInfo {
   private static final Logger logger = LogManager.getLogger(ExercisePhoneInfo.class);
 
   private int numPhones = 0;
+  private int numPhones2 = 0;
   /**
    * Unique set...?
    */
@@ -56,6 +57,10 @@ public class ExercisePhoneInfo {
   public ExercisePhoneInfo() {
   }
 
+  /**
+   * @see SlickUserExerciseDAO#fromSlickToExercise
+   * @param phoneString
+   */
   public ExercisePhoneInfo(String phoneString) {
     String[] split = phoneString.split("[,;]");
 //    List<String> phones = new ArrayList<>();
@@ -105,5 +110,13 @@ public class ExercisePhoneInfo {
 
   public Map<String, ExerciseToPhone.Info> getWordToInfo() {
     return wordToInfo;
+  }
+
+  public int getNumPhones2() {
+    return numPhones2;
+  }
+
+  public void setNumPhones2(int numPhones2) {
+    this.numPhones2 = numPhones2;
   }
 }

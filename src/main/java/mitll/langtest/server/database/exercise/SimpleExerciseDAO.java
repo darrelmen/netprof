@@ -64,7 +64,7 @@ public interface SimpleExerciseDAO<T extends CommonShell & HasUnitChapter> {
 
   int getNumExercises();
 
-  SectionHelper<T> getSectionHelper();
+  ISection<T> getSectionHelper();
 
   void reload();
 

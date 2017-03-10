@@ -54,11 +54,17 @@ public class Lesson<T extends Shell> {
    * @param unit
    */
   Lesson(String unit) { this.unit = unit; }
+
+  /**
+   * @see SectionHelper#addUnitNameEntry
+   * @param e
+   */
   public void addExercise(T e) { exerciseList.add(e); }
   public boolean remove(T exercise) {
     return exerciseList.remove(exercise);
   }
   public Collection<T> getExercises() { return Collections.unmodifiableList(exerciseList); }
+  public int size() { return exerciseList.size(); }
 
   public String toString() {
     return "Lesson '" + unit + "' " + exerciseList.size() + " exercises" +

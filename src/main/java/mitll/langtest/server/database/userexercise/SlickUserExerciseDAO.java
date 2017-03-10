@@ -35,9 +35,7 @@ package mitll.langtest.server.database.userexercise;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.DBExerciseDAO;
-import mitll.langtest.server.database.exercise.PronunciationLookup;
-import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -86,7 +84,7 @@ public class SlickUserExerciseDAO
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
   private IRefResultDAO refResultDAO;
-
+  public static final boolean ADD_PHONE_LENGTH = true;
   private SlickExercise unknownExercise;
 
   /**
@@ -118,7 +116,7 @@ public class SlickUserExerciseDAO
    * @param shared
    * @param projectID
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUserExercises
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addUserExercises
    */
   public SlickExercise toSlick(Exercise shared, int projectID) {
     Map<String, String> unitToValue = shared.getUnitToValue();
@@ -148,13 +146,19 @@ public class SlickUserExerciseDAO
         never);
   }
 
+  private List<String> typeOrder = null;
+
   /**
    * @return
    */
   List<String> getTypeOrder() {
+    if (typeOrder == null) {
 //    logger.info("getTypeOrder : exercise DAO "+ exerciseDAO);
-    List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
-    if (typeOrder.isEmpty()) typeOrder = exerciseDAO.getTypeOrder();
+      typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
+      if (typeOrder.isEmpty()) {
+        typeOrder = exerciseDAO.getTypeOrder();
+      }
+    }
     return typeOrder;
   }
 
@@ -184,7 +188,7 @@ public class SlickUserExerciseDAO
    * @return
    * @paramx isPredef
    * @see #toSlick
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addContextExercises
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addContextExercises
    */
   public SlickExercise toSlick(CommonExercise shared,
                                @Deprecated boolean isOverride,
@@ -280,9 +284,10 @@ public class SlickUserExerciseDAO
    */
   private Exercise fromSlickToExercise(SlickExercise slick,
                                        Collection<String> typeOrder,
-                                       SectionHelper<CommonExercise> sectionHelper,
+                                       ISection<CommonExercise> sectionHelper,
                                        Map<Integer, ExercisePhoneInfo> exToPhones,
-                                       PronunciationLookup lookup) {
+                                       PronunciationLookup lookup,
+                                       List<List<Pair>> allPairs) {
     int id = slick.id();
     Exercise exercise = new Exercise(
         id,
@@ -309,10 +314,22 @@ public class SlickUserExerciseDAO
 
     if (exercisePhoneInfo == null) {
       String pronunciations = lookup.getPronunciations(slick.foreignlanguage(), slick.transliteration());
+
+      int n2 =lookup.getNumPhones(slick.foreignlanguage(), slick.transliteration());
+
       exercisePhoneInfo = pronunciations.isEmpty() ? new ExercisePhoneInfo() : new ExercisePhoneInfo(pronunciations);
+
+      exercisePhoneInfo.setNumPhones2(n2);
+
+      if (slick.english().equals("address")) {
+        logger.info("ex " + slick);
+        logger.info("ex " + slick.foreignlanguage());
+        logger.info("pronunciations " + pronunciations);
+        logger.info("exercisePhoneInfo " + exercisePhoneInfo);
+      }
     }
 
-    boolean added = addPhoneInfo(slick, typeOrder, sectionHelper, exercise, exercisePhoneInfo);
+    boolean added = addPhoneInfo(slick, typeOrder, sectionHelper, exercise, exercisePhoneInfo, allPairs);
 
     return exercise;
   }
@@ -327,9 +344,10 @@ public class SlickUserExerciseDAO
    */
   private boolean addPhoneInfo(SlickExercise slick,
                                Collection<String> typeOrder,
-                               SectionHelper<CommonExercise> sectionHelper,
+                               ISection<CommonExercise> sectionHelper,
                                Exercise exercise,
-                               ExercisePhoneInfo exercisePhoneInfo) {
+                               ExercisePhoneInfo exercisePhoneInfo,
+                               List<List<Pair>> allPairs) {
     Map<String, String> unitToValue = getUnitToValue(slick, typeOrder);
 
     Collection<String> phones = exercisePhoneInfo == null ? null : exercisePhoneInfo.getPhones();
@@ -339,36 +357,49 @@ public class SlickUserExerciseDAO
     boolean addedPhones = false;
     if (slick.ispredef() && !slick.iscontext()) {
       //    addExerciseToSectionHelper(sectionHelper, unitToValue, exercise);
-      List<SectionHelper.Pair> pairs = getPairs(sectionHelper, unitToValue, exercise);
+      List<Pair> pairs = getPairs(sectionHelper, unitToValue, exercise);
       if (phones == null) {
 //        logger.warn("no phones for " + id);
       } else {
         addedPhones = true;
-        for (String phone : phones) {
-          pairs.add(sectionHelper.getPairForExerciseAndLesson(exercise, SOUND, phone));
-        }
 
         // TODO : maybe put back phone length later ???
-/*        if (ADD_PHONE_LENGTH) {
-          int numPhones = exercisePhoneInfo.getNumPhones();
+        if (ADD_PHONE_LENGTH) {
+          int numPhones = exercisePhoneInfo.getNumPhones2();
 
-          int choice = range.get(0);
+    /*      int choice = range.get(0);
           for (int r : range) {
             i++;
             if (numPhones <= r) {
               choice = i;
               break;
             }
+          }*/
+
+          //   String label = "" + choice;
+
+          String label = "" + numPhones;
+          if (numPhones >= max) {
+            label = ">" + (max - 1);
           }
-          String label = "" + choice;
-//        if (numPhones >= max) {
-//          label = ">" + (max - 1);
-//        }
           pairs.add(sectionHelper.getPairForExerciseAndLesson(exercise, DIFFICULTY, label));
-        }*/
+        }
+
+        // need to make a copy
+        for (String phone : phones) {
+          List<Pair> copy = new ArrayList<>(pairs);
+          copy.add(sectionHelper.getPairForExerciseAndLesson(exercise, SOUND, phone));
+
+  /*        if (slick.unit().equals("1") && slick.lesson().equals("1")) {
+            logger.info("for " + slick.id() + " " + slick.english() + " " + slick.foreignlanguage() + " (" +
+                exercisePhoneInfo.getNumPhones() +
+                ") " + copy);
+          }*/
+          allPairs.add(copy);
+        }
       }
 
-      sectionHelper.addAssociations(pairs);
+      // sectionHelper.addAssociations(pairs);
       return addedPhones;
     } else {
       exercise.setUnitToValue(unitToValue);
@@ -376,25 +407,34 @@ public class SlickUserExerciseDAO
     }
   }
 
-  private List<SectionHelper.Pair> getPairs(SectionHelper<CommonExercise> sectionHelper,
-                                            Map<String, String> unitToValue,
-                                            Exercise exercise) {
-    List<SectionHelper.Pair> pairs = new ArrayList<>();
+  /**
+   * @param sectionHelper
+   * @param unitToValue
+   * @param exercise
+   * @return
+   * @see #addPhoneInfo
+   */
+  private List<Pair> getPairs(ISection<CommonExercise> sectionHelper,
+                              Map<String, String> unitToValue,
+                              Exercise exercise) {
+    List<Pair> pairs = new ArrayList<>();
     for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
       pairs.add(getPair(sectionHelper, exercise, pair));
     }
     return pairs;
   }
 
-  private SectionHelper.Pair getPair(SectionHelper<CommonExercise> sectionHelper,
-                                     Exercise exercise,
-                                     Map.Entry<String, String> pair) {
+  private Pair getPair(ISection<CommonExercise> sectionHelper,
+                       Exercise exercise,
+                       Map.Entry<String, String> pair) {
     return sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue());
   }
 
-  int c = 0;
+  private int c = 0;
 
   /**
+   * Assumes at most two levels stored with each exercise.
+   *
    * @param slick
    * @param typeOrder
    * @return
@@ -406,6 +446,7 @@ public class SlickUserExerciseDAO
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
     boolean firstEmpty = slick.unit().isEmpty();
+
     if (firstEmpty && slick.ispredef()) {
       unitToValue.put(first, "1");
       if (c++ < 100 || c % 100 == 0) logger.warn("getUnitToValue (" + c +
@@ -414,7 +455,8 @@ public class SlickUserExerciseDAO
     } else {
       unitToValue.put(first, slick.unit());
     }
-    if (!second.isEmpty()) {
+
+    if (!second.isEmpty() && !second.equals(SOUND)) {
       if (slick.ispredef()) {
         boolean empty = slick.lesson().trim().isEmpty();
         unitToValue.put(second, empty ? "1" : slick.lesson());
@@ -469,13 +511,19 @@ public class SlickUserExerciseDAO
    * @see #getContextByProject
    */
   private List<CommonExercise> getExercises(Collection<SlickExercise> all,
-                                            Collection<String> typeOrder,
-                                            SectionHelper<CommonExercise> sectionHelper,
-                                            Map<Integer, ExercisePhoneInfo> exToPhones, PronunciationLookup lookup) {
+                                            List<String> typeOrder,
+                                            ISection<CommonExercise> sectionHelper,
+                                            Map<Integer, ExercisePhoneInfo> exToPhones,
+                                            PronunciationLookup lookup) {
     List<CommonExercise> copy = new ArrayList<>();
+
+    //List<String> ordered = new (typeOrder);
+
+    List<List<Pair>> allPairs = new ArrayList<>();
     for (SlickExercise userExercise : all) {
-      copy.add(fromSlickToExercise(userExercise, typeOrder, sectionHelper, exToPhones, lookup));
+      copy.add(fromSlickToExercise(userExercise, typeOrder, sectionHelper, exToPhones, lookup, allPairs));
     }
+    sectionHelper.rememberTypesInOrder(typeOrder, allPairs);
     return copy;
   }
 
@@ -591,8 +639,11 @@ public class SlickUserExerciseDAO
    */
   public List<CommonExercise> getByProject(int projectid,
                                            List<String> typeOrder,
-                                           SectionHelper<CommonExercise> sectionHelper,
-                                           Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject, PronunciationLookup lookup) {
+                                           ISection<CommonExercise> sectionHelper,
+                                           Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject,
+                                           PronunciationLookup lookup) {
+
+    logger.info("getByProject type order " + typeOrder);
     // Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject = refResultDAO.getExerciseToPhoneForProject(projectid);
     return getExercises(dao.getAllPredefByProject(projectid), typeOrder, sectionHelper, exerciseToPhoneForProject, lookup);
   }
@@ -606,8 +657,11 @@ public class SlickUserExerciseDAO
    * @return
    * @see DBExerciseDAO#readExercises
    */
-  public List<CommonExercise> getContextByProject(int projectid, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper,
-                                                  Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject, PronunciationLookup lookup) {
+  public List<CommonExercise> getContextByProject(int projectid,
+                                                  List<String> typeOrder,
+                                                  ISection<CommonExercise> sectionHelper,
+                                                  Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject,
+                                                  PronunciationLookup lookup) {
     return getExercises(dao.getAllContextPredefByProject(projectid), typeOrder, sectionHelper, exerciseToPhoneForProject, lookup);
   }
 
@@ -756,8 +810,7 @@ public class SlickUserExerciseDAO
   }
 
   public Map<Integer, Collection<SlickExerciseAttributeJoin>> getAllJoinByProject(int projid) {
-    Map<Integer, Collection<SlickExerciseAttributeJoin>> objectCollectionMap = attributeJoinDAOWrapper.allByProject(projid);
-    return objectCollectionMap;
+    return attributeJoinDAOWrapper.allByProject(projid);
   }
 
   public Map<Integer, ExerciseAttribute> getIDToPair(int projid) {

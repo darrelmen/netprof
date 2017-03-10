@@ -61,7 +61,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   private static final int SLOW_MILLIS = 50;
   private static final int WARN_DUR = 100;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   public static final int MIN_DEBUG_DURATION = 30;
   public static final int MIN_WARN_DURATION = 1000;
@@ -108,7 +108,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         ExerciseListWrapper<T> exerciseListWrapper = projidToWrapper.get(projectID);
         if (exerciseListWrapper != null) {
           logger.info("Returning cached exercises " + exerciseListWrapper);
-          return exerciseListWrapper;
+
+          return new ExerciseListWrapper<T>(request.getReqID(),
+              exerciseListWrapper.getExercises(),
+              exerciseListWrapper.getFirstExercise());
+          //  return exerciseListWrapper;
         }
       }
     }
@@ -374,8 +378,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     // TODO : do this the right way vis-a-vis type safe collection...
 
     List<T> exerciseShells1 = (List<T>) exerciseShells;
+    if (exerciseShells1.isEmpty() && firstExercise !=  null) {
+      logger.error("huh? no exercises");
+    }
     ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);
-    //logger.debug("returning " + exerciseListWrapper);
+    logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper);
     return exerciseListWrapper;
   }
 
@@ -885,7 +892,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         //   sortExercises("", commonExercises);
 //        }
 
-        return new ExerciseListWrapper<AmasExerciseImpl>(reqID, new ArrayList<>(exercises), null);
+        return new ExerciseListWrapper<>(reqID, new ArrayList<>(exercises), null);
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         Collection<AmasExerciseImpl> exercisesForSelectionState1 =

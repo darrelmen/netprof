@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.amas;
 
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.SimpleExerciseDAO;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -94,7 +95,7 @@ public class FileExerciseDAO<T extends CommonShell & HasUnitChapter> implements 
   }
 
   @Override
-  public SectionHelper<T> getSectionHelper() {
+  public ISection<T> getSectionHelper() {
     return sectionHelper;
   }
 

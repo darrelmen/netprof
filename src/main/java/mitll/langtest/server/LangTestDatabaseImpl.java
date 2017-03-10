@@ -36,8 +36,7 @@ import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
-import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
@@ -120,7 +119,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
   }
 
-  protected SectionHelper<CommonExercise> getSectionHelper() {
+  protected ISection<CommonExercise> getSectionHelper() {
     return super.getSectionHelper();
   }
 

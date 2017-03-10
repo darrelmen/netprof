@@ -47,7 +47,7 @@ import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.table.ListBoxSelect;
 import mitll.langtest.client.table.TableSelect;
-import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.SectionNode;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -66,6 +66,7 @@ public class ListSectionWidget implements SectionWidget {
    * @param type
    * @param nodes
    * @param singleSelectExerciseList
+   * @see SimpleSelectExerciseList#addChoiceWidgets
    */
   ListSectionWidget(String type,
                     Collection<SectionNode> nodes,
@@ -73,7 +74,7 @@ public class ListSectionWidget implements SectionWidget {
     this.type = type;
     this.nodes = nodes;
     this.singleSelectExerciseList = singleSelectExerciseList;
-    //  logger.info("made menu " + type + " with " + nodes.size());
+    logger.info("ListSectionWidget made menu " + type + " with " + nodes.size());
   }
 
   private int num = 0;

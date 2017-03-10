@@ -38,15 +38,15 @@ import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.npdata.dao.SlickExerciseAttribute;
 import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickRelatedExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import scala.tools.cmd.gen.AnyVals;
 
 import java.util.*;
+
+import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.SOUND;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
@@ -110,14 +110,25 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   List<CommonExercise> readExercises() {
     try {
-      List<String> typeOrder = Arrays.asList(project.first(), project.second());
+      List<String> typeOrder = new ArrayList<>();
+
+      typeOrder.add(project.first());
+
+      if (!project.second().isEmpty()) typeOrder.add(project.second());
+      typeOrder.add(SOUND);
+      if (SlickUserExerciseDAO.ADD_PHONE_LENGTH) {
+        typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
+      }
 
       int projid = project.id();
 
       Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
           userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
 
-      logger.info("readExercises read " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo for " + projid);
+      logger.info("readExercises" +
+          "\n\tread " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+          "\n\tfor " + projid +
+          "\n\ttype order " + typeOrder);
 
       List<CommonExercise> allNonContextExercises =
           userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject, fullProject);
@@ -127,8 +138,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       logger.info("found " + allByProject.size() + " attributes");
 
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
-
-      // Set<ExerciseAttribute> attributes = new HashSet<>();
 
       for (CommonExercise exercise : allNonContextExercises) {
         int id = exercise.getID();
@@ -141,7 +150,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
             attributes.add(attribute);
           }
           exercise.setAttributes(attributes);
-          logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
+          //   logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
         }
       }
       logger.info("readExercises project " + project +
@@ -168,7 +177,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           if (context != null) {
             root.getMutable().addContextExercise(context);
             attached++;
-          } else if (c++ < 10) {
+          } else if (c++ < 2) {
             logger.warn("1 " + prefix + " didn't attach " + relatedExercise + "" + " for\n" + root);
           }
         } else if (c++ < 10) {
