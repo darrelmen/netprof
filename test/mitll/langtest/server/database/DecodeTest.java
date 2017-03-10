@@ -358,7 +358,6 @@ public class DecodeTest extends BaseTest {
   public void testMSAProgress2() {
     doProgressReport("msa");
   }
-
   @Test
   public void testHindi() {
     doProgressReport("hindi");
@@ -372,6 +371,11 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testMandarinProgress() {
     doProgressReport("mandarin");
+  }
+
+  @Test
+  public void testMandarinTradProgress() {
+    doProgressReport("mandarinTrad");
   }
 
   @Test

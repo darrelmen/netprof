@@ -348,8 +348,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " +
             id);
       if (isStaleResponse(result)) {
-        if (DEBUG || true)
-          logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
+
+        if (DEBUG)
+           logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
               " b/c before latest " + lastReqID);
       } else {
         gotExercises(result);
@@ -358,7 +359,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         for (ListChangeListener<T> listener : listeners) {
           listener.listChanged(exercises, "");
         }
-        if (DEBUG || true) logger.info("\tExerciseList.SetExercisesCallbackWithID onSuccess id = " + id);
+
+        if (DEBUG) logger.info("\tExerciseList.SetExercisesCallbackWithID onSuccess id = " + id);
 
         pushFirstSelection(id, "");
       }

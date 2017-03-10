@@ -79,10 +79,11 @@ import java.util.logging.Logger;
 public class UserPassLogin extends UserDialog {
   private static final String USERNAME_BOX_SIGN_IN = "Username_Box_SignIn";
   public static final String USER_NAME_BOX = "UserNameBox";
+  public static final int MAX_LENGTH = 25;
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
- // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
+  // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
@@ -276,19 +277,22 @@ public class UserPassLogin extends UserDialog {
   }
 
   private Panel getLinksToSites() {
-    Panel hp = new HorizontalPanel();
+    DivWidget hp = new DivWidget();
     hp.getElement().setId("UserPassLogin_linksToSites");
-    hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    hp.getElement().getStyle().setMarginTop(40, Style.Unit.PX);
+    hp.getElement().getStyle().setClear(Style.Clear.RIGHT);
 
     String sitePrefix = props.getSitePrefix();
     for (String site : props.getSites()) {
-      Anchor w = new Anchor(site, sitePrefix + site.replaceAll("Mandarin", "CM"));
+      String s = site.equals("Mandarin") ? site.replaceAll("Mandarin", "CM") : site;
+      Anchor w = new Anchor(site, sitePrefix + s);
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+      w.addStyleName("floatLeftList");
+
       hp.add(w);
     }
     return hp;
   }
-
 
   /**
    * @param signInForm
@@ -301,7 +305,7 @@ public class UserPassLogin extends UserDialog {
 
     makeSignInUserName(fieldset);
 
-    password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, MAX_LENGTH, PASSWORD);
     password.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -773,7 +777,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void makeSignUpPassword(Fieldset fieldset, final UIObject emailBox) {
-    signUpPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    signUpPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, MAX_LENGTH, PASSWORD);
     signUpPassword.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {

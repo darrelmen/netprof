@@ -34,8 +34,10 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.sql.Connection;
+import java.util.Collection;
 
 /**
  * Created with IntelliJ IDEA.
@@ -61,4 +63,8 @@ public interface Database {
   String getLanguage();
 
   LogAndNotify getLogAndNotify();
+
+  CommonExercise getExercise(String id);
+
+  Collection<String> getTypeOrder();
 }

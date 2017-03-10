@@ -64,25 +64,31 @@ public class ReportAllTest extends BaseTest {
 
   @Test
   public void testMaleFemaleRefCoverageEgyptian() {
-    Map<String, Float> maleFemaleProgress = getDatabase("egyptian").getMaleFemaleProgress();
-    logger.info(maleFemaleProgress.toString());
+    logProgress("egyptian");
   }
 
   @Test
   public void testMaleFemaleRefCoverageFarsi() {
-    Map<String, Float> maleFemaleProgress = getDatabase("farsi").getMaleFemaleProgress();
-    logger.info(maleFemaleProgress.toString());
+    logProgress("farsi");
   }
 
   @Test
   public void testMaleFemaleRefCoverageKorean() {
-    Map<String, Float> maleFemaleProgress = getDatabase("korean").getMaleFemaleProgress();
-    logger.info(maleFemaleProgress.toString());
+    logProgress("korean");
   }
 
   @Test
   public void testMaleFemaleRefCoverageMandarin() {
-    Map<String, Float> maleFemaleProgress = getDatabase("mandarin").getMaleFemaleProgress();
+    logProgress("mandarin");
+  }
+
+  @Test
+  public void testMaleFemaleRefCoverageLevantine() {
+    logProgress("levantine");
+  }
+
+  private void logProgress(String mandarin) {
+    Map<String, Float> maleFemaleProgress = getDatabase(mandarin).getMaleFemaleProgress();
     logger.info(maleFemaleProgress.toString());
   }
 

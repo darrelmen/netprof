@@ -170,10 +170,7 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
   }
 
   private boolean addEntry(T exercise, String token) {
-    //boolean debug = exercise.getID().equals("14");
-    //if (debug) logger.warn("adding '" + token + "' : '" + token.toLowerCase() + "'");
-
-    ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(token.toLowerCase(), exercise);
+     ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(token.toLowerCase(), exercise);
     //if (textEntityDescription.isEmpty()) logger.error("addEntry - huh? "+textEntityDescription.getNormalizedValue() + " is empty " + exercise.getID());
     return addEntryToTrie(textEntityDescription);
   }

@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.PathHelper;
+
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -93,9 +93,8 @@ public class ImportCourseExamples {
     // add a audio reference to the audio ref table for each recording
     AudioDAO audioDAO = npfRussian.getAudioDAO();
     //audioDAO.drop();
-    PathHelper pathHelper = npfRussian.getPathHelper();
-    copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir, pathHelper);
-    copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir, pathHelper);
+    copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
+    copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
   }
 
   private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
@@ -128,7 +127,7 @@ public class ImportCourseExamples {
 
   private static void copyAudio(Map<Long, Map<String, Result>> userToResultsRegular, Map<Long, Long> oldToNew,
                                 AudioDAO audioDAO,
-                                String destAudioDir, String candidateAudioDir, PathHelper pathHelper) {
+                                String destAudioDir, String candidateAudioDir) {
     int count = 0;
     int bad = 0;
     for (Map.Entry<Long, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
@@ -142,7 +141,7 @@ public class ImportCourseExamples {
             " result = " + r.getUniqueID() + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.getAnswer());
         }
 
-        audioDAO.add(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer(), pathHelper);
+       //audioDAO.add(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());
 
         try {
           File destFile = new File(destAudioDir, r.getAnswer());

@@ -229,18 +229,18 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    */
   private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
     //    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
-    private final CommonExercise e;
+    //private final CommonExercise e;
 
     MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
-      this.e = e;
+    //  this.e = e;
     }
 
     @Override
     protected void enableNext() {
       super.enableNext();
       if (isCompleted()) {
-        showRecordedState(e);
+        showRecordedState(exercise);
       }
     }
 
@@ -295,7 +295,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
     @Override
     public void postAnswers(ExerciseController controller, HasID completedExercise) {
       super.postAnswers(controller, completedExercise);
-      tellOtherListExerciseDirty(e);
+      tellOtherListExerciseDirty(exercise);
     }
 
     /**

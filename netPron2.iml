@@ -58,11 +58,9 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/crtPashto" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/crtPashtoJune" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/dataCollectAdmin" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/farsi" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/farsi2" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/first" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/flashcard" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/levantine" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/mandarinClassroom" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/mandarinL1" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/pilot" />
@@ -98,7 +96,6 @@
     <orderEntry type="library" name="gwt" level="project" />
     <orderEntry type="library" name="lib2" level="project" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="lib1" level="project" />
     <orderEntry type="module" module-name="imagewriter" />
     <orderEntry type="module" module-name="Audioimage" />
     <orderEntry type="module-library">
@@ -130,5 +127,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="slf4j-log4j12-1.7.21" level="project" />
+    <orderEntry type="library" name="commons-logging-1.1.1" level="project" />
   </component>
 </module>

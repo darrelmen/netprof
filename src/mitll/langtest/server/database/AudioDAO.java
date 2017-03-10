@@ -36,11 +36,15 @@ import com.google.common.base.CharMatcher;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -782,18 +786,18 @@ public class AudioDAO extends DAO {
     float male = maleReg.size();
 
     regNotSlow.removeAll(maleSlowSpeed);
-//    logger.info("Reg not slow (" +regNotSlow.size()+     ") " + regNotSlow);
+    logger.info("Reg not slow (" + regNotSlow.size() + ") " + regNotSlow);
     Set<String> slowNotReg = new HashSet<>(maleSlowSpeed);
     slowNotReg.removeAll(origMaleReg);
-//    logger.info("Slow not reg (" +slowNotReg.size()+        ")" + slowNotReg);
+    logger.info("Slow not reg (" + slowNotReg.size() + ")" + slowNotReg);
 
-    HashSet<String> notreg = new HashSet<>(uniqueIDs);
+    Set<String> notreg = new HashSet<>(uniqueIDs);
     notreg.removeAll(origMaleReg);
-//    logger.info("not Reg  (" +notreg.size()+      ")" + new TreeSet<>(notreg) + " from " + uniqueIDs.size());
+    logger.info("not Reg  (" + notreg.size() + ")" + new TreeSet<>(notreg) + " from " + uniqueIDs.size());
 
-    HashSet<String> notslow = new HashSet<>(uniqueIDs);
+    Set<String> notslow = new HashSet<>(uniqueIDs);
     notslow.removeAll(maleSlowSpeed);
-//    logger.info("not slow (" +notslow.size()+      ")" + new TreeSet<>(notslow) + " from " + uniqueIDs.size());
+    logger.info("not slow (" + notslow.size() + ")" + new TreeSet<>(notslow) + " from " + uniqueIDs.size());
 
     femaleIDs = new HashSet<>(femaleIDs);
     femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);
@@ -802,6 +806,9 @@ public class AudioDAO extends DAO {
     Set<String> femaleSlowSpeed = new HashSet<>();
     float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs, exToTranscript, femaleReg);
     float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs, exToTranscript, femaleSlowSpeed);
+
+    List<CommonExercise> exercises = getMissingExercises(uniqueIDs, femaleReg);
+    writeMissing(exercises, "missingFemale");
 
     femaleReg.retainAll(femaleSlowSpeed);
     float female = femaleReg.size();
@@ -824,6 +831,29 @@ public class AudioDAO extends DAO {
     report.put(MALE_CONTEXT, cmale);
     report.put(FEMALE_CONTEXT, cfemale);
     return report;
+  }
+
+  private List<CommonExercise> getMissingExercises(Set<String> uniqueIDs, Set<String> femaleReg) {
+    Set<String> missingFemaleReg = new HashSet<>(uniqueIDs);
+    missingFemaleReg.removeAll(femaleReg);
+    TreeSet<Integer> integers = new TreeSet<>();
+    for (String id : new TreeSet<>(missingFemaleReg)) {
+//      logger.info("missing female " + id);
+      integers.add(Integer.parseInt(id));
+    }
+
+    List<CommonExercise> exercises = new ArrayList<>();
+    for (Integer id : integers) {
+//      logger.info("missing female " + id);
+      CommonExercise exercise = database.getExercise("" + id);
+      if (exercise == null) logger.error("missing ex " + id);
+      exercises.add(exercise);
+    }
+    return exercises;
+  }
+
+  private void writeMissing(List<CommonExercise> exercises, String missingFemale) {
+    new ExcelExport(database.getServerProps()).writeExcel(missingFemale + database.getLanguage() + ".xlsx", database.getTypeOrder(), exercises, database.getLanguage());
   }
 
   /**
@@ -938,7 +968,9 @@ public class AudioDAO extends DAO {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIds);
-      // logger.info("checking speed " + audioSpeed + " on " + userIds.size() + " users and " + uniqueIDs.size() + " ex ids");
+      boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
+      logger.info("checking speed " + audioSpeed + " on " + userIds.size() + " users and " + uniqueIDs.size() + " ex ids," +
+          " checkAudioTranscript " + checkAudioTranscript);
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
       String sql = "select " +
           "distinct " + Database.EXID + ", " +
@@ -953,12 +985,13 @@ public class AudioDAO extends DAO {
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
 
-      boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
 
 //    logger.info("Sql \n\t" + sql);
 
       boolean debug = false;
 //      String intersting = "5496";
+
+      Set<String> idsOfStaleExercises = new TreeSet<>();
 
       int c = 0;
       while (rs.next()) {
@@ -985,8 +1018,8 @@ public class AudioDAO extends DAO {
 //              }
               idsOfRecordedExercises.add(exid);
             } else {
-//              idsOfStaleExercises.add(exid);
-              logger.debug("getCountForGender skipping stale exid " + exid);
+              idsOfStaleExercises.add(exid);
+//              logger.debug("getCountForGender skipping stale exid " + exid);
             }
           } else {
             if (debug) {
@@ -1005,10 +1038,11 @@ public class AudioDAO extends DAO {
             "\n\tsql:\n\t" + sql);
       }
 
-/*
-      logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
-          " and stale " +idsOfStaleExercises.size());
-*/
+
+      logger.debug("getCountForGender : for " + audioSpeed +
+          (DEBUG ? ("\n\t" + sql) : "") +
+          "\n\tgot " + idsOfRecordedExercises.size() +
+          " recorded and stale " + idsOfStaleExercises.size() + " " + idsOfStaleExercises);
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);

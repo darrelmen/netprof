@@ -42,6 +42,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
@@ -63,14 +65,26 @@ public class ExcelExport {
     this.props = props;
   }
 
+  public void writeExcel(String file,
+                         Collection<String> typeOrder,
+                         Collection<CommonExercise> exercises,
+                         String language
+                         ) {
+    try {
+      writeExcelToStream(exercises,new FileOutputStream(file),typeOrder,language,false);
+    } catch (FileNotFoundException e) {
+      logger.error("got " +e);
+    }
+  }
+
   /**
    * @param exercises
    * @param out
    * @param typeOrder
    * @param language
    * @param isDefectList
-   * @see #writeToStream
-   * @see #addSpreadsheetToZip
+   * @seex #writeToStream
+   * @seex #addSpreadsheetToZip
    */
   public void writeExcelToStream(Collection<CommonExercise> exercises,
                                  OutputStream out,

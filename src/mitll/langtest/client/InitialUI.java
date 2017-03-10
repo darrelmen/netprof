@@ -397,8 +397,8 @@ public class InitialUI {
     style.setMarginTop(10, Style.Unit.PX);
 
     for (String site : props.getSites()) {
-      String siteChanged = site.endsWith("Mandarin") ? site.replaceAll("Mandarin", "CM") : site;
-      Anchor w = new Anchor(site, NPF_CLASSROOM_URL + siteChanged);
+       String siteChanged = site.equals("Mandarin") ? site.replaceAll("Mandarin", "CM") : site;
+       Anchor w = new Anchor(site, NPF_CLASSROOM_URL + siteChanged);
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       hp.add(w);
     }
