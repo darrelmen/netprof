@@ -44,6 +44,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -66,11 +67,12 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    */
   public SimpleSelectExerciseList(Panel secondRow,
                                   Panel currentExerciseVPanel,
-                                  ExerciseController controller, ListOptions listOptions) {
+                                  ExerciseController controller,
+                                  ListOptions listOptions) {
     super(currentExerciseVPanel, controller,
         listOptions.setShowTypeAhead(true)
 //        .setShowFirstNotCompleted(false)
-         );
+    );
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
@@ -128,9 +130,10 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
   }
 
   private void getTypeOrder(final FluidContainer container) {
-    typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    typeOrder = projectStartupInfo.getTypeOrder();
     //  logger.info("getTypeOrder type order is " + typeOrder);
-    addChoiceRow(controller.getProjectStartupInfo().getSectionNodes(), container, typeOrder);
+    addChoiceRow(projectStartupInfo.getSectionNodes(), container, typeOrder, projectStartupInfo.getTypeToDistinct());
   }
 
   private Panel firstTypeRow;
@@ -139,9 +142,13 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    * @param rootNodes
    * @param container
    * @param types
+   * @param typeToDistinct
    * @see #getTypeOrder
    */
-  private void addChoiceRow(Collection<SectionNode> rootNodes, final FluidContainer container, List<String> types) {
+  private void addChoiceRow(Collection<SectionNode> rootNodes,
+                            final FluidContainer container,
+                            List<String> types,
+                            Map<String, Set<String>> typeToDistinct) {
     logger.info("addChoiceRow for user = " + controller.getUser() + " got types " +
         types + " num root nodes " + rootNodes.size());
 
@@ -149,20 +156,14 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
       logger.warning("addChoiceRow : huh? types is empty?");
       return;
     }
-    //  showDefaultStatus();
-
     firstTypeRow = getChoicesRow();
     container.add(firstTypeRow);
 
     rootNodes = new SectionNodeItemSorter().getSortedItems(rootNodes);
-    addChoiceWidgets(rootNodes, types);
+    addChoiceWidgets(rootNodes, types, typeToDistinct);
     makeDefaultSelections();
 
-    firstTypeRow.add(getBottomRow());//downloadHelper.getDownloadButton());
-    //DivWidget bottomRow = getBottomRow();
-    //addBottomText(bottomRow);
-    //container.add(bottomRow);
-
+    firstTypeRow.add(getBottomRow());
     pushFirstListBoxSelection();
   }
 
@@ -173,54 +174,65 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
     return firstTypeRow;
   }
 
-  private void addChoiceWidgets(Collection<SectionNode> rootNodes, List<String> types) {
+  /**
+   * @param rootNodes
+   * @param types
+   * @see #addChoiceRow
+   */
+  private void addChoiceWidgets(Collection<SectionNode> rootNodes, List<String> types,
+                                Map<String, Set<String>> typeToDistinct) {
     ListSectionWidget parent = null;
     int i = 0;
 
+    logger.info("addChoiceWidgets for " + rootNodes.size() + " nodes and " + types.size() + " types " + types);
+    SectionNodeItemSorter sectionNodeItemSorter = new SectionNodeItemSorter();
     for (String type : types) {
-//      List<String> sectionsInType = new ArrayList<>();
-//      for (SectionNode node:rootNodes) {
-//        sectionsInType.add(node.getName());
-//      }
-      // if (!type.equals("Sound")) {
-      //   for (SectionNode node : rootNodes) logger.info("#" + (i++) + "\t" + node.getName());
-      // }
-      //List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
-      List<String> sectionsInType = getLabels(rootNodes);
+     // List<String> sectionsInType = getLabels(rootNodes);
+      Set<String> keys = typeToDistinct.get(type);
 
-      ListSectionWidget value = new ListSectionWidget(type, rootNodes, this);
+      if (keys == null) logger.warning("no type " + type + " in " + typeToDistinct.keySet());
+      List<String> sectionsInType = sectionNodeItemSorter.getSorted(keys);
+      logger.info("\taddChoiceWidgets for " + type + " : " + sectionsInType.size());
+
+      ListSectionWidget listSectionWidget = new ListSectionWidget(type, rootNodes, this, keys);
       if (parent != null) {
-        parent.addChild(value);
+        parent.addChild(listSectionWidget);
       }
-      parent = value;
-      sectionWidgetContainer.setWidget(type, value);
-      logger.info("for " + type + " : " + sectionsInType.size());
-      value.addChoices(firstTypeRow, type, sectionsInType);
+      parent = listSectionWidget;
+      sectionWidgetContainer.setWidget(type, listSectionWidget);
+      listSectionWidget.addChoices(firstTypeRow, type, sectionsInType);
 
       if (types.indexOf(type) < types.size() - 1) {
         rootNodes = getChildSectionNodes(rootNodes);
-        rootNodes = new SectionNodeItemSorter().getSortedItems(rootNodes);
+        rootNodes = sectionNodeItemSorter.getSortedItems(rootNodes);
       }
       i = 0;
     }
   }
 
+  /**
+   * @param rootNodes
+   * @return
+   * @see #addChoiceWidgets
+   */
   private List<SectionNode> getChildSectionNodes(Collection<SectionNode> rootNodes) {
     List<SectionNode> newNodes = new ArrayList<>();
     for (SectionNode node : rootNodes) {
-       logger.info("getChildSectionNodes " + node.getType() + " "+ node.getName());
+      logger.info("getChildSectionNodes " + node.getType() + " " + node.getName());
 
-     // Collection<SectionNode> children = node.getChildren();
+      // Collection<SectionNode> children = node.getChildren();
       Collection<SectionNode> children = node.getChildren();
 
-      if (!children.isEmpty() && !children.iterator().next().getType().equals("Sound")) {
+     // if (!children.isEmpty() && !children.iterator().next().getType().equals("Sound")) {
         //    for (SectionNode child : children) {
         //      logger.info("\tAdding " + child.getType() + " "+ child.getName());
         //   }
-      }
+     // }
       newNodes.addAll(children);
-
     }
+
+    logger.info("getChildSectionNodes found " + newNodes.size());
+
     return newNodes;
   }
 
@@ -254,6 +266,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
         items.add(n.getName());
       }
     }
+    logger.info("getLabels " + nodes.size() + " : " +items.size());
     return items;
   }
 
@@ -372,9 +385,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    * @see #addChoiceRow
    */
   private void makeDefaultSelections() {
-    for (SectionWidget v : sectionWidgetContainer.getValues()) {
-      v.selectFirst();
-    }
+    for (SectionWidget v : sectionWidgetContainer.getValues()) v.selectFirst();
   }
 
   protected SectionWidgetContainer<ListSectionWidget> getSectionWidgetContainer() {

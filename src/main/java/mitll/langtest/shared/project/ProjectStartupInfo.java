@@ -39,6 +39,7 @@ import mitll.langtest.shared.user.User;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ProjectStartupInfo implements IsSerializable {
   private Map<String, String> properties;
@@ -47,6 +48,7 @@ public class ProjectStartupInfo implements IsSerializable {
   private int projectid;
   private String language;
   private boolean hasModel;
+  private Map<String, Set<String>> typeToDistinct;
 
   public ProjectStartupInfo() {
   } // for serialization
@@ -63,13 +65,15 @@ public class ProjectStartupInfo implements IsSerializable {
                             List<String> typeOrder,
                             Collection<SectionNode> sectionNodes,
                             int projectid,
-                            String language, boolean hasModel) {
+                            String language, boolean hasModel,
+                            Map<String, Set<String>> typeToDistinct) {
     this.properties = properties;
     this.typeOrder = typeOrder;
     this.sectionNodes = sectionNodes;
     this.projectid = projectid;
     this.language = language;
     this.hasModel = hasModel;
+    this.typeToDistinct = typeToDistinct;
   }
 
   public Map<String, String> getProperties() {
@@ -108,5 +112,9 @@ public class ProjectStartupInfo implements IsSerializable {
         " Order " + getTypeOrder() +
         sectionInfo +
         " has model " + hasModel;
+  }
+
+  public Map<String, Set<String>> getTypeToDistinct() {
+    return typeToDistinct;
   }
 }

@@ -44,10 +44,13 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ItemSorter {
+
+  public static final String PREFIX = ">";
+
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList
    * @param sections
    * @return
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList
    */
   public List<String> getSortedItems(Collection<String> sections) {
     List<String> items = new ArrayList<String>(sections);
@@ -60,30 +63,30 @@ public class ItemSorter {
         isInt = false;
       }
     }
+
     if (isInt) {
       Collections.sort(items, new Comparator<String>() {
         @Override
         public int compare(String o1, String o2) {
-          int first  = Integer.parseInt(dropGreater(o1));
+          int first = Integer.parseInt(dropGreater(o1));
           int second = Integer.parseInt(dropGreater(o2));
           return first < second ? -1 : first > second ? +1 : 0;
         }
       });
-    }
-    else {
+    } else {
       sortWithCompoundKeys(items);
     }
     return items;
   }
 
-  public String dropGreater(String item) {
-    if (item.startsWith(">")) item = item.substring(1,item.length());
+  private String dropGreater(String item) {
+    if (item.startsWith(PREFIX)) item = item.substring(1, item.length());
     return item;
   }
 
   /**
-   * @see #getSortedItems(java.util.Collection)
    * @param items
+   * @see #getSortedItems(java.util.Collection)
    */
   private void sortWithCompoundKeys(List<String> items) {
     Collections.sort(items, new Comparator<String>() {
@@ -102,8 +105,7 @@ public class ItemSorter {
           if (first.length == 1) {
             System.err.println("huh? couldn't split " + o1);
             right1 = "";
-          }
-          else {
+          } else {
             right1 = first[1];
           }
         } else if (o1.contains(" ")) {

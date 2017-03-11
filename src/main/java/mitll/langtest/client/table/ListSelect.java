@@ -78,8 +78,6 @@ public class ListSelect {
         reallyGotSelection(s);
       }
     });*/
-
-
     ListBox box = new ListBox();
     for (String value : values) {
       box.addItem(value);
@@ -97,8 +95,6 @@ public class ListSelect {
     return sButton;
   }
 
-
-
   public interface Selection {
     void gotSelection(String s);
   }
@@ -109,4 +105,3 @@ public class ListSelect {
     singleSelectExerciseList.gotSelection();
   }
 }
-

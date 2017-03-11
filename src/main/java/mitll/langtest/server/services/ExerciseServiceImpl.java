@@ -329,7 +329,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       exercisesForState = trie.getExercises(prefix);
     }
 
-    if (exercisesForState.isEmpty()) { // allow lookup by id
+    if (exercisesForState.isEmpty() && !prefix.isEmpty()) { // allow lookup by id
       CommonExercise exercise = getExercise(prefix, incorrectFirst);
       if (exercise != null) exercisesForState = Collections.singletonList(exercise);
     }

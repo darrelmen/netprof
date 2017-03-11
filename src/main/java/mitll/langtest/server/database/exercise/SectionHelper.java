@@ -133,7 +133,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     if (childType == null) return;
     else {
-     // logger.info("recurseAndCount on " + node.getName() + " child type " + childType);
+      // logger.info("recurseAndCount on " + node.getName() + " child type " + childType);
 
       Set<String> members = typeToCount.get(childType);//, new HashSet<>());
       if (members == null) {
@@ -182,7 +182,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }*/
 
   private void putSoundAtEnd(List<String> types) {
-  //  String sound = SOUND;
+    //  String sound = SOUND;
     putAtEnd(types, SOUND);
     putAtEnd(types, DIFFICULTY);
   }
@@ -723,6 +723,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     logger.info("rememberTypesFor type->count " + typeToCount);
 
+  }
+
+  public Map<String, Set<String>> getTypeToDistinct() {
+    return typeToCount;
   }
 
   private SectionNode rememberOne(SectionNode child, List<Pair> pairs) {
