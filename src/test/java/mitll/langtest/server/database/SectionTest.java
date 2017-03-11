@@ -209,7 +209,7 @@ public class SectionTest extends BaseTest {
       logger.info("Got " + firstNode);
     }
     if (firstNode != null) {
-      firstNode = sectionHelper.getNode(firstNode,"Sound","ng");
+      firstNode = sectionHelper.getNode(firstNode,"Sound","b");
       logger.info("Got " + firstNode);
     }
     Collection<CommonExercise> unit = sectionHelper.getExercisesForSelectionState("Unit", "1");
@@ -225,11 +225,11 @@ public class SectionTest extends BaseTest {
     unit = sectionHelper.getExercisesForSelectionState(search);
     logger.info("for " +search + " found " + unit.size());
 
-    search.put("Sound",Collections.singleton("ng"));
+    search.put("Sound",Collections.singleton("b"));
     unit = sectionHelper.getExercisesForSelectionState(search);
     logger.info("for " +search + " found " + unit.size());
 
-    search.put("Difficulty",Collections.singleton("2"));
+    search.put("Difficulty",Collections.singleton("7"));
     unit = sectionHelper.getExercisesForSelectionState(search);
     logger.info("for " +search + " found " + unit.size());
 

@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -48,6 +49,7 @@ import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -262,7 +264,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * So if we have an existing history token, use it to set current selection.
    * If not, push the current state of the list boxes and act on it
    *
-   * @see FlexSectionExerciseList#setSizesAndPushFirst()
+   * @see SimpleSelectExerciseList#addChoiceRow
    */
   protected void pushFirstListBoxSelection() {
     if (History.getToken().isEmpty()) {

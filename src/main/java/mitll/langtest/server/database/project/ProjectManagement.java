@@ -44,6 +44,7 @@ import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
@@ -584,8 +585,11 @@ public class ProjectManagement implements IProjectManagement {
 //        Collection<SectionNode> sectionNodesForTypes =
 //            project.getSectionHelper().getSectionNodesForTypes(typeOrder);
 
+        ISection<CommonExercise> sectionHelper = project.getSectionHelper();
         Collection<SectionNode> sectionNodesForTypes =
-            project.getSectionHelper().getSectionNodesForTypes();
+            sectionHelper.getSectionNodesForTypes();
+
+;
 
         ProjectStartupInfo startupInfo = new ProjectStartupInfo(
             serverProps.getProperties(),
@@ -593,7 +597,8 @@ public class ProjectManagement implements IProjectManagement {
             sectionNodesForTypes,
             project1.id(),
             project1.language(),
-            hasModel(project1));
+            hasModel(project1),
+            sectionHelper.getTypeToDistinct());
 
         logger.info("setStartupInfo : For " + userWhere +
             "\n\t " + typeOrder +

@@ -51,7 +51,6 @@ import mitll.langtest.shared.exercise.SectionNode;
 
 import java.util.*;
 import java.util.logging.Logger;
-//import java.util.logging.Logger;
 
 public class MenuSectionWidget implements SectionWidget {
   private final Logger logger = Logger.getLogger("MenuSectionWidget");
@@ -72,7 +71,7 @@ public class MenuSectionWidget implements SectionWidget {
     this.type = type;
     this.nodes = nodes;
     this.singleSelectExerciseList = singleSelectExerciseList;
-    //  logger.info("made menu " + type + " with " + nodes.size());
+     logger.info("MenuSectionWidget made menu " + type + " with " + nodes.size());
   }
 
   private int num = 0;
@@ -257,12 +256,13 @@ public class MenuSectionWidget implements SectionWidget {
     logger.info("gotSelection " + type + " : " + possibleValues);
     boolean isAll = !possibleValues.isEmpty() && possibleValues.iterator().next().equals(TableSelect.ALL);
 
-    logger.info("examine " + nodes.size() + " nodes");
+    logger.info("gotSelection examine " + nodes.size() + " nodes : isAll " + isAll);
     Set<String> possible = new HashSet<>();
 
     List<String> sorted = new ArrayList<>();
     ItemSorter itemSorter = new ItemSorter();
 
+    // find the node that matches the filter
     for (SectionNode node : nodes) {
       if (isAll || possibleValues.contains(node.getName())) {
         List<String> temp = new ArrayList<>();

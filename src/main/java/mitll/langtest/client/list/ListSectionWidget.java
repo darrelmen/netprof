@@ -53,7 +53,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class ListSectionWidget implements SectionWidget {
-  private final Logger logger = Logger.getLogger("MenuSectionWidget");
+  private final Logger logger = Logger.getLogger("ListSectionWidget");
 
   public static final int RIGHT_MARGIN = 15;
 
@@ -61,6 +61,7 @@ public class ListSectionWidget implements SectionWidget {
   private ListBox listBox;
   private final Collection<SectionNode> nodes;
   private final SimpleSelectExerciseList singleSelectExerciseList;
+  Set<String> allValuesOfType;
 
   /**
    * @param type
@@ -70,10 +71,12 @@ public class ListSectionWidget implements SectionWidget {
    */
   ListSectionWidget(String type,
                     Collection<SectionNode> nodes,
-                    SimpleSelectExerciseList singleSelectExerciseList) {
+                    SimpleSelectExerciseList singleSelectExerciseList,
+                    Set<String> allValuesOfType) {
     this.type = type;
     this.nodes = nodes;
     this.singleSelectExerciseList = singleSelectExerciseList;
+    this.allValuesOfType =allValuesOfType;
     logger.info("ListSectionWidget made menu " + type + " with " + nodes.size());
   }
 
@@ -103,9 +106,7 @@ public class ListSectionWidget implements SectionWidget {
 
     this.num = values.size();
 
-    //addGridChoices(values, "All");
     addChoices(values, "All");
-
     container.add(horizontalPanel);
   }
 
@@ -233,6 +234,7 @@ public class ListSectionWidget implements SectionWidget {
   }
 
   /**
+   * Foolish = don't have to do this exhaustive thing
    * @param possibleValues
    * @see #gotSelection(String)
    */
@@ -240,45 +242,38 @@ public class ListSectionWidget implements SectionWidget {
     logger.info("gotSelection " + type + " : " + possibleValues);
     boolean isAll = !possibleValues.isEmpty() && possibleValues.iterator().next().equals(TableSelect.ALL);
 
-    logger.info("examine " + nodes.size() + " nodes");
-    Set<String> possible = new HashSet<>();
+    logger.info("gotSelection examine " + nodes.size() + " nodes");
+    Set<String> uniquePossible = new HashSet<>();
 
     List<String> sorted = new ArrayList<>();
     ItemSorter itemSorter = new ItemSorter();
 
+    /**
+     * Go through each node and add it's children values...?
+     */
     for (SectionNode node : nodes) {
       if (isAll || possibleValues.contains(node.getName())) {
         List<String> temp = new ArrayList<>();
         for (SectionNode n : node.getChildren()) {
-          if (possible.add(n.getName())) {
+          if (uniquePossible.add(n.getName())) {
             temp.add(n.getName());
           }
         }
 
         List<String> sectionsInType = itemSorter.getSortedItems(temp);
-//        List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(node.getChildren()));
-//        possible.addAll(sectionsInType);
         sorted.addAll(sectionsInType);
       }
     }
+
+    // try to decide if a child selection is still valid given upstream selection
     if (childWidget != null) {
       String currentSelection = childWidget.getCurrentSelection();
-
-      boolean stillValid = possible.contains(currentSelection);
-      // ArrayList<String> values = new ArrayList<>(possible);
-//      childWidget.addGridChoices(sorted, stillValid ? currentSelection : TableSelect.ALL);
+      boolean stillValid = uniquePossible.contains(currentSelection);
       childWidget.addChoices(sorted, stillValid ? currentSelection : TableSelect.ALL);
-
-
-//      if (!stillValid) {
-//        logger.info("\tgotSelection reset choice on " + childWidget + " since it's current is " + currentSelection +
-//            " is not in " + possible);
-//      }
-//      logger.info("\tgotSelection recurse on " + childWidget);
-      childWidget.gotSelection(possible);
+      logger.info("\tgotSelection recurse on " + childWidget + " with " +uniquePossible.size());
+      childWidget.gotSelection(uniquePossible);
     }
   }
-
 
   public String toString() {
     return "sectionWidget " + type;

@@ -37,19 +37,49 @@ import mitll.langtest.shared.exercise.SectionNode;
 import java.util.*;
 
 public class SectionNodeItemSorter {
+
+  public List<String> getSorted(Set<String> keys) {
+    List<String> items = new ArrayList<>(keys);
+    boolean isInt = true;
+    for (String item : items) {
+      if (!isInt(item)) {
+        isInt = false;
+        break;
+      }
+    }
+    if (isInt) {
+      Collections.sort(items, new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+          int first = Integer.parseInt(o1);
+          int second = Integer.parseInt(o2);
+          return first < second ? -1 : first > second ? +1 : 0;
+        }
+      });
+    } else {
+      Collections.sort(items, new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+          return compareTwo(o1, o2);
+        }
+      });
+    }
+    return items;
+  }
+
   /**
-   * @see FlexSectionExerciseList
    * @param sections
    * @return
+   * @see FlexSectionExerciseList
    */
   public List<SectionNode> getSortedItems(Collection<SectionNode> sections) {
     List<SectionNode> items = new ArrayList<>(sections);
     boolean isInt = true;
     for (SectionNode item : items) {
-      try {
-        Integer.parseInt(item.getName());
-      } catch (NumberFormatException e) {
+      String name = item.getName();
+      if (!isInt(name)) {
         isInt = false;
+        break;
       }
     }
     if (isInt) {
@@ -61,16 +91,25 @@ public class SectionNodeItemSorter {
           return first < second ? -1 : first > second ? +1 : 0;
         }
       });
-    }
-    else {
+    } else {
       sortWithCompoundKeys(items);
     }
     return items;
   }
 
+  private boolean isInt(String name) {
+    try {
+      Integer.parseInt(name);
+
+      return true;
+    } catch (NumberFormatException e) {
+      return false;
+    }
+  }
+
   /**
-   * @see #getSortedItems(Collection)
    * @param items
+   * @see #getSortedItems(Collection)
    */
   private void sortWithCompoundKeys(List<SectionNode> items) {
     Collections.sort(items, new Comparator<SectionNode>() {
@@ -78,54 +117,56 @@ public class SectionNodeItemSorter {
       public int compare(SectionNode sectionNode1, SectionNode sectionNode2) {
         String o1 = sectionNode1.getName();
         String o2 = sectionNode2.getName();
-
-        boolean firstHasSep = o1.contains("-");
-        boolean secondHasSep = o2.contains("-");
-        String left1 = o1;
-        String left2 = o2;
-        String right1 = "";
-        String right2 = "";
-
-        if (firstHasSep) {
-          String[] first = o1.split("-");
-          left1 = first[0];
-          if (first.length == 1) {
-            System.err.println("huh? couldn't split " + o1);
-            right1 = "";
-          }
-          else {
-            right1 = first[1];
-          }
-        } else if (o1.contains(" ")) {
-          firstHasSep = true;
-          String[] first = o1.split("\\s");
-          left1 = first[0];
-          right1 = first[1];
-        }
-
-        if (secondHasSep) {
-          String[] second = o2.split("-");
-          left2 = second[0];
-          right2 = second[1];
-        } else if (o2.contains(" ")) {
-          secondHasSep = true;
-          String[] second = o2.split("\\s");
-          left2 = second[0];
-          right2 = second[1];
-        }
-
-        if (firstHasSep || secondHasSep) {
-          int leftCompare = getIntCompare(left1, left2);
-          if (leftCompare != 0) {
-            return leftCompare;
-          } else {
-            return getIntCompare(right1, right2);
-          }
-        } else {
-          return getIntCompare(o1, o2);
-        }
+        return SectionNodeItemSorter.this.compareTwo(o1, o2);
       }
     });
+  }
+
+  private int compareTwo(String o1, String o2) {
+    boolean firstHasSep = o1.contains("-");
+    boolean secondHasSep = o2.contains("-");
+    String left1 = o1;
+    String left2 = o2;
+    String right1 = "";
+    String right2 = "";
+
+    if (firstHasSep) {
+      String[] first = o1.split("-");
+      left1 = first[0];
+      if (first.length == 1) {
+        System.err.println("huh? couldn't split " + o1);
+        right1 = "";
+      } else {
+        right1 = first[1];
+      }
+    } else if (o1.contains(" ")) {
+      firstHasSep = true;
+      String[] first = o1.split("\\s");
+      left1 = first[0];
+      right1 = first[1];
+    }
+
+    if (secondHasSep) {
+      String[] second = o2.split("-");
+      left2 = second[0];
+      right2 = second[1];
+    } else if (o2.contains(" ")) {
+      secondHasSep = true;
+      String[] second = o2.split("\\s");
+      left2 = second[0];
+      right2 = second[1];
+    }
+
+    if (firstHasSep || secondHasSep) {
+      int leftCompare = getIntCompare(left1, left2);
+      if (leftCompare != 0) {
+        return leftCompare;
+      } else {
+        return getIntCompare(right1, right2);
+      }
+    } else {
+      return getIntCompare(o1, o2);
+    }
   }
 
   private int getIntCompare(String first, String second) {

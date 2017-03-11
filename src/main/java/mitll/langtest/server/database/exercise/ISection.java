@@ -5,6 +5,7 @@ import mitll.langtest.shared.exercise.SectionNode;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by go22670 on 3/9/17.
@@ -17,7 +18,7 @@ public interface ISection<T> {
   boolean allKeysValid();
 
   Collection<SectionNode> getSectionNodesForTypes();
-
+  Map<String, Set<String>> getTypeToDistinct();
   //Collection<SectionNode> getSectionNodesForTypes2();
 
 /*
