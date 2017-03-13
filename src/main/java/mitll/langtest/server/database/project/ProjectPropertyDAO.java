@@ -32,9 +32,11 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.database.BaseSlickDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
+import mitll.npdata.dao.BaseWrapper;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProjectProperty;
 import mitll.npdata.dao.project.ProjectPropertyDAOWrapper;
@@ -44,7 +46,7 @@ import org.apache.logging.log4j.Logger;
 import java.sql.Timestamp;
 import java.util.Collection;
 
-class ProjectPropertyDAO extends DAO implements IDAO {
+class ProjectPropertyDAO extends BaseSlickDAO implements IDAO {
   private static final Logger logger = LogManager.getLogger(ProjectPropertyDAO.class);
 
   private ProjectPropertyDAOWrapper dao;
@@ -54,23 +56,30 @@ class ProjectPropertyDAO extends DAO implements IDAO {
     dao = new ProjectPropertyDAOWrapper(dbConnection);
   }
 
-  public void createTable() {
-   // logger.info("create table  " + getName());
-    dao.createTable();
-  }
-
   @Override
-  public String getName() {
-    return dao.dao().name();
+  protected BaseWrapper getWrapper() {
+    return dao;
   }
 
-  public void add(int projid, long modified, String key, String value) {
+  /**
+   *
+   * @param projid
+   * @param modified
+   * @param key
+   * @param value
+   * @param propertyType
+   * @param parent
+   * @see ProjectDAO#addProperty
+   */
+  public void add(int projid, long modified, String key, String value, String propertyType, String parent) {
     dao.insert(new SlickProjectProperty(-1,
         new Timestamp(modified),
         projid,
         key,
-        value));
+        value, propertyType, parent,false));
   }
+
+  public void update(SlickProjectProperty property) { dao.update(property); }
 
   public Collection<SlickProjectProperty> getAll() {
     return dao.getAll();

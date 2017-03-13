@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.exercise.Shell;
@@ -468,7 +469,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   @Override
   public Pair addExerciseToLesson(T exercise, String type, String unitName) {
     Pair pair = getPairForExerciseAndLesson(exercise, type, unitName);
-
     exercise.addUnitToValue(type, unitName);
 
     return pair;
@@ -667,6 +667,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   Map<String, Set<String>> typeToCount = new HashMap<>();
 
+  /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
+   * @param predefinedTypeOrder
+   * @param seen
+   */
   public void rememberTypesInOrder(final List<String> predefinedTypeOrder, List<List<Pair>> seen) {
     SectionNode child = root;
 
@@ -686,6 +691,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     //  logger.info("NEW ROOT " + root, new Exception());
   }
 
+  /**
+   * @see #rememberTypesInOrder
+   * @param predefinedTypeOrder
+   * @param child
+   * @param pairs
+   * @return
+   */
   private SectionNode rememberOne(final List<String> predefinedTypeOrder, SectionNode child, List<Pair> pairs) {
     pairs.sort(new Comparator<Pair>() {
       @Override
@@ -712,17 +724,12 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   public void rememberTypesFor(List<List<Pair>> seen) {
-    //makeRoot();
     SectionNode child = root;
 
-    for (List<Pair> pairs : seen) {
-      child = rememberOne(child, pairs);
-    }
-
+    for (List<Pair> pairs : seen)  child = rememberOne(child, pairs);
     recurseAndCount(root, typeToCount = new HashMap<String, Set<String>>());
 
     logger.info("rememberTypesFor type->count " + typeToCount);
-
   }
 
   public Map<String, Set<String>> getTypeToDistinct() {

@@ -55,7 +55,7 @@ public interface IProjectDAO extends IDAO {
    */
   Collection<SlickProject> getAll();
 
-  void addProperty(int projid, String key, String value);
+  void addProperty(int projid, String key, String value, String propertyType, String parent);
 
   int getByName(String name);
   int getByLanguage(String language);

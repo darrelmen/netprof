@@ -15,6 +15,7 @@ import java.util.Properties;
  */
 class CreateProject {
   private static final Logger logger = LogManager.getLogger(CreateProject.class);
+  public static final String MODEL_PROPERTY_TYPE = "model";
 
   /**
    * @param db
@@ -73,6 +74,7 @@ class CreateProject {
     DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
 
     if (language.equals("msa")) language = "MSA";
+    if (language.equals("levantine")) language = "Levantine";
 
     int byName = projectDAO.add(
         dominoUserDAO.getBeforeLoginUser(),
@@ -86,7 +88,7 @@ class CreateProject {
     for (String prop : ServerProperties.CORE_PROPERTIES) {
       String property = props.getProperty(prop);
       if (property != null) {
-        projectDAO.addProperty(byName, prop, property);
+        projectDAO.addProperty(byName, prop, property, MODEL_PROPERTY_TYPE, "");
       }
     }
 

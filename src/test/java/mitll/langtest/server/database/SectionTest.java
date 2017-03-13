@@ -21,8 +21,13 @@ public class SectionTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(SectionTest.class);
 
   @Test
-  public void testSection() {
+  public void testSectionSpanish() {
     doReport("spanish");
+  }
+
+  @Test
+  public void testSectionPashto() {
+    doReport("pashto");
   }
 
   @Test
@@ -67,7 +72,7 @@ public class SectionTest extends BaseTest {
   public void testOrder() {
     SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
     addData(sectionHelper);
-    sectionHelper.rememberTypes(Arrays.asList("Sound","Chapter","Unit"));
+    sectionHelper.rememberTypes(Arrays.asList("Sound", "Chapter", "Unit"));
     Collection<SectionNode> sectionNodesForTypes = sectionHelper.getSectionNodesForTypes();
 
     logger.info("root " + sectionHelper.getRoot());
@@ -76,11 +81,12 @@ public class SectionTest extends BaseTest {
       forChild(sectionHelper, child, map, 0);
     }
   }
+
   @Test
   public void testOrder2() {
     SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
     addData(sectionHelper);
-    sectionHelper.rememberTypes(Arrays.asList("Unit","Chapter"));
+    sectionHelper.rememberTypes(Arrays.asList("Unit", "Chapter"));
     Collection<SectionNode> sectionNodesForTypes = sectionHelper.getSectionNodesForTypes();
 
     logger.info("root " + sectionHelper.getRoot());
@@ -192,7 +198,7 @@ public class SectionTest extends BaseTest {
     // sectionHelper.report();
 
     List<String> typeOrder = sectionHelper.getTypeOrder();
-  logger.info("type order " + typeOrder);
+    logger.info("type order " + typeOrder);
     Collection<SectionNode> sectionNodesForTypes = sectionHelper.getSectionNodesForTypes();
 
  /*
@@ -202,36 +208,40 @@ public class SectionTest extends BaseTest {
     }
     */
 
+    logger.info("root " + sectionHelper.getRoot());
+    logger.info("root children " + sectionHelper.getRoot().getChildren());
+    logger.info("initial values " + sectionHelper.getTypeToDistinct());
+
     SectionNode firstNode = sectionHelper.getFirstNode("1");
-    logger.info("Got " + firstNode);
+    logger.info("Got first node for 1 " + firstNode);
     if (firstNode != null) {
-      firstNode = sectionHelper.getNode(firstNode,"Chapter","1");
+      firstNode = sectionHelper.getNode(firstNode, "Chapter", "1");
       logger.info("Got " + firstNode);
     }
     if (firstNode != null) {
-      firstNode = sectionHelper.getNode(firstNode,"Sound","b");
+      firstNode = sectionHelper.getNode(firstNode, "Sound", "b");
       logger.info("Got " + firstNode);
     }
     Collection<CommonExercise> unit = sectionHelper.getExercisesForSelectionState("Unit", "1");
     logger.info("found " + unit.size());
 
-    Map<String,Collection<String>> search = new HashMap<>();
-    search.put("Unit",Collections.singleton("1"));
+    Map<String, Collection<String>> search = new HashMap<>();
+    search.put("Unit", Collections.singleton("1"));
 
     unit = sectionHelper.getExercisesForSelectionState(search);
-    logger.info("for " +search + " found " + unit.size());
+    logger.info("for " + search + " found " + unit.size());
 
-    search.put("Chapter",Collections.singleton("1"));
+    search.put("Chapter", Collections.singleton("1"));
     unit = sectionHelper.getExercisesForSelectionState(search);
-    logger.info("for " +search + " found " + unit.size());
+    logger.info("for " + search + " found " + unit.size());
 
-    search.put("Sound",Collections.singleton("b"));
+    search.put("Sound", Collections.singleton("b"));
     unit = sectionHelper.getExercisesForSelectionState(search);
-    logger.info("for " +search + " found " + unit.size());
+    logger.info("for " + search + " found " + unit.size());
 
-    search.put("Difficulty",Collections.singleton("7"));
+    search.put("Difficulty", Collections.singleton("7"));
     unit = sectionHelper.getExercisesForSelectionState(search);
-    logger.info("for " +search + " found " + unit.size());
+    logger.info("for " + search + " found " + unit.size());
 
     andPopulate.close();
   }
