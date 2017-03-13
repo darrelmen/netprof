@@ -43,6 +43,7 @@ import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickRelatedExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -74,17 +75,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * TODO : remove duplicate
    *
    * @return
+   * @see SlickUserExerciseDAO#getTypeOrder
    */
   @Override
   public List<String> getTypeOrder() {
     List<String> typeOrder = getSectionHelper().getTypeOrder();
     if (typeOrder.isEmpty()) {
       typeOrder = new ArrayList<>();
-      String first = project.first();
+      String first  = project.first();
       String second = project.second();
-      if (first != null && !first.isEmpty()) typeOrder.add(first);
+      if (first  != null && !first.isEmpty())  typeOrder.add(first);
       if (second != null && !second.isEmpty()) typeOrder.add(second);
-      // typeOrder = project.getTypeOrder();
     }
     return typeOrder;
   }
@@ -110,15 +111,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   List<CommonExercise> readExercises() {
     try {
-      List<String> typeOrder = new ArrayList<>();
-
-      typeOrder.add(project.first());
-
-      if (!project.second().isEmpty()) typeOrder.add(project.second());
-      typeOrder.add(SOUND);
-      if (SlickUserExerciseDAO.ADD_PHONE_LENGTH) {
-        typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
-      }
+      List<String> typeOrder = getTypeOrderFromProject();
 
       int projid = project.id();
 
@@ -130,67 +123,91 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           "\n\tfor " + projid +
           "\n\ttype order " + typeOrder);
 
+      // do we add attributes to context exercises?
       List<CommonExercise> allNonContextExercises =
           userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject, fullProject);
 
-      Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
+      addExerciseAttributes(projid, allNonContextExercises);
 
-      logger.info("found " + allByProject.size() + " attributes");
-
-      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
-
-      for (CommonExercise exercise : allNonContextExercises) {
-        int id = exercise.getID();
-        Collection<SlickExerciseAttributeJoin> slickExerciseAttributeJoins = exToAttrs.get(id);
-
-        List<ExerciseAttribute> attributes = new ArrayList<>();
-        if (slickExerciseAttributeJoins != null) {
-          for (SlickExerciseAttributeJoin join : slickExerciseAttributeJoins) {
-            ExerciseAttribute attribute = allByProject.get(join.attrid());
-            attributes.add(attribute);
-          }
-          exercise.setAttributes(attributes);
-          //   logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
-        }
-      }
       logger.info("readExercises project " + project +
           " readExercises got " + allNonContextExercises.size() + " predef exercises");
 
-      Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated(projid);
-
 //      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
-      Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
 
-      Map<Integer, CommonExercise> idToContext =
-          getIDToExercise(userExerciseDAO.getContextByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject, fullProject));
+       Map<Integer, CommonExercise> idToContext =
+          getIDToExercise(userExerciseDAO.getContextByProject(projid, typeOrder, getSectionHelper(),
+              exerciseToPhoneForProject, fullProject));
 
       // logger.info(prefix + " idToContext " + idToContext.size());
 
-      int attached = 0;
-      int c = 0;
+      attachContextExercises(allNonContextExercises, userExerciseDAO.getAllRelated(projid), idToContext);
 
-      String prefix = "Project " + project.name();
-      for (SlickRelatedExercise relatedExercise : related) {
-        CommonExercise root = idToEx.get(relatedExercise.exid());
-        if (root != null) {
-          CommonExercise context = idToContext.get(relatedExercise.contextexid());
-          if (context != null) {
-            root.getMutable().addContextExercise(context);
-            attached++;
-          } else if (c++ < 2) {
-            logger.warn("1 " + prefix + " didn't attach " + relatedExercise + "" + " for\n" + root);
-          }
-        } else if (c++ < 10) {
-          logger.warn("2 " + prefix + " didn't attach " + relatedExercise + "" +
-              " for, e.g. " + allNonContextExercises.iterator().next());
-        }
-      }
-      logger.info(prefix + " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);
       return allNonContextExercises;
+
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
     return Collections.emptyList();
+  }
+
+  private void attachContextExercises(List<CommonExercise> allNonContextExercises,
+                                      Collection<SlickRelatedExercise> related,
+                                      //Map<Integer, CommonExercise> idToEx,
+                                      Map<Integer, CommonExercise> idToContext) {
+    int attached = 0;
+    int c = 0;
+
+    Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
+    String prefix = "Project " + project.name();
+    for (SlickRelatedExercise relatedExercise : related) {
+      CommonExercise root = idToEx.get(relatedExercise.exid());
+      if (root != null) {
+        CommonExercise context = idToContext.get(relatedExercise.contextexid());
+        if (context != null) {
+          root.getMutable().addContextExercise(context);
+          attached++;
+        } else if (c++ < 2) {
+          logger.warn("1 " + prefix + " didn't attach " + relatedExercise + "" + " for\n" + root);
+        }
+      } else if (c++ < 10) {
+        logger.warn("2 " + prefix + " didn't attach " + relatedExercise + "" +
+            " for, e.g. " + allNonContextExercises.iterator().next());
+      }
+    }
+    logger.info(prefix + " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);
+  }
+
+  @NotNull
+  private List<String> getTypeOrderFromProject() {
+    List<String> typeOrder = new ArrayList<>();
+    typeOrder.add(project.first());
+    if (!project.second().isEmpty()) typeOrder.add(project.second());
+    typeOrder.add(SOUND);
+    if (SlickUserExerciseDAO.ADD_PHONE_LENGTH) {
+      typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
+    }
+    return typeOrder;
+  }
+
+  private void addExerciseAttributes(int projid, List<CommonExercise> allNonContextExercises) {
+    Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
+
+    logger.info("found " + allByProject.size() + " attributes");
+    Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
+
+    for (CommonExercise exercise : allNonContextExercises) {
+      Collection<SlickExerciseAttributeJoin> slickExerciseAttributeJoins = exToAttrs.get(exercise.getID());
+
+      List<ExerciseAttribute> attributes = new ArrayList<>();
+      if (slickExerciseAttributeJoins != null) {
+        for (SlickExerciseAttributeJoin join : slickExerciseAttributeJoins) {
+          ExerciseAttribute attribute = allByProject.get(join.attrid());
+          attributes.add(attribute);
+        }
+        exercise.setAttributes(attributes);
+        //   logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
+      }
+    }
   }
 
   private Map<Integer, CommonExercise> getIDToExercise(Collection<CommonExercise> allExercises) {

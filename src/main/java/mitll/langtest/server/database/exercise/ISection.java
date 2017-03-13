@@ -18,6 +18,11 @@ public interface ISection<T> {
   boolean allKeysValid();
 
   Collection<SectionNode> getSectionNodesForTypes();
+
+  /**
+   * Initial map of facet to all possible values for facet
+   * @return
+   */
   Map<String, Set<String>> getTypeToDistinct();
   //Collection<SectionNode> getSectionNodesForTypes2();
 

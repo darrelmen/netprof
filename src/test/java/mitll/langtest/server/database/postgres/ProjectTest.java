@@ -44,12 +44,9 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
@@ -102,7 +99,7 @@ public class ProjectTest extends BaseTest {
     IProjectDAO projectDAO = spanish.getProjectDAO();
     SlickProject next = projectDAO.getAll().iterator().next();
 
-    projectDAO.addProperty(next.id(), "key", "value");
+    projectDAO.addProperty(next.id(), "key", "value", "", "");
 
     testListProjects();
 //    next.addProp(new SlickProjectProperty(-1, new Timestamp(System.currentTimeMillis()), next.id(), "test", "test"));

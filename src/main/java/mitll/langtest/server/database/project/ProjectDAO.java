@@ -34,12 +34,14 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.UserProjectDAO;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickProjectProperty;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -265,8 +267,21 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return dao.getAll();
   }
 
-  public void addProperty(int project, String key, String value) {
-    propertyDAO.add(project, System.currentTimeMillis(), key, value);
+  /**
+   *
+   * @param project
+   * @param key
+   * @param value
+   * @param propertyType
+   * @param parent
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject
+   */
+  public void addProperty(int project, String key, String value, String propertyType, String parent) {
+    propertyDAO.add(project, System.currentTimeMillis(), key, value, propertyType, parent);
+  }
+
+  public void updateProperty(SlickProjectProperty property) {
+    propertyDAO.update(property);
   }
 
   @Override

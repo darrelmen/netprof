@@ -40,6 +40,8 @@ import java.util.Arrays;
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
+ * TODO : should we send this at all?
+ *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 12/12/13
  * Time: 7:47 PM
@@ -53,7 +55,7 @@ public class ExerciseAttribute implements IsSerializable {
   public ExerciseAttribute() {
   }
 
-  public ExerciseAttribute(int id, String status, String value) {
+  private ExerciseAttribute(int id, String status, String value) {
     this.id = id;
     this.property = status;
     this.value = value;
