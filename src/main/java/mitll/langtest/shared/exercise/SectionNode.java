@@ -56,8 +56,6 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
   private List<SectionNode> children = null;//Collections.emptyList();// ArrayList<SectionNode>();
 
   private String childType;
-  // private Map<String, Set<SectionNode>> typeToChildren = new HashMap<>();
-  // private Map<String, Set<SectionNode>> typeToChildren = new HashMap<>();
 
   public SectionNode() {
   }   // required for serialization
@@ -177,7 +175,7 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
       //    System.out.println("1.5 now " + this);
     } else {
       if (collect.size() > 1) {
-        System.err.println("found " + collect.size());
+        System.err.println("getChild found " + collect.size());
         e = null;
       } else {
         e = collect.get(0);
@@ -185,6 +183,13 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
       }
     }
     return e;
+  }
+
+  public SectionNode getChildWithName(String name) {
+    for (SectionNode node : children) {
+      if (node.getName().equals(name)) return node;
+    }
+    return null;
   }
 
   public String getChildType() {

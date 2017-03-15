@@ -48,6 +48,87 @@ public class SectionTest extends BaseTest {
 
     logger.info("type order " + sectionHelper.getTypeOrder());
     logger.info("type to sections " + sectionHelper.getTypeToDistinct());
+
+    Map<String, String> test = new HashMap<>();
+    test.put("Unit", "1");
+    Map<String, Set<String>> unit = sectionHelper.getTypeToMatches("Unit", "1");
+    logger.info("match for " + test + " is " + unit);
+
+
+    test = new HashMap<>();
+    test.put("Unit", "2");
+    unit = sectionHelper.getTypeToMatches("Unit", "2");
+    logger.info("match for " + test + " is " + unit);
+
+    test = new HashMap<>();
+    test.put("Chapter", "a");
+    unit = sectionHelper.getTypeToMatches("Chapter", "a");
+    logger.info("match for " + test + " is " + unit);
+
+    test = new HashMap<>();
+    test.put("Chapter", "b");
+    unit = sectionHelper.getTypeToMatches("Chapter", "b");
+    logger.info("match for " + test + " is " + unit);
+
+    test = new HashMap<>();
+    test.put("Chapter", "dude");
+    unit = sectionHelper.getTypeToMatches("Chapter", "dude");
+    logger.info("match for " + test + " is " + unit);
+
+    test = new HashMap<>();
+    test.put("Unit", "1");
+    test.put("Chapter", "a");
+
+    List<Pair> toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "1"));
+    toMatch.add(new Pair("Chapter", "a"));
+    unit = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + unit);
+
+    toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "2"));
+    toMatch.add(new Pair("Chapter", "a"));
+    unit = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + unit);
+
+    toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "2"));
+    toMatch.add(new Pair("Chapter", "a"));
+    toMatch.add(new Pair("Sound", "x"));
+    unit = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + unit);
+
+
+    toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "1"));
+    toMatch.add(new Pair("Chapter", "a"));
+    toMatch.add(new Pair("Sound", "x"));
+    unit = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + unit);
+
+    toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "2"));
+    //  toMatch.add(new Pair("Chapter", "a"));
+    unit = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + unit);
+
+    toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "all"));
+    toMatch.add(new Pair("Chapter", "a"));
+    toMatch.add(new Pair("Sound", "all"));
+
+    //  toMatch.add(new Pair("Chapter", "a"));
+    unit = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + unit);
+
+    toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "all"));
+    toMatch.add(new Pair("Chapter", "b"));
+    toMatch.add(new Pair("Sound", "all"));
+
+    //  toMatch.add(new Pair("Chapter", "a"));
+    unit = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + unit);
   }
 
 /*
@@ -104,31 +185,39 @@ public class SectionTest extends BaseTest {
     pairs.add(new Pair("Chapter", "a"));
 
     List<Pair> copy = new ArrayList<>(pairs);
-    copy.add(new Pair("Sound", "ng"));
+    Pair ng = new Pair("Sound", "ng");
+    copy.add(ng);
     sectionHelper.rememberPairs(copy);
 
-    pairs.add(new Pair("Sound", "r"));
+    Pair r = new Pair("Sound", "r");
+    pairs.add(r);
 
     sectionHelper.rememberPairs(pairs);
 
     pairs = new ArrayList<>();
     pairs.add(new Pair("Unit", "1"));
     pairs.add(new Pair("Chapter", "b"));
-    pairs.add(new Pair("Sound", "ng"));
+    pairs.add(ng);
 
     sectionHelper.rememberPairs(pairs);
 
     pairs = new ArrayList<>();
     pairs.add(new Pair("Unit", "1"));
     pairs.add(new Pair("Chapter", "c"));
-    pairs.add(new Pair("Sound", "ng"));
+    pairs.add(ng);
 
     sectionHelper.rememberPairs(pairs);
 
     pairs = new ArrayList<>();
     pairs.add(new Pair("Unit", "2"));
     pairs.add(new Pair("Chapter", "a"));
-    pairs.add(new Pair("Sound", "ng"));
+    pairs.add(ng);
+    sectionHelper.rememberPairs(pairs);
+
+    pairs = new ArrayList<>();
+    pairs.add(new Pair("Unit", "2"));
+    pairs.add(new Pair("Chapter", "a"));
+    pairs.add(new Pair("Sound", "x"));
     sectionHelper.rememberPairs(pairs);
 
     pairs = new ArrayList<>();
@@ -139,10 +228,10 @@ public class SectionTest extends BaseTest {
     List<Pair> copy3 = new ArrayList<>(pairs);
     List<Pair> copy4 = new ArrayList<>(pairs);
 
-    copy2.add(new Pair("Sound", "ng"));
+    copy2.add(ng);
     sectionHelper.rememberPairs(copy2);
 
-    copy3.add(new Pair("Sound", "r"));
+    copy3.add(r);
     sectionHelper.rememberPairs(copy3);
     copy4.add(new Pair("Sound", "t"));
     sectionHelper.rememberPairs(copy4);
