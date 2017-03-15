@@ -41,18 +41,30 @@ import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
+import java.util.Collection;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise, V> {
+public abstract class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise, V> {
   //private Logger logger = Logger.getLogger("NPExerciseList");
   protected NPExerciseList(Panel currentExerciseVPanel,
                            ExerciseController controller,
                            ListOptions listOptions) {
     super(currentExerciseVPanel, controller, listOptions);
+  }
+
+  @Override
+  protected FacetContainer getSectionWidgetContainer() {
+    return new SectionWidgetContainer<V>() {
+      @Override
+      protected void selectItem(String type, Collection<String> sections) {
+
+      }
+    };
   }
 
   protected  NPExerciseList(Panel currentExerciseVPanel,

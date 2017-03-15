@@ -103,7 +103,8 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName) {
 //        logger.info("instance is " + instanceName);
-        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, new ListOptions().setInstance(instanceName)) {
+        return new NPFlexSectionExerciseList(controller, topRow, currentExercisePanel,
+            new ListOptions().setInstance(instanceName)) {
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override

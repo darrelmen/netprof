@@ -41,10 +41,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Once a user has chosen a project, what the UI needs to show initial views
+ */
 public class ProjectStartupInfo implements IsSerializable {
   private Map<String, String> properties;
   private List<String> typeOrder;
   private Collection<SectionNode> sectionNodes;
+  //private Collection<SectionNode> rootNodes;
   private int projectid;
   private String language;
   private boolean hasModel;
@@ -59,7 +63,7 @@ public class ProjectStartupInfo implements IsSerializable {
    * @param sectionNodes
    * @param projectid
    * @param hasModel
-   * @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo(User, int)
+   * @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo
    */
   public ProjectStartupInfo(Map<String, String> properties,
                             List<String> typeOrder,

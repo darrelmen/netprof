@@ -65,6 +65,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
+ * @deprecated
  */
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private Logger logger = Logger.getLogger("ASRScorePanel");
@@ -96,6 +97,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
+   * @deprecated
    */
   public ASRScorePanel(String parent, ExerciseController controller, int exerciseID) {
     this.controller = controller;

@@ -62,13 +62,13 @@ public class DatabaseServlet extends HttpServlet {
   /**
    * @param wavFile
    * @param trackInfo
-   * @see mitll.langtest.server.ScoreServlet#ensureMP3Later
+   * @seex mitll.langtest.server.ScoreServlet#ensureMP3Later
    */
-  void writeCompressedVersions(String wavFile, TrackInfo trackInfo) {
-    File absolutePathToWav = new File(wavFile);
-    if (!absolutePathToWav.exists()) logger.error("no file at " +absolutePathToWav);
-    String s = new AudioConversion(serverProps).writeCompressedVersions(absolutePathToWav, false, trackInfo);
-  }
+//  void writeCompressedVersions(String wavFile, TrackInfo trackInfo) {
+//    File absolutePathToWav = new File(wavFile);
+//    if (!absolutePathToWav.exists()) logger.error("no file at " +absolutePathToWav);
+//    String s = new AudioConversion(serverProps).writeCompressedVersions(absolutePathToWav, false, trackInfo);
+//  }
 
   /**
    * @see DownloadServlet#init
@@ -78,7 +78,12 @@ public class DatabaseServlet extends HttpServlet {
   }
 
   private PathHelper getPathHelper() {
-    serverProps = getDatabase().getServerProps();
+    DatabaseImpl database = getDatabase();
+    if (database == null) {
+      logger.warn("huh? no database?");
+      return null;
+    }
+    serverProps = database.getServerProps();
     if (serverProps == null) throw new IllegalArgumentException("huh? props is null?");
     return new PathHelper(getServletContext(), serverProps);
   }

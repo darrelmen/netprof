@@ -491,7 +491,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public Project getProject(int projectid) {
-    if (projectid == -1) return getFirstProject();
+    if (projectid == -1 && !idToProject.isEmpty()) return getFirstProject();
     Project project = idToProject.get(projectid);
 
     Set<Integer> knownProjects = idToProject.keySet();
@@ -510,7 +510,7 @@ public class ProjectManagement implements IProjectManagement {
         project = idToProject.get(projectid);
       }
 
-      if (project == null) {
+      if (project == null && !idToProject.isEmpty()) {
         Project firstProject = getFirstProject();
         logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
                 ") returning first " + firstProject,
@@ -586,15 +586,11 @@ public class ProjectManagement implements IProjectManagement {
 //            project.getSectionHelper().getSectionNodesForTypes(typeOrder);
 
         ISection<CommonExercise> sectionHelper = project.getSectionHelper();
-        Collection<SectionNode> sectionNodesForTypes =
-            sectionHelper.getSectionNodesForTypes();
-
-;
 
         ProjectStartupInfo startupInfo = new ProjectStartupInfo(
             serverProps.getProperties(),
             typeOrder,
-            sectionNodesForTypes,
+            sectionHelper.getSectionNodesForTypes(),
             project1.id(),
             project1.language(),
             hasModel(project1),
@@ -605,6 +601,8 @@ public class ProjectManagement implements IProjectManagement {
             "\n\tSet startup info " + startupInfo);
 
         userWhere.setStartupInfo(startupInfo);
+
+        logger.info("setStartupInfo - got here");
       }
     }
   }

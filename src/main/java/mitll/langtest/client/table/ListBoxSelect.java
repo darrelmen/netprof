@@ -40,6 +40,9 @@ import mitll.langtest.client.list.SimpleSelectExerciseList;
 
 import java.util.List;
 
+/**
+ * @see ListSectionWidget#addChoices
+ */
 public class ListBoxSelect {
   //  private final Logger logger = Logger.getLogger("TableSelect");
   public static final String ALL = "All";

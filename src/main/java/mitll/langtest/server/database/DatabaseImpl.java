@@ -600,7 +600,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see UserServiceImpl#getUserFromSession
    */
   public void setStartupInfo(User userWhere) {
-    setStartupInfo(userWhere, getUserProjectDAO().mostRecentByUser(userWhere.getID()));
+    setStartupInfo(userWhere, projectForUser(userWhere.getID()));
   }
 
   /**
@@ -907,8 +907,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   private JsonSupport getJsonSupport(int userid) {
-    int i = getUserProjectDAO().mostRecentByUser(userid);
+    int i = projectForUser(userid);
     return getJsonSupportForProject(i);
+  }
+
+  private int projectForUser(int userid) {
+    return getUserProjectDAO().mostRecentByUser(userid);
   }
 
   private JsonSupport getJsonSupportForProject(int i) {

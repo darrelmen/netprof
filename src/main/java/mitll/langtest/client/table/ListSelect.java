@@ -42,6 +42,9 @@ import mitll.langtest.client.list.SimpleSelectExerciseList;
 
 import java.util.List;
 
+/**
+ * @see MenuSectionWidget#addChoices(List, String)
+ */
 public class ListSelect {
   //  private final Logger logger = Logger.getLogger("TableSelect");
   public static final String ALL = "All";
@@ -57,6 +60,7 @@ public class ListSelect {
    * @param menuSectionWidget
    * @param initialSelection
    * @return
+   * @see MenuSectionWidget#addChoices(List, String)
    */
   public DropdownButton makeSymbolButton(List<String> values,
                                          int width,

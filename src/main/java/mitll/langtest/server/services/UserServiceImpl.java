@@ -353,7 +353,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         db.setStartupInfo(sessionUser, projectid);
       }
       return sessionUser;
-    } catch (DominoSessionException e) {
+    } catch (Exception e) {
       logger.error("got " + e, e);
       return null;
     }

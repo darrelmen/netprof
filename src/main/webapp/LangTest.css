@@ -3,11 +3,11 @@
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
-  font-size: 2em;
-  font-weight: bold;
-  color: #777777;
-  margin: 40px 0px 70px;
-  text-align: center;
+    font-size: 2em;
+    font-weight: bold;
+    color: #777777;
+    margin: 40px 0px 70px;
+    text-align: center;
 }
 
 .body {
@@ -43,7 +43,7 @@ h1 {
     border-left-width: 2px;
 
     padding-right: 0px;
- }
+}
 
 
 .qcBorder {
@@ -52,16 +52,16 @@ h1 {
 }
 
 .cardBackground {
-     background-color: #e8eaea;
- }
+    background-color: #e8eaea;
+}
 
 .cardHiddenText {
     color: #e8eaea;
 }
 
 .cardHiddenText2 {
-     color: white;
- }
+    color: white;
+}
 
 .cardText {
     padding: 55px;
@@ -86,8 +86,8 @@ h1 {
 }
 
 .helpPadding {
-     padding-top: 10px;
- }
+    padding-top: 10px;
+}
 
 .rowPadding {
     padding-left: 5px;
@@ -118,8 +118,8 @@ h1 {
 }
 
 .subtitleNoRecordingForeground {
-     color : #ffb911;
- }
+    color : #ffb911;
+}
 
 .questionMarkForeground {
     color : #f0f9fb;
@@ -127,15 +127,15 @@ h1 {
 
 .blueBackground {
     background-color : #f0f9fb;
- }
+}
 
 .primaryButtonColor {
     background-color: #b2b5b4;
 }
 
 .clearButtonColor {
-     background-color: #b2b5b4;
- }
+    background-color: #b2b5b4;
+}
 
 .successButtonColor {
     background-color: #b2b5b4;
@@ -164,8 +164,8 @@ h1 {
 }
 
 .floatLeftList {
-   float: left;
- }
+    float: left;
+}
 
 .floatRight {
     float: right;
@@ -239,8 +239,8 @@ h1 {
 }
 
 .trueInlineStyle {
-     display: inline;
- }
+    display: inline;
+}
 
 .realInlineStyle {
     display: inline;
@@ -295,21 +295,21 @@ h1 {
 }
 
 .sendButton {
-  display: block;
-  font-size: 16pt;
+    display: block;
+    font-size: 16pt;
 }
 
 /** Most GWT widgets already have a style name defined */
 .gwt-DialogBox {
-  width: 400px;
+    width: 400px;
 }
 
 .dialogVPanel {
-  margin: 5px;
+    margin: 5px;
 }
 
 .serverResponseLabelError {
-  color: red;
+    color: red;
 }
 
 fieldset {
@@ -322,8 +322,8 @@ fieldset {
 }
 
 .leftFiftyPercentMargin {
-     margin-left: 43%;
- }
+    margin-left: 43%;
+}
 
 .dialogExpandedTopMargin {
     margin-top: -70px;
@@ -333,15 +333,15 @@ fieldset {
     margin-top: 10px;
 }
 .topBarMargin {
-     margin-top: 18px;
- }
+    margin-top: 18px;
+}
 
 .topFiveMargin {
     margin-top: 5px;
 }
 
 .bottomFiveMargin {
-     margin-bottom: 5px;
+    margin-bottom: 5px;
 }
 .topMinusFiveMargin {
     margin-top: -13px;
@@ -351,8 +351,8 @@ fieldset {
     margin-top: 20px;
 }
 .topFiftyMargin {
-     margin-top: 50px;
- }
+    margin-top: 50px;
+}
 
 .leftFiveMargin {
     margin-left: 5px;
@@ -367,8 +367,8 @@ fieldset {
 }
 
 .leftFiftyMargin {
-     margin-left: 55px;
- }
+    margin-left: 55px;
+}
 
 .noMargin {
     margin: 0px;
@@ -382,7 +382,7 @@ fieldset > legend {
 
 /** Set ids using widget.getElement().setId("idOfElement") */
 #closeButton {
-  margin: 15px 6px 6px;
+    margin: 15px 6px 6px;
 }
 
 #closeButtonLessTopMargin {
@@ -394,23 +394,23 @@ fieldset > legend {
 }
 
 .exercise {
-  font-size: 12pt;
+    font-size: 12pt;
 }
 
 .exercise-highlighted {
-  background-color: #668CD9;
-  border: none;
+    background-color: #668CD9;
+    border: none;
 }
 
 .exerciseBackground {
     background-color: #ebebec;
     color: #262726;
-/*
-    width:95%;
-*/
+    /*
+        width:95%;
+    */
 
-/*    border: 1px solid #E3E3E3;
-    border-radius: 4px 4px 4px 4px;*/
+    /*    border: 1px solid #E3E3E3;
+        border-radius: 4px 4px 4px 4px;*/
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
     margin-bottom: 0px;
     min-height: 20px;
@@ -420,11 +420,11 @@ fieldset > legend {
 
 #nextButton {  margin-left: 5px; }
 .paddedHorizontalPanel .gwt-Button {
-  padding-left: 20px;
+    padding-left: 20px;
 }
 
 .paddedHorizontalPanel {
-  padding-left: 20px;
+    padding-left: 20px;
 }
 
 .alignTop {
@@ -481,8 +481,8 @@ fieldset > legend {
 }
 
 .backgroundWhite {
-     background-color: white;
- }
+    background-color: white;
+}
 
 .Instruction {
     text-align: left;
@@ -492,9 +492,9 @@ fieldset > legend {
 .Instruction-title {
     color: #333333;
     font-size: 16px;
-/*
-    margin-bottom: 4px;
-    */
+    /*
+        margin-bottom: 4px;
+        */
 }
 
 .Instruction-data  {
@@ -550,7 +550,7 @@ fieldset > legend {
 
 .lightBlue {
     background-color : #afdef8;
- }
+}
 
 .grayColor {
     background-color: #d4d1cc;
@@ -571,7 +571,7 @@ fieldset > legend {
 }
 
 .correct {
-   color:green
+    color:green
 }
 
 .incorrect {
@@ -656,7 +656,7 @@ fieldset > legend {
 
 .bigFont {
     font-size: 1.8em;
-/*    letter-spacing: 0.4em; */
+    /*    letter-spacing: 0.4em; */
     padding-top: 19px;
 }
 
@@ -671,8 +671,8 @@ fieldset > legend {
     margin-right: 10px;
 }
 .rightTwentyMargin {
-     margin-right: 20px;
- }
+    margin-right: 20px;
+}
 
 .minWidth {
     min-width: 190px;
@@ -696,11 +696,11 @@ fieldset > legend {
 }
 
 .userNPFContent {
-     margin-top: 2px;
-     border-radius: 3px 3px 3px 3px;
-     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
-     padding: 5px 110px 5px 5px;
- }
+    margin-top: 2px;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px 110px 5px 5px;
+}
 
 .userNPFContentLightPadding {
     margin-top: 2px;
@@ -804,8 +804,8 @@ fieldset > legend {
 }
 
 #unitLesson small {
-     color: #333333;
- }
+    color: #333333;
+}
 
 .borderTopQC {
     margin-top: 5px;
@@ -869,13 +869,13 @@ fieldset > legend {
 }
 
 .buttonGroupInset5 {
-     border-radius: 3px 3px 3px 3px;
-     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
-     min-height: 30px;
-     padding-left: 5px;
-     padding-right: 5px;
-     padding-top: 5px;
- }
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    min-height: 30px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+}
 
 .buttonGroupInset4 {
     border-radius: 3px 3px 3px 3px;
@@ -898,15 +898,15 @@ fieldset > legend {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding: 2px;
     margin-top:2px;
- }
+}
 
 .mouseOverHighlight {
     cursor: pointer;
 }
 
 .playingAudioHighlight {
-     background-color: yellow;
- }
+    background-color: yellow;
+}
 
 .cardBorderShadow {
     background-color: #FFFFFF;
@@ -963,8 +963,8 @@ fieldset > legend {
 }
 
 .maxWidth {
-     max-width: 145px;
- }
+    max-width: 145px;
+}
 
 #ASRScorePanel fieldset legend {
     margin-bottom: 5px;
@@ -988,7 +988,7 @@ td > h5 {
 }
 
 .englishQuestionRightMargin {
-   margin-right : 131px;
+    margin-right : 131px;
 }
 
 #Student_LoginBoxDialog > .modal-body {
@@ -1360,4 +1360,78 @@ document sections.*/
 .dropdown-menu.domino-picklist>li.pick-item.active>a:focus>[class^="icon-"] {
     color: black;
     text-shadow: none;
+}
+
+.sidebar {
+    font-family: BentonRegular, Arial,sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    font-size: 12px;
+    width: 204px;
+    margin-top: 2px;
+}
+
+.mainBlock {
+    vertical-align: top;
+    display: inline-block;
+    width: 750px;
+    zoom: 1;
+}
+
+.leftBlock {
+    margin-right: 6px;
+}
+
+.leftBlock, .rightBlock {
+    display: inline-block;
+    width: 204px;
+    margin-right: 6px;
+    zoom: 1;
+}
+
+.sidebar .dimension {
+    margin: 4px 0;
+    border-bottom: 1px solid #96979a;
+}
+
+.sidebar .dimension>.menuItem>a {
+    display: block;
+    color: #292b2d;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-family: BentonMedium;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    right: 0;
+    left: 0;
+    padding: 0 10px;
+}
+
+.sidebar a {
+    text-decoration: none;
+}
+
+.sidebar .dimension>.menuItem>a:after {
+    font-family: FontAwesome;
+    float: right;
+    font-size: 11px;
+    content: "\f077";
+}
+
+.sidebar .dimension>ul {
+    background-color: #fff;
+    opacity: 1;
+    overflow: hidden;
+    transition: all 0ms ease;
+}
+
+.sidebar>nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 6px 0;
+}
+
+.sidebar .dimension li, .sidebar nav li {
+    padding: 4px 10px;
 }

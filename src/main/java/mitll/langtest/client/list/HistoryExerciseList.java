@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -49,7 +48,6 @@ import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -72,7 +70,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   private HandlerRegistration handlerRegistration;
   protected long userID;
-  protected final SectionWidgetContainer<V> sectionWidgetContainer;
+  protected final FacetContainer sectionWidgetContainer;
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
   private static final boolean DEBUG = false;
@@ -90,13 +88,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     addHistoryListener();
   }
 
-  protected SectionWidgetContainer<V> getSectionWidgetContainer() {
-    return new SectionWidgetContainer<V>();
-  }
-
-  protected V getSectionWidget(String type) {
-    return sectionWidgetContainer.getWidget(type);
-  }
+  protected abstract FacetContainer getSectionWidgetContainer();
 
   protected String getHistoryToken(int id) {
     return getHistoryTokenFromUIState("", id);
@@ -114,7 +106,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #pushNewSectionHistoryToken()
    */
   protected String getHistoryTokenFromUIState(String search, int id) {
- //   String unitAndChapterSelection = sectionWidgetContainer.getHistoryToken();
+    //   String unitAndChapterSelection = sectionWidgetContainer.getHistoryToken();
     //logger.info("\tgetHistoryToken for " + id + " is '" +unitAndChapterSelection.toString() + "'");
     if (logger == null) {
       logger = Logger.getLogger("HistoryExerciseList");
@@ -277,8 +269,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   /**
+   * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#addClickHandlerToButton
    * @see #pushFirstListBoxSelection
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addClickHandlerToButton
    */
   protected void pushNewSectionHistoryToken() {
     String currentToken = History.getToken();
@@ -529,7 +521,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                               ExerciseListRequest request) {
     scheduleWaitTimer();
     String selectionID = userListID + "_" + typeToSection.toString();
-    logger.info("getExerciseIDs for '" + prefix+ "'");
+    logger.info("getExerciseIDs for '" + prefix + "'");
     service.getExerciseIds(
         request,
         new SetExercisesCallback(selectionID, prefix, exerciseID, request));

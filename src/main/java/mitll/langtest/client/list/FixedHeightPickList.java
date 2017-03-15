@@ -45,6 +45,7 @@ import mitll.langtest.client.table.ListSelect;
 import java.util.List;
 
 public class FixedHeightPickList {
+/*
   private NavList contributorNL;
 
   public void addContributorDF(HasWidgets fields, List<String> choices, ListSelect.Selection handler) {
@@ -66,7 +67,9 @@ public class FixedHeightPickList {
   }
 
   private void addContributorFields(List<String> choices,  ListSelect.Selection handler
-                                    /*, String prefix*/) {
+                                    */
+/*, String prefix*//*
+) {
     for (String contrib : choices) {
       NavLink link = createNavLink(//prefix +
           contrib,
@@ -77,6 +80,7 @@ public class FixedHeightPickList {
             }
           });
 
+*/
 /*      Tooltip tip = new Tooltip(contrib);//contrib.getContribUser().getUserId());
       tip.setWidget(link);
       tip.setShowDelay(500);
@@ -84,12 +88,14 @@ public class FixedHeightPickList {
       tip.setPlacement(Placement.LEFT);
       tip.reconfigure();
       //contributorMap.put(link, contrib);
-      link.addStyleName("pick-item");*/
+      link.addStyleName("pick-item");*//*
+
 
       contributorNL.add(link);
     }
   }
 
+*/
 /*  private <CType> void updateLink(NavLink nl, Map<NavLink, CType> nlMap, Set<CType> activeSet) {
     boolean newChecked = !nl.isActive();
     IconType icon = newChecked ? IconType.OK : IconType.CHECK_EMPTY;
@@ -101,7 +107,8 @@ public class FixedHeightPickList {
     } else {
       activeSet.remove(active);
     }
-  }*/
+  }*//*
+
 
   public NavLink createNavLink(String linkText,
                                IconType linkIcon,
@@ -119,16 +126,19 @@ public class FixedHeightPickList {
     if (linkText != null) {
       theLink.setText(linkText);
     }
+*/
 /*    if (linkIcon != null) {
       theLink.setIcon(linkIcon);
       theLink.setIconSize(iconSize);
-    }*/
+    }*//*
+
     // force right dropdowns to align left.
     theLink.addStyleName("left-align");
     theLink.addClickHandler(handler);
     theLink.setActive(active);
     return theLink;
   }
+*/
 
 
 }

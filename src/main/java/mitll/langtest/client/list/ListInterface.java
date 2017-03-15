@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -59,7 +60,18 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface ListInterface<T extends Shell> extends RequiresResize, Reloadable {
+  /**
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
+   * @param hasID
+   * @return
+   */
   T byHasID(HasID hasID);
+
+  /**
+   * @see Navigation#showLearnAndItem
+   * @param name
+   * @return
+   */
   T byID(int name);
 
   void addExercise(T es);
@@ -67,21 +79,21 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   T simpleRemove(int id);
 
   /**
-   * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    * @param factory
+   * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    */
   void setFactory(ExercisePanelFactory factory);
 
-    /**
-     * @see mitll.langtest.client.LangTest#gotUser
-     * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
-     * @param userID
-     */
+  /**
+   * @param userID
+   * @see mitll.langtest.client.LangTest#gotUser
+   * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
+   */
   boolean getExercises(long userID);
 
   /**
-   * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout(UserList, String)
    * @return
+   * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout(UserList, String)
    */
   Widget getExerciseListOnLeftSide();
 
@@ -90,7 +102,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   boolean loadNext();
 
   /**
-   *
    * @param current
    * @return
    * @see ListInterface#loadNextExercise
@@ -106,22 +117,25 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   void checkAndAskServer(int id);
 
   /**
-   * @see ShowTab#showLearnAndItem(int)
    * @param id
    * @return
+   * @see ShowTab#showLearnAndItem(int)
    */
   boolean loadByID(int id);
 
 
   /**
-   * @see PrevNextList#clickNext()
    * @return
+   * @see PrevNextList#clickNext()
    */
   boolean onFirst();
+
   boolean onFirst(HasID current);
 
   boolean onLast();
+
   boolean onLast(HasID current);
+
   /**
    * @see mitll.langtest.client.LangTest#resetState
    */
@@ -137,38 +151,41 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   int getSize();
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, LangTestDatabaseAsync, ExerciseController, boolean, String)
    * @return
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, LangTestDatabaseAsync, ExerciseController, boolean, String)
    */
   boolean isPendingReq();
 
   void hide();
 
   /**
-   * @see Navigation#getTabPanel()
    * @return
+   * @see Navigation#getTabPanel()
    */
   Panel getCreatedPanel();
 
   void setState(int id, STATE state);
+
   void setSecondState(int id, STATE state);
 
   void addListChangedListener(ListChangeListener<T> listener);
 
   void setShuffle(boolean doShuffle);
+
   void simpleSetShuffle(boolean doShuffle);
 
   void reload(Map<String, Collection<String>> typeToSection);
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#makeClickableText(String, String, String, boolean)
    * @param text
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#makeClickableText(String, String, String, boolean)
    */
   void searchBoxEntry(String text);
 
   int getIndex(int currentID);
 
- void markCurrentExercise(int id);
+  void markCurrentExercise(int id);
+
   void report();
 
   void gotClickOnItem(T newExercise);

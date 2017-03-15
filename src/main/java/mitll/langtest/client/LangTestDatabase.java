@@ -78,8 +78,6 @@ public interface LangTestDatabase extends RemoteService {
    */
   AVPScoreReport getUserHistoryForList(int userid, Collection<Integer> ids, long latestResultID,
                                        Map<String, Collection<String>> typeToSection, long userListID);
-
-
   // Telemetry ---
 
   /**
@@ -113,7 +111,6 @@ public interface LangTestDatabase extends RemoteService {
    * @see mitll.langtest.client.custom.Navigation#makeDialogWindow(LangTestDatabaseAsync, ExerciseController)
    */
   ContextPractice getContextPractice();
-
 
   @Deprecated
   void reloadExercises();

@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 4/27/16.
  */
-public class SectionWidgetContainer<T extends SectionWidget> {
+public abstract class SectionWidgetContainer<T extends SectionWidget> implements FacetContainer {
   private final Logger logger = Logger.getLogger("SectionWidgetContainer");
 
   private static final boolean DEBUG = false;
@@ -58,7 +58,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   /**
    * @param type
    * @param value
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#populateButtonGroups(Collection)
+   * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#populateButtonGroups(Collection)
    */
   public void setWidget(String type, T value) {
     typeToBox.put(type, value);
@@ -70,7 +70,8 @@ public class SectionWidgetContainer<T extends SectionWidget> {
    * @param selectionState
    * @see HistoryExerciseList#restoreListBoxState(SelectionState)
    */
-  void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
+  @Override
+  public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
     Map<String, Collection<String>> selectionState2 = getCompleteState(selectionState);
 
 //    logger.info("restoreListBoxState original state " + selectionState);
@@ -179,7 +180,8 @@ public class SectionWidgetContainer<T extends SectionWidget> {
    * @see ExerciseList#pushNewItem(String, int)
    * @see HistoryExerciseList#pushNewSectionHistoryToken()
    */
-  String getHistoryToken() {
+  @Override
+  public String getHistoryToken() {
     if (typeToBox.isEmpty()) {
       return "";
     } else {
@@ -235,7 +237,8 @@ public class SectionWidgetContainer<T extends SectionWidget> {
    * @see SingleSelectExerciseList#gotSelection()
    * @see SingleSelectExerciseList#restoreListFromHistory
    */
-  int getNumSelections() {
+  @Override
+  public int getNumSelections() {
     int count = 0;
     // logger.info("type now " + typeToSelection);
     for (T widget : typeToBox.values()) {
@@ -253,9 +256,10 @@ public class SectionWidgetContainer<T extends SectionWidget> {
    * @param sections
    * @see #restoreListBoxState
    */
-  protected void selectItem(String type, Collection<String> sections) {
-    logger.warning("doing NO OP");
-  }
+  protected abstract void selectItem(String type, Collection<String> sections);
+//  {
+//    logger.warning("doing NO OP");
+//  }
 
   public void clear() {
     typeToBox.clear();
