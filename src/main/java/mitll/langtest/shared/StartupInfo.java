@@ -69,7 +69,6 @@ public class StartupInfo implements IsSerializable {
     this.projects = projects;
     this.message = message;
     this.affiliations = affiliations;
-
   }
 
   public Map<String, String> getProperties() {
@@ -80,6 +79,10 @@ public class StartupInfo implements IsSerializable {
     return projects;
   }
 
+  /**
+   * If the app doesn't start properly, what to show
+   * @return
+   */
   public String getMessage() {
     return message;
   }

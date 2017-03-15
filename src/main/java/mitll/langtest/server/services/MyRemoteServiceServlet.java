@@ -230,8 +230,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       if (loggedInUser != null) {
         db.setStartupInfo(loggedInUser);
       }
+logger.info("Got here = "+loggedInUser);
       return loggedInUser;
-    } catch (DominoSessionException e) {
+    } catch (Exception e) {
       logger.error("Got " + e, e);
       return null;
     }

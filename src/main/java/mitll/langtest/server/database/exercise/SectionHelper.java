@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.SectionNode;
@@ -129,6 +130,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     }
   }
 
+  ItemSorter itemSorter = new ItemSorter();
+
   private void recurseAndCount(SectionNode node, Map<String, Set<String>> typeToCount) {
     String childType = node.getChildType();
 
@@ -138,7 +141,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
       Set<String> members = typeToCount.get(childType);//, new HashSet<>());
       if (members == null) {
-        typeToCount.put(childType, members = new HashSet<String>());
+        typeToCount.put(childType, members = new TreeSet<>(itemSorter));
       }
       for (SectionNode child : node.getChildren()) {
         members.add(child.getName());

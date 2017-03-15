@@ -49,6 +49,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.client.list.ListSectionWidget;
+import mitll.langtest.client.list.SectionWidgetContainer;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -68,7 +70,8 @@ import static mitll.langtest.shared.answer.ActivityType.AUTOCRT;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasExerciseImpl, AmasExerciseImpl, ButtonBarSectionWidget> {
+public abstract class SingleSelectExerciseList
+    extends HistoryExerciseList<AmasExerciseImpl, AmasExerciseImpl, ButtonBarSectionWidget> {
   private final Logger logger = Logger.getLogger("SingleSelectExerciseList");
   private static final int NUM_CHOICES = 3;
 
@@ -128,8 +131,8 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
 
   /**
    * @see #getExercises(long)
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
-   * @see mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
+   * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
+   * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
    */
   @Override
   public void addWidgets() {
@@ -191,7 +194,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       Collection<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
 
       ButtonBarSectionWidget value = new ButtonBarSectionWidget(type);
-      sectionWidgetContainer.setWidget(type, value);
+      buttonBarSectionWidgetContainer.setWidget(type, value);
       value.getButtonBar(firstTypeRow, type, sectionsInType, type, buttonTypes.get(index++), this);
 
       List<SectionNode> newNodes = new ArrayList<>();
@@ -206,6 +209,18 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     DivWidget bottomRow = getBottomRow();
     addBottomText(bottomRow);
     container.add(bottomRow);
+  }
+
+  private SectionWidgetContainer<ButtonBarSectionWidget> buttonBarSectionWidgetContainer;
+
+  protected SectionWidgetContainer<ButtonBarSectionWidget> getSectionWidgetContainer() {
+    buttonBarSectionWidgetContainer = new SectionWidgetContainer<ButtonBarSectionWidget>() {
+      @Override
+      protected void selectItem(String type, Collection sections) {
+
+      }
+    };
+    return buttonBarSectionWidgetContainer;
   }
 
   /**
@@ -340,6 +355,13 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     return getSectionWidget("Quiz") == null ? NUM_CHOICES - 1 : NUM_CHOICES;
   }
 
+  SectionWidgetContainer<SectionWidget> mySectionWidgetContainer;
+
+
+  protected SectionWidget getSectionWidget(String type) {
+    return mySectionWidgetContainer.getWidget(type);
+  }
+
   /**
    * @param toShow
    * @see SingleSelectExerciseList#gotEmptyExerciseList()
@@ -411,7 +433,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @see #addButtonRow
    */
   private void makeDefaultSelections() {
-    for (ButtonBarSectionWidget v : sectionWidgetContainer.getValues()) {
+    for (ButtonBarSectionWidget v : buttonBarSectionWidgetContainer.getValues()) {
       // ButtonBarSectionWidget value = (ButtonBarSectionWidget) v;
       v.simpleSelectOnlyOne();
     }

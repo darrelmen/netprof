@@ -199,7 +199,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
         parent.addChild(listSectionWidget);
       }
       parent = listSectionWidget;
-      sectionWidgetContainer.setWidget(type, listSectionWidget);
+      mySectionWidgetContainer.setWidget(type, listSectionWidget);
       listSectionWidget.addChoices(firstTypeRow, type, sectionsInType);
 
       if (types.indexOf(type) < types.size() - 1) {
@@ -249,25 +249,6 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
     links.addStyleName("topMargin");
     links.addStyleName("leftFiveMargin");
     return links;
-//    DivWidget bottomRow = new DivWidget();
-//    bottomRow.getElement().getStyle().setMarginBottom(18, Style.Unit.PX);
-//    DivWidget left = new DivWidget();
-//    left.addStyleName("floatLeftList");
-//    left.add(links);
-//    bottomRow.add(left);
-//    return bottomRow;
-  }
-
-  private List<String> getLabels(Collection<SectionNode> nodes) {
-    List<String> items = new ArrayList<>();
-    Set<String> added = new HashSet<>();
-    for (SectionNode n : nodes) {
-      if (added.add(n.getName())) {
-        items.add(n.getName());
-      }
-    }
-    logger.info("getLabels " + nodes.size() + " : " +items.size());
-    return items;
   }
 
   /**
@@ -290,74 +271,10 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    */
   private void showSelectionState(SelectionState selectionState) {
     // keep the download link info in sync with the selection
-    Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
+//    Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
     //  logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
-
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
-
-/*    if (typeToSection.isEmpty()) {
-   //   showDefaultStatus();
-    } else {
-      StringBuilder status = new StringBuilder();
-      // logger.info("\tshowSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
-      for (String type : typeOrder) {
-        Collection<String> selectedItems = typeToSection.get(type);
-        if (selectedItems != null) {
-          List<String> sorted = new ArrayList<>();
-          for (String selectedItem : selectedItems) {
-            sorted.add(selectedItem);
-          }
-          Collections.sort(sorted);
-          StringBuilder status2 = new StringBuilder();
-          for (String item : sorted) status2.append(item).append(", ");
-          String s = status2.toString();
-          if (!s.isEmpty()) s = s.substring(0, s.length() - 2);
-          String statusForType = type + " " + s;
-          status.append(statusForType).append(" and ");
-        }
-      }
-
-      String text = status.toString();
-      if (text.length() > 0) text = text.substring(0, text.length() - " and ".length());
-      statusHeader.setText(text);
-    }*/
   }
-
-/*
-  private void showDefaultStatus() {
-    statusHeader.setText(SHOWING_ALL_ENTRIES);
-  }
-*/
-
-  /**
-   * @param container
-   * @see #addChoiceRow
-   */
-/*
-  private void addBottomText(Panel container) {
-    Panel status = getStatusRow();
-    container.add(status);
-    status.addStyleName("leftFiftyPercentMargin");
-  }
-*/
-
-  /**
-   * @return
-   * @see #addBottomText
-   */
-/*
-  private Panel getStatusRow() {
-    Panel status = new DivWidget();
-    status.getElement().setId("statusRow");
-    status.addStyleName("alignCenter");
-    status.addStyleName("inlineBlockStyle");
-    status.add(statusHeader);
-    statusHeader.getElement().setId("statusHeader");
-    statusHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    statusHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-    return status;
-  }
-*/
 
   /**
    * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.amas.ExerciseListWrapper)
@@ -385,11 +302,13 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    * @see #addChoiceRow
    */
   private void makeDefaultSelections() {
-    for (SectionWidget v : sectionWidgetContainer.getValues()) v.selectFirst();
+    for (SectionWidget v : mySectionWidgetContainer.getValues()) v.selectFirst();
   }
 
+
+  private SectionWidgetContainer<ListSectionWidget> mySectionWidgetContainer;
   protected SectionWidgetContainer<ListSectionWidget> getSectionWidgetContainer() {
-    return new SectionWidgetContainer<ListSectionWidget>() {
+    mySectionWidgetContainer = new SectionWidgetContainer<ListSectionWidget>() {
       protected String getAnySelectionValue() {
         return "All";
       }
@@ -400,9 +319,10 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
        * @param sections
        */
       protected void selectItem(String type, Collection<String> sections) {
-        SectionWidget widget = sectionWidgetContainer.getWidget(type);
+        SectionWidget widget = mySectionWidgetContainer.getWidget(type);
         widget.selectItem(sections.iterator().next());
       }
     };
+    return mySectionWidgetContainer;
   }
 }

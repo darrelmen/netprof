@@ -36,6 +36,8 @@ import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SimpleSelectExerciseList;
 
@@ -45,7 +47,7 @@ import mitll.langtest.client.list.SimpleSelectExerciseList;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/26/16.
  */
-public class NPFlexSectionExerciseList extends SimpleSelectExerciseList {
+public class NPFlexSectionExerciseList extends FacetExerciseList {
   private static final String COMPLETE = "Complete";
   private static final String LIST_COMPLETE = "List complete!";
 
@@ -53,16 +55,14 @@ public class NPFlexSectionExerciseList extends SimpleSelectExerciseList {
    * @param topRow
    * @param currentExercisePanel
    * @param listOptions
-   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper
+   * @seex mitll.langtest.client.custom.Navigation#makePracticeHelper
    * @see FlexListLayout#makeExerciseList(Panel, Panel, String)
    */
-  public NPFlexSectionExerciseList(FlexListLayout flexListLayout,
+  public NPFlexSectionExerciseList(ExerciseController controller,
                                    Panel topRow,
                                    Panel currentExercisePanel,
                                    ListOptions listOptions) {
-    super(topRow, currentExercisePanel,
-        flexListLayout.controller,  /*, showFirstNotCompleted*/
-        listOptions);
+    super(topRow, currentExercisePanel, controller, listOptions);
   }
 
   @Override

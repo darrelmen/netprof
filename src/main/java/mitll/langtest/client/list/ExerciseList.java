@@ -693,15 +693,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @return
-   * @see mitll.langtest.client.list.PagingExerciseList#gotClickOnItem
-   */
-/*  boolean isExercisePanelBusy() {
-    Widget current = innerContainer.getWidget();
-    return current != null && current instanceof BusyPanel && ((BusyPanel) current).isBusy();
-  }*/
-
-  /**
    * @param current
    * @see ListInterface#loadNextExercise
    */

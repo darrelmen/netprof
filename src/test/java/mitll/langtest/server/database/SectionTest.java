@@ -47,6 +47,7 @@ public class SectionTest extends BaseTest {
     }
 
     logger.info("type order " + sectionHelper.getTypeOrder());
+    logger.info("type to sections " + sectionHelper.getTypeToDistinct());
   }
 
 /*
@@ -192,6 +193,10 @@ public class SectionTest extends BaseTest {
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
     int byLanguage = projectDAO.getByLanguage(croatian);
     Project project = andPopulate.getProject(byLanguage);
+    if (project == null) {
+      logger.error("no project " + byLanguage);
+      return;
+    }
 
     ISection<CommonExercise> sectionHelper = project.getSectionHelper();
 

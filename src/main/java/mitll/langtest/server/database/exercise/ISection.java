@@ -17,6 +17,7 @@ public interface ISection<T> {
 
   boolean allKeysValid();
 
+ // Collection<SectionNode> getRootNodes();
   Collection<SectionNode> getSectionNodesForTypes();
 
   /**

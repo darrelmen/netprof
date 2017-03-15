@@ -260,8 +260,8 @@ public class ListSectionWidget implements SectionWidget {
           }
         }
 
-        List<String> sectionsInType = itemSorter.getSortedItems(temp);
-        sorted.addAll(sectionsInType);
+        // ???
+        sorted.addAll(itemSorter.getSortedItems(temp));
       }
     }
 

@@ -67,7 +67,7 @@ public class ReviewItemHelper extends NPFHelper {
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
 
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
-   private final ReloadableContainer predefinedContent;
+  private final ReloadableContainer predefinedContent;
 
   /**
    * @param controller
@@ -94,7 +94,7 @@ public class ReviewItemHelper extends NPFHelper {
   protected Panel doInternalLayout(final UserList<CommonShell> ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
     this.flexListLayout = new ReviewFlexListLayout(ul);
-    Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
+    Panel widgets = flexListLayout.doInternalLayout(ul == null ? -1 : ul.getID(), instanceName, true);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
   }
@@ -105,9 +105,10 @@ public class ReviewItemHelper extends NPFHelper {
       flexListLayout.onResize();
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
-    } else {
-      //System.out.println("ReviewItemHelper.onResize : not sending resize event - flexListLayout is null?");
     }
+    //else {
+      //System.out.println("ReviewItemHelper.onResize : not sending resize event - flexListLayout is null?");
+    //}
   }
 
   // private class ReviewFlexListLayout<CommonExercise extends CommonShell & AnnotationExercise & AudioRefExercise> extends FlexListLayout<CommonExercise> {
@@ -121,7 +122,7 @@ public class ReviewItemHelper extends NPFHelper {
 
     @Override
     protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> pagingExerciseList) {
-      return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, pagingExerciseList) {
+      return new ExercisePanelFactory<CommonShell, CommonExercise>(getController(), pagingExerciseList) {
         @Override
         public Panel getExercisePanel(CommonExercise exercise) {
           CommonExercise userExercise = new Exercise(exercise);
@@ -150,7 +151,7 @@ public class ReviewItemHelper extends NPFHelper {
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                String instanceName) {
       FlexListLayout outer = this;
-      return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, new ListOptions(instanceName)) {
+      return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel, new ListOptions(instanceName)) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         /**

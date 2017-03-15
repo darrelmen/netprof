@@ -119,8 +119,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public void reload(Map<String, Collection<String>> typeToSection) {
-  }
+  public void reload(Map<String, Collection<String>> typeToSection) {  }
 
   /**
    * Add two rows -- the search box and then the item list
@@ -166,20 +165,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   *   ExerciseListRequest getRequest(String prefix) {
-   return new ExerciseListRequest(incrRequest(),
-   controller.getUserState().getUser())
-   .setPrefix(prefix)
-   .setUserListID(userListID)
-   .setActivityType(getRole())
-   .setOnlyUnrecordedByMe(getUnrecorded())
-   .setOnlyExamples(isOnlyExamples())
-   .setIncorrectFirstOrder(incorrectFirstOrder)
-   .setOnlyDefaultAudio(defaultAudioFilter);
-   }
-   */
-
-  /**
    * @return
    * @see PagingExerciseList#loadExercises
    */
@@ -192,6 +177,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
   abstract protected ClickablePagingContainer<T> makePagingContainer();
+
+  public abstract void gotClickOnItem(final T e);
 
   /**
    * Skip to first not completed or just go to the first item.
@@ -382,7 +369,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     logger.info("for " + getInstance() +
         " showing no items match relative to " + typeAhead.getWidget().getElement().getExID() + " parent " + typeAhead.getWidget().getParent().getElement().getExID());
 */
-
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
@@ -396,11 +382,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   String getHistoryTokenFromUIState(String search, int id) {
-    return "search=" + search + SelectionState.SECTION_SEPARATOR +
-        "item=" + id;
+    return "search=" + search + SelectionState.SECTION_SEPARATOR + "item=" + id;
   }
-
-  public abstract void gotClickOnItem(final T e);
 
   public void clear() {
     pagingContainer.clear();
@@ -513,7 +496,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @param id
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @see mitll.langtest.client.list.ExerciseList#removeExercise
    */
   @Override
@@ -549,30 +531,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pagingContainer.flush();
     pagingContainer.redraw();
   }
-
-  /**
-   * @return
-   * @see HistoryExerciseList#loadExercisesUsingPrefix
-   */
-/*
-  boolean getUnrecorded() {
-    return unrecorded;
-  }
-*/
-
-  /**
-   * @paramx unrecorded
-   * @seex SimpleChapterNPFHelper#getMyListLayout
-   */
-/*
-  public void setUnrecorded(boolean unrecorded) {
-    this.unrecorded = unrecorded;
-  }
-
-  public void setDefaultAudioFilter(boolean unrecorded) {
-    this.defaultAudioFilter = unrecorded;
-  }
-*/
 
   boolean isOnlyExamples() {
     return onlyExamples;
