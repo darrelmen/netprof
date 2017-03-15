@@ -46,6 +46,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -1031,8 +1032,13 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
    */
   private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
     Heading foreignLanguageContent = new Heading(1, foreignSentence);
-    foreignLanguageContent.getElement().setId("ForeignLanguageContent");
-    foreignLanguageContent.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+    Element element = foreignLanguageContent.getElement();
+    element.setId("ForeignLanguageContent");
+    element.getStyle().setTextAlign(Style.TextAlign.CENTER);
+
+    if (isPashto()) {
+      foreignLanguageContent.addStyleName("pashtofont");
+    }
 
     FocusPanel flPhraseContainer = new FocusPanel();   // TODO : remove???
     flPhraseContainer.getElement().setId("FLPhrase_container");
@@ -1058,6 +1064,10 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
 
     addAudioBindings(flPhraseContainer);
     return flPhraseContainer;
+  }
+
+  private boolean isPashto() {
+    return controller.getLanguage().equalsIgnoreCase("Pashto");
   }
 
   private DivWidget getCenteringRow() {

@@ -84,7 +84,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private static final int SOUND_WIDTH = 75;
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
-  private final boolean isNarrow;
+ // private final boolean isNarrow;
   private long from;
   private long to;
   //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
@@ -97,12 +97,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @param isNarrow
    * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
    */
-  public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,
+  PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,
                         PhonePlot phonePlot, boolean isNarrow) {
-    super(controller);
+    super(controller, false);
     this.exampleContainer = exampleContainer;
     this.phonePlot = phonePlot;
-    this.isNarrow = isNarrow;
+   // this.isNarrow = isNarrow;
   }
 
   @Override

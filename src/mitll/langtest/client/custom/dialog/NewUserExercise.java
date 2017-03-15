@@ -85,6 +85,9 @@ class NewUserExercise extends BasicDialog {
   protected static final int TEXT_FIELD_WIDTH = 500;
   private static final int LABEL_WIDTH = 105;
 
+  /**
+   *
+   */
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
   private static final String ENGLISH_LABEL = "English";// (optional)";
@@ -399,9 +402,28 @@ class NewUserExercise extends BasicDialog {
     foreignAnno.getElement().setId("foreignLanguageAnnotation");
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
     foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
-    foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+    TextBoxBase box = foreignLang.box;
+    box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+
+    if (isPashto()) {
+      styleForPashto(box);
+    }
+
     setMarginBottom(foreignLang);
   }
+
+  private void styleForPashto(TextBoxBase box) {
+    Style style = box.getElement().getStyle();
+    style.setProperty("fontSize", "xx-large");
+    style.setProperty("fontFamily", "'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif");
+    box.setHeight("35px");
+  }
+
+
+  private boolean isPashto() {
+    return controller.getLanguage().equalsIgnoreCase("Pashto");
+  }
+
 
   private String getLanguage() {
     return controller.getLanguage();
@@ -410,6 +432,7 @@ class NewUserExercise extends BasicDialog {
   protected void setMarginBottom(FormField foreignLang) {
     foreignLang.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
   }
+
   private void makeTranslitRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
@@ -425,6 +448,7 @@ class NewUserExercise extends BasicDialog {
     FormField formField = makeBoxAndAnno(container, CONTEXT_LABEL, "", contextAnno);
 
     TextBoxBase box = formField.box;
+    if (isPashto()) styleForPashto(box);
     box.setText(originalContext = newUserExercise.getContext());
     box.addBlurHandler(new BlurHandler() {
       @Override
@@ -447,8 +471,8 @@ class NewUserExercise extends BasicDialog {
     }
   }
 
-  private  <S extends CommonShell & AudioRefExercise & AnnotationExercise> FormField addContextTranslation(Panel container,
-                                                                                                            S newUserExercise) {
+  private <S extends CommonShell & AudioRefExercise & AnnotationExercise> FormField addContextTranslation(Panel container,
+                                                                                                          S newUserExercise) {
     FormField formField = makeBoxAndAnno(container, CONTEXT_TRANSLATION_LABEL, "", contextTransAnno);
 
     TextBoxBase box1 = formField.box;
@@ -734,7 +758,7 @@ class NewUserExercise extends BasicDialog {
 
     CommonShell newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
 
- //   logger.info("afterItemCreated removed " + newUserExercisePlaceholder);
+    //   logger.info("afterItemCreated removed " + newUserExercisePlaceholder);
 
     ul.addExercise(newExercise);
     originalList.addExercise(newExercise);
@@ -747,7 +771,7 @@ class NewUserExercise extends BasicDialog {
     exerciseList.clearCachedExercise(); // if we don't it will just use the cached exercise, if it's the current one
     String id = toMoveToEnd.getID();
 
-   // logger.info("afterItemCreated checkAndAskServer " + id);
+    // logger.info("afterItemCreated checkAndAskServer " + id);
 
     exerciseList.checkAndAskServer(id);
 

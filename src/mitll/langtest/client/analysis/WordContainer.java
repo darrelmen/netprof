@@ -96,7 +96,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
    * @see AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel, int)
    */
   WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
-    super(controller);
+    super(controller, true);
     spanish = controller.getLanguage().equalsIgnoreCase("Spanish");
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.plot = plot;
@@ -106,7 +106,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   }
 
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
-  private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
+  //private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
 
   protected int getPageSize() {
     return ROWS_TO_SHOW;
@@ -137,9 +137,9 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
         String id = o1.getId();
         String id1 = o2.getId();
         boolean firstNull = id == null;
-        if (firstNull) logger.warning("1 got null id for " +o1);
+        if (firstNull) logger.warning("1 got null id for " + o1);
         boolean secondNull = id1 == null;
-        if (secondNull) logger.warning("2 got null id for " +o2);
+        if (secondNull) logger.warning("2 got null id for " + o2);
         return i == 0 ? (firstNull || secondNull ? i : id.compareTo(id1)) : i;
       }
     });
@@ -166,12 +166,35 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
     flush();
   }
 
-  @Override
-  protected CellTable.Resources chooseResources() {
+//  @Override
+//  protected CellTable.Resources chooseResources() {
+//    CellTable.Resources o;
+//    o = GWT.create(LocalTableResources.class);
+//    return o;
+//  }
+
+  /**
+   * @see #makeCellTable
+   * @return
+   */
+/*  protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
-    o = GWT.create(LocalTableResources.class);
+
+    if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
+      if (isPashto()) {
+        logger.info("WordContainer : chooseResources RTL - pashto ");
+        o = GWT.create(RTLPashtoLocalTableResources.class);
+      } else {
+        logger.info("WordContainer : chooseResources RTL ");
+
+        o = GWT.create(RTLLocalTableResources.class);
+      }
+    } else {
+       logger.info("WordContainer : chooseResources LTR");
+      o = GWT.create(LocalTableResources.class);
+    }
     return o;
-  }
+  }*/
 
   private void addReview() {
     Column<WordScore, SafeHtml> itemCol = getItemColumn();
@@ -385,10 +408,9 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
     if (from == 0) {
       heading.setSubtext("");
       addItems(sortedHistory);
-    }
-    else {
-     // logger.info("Starting from " +from + " : " +to);
-     // logger.info("Starting from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
+    } else {
+      // logger.info("Starting from " +from + " : " +to);
+      // logger.info("Starting from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
       heading.setSubtext("Starting " + superShortFormat.format(new Date(from)));
 
       WordScore fromElement = new WordScore();
@@ -404,12 +426,46 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
     }
   }
 
-  public interface LocalTableResources extends CellTable.Resources {
-    /**
+/*  public interface LocalTableResources extends CellTable.Resources {
+    *//**
      * The styles applied to the table.
-     */
+     *//*
+    interface TableStyle extends CellTable.Style {
+    }
+
+    *//**
+     * The styles applied to the table.
+     *//*
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
-    TableResources.TableStyle cellTableStyle();
+    WordContainer.LocalTableResources.TableStyle cellTableStyle();
   }
+
+  public interface RTLLocalTableResources extends CellTable.Resources {
+    *//**
+     * The styles applied to the table.
+     *//*
+    interface TableStyle extends CellTable.Style {
+    }
+    *//**
+     * The styles applied to the table.
+     *//*
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "RTLScoresCellTableStyleSheet.css"})
+    WordContainer.RTLLocalTableResources.TableStyle cellTableStyle();
+  }
+
+  public interface RTLPashtoLocalTableResources extends CellTable.Resources {
+    *//**
+     * The styles applied to the table.
+     *//*
+    interface TableStyle extends CellTable.Style {
+    }
+    *//**
+     * The styles applied to the table.
+     *//*
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "RTLPashtoScoresCellTableStyleSheet.css"})
+    TableResources.TableStyle cellTableStyle();
+  }*/
 }

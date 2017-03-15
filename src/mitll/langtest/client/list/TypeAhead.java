@@ -59,15 +59,18 @@ public class TypeAhead {
   private Logger logger = Logger.getLogger("TypeAhead");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final TextBox typeAhead = new TextBox();
+  private final boolean isPashto;
 
   /**
    * @param column
    * @param waitCursor
    * @param title
    * @param hasFirstFocus
+   * @param language
    * @see mitll.langtest.client.list.PagingExerciseList#addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
-  TypeAhead(Panel column, Image waitCursor, String title, boolean hasFirstFocus) {
+  TypeAhead(Panel column, Image waitCursor, String title, boolean hasFirstFocus, String language) {
+    this.isPashto = language.equalsIgnoreCase("Pashto");
     makeTypeAhead();
     column.add(title.equals(PagingExerciseList.SEARCH) ? getSearch(waitCursor) : getControlGroup(waitCursor, title));
     checkFocus(hasFirstFocus);
@@ -95,9 +98,16 @@ public class TypeAhead {
    * On key up, do something, like go get a new list given a search term.
    */
   private void makeTypeAhead() {
-    typeAhead.setWidth("240px");
-    typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT);
+    typeAhead.setWidth(240 +       "px");
     getTypeAhead().getElement().setId("ExerciseList_TypeAhead");
+
+    if (isPashto) {
+      typeAhead.addStyleName("pashtofont");
+      typeAhead.getElement().getStyle().setProperty("fontSize", "xx-large");
+      typeAhead.setHeight("32px");
+    } else {
+      typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT);
+    }
 
     getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {

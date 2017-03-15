@@ -201,8 +201,12 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return isRTLContent(exercise.getForeignLanguage());
   }
 
-  private boolean isPashto() {
+  protected boolean isPashto() {
     return controller.getLanguage().equalsIgnoreCase("Pashto");
+  }
+
+  protected boolean isUrdu() {
+    return controller.getLanguage().equalsIgnoreCase("Urdu");
   }
 
   public void onResize() {

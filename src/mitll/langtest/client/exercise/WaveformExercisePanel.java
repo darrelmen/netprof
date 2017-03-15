@@ -144,7 +144,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
   protected String getExerciseContent(T e) {
     String context = isNormalRecord() ? e.getForeignLanguage() :
         hasContext(exercise) ? exercise.getContext() : "No in-context audio for this exercise.";
-    return ExerciseFormatter.getArabic(context);
+    return ExerciseFormatter.getArabic(context, isUrdu(), isPashto());
   }
 
   /**

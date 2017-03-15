@@ -92,6 +92,7 @@ public class AudioDAO extends DAO {
   private static final String DNR = "dnr";
 
   private final boolean DEBUG = false;
+  private final boolean DEBUG_SQL = true;
   private static final boolean DEBUG_ATTACH = false;
 
   private final Connection connection;
@@ -775,29 +776,31 @@ public class AudioDAO extends DAO {
     Set<String> maleReg = new HashSet<>();
     Set<String> maleSlowSpeed = new HashSet<>();
     float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs, exToTranscript, maleReg);
+    writeMissing(getMissingExercises(uniqueIDs, maleReg), "missingMaleReg");
 
     Set<String> origMaleReg = new HashSet<>(maleReg);
-    Set<String> regNotSlow = new HashSet<>(origMaleReg);
+    Set<String> regNotSlow  = new HashSet<>(origMaleReg);
 
     float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs, exToTranscript, maleSlowSpeed);
+    writeMissing(getMissingExercises(uniqueIDs, maleSlowSpeed), "missingMaleSlow");
 
     // modify
     maleReg.retainAll(maleSlowSpeed);
     float male = maleReg.size();
 
     regNotSlow.removeAll(maleSlowSpeed);
-    logger.info("Reg not slow (" + regNotSlow.size() + ") " + regNotSlow);
+    logger.info("Male Reg not slow (" + regNotSlow.size() + ") " + regNotSlow);
     Set<String> slowNotReg = new HashSet<>(maleSlowSpeed);
     slowNotReg.removeAll(origMaleReg);
-    logger.info("Slow not reg (" + slowNotReg.size() + ")" + slowNotReg);
+    logger.info("Male Slow not reg (" + slowNotReg.size() + ")" + slowNotReg);
 
     Set<String> notreg = new HashSet<>(uniqueIDs);
     notreg.removeAll(origMaleReg);
-    logger.info("not Reg  (" + notreg.size() + ")" + new TreeSet<>(notreg) + " from " + uniqueIDs.size());
+    logger.info("unrecorded male Reg      (" + notreg.size() + ")" + new TreeSet<>(notreg) + " from " + uniqueIDs.size());
 
     Set<String> notslow = new HashSet<>(uniqueIDs);
     notslow.removeAll(maleSlowSpeed);
-    logger.info("not slow (" + notslow.size() + ")" + new TreeSet<>(notslow) + " from " + uniqueIDs.size());
+    logger.info("unrecorded male slow     (" + notslow.size() + ")" + new TreeSet<>(notslow) + " from " + uniqueIDs.size());
 
     femaleIDs = new HashSet<>(femaleIDs);
     femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);
@@ -807,8 +810,8 @@ public class AudioDAO extends DAO {
     float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs, exToTranscript, femaleReg);
     float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs, exToTranscript, femaleSlowSpeed);
 
-    List<CommonExercise> exercises = getMissingExercises(uniqueIDs, femaleReg);
-    writeMissing(exercises, "missingFemale");
+    writeMissing(getMissingExercises(uniqueIDs, femaleReg), "missingFemaleReg");
+    writeMissing(getMissingExercises(uniqueIDs, femaleSlowSpeed), "missingFemaleSlow");
 
     femaleReg.retainAll(femaleSlowSpeed);
     float female = femaleReg.size();
@@ -1040,7 +1043,7 @@ public class AudioDAO extends DAO {
 
 
       logger.debug("getCountForGender : for " + audioSpeed +
-          (DEBUG ? ("\n\t" + sql) : "") +
+          (DEBUG_SQL ? ("\n\t" + sql) : "") +
           "\n\tgot " + idsOfRecordedExercises.size() +
           " recorded and stale " + idsOfStaleExercises.size() + " " + idsOfStaleExercises);
 

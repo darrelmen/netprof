@@ -83,8 +83,8 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    * @param controller
    * @see AnalysisTab#getPhoneReport
    */
-  public PhoneExampleContainer(ExerciseController controller, ShowTab learnTab, Heading heading) {
-    super(controller);
+  PhoneExampleContainer(ExerciseController controller, ShowTab learnTab, Heading heading) {
+    super(controller, true);
     this.learnTab = learnTab;
     isSpanish = controller.getLanguage().equalsIgnoreCase("Spanish");
     this.heading = heading;
@@ -101,7 +101,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
 
   /**
    * @return
-   * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
+   * @see SetCompleteDisplay#getScoreHistory
    */
   public Panel getTableWithPager() {
     Panel tableWithPager = super.getTableWithPager();
@@ -137,12 +137,12 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     });
   }
 
-  @Override
+/*  @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
     o = GWT.create(LocalTableResources.class);
     return o;
-  }
+  }*/
 
   private Column<WordAndScore, SafeHtml> getPlayAudio() {
     return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
@@ -260,9 +260,9 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   /**
    * Must be public
    */
-  public interface LocalTableResources extends CellTable.Resources {
+/*  public interface LocalTableResources extends CellTable.Resources {
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "PhoneScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();
-  }
+  }*/
 }

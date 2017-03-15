@@ -107,7 +107,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
                        ShowTab learnTab,
                        String selectedUserKey
   ) {
-    super(controller);
+    super(controller, false);
     this.rightSide = rightSide;
     this.learnTab = learnTab;
     this.service = service;
@@ -581,7 +581,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
      * The styles applied to the table.
      */
     @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
+    @Source({CellTable.Style.DEFAULT_CSS, "../exercise/ScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();
   }
 }

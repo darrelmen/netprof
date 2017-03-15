@@ -485,7 +485,9 @@ fieldset > legend {
  }
 
 .Instruction {
-    text-align: left;
+    /**
+        text-align: left;
+     */
     margin-bottom: 6px;
 }
 
@@ -506,6 +508,11 @@ fieldset > legend {
     white-space: normal;
     font-family: sans-serif;
     line-height: 100%;
+}
+
+.itemcolor {
+    color: #CC6600;
+    font-size: 32pt;
 }
 
 .Instruction-data-with-wrap  {
@@ -585,13 +592,17 @@ fieldset > legend {
 
 .pashtofont {
     font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
-    font-size: x-large;
+    font-size: xx-large;
     margin-bottom: 5px;
+    direction:rtl;
+    text-align: right;
 }
 
 .pashtofont td {
     font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
-    font-size: x-large;
+    font-size: xx-large;
+    direction:rtl;
+    text-align: right;
 }
 
 .xlargeFont {

@@ -95,6 +95,7 @@ public class BasicDialog {
                                                     int optWidth) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     if (optWidth>0) user.setWidth(optWidth + "px");
+    user.setDirectionEstimator(true);   // automatically detect whether text is RTL
 
     user.getElement().setId("textBox");
     Panel row = new HorizontalPanel();

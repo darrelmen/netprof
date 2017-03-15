@@ -65,7 +65,10 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -85,6 +88,8 @@ import java.util.logging.Logger;
  */
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
+  public static final String INSTRUCTION_TITLE = "Instruction-title";
+  public static final String INSTRUCTION_DATA_WITH_WRAP = "Instruction-data-with-wrap";
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   public static final String CONTEXT = "Context";
@@ -154,10 +159,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     navigationHelper.addStyleName("topBarMargin");
 
     addContent();
-  }
-
-  protected boolean isRTL(T exercise) {
-    return isRTLContent(exercise.getForeignLanguage());
   }
 
   private void addContent() {
@@ -394,7 +395,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
     if (includeLabel) {
       InlineHTML labelWidget = new InlineHTML(label);
-      labelWidget.addStyleName("Instruction-title");
+      labelWidget.addStyleName(INSTRUCTION_TITLE);
       nameValueRow.add(labelWidget);
       labelWidget.setWidth("150px");
     }
@@ -403,10 +404,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     // and when clicking inside dialog, seems like we need to dismiss dialog...
     if (label.contains(CONTEXT)) {
       InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
-      englishPhrase.addStyleName("Instruction-data-with-wrap");
+      englishPhrase.addStyleName(INSTRUCTION_DATA_WITH_WRAP);
       if (label.contains("Meaning")) {
         englishPhrase.addStyleName("englishFont");
       }
+      if (isPashto()) englishPhrase.addStyleName("pashtofont");
       nameValueRow.add(englishPhrase);
       addTooltip(englishPhrase, label.replaceAll(":", ""));
       englishPhrase.addStyleName("leftFiveMargin");
@@ -447,7 +449,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
     }
 
-    if (isRTL(exercise) && flLine) {
+    if (isRTLContent(value)) {
       Collections.reverse(tokens);
     }
     for (String token : tokens) {
@@ -498,10 +500,18 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     if (label.contains("Meaning")) {
       w.addStyleName("englishFont");
     }
+    if (isPashto()) {
+      w.addStyleName("pashtofont");
+    }
     if (!chineseCharacter) w.addStyleName("rightFiveMargin");
 
     return w;
   }
+
+  private boolean isPashto() {
+    return controller.getLanguage().equalsIgnoreCase("Pashto");
+  }
+
 
   /**
    * @return

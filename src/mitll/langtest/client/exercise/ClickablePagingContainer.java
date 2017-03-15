@@ -55,7 +55,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
   private final Map<String, T> idToExercise = new HashMap<>();
 
   public ClickablePagingContainer(ExerciseController controller) {
-    super(controller);
+    super(controller, false);
   }
 
   public void redraw() {

@@ -289,7 +289,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void addTypeAhead(Panel column) {
     if (showTypeAhead) {
-      typeAhead = new TypeAhead(column, waitCursor, SEARCH, true) {
+      typeAhead = new TypeAhead(column, waitCursor, SEARCH, true, controller.getLanguage()) {
         @Override
         public void gotTypeAheadEntry(String text) {
           gotTypeAheadEvent(text, false);

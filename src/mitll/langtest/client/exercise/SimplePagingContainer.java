@@ -69,9 +69,11 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected SingleSelectionModel<T> selectionModel;
   int verticalUnaccountedFor = 100;
   //  private static final boolean debug = false;
+  private boolean foreignLanguageInFirstRow;
 
-  protected SimplePagingContainer(ExerciseController controller) {
+  protected SimplePagingContainer(ExerciseController controller, boolean foreignLanguageInFirstRow) {
     this.controller = controller;
+    this.foreignLanguageInFirstRow = foreignLanguageInFirstRow;
   }
 
   /**
@@ -121,14 +123,40 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
 
-    if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
-      //logger.info("simplePaging : chooseResources RTL - content");
-      o = GWT.create(RTLTableResources.class);
-    } else {
-      // logger.info("simplePaging : chooseResources LTR - content");
-      o = GWT.create(TableResources.class);
+    if (foreignLanguageInFirstRow) {
+      if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
+        if (isPashto()) {
+          logger.info("WordContainer : chooseResources RTL - pashto ");
+          o = GWT.create(RTLPashtoLocalTableResources.class);
+        } else {
+          logger.info("WordContainer : chooseResources RTL ");
+
+          o = GWT.create(RTLLocalTableResources.class);
+        }
+      } else {
+        logger.info("WordContainer : chooseResources LTR");
+        o = GWT.create(TableResources.class);
+      }
+    }
+    else {
+      if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
+        if (isPashto()) {
+          logger.info("simplePagingContainer : chooseResources RTL - pashto");
+          o = GWT.create(RTLPashtoTableResources.class);
+        } else {
+          logger.info("simplePagingContainer : chooseResources RTL");
+          o = GWT.create(RTLTableResources.class);
+        }
+      } else {
+        logger.info("simplePagingContainer : chooseResources LTR");
+        o = GWT.create(TableResources.class);
+      }
     }
     return o;
+  }
+
+  protected boolean isPashto() {
+    return controller.getLanguage().equalsIgnoreCase("Pashto");
   }
 
   private void configureTable() {
@@ -271,7 +299,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ExerciseCellTableStyleSheet.css"})
-    PagingContainer.TableResources.TableStyle cellTableStyle();
+    SimplePagingContainer.TableResources.TableStyle cellTableStyle();
   }
 
   public interface RTLTableResources extends CellTable.Resources {
@@ -283,6 +311,61 @@ public class SimplePagingContainer<T> implements RequiresResize {
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
-    PagingContainer.RTLTableResources.TableStyle cellTableStyle();
+    SimplePagingContainer.RTLTableResources.TableStyle cellTableStyle();
+  }
+
+  public interface RTLPashtoTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {
+    }
+
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "RTLPashtoExerciseCellTableStyleSheet.css"})
+    SimplePagingContainer.RTLPashtoTableResources.TableStyle cellTableStyle();
+  }
+
+/*  public interface LocalTableResources extends CellTable.Resources {
+    *//**
+     * The styles applied to the table.
+     *//*
+    interface TableStyle extends CellTable.Style {
+    }
+
+    *//**
+     * The styles applied to the table.
+     *//*
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
+    SimplePagingContainer.LocalTableResources.TableStyle cellTableStyle();
+  }*/
+
+  public interface RTLLocalTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {
+    }
+    /**
+     * The styles applied to the table.
+     */
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "RTLScoresCellTableStyleSheet.css"})
+    SimplePagingContainer.RTLLocalTableResources.TableStyle cellTableStyle();
+  }
+
+  public interface RTLPashtoLocalTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {
+    }
+    /**
+     * The styles applied to the table.
+     */
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "RTLPashtoScoresCellTableStyleSheet.css"})
+    SimplePagingContainer.RTLPashtoLocalTableResources.TableStyle cellTableStyle();
   }
 }
