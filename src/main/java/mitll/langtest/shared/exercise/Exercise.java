@@ -135,8 +135,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param altcontext
    * @param contextTranslation
    * @param projectid
-   * @see #addContext
    * @Deprecated - use related exercise join table
+   * @see #addContext
    */
   @Deprecated
   private Exercise(String id, String context, String altcontext, String contextTranslation, int projectid) {
@@ -298,6 +298,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
+  /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise(Map, Map, CommonExercise)
+   * @param exerciseAttributes
+   */
   @Override
   public void setAttributes(List<ExerciseAttribute> exerciseAttributes) {
     this.attributes = exerciseAttributes;
@@ -418,7 +422,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   public String getContext() {
     return hasContext() ? getDirectlyRelated().iterator().next().getForeignLanguage() : "";
-  }  public String getContextTranslation() {
+  }
+
+  public String getContextTranslation() {
     return hasContext() ? getDirectlyRelated().iterator().next().getEnglish() : "";
   }
 
@@ -445,8 +451,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @deprecated we don't do overrides any more
    * @return
+   * @deprecated we don't do overrides any more
    */
   public boolean isOverride() {
     return isOverride;
@@ -497,7 +503,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
         " audio count = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue() +
-        " attr " +getAttributes();
+        " attr " + getAttributes();
   }
 
   @Deprecated
@@ -515,8 +521,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   *
-   *
    * @return
    */
   public Map<String, String> getUnitToValue() {
@@ -533,12 +537,20 @@ public class Exercise extends AudioExercise implements CommonExercise,
     unitToValue.put(unit, value);
   }
 
+  public void addPair(Pair pair) {
+    unitToValue.put(pair.getProperty(), pair.getValue());
+  }
+
   /**
    * @param unitToValue
    * @see mitll.langtest.shared.exercise.Exercise#Exercise
    */
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
+  }
+
+  public void setPairs(List<Pair> pairs) {
+    for (Pair pair : pairs) unitToValue.put(pair.getProperty(), pair.getValue());
   }
 
   @Override

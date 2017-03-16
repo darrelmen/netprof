@@ -243,7 +243,7 @@ public abstract class SectionWidgetContainer<T extends SectionWidget> implements
     // logger.info("type now " + typeToSelection);
     for (T widget : typeToBox.values()) {
       boolean hasSelection = !widget.getCurrentSelections().isEmpty();
-      //logger.info("getNumSelections : widget " + widget.getType() + " value now " + currentSelection);
+      //logger.info("getNumSelections : widget " + widget.getProperty() + " value now " + currentSelection);
       if (hasSelection) {
         count++;
       }

@@ -50,7 +50,7 @@ import mitll.langtest.client.services.AmasService;
 import mitll.langtest.client.services.AmasServiceAsync;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.amas.Answer;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;

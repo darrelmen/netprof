@@ -91,7 +91,7 @@ public class OpsUserContainer extends BasicUserContainer<UserInfo> implements Re
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, MiniUser object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
+        if (BrowserEvents.CLICK.equals(event.getProperty())) {
           gotClickOnItem(object);
         }
       }

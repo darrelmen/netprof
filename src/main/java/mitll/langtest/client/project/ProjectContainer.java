@@ -165,7 +165,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, ProjectInfo object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
+        if (BrowserEvents.CLICK.equals(event.getProperty())) {
           gotClickOnItem(object);
         }
       }

@@ -2,8 +2,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.Pair;
-import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickExerciseAttribute;
 import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;

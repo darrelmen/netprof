@@ -37,6 +37,7 @@ import mitll.langtest.server.amas.ILRMapping;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.exercise.Pair;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;

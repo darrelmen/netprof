@@ -259,7 +259,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     String nrml = Normalizer.normalize(input, Normalizer.Form.NFD);
     StringBuilder stripped = new StringBuilder();
     for (int i = 0; i < nrml.length(); ++i) {
-      if (Character.getType(nrml.charAt(i)) != Character.NON_SPACING_MARK) {
+      if (Character.getProperty(nrml.charAt(i)) != Character.NON_SPACING_MARK) {
         stripped.append(nrml.charAt(i));
       }
     }

@@ -35,7 +35,7 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.services.AmasService;
 import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.autocrt.AutoCRT;
-import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.amas.Answer;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.scoring.AudioContext;
 

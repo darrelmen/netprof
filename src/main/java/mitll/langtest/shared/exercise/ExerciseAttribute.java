@@ -47,30 +47,21 @@ import java.util.Arrays;
  * Time: 7:47 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseAttribute implements IsSerializable {
-  private String property;
-  private String value;
+public class ExerciseAttribute extends Pair {
+//  private String property;
+//  private String value;
   private int id;
 
   public ExerciseAttribute() {
   }
 
   private ExerciseAttribute(int id, String status, String value) {
+    super(status,value);
     this.id = id;
-    this.property = status;
-    this.value = value;
   }
 
   public ExerciseAttribute(String status, String value) {
     this(-1, status, value);
-  }
-
-  public String getProperty() {
-    return property;
-  }
-
-  public String getValue() {
-    return value;
   }
 
   public void setValue(String value) {
@@ -79,10 +70,6 @@ public class ExerciseAttribute implements IsSerializable {
 
   public void setProperty(String property) {
     this.property = property;
-  }
-
-  public String toString() {
-    return "[" + getProperty() + " : '" + getValue() + "']";
   }
 
   @Override

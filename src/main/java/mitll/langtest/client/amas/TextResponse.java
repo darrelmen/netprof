@@ -53,7 +53,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AmasService;
 import mitll.langtest.client.services.AmasServiceAsync;
-import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.amas.Answer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 

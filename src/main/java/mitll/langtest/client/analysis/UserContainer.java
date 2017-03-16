@@ -281,7 +281,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
+        if (BrowserEvents.CLICK.equals(event.getProperty())) {
           gotClickOnItem(object);
         }
       }

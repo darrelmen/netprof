@@ -56,7 +56,7 @@ public class DominoReaderTest {
   //  logger.info("Got " + startupInfo);
    // SectionNode next = startupInfo.getSectionNodesForTypes().iterator().next();
   //  Map<String, Collection<String>> typeToSection = new HashMap<>();
-  //  typeToSection.put(next.getType(), Collections.singleton(next.getName()));
+  //  typeToSection.put(next.getProperty(), Collections.singleton(next.getName()));
   //  Collection exercisesForSelectionState = database.getSectionHelper().getExercisesForSelectionState(typeToSection);
 
    // logger.info("got " + exercisesForSelectionState.size() + " e.g. " + exercisesForSelectionState.iterator().next());

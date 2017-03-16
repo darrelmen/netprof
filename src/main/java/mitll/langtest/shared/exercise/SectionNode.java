@@ -131,7 +131,7 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
       builder.append("\n");
     }
     return
-        //getType() + "=" +
+        //getProperty() + "=" +
         name + " children are " + childType +
             (this.children.isEmpty() ? "" : (" : [(" + this.children.size() + "), " + builder.toString() + "]"));
   }
@@ -139,7 +139,7 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
   public String toString() {
     String example = isLeaf() ? "" : children.toString();//children.get(0).toString();
     return
-        //  getType() + "="       +
+        //  getProperty() + "="       +
         name + "" + //(typeToChildren.isEmpty() ? "" : " " + typeToChildren) +
             (isLeaf() ? "" : (" " + childType +
                 " : [" +

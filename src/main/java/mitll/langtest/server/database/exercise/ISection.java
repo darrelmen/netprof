@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.exercise.SectionNode;
 
 import java.util.Collection;
@@ -37,6 +38,8 @@ public interface ISection<T> {
 
   Collection<T> getExercisesForSelectionState(String type, String value);
 
+  Map<String, Set<String>> getTypeToMatches(Collection<Pair> pairs);
+
   Collection<T> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
 
   void addExercise(T exercise);
@@ -48,6 +51,8 @@ public interface ISection<T> {
    * @return
    */
   Pair addExerciseToLesson(T exercise, String type, String unitName);
+  void addExerciseToLesson(T exercise, Pair pair);
+  void addPairs(T exercise, List<Pair> pair);
 
   /**
    * @param exercise
@@ -67,6 +72,11 @@ public interface ISection<T> {
 
   void report();
 
+ /**
+  * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
+  * @param predefinedTypeOrder
+  * @param seen
+  */
   void rememberTypesInOrder(final List<String> predefinedTypeOrder, List<List<Pair>> seen);
 
   void rememberTypesFor(List<List<Pair>> seen);

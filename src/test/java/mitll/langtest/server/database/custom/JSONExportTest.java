@@ -221,7 +221,7 @@ public class JSONExportTest extends JsonExport {
 //
 //    logger.info("Got " + rawExercises.size());
 //    for (SectionNode node : exerciseDAO.getSectionHelper().getSectionNodesForTypes()) {
-//      Collection<CommonExercise> exercisesForSelectionState = exerciseDAO.getSectionHelper().getExercisesForSelectionState(node.getType(), node.getName());
+//      Collection<CommonExercise> exercisesForSelectionState = exerciseDAO.getSectionHelper().getExercisesForSelectionState(node.getProperty(), node.getName());
 //      logger.info("for " + node + " got " + exercisesForSelectionState.size());
 //    }
 //    //for (CommonExercise exercise : rawExercises) logger.debug(exercise);
