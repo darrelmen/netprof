@@ -47,6 +47,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.DIFFICULTY;
 import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.SOUND;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
@@ -82,9 +83,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     List<String> typeOrder = getSectionHelper().getTypeOrder();
     if (typeOrder.isEmpty()) {
       typeOrder = new ArrayList<>();
-      String first  = project.first();
+      String first = project.first();
       String second = project.second();
-      if (first  != null && !first.isEmpty())  typeOrder.add(first);
+      if (first != null && !first.isEmpty()) typeOrder.add(first);
       if (second != null && !second.isEmpty()) typeOrder.add(second);
     }
     return typeOrder;
@@ -112,6 +113,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   List<CommonExercise> readExercises() {
     try {
       List<String> typeOrder = getTypeOrderFromProject();
+      putSoundAtEnd(typeOrder);
 
       int projid = project.id();
 
@@ -123,20 +125,28 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           "\n\tfor " + projid +
           "\n\ttype order " + typeOrder);
 
+      Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
+
+      //  logger.info("addExerciseAttributes found " + allByProject.size() + " attributes");
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
+
       // do we add attributes to context exercises?
       List<CommonExercise> allNonContextExercises =
-          userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject, fullProject);
+          userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject,
+              fullProject, allByProject, exToAttrs
+          );
 
-      addExerciseAttributes(projid, allNonContextExercises);
+      //addExerciseAttributes(projid, allNonContextExercises);
 
       logger.info("readExercises project " + project +
           " readExercises got " + allNonContextExercises.size() + " predef exercises");
 
 //      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
 
-       Map<Integer, CommonExercise> idToContext =
+      Map<Integer, CommonExercise> idToContext =
           getIDToExercise(userExerciseDAO.getContextByProject(projid, typeOrder, getSectionHelper(),
-              exerciseToPhoneForProject, fullProject));
+              exerciseToPhoneForProject, fullProject, allByProject, exToAttrs
+          ));
 
       // logger.info(prefix + " idToContext " + idToContext.size());
 
@@ -148,6 +158,21 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       logger.error("got " + e, e);
     }
     return Collections.emptyList();
+  }
+
+  private void putSoundAtEnd(List<String> types) {
+    //  String sound = SOUND;
+    putAtEnd(types, "Sub-topic");
+    putAtEnd(types, "Grammar");
+    putAtEnd(types, SOUND);
+    putAtEnd(types, DIFFICULTY);
+  }
+
+  private void putAtEnd(List<String> types, String sound) {
+    if (types.contains(sound)) {
+      types.remove(sound);
+      types.add(sound);
+    }
   }
 
   private void attachContextExercises(List<CommonExercise> allNonContextExercises,
@@ -179,6 +204,15 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   @NotNull
   private List<String> getTypeOrderFromProject() {
+    List<String> typeOrder = getBaseTypeOrder();
+
+    typeOrder.addAll(getAttributeTypes());
+
+    return typeOrder;
+  }
+
+  @NotNull
+  private List<String> getBaseTypeOrder() {
     List<String> typeOrder = new ArrayList<>();
     typeOrder.add(project.first());
     if (!project.second().isEmpty()) typeOrder.add(project.second());
@@ -189,26 +223,40 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     return typeOrder;
   }
 
-  private void addExerciseAttributes(int projid, List<CommonExercise> allNonContextExercises) {
+  private Collection<String> getAttributeTypes() {
+    return userExerciseDAO.getAttributeTypes(project.id());
+  }
+
+  /**
+   * @paramx projid
+   * @paramx exercises
+   */
+ /* private void addExerciseAttributes(int projid, List<CommonExercise> exercises) {
     Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
 
-    logger.info("found " + allByProject.size() + " attributes");
+    //  logger.info("addExerciseAttributes found " + allByProject.size() + " attributes");
     Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
 
-    for (CommonExercise exercise : allNonContextExercises) {
-      Collection<SlickExerciseAttributeJoin> slickExerciseAttributeJoins = exToAttrs.get(exercise.getID());
-
-      List<ExerciseAttribute> attributes = new ArrayList<>();
-      if (slickExerciseAttributeJoins != null) {
-        for (SlickExerciseAttributeJoin join : slickExerciseAttributeJoins) {
-          ExerciseAttribute attribute = allByProject.get(join.attrid());
-          attributes.add(attribute);
-        }
-        exercise.setAttributes(attributes);
-        //   logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
-      }
+    for (CommonExercise exercise : exercises) {
+      addAttributeToExercise(allByProject, exToAttrs, exercise);
     }
-  }
+  }*/
+/*
+  private void addAttributeToExercise(Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs, CommonExercise exercise) {
+    Collection<SlickExerciseAttributeJoin> slickExerciseAttributeJoins = exToAttrs.get(exercise.getID());
+
+    List<ExerciseAttribute> attributes = new ArrayList<>();
+    if (slickExerciseAttributeJoins != null) {
+      for (SlickExerciseAttributeJoin join : slickExerciseAttributeJoins) {
+        ExerciseAttribute attribute = allByProject.get(join.attrid());
+        attributes.add(attribute);
+      }
+      exercise.setAttributes(attributes);
+
+//        getSectionHelper().rememberTypesFor();
+      //   logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
+    }
+  }*/
 
   private Map<Integer, CommonExercise> getIDToExercise(Collection<CommonExercise> allExercises) {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();

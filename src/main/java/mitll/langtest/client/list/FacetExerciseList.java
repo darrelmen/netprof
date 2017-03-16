@@ -36,14 +36,20 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.exercise.FilterRequest;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,7 +84,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
 
     sectionPanel = new DivWidget();
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
-secondRow.add(sectionPanel);
+    secondRow.add(sectionPanel);
 //    Style style = sectionPanel.getElement().getStyle();
 //    style.setPaddingLeft(0, Style.Unit.PX);
 //    style.setPaddingRight(0, Style.Unit.PX);
@@ -106,14 +112,16 @@ secondRow.add(sectionPanel);
 
   /**
    * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
-   * @see #getExercises(long)
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
+   * @see #getExercises(long)
    */
   @Override
   public void addWidgets() {
     sectionPanel.clear();
-    sectionPanel.add(getWidgetsForTypes());
+    sectionPanel.add(typeOrderContainer = getWidgetsForTypes());
   }
+
+  Panel typeOrderContainer;
 
   /**
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
@@ -178,8 +186,6 @@ secondRow.add(sectionPanel);
 
     addFacetsForReal(rootNodes, types, typeToDistinct, nav);
     makeDefaultSelections();
-
-    // firstTypeRow.add(getBottomRow());
     pushFirstListBoxSelection();
   }
 
@@ -189,12 +195,13 @@ secondRow.add(sectionPanel);
   Map<String, String> typeToSelection = new HashMap<>();
 
   Set<String> types = new HashSet<>();
+
   /**
    * ul
-   *  li - each dimension
-   *   span - header
-   *   ul - choices in each dimension
-   *    li - choice - with span (qty)
+   * li - each dimension
+   * span - header
+   * ul - choices in each dimension
+   * li - choice - with span (qty)
    *
    * @param rootNodes
    * @param types
@@ -203,32 +210,39 @@ secondRow.add(sectionPanel);
   private void addFacetsForReal(Collection<SectionNode> rootNodes,
                                 List<String> types,
                                 Map<String, Set<String>> typeToDistinct,
-                                ComplexWidget nav) {
+                                Panel nav) {
     int i = 0;
 
     logger.info("addChoiceWidgets\n\tfor " +
-        rootNodes.size() +
+        //rootNodes.size() +
         " nodes" +
         "\n\tand " + types.size() + " types " + types + " " +
-        " type->distinct " +typeToDistinct);
+        " type->distinct " + typeToDistinct);
     // SectionNodeItemSorter sectionNodeItemSorter = new SectionNodeItemSorter();
 
     this.types = new HashSet<>(types);
     // nav -
     //   ul
     UnorderedList allTypesContainer = new UnorderedList(); //ul
+    nav.clear();
     nav.add(allTypesContainer);
 
     for (String type : types) {
       // List<String> sectionsInType = getLabels(rootNodes);
       Set<String> keys = typeToDistinct.get(type);
 
+      boolean refined = typeToSelection.containsKey(type);
+
       // nav
       //  ul
-      //   li
-      NavLink typeSection = new NavLink(type); // li
-      typeSection.addStyleName("dimension");
-      allTypesContainer.add(typeSection);
+      //   li - dimension
+      ListItem liForDimension = new ListItem();
+      if (refined) liForDimension.addStyleName("refined");
+      allTypesContainer.add(liForDimension);
+
+      NavLink typeSection = new NavLink(type + "::after"); // li
+      typeSection.addStyleName("menuItem");
+      liForDimension.add(typeSection);
 
       // nav
       //  ul
@@ -239,18 +253,61 @@ secondRow.add(sectionPanel);
       typeSection.add(choices);
 //      NavHeader header = new NavHeader(type);
 
-      for (String key : keys) {
-        NavLink w = new NavLink(key);
+      String selectionForType = typeToSelection.get(type);
+      if (selectionForType != null) {
+        NavLink w = new NavLink(selectionForType);
         typeSection.add(w);
-        w.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            typeToSelection.put(type, key);
-            gotSelection();
+        w.addStyleName("selected");
+      } else {
+        if (keys != null) {
+          for (String key : keys) {
+            NavLink w = new NavLink(key);
+            typeSection.add(w);
+            w.addClickHandler(getHandler(type, key));
           }
-        });
+        }
       }
     }
+  }
+
+  @NotNull
+  private ClickHandler getHandler(final String type, final String key) {
+    return new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        typeToSelection.put(type, key);
+        gotSelection();
+        getTypeToValue();
+      }
+    };
+  }
+
+  int reqid = 0;
+
+  private void getTypeToValue() {
+    List<Pair> pairs = new ArrayList<>();
+
+    for (String type:typeOrder) {
+      String s = typeToSelection.get(type);
+      if (s == null) {
+        pairs.add(new Pair(type, "Any"));
+      }
+      else {
+        pairs.add(new Pair(type, s));
+      }
+    }
+
+    controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs), new AsyncCallback<Map<String, Set<String>>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Map<String, Set<String>> result) {
+        addFacetsForReal(null, typeOrder, result, typeOrderContainer);
+      }
+    });
   }
 
   /**
@@ -266,9 +323,9 @@ secondRow.add(sectionPanel);
       // Collection<SectionNode> children = node.getChildren();
       Collection<SectionNode> children = node.getChildren();
 
-      // if (!children.isEmpty() && !children.iterator().next().getType().equals("Sound")) {
+      // if (!children.isEmpty() && !children.iterator().next().getProperty().equals("Sound")) {
       //    for (SectionNode child : children) {
-      //      logger.info("\tAdding " + child.getType() + " "+ child.getName());
+      //      logger.info("\tAdding " + child.getProperty() + " "+ child.getName());
       //   }
       // }
       newNodes.addAll(children);
@@ -422,7 +479,7 @@ secondRow.add(sectionPanel);
       @Override
       public String getHistoryToken() {
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> pair:typeToSelection.entrySet()) {
+        for (Map.Entry<String, String> pair : typeToSelection.entrySet()) {
           builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
         }
 

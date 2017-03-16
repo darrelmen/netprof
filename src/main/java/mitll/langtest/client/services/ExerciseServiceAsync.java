@@ -33,12 +33,15 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
+
+import java.util.Map;
+import java.util.Set;
 
 public interface ExerciseServiceAsync {
   <T extends CommonShell> void getExerciseIds(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
+
   <T extends Shell> void getExercise(int exid, boolean isFlashcardReq, AsyncCallback<T> async);
+
+  void getTypeToValues(FilterRequest request, AsyncCallback<Map<String, Set<String>>> async);
 }

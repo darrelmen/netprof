@@ -34,6 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.exercise.Shell;
@@ -49,6 +50,7 @@ import java.io.InputStream;
 import java.util.*;
 
 import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.DIFFICULTY;
+import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.SOUND;
 
 /**
  * Created with IntelliJ IDEA.
@@ -143,6 +145,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
 
       for (SectionNode child : node.getChildren()) {
+        if (!child.getType().equals(childType)) {
+          logger.error("child "+ child + " doesn't match " +childType);
+        }
         members.add(child.getName());
         recurseAndCount(child, typeToCount);
       }
@@ -186,9 +191,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   private void putSoundAtEnd(List<String> types) {
     //  String sound = SOUND;
+    putAtEnd(types, "Topic");
+    putAtEnd(types, "Sub-topic");
+    putAtEnd(types, "Grammar");
     putAtEnd(types, SOUND);
     putAtEnd(types, DIFFICULTY);
   }
+
 
   private void putAtEnd(List<String> types, String sound) {
     if (types.contains(sound)) {
@@ -265,7 +274,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   @Nullable
   private SectionNode getMatch(Collection<SectionNode> sectionNodesForTypes, String name) {
     for (SectionNode node : sectionNodesForTypes) {
-      if (//node.getType().equals(type) &&
+      if (//node.getProperty().equals(type) &&
           node.getName().equals(name)) return node;
     }
     return null;
@@ -376,6 +385,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return getTypeToMatch(type, value, root);
   }
 
+  @Override
   public Map<String, Set<String>> getTypeToMatches(Collection<Pair> pairs) {
     SectionNode root = this.root;
     List<Pair> copy = new ArrayList<>(pairs);
@@ -395,11 +405,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     Iterator<Pair> iterator = pairs.iterator();
     Pair next = iterator.next();
-    String type = next.getType();
-    String toMatch = next.getSection();
+    String type = next.getProperty();
+    String toMatch = next.getValue();
 
     boolean isAll = toMatch.equalsIgnoreCase("any") || toMatch.equalsIgnoreCase("all");
-    logger.info("to match " +type + "="+ toMatch + " out of " +pairs + " is all " +isAll);
+    logger.info("to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
     if (root.getChildType().equals(type)) {
       Set<String> matches = new HashSet<>();
       typeToMatch.put(type, matches);
@@ -409,6 +419,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       if (isAll) {
         childMatches = root.getChildren();
         for (SectionNode child : childMatches) {
+          if (!child.getType().equals(type)) logger.error("huh? adding " + child + " to " + type);
           matches.add(child.getName());
         }
       } else {
@@ -422,7 +433,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         }
       }
 
-      logger.info("children of " + root.getName() + " match for " + next + " is " +(childMatches == null ? "none":childMatches.size()));
+      logger.info("children of " + root.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
       if (childMatches == null || childMatches.isEmpty()) {  // couldn't find matching value
         return typeToMatch;
       } else {
@@ -435,8 +446,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
             recurseAndCount(childMatch, typeToMatch);
           }
           return typeToMatch;
-        }
-        else {
+        } else {
           logger.info("recurse on " + childMatches.size() + " with path " + pairs);
 
           for (SectionNode childMatch : childMatches) {
@@ -454,8 +464,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
       if (pairs.isEmpty()) {
         logger.error("huh? pairs is empty for " + matches.size());
-      }
-      else {
+      } else {
         for (SectionNode child : root.getChildren()) {
           Map<String, Set<String>> typeToMatch1 = getTypeToMatchPairs(pairs, child);
           mergeMaps(typeToMatch, typeToMatch1);
@@ -505,7 +514,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
 //  private void addChild(SectionNode child,Map<String, Set<String>> typeToMatch) {
-//    typeToMatch.put(child.getType(),child.getChildren())
+//    typeToMatch.put(child.getProperty(),child.getChildren())
 //  }
 
   /**
@@ -613,11 +622,28 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return pair;
   }
 
+  public void addPairs(T exercise, List<Pair> pairs) {
+    for (Pair pair : pairs) addExerciseToLesson(exercise, pair);
+  }
+
+  @Override
+  public void addExerciseToLesson(T exercise, Pair pair) {
+    addPairEntry(exercise, pair);
+    exercise.addPair(pair);
+  }
+
   @Override
   public Pair getPairForExerciseAndLesson(T exercise, String type, String unitName) {
-    Map<String, Lesson<T>> sectionToLesson = getSectionToLesson(type);
-    addUnitNameEntry(exercise, unitName, sectionToLesson);
+    addPairEntry(exercise, type, unitName);
     return new Pair(type, unitName);
+  }
+
+  private void addPairEntry(T exercise, Pair pair) {
+    addUnitNameEntry(exercise, pair.getValue(), getSectionToLesson(pair.getProperty()));
+  }
+
+  private void addPairEntry(T exercise, String type, String unitName) {
+    addUnitNameEntry(exercise, unitName, getSectionToLesson(type));
   }
 
   /**
@@ -814,7 +840,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public void rememberTypesInOrder(final List<String> predefinedTypeOrder, List<List<Pair>> seen) {
     SectionNode child = root;
 
-    logger.info("type order " + predefinedTypeOrder);
+    logger.info("rememberTypesInOrder type order " + predefinedTypeOrder);
     for (List<Pair> pairs : seen) {
       child = rememberOne(predefinedTypeOrder, child, pairs);
     }
@@ -822,7 +848,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     typeToCount = new HashMap<>();
     recurseAndCount(root, typeToCount);
 
-    logger.info("type->count " + typeToCount);
+    logger.info("rememberTypesInOrder type->count " + typeToCount);
   }
 
   private void makeRoot() {
@@ -830,6 +856,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     //  logger.info("NEW ROOT " + root, new Exception());
   }
 
+  int spew = 0;
   /**
    * @param predefinedTypeOrder
    * @param child
@@ -841,14 +868,17 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     pairs.sort(new Comparator<Pair>() {
       @Override
       public int compare(Pair o1, Pair o2) {
-        int i = predefinedTypeOrder.indexOf(o1.getType());
-        int anotherInteger = predefinedTypeOrder.indexOf(o2.getType());
+        int i = predefinedTypeOrder.indexOf(o1.getProperty());
+        int anotherInteger = predefinedTypeOrder.indexOf(o2.getProperty());
         if (i > 0 && anotherInteger == -1) return -1;
         else if (i == -1 && anotherInteger > 0) return +1;
-        else if (i == -1 && anotherInteger == -1) return o1.getType().compareTo(o2.getType());
+        else if (i == -1 && anotherInteger == -1) return o1.getProperty().compareTo(o2.getProperty());
         else return Integer.valueOf(i).compareTo(anotherInteger);
       }
     });
+
+    if (pairs.size() != 3 && spew++ <100)
+    logger.info("after " + pairs);
 
     return rememberOne(child, pairs);
   }
@@ -877,7 +907,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   private SectionNode rememberOne(SectionNode child, List<Pair> pairs) {
     for (Pair pair : pairs) {
-      child = child.getChild(pair.getType(), pair.getSection());
+      child = child.getChild(pair.getProperty(), pair.getValue());
     }
     child = root;
     return child;

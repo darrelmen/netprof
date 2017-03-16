@@ -32,7 +32,7 @@
 
 package mitll.langtest.server.amas;
 
-import mitll.langtest.server.database.exercise.Pair;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.exercise.Shell;

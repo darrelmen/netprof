@@ -1,6 +1,5 @@
 /** Add css rules here for your application. */
 
-
 /** Example rules used by the template application (remove for your app) */
 h1 {
     font-size: 2em;
@@ -11,7 +10,7 @@ h1 {
 }
 
 .body {
-    font-family: Arial,sans-serif;
+    font-family: Arial, sans-serif;
     color: #333333;
 
     background: #d3d3d3; /* for non-css3 browsers */
@@ -27,9 +26,8 @@ h1 {
 }
 
 .whiteBackground {
-    color:#ffffff;
+    color: #ffffff;
 }
-
 
 .headerLowerBorder {
     border: 2px solid #404141;
@@ -44,7 +42,6 @@ h1 {
 
     padding-right: 0px;
 }
-
 
 .qcBorder {
     border: 0 solid #404141;
@@ -71,6 +68,7 @@ h1 {
 .spaceBarBlue {
     background-color: #3195b9;
 }
+
 .spaceBarBlueJess {
     background-color: #269cce;
 }
@@ -99,7 +97,7 @@ h1 {
 }
 
 .borderSpacing {
-    border-collapse:separate;
+    border-collapse: separate;
     border-spacing: 0px;
 }
 
@@ -114,19 +112,19 @@ h1 {
 }
 
 .subtitleForeground {
-    color : #f3f6f5;
+    color: #f3f6f5;
 }
 
 .subtitleNoRecordingForeground {
-    color : #ffb911;
+    color: #ffb911;
 }
 
 .questionMarkForeground {
-    color : #f0f9fb;
+    color: #f0f9fb;
 }
 
 .blueBackground {
-    background-color : #f0f9fb;
+    background-color: #f0f9fb;
 }
 
 .primaryButtonColor {
@@ -160,7 +158,7 @@ h1 {
 
 .floatLeft {
     float: left;
-    clear:none;
+    clear: none;
 }
 
 .floatLeftList {
@@ -172,7 +170,7 @@ h1 {
 }
 
 .border {
-    border : 1px solid;
+    border: 1px solid;
 }
 
 .overflowStyle {
@@ -180,7 +178,7 @@ h1 {
 }
 
 .wrapword {
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
 }
@@ -231,7 +229,7 @@ h1 {
 
 .inlineBlockStyle {
     display: inline-block;
-    white-space:nowrap;
+    white-space: nowrap;
 }
 
 .inlineBlockStyleOnly {
@@ -285,13 +283,13 @@ h1 {
     padding-right: 3px;
 }
 
-.addPadding{
+.addPadding {
     border-width: 0;
 }
 
 .tableCenter {
-    margin-left:auto;
-    margin-right:auto;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .sendButton {
@@ -332,6 +330,7 @@ fieldset {
 .topMargin {
     margin-top: 10px;
 }
+
 .topBarMargin {
     margin-top: 18px;
 }
@@ -343,6 +342,7 @@ fieldset {
 .bottomFiveMargin {
     margin-bottom: 5px;
 }
+
 .topMinusFiveMargin {
     margin-top: -13px;
 }
@@ -350,6 +350,7 @@ fieldset {
 .topTwentyMargin {
     margin-top: 20px;
 }
+
 .topFiftyMargin {
     margin-top: 50px;
 }
@@ -418,7 +419,10 @@ fieldset > legend {
     padding-right: 5px;
 }
 
-#nextButton {  margin-left: 5px; }
+#nextButton {
+    margin-left: 5px;
+}
+
 .paddedHorizontalPanel .gwt-Button {
     padding-left: 20px;
 }
@@ -428,10 +432,10 @@ fieldset > legend {
 }
 
 .alignTop {
-    vertical-align:top;
+    vertical-align: top;
 }
 
-.ImageOverlay{
+.ImageOverlay {
     background-color: red;
 }
 
@@ -440,7 +444,7 @@ fieldset > legend {
     margin-right: 5px;
 }
 
-.Button{
+.Button {
     font-family: Arial Unicode MS, Arial, sans-serif;
 }
 
@@ -466,17 +470,17 @@ fieldset > legend {
     padding-right: 6px;
 }
 
-.Tooltip{
+.Tooltip {
     background-color: lightyellow;
     padding: 3px;
     border: 1px solid black;
 }
 
-.TooltipPopup{
+.TooltipPopup {
     border: none;
 }
 
-.RecordPopup{
+.RecordPopup {
     background-color: white;
 }
 
@@ -497,47 +501,47 @@ fieldset > legend {
         */
 }
 
-.Instruction-data  {
+.Instruction-data {
     color: #CC6600;
     font-size: larger;
     font-weight: bold;
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
     line-height: 100%;
 }
 
-.Instruction-data-with-wrap  {
+.Instruction-data-with-wrap {
     color: #CC6600;
     font-size: 28px;
     font-weight: bold;
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
     line-height: 100%;
 }
 
-.Instruction-data-with-wrap-black  {
+.Instruction-data-with-wrap-black {
     font-size: 28px;
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
     line-height: 100%;
 }
 
-.Instruction-data-with-wrap-keep-word  {
+.Instruction-data-with-wrap-keep-word {
     color: #CC6600;
     font-size: 28px;
     font-weight: bold;
-    word-wrap: normal;       /* Internet Explorer 5.5+ */
+    word-wrap: normal; /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
     line-height: 100%;
-    float:left;
+    float: left;
 }
 
 .blueColor {
@@ -549,7 +553,7 @@ fieldset > legend {
 }
 
 .lightBlue {
-    background-color : #afdef8;
+    background-color: #afdef8;
 }
 
 .grayColor {
@@ -566,16 +570,16 @@ fieldset > legend {
 }
 
 .tableRowUserCurrentColor {
-    color:green;
+    color: green;
     font-weight: bold;
 }
 
 .correct {
-    color:green
+    color: green
 }
 
 .incorrect {
-    color:red
+    color: red
 }
 
 .incorrectCard {
@@ -588,18 +592,18 @@ fieldset > legend {
 
 .urdufont {
     color: #CC6600;
-    font-family: 'Nafees Naskh',Nafees,sans-serif;
+    font-family: 'Nafees Naskh', Nafees, sans-serif;
     font-size: 24px;
 }
 
 .pashtofont {
-    font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
+    font-family: 'Pashto Kror Asiatype', 'HSPashto', 'HSTahoma', Arial, Helvetica, sans-serif;
     font-size: x-large;
     margin-bottom: 5px;
 }
 
 .pashtofont td {
-    font-family: 'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif;
+    font-family: 'Pashto Kror Asiatype', 'HSPashto', 'HSTahoma', Arial, Helvetica, sans-serif;
     font-size: x-large;
 }
 
@@ -639,7 +643,7 @@ fieldset > legend {
 .gwt-DisclosurePanel .header,
 .gwt-DisclosurePanel .header a,
 .gwt-DisclosurePanel .header td {
-    text-decoration: none;  /* Remove underline from header */
+    text-decoration: none; /* Remove underline from header */
     color: black;
     cursor: pointer;
 }
@@ -651,7 +655,7 @@ fieldset > legend {
 }
 
 .rightAlign {
-    text-align:right;
+    text-align: right;
 }
 
 .bigFont {
@@ -667,9 +671,11 @@ fieldset > legend {
 .rightFiveMargin {
     margin-right: 5px;
 }
+
 .rightTenMargin {
     margin-right: 10px;
 }
+
 .rightTwentyMargin {
     margin-right: 20px;
 }
@@ -681,6 +687,7 @@ fieldset > legend {
 .scrollBackground {
     background-color: #F8FEFF;
 }
+
 .userNPFContent2 {
     margin-top: 5px;
     float: left;
@@ -717,26 +724,27 @@ fieldset > legend {
 }
 
 .userListBackground {
-    background-color:#ffffff;
+    background-color: #ffffff;
 }
 
 .fullWidth {
     width: 100%;
 
 }
+
 .fullWidth2 {
     width: 95%;
 }
 
 .userListFont {
     color: #111111;
-    font: 600 19px/1.3 "Helvetica Neue",arial,sans-serif;
+    font: 600 19px/1.3 "Helvetica Neue", arial, sans-serif;
     font-weight: bold;
 }
 
 .userListFontBlue {
     color: #3339d9;
-    font: 600 19px/1.3 "Helvetica Neue",arial,sans-serif;
+    font: 600 19px/1.3 "Helvetica Neue", arial, sans-serif;
     font-weight: bold;
 }
 
@@ -747,7 +755,7 @@ fieldset > legend {
 .userListFont2 {
     margin-left: 10px;
     color: #111111;
-    font: 600 15px/1.3 "Helvetica Neue",arial,sans-serif;
+    font: 600 15px/1.3 "Helvetica Neue", arial, sans-serif;
 }
 
 .numItemFont {
@@ -761,8 +769,8 @@ fieldset > legend {
 .userListContainer {
     background-color: rgba(110, 175, 255, 0.27);
     border: none;
-    padding-left:0;
-    padding-right:0;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .handCursor {
@@ -772,6 +780,7 @@ fieldset > legend {
 .userListDarkerBlueColor {
     background-color: #669dc6;
 }
+
 .userListOperations {
     border-top: 1px solid rgba(0, 0, 0, 0.2);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
@@ -788,7 +797,7 @@ fieldset > legend {
 }
 
 .tabbable .nav {
-    margin-bottom : 2px;
+    margin-bottom: 2px;
 }
 
 #showListContainer h1 small {
@@ -831,8 +840,8 @@ fieldset > legend {
 }
 
 .comment-button-group-new {
-    opacity:0.70;
-    filter:alpha(opacity=70);
+    opacity: 0.70;
+    filter: alpha(opacity=70);
 }
 
 .questionContentPadding {
@@ -881,15 +890,15 @@ fieldset > legend {
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
     padding: 5px;
-    margin-bottom:5px;
-    margin-top:5px;
+    margin-bottom: 5px;
+    margin-top: 5px;
 }
 
 .buttonGroupInset6 {
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
     padding: 5px;
-    margin-top:5px;
+    margin-top: 5px;
 }
 
 .buttonGroupInset7 {
@@ -897,7 +906,7 @@ fieldset > legend {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding: 2px;
-    margin-top:2px;
+    margin-top: 2px;
 }
 
 .mouseOverHighlight {
@@ -912,7 +921,7 @@ fieldset > legend {
     background-color: #FFFFFF;
     border-radius: 4px 4px 4px 4px;
     box-shadow: 1px 1px 0 #CAC3B8, 5px 5px 16px #D4CEC5;
-    padding:10px;
+    padding: 10px;
     border: #CAC3B8;
     border-width: 1px 0px 0 1px;
     border-style: solid;
@@ -923,39 +932,39 @@ fieldset > legend {
     left: 0;
     text-align: center;
     vertical-align: middle;
-    width:750px;
+    width: 750px;
 }
 
 .middleColumn {
-    position:absolute;
-    top:0px;
+    position: absolute;
+    top: 0px;
     margin-right: 185px;
     margin-left: 185px;
 }
 
 .rightColumn {
-    position:absolute;
+    position: absolute;
     right: 10px;
-    top:0px;
+    top: 0px;
     padding-left: 10px;
 }
 
 .leftColumn {
-    position:absolute;
+    position: absolute;
     left: 0px;
-    top:0px;
+    top: 0px;
     padding-right: 10px;
 }
 
 .bottomColumn {
-    position:absolute;
-    bottom:0px;
-    text-align:center;
+    position: absolute;
+    bottom: 0px;
+    text-align: center;
     padding-right: 10px;
 }
 
 .positionRelative {
-    position:relative;
+    position: relative;
 }
 
 .minWidthFifty {
@@ -988,11 +997,11 @@ td > h5 {
 }
 
 .englishQuestionRightMargin {
-    margin-right : 131px;
+    margin-right: 131px;
 }
 
 #Student_LoginBoxDialog > .modal-body {
-    padding-top : 5px;
+    padding-top: 5px;
 }
 
 .cogStyle {
@@ -1000,26 +1009,26 @@ td > h5 {
 }
 
 .englishFont {
-    font-family: georgia,"times new roman",times,serif;
+    font-family: georgia, "times new roman", times, serif;
 }
 
 .minWidthRecordButton {
     min-width: 60px;
 }
 
-body>.dropdown-popup {
+body > .dropdown-popup {
     border: 1px solid #ddd;
     background-clip: padding-box;
     border-radius: 6px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
-body>.dropdown-popup a:link {
+body > .dropdown-popup a:link {
     color: black;
 }
 
-body>.dropdown-popup a:HOVER,
-body>.dropdown-popup .nav-list>li.active>a  {
+body > .dropdown-popup a:HOVER,
+body > .dropdown-popup .nav-list > li.active > a {
     background-color: #0081C2;
     background-image: linear-gradient(to bottom, #0088CC, #0077B3);
     background-repeat: repeat-x;
@@ -1030,11 +1039,11 @@ body>.dropdown-popup .nav-list>li.active>a  {
 }
 
 #addItemsAtTop_unitLesson small {
-    color:black;
+    color: black;
 }
 
-#getUnitLessonForExercise_unitLesson  small {
-    color:black;
+#getUnitLessonForExercise_unitLesson small {
+    color: black;
 }
 
 .centeringPractice {
@@ -1159,11 +1168,13 @@ body .btn-toolbar > .btn-group > .btn.active {
     overflow: hidden;
     display: inline-block;
 }
-.stats-toolbar .stats-settings-area>* {
+
+.stats-toolbar .stats-settings-area > * {
     margin-top: 1px;
     margin-bottom: 1px;
 }
-.stats-toolbar .stats-settings-area>a.btn-link:LINK {
+
+.stats-toolbar .stats-settings-area > a.btn-link:LINK {
     color: black;
     text-decoration: none;
     margin-right: 6px;
@@ -1252,7 +1263,6 @@ body .login-modal.modal.in .login-processing * {
     margin-right: 10px;
 }
 
-
 body .ch-password-modal.modal.in {
     top: 5%;
     max-height: 380px;
@@ -1265,7 +1275,6 @@ body .ch-password-modal .force-pw-label {
     padding-bottom: 10px;
     font-weight: bold;
 }
-
 
 body .big-modal.modal.in {
     left: 7%;
@@ -1318,29 +1327,29 @@ ul.nav-list.domino-visible-picklist {
 
 /** Do not highlight links when checked in the dropup for editable
 document sections.*/
-.nav-list.domino-picklist>li.pick-item>a,
-.nav-list.domino-picklist>li.pick-item>a:hover,
-.nav-list.domino-picklist>li.pick-item>a:focus,
-.dropdown-menu.domino-picklist>li.pick-item>a,
-.dropdown-menu.domino-picklist>li.pick-item>a:hover,
-.dropdown-menu.domino-picklist>li.pick-item>a:focus {
+.nav-list.domino-picklist > li.pick-item > a,
+.nav-list.domino-picklist > li.pick-item > a:hover,
+.nav-list.domino-picklist > li.pick-item > a:focus,
+.dropdown-menu.domino-picklist > li.pick-item > a,
+.dropdown-menu.domino-picklist > li.pick-item > a:hover,
+.dropdown-menu.domino-picklist > li.pick-item > a:focus {
     background: none;
     color: black;
     text-shadow: none;
     background-image: none;
 }
 
-.nav-list.domino-picklist>li.pick-item>a>[class^="icon-"],
-.nav-list.domino-picklist>li.pick-item>a:hover>[class^="icon-"],
-.nav-list.domino-picklist>li.pick-item>a:focus>[class^="icon-"],
-.dropdown-menu.domino-picklist>li.pick-item>a>[class^="icon-"],
-.dropdown-menu.domino-picklist>li.pick-item>a:hover>[class^="icon-"],
-.dropdown-menu.domino-picklist>li.pick-item>a:focus>[class^="icon-"] {
+.nav-list.domino-picklist > li.pick-item > a > [class^="icon-"],
+.nav-list.domino-picklist > li.pick-item > a:hover > [class^="icon-"],
+.nav-list.domino-picklist > li.pick-item > a:focus > [class^="icon-"],
+.dropdown-menu.domino-picklist > li.pick-item > a > [class^="icon-"],
+.dropdown-menu.domino-picklist > li.pick-item > a:hover > [class^="icon-"],
+.dropdown-menu.domino-picklist > li.pick-item > a:focus > [class^="icon-"] {
     background-image: none;
 }
 
-.nav-list.domino-picklist>.pick-item.visible-highlight>a:hover,
-.dropdown-menu.domino-picklist>.pick-item.visible-highlight>a:hover {
+.nav-list.domino-picklist > .pick-item.visible-highlight > a:hover,
+.dropdown-menu.domino-picklist > .pick-item.visible-highlight > a:hover {
     background-color: #D9EDF7;
 }
 
@@ -1352,18 +1361,18 @@ document sections.*/
  	background-image: none !important;
  }*/
 
-.nav-list.domino-picklist>li.pick-item.active>a>[class^="icon-"],
-.nav-list.domino-picklist>li.pick-item.active>a:hover>[class^="icon-"],
-.nav-list.domino-picklist>li.pick-item.active>a:focus>[class^="icon-"],
-.dropdown-menu.domino-picklist>li.pick-item.active>a>[class^="icon-"],
-.dropdown-menu.domino-picklist>li.pick-item.active>a:hover>[class^="icon-"],
-.dropdown-menu.domino-picklist>li.pick-item.active>a:focus>[class^="icon-"] {
+.nav-list.domino-picklist > li.pick-item.active > a > [class^="icon-"],
+.nav-list.domino-picklist > li.pick-item.active > a:hover > [class^="icon-"],
+.nav-list.domino-picklist > li.pick-item.active > a:focus > [class^="icon-"],
+.dropdown-menu.domino-picklist > li.pick-item.active > a > [class^="icon-"],
+.dropdown-menu.domino-picklist > li.pick-item.active > a:hover > [class^="icon-"],
+.dropdown-menu.domino-picklist > li.pick-item.active > a:focus > [class^="icon-"] {
     color: black;
     text-shadow: none;
 }
 
 .sidebar {
-    font-family: BentonRegular, Arial,sans-serif;
+    font-family: BentonRegular, Arial, sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     font-size: 12px;
@@ -1389,12 +1398,20 @@ document sections.*/
     zoom: 1;
 }
 
-.sidebar .dimension {
+.refined {}
+
+.sidebar {
     margin: 4px 0;
     border-bottom: 1px solid #96979a;
 }
 
-.sidebar .dimension>.menuItem>a {
+.sidebar > nav ul {
+    list-style: outside none none;
+    margin: 0;
+    padding: 6px 0;
+}
+
+.sidebar > .menuItem > a {
     display: block;
     color: #292b2d;
     text-transform: uppercase;
@@ -1412,26 +1429,41 @@ document sections.*/
     text-decoration: none;
 }
 
-.sidebar .dimension>.menuItem>a:after {
+.sidebar > .menuItem > a:after {
     font-family: FontAwesome;
     float: right;
     font-size: 11px;
     content: "\f077";
 }
 
-.sidebar .dimension>ul {
+.sidebar > ul {
     background-color: #fff;
     opacity: 1;
     overflow: hidden;
     transition: all 0ms ease;
 }
 
-.sidebar>nav ul {
+.sidebar > nav ul {
     list-style: none;
     margin: 0;
     padding: 6px 0;
 }
 
-.sidebar .dimension li, .sidebar nav li {
+.sidebar li, .sidebar nav li {
     padding: 4px 10px;
+}
+
+.sidebar .selected {
+    color: #b71f39;
+    font-family: BentonMedium;
+    font-weight: 400;
+}
+
+.sidebar .refined > .menuItem > a::after {
+    color: #303239;
+    content: "view all";
+    font-family: BentonRegular;
+    font-size: 14px;
+    font-weight: 400;
+    text-transform: none;
 }

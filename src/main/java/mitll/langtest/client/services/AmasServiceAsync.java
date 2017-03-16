@@ -33,7 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.amas.Answer;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.scoring.AudioContext;
 

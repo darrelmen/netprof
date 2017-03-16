@@ -223,9 +223,9 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
       // Collection<SectionNode> children = node.getChildren();
       Collection<SectionNode> children = node.getChildren();
 
-     // if (!children.isEmpty() && !children.iterator().next().getType().equals("Sound")) {
+     // if (!children.isEmpty() && !children.iterator().next().getProperty().equals("Sound")) {
         //    for (SectionNode child : children) {
-        //      logger.info("\tAdding " + child.getType() + " "+ child.getName());
+        //      logger.info("\tAdding " + child.getProperty() + " "+ child.getName());
         //   }
      // }
       newNodes.addAll(children);

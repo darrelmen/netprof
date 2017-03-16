@@ -211,6 +211,11 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     this.getUnitToValue().put(unit, value);
   }
 
+  @Override
+  public void addPair(Pair pair) {
+
+  }
+
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
   }

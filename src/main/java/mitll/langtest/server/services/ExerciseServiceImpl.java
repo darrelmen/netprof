@@ -34,7 +34,6 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -67,6 +66,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   public static final int MIN_WARN_DURATION = 1000;
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
+
+  public Map<String, Set<String>> getTypeToValues(FilterRequest request) {
+    List<Pair> typeToSelection = request.getTypeToSelection();
+    logger.info("request is " + typeToSelection);
+    return getSectionHelper().getTypeToMatches(typeToSelection);
+  }
 
   /**
    * Complicated.
@@ -378,7 +383,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     // TODO : do this the right way vis-a-vis type safe collection...
 
     List<T> exerciseShells1 = (List<T>) exerciseShells;
-    if (exerciseShells1.isEmpty() && firstExercise !=  null) {
+    if (exerciseShells1.isEmpty() && firstExercise != null) {
       logger.error("huh? no exercises");
     }
     ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);

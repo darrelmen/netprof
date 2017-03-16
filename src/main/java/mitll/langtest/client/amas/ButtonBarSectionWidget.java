@@ -180,7 +180,7 @@ public class ButtonBarSectionWidget implements SectionWidget {
   public List<String> getCurrentSelections() {
     List<String> strings = new ArrayList<String>();
     for (Button button : buttons) {
-      //  logger.info("getCurrentSelection for  " + getType() + " button "  + button.getElement().getExID() + " active " + button.isActive());
+      //  logger.info("getCurrentSelection for  " + getProperty() + " button "  + button.getElement().getExID() + " active " + button.isActive());
       if (button.isActive()) {
         strings.add(button.getText().trim());
       }
@@ -269,7 +269,7 @@ public class ButtonBarSectionWidget implements SectionWidget {
    * @see SingleSelectExerciseList#selectItem
    */
   public boolean selectItem(String toSelect) {
-    // logger.info("ButtonGroupSectionWidget: selectItem " + getType() + "=" + toSelect);
+    // logger.info("ButtonGroupSectionWidget: selectItem " + getProperty() + "=" + toSelect);
     String currentSelection = getCurrentSelection();
     boolean alreadySelected = toSelect.equals(currentSelection.trim());
 

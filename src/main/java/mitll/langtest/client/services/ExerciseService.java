@@ -34,10 +34,11 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 @RemoteServiceRelativePath("exercise-manager")
 public interface ExerciseService<T extends CommonShell> extends RemoteService {
@@ -57,4 +58,7 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
    * @return
    */
   <T extends Shell> T getExercise(int exid, boolean isFlashcardReq);
+
+    Map<String, Set<String>> getTypeToValues(FilterRequest request);
+
 }

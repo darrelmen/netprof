@@ -1,7 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Pair;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.project.IProjectDAO;
@@ -136,10 +136,10 @@ public class SectionTest extends BaseTest {
     //for (SectionNode type : sectionNodesForTypes) {
     Map<String, String> map2 = new LinkedHashMap<>();
     map2.putAll(map);
-    map2.put(type.getType(), type.getName());
+    map2.put(type.getProperty(), type.getName());
     //Collection<CommonExercise> exercisesForSelectionState = sectionHelper.getExercisesForSimpleSelectionState(map2);
     String s = getDepth(level);
-    logger.info(s + " for " + type.getType() + " " + type.getName() + " (" + map2 +
+    logger.info(s + " for " + type.getProperty() + " " + type.getName() + " (" + map2 +
         ") " + exercisesForSelectionState.size());
 
     for (SectionNode sectionNode : type.getChildren()) {
@@ -336,6 +336,34 @@ public class SectionTest extends BaseTest {
     search.put("Difficulty", Collections.singleton("7"));
     unit = sectionHelper.getExercisesForSelectionState(search);
     logger.info("for " + search + " found " + unit.size());
+
+    ArrayList<Pair> toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "1"));
+    //toMatch.add(new Pair("Chapter", "a"));
+    //toMatch.add(new Pair("Sound", "x"));
+    Map<String, Set<String>> typeToMatches = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + typeToMatches);
+
+    toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "1"));
+    //toMatch.add(new Pair("Chapter", "a"));
+    //toMatch.add(new Pair("Sound", "x"));
+    typeToMatches = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + typeToMatches);
+
+    toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "1"));
+    toMatch.add(new Pair("Topic", "Basics"));
+    //toMatch.add(new Pair("Sound", "x"));
+    typeToMatches = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + typeToMatches);
+
+    toMatch = new ArrayList<>();
+    toMatch.add(new Pair("Unit", "0"));
+    toMatch.add(new Pair("Topic", "Basics"));
+    //toMatch.add(new Pair("Sound", "x"));
+    typeToMatches = sectionHelper.getTypeToMatches(toMatch);
+    logger.info("match for " + toMatch + " is " + typeToMatches);
 
     andPopulate.close();
   }
