@@ -67,12 +67,15 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
-  public Map<String, Set<String>> getTypeToValues(FilterRequest request) {
+  public FilterResponse getTypeToValues(FilterRequest request) {
     List<Pair> typeToSelection = request.getTypeToSelection();
     logger.info("request is       " + typeToSelection);
     Map<String, Set<String>> typeToMatches = getSectionHelper().getTypeToMatches(typeToSelection);
     logger.info("typeToMatches is " + typeToMatches);
-    return typeToMatches;
+    Set<String> typesToInclude = typeToMatches.keySet();
+
+    FilterResponse response = new FilterResponse(typeToMatches, new HashSet<>(typesToInclude));
+    return response;
   }
 
   /**

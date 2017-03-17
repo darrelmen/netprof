@@ -88,6 +88,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
       topRow.addStyleName("floatLeftList");
       topRow.addStyleName("leftBlock");
       topRow.addStyleName("sidebar");
+      topRow.addStyleName("rightFiveMargin");
     }
     twoRows.add(topRow);
 

@@ -607,26 +607,34 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
+  /**
+   * For now, not adding difficulty or sound as properties - sort by difficulty though.
+   * @param project
+   * @return
+   */
   @NotNull
   private List<String> getTypeOrder(Project project) {
     List<String> typeOrder = project.getTypeOrder();
     logger.info("project " + project.getID() + " type order " + typeOrder);
 
-    boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
+  //  boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
     boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
 
     //if (!sound) {
     //   logger.warn("getTypeOrder : sound hierarchy missing for " + project);
     // }
     //else {
-    typeOrder.add(SlickUserExerciseDAO.SOUND);
+
+//    typeOrder.add(SlickUserExerciseDAO.SOUND);
     // }
 
+/*
     if (!diff) {
     } else if (SlickUserExerciseDAO.ADD_PHONE_LENGTH) {
       typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
     }
     logger.info("project " + project.getID() + " type order " + typeOrder);
+*/
 
 
     return typeOrder;

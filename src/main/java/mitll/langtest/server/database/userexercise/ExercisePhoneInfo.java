@@ -32,10 +32,14 @@
 
 package mitll.langtest.server.database.userexercise;
 
+import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.shared.exercise.Exercise;
+import mitll.npdata.dao.SlickExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -50,6 +54,10 @@ public class ExercisePhoneInfo {
   private Collection<String> phones = new TreeSet<>();
   private Map<String, ExerciseToPhone.Info> wordToInfo;
 
+  /**
+   * @see SlickUserExerciseDAO#useExToPhones
+   * @return
+   */
   int getNumPhones() {
     return numPhones;
   }
@@ -112,6 +120,10 @@ public class ExercisePhoneInfo {
     return wordToInfo;
   }
 
+  /**
+   * @see SlickUserExerciseDAO#addPhoneInfo
+   * @return
+   */
   public int getNumPhones2() {
     return numPhones2;
   }

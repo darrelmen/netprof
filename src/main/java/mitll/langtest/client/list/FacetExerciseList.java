@@ -41,10 +41,13 @@ import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.FilterRequest;
+import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -84,6 +87,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
 
     sectionPanel = new DivWidget();
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
+    sectionPanel.addStyleName("rightFiveMargin");
     secondRow.add(sectionPanel);
 //    Style style = sectionPanel.getElement().getStyle();
 //    style.setPaddingLeft(0, Style.Unit.PX);
@@ -194,6 +198,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * TODO : for now only single selection
    */
   private Map<String, String> typeToSelection = new HashMap<>();
+  private Map<String, Boolean> typeToShowAll = new HashMap<>();
 
   private Set<String> types = new HashSet<>();
 
@@ -247,38 +252,122 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
       // InlineHTML span = new InlineHTML("");
       // span.addStyleName("menuItem");
       // liForDimension.add(span);
-      liForDimension.add(getHeaderAnchor(type));
+      Anchor headerAnchor = getHeaderAnchor(type);
+      DivWidget headerContainer = new DivWidget();
+      headerContainer.addStyleName("menuItem");
+      headerContainer.add(headerAnchor);
+      liForDimension.add(headerContainer);
 
       // nav
       //  ul
       //   li
       //    ul
       //
-      UnorderedList choices = new UnorderedList(); // ul
+      boolean allShort = areAllShort(keys);
+      Panel choices = allShort ? new DivWidget() : new UnorderedList(); // ul
+
+      if (allShort) {
+        choices.addStyleName("symbolic");
+        choices.addStyleName("topFiveMargin");
+      }
       liForDimension.add(choices);
 //      NavHeader header = new NavHeader(type);
 
       String selectionForType = typeToSelection.get(type);
       if (selectionForType != null) {
-        NavLink w = new NavLink(selectionForType);
-        choices.add(w);
-        w.addStyleName("selected");
+       // NavLink w = new NavLink(selectionForType);
+        Anchor anchor = new Anchor();
+        anchor.setText(selectionForType);
+        choices.add(anchor);
+        anchor.addStyleName("selected");
       } else {
         if (keys != null) {
-          for (String key : keys) {
-            NavLink w = new NavLink(key);
-            choices.add(w);
-            w.addClickHandler(getHandler(type, key));
+          if (allShort) {
+            //  DivWidget current = new DivWidget();
+            // DivWidget tiny = new DivWidget();
+            // tiny.addStyleName("symbolic");
+            // choices.add(tiny);
+            for (String key : keys) {
+              // tiny.addStyleName("floatLeftList");
+              Widget anchor = getAnchor(type, key);
+              choices.add(anchor);
+              //tiny.add(anchor);
+              //tiny.addStyleName("rightFiveMargin");
+            }
+          } else {
+            int j = 0;
+            boolean hasMore = keys.size() > 4;
+            Boolean showAll = typeToShowAll.getOrDefault(type, false);
+            for (String key : keys) {
+              Widget anchor1 = getAnchor(type, key);
+
+              addChoice(choices, anchor1);
+
+              if (hasMore && !showAll && ++j==4) {
+                Anchor anchor = new Anchor();
+                anchor.setText("Show More...");
+                anchor.addClickHandler(new ClickHandler() {
+                  @Override
+                  public void onClick(ClickEvent event) {
+                    typeToShowAll.put(type, true);
+                    addFacetsForReal(null, typeOrder, typeToDistinct, typeOrderContainer);
+                  }
+                });
+                addChoice(choices, anchor);
+                break;
+              }
+            }
+            if (hasMore && showAll) {
+              Anchor anchor = new Anchor();
+              anchor.setText("Show Less...");
+              anchor.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                  typeToShowAll.put(type, false);
+                  addFacetsForReal(null, typeOrder, typeToDistinct, typeOrderContainer);
+                }
+              });
+              addChoice(choices, anchor);
+            }
           }
         }
       }
     }
   }
 
+  private void addChoice(Panel choices, Widget anchor1) {
+    ListItem li = new ListItem();
+    //li.addStyleName("menuItem");
+    // NavLink w = new NavLink(key);
+    li.add(anchor1);
+    choices.add(li);
+  }
+
+  private boolean areAllShort(Set<String> keys) {
+    boolean allShort = true;
+    for (String key : keys) {
+      if (key.length() > 3) {
+        allShort = false;
+        break;
+      }
+    }
+    return allShort;
+  }
+
+  private Widget getAnchor(String type, String key) {
+    // IconAnchor anchor = new IconAnchor();
+    Anchor anchor = new Anchor();
+    anchor.setText(key);
+    anchor.addClickHandler(getHandler(type, key));
+    return anchor;
+  }
+
   @NotNull
-  private IconAnchor getHeaderAnchor(final String type) {
-    IconAnchor typeSection = new IconAnchor(); // li
+  private Anchor getHeaderAnchor(final String type) {
+    //  IconAnchor typeSection = new IconAnchor(); // li
+    Anchor typeSection = new Anchor(); // li
     typeSection.setText(type);
+    typeSection.addStyleName("menuItem");
     typeSection.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -319,14 +408,19 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     }
 
     controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs),
-        new AsyncCallback<Map<String, Set<String>>>() {
+        new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
 
           }
 
+          /**
+           * TODO : fix downstream selections that no longer make sense.
+           * @param response
+           */
           @Override
-          public void onSuccess(Map<String, Set<String>> result) {
+          public void onSuccess(FilterResponse response) {
+            Map<String, Set<String>> result = response.getTypeToValues();
             addFacetsForReal(null, typeOrder, result, typeOrderContainer);
           }
         });

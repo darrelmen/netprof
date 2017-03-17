@@ -77,9 +77,6 @@ public interface IRefResultDAO extends IDAO {
    */
   List<Result> getResults();
 
-//  List<SlickRefResultJson> getJsonResults();
-//  List<SlickRefResultJson> getJsonResultsForProject(int projid);
-
   Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
   /**
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore

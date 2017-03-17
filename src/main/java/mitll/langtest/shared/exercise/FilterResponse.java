@@ -32,28 +32,33 @@
 
 package mitll.langtest.shared.exercise;
 
-import java.util.Collection;
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
- * TODO: consider adding info to permit sorting
- *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 3/21/2014.
+ * @since 3/30/16.
  */
-public interface CommonShell extends Shell {
-  String getEnglish();
-  String getMeaning();
-  String getForeignLanguage();
+public class FilterResponse implements IsSerializable {
+  private Map<String, Set<String>> typeToValues = new HashMap<>();
+  private Set<String> typesToInclude;
 
-  MutableShell getMutableShell();
+  public FilterResponse() {
+  }
 
-  /**
-   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
-   * @return
-   */
-  Collection<String> getRefSentences();
+  public FilterResponse(Map<String, Set<String>> typeToValues, Set<String> typesToInclude) {
+    this.typeToValues = typeToValues;
+    this.typesToInclude = typesToInclude;
+  }
 
-  CommonShell getShell();
+  public Map<String, Set<String>> getTypeToValues() {
+    return typeToValues;
+  }
+
+  public Set<String> getTypesToInclude() {
+    return typesToInclude;
+  }
 }
