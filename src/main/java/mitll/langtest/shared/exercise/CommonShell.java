@@ -37,6 +37,8 @@ import java.util.Collection;
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
+ * TODO: consider adding info to permit sorting
+ *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/21/2014.
  */

@@ -113,12 +113,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   List<CommonExercise> readExercises() {
     try {
       List<String> typeOrder = getTypeOrderFromProject();
-      putSoundAtEnd(typeOrder);
+      getSectionHelper().putSoundAtEnd(typeOrder);
 
       int projid = project.id();
 
       Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
           userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
+
+      //userExerciseDAO.useExToPhones(exerciseToPhoneForProject);
 
       logger.info("readExercises" +
           "\n\tread " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
@@ -132,11 +134,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       // do we add attributes to context exercises?
       List<CommonExercise> allNonContextExercises =
-          userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper(), exerciseToPhoneForProject,
-              fullProject, allByProject, exToAttrs
+          userExerciseDAO.getByProject(
+              typeOrder,
+              getSectionHelper(),
+              exerciseToPhoneForProject,
+              fullProject,
+              allByProject,
+              exToAttrs
           );
-
-      //addExerciseAttributes(projid, allNonContextExercises);
 
       logger.info("readExercises project " + project +
           " readExercises got " + allNonContextExercises.size() + " predef exercises");
@@ -144,7 +149,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 //      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
 
       Map<Integer, CommonExercise> idToContext =
-          getIDToExercise(userExerciseDAO.getContextByProject(projid, typeOrder, getSectionHelper(),
+          getIDToExercise(userExerciseDAO.getContextByProject(
+              typeOrder,
+              getSectionHelper(),
               exerciseToPhoneForProject, fullProject, allByProject, exToAttrs
           ));
 
@@ -160,20 +167,27 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     return Collections.emptyList();
   }
 
+
+/*
+
   private void putSoundAtEnd(List<String> types) {
+    getSectionHelper().putSoundAtEnd(types);
     //  String sound = SOUND;
     putAtEnd(types, "Sub-topic");
     putAtEnd(types, "Grammar");
     putAtEnd(types, SOUND);
     putAtEnd(types, DIFFICULTY);
   }
+*/
 
+/*
   private void putAtEnd(List<String> types, String sound) {
     if (types.contains(sound)) {
       types.remove(sound);
       types.add(sound);
     }
   }
+*/
 
   private void attachContextExercises(List<CommonExercise> allNonContextExercises,
                                       Collection<SlickRelatedExercise> related,
@@ -215,11 +229,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private List<String> getBaseTypeOrder() {
     List<String> typeOrder = new ArrayList<>();
     typeOrder.add(project.first());
-    if (!project.second().isEmpty()) typeOrder.add(project.second());
+    if (!project.second().isEmpty()) {
+      typeOrder.add(project.second());
+    }
+
+
+/*
     typeOrder.add(SOUND);
     if (SlickUserExerciseDAO.ADD_PHONE_LENGTH) {
       typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
     }
+    */
     return typeOrder;
   }
 

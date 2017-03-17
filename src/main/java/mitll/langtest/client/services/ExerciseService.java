@@ -59,6 +59,6 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
    */
   <T extends Shell> T getExercise(int exid, boolean isFlashcardReq);
 
-    Map<String, Set<String>> getTypeToValues(FilterRequest request);
+  FilterResponse getTypeToValues(FilterRequest request);
 
 }

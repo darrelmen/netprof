@@ -99,21 +99,25 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<>();
       //  types.addAll(typeToSectionToTypeToSections.keySet());
-      //   logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
       types.addAll(typeToUnitToLesson.keySet());
+      logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
+      logger.info("getTypeOrder typeToCount = " + typeToCount);
 
       if (types.isEmpty()) {
         types.addAll(typeToCount.keySet());
       } //else {
-      Collections.sort(types, new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-          int first = typeToCount.get(o1).size();
-          int second = typeToCount.get(o2).size();
-          int i = first > second ? +1 : first < second ? -1 : 0;
-          return i == 0 ? o1.compareTo(o2) : i;
-        }
-      });
+
+      if (!typeToCount.isEmpty()) {
+        Collections.sort(types, new Comparator<String>() {
+          @Override
+          public int compare(String o1, String o2) {
+            int first  = typeToCount.get(o1).size();
+            int second = typeToCount.get(o2).size();
+            int i = first > second ? +1 : first < second ? -1 : 0;
+            return i == 0 ? o1.compareTo(o2) : i;
+          }
+        });
+      }
 
       // TODO : I feel like I did this before...?
       // put sound at end...
@@ -189,13 +193,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     }
   }*/
 
-  private void putSoundAtEnd(List<String> types) {
+  public void putSoundAtEnd(List<String> types) {
     //  String sound = SOUND;
     putAtEnd(types, "Topic");
     putAtEnd(types, "Sub-topic");
     putAtEnd(types, "Grammar");
-    putAtEnd(types, SOUND);
-    putAtEnd(types, DIFFICULTY);
+    //  putAtEnd(types, SOUND);
+    //  putAtEnd(types, DIFFICULTY);
   }
 
 
@@ -850,7 +854,12 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public void rememberTypesInOrder(final List<String> predefinedTypeOrder, List<List<Pair>> seen) {
     SectionNode child = root;
 
-    logger.info("rememberTypesInOrder type order " + predefinedTypeOrder);
+    if (seen.isEmpty()) logger.error("huh? no types to remember?");
+
+    logger.info("rememberTypesInOrder type order " + predefinedTypeOrder +
+        " root " + root.getName() +
+        " children  " + root.getChildren().size() +
+        " num seen " + seen.size());
     for (List<Pair> pairs : seen) {
       child = rememberOne(predefinedTypeOrder, child, pairs);
     }
