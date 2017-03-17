@@ -34,21 +34,21 @@ package mitll.langtest.client.list;
 
 
 import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import net.liftweb.util.RE;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -91,6 +91,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     // secondRow.add(new Column(12, sectionPanel));
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
     downloadHelper = new DownloadHelper(this);
+    logger.info("made ex list....");
   }
 
   /**
@@ -192,9 +193,9 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   /**
    * TODO : for now only single selection
    */
-  Map<String, String> typeToSelection = new HashMap<>();
+  private Map<String, String> typeToSelection = new HashMap<>();
 
-  Set<String> types = new HashSet<>();
+  private Set<String> types = new HashSet<>();
 
   /**
    * ul
@@ -216,33 +217,37 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     logger.info("addChoiceWidgets\n\tfor " +
         //rootNodes.size() +
         " nodes" +
-        "\n\tand " + types.size() + " types " + types + " " +
-        " type->distinct " + typeToDistinct);
-    // SectionNodeItemSorter sectionNodeItemSorter = new SectionNodeItemSorter();
-
+        "\n\tand " + types.size() +
+        //" types " + types + " " +
+        " type->distinct " + typeToDistinct.keySet() + "\n\ttype->sel " + typeToSelection);
     this.types = new HashSet<>(types);
     // nav -
     //   ul
     UnorderedList allTypesContainer = new UnorderedList(); //ul
     nav.clear();
     nav.add(allTypesContainer);
+    allTypesContainer.addStyleName("sidebar");
 
     for (String type : types) {
       // List<String> sectionsInType = getLabels(rootNodes);
       Set<String> keys = typeToDistinct.get(type);
 
       boolean refined = typeToSelection.containsKey(type);
+      if (refined) logger.info("Sel on  " + type);
 
       // nav
       //  ul
       //   li - dimension
       ListItem liForDimension = new ListItem();
+      liForDimension.addStyleName("dimension");
       if (refined) liForDimension.addStyleName("refined");
       allTypesContainer.add(liForDimension);
 
-      NavLink typeSection = new NavLink(type + "::after"); // li
-      typeSection.addStyleName("menuItem");
-      liForDimension.add(typeSection);
+      //typeSection.addStyleName("menuItem");
+      // InlineHTML span = new InlineHTML("");
+      // span.addStyleName("menuItem");
+      // liForDimension.add(span);
+      liForDimension.add(getHeaderAnchor(type));
 
       // nav
       //  ul
@@ -250,19 +255,19 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
       //    ul
       //
       UnorderedList choices = new UnorderedList(); // ul
-      typeSection.add(choices);
+      liForDimension.add(choices);
 //      NavHeader header = new NavHeader(type);
 
       String selectionForType = typeToSelection.get(type);
       if (selectionForType != null) {
         NavLink w = new NavLink(selectionForType);
-        typeSection.add(w);
+        choices.add(w);
         w.addStyleName("selected");
       } else {
         if (keys != null) {
           for (String key : keys) {
             NavLink w = new NavLink(key);
-            typeSection.add(w);
+            choices.add(w);
             w.addClickHandler(getHandler(type, key));
           }
         }
@@ -271,11 +276,28 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   }
 
   @NotNull
+  private IconAnchor getHeaderAnchor(final String type) {
+    IconAnchor typeSection = new IconAnchor(); // li
+    typeSection.setText(type);
+    typeSection.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        typeToSelection.remove(type);
+        logger.info("ty->sel remove " + typeToSelection);
+        gotSelection();
+        getTypeToValue();
+      }
+    });
+    return typeSection;
+  }
+
+  @NotNull
   private ClickHandler getHandler(final String type, final String key) {
     return new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         typeToSelection.put(type, key);
+        logger.info("getHandler t->sel " + typeToSelection);
         gotSelection();
         getTypeToValue();
       }
@@ -287,27 +309,27 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   private void getTypeToValue() {
     List<Pair> pairs = new ArrayList<>();
 
-    for (String type:typeOrder) {
+    for (String type : typeOrder) {
       String s = typeToSelection.get(type);
       if (s == null) {
         pairs.add(new Pair(type, "Any"));
-      }
-      else {
+      } else {
         pairs.add(new Pair(type, s));
       }
     }
 
-    controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs), new AsyncCallback<Map<String, Set<String>>>() {
-      @Override
-      public void onFailure(Throwable caught) {
+    controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs),
+        new AsyncCallback<Map<String, Set<String>>>() {
+          @Override
+          public void onFailure(Throwable caught) {
 
-      }
+          }
 
-      @Override
-      public void onSuccess(Map<String, Set<String>> result) {
-        addFacetsForReal(null, typeOrder, result, typeOrderContainer);
-      }
-    });
+          @Override
+          public void onSuccess(Map<String, Set<String>> result) {
+            addFacetsForReal(null, typeOrder, result, typeOrderContainer);
+          }
+        });
   }
 
   /**
@@ -473,17 +495,23 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     return new FacetContainer() {
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
+        logger.info("restoreListBoxState t->sel " + typeToSelection);
 
       }
 
       @Override
       public String getHistoryToken() {
         StringBuilder builder = new StringBuilder();
+        logger.info("getHistoryToken t->sel " + typeToSelection);
+
         for (Map.Entry<String, String> pair : typeToSelection.entrySet()) {
           builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
         }
 
-        return builder.toString();
+        String s = builder.toString();
+        logger.info("getHistoryToken token " + s);
+
+        return s;
       }
 
       @Override
