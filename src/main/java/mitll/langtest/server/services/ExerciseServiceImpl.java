@@ -69,8 +69,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   public Map<String, Set<String>> getTypeToValues(FilterRequest request) {
     List<Pair> typeToSelection = request.getTypeToSelection();
-    logger.info("request is " + typeToSelection);
-    return getSectionHelper().getTypeToMatches(typeToSelection);
+    logger.info("request is       " + typeToSelection);
+    Map<String, Set<String>> typeToMatches = getSectionHelper().getTypeToMatches(typeToSelection);
+    logger.info("typeToMatches is " + typeToMatches);
+    return typeToMatches;
   }
 
   /**

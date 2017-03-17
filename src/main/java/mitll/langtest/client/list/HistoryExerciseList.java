@@ -116,12 +116,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     boolean hasItemID = id != -1;//id != null && id.length() > 0;
 
     String s = (hasItemID ?
-        super.getHistoryTokenFromUIState(search, id) + SECTION_SEPARATOR :
-        "search=" + search + SECTION_SEPARATOR) +
-        sectionWidgetContainer.getHistoryToken() +
+        super.getHistoryTokenFromUIState(search, id) :
+        "search=" + search ) + SECTION_SEPARATOR+
+        sectionWidgetContainer.getHistoryToken() +SECTION_SEPARATOR+
         instanceSuffix;
 
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getHistoryTokenFromUIState '" + s + "'");
     }
     return s;

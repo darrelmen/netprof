@@ -146,7 +146,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
       for (SectionNode child : node.getChildren()) {
         if (!child.getType().equals(childType)) {
-          logger.error("child "+ child + " doesn't match " +childType);
+          logger.error("child " + child + " doesn't match " + childType);
         }
         members.add(child.getName());
         recurseAndCount(child, typeToCount);
@@ -389,7 +389,17 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public Map<String, Set<String>> getTypeToMatches(Collection<Pair> pairs) {
     SectionNode root = this.root;
     List<Pair> copy = new ArrayList<>(pairs);
-    return getTypeToMatchPairs(copy, root);
+
+    Map<String, Set<String>> typeToMatchPairs = getTypeToMatchPairs(copy, root);
+
+    Set<String> strings1 = typeToMatchPairs.keySet();
+    for (String key : strings1) {
+      TreeSet<String> strings = new TreeSet<>(itemSorter);
+      strings.addAll(typeToMatchPairs.get(key));
+      typeToMatchPairs.put(key, strings);
+    }
+
+    return typeToMatchPairs;
   }
 
   /**
@@ -409,7 +419,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String toMatch = next.getValue();
 
     boolean isAll = toMatch.equalsIgnoreCase("any") || toMatch.equalsIgnoreCase("all");
-    logger.info("to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
+//    logger.info("to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
     if (root.getChildType().equals(type)) {
       Set<String> matches = new HashSet<>();
       typeToMatch.put(type, matches);
@@ -433,7 +443,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         }
       }
 
-      logger.info("children of " + root.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
+      //    logger.info("children of " + root.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
       if (childMatches == null || childMatches.isEmpty()) {  // couldn't find matching value
         return typeToMatch;
       } else {
@@ -447,7 +457,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
           }
           return typeToMatch;
         } else {
-          logger.info("recurse on " + childMatches.size() + " with path " + pairs);
+          //      logger.info("recurse on " + childMatches.size() + " with path " + pairs);
 
           for (SectionNode childMatch : childMatches) {
             List<Pair> copy = new ArrayList<>(pairs);
@@ -857,6 +867,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   int spew = 0;
+
   /**
    * @param predefinedTypeOrder
    * @param child
@@ -877,8 +888,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
     });
 
-    if (pairs.size() != 3 && spew++ <100)
-    logger.info("after " + pairs);
+    if (pairs.size() != 3 && spew++ < 100)
+      logger.info("after " + pairs);
 
     return rememberOne(child, pairs);
   }

@@ -48,6 +48,8 @@ import java.util.*;
 public class ItemSorter implements Comparator<String>, IsSerializable {
   private static final String PREFIX = ">";
 
+  public  ItemSorter(){}
+  
   /**
    * @param sections
    * @return

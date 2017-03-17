@@ -1411,7 +1411,7 @@ document sections.*/
     padding: 6px 0;
 }
 
-.sidebar > .menuItem > a {
+.sidebar .menuItem a {
     display: block;
     color: #292b2d;
     text-transform: uppercase;
@@ -1429,7 +1429,7 @@ document sections.*/
     text-decoration: none;
 }
 
-.sidebar > .menuItem > a:after {
+.sidebar .menuItem a:after {
     font-family: FontAwesome;
     float: right;
     font-size: 11px;
@@ -1466,4 +1466,64 @@ document sections.*/
     font-size: 14px;
     font-weight: 400;
     text-transform: none;
+}
+
+.dimension {}
+
+.sidebar .dimension.refined > .menuItem > a::after {
+    color: #303239;
+    content: "view all";
+    font-family: BentonRegular;
+    font-size: 14px;
+    font-weight: 400;
+    text-transform: none;
+}
+
+.sidebar .dimension > .menuItem > a::after {
+    content: "";
+    float: right;
+    font-family: FontAwesome;
+    font-size: 11px;
+}
+
+.sidebar .dimension > .menuItem > a {
+    color: #292b2d;
+    display: block;
+    font-family: BentonMedium;
+    font-size: 14px;
+    font-weight: 400;
+    left: 0;
+    padding: 0 10px;
+    position: relative;
+    right: 0;
+    text-transform: uppercase;
+}
+
+.sidebar .refinements > ul > li {
+    padding: 4px 0;
+}
+.sidebar .dimension {
+    border-bottom: 1px solid #96979a;
+    margin: 4px 0;
+}
+.sidebar .dimension li, .sidebar nav li {
+    padding: 4px 10px;
+}
+
+a, a:visited {
+    color: #303239;
+}
+
+a.conspicuousLink, a.conspicuousLink:visited {
+    color: #2b95d0;
+}
+
+a:hover {
+    color: #2b95d0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #b71f39;
+    margin: 0;
+    padding: 0;
 }
