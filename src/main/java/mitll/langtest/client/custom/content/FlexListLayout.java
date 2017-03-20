@@ -82,15 +82,22 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     exerciseListContainer.getElement().setId("NPFHelper_exerciseListContainer");
 
     // second row ---------------
-    DivWidget topRow = hasTopRow ? new FluidRow() : new DivWidget();
+    Panel topRow = hasTopRow ? new FluidRow() : new FlowPanel("nav");
     topRow.getElement().setId("NPFHelper_" + (hasTopRow ? "topRow" : "leftSide"));
     if (!hasTopRow) {
       topRow.addStyleName("floatLeftList");
       topRow.addStyleName("leftBlock");
-      topRow.addStyleName("sidebar");
       topRow.addStyleName("rightFiveMargin");
+
+      FlowPanel section = new FlowPanel("section");
+      section.addStyleName("sidebar");
+
+      twoRows.add(section);
+      section.add(topRow);
     }
-    twoRows.add(topRow);
+    else {
+      twoRows.add(topRow);
+    }
 
     DivWidget bottomRowDiv = new DivWidget();
     if (!hasTopRow) {

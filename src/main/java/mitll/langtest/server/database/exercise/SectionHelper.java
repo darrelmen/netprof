@@ -34,10 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.exercise.Pair;
-import mitll.langtest.shared.exercise.SectionNode;
-import mitll.langtest.shared.exercise.HasUnitChapter;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -48,9 +45,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-
-import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.DIFFICULTY;
-import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.SOUND;
 
 /**
  * Created with IntelliJ IDEA.
@@ -63,15 +57,22 @@ import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.S
  */
 public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection<T> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
-  private static final String SOUND = "Sound";
+  public static final String TOPIC = "Topic";
+  public static final String SUB_TOPIC = "Sub-topic";
+  public static final String GRAMMAR = "Grammar";
+  //  private static final String SOUND = "Sound";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
+  boolean DEBUG = false;
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
 /*  private final Map<String,
       Map<String,
           Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<>();*/
   private SectionNode root = null;
+
+  private Set<String> rootTypes = new HashSet<>();
+  private Map<String,String> parentToChildTypes = new HashMap<>();
 
   public SectionHelper() {
     makeRoot();
@@ -83,7 +84,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   @Override
   public void clear() {
     typeToUnitToLesson.clear();
-    //  typeToSectionToTypeToSections.clear();
     root = null;
   }
 
@@ -111,7 +111,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         Collections.sort(types, new Comparator<String>() {
           @Override
           public int compare(String o1, String o2) {
-            int first  = typeToCount.get(o1).size();
+            int first = typeToCount.get(o1).size();
             int second = typeToCount.get(o2).size();
             int i = first > second ? +1 : first < second ? -1 : 0;
             return i == 0 ? o1.compareTo(o2) : i;
@@ -195,9 +195,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   public void putSoundAtEnd(List<String> types) {
     //  String sound = SOUND;
-    putAtEnd(types, "Topic");
-    putAtEnd(types, "Sub-topic");
-    putAtEnd(types, "Grammar");
+    putAtEnd(types, TOPIC);
+    putAtEnd(types, SUB_TOPIC);
+    putAtEnd(types, GRAMMAR);
     //  putAtEnd(types, SOUND);
     //  putAtEnd(types, DIFFICULTY);
   }
@@ -384,17 +384,25 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return getExercisesForSelectionState(typeToSection);
   }
 
+  /**
+   * JUST FOR TESTING
+   *
+   * @param type
+   * @param value
+   * @return
+   */
   public Map<String, Set<String>> getTypeToMatches(String type, String value) {
-    SectionNode root = this.root;
-    return getTypeToMatch(type, value, root);
+    return getTypeToMatch(type, value, this.root);
   }
 
+  /**
+   * @param pairs
+   * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
+   */
   @Override
   public Map<String, Set<String>> getTypeToMatches(Collection<Pair> pairs) {
-    SectionNode root = this.root;
-    List<Pair> copy = new ArrayList<>(pairs);
-
-    Map<String, Set<String>> typeToMatchPairs = getTypeToMatchPairs(copy, root);
+    Map<String, Set<String>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
 
     Set<String> strings1 = typeToMatchPairs.keySet();
     for (String key : strings1) {
@@ -424,7 +432,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     boolean isAll = toMatch.equalsIgnoreCase("any") || toMatch.equalsIgnoreCase("all");
 //    logger.info("to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
-    if (root.getChildType().equals(type)) {
+    if (!root.isLeaf() && root.getChildType().equals(type)) {
       Set<String> matches = new HashSet<>();
       typeToMatch.put(type, matches);
 
@@ -433,7 +441,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       if (isAll) {
         childMatches = root.getChildren();
         for (SectionNode child : childMatches) {
-          if (!child.getType().equals(type)) logger.error("huh? adding " + child + " to " + type);
+
+          if (!child.getType().equals(type)) {
+            logger.error("huh? adding " + child + " to " + type);
+          }
+
           matches.add(child.getName());
         }
       } else {
@@ -447,13 +459,16 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         }
       }
 
-      //    logger.info("children of " + root.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
+      if (DEBUG) {
+        logger.info("children of " + root.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
+      }
+
       if (childMatches == null || childMatches.isEmpty()) {  // couldn't find matching value
         return typeToMatch;
       } else {
         iterator.remove();
 
-        //logger.info("path now " + pairs);
+        if (DEBUG) logger.info("path now " + pairs);
 
         if (pairs.isEmpty()) {
           for (SectionNode childMatch : childMatches) {
@@ -461,27 +476,29 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
           }
           return typeToMatch;
         } else {
-          //      logger.info("recurse on " + childMatches.size() + " with path " + pairs);
+          if (DEBUG) logger.info("recurse on " + childMatches.size() + " with path " + pairs);
 
           for (SectionNode childMatch : childMatches) {
-            List<Pair> copy = new ArrayList<>(pairs);
-            Map<String, Set<String>> typeToMatchPairs = getTypeToMatchPairs(copy, childMatch);
-            mergeMaps(typeToMatch, typeToMatchPairs);
+            mergeMaps(typeToMatch, getTypeToMatchPairs(new ArrayList<>(pairs), childMatch));
           }
         }
       }
     } else {
       Set<String> matches = new HashSet<>();
       typeToMatch.put(type, matches);
-      matches.addAll(typeToCount.get(type));
+      Set<String> c = typeToCount.get(type);
+      if (c == null) {
+        logger.warn("no known type " + type);
+      } else {
+        matches.addAll(c);
+      }
       iterator.remove();
 
       if (pairs.isEmpty()) {
-        logger.error("huh? pairs is empty for " + matches.size());
+        logger.error("huh? pairs is empty for type " + type);
       } else {
         for (SectionNode child : root.getChildren()) {
-          Map<String, Set<String>> typeToMatch1 = getTypeToMatchPairs(pairs, child);
-          mergeMaps(typeToMatch, typeToMatch1);
+          mergeMaps(typeToMatch, getTypeToMatchPairs(pairs, child));
         }
       }
     }
@@ -740,7 +757,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   /**
    * @param predefinedTypeOrder
-   * @see mitll.langtest.server.database.exercise.ExcelImport#readFromSheet(org.apache.poi.ss.usermodel.Sheet)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#readFromSheet
    */
   @Override
   public void setPredefinedTypeOrder(List<String> predefinedTypeOrder) {
@@ -897,8 +914,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
     });
 
+/*
     if (pairs.size() != 3 && spew++ < 100)
       logger.info("after " + pairs);
+*/
 
     return rememberOne(child, pairs);
   }
@@ -936,4 +955,66 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public SectionNode getRoot() {
     return root;
   }
+
+  @Override
+  public Set<String> getRootTypes() {
+    return rootTypes;
+  }
+
+  @Override
+  public void setRootTypes(Set<String> rootTypes) {
+    this.rootTypes = rootTypes;
+  }
+
+  @Override
+  public Map<String, String> getParentToChildTypes() {
+    return parentToChildTypes;
+  }
+
+  @Override
+  public void setParentToChildTypes(Map<String, String> parentToChildTypes) {
+    this.parentToChildTypes = parentToChildTypes;
+  }
+
+  @Override
+  public FilterResponse getTypeToValues(FilterRequest request) {
+    List<Pair> typeToSelection = request.getTypeToSelection();
+
+    List<String> typesInOrder = new ArrayList<>();
+    for (Pair pair : typeToSelection) typesInOrder.add(pair.getProperty());
+    Set<String> typesToInclude1 = new HashSet<>(typesInOrder);
+
+    logger.info("request is       " + typeToSelection);
+    Map<String, Set<String>> typeToMatches =  getTypeToMatches(typeToSelection);
+    logger.info("typeToMatches is " + typeToMatches);
+
+    boolean someEmpty = false;
+    for (String type : typesInOrder) {
+      Set<String> matches = typeToMatches.get(type);
+      if (matches == null || matches.isEmpty()) {
+        typesToInclude1.remove(type);
+        logger.info("removing " + type);
+        someEmpty = true;
+      }
+    }
+
+    if (someEmpty) {
+      List<Pair> typeToSelection2 = new ArrayList<>();
+      logger.info("back off including  " +typesToInclude1);
+      for (Pair pair : typeToSelection) {
+        if (typesToInclude1.contains(pair.getProperty())) {
+          typeToSelection2.add(pair);
+        }
+        else {
+          typeToSelection2.add(new Pair(pair.getProperty(),"all"));
+        }
+      }
+      logger.info("try search again with " + typeToSelection2);
+
+      return new FilterResponse(getTypeToMatches(typeToSelection2), typesToInclude1);
+    } else {
+      return new FilterResponse(typeToMatches, typesToInclude1);
+    }
+  }
+
 }

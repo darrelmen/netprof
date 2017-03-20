@@ -50,7 +50,6 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.SlimProject;
@@ -594,7 +593,9 @@ public class ProjectManagement implements IProjectManagement {
             project1.id(),
             project1.language(),
             hasModel(project1),
-            sectionHelper.getTypeToDistinct());
+            sectionHelper.getTypeToDistinct(),
+            sectionHelper.getRootTypes(),
+            sectionHelper.getParentToChildTypes());
 
         logger.info("setStartupInfo : For " + userWhere +
             "\n\t " + typeOrder +

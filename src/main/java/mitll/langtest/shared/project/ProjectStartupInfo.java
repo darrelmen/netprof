@@ -34,7 +34,6 @@ package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.exercise.SectionNode;
-import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -48,11 +47,12 @@ public class ProjectStartupInfo implements IsSerializable {
   private Map<String, String> properties;
   private List<String> typeOrder;
   private Collection<SectionNode> sectionNodes;
-  //private Collection<SectionNode> rootNodes;
   private int projectid;
   private String language;
   private boolean hasModel;
   private Map<String, Set<String>> typeToDistinct;
+  private Set<String> rootNodes;
+  private Map<String, String> parentToChild;
 
   public ProjectStartupInfo() {
   } // for serialization
@@ -63,14 +63,16 @@ public class ProjectStartupInfo implements IsSerializable {
    * @param sectionNodes
    * @param projectid
    * @param hasModel
-   * @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo
+   * @param rootNodes
+   * @param parentToChild
+   *  @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo
    */
   public ProjectStartupInfo(Map<String, String> properties,
                             List<String> typeOrder,
                             Collection<SectionNode> sectionNodes,
                             int projectid,
                             String language, boolean hasModel,
-                            Map<String, Set<String>> typeToDistinct) {
+                            Map<String, Set<String>> typeToDistinct, Set<String> rootNodes, Map<String, String> parentToChild) {
     this.properties = properties;
     this.typeOrder = typeOrder;
     this.sectionNodes = sectionNodes;
@@ -78,6 +80,8 @@ public class ProjectStartupInfo implements IsSerializable {
     this.language = language;
     this.hasModel = hasModel;
     this.typeToDistinct = typeToDistinct;
+    this.rootNodes = rootNodes;
+    this.parentToChild = parentToChild;
   }
 
   public Map<String, String> getProperties() {
@@ -120,5 +124,13 @@ public class ProjectStartupInfo implements IsSerializable {
 
   public Map<String, Set<String>> getTypeToDistinct() {
     return typeToDistinct;
+  }
+
+  public Set<String> getRootNodes() {
+    return rootNodes;
+  }
+
+  public Map<String, String> getParentToChild() {
+    return parentToChild;
   }
 }

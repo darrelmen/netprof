@@ -72,7 +72,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected long userID;
   protected final FacetContainer sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
 
   /**
@@ -83,7 +83,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                                 ExerciseController controller,
                                 ListOptions options) {
     super(currentExerciseVPanel, null, controller, options);
-//    logger.info("showFirstNotCompleted " + showFirstNotCompleted + " for " + instance + " : " + this.getElement().getId());
     sectionWidgetContainer = getSectionWidgetContainer();
     addHistoryListener();
   }

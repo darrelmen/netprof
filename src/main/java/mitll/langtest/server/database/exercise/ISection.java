@@ -1,5 +1,7 @@
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.shared.exercise.FilterRequest;
+import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.exercise.SectionNode;
 
@@ -88,4 +90,14 @@ public interface ISection<T> {
   SectionNode getNode(SectionNode node, String type, String name);
 
   void putSoundAtEnd(List<String> types);
+
+  Set<String> getRootTypes();
+
+  void setRootTypes(Set<String> rootTypes);
+
+  Map<String, String> getParentToChildTypes();
+
+  void setParentToChildTypes(Map<String, String> parentToChildTypes);
+
+  FilterResponse getTypeToValues(FilterRequest request);
 }

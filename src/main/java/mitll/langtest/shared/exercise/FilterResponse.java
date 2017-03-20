@@ -61,4 +61,6 @@ public class FilterResponse implements IsSerializable {
   public Set<String> getTypesToInclude() {
     return typesToInclude;
   }
+
+  public String toString() { return "response " + typeToValues; }
 }

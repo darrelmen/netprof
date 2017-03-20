@@ -46,6 +46,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.DIFFICULTY;
 import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.SOUND;
@@ -114,6 +115,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     try {
       List<String> typeOrder = getTypeOrderFromProject();
       getSectionHelper().putSoundAtEnd(typeOrder);
+      setRootTypes();
 
       int projid = project.id();
 
@@ -243,40 +245,32 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     return typeOrder;
   }
 
-  private Collection<String> getAttributeTypes() {
-    return userExerciseDAO.getAttributeTypes(project.id());
+  private void setRootTypes() {
+    Collection<String> attributeTypes = getAttributeTypes();
+    Set<String> collect = attributeTypes.stream().filter(p -> !p.equals(SectionHelper.SUB_TOPIC)).collect(Collectors.toSet());
+
+    Set<String> rootTypes = new HashSet<>(Arrays.asList(project.first()));
+    rootTypes.addAll(collect);
+
+    ISection<CommonExercise> sectionHelper = getSectionHelper();
+    sectionHelper.setRootTypes(rootTypes);
+
+    Map<String,String> parentToChild = new HashMap<>();
+    if (project.second() != null && !project.second().isEmpty()) {
+      parentToChild.put(project.first(),project.second());
+    }
+
+    if (rootTypes.contains(SectionHelper.TOPIC)) {
+      parentToChild.put(SectionHelper.TOPIC, SectionHelper.SUB_TOPIC);
+    }
+
+    sectionHelper.setParentToChildTypes(parentToChild);
+
+    logger.info("roots " + rootTypes);
+    logger.info("parentToChild " + parentToChild);
   }
 
-  /**
-   * @paramx projid
-   * @paramx exercises
-   */
- /* private void addExerciseAttributes(int projid, List<CommonExercise> exercises) {
-    Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
-
-    //  logger.info("addExerciseAttributes found " + allByProject.size() + " attributes");
-    Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
-
-    for (CommonExercise exercise : exercises) {
-      addAttributeToExercise(allByProject, exToAttrs, exercise);
-    }
-  }*/
-/*
-  private void addAttributeToExercise(Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs, CommonExercise exercise) {
-    Collection<SlickExerciseAttributeJoin> slickExerciseAttributeJoins = exToAttrs.get(exercise.getID());
-
-    List<ExerciseAttribute> attributes = new ArrayList<>();
-    if (slickExerciseAttributeJoins != null) {
-      for (SlickExerciseAttributeJoin join : slickExerciseAttributeJoins) {
-        ExerciseAttribute attribute = allByProject.get(join.attrid());
-        attributes.add(attribute);
-      }
-      exercise.setAttributes(attributes);
-
-//        getSectionHelper().rememberTypesFor();
-      //   logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
-    }
-  }*/
+  private Collection<String> getAttributeTypes() {   return userExerciseDAO.getAttributeTypes(project.id()); }
 
   private Map<Integer, CommonExercise> getIDToExercise(Collection<CommonExercise> allExercises) {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();

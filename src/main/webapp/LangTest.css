@@ -1442,11 +1442,20 @@ document sections.*/
 
 .sidebar > nav ul {
     list-style: outside none none;
+    margin: 0 0 5px 5px;
 }
+
+.sidebar .dimension > .menuItem > a:hover {
+    color: #2b95d0;
+    text-decoration: none;
+}
+
+/*
 
 .sidebar li, .sidebar nav li {
     padding: 4px 10px;
 }
+*/
 
 .sidebar .selected {
     color: #b71f39;
@@ -1505,6 +1514,7 @@ document sections.*/
     position: relative;
     right: 0;
     text-transform: uppercase;
+    cursor: pointer;
 }
 
 .sidebar .refinements > ul > li {
@@ -1517,19 +1527,22 @@ document sections.*/
     clear: both;
 }
 
+/*
 .sidebar .dimension li, .sidebar nav li {
     padding: 4px 10px;
 }
+*/
 
-a, a:visited {
+.sidebar a, a:visited {
     color: #303239;
+    cursor: pointer;
 }
 
-a.conspicuousLink, a.conspicuousLink:visited {
+.sidebar a.conspicuousLink, a.conspicuousLink:visited {
     color: #2b95d0;
 }
 
-a:hover {
+.sidebar a:hover {
     color: #2b95d0;
 }
 
@@ -1558,4 +1571,30 @@ h1, h2, h3, h4, h5, h6 {
 
 .sidebar > nav .menuItem, .sidebar > nav .viewAll, .sidebar > nav .menuItem > a, .sidebar > nav .viewAll > a, .sidebar > nav .menuItem > a + .qty, .sidebar > nav .viewAll > a + .qty {
     color: #303239;
+}
+
+.sidebar .subdimension > ul {
+    margin-top: 4px;
+    overflow: hidden;
+    padding: 0;
+    transition: max-height 100ms ease-out 0s;
+}
+
+.sidebar .dimension.refined .refinement .selected {
+    color: #b71f39;
+    font-family: BentonMedium;
+    font-weight: 400;
+}
+
+.sidebar > nav .qty::before {
+    content: " (";
+}
+.sidebar > nav .qty::after {
+    content: ")";
+}
+.sidebar > nav .menuItem, .sidebar > nav .viewAll, .sidebar > nav .menuItem > a, .sidebar > nav .viewAll > a, .sidebar > nav .menuItem > a + .qty, .sidebar > nav .viewAll > a + .qty {
+    color: #303239;
+}
+.sidebar > nav .qty {
+    cursor: pointer;
 }

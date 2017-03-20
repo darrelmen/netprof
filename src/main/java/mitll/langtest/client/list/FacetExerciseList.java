@@ -33,42 +33,29 @@
 package mitll.langtest.client.list;
 
 
-import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.exercise.Pair;
-import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import net.liftweb.util.RE;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget> {
-  private final Logger logger = Logger.getLogger("SimpleSelectExerciseList");
+  public static final int MAX_TO_SHOW = 4;
+  private final Logger logger = Logger.getLogger("FacetExerciseList");
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
-//  private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
 
-  //  private final Heading statusHeader = new Heading(4);
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
@@ -89,13 +76,9 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
     secondRow.add(sectionPanel);
-//    Style style = sectionPanel.getElement().getStyle();
-//    style.setPaddingLeft(0, Style.Unit.PX);
-//    style.setPaddingRight(0, Style.Unit.PX);
-    // secondRow.add(new Column(12, sectionPanel));
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
     downloadHelper = new DownloadHelper(this);
-    logger.info("made ex list....");
+    //  logger.info("made ex list....");
   }
 
   /**
@@ -148,7 +131,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     typeOrder = projectStartupInfo.getTypeOrder();
     //  logger.info("getTypeOrder type order is " + typeOrder);
-    addFacets(projectStartupInfo.getSectionNodes(), container, typeOrder, projectStartupInfo.getTypeToDistinct());
+    addFacets(container, projectStartupInfo.getRootNodes(), projectStartupInfo.getTypeToDistinct());
   }
 
   private Panel firstTypeRow;
@@ -171,25 +154,25 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * click on header, removes selection of choice
    * click on choice, down select for that choice
    *
-   * @param rootNodes
    * @param nav
    * @param types
    * @param typeToDistinct
+   * @paramx rootNodes
    * @see #getTypeOrder
    */
-  private void addFacets(Collection<SectionNode> rootNodes,
-                         final UnorderedList nav,
-                         List<String> types,
-                         Map<String, Set<String>> typeToDistinct) {
+  private void addFacets(
+      final UnorderedList nav,
+      Collection<String> types,
+      Map<String, Set<String>> typeToDistinct) {
     logger.info("addChoiceRow for user = " + controller.getUser() + " got types " +
-        types + " num root nodes " + rootNodes.size());
+        types);// + " num root nodes " + rootNodes.size());
 
     if (types.isEmpty()) {
       logger.warning("addChoiceRow : huh? types is empty?");
       return;
     }
 
-    addFacetsForReal(rootNodes, types, typeToDistinct, nav);
+    addFacetsForReal(typeToDistinct, nav);
     makeDefaultSelections();
     pushFirstListBoxSelection();
   }
@@ -209,133 +192,176 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * ul - choices in each dimension
    * li - choice - with span (qty)
    *
-   * @param rootNodes
-   * @param types
+   * @paramx rootNodes
+   * @paramx types
    * @see #addFacets
    */
-  private void addFacetsForReal(Collection<SectionNode> rootNodes,
-                                List<String> types,
-                                Map<String, Set<String>> typeToDistinct,
-                                Panel nav) {
+  private void addFacetsForReal(Map<String, Set<String>> typeToValues, Panel nav) {
     int i = 0;
 
-    logger.info("addChoiceWidgets\n\tfor " +
+    logger.info("addFacetsForReal\n\tfor " +
         //rootNodes.size() +
         " nodes" +
         "\n\tand " + types.size() +
         //" types " + types + " " +
-        " type->distinct " + typeToDistinct.keySet() + "\n\ttype->sel " + typeToSelection);
-    this.types = new HashSet<>(types);
+        " type->distinct " + typeToValues.keySet() + "\n\ttype->sel " + typeToSelection);
+    Collection<String> rootNodes = controller.getProjectStartupInfo().getRootNodes();
+
+    this.types = new HashSet<>(controller.getProjectStartupInfo().getTypeOrder());
+    this.types.retainAll(rootNodes);
+
     // nav -
     //   ul
     UnorderedList allTypesContainer = new UnorderedList(); //ul
     nav.clear();
     nav.add(allTypesContainer);
-    allTypesContainer.addStyleName("sidebar");
+    // allTypesContainer.addStyleName("sidebar");
 
     for (String type : types) {
-      // List<String> sectionsInType = getLabels(rootNodes);
-      Set<String> keys = typeToDistinct.get(type);
-
-      boolean refined = typeToSelection.containsKey(type);
-      if (refined) logger.info("Sel on  " + type);
+      //if (refined) logger.info("Sel on  " + type);
 
       // nav
       //  ul
       //   li - dimension
-      ListItem liForDimension = new ListItem();
-      liForDimension.addStyleName("dimension");
-      if (refined) liForDimension.addStyleName("refined");
-      allTypesContainer.add(liForDimension);
-
-      //typeSection.addStyleName("menuItem");
-      // InlineHTML span = new InlineHTML("");
-      // span.addStyleName("menuItem");
-      // liForDimension.add(span);
-      Anchor headerAnchor = getHeaderAnchor(type);
-      DivWidget headerContainer = new DivWidget();
-      headerContainer.addStyleName("menuItem");
-      headerContainer.add(headerAnchor);
-      liForDimension.add(headerContainer);
+      ListItem liForDimensionForType = getLIDimension(typeToSelection.containsKey(type));
+      allTypesContainer.add(liForDimensionForType);
+      liForDimensionForType.add(getTypeHeader(type));
 
       // nav
       //  ul
       //   li
       //    ul
       //
-      boolean allShort = areAllShort(keys);
-      Panel choices = allShort ? new DivWidget() : new UnorderedList(); // ul
-
-      if (allShort) {
-        choices.addStyleName("symbolic");
-        choices.addStyleName("topFiveMargin");
-      }
-      liForDimension.add(choices);
-//      NavHeader header = new NavHeader(type);
-
-      String selectionForType = typeToSelection.get(type);
-      if (selectionForType != null) {
-       // NavLink w = new NavLink(selectionForType);
-        Anchor anchor = new Anchor();
-        anchor.setText(selectionForType);
-        choices.add(anchor);
-        anchor.addStyleName("selected");
-      } else {
-        if (keys != null) {
-          if (allShort) {
-            //  DivWidget current = new DivWidget();
-            // DivWidget tiny = new DivWidget();
-            // tiny.addStyleName("symbolic");
-            // choices.add(tiny);
-            for (String key : keys) {
-              // tiny.addStyleName("floatLeftList");
-              Widget anchor = getAnchor(type, key);
-              choices.add(anchor);
-              //tiny.add(anchor);
-              //tiny.addStyleName("rightFiveMargin");
-            }
-          } else {
-            int j = 0;
-            boolean hasMore = keys.size() > 4;
-            Boolean showAll = typeToShowAll.getOrDefault(type, false);
-            for (String key : keys) {
-              Widget anchor1 = getAnchor(type, key);
-
-              addChoice(choices, anchor1);
-
-              if (hasMore && !showAll && ++j==4) {
-                Anchor anchor = new Anchor();
-                anchor.setText("Show More...");
-                anchor.addClickHandler(new ClickHandler() {
-                  @Override
-                  public void onClick(ClickEvent event) {
-                    typeToShowAll.put(type, true);
-                    addFacetsForReal(null, typeOrder, typeToDistinct, typeOrderContainer);
-                  }
-                });
-                addChoice(choices, anchor);
-                break;
-              }
-            }
-            if (hasMore && showAll) {
-              Anchor anchor = new Anchor();
-              anchor.setText("Show Less...");
-              anchor.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                  typeToShowAll.put(type, false);
-                  addFacetsForReal(null, typeOrder, typeToDistinct, typeOrderContainer);
-                }
-              });
-              addChoice(choices, anchor);
-            }
-          }
-        }
-      }
+      liForDimensionForType.add(addChoices(typeToValues, type));
     }
   }
 
-  private void addChoice(Panel choices, Widget anchor1) {
+  /**
+   * ul
+   * span
+   * li
+   * ul
+   * span
+   * li ...
+   * <p>
+   * ul
+   *
+   * @param typeToValues
+   * @param type
+   * @return
+   */
+  private Panel addChoices(Map<String, Set<String>> typeToValues, String type) {
+    Panel choices = /*allShort ? new DivWidget() :*/ new UnorderedList(); // ul
+    /*  if (allShort) {
+        choices.addStyleName("symbolic");
+        choices.addStyleName("topFiveMargin");
+      }*/
+    //  liForDimension.add(choices);
+
+    String selectionForType = typeToSelection.get(type);
+    if (selectionForType != null) {
+      String childType = getChildForParent(type);
+      if (childType != null) {
+        Widget parentAnchor =
+            typeToSelection.containsKey(childType) ?
+                getParentAnchor(selectionForType, childType) :
+                getSelectedAnchor(selectionForType);
+        choices.add(parentAnchor);
+        ListItem liForDimension = new ListItem();
+        liForDimension.addStyleName("subdimension");
+        liForDimension.addStyleName("refinement");
+        choices.add(liForDimension);
+        liForDimension.add(addChoices(typeToValues, childType));
+      } else {
+        choices.add(getSelectedAnchor(selectionForType));
+      }
+    } else {
+      Set<String> keys = typeToValues.get(type);
+      if (keys != null) {
+        addChoicesForType(typeToValues, type, choices, keys);
+      }
+    }
+    return choices;
+  }
+
+  private void addChoicesForType(Map<String, Set<String>> typeToValues, String type, Panel choices, Set<String> keys) {
+    int j = 0;
+    boolean hasMore = keys.size() > MAX_TO_SHOW;
+    Boolean showAll = typeToShowAll.getOrDefault(type, false);
+    for (String key : keys) {
+      addLIChoice(choices, getAnchor(type, key));
+
+      if (hasMore && !showAll && ++j == MAX_TO_SHOW) {
+        addLIChoice(choices, getShowMoreAnchor(typeToValues, type));
+        break;
+      }
+    }
+    if (hasMore && showAll) {
+      addLIChoice(choices, getShowLess(typeToValues, type));
+    }
+  }
+
+  @NotNull
+  private Anchor getShowLess(final Map<String, Set<String>> typeToValues, final String type) {
+    Anchor anchor = new Anchor();
+    anchor.setText("Show Less...");
+    anchor.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        typeToShowAll.put(type, false);
+        addFacetsForReal(typeToValues, typeOrderContainer);
+      }
+    });
+    return anchor;
+  }
+
+  @NotNull
+  private Anchor getShowMoreAnchor(final Map<String, Set<String>> typeToValues, final String type) {
+    Anchor anchor = new Anchor();
+
+    anchor.setText("Show More...");
+    anchor.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        typeToShowAll.put(type, true);
+        addFacetsForReal(typeToValues, typeOrderContainer);
+      }
+    });
+    return anchor;
+  }
+
+  @NotNull
+  private Widget getSelectedAnchor(String selectionForType) {
+ /*   Anchor anchor = new Anchor();
+    anchor.setText(selectionForType);
+    anchor.addStyleName("selected");*/
+    Panel anchor = new FlowPanel("span");
+    anchor.getElement().setInnerHTML(selectionForType);
+    anchor.addStyleName("selected");
+    return anchor;
+  }
+
+  @NotNull
+  private Panel getTypeHeader(String type) {
+    Anchor headerAnchor = getHeaderAnchor(type);
+
+    // DivWidget headerContainer = new DivWidget();
+    Panel headerContainer = new FlowPanel("span");
+    headerContainer.addStyleName("menuItem");
+
+    headerContainer.add(headerAnchor);
+    return headerContainer;
+  }
+
+  @NotNull
+  private ListItem getLIDimension(boolean refined) {
+    ListItem liForDimension = new ListItem();
+    liForDimension.addStyleName("dimension");
+    if (refined) liForDimension.addStyleName("refined");
+    return liForDimension;
+  }
+
+  private void addLIChoice(Panel choices, Widget anchor1) {
     ListItem li = new ListItem();
     //li.addStyleName("menuItem");
     // NavLink w = new NavLink(key);
@@ -343,7 +369,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     choices.add(li);
   }
 
-  private boolean areAllShort(Set<String> keys) {
+/*  private boolean areAllShort(Set<String> keys) {
     boolean allShort = true;
     for (String key : keys) {
       if (key.length() > 3) {
@@ -352,32 +378,71 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
       }
     }
     return allShort;
-  }
+  }*/
 
   private Widget getAnchor(String type, String key) {
-    // IconAnchor anchor = new IconAnchor();
-    Anchor anchor = new Anchor();
+    Anchor anchor = getAnchor();
+
     anchor.setText(key);
     anchor.addClickHandler(getHandler(type, key));
     return anchor;
   }
 
   @NotNull
+  private Anchor getAnchor() {
+    Anchor anchor = new Anchor();
+    removeAnchorStyle(anchor);
+    return anchor;
+  }
+
+  private void removeAnchorStyle(Anchor anchor) {
+    anchor.removeStyleName("gwt-Anchor");
+  }
+
+  @NotNull
   private Anchor getHeaderAnchor(final String type) {
-    //  IconAnchor typeSection = new IconAnchor(); // li
-    Anchor typeSection = new Anchor(); // li
+    Anchor typeSection = getAnchor(); // li
     typeSection.setText(type);
-    typeSection.addStyleName("menuItem");
     typeSection.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        typeToSelection.remove(type);
+        removeSelection(type);
         logger.info("ty->sel remove " + typeToSelection);
         gotSelection();
         getTypeToValue();
       }
     });
     return typeSection;
+  }
+
+  @NotNull
+  private Widget getParentAnchor(final String value, String childType) {
+    Anchor typeSection = getAnchor(); // li
+    typeSection.setText(value);
+    typeSection.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        removeSelection(childType);
+        logger.info("ty->sel remove " + typeToSelection);
+        gotSelection();
+        getTypeToValue();
+      }
+    });
+    return typeSection;
+  }
+
+  private boolean removeSelection(String childType) {
+    String remove = typeToSelection.remove(childType);
+    boolean did = remove != null;
+    String childOfChild = getChildForParent(childType);
+    if (childOfChild != null) {
+      did |= removeSelection(childOfChild);
+    }
+    return did;
+  }
+
+  private String getChildForParent(String childType) {
+    return controller.getProjectStartupInfo().getParentToChild().get(childType);
   }
 
   @NotNull
@@ -421,9 +486,43 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
           @Override
           public void onSuccess(FilterResponse response) {
             Map<String, Set<String>> result = response.getTypeToValues();
-            addFacetsForReal(null, typeOrder, result, typeOrderContainer);
+            logger.info("getTypeToValues for " + pairs + " got " + result);
+            boolean b = changeSelection(response.getTypesToInclude());
+            addFacetsForReal(result, typeOrderContainer);
+            if (b) {
+              logger.info("getTypeToValues gotSelection --- ");
+              gotSelection();
+            }
           }
         });
+  }
+
+  private boolean changeSelection(Set<String> typesToInclude) {
+    boolean removed = false;
+
+    Set<String> strings = typeToSelection.keySet();
+    logger.info(" - found " + strings + " selected types vs "  + typesToInclude);
+
+    for (String typeWithSelection : strings) {
+      boolean clearSelection = !typesToInclude.contains(typeWithSelection);
+      if (clearSelection) {
+        if (removeSelection(typeWithSelection)) {
+          logger.info("removed selection " + typeWithSelection);
+          removed = true;
+        }
+        else {
+          logger.info("no selection " + typeWithSelection);
+
+        }
+      }
+      else {
+        logger.info(" - found " + typeWithSelection + " selected type in "  + typesToInclude);
+      }
+    }
+
+    logger.info("changeSelection removed --- " + removed);
+
+    return removed;
   }
 
   /**
@@ -431,7 +530,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * @return
    * @seex #addChoiceWidgets
    */
-  private List<SectionNode> getChildSectionNodes(Collection<SectionNode> rootNodes) {
+ /* private List<SectionNode> getChildSectionNodes(Collection<SectionNode> rootNodes) {
     List<SectionNode> newNodes = new ArrayList<>();
     for (SectionNode node : rootNodes) {
       logger.info("getChildSectionNodes " + node.getType() + " " + node.getName());
@@ -450,13 +549,13 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     logger.info("getChildSectionNodes found " + newNodes.size());
 
     return newNodes;
-  }
+  }*/
 
   /**
    * @seex ButtonBarSectionWidget#getChoice(ButtonGroup, String)
    */
   public void gotSelection() {
-    //   logger.info("gotSelection --- >");
+    //logger.info("gotSelection --- ");
     pushNewSectionHistoryToken();
   }
 
@@ -526,35 +625,6 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   }
 */
 
-  /**
-   * @param container
-   * @see #addChoiceRow
-   */
-/*
-  private void addBottomText(Panel container) {
-    Panel status = getStatusRow();
-    container.add(status);
-    status.addStyleName("leftFiftyPercentMargin");
-  }
-*/
-
-  /**
-   * @return
-   * @see #addBottomText
-   */
-/*
-  private Panel getStatusRow() {
-    Panel status = new DivWidget();
-    status.getElement().setId("statusRow");
-    status.addStyleName("alignCenter");
-    status.addStyleName("inlineBlockStyle");
-    status.add(statusHeader);
-    statusHeader.getElement().setId("statusHeader");
-    statusHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    statusHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-    return status;
-  }
-*/
 
   /**
    * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.amas.ExerciseListWrapper)

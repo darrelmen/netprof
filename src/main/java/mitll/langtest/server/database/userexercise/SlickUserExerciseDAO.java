@@ -594,10 +594,7 @@ public class SlickUserExerciseDAO
     List<CommonExercise> copy = new ArrayList<>();
     for (SlickExercise slickExercise : all) {
       Exercise exercise = makeExercise(slickExercise);
-      //Exercise e = fromSlickToExercise(slickExercise, typeOrder, sectionHelper, exToPhones, lookup, allPairs);
-
       addAttributeToExercise(allByProject, exToAttrs, exercise);
-
 //      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());
       allPairs.add(addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, exToPhones, lookup, exercise, attrTypes));
       copy.add(exercise);
