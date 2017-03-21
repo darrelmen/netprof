@@ -1470,6 +1470,7 @@ document sections.*/
     font-size: 14px;
     font-weight: 400;
     text-transform: none;
+    float: right;
 }
 
 .sidebar .refined > .menuItem > a::after {

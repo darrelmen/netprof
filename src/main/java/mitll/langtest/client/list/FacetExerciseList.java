@@ -39,7 +39,11 @@ import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.FilterRequest;
@@ -55,8 +59,8 @@ import java.util.logging.Logger;
 public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget> {
   public static final int MAX_TO_SHOW = 4;
   private static final int TOTAL = 32;
-  private static final String SHOW_LESS = "<i>Show Less...</i>";
-  private static final String SHOW_MORE = "<i>Show More...</i>";
+  private static final String SHOW_LESS = "<i>View fewer</i>";
+  private static final String SHOW_MORE = "<i>View all</i>";
   public static final String ANY = "Any";
   public static final String MENU_ITEM = "menuItem";
 
@@ -286,21 +290,15 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * @return
    */
   private Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type) {
-    Panel choices = /*allShort ? new DivWidget() :*/ new UnorderedList(); // ul
-    /*  if (allShort) {
-        choices.addStyleName("symbolic");
-        choices.addStyleName("topFiveMargin");
-      }*/
-    //  liForDimension.add(choices);
-
+    Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
     if (selectionForType != null) {
       String childType = getChildForParent(type);
       if (childType != null) {
         Widget parentAnchor =
             typeToSelection.containsKey(childType) ?
-                getParentAnchor(selectionForType, childType) :
-                getSelectedAnchor(selectionForType);
+                getParentAnchor(type, selectionForType, childType) :
+                getSelectedAnchor(type, selectionForType);
         choices.add(parentAnchor);
         ListItem liForDimension = new ListItem();
         liForDimension.addStyleName("subdimension");
@@ -308,7 +306,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
         choices.add(liForDimension);
         liForDimension.add(addChoices(typeToValues, childType));
       } else {
-        choices.add(getSelectedAnchor(selectionForType));
+        choices.add(getSelectedAnchor(type, selectionForType));
       }
     } else {
       Set<MatchInfo> keys = typeToValues.get(type);
@@ -370,13 +368,11 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   }
 
   @NotNull
-  private Widget getSelectedAnchor(String selectionForType) {
- /*   Anchor anchor = new Anchor();
-    anchor.setText(selectionForType);
-    anchor.addStyleName("selected");*/
+  private Widget getSelectedAnchor(String type, String selectionForType) {
     Panel anchor = getSpan();
     anchor.getElement().setInnerHTML(selectionForType);
     anchor.addStyleName("selected");
+    addTooltip(type, selectionForType, anchor);
     return anchor;
   }
 
@@ -392,6 +388,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     Panel headerContainer = getSpan();
     headerContainer.addStyleName(MENU_ITEM);
     headerContainer.add(headerAnchor);
+
     return headerContainer;
   }
 
@@ -411,6 +408,8 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
 
   private Widget getAnchor(String type, MatchInfo key) {
     Panel span = getSpan();
+
+    addMatchInfoTooltip(type, key, span);
     span.addStyleName(MENU_ITEM);
     Anchor anchor = getAnchor(key.getValue());
     anchor.addClickHandler(getHandler(type, key.getValue()));
@@ -421,6 +420,15 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     qty.getElement().setInnerHTML("" + key.getCount());
     span.add(qty);
     return span;
+  }
+
+  private void addMatchInfoTooltip(String type, MatchInfo key, Panel span) {
+    String value = key.getValue();
+    addTooltip(type, value, span);
+  }
+
+  private void addTooltip(String type, String value, Panel span) {
+    new TooltipHelper().addTooltip(span, type + " " + value);
   }
 
   @NotNull
@@ -443,12 +451,13 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   }
 
   @NotNull
-  private Widget getParentAnchor(String value, String childType) {
-    FlowPanel span = getSpan();
+  private Widget getParentAnchor(String type, String value, String childType) {
+    Panel span = getSpan();
     span.addStyleName(MENU_ITEM);
     Anchor typeSection = getAnchor(value); // li
     addRemoveClickHandler(childType, typeSection);
     span.add(typeSection);
+    addTooltip(type, value, span);
     return span;
   }
 
