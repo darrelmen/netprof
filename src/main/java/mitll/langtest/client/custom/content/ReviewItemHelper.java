@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.custom.content;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -149,9 +150,9 @@ public class ReviewItemHelper extends NPFHelper {
 
     @Override
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
-                                                                               String instanceName) {
+                                                                               String instanceName, DivWidget listHeader) {
       FlexListLayout outer = this;
-      return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel, new ListOptions(instanceName)) {
+      return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel, new ListOptions(instanceName), listHeader) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         /**

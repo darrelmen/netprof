@@ -63,7 +63,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private List<CorrectAndScore> scores;
 
   private transient List<String> firstPron = new ArrayList<>();
-  private int numPhones;
   private long updateTime = 0;
 
   private Collection<CommonExercise> directlyRelated = new ArrayList<>();
@@ -565,10 +564,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   public long getLastChecked() {
     return safeToDecodeLastChecked;
-  }
-
-  public int getNumPhones() {
-    return numPhones;
   }
 
   public void setNumPhones(int numPhones) {

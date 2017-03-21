@@ -1520,6 +1520,24 @@ document sections.*/
     cursor: pointer;
 }
 
+.sidebar .dimension > .header {
+    color: #292b2d;
+    display: block;
+    font-family: BentonMedium;
+    font-size: 14px;
+    font-weight: 400;
+    left: 0;
+    /*
+    padding: 0 10px;
+    */
+    position: relative;
+    right: 0;
+    text-transform: uppercase;
+    /*
+    cursor: pointer;
+    */
+}
+
 /*.sidebar .menuItem a {
     display: block;
     color: #292b2d;
@@ -1560,8 +1578,12 @@ document sections.*/
 }
 
 .sidebar a:hover {
-    color: #2b95d0;
+    color: #2b95d0 !important;
 }
+
+.sidebar .choice a:hover {
+     color: #2b95d0;
+ }
 
 a:hover {
     color: #2b95d0;
@@ -1664,3 +1686,14 @@ h1, h2, h3, h4, h5, h6 {
     font-family: BentonMedium;
     font-weight: 400;
 }*/
+
+
+.listHeader {
+    font-family: BentonRegular;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    font-size: 12px;
+    line-height: 1.5;
+    vertical-align: baseline;
+    padding: 10px;
+}

@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.content.FlexListLayout;
@@ -85,8 +86,8 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
-                                                                                 String instanceName) {
-        return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel, new ListOptions(instanceName)) {
+                                                                                 String instanceName, DivWidget listHeader) {
+        return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel, new ListOptions(instanceName), listHeader) {
           @Override
           protected CommonShell findFirstExercise() {
             int currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();

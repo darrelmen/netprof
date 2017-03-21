@@ -112,9 +112,9 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
-                                                                                 String instanceName) {
+                                                                                 String instanceName, DivWidget listHeader) {
         return new NPFlexSectionExerciseList(outerLayout.getController(), topRow, currentExercisePanel,
-            new ListOptions().setInstance(instanceName).setShowFirstNotCompleted(true)) {
+            new ListOptions().setInstance(instanceName).setShowFirstNotCompleted(true), listHeader) {
           private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
           private CheckBox filterOnly;
 

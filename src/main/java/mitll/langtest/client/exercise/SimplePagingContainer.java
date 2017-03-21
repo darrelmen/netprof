@@ -42,6 +42,8 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -75,9 +77,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
   }
 
   /**
+   * @param sortEnglish
    * @return
    * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
-   * @param sortEnglish
    */
   public Panel getTableWithPager(boolean sortEnglish) {
     this.dataProvider = new ListDataProvider<T>();
@@ -148,12 +150,15 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
   }
 
   /**
-   * @see #configureTable
    * @param sortEnglish
+   * @see #configureTable
    */
   abstract protected void addColumnsToTable(boolean sortEnglish);
 
   public void flush() {
+    if (comp != null) {
+      Collections.sort(getList(),comp);
+    }
     dataProvider.flush();
     table.setRowCount(getList().size());
   }
@@ -181,7 +186,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
         controller.logMessageOnServer("no table for " + suffix, controller.getLanguage());
       } else {
         table.setRowCount(0);
-        controller.logMessageOnServer("no list for " + suffix,  controller.getLanguage());
+        controller.logMessageOnServer("no list for " + suffix, controller.getLanguage());
       }
     } else {
       list.clear();
@@ -270,6 +275,14 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
         table.setVisibleRange(newStart, table.getPageSize());
       }
     }
+  }
+
+  Comparator<T> comp;
+
+  public void sortBy(Comparator<T> comp) {
+    this.comp = comp;
+    Collections.sort(getList(), comp);
+   // table.redraw();
   }
 
   public interface TableResources extends CellTable.Resources {

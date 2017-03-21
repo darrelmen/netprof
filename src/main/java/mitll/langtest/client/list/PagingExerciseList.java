@@ -103,6 +103,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 //    if (showFirstNotCompleted) logger.info("show first completed for " + instance);
   }
 
+  public void sortBy(Comparator<T> comp) {
+    pagingContainer.sortBy(comp);
+    loadFirst();
+  }
+
   @Override
   protected Set<Integer> getKeys() {
     return pagingContainer.getKeys();

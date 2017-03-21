@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.amas;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -105,7 +106,7 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   protected FlexListLayout getMyListLayout(SimpleChapterNPFHelper outer) {
     return new MyFlexListLayout(controller, outer) {
       @Override
-      protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName) {
+      protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
         exerciseList = new ResponseExerciseList(topRow, currentExercisePanel, controller, instanceName);
         return exerciseList;
       }

@@ -112,10 +112,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         if (exerciseListWrapper != null) {
           logger.info("Returning cached exercises " + exerciseListWrapper);
 
-          return new ExerciseListWrapper<T>(request.getReqID(),
+          ExerciseListWrapper<T> tExerciseListWrapper = new ExerciseListWrapper<>(request.getReqID(),
               exerciseListWrapper.getExercises(),
               exerciseListWrapper.getFirstExercise());
-          //  return exerciseListWrapper;
+
+          addScoresForAll(request.getUserID(), exerciseListWrapper.getExercises());
+          return tExerciseListWrapper;
         }
       }
     }
@@ -189,6 +191,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logAndNotifyServerException(e);
       return new ExerciseListWrapper<T>();
     }
+  }
+
+  private void addScoresForAll(int userid, List<T> exercises) {
+    db.addScoresForAll(userid, exercises);
+  }
+
+  private void addScores(int userid, List<CommonShell> exercises) {
+    db.addScores(userid, exercises);
   }
 
   /**
@@ -385,6 +395,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.error("huh? no exercises");
     }
     ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);
+
+    addScores(userID, exerciseShells);
     logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper);
     return exerciseListWrapper;
   }

@@ -903,19 +903,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return getJsonSupport(userid).getJsonScoreHistory(userid, typeToSection, sorter);
   }
 
-  private JsonSupport getJsonSupport(int userid) {
-    int i = projectForUser(userid);
-    return getJsonSupportForProject(i);
-  }
+  private JsonSupport getJsonSupport(int userid) {  return getJsonSupportForProject(projectForUser(userid));  }
 
   private int projectForUser(int userid) {
     return getUserProjectDAO().mostRecentByUser(userid);
   }
 
-  private JsonSupport getJsonSupportForProject(int i) {
-    Project project = getProject(i);
-    return project.getJsonSupport();
-  }
+  private JsonSupport getJsonSupportForProject(int i) {  return getProject(i).getJsonSupport();  }
 
   /**
    * @param typeToSection
@@ -1787,6 +1781,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (now - then > 100) logger.info("getRecordedReport took " + (now - then));
 
     return recordedReport;
+  }
+
+  @Override
+  public <T extends CommonShell> void addScores(int userid, Collection<T> exercises) {
+    resultDAO.addScores(userid, exercises);
+  }
+
+  @Override
+  public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
+    resultDAO.addScoresForAll(userid, exercises);
   }
 
   @Override

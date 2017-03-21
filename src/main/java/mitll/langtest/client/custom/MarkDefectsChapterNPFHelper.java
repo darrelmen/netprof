@@ -33,6 +33,7 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
@@ -101,10 +102,10 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
-                                                                                 String instanceName) {
+                                                                                 String instanceName, DivWidget listHeader) {
 //        logger.info("instance is " + instanceName);
         return new NPFlexSectionExerciseList(controller, topRow, currentExercisePanel,
-            new ListOptions().setInstance(instanceName)) {
+            new ListOptions().setInstance(instanceName), listHeader) {
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override

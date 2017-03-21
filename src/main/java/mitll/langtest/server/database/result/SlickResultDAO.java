@@ -37,6 +37,8 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.DBConnection;
@@ -44,6 +46,7 @@ import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
+import mitll.npdata.dao.result.SlickExerciseScore;
 import mitll.npdata.dao.result.SlickUserAndTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,6 +54,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   private static final Logger logger = LogManager.getLogger(SlickResultDAO.class);
@@ -277,18 +281,34 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return userAndTimes;
   }
 
+  /**
+   * @param ids
+   * @param matchAVP
+   * @param userid
+   * @param language
+   * @return
+   */
+  @Override
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid, String language) {
+    if (matchAVP) {
+      return getCorrectAndScores(dao.correctAndScoreMatchAVPUser(ids, matchAVP, userid), language);
+    } else {
+      return getResultsForExIDInForUser(ids, userid, "", language);
+    }
+  }
+
+  /**
+   * public for amas
+   *
+   * @param ids
+   * @param userid
+   * @param ignoredSession
+   * @param language
+   * @return
+   */
   @Override
   public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String ignoredSession, String language) {
     return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids), language);
-  }
-
-  @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid, String language) {
-    if (!matchAVP) {
-      return getResultsForExIDInForUser(ids, userid, "", language);
-    } else {
-      return getCorrectAndScores(dao.correctAndScoreMatchAVPUser(ids, matchAVP, userid), language);
-    }
   }
 
   @Override
@@ -304,10 +324,47 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   @Override
   List<CorrectAndScore> getCorrectAndScoresForReal(String language) {
-    List<SlickCorrectAndScore> slickCorrectAndScores = dao.correctAndScore();
-    return getCorrectAndScores(slickCorrectAndScores, language);
+    return getCorrectAndScores(dao.correctAndScore(), language);
   }
 
+/*  private List<ExerciseIDAndScore> getExAndScore(Collection<SlickExerciseScore> slickCorrectAndScores) {
+    List<ExerciseIDAndScore> cs = new ArrayList<>();
+    for (SlickExerciseScore scs : slickCorrectAndScores) {
+      cs.add(new ExerciseIDAndScore(scs.exerciseid(),scs.modified(),scs.pronscore()));
+    }
+    return cs;
+  }*/
+
+  @Override
+  public <T extends CommonShell> void addScores(int userid, Collection<T> exercises) {
+    List<Integer> collect = exercises
+        .stream()
+        .map(HasID::getID)
+        .collect(Collectors.toList());
+
+    Map<Integer, SlickExerciseScore> correctAndScoresForReal = dao.exidAndScoreWhere(userid, collect);
+    logger.info("for " + userid + " checking " + exercises.size() + " found " + correctAndScoresForReal.size() + " scores");
+    setScores(exercises, correctAndScoresForReal);
+  }
+
+  @Override
+  public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
+    setScores(exercises, dao.exidAndScore(userid));
+  }
+
+  private <T extends CommonShell> void setScores(Collection<T> exercises, Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
+    for (T ex : exercises) {
+      SlickExerciseScore slickExerciseScore = correctAndScoresForReal.get(ex.getID());
+      if (slickExerciseScore != null) {
+        ex.getMutableShell().setScore(slickExerciseScore.pronscore());
+        logger.info("Set "+ ex.getID() + " to "+ slickExerciseScore.pronscore());
+      }
+    }
+  }
+
+  Map<Integer, SlickExerciseScore> getCorrectAndScoresForReal(int userid, Collection<Integer> exids) {
+    return dao.exidAndScoreWhere(userid, exids);
+  }
 
   private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
     List<CorrectAndScore> cs = new ArrayList<>();

@@ -49,6 +49,8 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   protected String english = "";
   protected String meaning = "";
   protected String foreignLanguage = "";
+  protected int numPhones;
+  private float score = -1.0f;
 
   public ExerciseShell() {
   }
@@ -57,7 +59,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @see AudioExercise#AudioExercise(int, int)
    */
   ExerciseShell(int realID) {
-    this("", "", "", realID);
+    this("", "", "", realID, 0);
   }
 
   /**
@@ -73,11 +75,12 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   private ExerciseShell(String english,
                         String meaning,
                         String foreignLanguage,
-                        int realID) {
+                        int realID, int numPhones) {
     super(realID);
     this.english = english;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
+    this.numPhones = numPhones;
   }
 
   /**
@@ -85,7 +88,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
   public CommonShell getShell() {
-    return new ExerciseShell(english, meaning, foreignLanguage, getID());
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones);
   }
 
   public String getEnglish() {
@@ -102,24 +105,29 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   @Override
+  public void setScore(float score) {
+    this.score = score;
+  }
+
+  @Override
   public String getForeignLanguage() {
     return foreignLanguage;
   }
 
   /**
    * TODO: don't put this here
+   *
    * @return
    */
 /*  public String getAltFL() {
     return "";
   }*/
-
   @Override
   public boolean equals(Object other) {
     //boolean checkOld = !getOldID().isEmpty();
     return other instanceof ExerciseShell &&
-      //  (checkOld && getOldID().equals(((ExerciseShell) other).getOldID()) ||
-            (getID() == ((ExerciseShell) other).getID()//)
+        //  (checkOld && getOldID().equals(((ExerciseShell) other).getOldID()) ||
+        (getID() == ((ExerciseShell) other).getID()//)
         );
   }
 
@@ -144,13 +152,21 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     this.english = english;
   }
 
+  @Override
+  public int getNumPhones() {
+    return numPhones;
+  }
+
+  public float getScore() {
+    return score;
+  }
+
   public String toString() {
     return "ExerciseShell " +
         "id = " +
         //getOldID() + "/" +
         getID() +
-        " : '" + getEnglish() + "'"+
+        " : '" + getEnglish() + "'" +
         " states " + getState() + "/" + getSecondState();
   }
-
 }

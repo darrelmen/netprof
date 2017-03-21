@@ -94,15 +94,19 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
       twoRows.add(section);
       section.add(topRow);
-    }
-    else {
+    } else {
       twoRows.add(topRow);
     }
 
     DivWidget bottomRowDiv = new DivWidget();
+    DivWidget listHeader = new DivWidget();
     if (!hasTopRow) {
       bottomRowDiv.addStyleName("floatLeftList");
       bottomRowDiv.addStyleName("mainBlock");
+      bottomRowDiv.getElement().setId("rightSideDiv");
+
+      listHeader.addStyleName("listHeader");
+      bottomRowDiv.add(listHeader);
     }
 
     Panel bottomRow = new HorizontalPanel();
@@ -117,8 +121,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     bottomRow.add(currentExerciseVPanel);
 
     // TODO : only has to be paging b/c it needs to setUserListID
-    PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID
-    );
+    PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID,
+        listHeader);
     npfExerciseList = widgets;
 
     addThirdColumn(bottomRow);
@@ -153,14 +157,16 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    * @param currentExercisePanel
    * @param instanceName
    * @param userListID
+   * @param listHeader
    * @return
    * @see #doInternalLayout
    */
   private PagingExerciseList<T, U> makeNPFExerciseList(final Panel topRow,
                                                        Panel currentExercisePanel,
                                                        String instanceName,
-                                                       long userListID) {
-    final PagingExerciseList<T, U> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName);
+                                                       long userListID,
+                                                       DivWidget listHeader) {
+    final PagingExerciseList<T, U> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, listHeader);
     exerciseList.setUserListID(userListID);
 
     exerciseList.setFactory(getFactory(exerciseList));
@@ -175,7 +181,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
   protected abstract PagingExerciseList<T, U> makeExerciseList(final Panel topRow,
                                                                Panel currentExercisePanel,
-                                                               final String instanceName);
+                                                               final String instanceName, DivWidget listHeader);
 
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
 

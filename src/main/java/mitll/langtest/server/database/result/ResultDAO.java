@@ -39,6 +39,7 @@ import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
 import org.apache.logging.log4j.LogManager;
@@ -457,6 +458,16 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   @Override
   public Collection<Integer> getPracticedByUser(int userid, int projid) {
     return null;
+  }
+
+  @Override
+  public <T extends CommonShell> void addScores(int userid, Collection<T> exercises) {
+
+  }
+
+  @Override
+  public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
+
   }
 
   /**

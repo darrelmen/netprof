@@ -309,6 +309,16 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return null;
   }
 
+  @Override
+  public int getNumPhones() {
+    return 0;
+  }
+
+  @Override
+  public float getScore() {
+    return 0;
+  }
+
 /*  public String getContentTrans() {
     return contentTrans;
   }

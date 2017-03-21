@@ -43,17 +43,15 @@ import mitll.langtest.shared.exercise.HasID;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/13/14.
  */
-public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndScore> {
+public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<CorrectAndScore> {
   private int uniqueID;
   private int userid;
 
-  private int exid;
   /**
    * For AMAS
    */
   private int qid;
   private boolean correct;
-  private float score;
   /**
    * For AMAS
    */
@@ -63,7 +61,6 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
    */
   private float userScore;
 
-  private long timestamp;
   private String path;
   private transient String scoreJson;
 

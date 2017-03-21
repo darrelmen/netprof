@@ -33,23 +33,20 @@
 package mitll.langtest.client.list;
 
 
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
-import mitll.langtest.shared.exercise.MatchInfo;
-import mitll.langtest.shared.exercise.Pair;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,6 +54,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget> {
+  private final Logger logger = Logger.getLogger("FacetExerciseList");
+
   public static final int MAX_TO_SHOW = 4;
   private static final int TOTAL = 32;
   private static final String SHOW_LESS = "<i>View fewer</i>";
@@ -64,23 +63,24 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   public static final String ANY = "Any";
   public static final String MENU_ITEM = "menuItem";
 
-  private final Logger logger = Logger.getLogger("FacetExerciseList");
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
 
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
+  DivWidget listHeader;
 
   /**
    * @param secondRow             add the section panel to this row
    * @param currentExerciseVPanel
    * @param controller
    * @param listOptions
+   * @param listHeader
    */
   public FacetExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
                            ExerciseController controller,
-                           ListOptions listOptions) {
+                           ListOptions listOptions, DivWidget listHeader) {
     super(currentExerciseVPanel, controller, listOptions.setShowTypeAhead(true));
 
     sectionPanel = new DivWidget();
@@ -89,7 +89,82 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     secondRow.add(sectionPanel);
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
     downloadHelper = new DownloadHelper(this);
+
+    this.listHeader = listHeader;
+    DivWidget w = new DivWidget();
+    w.addStyleName("floatRight");
+    listHeader.add(w);
+    w.add(new HTML("Sort by"));
+    getSortBox(controller, w);
+    //   w1.add(new )
     //  logger.info("made ex list....");
+  }
+
+  private void getSortBox(ExerciseController controller, DivWidget w) {
+    ListBox w1 = new ListBox();
+    w.add(w1);
+    w1.addItem("English");
+    String language = controller.getLanguage();
+    w1.addItem(language);
+    String item = "Length - Short To Long";
+    w1.addItem(item);
+    String item1 = "Length - Long To Short";
+    w1.addItem(item1);
+    String score = "Score";
+    w1.addItem(score);
+    w1.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        String selectedValue = w1.getSelectedValue();
+        if (selectedValue.equals(item)) {
+          logger.info("by difficulty ");
+          sortBy(new Comparator<CommonShell>() {
+            @Override
+            public int compare(CommonShell o1, CommonShell o2) {
+              int i = Integer.valueOf(o1.getNumPhones()).compareTo(o2.getNumPhones());
+              return compareShells(o1, o2, i);
+            }
+          });
+        } else if (selectedValue.equals(item1)) {
+          logger.info("by difficulty other way ");
+          sortBy(new Comparator<CommonShell>() {
+            @Override
+            public int compare(CommonShell o1, CommonShell o2) {
+              int i = -1 * Integer.valueOf(o1.getNumPhones()).compareTo(o2.getNumPhones());
+              return compareShells(o1, o2, i);
+            }
+          });
+        } else if (selectedValue.equals("English")) {
+          sortBy(new Comparator<CommonShell>() {
+            @Override
+            public int compare(CommonShell o1, CommonShell o2) {
+              return o1.getEnglish().compareTo(o2.getEnglish());
+            }
+          });
+        } else if (selectedValue.equals(language)) {
+          sortBy(new Comparator<CommonShell>() {
+            @Override
+            public int compare(CommonShell o1, CommonShell o2) {
+              return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
+            }
+          });
+        } else if (selectedValue.equals(score)) {
+          sortBy(new Comparator<CommonShell>() {
+            @Override
+            public int compare(CommonShell o1, CommonShell o2) {
+              int i = Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+              return compareShells(o1, o2, i);
+            }
+          });
+        }
+      }
+    });
+  }
+
+  private int compareShells(CommonShell o1, CommonShell o2, int i) {
+    if (i == 0) i = o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
+    if (i == 0) i = o1.getEnglish().compareTo(o2.getEnglish());
+    return i;
   }
 
   /**
@@ -133,7 +208,6 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     container.getElement().setId("typeOrderContainer");
 //    container.getElement().getStyle().setPaddingLeft(2, Style.Unit.PX);
 //    container.getElement().getStyle().setPaddingRight(2, Style.Unit.PX);
-
     getTypeOrder(container);
     return container;
   }
@@ -236,13 +310,9 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * @see #addFacets
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
-    int i = 0;
-
     logger.info("addFacetsForReal\n\tfor " +
-        //rootNodes.size() +
         " nodes" +
         "\n\tand " + rootNodesInOrder.size() +
-        //" rootNodesInOrder " + rootNodesInOrder + " " +
         " type->distinct " + typeToValues.keySet() + "\n\ttype->sel " + typeToSelection);
     Collection<String> rootNodes = controller.getProjectStartupInfo().getRootNodes();
 
@@ -254,17 +324,16 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     UnorderedList allTypesContainer = new UnorderedList(); //ul
     nav.clear();
     nav.add(allTypesContainer);
-    // allTypesContainer.addStyleName("sidebar");
 
     for (String type : rootNodesInOrder) {
-      //if (refined) logger.info("Sel on  " + type);
-
       // nav
       //  ul
       //   li - dimension
-      ListItem liForDimensionForType = getLIDimension(typeToSelection.containsKey(type));
+      boolean hasSelection = typeToSelection.containsKey(type);
+      ListItem liForDimensionForType = getLIDimension(hasSelection);
       allTypesContainer.add(liForDimensionForType);
-      liForDimensionForType.add(getTypeHeader(type));
+      Panel typeHeader = hasSelection ? getTypeHeader(type) : getSimpleHeader(type);
+      liForDimensionForType.add(typeHeader);
 
       // nav
       //  ul
@@ -273,6 +342,13 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
       //
       liForDimensionForType.add(addChoices(typeToValues, type));
     }
+  }
+
+  private Panel getSimpleHeader(String type) {
+    FlowPanel span = getSpan();
+    span.getElement().setInnerText(type);
+    span.addStyleName("header");
+    return span;
   }
 
   /**
@@ -413,6 +489,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     span.addStyleName(MENU_ITEM);
     Anchor anchor = getAnchor(key.getValue());
     anchor.addClickHandler(getHandler(type, key.getValue()));
+    anchor.addStyleName("choice");
     span.add(anchor);
 
     FlowPanel qty = getSpan();
@@ -466,8 +543,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
       @Override
       public void onClick(ClickEvent event) {
         removeSelection(type);
-        logger.info("ty->sel remove " + typeToSelection);
-        //  gotSelection();
+//        logger.info("ty->sel remove " + typeToSelection);
         getTypeToValue(typeToSelection);
       }
     });
@@ -499,8 +575,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
       public void onClick(ClickEvent event) {
         Map<String, String> candidate = new HashMap<>(typeToSelection);
         candidate.put(type, key);
-        logger.info("getHandler t->sel " + typeToSelection);
-        //gotSelection();
+        //      logger.info("getHandler t->sel " + typeToSelection);
         getTypeToValue(candidate);
       }
     };
@@ -548,10 +623,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
             setTypeToSelection(typeToSelection);
 
             addFacetsForReal(result, typeOrderContainer);
-            //if (b) {
-            //logger.info("getTypeToValues gotSelection --- ");
             gotSelection();
-            //}
           }
         });
   }
@@ -560,53 +632,26 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     boolean removed = false;
 
     Collection<String> typesWithSelections = new ArrayList<String>(typeToSelection.keySet());
-    logger.info(" - found " + typesWithSelections + " selected rootNodesInOrder vs " + typesToInclude);
+    //logger.info(" - found " + typesWithSelections + " selected rootNodesInOrder vs " + typesToInclude);
 
     for (String selectedType : typesWithSelections) {
       boolean clearSelection = !typesToInclude.contains(selectedType);
       if (clearSelection) {
         if (removeSelection(selectedType, typeToSelection)) {
-          logger.info("removed selection " + selectedType);
+          //    logger.info("removed selection " + selectedType);
           removed = true;
         } else {
-          logger.info("no selection " + selectedType);
-
+          //  logger.info("no selection " + selectedType);
         }
       } else {
-        logger.info(" - found " + selectedType + " selected type in " + typesToInclude);
+//        logger.info(" - found " + selectedType + " selected type in " + typesToInclude);
       }
     }
 
-    logger.info("changeSelection removed --- " + removed);
+    //  logger.info("changeSelection removed --- " + removed);
 
     return removed;
   }
-
-  /**
-   * @param rootNodes
-   * @return
-   * @seex #addChoiceWidgets
-   */
- /* private List<SectionNode> getChildSectionNodes(Collection<SectionNode> rootNodes) {
-    List<SectionNode> newNodes = new ArrayList<>();
-    for (SectionNode node : rootNodes) {
-      logger.info("getChildSectionNodes " + node.getType() + " " + node.getName());
-
-      // Collection<SectionNode> children = node.getChildren();
-      Collection<SectionNode> children = node.getChildren();
-
-      // if (!children.isEmpty() && !children.iterator().next().getProperty().equals("Sound")) {
-      //    for (SectionNode child : children) {
-      //      logger.info("\tAdding " + child.getProperty() + " "+ child.getName());
-      //   }
-      // }
-      newNodes.addAll(children);
-    }
-
-    logger.info("getChildSectionNodes found " + newNodes.size());
-
-    return newNodes;
-  }*/
 
   /**
    * @seex ButtonBarSectionWidget#getChoice(ButtonGroup, String)
@@ -615,13 +660,6 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     //logger.info("gotSelection --- ");
     pushNewSectionHistoryToken();
   }
-
-//  private Widget getBottomRow() {
-//    Panel links = downloadHelper.getDownloadButton();
-//    links.addStyleName("topMargin");
-//    links.addStyleName("leftFiveMargin");
-//    return links;
-//  }
 
   /**
    * @param selectionState

@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.custom.content;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.ui.Panel;
@@ -39,7 +40,6 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.SimpleSelectExerciseList;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -55,14 +55,15 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
    * @param topRow
    * @param currentExercisePanel
    * @param listOptions
+   * @param listHeader
    * @seex mitll.langtest.client.custom.Navigation#makePracticeHelper
-   * @see FlexListLayout#makeExerciseList(Panel, Panel, String)
+   * @see FlexListLayout#makeExerciseList(Panel, Panel, String, com.github.gwtbootstrap.client.ui.base.DivWidget)
    */
   public NPFlexSectionExerciseList(ExerciseController controller,
                                    Panel topRow,
                                    Panel currentExercisePanel,
-                                   ListOptions listOptions) {
-    super(topRow, currentExercisePanel, controller, listOptions);
+                                   ListOptions listOptions, DivWidget listHeader) {
+    super(topRow, currentExercisePanel, controller, listOptions, listHeader);
   }
 
   @Override

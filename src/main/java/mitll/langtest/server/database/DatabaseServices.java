@@ -47,6 +47,7 @@ import mitll.langtest.server.database.userlist.UserListServices;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -105,6 +106,8 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid);
 
+  <T extends CommonShell> void addScores(int userid, Collection<T> exercises);
+  <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises);
 
   void rememberScore(int resultID, PretestScore asrScoreForAudio, boolean isCorrect);
 

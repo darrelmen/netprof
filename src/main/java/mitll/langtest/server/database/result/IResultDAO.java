@@ -92,4 +92,8 @@ public interface IResultDAO extends IDAO {
   int getDefaultResult();
 
   Collection<Integer> getPracticedByUser(int userid, int projid);
+
+  <T extends CommonShell> void addScores(int userid, Collection<T> exercises);
+
+  <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises);
 }

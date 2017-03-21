@@ -203,18 +203,20 @@ public class Navigation implements RequiresResize, ShowTab {
         ExerciseController outerC = controller;
         return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
           /**
-           * @see FlexListLayout#makeNPFExerciseList(Panel, Panel, String, long)
+           * @see FlexListLayout#makeNPFExerciseList
            * @param topRow
            * @param currentExercisePanel
            * @param instanceName
+           * @param listHeader
            * @return
            */
           @Override
           protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                      Panel currentExercisePanel,
-                                                                                     String instanceName) {
+                                                                                     String instanceName,
+                                                                                     DivWidget listHeader) {
             return new NPFlexSectionExerciseList(outerC, topRow, currentExercisePanel,
-                new ListOptions(instanceName));
+                new ListOptions(instanceName), listHeader);
           }
         };
       }

@@ -231,7 +231,8 @@ public abstract class BaseResultDAO extends DAO {
    */
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(int userid,
                                                                     List<Integer> allIds,
-                                                                    Map<Integer, CollationKey> idToKey, String language) {
+                                                                    Map<Integer, CollationKey> idToKey,
+                                                                    String language) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid, language);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistory(results, allIds, idToKey);
