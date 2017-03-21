@@ -67,7 +67,7 @@ public class UserCopy {
     logger.info("copyUsers h2 importUsers  " + importUsers.size());
     UserToCount userToNumAnswers = oldResultDAO.getUserToNumAnswers();
     Map<Integer, Integer> idToCount = userToNumAnswers.getIdToCount();
-    if (DEBUG) logger.info("copyUsers id->count " + idToCount.size() + " values " + idToCount.values().size());
+    if (DEBUG) logger.info("copyUsers id->childCount " + idToCount.size() + " values " + idToCount.values().size());
 
     int collisions = 0;
     int lurker = 0;

@@ -44,6 +44,7 @@ import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
@@ -53,6 +54,12 @@ import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget> {
   public static final int MAX_TO_SHOW = 4;
+  private static final int TOTAL = 32;
+  private static final String SHOW_LESS = "<i>Show Less...</i>";
+  private static final String SHOW_MORE = "<i>Show More...</i>";
+  public static final String ANY = "Any";
+  public static final String MENU_ITEM = "menuItem";
+
   private final Logger logger = Logger.getLogger("FacetExerciseList");
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
 
@@ -109,7 +116,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     sectionPanel.add(typeOrderContainer = getWidgetsForTypes());
   }
 
-  Panel typeOrderContainer;
+  private Panel typeOrderContainer;
 
   /**
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
@@ -163,12 +170,12 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   private void addFacets(
       final UnorderedList nav,
       Collection<String> types,
-      Map<String, Set<String>> typeToDistinct) {
-    logger.info("addChoiceRow for user = " + controller.getUser() + " got types " +
+      Map<String, Set<MatchInfo>> typeToDistinct) {
+    logger.info("addChoiceRow for user = " + controller.getUser() + " got rootNodesInOrder " +
         types);// + " num root nodes " + rootNodes.size());
 
     if (types.isEmpty()) {
-      logger.warning("addChoiceRow : huh? types is empty?");
+      logger.warning("addChoiceRow : huh? rootNodesInOrder is empty?");
       return;
     }
 
@@ -181,9 +188,37 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * TODO : for now only single selection
    */
   private Map<String, String> typeToSelection = new HashMap<>();
-  private Map<String, Boolean> typeToShowAll = new HashMap<>();
+  private final Map<String, Boolean> typeToShowAll = new HashMap<>();
+  private Set<String> rootNodesInOrder = new HashSet<>();
 
-  private Set<String> types = new HashSet<>();
+  private void setTypeToSelection(Map<String, String> typeToSelection) {
+    this.typeToSelection = typeToSelection;
+  }
+
+/*
+  private static class TypeInfo {
+    private String selection;
+    private boolean showAll;
+
+    public TypeInfo(String selection,boolean showAll) {
+      this.selection = selection;
+      this.showAll = showAll;
+    }
+
+    public String getSelection() {
+      return selection;
+    }
+
+    public boolean isShowAll() {
+      return showAll;
+    }
+
+    public String toString() { return selection + (showAll ? "show all":""); }
+
+    public void setShowAll(boolean showAll) {
+      this.showAll = showAll;
+    }
+  }*/
 
   /**
    * ul
@@ -193,22 +228,22 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * li - choice - with span (qty)
    *
    * @paramx rootNodes
-   * @paramx types
+   * @paramx rootNodesInOrder
    * @see #addFacets
    */
-  private void addFacetsForReal(Map<String, Set<String>> typeToValues, Panel nav) {
+  private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
     int i = 0;
 
     logger.info("addFacetsForReal\n\tfor " +
         //rootNodes.size() +
         " nodes" +
-        "\n\tand " + types.size() +
-        //" types " + types + " " +
+        "\n\tand " + rootNodesInOrder.size() +
+        //" rootNodesInOrder " + rootNodesInOrder + " " +
         " type->distinct " + typeToValues.keySet() + "\n\ttype->sel " + typeToSelection);
     Collection<String> rootNodes = controller.getProjectStartupInfo().getRootNodes();
 
-    this.types = new HashSet<>(controller.getProjectStartupInfo().getTypeOrder());
-    this.types.retainAll(rootNodes);
+    this.rootNodesInOrder = new HashSet<>(controller.getProjectStartupInfo().getTypeOrder());
+    this.rootNodesInOrder.retainAll(rootNodes);
 
     // nav -
     //   ul
@@ -217,7 +252,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     nav.add(allTypesContainer);
     // allTypesContainer.addStyleName("sidebar");
 
-    for (String type : types) {
+    for (String type : rootNodesInOrder) {
       //if (refined) logger.info("Sel on  " + type);
 
       // nav
@@ -250,7 +285,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * @param type
    * @return
    */
-  private Panel addChoices(Map<String, Set<String>> typeToValues, String type) {
+  private Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type) {
     Panel choices = /*allShort ? new DivWidget() :*/ new UnorderedList(); // ul
     /*  if (allShort) {
         choices.addStyleName("symbolic");
@@ -276,7 +311,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
         choices.add(getSelectedAnchor(selectionForType));
       }
     } else {
-      Set<String> keys = typeToValues.get(type);
+      Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
         addChoicesForType(typeToValues, type, choices, keys);
       }
@@ -284,14 +319,18 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     return choices;
   }
 
-  private void addChoicesForType(Map<String, Set<String>> typeToValues, String type, Panel choices, Set<String> keys) {
+  private void addChoicesForType(Map<String, Set<MatchInfo>> typeToValues,
+                                 String type,
+                                 Panel choices,
+                                 Set<MatchInfo> keys) {
     int j = 0;
-    boolean hasMore = keys.size() > MAX_TO_SHOW;
+    int toShow = TOTAL / typeToValues.keySet().size();
+    boolean hasMore = keys.size() > toShow;
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
-    for (String key : keys) {
+    for (MatchInfo key : keys) {
       addLIChoice(choices, getAnchor(type, key));
 
-      if (hasMore && !showAll && ++j == MAX_TO_SHOW) {
+      if (hasMore && !showAll && ++j == toShow) {
         addLIChoice(choices, getShowMoreAnchor(typeToValues, type));
         break;
       }
@@ -302,9 +341,9 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   }
 
   @NotNull
-  private Anchor getShowLess(final Map<String, Set<String>> typeToValues, final String type) {
+  private Anchor getShowLess(final Map<String, Set<MatchInfo>> typeToValues, final String type) {
     Anchor anchor = new Anchor();
-    anchor.setText("Show Less...");
+    anchor.setHTML(SHOW_LESS);
     anchor.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -316,10 +355,10 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   }
 
   @NotNull
-  private Anchor getShowMoreAnchor(final Map<String, Set<String>> typeToValues, final String type) {
+  private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type) {
     Anchor anchor = new Anchor();
 
-    anchor.setText("Show More...");
+    anchor.setHTML(SHOW_MORE);
     anchor.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -335,20 +374,23 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
  /*   Anchor anchor = new Anchor();
     anchor.setText(selectionForType);
     anchor.addStyleName("selected");*/
-    Panel anchor = new FlowPanel("span");
+    Panel anchor = getSpan();
     anchor.getElement().setInnerHTML(selectionForType);
     anchor.addStyleName("selected");
     return anchor;
   }
 
   @NotNull
+  private FlowPanel getSpan() {
+    return new FlowPanel("span");
+  }
+
+  @NotNull
   private Panel getTypeHeader(String type) {
     Anchor headerAnchor = getHeaderAnchor(type);
 
-    // DivWidget headerContainer = new DivWidget();
-    Panel headerContainer = new FlowPanel("span");
-    headerContainer.addStyleName("menuItem");
-
+    Panel headerContainer = getSpan();
+    headerContainer.addStyleName(MENU_ITEM);
     headerContainer.add(headerAnchor);
     return headerContainer;
   }
@@ -363,34 +405,35 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
 
   private void addLIChoice(Panel choices, Widget anchor1) {
     ListItem li = new ListItem();
-    //li.addStyleName("menuItem");
-    // NavLink w = new NavLink(key);
     li.add(anchor1);
     choices.add(li);
   }
 
-/*  private boolean areAllShort(Set<String> keys) {
-    boolean allShort = true;
-    for (String key : keys) {
-      if (key.length() > 3) {
-        allShort = false;
-        break;
-      }
-    }
-    return allShort;
-  }*/
+  private Widget getAnchor(String type, MatchInfo key) {
+    Panel span = getSpan();
+    span.addStyleName(MENU_ITEM);
+    Anchor anchor = getAnchor(key.getValue());
+    anchor.addClickHandler(getHandler(type, key.getValue()));
+    span.add(anchor);
 
-  private Widget getAnchor(String type, String key) {
-    Anchor anchor = getAnchor();
-
-    anchor.setText(key);
-    anchor.addClickHandler(getHandler(type, key));
-    return anchor;
+    FlowPanel qty = getSpan();
+    qty.addStyleName("qty");
+    qty.getElement().setInnerHTML("" + key.getCount());
+    span.add(qty);
+    return span;
   }
 
   @NotNull
-  private Anchor getAnchor() {
+  private Anchor getHeaderAnchor(final String type) {
+    Anchor typeSection = getAnchor(type); // li
+    addRemoveClickHandler(type, typeSection);
+    return typeSection;
+  }
+
+  @NotNull
+  private Anchor getAnchor(String value) {
     Anchor anchor = new Anchor();
+    anchor.setText(value);
     removeAnchorStyle(anchor);
     return anchor;
   }
@@ -400,38 +443,33 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   }
 
   @NotNull
-  private Anchor getHeaderAnchor(final String type) {
-    Anchor typeSection = getAnchor(); // li
-    typeSection.setText(type);
+  private Widget getParentAnchor(String value, String childType) {
+    FlowPanel span = getSpan();
+    span.addStyleName(MENU_ITEM);
+    Anchor typeSection = getAnchor(value); // li
+    addRemoveClickHandler(childType, typeSection);
+    span.add(typeSection);
+    return span;
+  }
+
+  private void addRemoveClickHandler(final String type, Anchor typeSection) {
     typeSection.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         removeSelection(type);
         logger.info("ty->sel remove " + typeToSelection);
-        gotSelection();
-        getTypeToValue();
+        //  gotSelection();
+        getTypeToValue(typeToSelection);
       }
     });
-    return typeSection;
-  }
-
-  @NotNull
-  private Widget getParentAnchor(final String value, String childType) {
-    Anchor typeSection = getAnchor(); // li
-    typeSection.setText(value);
-    typeSection.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        removeSelection(childType);
-        logger.info("ty->sel remove " + typeToSelection);
-        gotSelection();
-        getTypeToValue();
-      }
-    });
-    return typeSection;
   }
 
   private boolean removeSelection(String childType) {
+    Map<String, String> typeToSelection = this.typeToSelection;
+    return removeSelection(childType, typeToSelection);
+  }
+
+  private boolean removeSelection(String childType, Map<String, String> typeToSelection) {
     String remove = typeToSelection.remove(childType);
     boolean did = remove != null;
     String childOfChild = getChildForParent(childType);
@@ -450,23 +488,33 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     return new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        typeToSelection.put(type, key);
+        Map<String, String> candidate = new HashMap<>(typeToSelection);
+        candidate.put(type, key);
         logger.info("getHandler t->sel " + typeToSelection);
-        gotSelection();
-        getTypeToValue();
+        //gotSelection();
+        getTypeToValue(candidate);
       }
     };
   }
 
-  int reqid = 0;
+  private int reqid = 0;
 
-  private void getTypeToValue() {
+  /**
+   * So you can specify a filter sequence that results in no exercises
+   * The idea here is to unset downstream filters that until we have a set that
+   * results in a non-zero set of exercises.
+   * <p>
+   * TODO : consider reqid check to deal with races...
+   *
+   * @param typeToSelection
+   */
+  private void getTypeToValue(Map<String, String> typeToSelection) {
     List<Pair> pairs = new ArrayList<>();
 
     for (String type : typeOrder) {
       String s = typeToSelection.get(type);
       if (s == null) {
-        pairs.add(new Pair(type, "Any"));
+        pairs.add(new Pair(type, ANY));
       } else {
         pairs.add(new Pair(type, s));
       }
@@ -476,7 +524,6 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
         new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
-
           }
 
           /**
@@ -485,38 +532,39 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
            */
           @Override
           public void onSuccess(FilterResponse response) {
-            Map<String, Set<String>> result = response.getTypeToValues();
+            Map<String, Set<MatchInfo>> result = response.getTypeToValues();
             logger.info("getTypeToValues for " + pairs + " got " + result);
-            boolean b = changeSelection(response.getTypesToInclude());
+            boolean b = changeSelection(response.getTypesToInclude(), typeToSelection);
+
+            setTypeToSelection(typeToSelection);
+
             addFacetsForReal(result, typeOrderContainer);
-            if (b) {
-              logger.info("getTypeToValues gotSelection --- ");
-              gotSelection();
-            }
+            //if (b) {
+            //logger.info("getTypeToValues gotSelection --- ");
+            gotSelection();
+            //}
           }
         });
   }
 
-  private boolean changeSelection(Set<String> typesToInclude) {
+  private boolean changeSelection(Set<String> typesToInclude, Map<String, String> typeToSelection) {
     boolean removed = false;
 
-    Set<String> strings = typeToSelection.keySet();
-    logger.info(" - found " + strings + " selected types vs "  + typesToInclude);
+    Collection<String> typesWithSelections = new ArrayList<String>(typeToSelection.keySet());
+    logger.info(" - found " + typesWithSelections + " selected rootNodesInOrder vs " + typesToInclude);
 
-    for (String typeWithSelection : strings) {
-      boolean clearSelection = !typesToInclude.contains(typeWithSelection);
+    for (String selectedType : typesWithSelections) {
+      boolean clearSelection = !typesToInclude.contains(selectedType);
       if (clearSelection) {
-        if (removeSelection(typeWithSelection)) {
-          logger.info("removed selection " + typeWithSelection);
+        if (removeSelection(selectedType, typeToSelection)) {
+          logger.info("removed selection " + selectedType);
           removed = true;
-        }
-        else {
-          logger.info("no selection " + typeWithSelection);
+        } else {
+          logger.info("no selection " + selectedType);
 
         }
-      }
-      else {
-        logger.info(" - found " + typeWithSelection + " selected type in "  + typesToInclude);
+      } else {
+        logger.info(" - found " + selectedType + " selected type in " + typesToInclude);
       }
     }
 
@@ -554,7 +602,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   /**
    * @seex ButtonBarSectionWidget#getChoice(ButtonGroup, String)
    */
-  public void gotSelection() {
+  private void gotSelection() {
     //logger.info("gotSelection --- ");
     pushNewSectionHistoryToken();
   }
@@ -659,8 +707,16 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     return new FacetContainer() {
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
-        logger.info("restoreListBoxState t->sel " + typeToSelection);
+        logger.info("restoreListBoxState t->sel " + selectionState);
 
+        Map<String, String> newTypeToSelection = new HashMap<>();
+        for (String type : typeOrder) {
+          Collection<String> selections = selectionState.getTypeToSection().get(type);
+          if (selections != null && !selections.isEmpty()) {
+            newTypeToSelection.put(type, selections.iterator().next());
+          }
+        }
+        getTypeToValue(newTypeToSelection);
       }
 
       @Override
@@ -695,9 +751,9 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     };
   }
 
-  class FacetWidget {
+/*  private class FacetWidget {
     void selectItem(String item) {
 // ?
     }
-  }
+  }*/
 }

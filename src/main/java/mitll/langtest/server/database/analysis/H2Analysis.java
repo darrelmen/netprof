@@ -263,7 +263,7 @@ class H2Analysis extends Analysis implements IAnalysis {
       logger.info("getUserToResults total " + count + " missing audio " + missing +
           " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn);// + " exToRef " + exToRef.size());
       if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
-      if (emptyCount > 0) logger.info("missing score json count " + emptyCount + "/" + count);
+      if (emptyCount > 0) logger.info("missing score json childCount " + emptyCount + "/" + count);
     }
 
     finish(connection, statement, rs);

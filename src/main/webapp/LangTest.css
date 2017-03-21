@@ -1405,6 +1405,7 @@ document sections.*/
     margin: 4px 0;
     border-bottom: 1px solid #96979a;
 }
+
 /*
 
 .sidebar > nav ul {
@@ -1413,20 +1414,6 @@ document sections.*/
     padding: 6px 0;
 }
 */
-
-.sidebar .menuItem a {
-    display: block;
-    color: #292b2d;
-    text-transform: uppercase;
-    font-size: 14px;
-    font-family: BentonMedium;
-    font-weight: 400;
-    -webkit-font-smoothing: antialiased;
-    position: relative;
-    right: 0;
-    left: 0;
-    padding: 0 10px;
-}
 
 .sidebar a {
     text-decoration: none;
@@ -1466,6 +1453,16 @@ document sections.*/
 .dimension {
 }
 
+/*
+.sidebar .dimension li, .sidebar nav li {
+    padding: 4px 10px;
+}
+*/
+
+.sidebar .dimension li, .sidebar nav li {
+    padding: 2px 2px;
+}
+
 .sidebar .dimension.refined > .menuItem > a::after {
     color: #303239;
     content: "view all";
@@ -1482,16 +1479,18 @@ document sections.*/
     font-size: 14px;
     font-weight: 400;
     text-transform: none;
-}
-
-.sidebar .dimension > .menuItem > a::after {
-    content: "\f077";
     float: right;
-    font-family: FontAwesome;
-    font-size: 11px;
 }
 
-.sidebar .menuItem a:after {
+/*.sidebar .menuItem a:after {
+    font-family: FontAwesome;
+    float: right;
+    font-size: 11px;
+    content: "\f077";
+}*/
+
+/*
+.sidebar .dimension > .menuItem > a::after {
     font-family: FontAwesome;
     float: right;
     font-size: 11px;
@@ -1502,6 +1501,7 @@ document sections.*/
     content: "\f078";
     font-weight: 400;
 }
+*/
 
 .sidebar .dimension > .menuItem > a {
     color: #292b2d;
@@ -1510,12 +1510,28 @@ document sections.*/
     font-size: 14px;
     font-weight: 400;
     left: 0;
+    /*
     padding: 0 10px;
+    */
     position: relative;
     right: 0;
     text-transform: uppercase;
     cursor: pointer;
 }
+
+/*.sidebar .menuItem a {
+    display: block;
+    color: #292b2d;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-family: BentonMedium;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    right: 0;
+    left: 0;
+    padding: 0 10px;
+}*/
 
 .sidebar .refinements > ul > li {
     padding: 4px 0;
@@ -1543,6 +1559,10 @@ document sections.*/
 }
 
 .sidebar a:hover {
+    color: #2b95d0;
+}
+
+a:hover {
     color: #2b95d0;
 }
 
@@ -1580,21 +1600,66 @@ h1, h2, h3, h4, h5, h6 {
     transition: max-height 100ms ease-out 0s;
 }
 
+.sidebar > nav .qty::before {
+    content: " (";
+}
+
+.sidebar > nav .qty::after {
+    content: ")";
+}
+
+.sidebar > nav .menuItem, .sidebar > nav .viewAll, .sidebar > nav .menuItem > a, .sidebar > nav .viewAll > a, .sidebar > nav .menuItem > a + .qty, .sidebar > nav .viewAll > a + .qty {
+    color: #303239;
+}
+
+.sidebar > nav .qty {
+    cursor: pointer;
+}
+
+.sidebar > nav .menuItem, .sidebar > nav .viewAll, .sidebar > nav .menuItem > a, .sidebar > nav .viewAll > a, .sidebar > nav .menuItem > a + .qty, .sidebar > nav .viewAll > a + .qty {
+    color: #303239;
+}
+
+.sidebar > nav .qty {
+    cursor: pointer;
+}
+
+.sidebar > nav .qty:before {
+    content: "\00A0(";
+}
+
+.sidebar > nav .qty:after {
+    content: ")";
+}
+
+.sidebar li {
+    display: list-item;
+    text-align: -webkit-match-parent;
+}
+
+.sidebar .dimension.refined .refined > .menuItem > a:before {
+    font-family: FontAwesome;
+    content: "\f104" " ";
+}
+
+.sidebar .subdimension > ul {
+    margin-top: 4px;
+    padding: 0;
+    overflow: hidden;
+    transition: max-height 100ms ease-out;
+}
+
 .sidebar .dimension.refined .refinement .selected {
     color: #b71f39;
     font-family: BentonMedium;
     font-weight: 400;
+    -webkit-font-smoothing: antialiased;
 }
 
-.sidebar > nav .qty::before {
-    content: " (";
-}
-.sidebar > nav .qty::after {
-    content: ")";
-}
-.sidebar > nav .menuItem, .sidebar > nav .viewAll, .sidebar > nav .menuItem > a, .sidebar > nav .viewAll > a, .sidebar > nav .menuItem > a + .qty, .sidebar > nav .viewAll > a + .qty {
-    color: #303239;
-}
-.sidebar > nav .qty {
-    cursor: pointer;
-}
+/*
+
+.sidebar .dimension.refined .refinement .selected {
+    color: #b71f39;
+    font-family: BentonMedium;
+    font-weight: 400;
+}*/

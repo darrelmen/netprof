@@ -234,7 +234,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * Why would we want to make a map of phone->count?
+   * Why would we want to make a map of phone->childCount?
    *
    * @param exercise
    * @param <T>

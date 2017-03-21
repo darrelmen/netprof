@@ -71,13 +71,13 @@ public class GradeDAO extends DAO {
   }
 
 /*  public class CountAndGradeID implements IsSerializable {
-    public int count;
+    public int childCount;
     public int resultCount;
     public long gradeID;
 
     public CountAndGradeID() {}
     public CountAndGradeID(int c, int resultCount, long g) {
-      this.count = c;
+      this.childCount = c;
       this.resultCount = resultCount;
       this.gradeID = g;
     }

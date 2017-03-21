@@ -243,7 +243,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       logger.info("getUserToResults total " + count + " missing audio " + missing +
           " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " took " + (now-then) + " millis");//+ " exToRef " + exToRef.size());
    //   if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
-      if (emptyCount > 0) logger.info("missing score json count " + emptyCount + "/" + count);
+      if (emptyCount > 0) logger.info("missing score json childCount " + emptyCount + "/" + count);
     }
 
     return userToBest;

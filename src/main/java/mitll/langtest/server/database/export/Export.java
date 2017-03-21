@@ -410,7 +410,7 @@ public class Export {
     int qid;
     List<QAPair> qaPairs = useFLQ ? exercise.getForeignLanguageQuestions() : exercise.getEnglishQuestions();
     qid = 1;
-    //  int count = 0;
+    //  int childCount = 0;
     Set<String> answers = new HashSet<String>();
     for (QAPair q : qaPairs) {
       ExerciseExport exerciseExport = qidToExport.get(qid);
@@ -431,7 +431,7 @@ public class Export {
           exerciseExport.addRG(question, 1, correctGrade);
           preDef.addRG(question, 1, correctGrade);
           answers.add(question);
-          //      count++;
+          //      childCount++;
         }
 
         // key answers are correct
@@ -445,7 +445,7 @@ public class Export {
           preDef.addRG(answer1, correctGrade, correctGrade);
 
           answers.add(answer1);
-          //    count++;
+          //    childCount++;
         }*/
 
         for (String answer : q.getAlternateAnswers()) {
@@ -462,7 +462,7 @@ public class Export {
             preDef.addRG(answer, correctGrade, correctGrade);
 
             answers.add(answer);
-//            count++;
+//            childCount++;
           }
         }
         //logger.debug("for " + exercise.getOldID() + " export is " + exerciseExport);
@@ -472,7 +472,7 @@ public class Export {
     if (answers.size() == 0) {
       logger.warn("for " + exercise.getOldID() + " added " + answers.size() + " predefined answers from " + qaPairs);
     } else {
-//      logger.info("for " + exercise.getOldID() + " added " + count + " predefined answers from " + qaPairs);
+//      logger.info("for " + exercise.getOldID() + " added " + childCount + " predefined answers from " + qaPairs);
     }
     return answers;
   }

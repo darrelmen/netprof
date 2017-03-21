@@ -418,7 +418,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   }
 
   /**
-   * Does repeat audio if count > 0
+   * Does repeat audio if childCount > 0
    */
   public void reinitialize() {
     if (DEBUG) {

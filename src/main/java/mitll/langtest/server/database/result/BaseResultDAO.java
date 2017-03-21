@@ -526,7 +526,7 @@ public abstract class BaseResultDAO extends DAO {
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
    * <p>
-   * Multiple answers to the same exercise count as one answer.
+   * Multiple answers to the same exercise childCount as one answer.
    *
    * @return list of duration and numAnswer pairs
    * @param language

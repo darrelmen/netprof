@@ -43,18 +43,20 @@ import java.util.*;
  * @since 3/30/16.
  */
 public class FilterResponse implements IsSerializable {
-  private Map<String, Set<String>> typeToValues = new HashMap<>();
+  private Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
   private Set<String> typesToInclude;
+  private int reqid;
 
   public FilterResponse() {
   }
 
-  public FilterResponse(Map<String, Set<String>> typeToValues, Set<String> typesToInclude) {
+  public FilterResponse(int reqid, Map<String, Set<MatchInfo>> typeToValues, Set<String> typesToInclude) {
+    this.reqid = reqid;
     this.typeToValues = typeToValues;
     this.typesToInclude = typesToInclude;
   }
 
-  public Map<String, Set<String>> getTypeToValues() {
+  public Map<String, Set<MatchInfo>> getTypeToValues() {
     return typeToValues;
   }
 
@@ -62,5 +64,11 @@ public class FilterResponse implements IsSerializable {
     return typesToInclude;
   }
 
-  public String toString() { return "response " + typeToValues; }
+  public int getReqid() {
+    return reqid;
+  }
+
+  public String toString() {
+    return "response " + reqid + " " + typesToInclude + " " + typeToValues;
+  }
 }

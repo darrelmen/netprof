@@ -42,6 +42,7 @@ import mitll.langtest.client.bootstrap.SectionNodeItemSorter;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -104,8 +105,8 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
 
   /**
    * @see #getExercises(long)
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
-   * @see mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
+   * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
+   * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
    */
   @Override
   public void addWidgets() {
@@ -148,7 +149,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
   private void addChoiceRow(Collection<SectionNode> rootNodes,
                             final FluidContainer container,
                             List<String> types,
-                            Map<String, Set<String>> typeToDistinct) {
+                            Map<String, Set<MatchInfo>> typeToDistinct) {
     logger.info("addChoiceRow for user = " + controller.getUser() + " got types " +
         types + " num root nodes " + rootNodes.size());
 
@@ -180,7 +181,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    * @see #addChoiceRow
    */
   private void addChoiceWidgets(Collection<SectionNode> rootNodes, List<String> types,
-                                Map<String, Set<String>> typeToDistinct) {
+                                Map<String, Set<MatchInfo>> typeToDistinct) {
     ListSectionWidget parent = null;
     int i = 0;
 
@@ -188,25 +189,33 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
     SectionNodeItemSorter sectionNodeItemSorter = new SectionNodeItemSorter();
     for (String type : types) {
      // List<String> sectionsInType = getLabels(rootNodes);
-      Set<String> keys = typeToDistinct.get(type);
+      Set<MatchInfo> keys = typeToDistinct.get(type);
 
-      if (keys == null) logger.warning("no type " + type + " in " + typeToDistinct.keySet());
-      List<String> sectionsInType = sectionNodeItemSorter.getSorted(keys);
-      logger.info("\taddChoiceWidgets for " + type + " : " + sectionsInType.size());
 
-      ListSectionWidget listSectionWidget = new ListSectionWidget(type, rootNodes, this, keys);
-      if (parent != null) {
-        parent.addChild(listSectionWidget);
+
+      if (keys == null) {
+        logger.warning("no type " + type + " in " + typeToDistinct.keySet());
       }
-      parent = listSectionWidget;
-      mySectionWidgetContainer.setWidget(type, listSectionWidget);
-      listSectionWidget.addChoices(firstTypeRow, type, sectionsInType);
+      else {
+        Set<String> asKeys = new HashSet<>();
+        for (MatchInfo info : keys) asKeys.add(info.getValue());
+        List<String> sectionsInType = sectionNodeItemSorter.getSorted(asKeys);
+        logger.info("\taddChoiceWidgets for " + type + " : " + sectionsInType.size());
 
-      if (types.indexOf(type) < types.size() - 1) {
-        rootNodes = getChildSectionNodes(rootNodes);
-        rootNodes = sectionNodeItemSorter.getSortedItems(rootNodes);
+        ListSectionWidget listSectionWidget = new ListSectionWidget(type, rootNodes, this, asKeys);
+        if (parent != null) {
+          parent.addChild(listSectionWidget);
+        }
+        parent = listSectionWidget;
+        mySectionWidgetContainer.setWidget(type, listSectionWidget);
+        listSectionWidget.addChoices(firstTypeRow, type, sectionsInType);
+
+        if (types.indexOf(type) < types.size() - 1) {
+          rootNodes = getChildSectionNodes(rootNodes);
+          rootNodes = sectionNodeItemSorter.getSortedItems(rootNodes);
+        }
+        i = 0;
       }
-      i = 0;
     }
   }
 

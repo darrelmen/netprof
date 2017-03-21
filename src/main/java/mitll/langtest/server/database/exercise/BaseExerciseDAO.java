@@ -421,10 +421,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       }
     }
     if (override > 0) {
-      logger.debug("addOverlays overlay count was " + override);
+      logger.debug("addOverlays overlay childCount was " + override);
     }
     if (skippedOverride > 0) {
-      logger.debug("addOverlays skippedOverride count was " + skippedOverride);
+      logger.debug("addOverlays skippedOverride childCount was " + skippedOverride);
     }
     if (!staleOverrides.isEmpty()) {
       logger.debug("addOverlays skipped " + staleOverrides.size() + " stale overrides - the original list doesn't contain them any more.");

@@ -172,7 +172,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
       if (j != 1) {
         logger.error("remove : huh? didn't remove row for " + exerciseID);
         int count = getCount();
-        // logger.debug("now " + count + " reviewed");
+        // logger.debug("now " + childCount + " reviewed");
         if (before - count != 1) logger.error("ReviewedDAO : huh? there were " + before + " before");
       }
 
@@ -260,8 +260,8 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
       }
 
       finish(connection, statement, rs, sql3);
-     // int count = getCount();
-     // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
+     // int childCount = getCount();
+     // if (childCount % 10 == 0) logger.debug("now " + childCount + " reviewed");
       //logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
       return exidToState;
     } catch (SQLException e) {
@@ -330,8 +330,8 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
       }
 
       finish(connection, statement, rs);
-      // int count = getCount();
-      // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
+      // int childCount = getCount();
+      // if (childCount % 10 == 0) logger.debug("now " + childCount + " reviewed");
       //logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
       return all;
     } catch (SQLException e) {

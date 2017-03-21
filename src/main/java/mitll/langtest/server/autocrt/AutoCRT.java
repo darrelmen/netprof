@@ -328,7 +328,7 @@ public class AutoCRT {
 //              " added " + new ResponseAndGrade(answer, correctGrade, correctGrade) + " for " + q);
 //        }
         possible.add(answer);
-//            count++;
+//            childCount++;
       }
     }
     return possible;

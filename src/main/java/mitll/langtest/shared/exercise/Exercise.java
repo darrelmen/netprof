@@ -501,7 +501,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
         "meaning '" + getMeaning() +
         "' transliteration '" + getTransliteration() +
         "' context " + getDirectlyRelated() +
-        " audio count = " + audioAttributes1.size() +
+        " audio childCount = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue() +
         " attr " + getAttributes();

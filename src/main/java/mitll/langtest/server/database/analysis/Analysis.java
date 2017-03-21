@@ -371,7 +371,7 @@ public abstract class Analysis extends DAO {
       int last = -1;
 
       long lastTimestamp = 0;
-      // int count = 0;
+      // int childCount = 0;
       BestScore lastBest = null;
       Set<Integer> seen = new HashSet<>();
 
@@ -391,15 +391,15 @@ public abstract class Analysis extends DAO {
             if (DEBUG) logger.info("getBestForQuery Adding " + lastBest);
             seen.add(id);
           }
-          //        lastBest.setCount(count);
+          //        lastBest.setCount(childCount);
           lastTimestamp = time;
-          //   count = 0;
+          //   childCount = 0;
         }
         if (lastTimestamp == 0) lastTimestamp = time;
         last = exid;
         lastBest = bs;
 //        lastBest = new BestScore(exid, pronScore, time, id, json, isiPad, path);
-        // count++;
+        // childCount++;
       }
 
       if (lastBest != null) {

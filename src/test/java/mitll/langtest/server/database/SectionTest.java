@@ -48,7 +48,7 @@ public class SectionTest extends BaseTest {
 
     List<Pair> toMatch = new ArrayList<>();
     toMatch.add(getUnitOne());
-    Map<String, Set<String>> unit = sectionHelper.getTypeToMatches(toMatch);
+    Map<String, Set<MatchInfo>> unit = sectionHelper.getTypeToMatches(toMatch);
     logger.info("match for " + toMatch + " is " + unit);
 
     toMatch = new ArrayList<>();
@@ -90,7 +90,7 @@ public class SectionTest extends BaseTest {
 
     List<Pair> toMatch = new ArrayList<>();
     toMatch.add(getUnitOne());
-    Map<String, Set<String>> unit = sectionHelper.getTypeToMatches(toMatch);
+    Map<String, Set<MatchInfo>> unit = sectionHelper.getTypeToMatches(toMatch);
     logger.info("match for " + toMatch + " is " + unit);
 
     toMatch = new ArrayList<>();
@@ -139,7 +139,7 @@ public class SectionTest extends BaseTest {
 
     List<Pair> toMatch = new ArrayList<>();
     toMatch.add(getUnitOne());
-    Map<String, Set<String>> unit = sectionHelper.getTypeToMatches(toMatch);
+    Map<String, Set<MatchInfo>> unit  = sectionHelper.getTypeToMatches(toMatch);
     logger.info("match for " + toMatch + " is " + unit);
 
     toMatch = new ArrayList<>();
@@ -254,56 +254,58 @@ public class SectionTest extends BaseTest {
     test.put("Unit", "1");
     test.put("Chapter", "a");
 
-    List<Pair> toMatch = new ArrayList<>();
-    toMatch.add(getUnitOne());
-    toMatch.add(getChapterA());
-    unit = sectionHelper.getTypeToMatches(toMatch);
-    logger.info("match for " + toMatch + " is " + unit);
+    {
+      List<Pair> toMatch = new ArrayList<>();
+      toMatch.add(getUnitOne());
+      toMatch.add(getChapterA());
+      Map<String, Set<MatchInfo>> unit2 = sectionHelper.getTypeToMatches(toMatch);
+      logger.info("match for " + toMatch + " is " + unit2);
 
-    toMatch = new ArrayList<>();
-    toMatch.add(getUnit2());
-    toMatch.add(getChapterA());
-    unit = sectionHelper.getTypeToMatches(toMatch);
-    logger.info("match for " + toMatch + " is " + unit);
+      toMatch = new ArrayList<>();
+      toMatch.add(getUnit2());
+      toMatch.add(getChapterA());
+      unit2 = sectionHelper.getTypeToMatches(toMatch);
+      logger.info("match for " + toMatch + " is " + unit2);
 
-    toMatch = new ArrayList<>();
-    toMatch.add(getUnit2());
-    toMatch.add(getChapterA());
-    toMatch.add(getSoundX());
-    unit = sectionHelper.getTypeToMatches(toMatch);
-    logger.info("match for " + toMatch + " is " + unit);
+      toMatch = new ArrayList<>();
+      toMatch.add(getUnit2());
+      toMatch.add(getChapterA());
+      toMatch.add(getSoundX());
+      unit2 = sectionHelper.getTypeToMatches(toMatch);
+      logger.info("match for " + toMatch + " is " + unit2);
 
 
-    toMatch = new ArrayList<>();
-    toMatch.add(getUnitOne());
-    toMatch.add(getChapterA());
-    toMatch.add(getSoundX());
-    unit = sectionHelper.getTypeToMatches(toMatch);
-    logger.info("match for " + toMatch + " is " + unit);
+      toMatch = new ArrayList<>();
+      toMatch.add(getUnitOne());
+      toMatch.add(getChapterA());
+      toMatch.add(getSoundX());
+      unit2 = sectionHelper.getTypeToMatches(toMatch);
+      logger.info("match for " + toMatch + " is " + unit2);
 
-    toMatch = new ArrayList<>();
-    toMatch.add(getUnit2());
-    //  toMatch.add(new Pair("Chapter", "a"));
-    unit = sectionHelper.getTypeToMatches(toMatch);
-    logger.info("match for " + toMatch + " is " + unit);
+      toMatch = new ArrayList<>();
+      toMatch.add(getUnit2());
+      //  toMatch.add(new Pair("Chapter", "a"));
+      unit2 = sectionHelper.getTypeToMatches(toMatch);
+      logger.info("match for " + toMatch + " is " + unit2);
 
-    toMatch = new ArrayList<>();
-    toMatch.add(getUnitAll());
-    toMatch.add(getChapterA());
-    toMatch.add(getSoundAll());
+      toMatch = new ArrayList<>();
+      toMatch.add(getUnitAll());
+      toMatch.add(getChapterA());
+      toMatch.add(getSoundAll());
 
-    //  toMatch.add(new Pair("Chapter", "a"));
-    unit = sectionHelper.getTypeToMatches(toMatch);
-    logger.info("match for " + toMatch + " is " + unit);
+      //  toMatch.add(new Pair("Chapter", "a"));
+      unit2 = sectionHelper.getTypeToMatches(toMatch);
+      logger.info("match for " + toMatch + " is " + unit2);
 
-    toMatch = new ArrayList<>();
-    toMatch.add(getUnitAll());
-    toMatch.add(getChapterB());
-    toMatch.add(getSoundAll());
+      toMatch = new ArrayList<>();
+      toMatch.add(getUnitAll());
+      toMatch.add(getChapterB());
+      toMatch.add(getSoundAll());
 
-    //  toMatch.add(new Pair("Chapter", "a"));
-    unit = sectionHelper.getTypeToMatches(toMatch);
-    logger.info("match for " + toMatch + " is " + unit);
+      //  toMatch.add(new Pair("Chapter", "a"));
+      unit2 = sectionHelper.getTypeToMatches(toMatch);
+      logger.info("match for " + toMatch + " is " + unit2);
+    }
   }
 
   @NotNull
@@ -536,7 +538,8 @@ public class SectionTest extends BaseTest {
 
     SectionNode root = sectionHelper.getRoot();
     logger.info("Got " + root);
-    logger.info("depth " + root.count());
+    logger.info("depth " + root.childCount());
+    logger.info("type to distinct " + sectionHelper.getTypeToDistinct());
   }
 
   private void doReport(String croatian) {
@@ -603,7 +606,7 @@ public class SectionTest extends BaseTest {
     toMatch.add(getUnitOne());
     //toMatch.add(new Pair("Chapter", "a"));
     //toMatch.add(new Pair("Sound", "x"));
-    Map<String, Set<String>> typeToMatches = sectionHelper.getTypeToMatches(toMatch);
+    Map<String, Set<MatchInfo>> typeToMatches = sectionHelper.getTypeToMatches(toMatch);
     logger.info("match for " + toMatch + " is " + typeToMatches);
 
     toMatch = new ArrayList<>();

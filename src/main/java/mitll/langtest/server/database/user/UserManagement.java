@@ -222,9 +222,9 @@ public class UserManagement {
       int userid = result.getUserid();
       int exerciseID = result.getExid();
 
-      Integer count = idToCount.get(userid);
-      if (count == null) idToCount.put(userid, 1);
-      else idToCount.put(userid, count + 1);
+      Integer childCount = idToCount.get(userid);
+      if (childCount == null) idToCount.put(userid, 1);
+      else idToCount.put(userid, childCount + 1);
 
       Set<Integer> uniqueForUser = idToUniqueCount.get(userid);
       if (uniqueForUser == null) idToUniqueCount.put(userid, uniqueForUser = new HashSet<>());

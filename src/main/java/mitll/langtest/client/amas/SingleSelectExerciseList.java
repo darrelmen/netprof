@@ -229,10 +229,10 @@ public abstract class SingleSelectExerciseList
   public void gotSelection() {
     int count = getNumSelections();
     if (count == getNumChoices()) {
-      //  logger.info("gotSelection count = " + count);
+      //  logger.info("gotSelection childCount = " + childCount);
       pushNewSectionHistoryToken();
     } else {
-      //logger.info("gotSelection count " + count + " < " + getNumChoices());
+      //logger.info("gotSelection childCount " + childCount + " < " + getNumChoices());
     }
   }
 
@@ -463,11 +463,11 @@ public abstract class SingleSelectExerciseList
       int count = getNumSelections();
       if (count == 3) {
         //    logger.info("push new token " + getHistoryTokenFromUIState());
-        logger.info("gotSelection count = " + count);
+        logger.info("gotSelection childCount = " + count);
         loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), -1,
             false, false, false, false);
       } else {
-        // logger.warning("not enough selections " +count);
+        // logger.warning("not enough selections " +childCount);
         gotEmptyExerciseList();
       }
     } catch (Exception e) {

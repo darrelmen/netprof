@@ -48,8 +48,9 @@ import java.util.*;
 public class ItemSorter implements Comparator<String>, IsSerializable {
   private static final String PREFIX = ">";
 
-  public  ItemSorter(){}
-  
+  public ItemSorter() {
+  }
+
   /**
    * @param sections
    * @return
@@ -81,31 +82,16 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
     return items;
   }
 
-  private int compareInts(String o1, String o2) {
-    int first  = Integer.parseInt(dropGreater(o1));
-    int second = Integer.parseInt(dropGreater(o2));
-    return first < second ? -1 : first > second ? +1 : 0;
+  @Override
+  public int compare(String o1, String o2) {
+    try {
+      return compareInts(o1, o2);
+    } catch (Exception e) {
+      return compoundCompare(o1, o2);
+    }
   }
 
-  private String dropGreater(String item) {
-    if (item.startsWith(PREFIX)) item = item.substring(1, item.length());
-    return item;
-  }
-
-  /**
-   * @param items
-   * @see #getSortedItems(java.util.Collection)
-   */
-  private void sortWithCompoundKeys(List<String> items) {
-    Collections.sort(items, new Comparator<String>() {
-      @Override
-      public int compare(String o1, String o2) {
-        return compoundCompare(o1, o2);
-      }
-    });
-  }
-
-  private int compoundCompare(String o1, String o2) {
+  int compoundCompare(String o1, String o2) {
     boolean firstHasSep = o1.contains("-");
     boolean secondHasSep = o2.contains("-");
     String left1 = o1;
@@ -152,6 +138,30 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
     }
   }
 
+  private int compareInts(String o1, String o2) {
+    int first = Integer.parseInt(dropGreater(o1));
+    int second = Integer.parseInt(dropGreater(o2));
+    return first < second ? -1 : first > second ? +1 : 0;
+  }
+
+  private String dropGreater(String item) {
+    if (item.startsWith(PREFIX)) item = item.substring(1, item.length());
+    return item;
+  }
+
+  /**
+   * @param items
+   * @see #getSortedItems(java.util.Collection)
+   */
+  private void sortWithCompoundKeys(List<String> items) {
+    Collections.sort(items, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        return compoundCompare(o1, o2);
+      }
+    });
+  }
+
   private int getIntCompare(String first, String second) {
     if (first.length() > 0 && !Character.isDigit(first.charAt(0))) {
       return first.compareToIgnoreCase(second);
@@ -164,15 +174,5 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
         return first.compareToIgnoreCase(second);
       }
     }
-  }
-
-  @Override
-  public int compare(String o1, String o2) {
-    try {
-      return compareInts(o1, o2);
-    } catch (Exception e) {
-      return compoundCompare(o1,o2);
-    }
-
   }
 }

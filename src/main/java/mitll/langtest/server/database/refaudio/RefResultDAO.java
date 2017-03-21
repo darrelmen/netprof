@@ -562,7 +562,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
     //now = System.currentTimeMillis();
 
- //   logger.info("getResultsForQuery took " + (now - then) + " millis, found " + count + " invalid decode results, skipped " + skipped);
+ //   logger.info("getResultsForQuery took " + (now - then) + " millis, found " + childCount + " invalid decode results, skipped " + skipped);
     finish(connection, statement, rs, sql);
 
     return results;

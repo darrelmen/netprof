@@ -1,9 +1,6 @@
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
-import mitll.langtest.shared.exercise.Pair;
-import mitll.langtest.shared.exercise.SectionNode;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,27 +17,19 @@ public interface ISection<T> {
 
   boolean allKeysValid();
 
- // Collection<SectionNode> getRootNodes();
   Collection<SectionNode> getSectionNodesForTypes();
 
   /**
    * Initial map of facet to all possible values for facet
    * @return
    */
-  Map<String, Set<String>> getTypeToDistinct();
-  //Collection<SectionNode> getSectionNodesForTypes2();
-
-/*
-  @Deprecated
-  Collection<SectionNode> getSectionNodesForTypes(List<String> typeOrder);
-*/
-
+  Map<String, Set<MatchInfo>> getTypeToDistinct();
 
   Collection<T> getExercisesForSimpleSelectionState(Map<String, String> simpleMap);
 
   Collection<T> getExercisesForSelectionState(String type, String value);
 
-  Map<String, Set<String>> getTypeToMatches(Collection<Pair> pairs);
+  Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs);
 
   Collection<T> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
 

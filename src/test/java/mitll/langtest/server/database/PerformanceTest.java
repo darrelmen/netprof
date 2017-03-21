@@ -360,11 +360,11 @@ public class PerformanceTest extends BaseTest {
     Collection<Result> resultsToDecode = database.getResultDAO().getResultsToDecode();
 
     logger.info("results " + resultsToDecode.size());
-    int count = 0;
+    int childCount = 0;
     for (Result res : resultsToDecode) {
       //if (res.getAnswer().contains("best")) {
       logger.info("Got " + res);
-      if (count++ > 1000) break;
+      if (childCount++ > 1000) break;
       // }
     }
   }*/
@@ -379,11 +379,11 @@ public class PerformanceTest extends BaseTest {
     Collection<Result> resultsToDecode = database.getResultDAO().getResultsToDecode();
 
     logger.info("results " + resultsToDecode.size());
-    int count = 0;
+    int childCount = 0;
     for (Result res : resultsToDecode) {
       //if (res.getAnswer().contains("best")) {
       logger.info("Got " + res);
-      // if (count++ > 100) break;
+      // if (childCount++ > 100) break;
       // }
     }
   }

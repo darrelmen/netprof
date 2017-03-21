@@ -369,7 +369,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
 
   /**
-   * select count(*) from (select count(*) from (select DISTINCT exid, audiotype from audio where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true) where length(exid) > 0 group by exid)
+   * select childCount(*) from (select childCount(*) from (select DISTINCT exid, audiotype from audio where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true) where length(exid) > 0 group by exid)
    *
    * @param projid
    * @param audioSpeed
@@ -454,8 +454,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       String s = getInClause(userIds);
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
 //      String sql2 =
-//          "select count(count1) from " +
-//              " (select count(*) as count1 from " +
+//          "select childCount(count1) from " +
+//              " (select childCount(*) as count1 from " +
 //              " (select DISTINCT exid, audiotype from " +
 //              AUDIO +
 //              " where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true " +

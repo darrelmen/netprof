@@ -897,7 +897,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     long now = System.currentTimeMillis();
 
     int userCount = delegate.getUserCount();
-    logger.debug("getMiniUsers user count is " + userCount, new Exception());
+    logger.debug("getMiniUsers user childCount is " + userCount, new Exception());
 
     if (miniUserCache == null || (now - lastCache) > 60 * 60 * 1000 || lastCount != userCount) {
       Map<Integer, MiniUser> idToUser = new HashMap<>();
@@ -915,7 +915,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         long now2 = System.currentTimeMillis();
 
         if (now2 - then > 10) {
-          logger.warn("getMiniUsers took " + (now2 - then) + " millis to get count of db users = " + miniUserCache.size());
+          logger.warn("getMiniUsers took " + (now2 - then) + " millis to get childCount of db users = " + miniUserCache.size());
         }
 
       }

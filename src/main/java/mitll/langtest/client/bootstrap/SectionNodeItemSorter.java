@@ -37,6 +37,7 @@ import mitll.langtest.shared.exercise.SectionNode;
 import java.util.*;
 
 public class SectionNodeItemSorter {
+  private ItemSorter itemSorter = new ItemSorter();
   public List<String> getSorted(Set<String> keys) {
     List<String> items = new ArrayList<>(keys);
     boolean isInt = true;
@@ -47,21 +48,13 @@ public class SectionNodeItemSorter {
       }
     }
     if (isInt) {
-      Collections.sort(items, new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-          int first = Integer.parseInt(o1);
-          int second = Integer.parseInt(o2);
-          return first < second ? -1 : first > second ? +1 : 0;
-        }
+      Collections.sort(items, (o1, o2) -> {
+        int first = Integer.parseInt(o1);
+        int second = Integer.parseInt(o2);
+        return first < second ? -1 : first > second ? +1 : 0;
       });
     } else {
-      Collections.sort(items, new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-          return compareTwo(o1, o2);
-        }
-      });
+      Collections.sort(items, (o1, o2) -> itemSorter.compoundCompare(o1, o2));
     }
     return items;
   }
@@ -116,11 +109,12 @@ public class SectionNodeItemSorter {
       public int compare(SectionNode sectionNode1, SectionNode sectionNode2) {
         String o1 = sectionNode1.getName();
         String o2 = sectionNode2.getName();
-        return SectionNodeItemSorter.this.compareTwo(o1, o2);
+        return itemSorter.compoundCompare(o1, o2);
       }
     });
   }
 
+/*
   private int compareTwo(String o1, String o2) {
     boolean firstHasSep = o1.contains("-");
     boolean secondHasSep = o2.contains("-");
@@ -167,8 +161,9 @@ public class SectionNodeItemSorter {
       return getIntCompare(o1, o2);
     }
   }
+*/
 
-  private int getIntCompare(String first, String second) {
+/*  private int getIntCompare(String first, String second) {
     if (first.length() > 0 && !Character.isDigit(first.charAt(0))) {
       return first.compareToIgnoreCase(second);
     } else {
@@ -180,5 +175,5 @@ public class SectionNodeItemSorter {
         return first.compareToIgnoreCase(second);
       }
     }
-  }
+  }*/
 }

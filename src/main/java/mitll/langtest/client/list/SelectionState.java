@@ -53,11 +53,11 @@ public class SelectionState {
   public static final String ONLY_UNRECORDED = "onlyUnrecorded";
   public static final String ONLY_DEFAULT = "onlyDefault";
   public static final String ONLY_UNINSPECTED = "onlyUninspected";
-  public static final String ITEM_SEPARATOR = "&#44";
+  private static final String ITEM_SEPARATOR = "&#44";
 
   static final String INSTANCE = "instance";
   private int item = -1;
-  private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+  private final Map<String, Collection<String>> typeToSection = new HashMap<>();
   private String instance = "";
   private String search = "";
   private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault, onlyUninspected;
@@ -110,7 +110,7 @@ public class SelectionState {
         String[] segments = part.split("=");
         if (DEBUG) logger.info("\tpart " + part + " : " + Arrays.asList(segments));
         if (segments.length > 1) {
-          String type = segments[0].trim();
+          String type    = segments[0].trim();
           String section = segments[1];
 
           if (isMatch(type, "item")) {
@@ -137,7 +137,7 @@ public class SelectionState {
             } else {
               if (DEBUG) logger.info("\t\tparseToken : add " + type + " : " + sections);
               if (type.equals(INSTANCE)) instance = section;
-              else add(type, sections);
+              else addTypeToSelection(type, sections);
             }
             if (DEBUG) logger.info("\tparseToken : part " + part + " : " + type + "->" + section);
           }
@@ -167,8 +167,8 @@ public class SelectionState {
     return type.equals("#" + toMatch) || type.equals(toMatch);
   }
 
-  private void add(String type, Collection<String> section) {
-    List<String> copy = new ArrayList<String>();
+  private void addTypeToSelection(String type, Collection<String> section) {
+    List<String> copy = new ArrayList<>();
     for (String s : section) copy.add(s.trim());
     getTypeToSection().put(type, copy);
   }
@@ -181,14 +181,7 @@ public class SelectionState {
     this.item = item;
   }
 
-
-/*
-  public Map<String, Collection<String>> getTypeToSection() {
-    return typeToSection;
-  }
-*/
-
-  public static final String SHOWING_ALL_ENTRIES = "Showing all entries";
+  private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
 
   public String getDescription(Collection<String> typeOrder) {
     if (typeToSection.isEmpty()) {
@@ -199,7 +192,7 @@ public class SelectionState {
       for (String type : typeOrder) {
         Collection<String> selectedItems = typeToSection.get(type);
         if (selectedItems != null) {
-          List<String> sorted = new ArrayList<String>();
+          List<String> sorted = new ArrayList<>();
           for (String selectedItem : selectedItems) {
             sorted.add(selectedItem);
           }

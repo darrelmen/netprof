@@ -92,7 +92,7 @@ public class SimpleTimeAndScore implements Serializable {
   public String toString() {
     String format = getTimeString();
     return "at\t" + format + " avg score for " +
-        //count + "\t" +
+        //childCount + "\t" +
         "=\t" + score;
   }
 

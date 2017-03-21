@@ -33,6 +33,7 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.SectionNode;
 
 import java.util.Collection;
@@ -50,7 +51,7 @@ public class ProjectStartupInfo implements IsSerializable {
   private int projectid;
   private String language;
   private boolean hasModel;
-  private Map<String, Set<String>> typeToDistinct;
+  private Map<String, Set<MatchInfo>> typeToDistinct;
   private Set<String> rootNodes;
   private Map<String, String> parentToChild;
 
@@ -72,7 +73,9 @@ public class ProjectStartupInfo implements IsSerializable {
                             Collection<SectionNode> sectionNodes,
                             int projectid,
                             String language, boolean hasModel,
-                            Map<String, Set<String>> typeToDistinct, Set<String> rootNodes, Map<String, String> parentToChild) {
+                            Map<String, Set<MatchInfo>> typeToDistinct,
+                            Set<String> rootNodes,
+                            Map<String, String> parentToChild) {
     this.properties = properties;
     this.typeOrder = typeOrder;
     this.sectionNodes = sectionNodes;
@@ -122,7 +125,7 @@ public class ProjectStartupInfo implements IsSerializable {
         " has model " + hasModel;
   }
 
-  public Map<String, Set<String>> getTypeToDistinct() {
+  public Map<String, Set<MatchInfo>> getTypeToDistinct() {
     return typeToDistinct;
   }
 

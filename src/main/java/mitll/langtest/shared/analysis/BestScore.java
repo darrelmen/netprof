@@ -84,7 +84,7 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
   public String toString() {
     return "ex " + getExId() + "/ res " + getResultID() +
         " : " + new Date(getTimestamp()) + " # " +
-        //count +
+        //childCount +
         " : " + getScore() + " native " + nativeAudio + " ref " + fileRef;
   }
 

@@ -391,7 +391,7 @@ public class AudioExport {
     //logger.debug("found audio for " + exToAudio.size() + " items and writing " + toWrite.size() + " items ");
     // logger.debug("realContextPath " + realContextPath + " installPath " + installPath + " relativeConfigDir1 " +relativeConfigDir1);
 
-    // get male and female majority users - map of user->count of recordings for this exercise
+    // get male and female majority users - map of user->childCount of recordings for this exercise
     Map<MiniUser, Integer> maleToCount = new HashMap<>();
     Map<MiniUser, Integer> femaleToCount = new HashMap<>();
 

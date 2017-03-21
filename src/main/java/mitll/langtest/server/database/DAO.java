@@ -174,7 +174,7 @@ public class DAO {
       database.closeConnection(connection);
 
       int count = getCount(table);
-      //  logger.debug("now " + count + " in " + table);
+      //  logger.debug("now " + childCount + " in " + table);
       if (before - count == 0 && warnIfDidntAlter) {
         logger.warn("DAO.doSqlOn : now " + count +
             " there were " + before + " before for " + table);

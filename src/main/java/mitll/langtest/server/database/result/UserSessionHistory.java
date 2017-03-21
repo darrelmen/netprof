@@ -81,12 +81,12 @@ public class UserSessionHistory {
       }
     });
 
-    int count = 0;
+    int childCount = 0;
     List<AVPHistoryForList.UserScore> scores = new ArrayList<>();
 
     for (Session session : sessionsForUserIn2) {
-      if (count++ < 10 || session.isLatest()) {
-        scores.add(makeScore(count, byID, session, true));
+      if (childCount++ < 10 || session.isLatest()) {
+        scores.add(makeScore(childCount, byID, session, true));
       }
     }
 
@@ -104,12 +104,12 @@ public class UserSessionHistory {
       }
     });
 
-    count = 0;
+    childCount = 0;
     scores = new ArrayList<>();
 
     for (Session session : sessionsForUserIn2) {
-      if (count++ < 10 || session.isLatest()) {
-        scores.add(makeScore(count, byID, session, false));
+      if (childCount++ < 10 || session.isLatest()) {
+        scores.add(makeScore(childCount, byID, session, false));
       }
     }
     logger.debug("getUserHistoryForList pron    scores " + scores);
@@ -134,7 +134,7 @@ public class UserSessionHistory {
     return o1.getTimestamp() < o2.getTimestamp() ? +1 : o1.getTimestamp() > o2.getTimestamp() ? -1 : 0;
   }*/
 
-/*  private AVPHistoryForList.UserScore makeScore(int count,
+/*  private AVPHistoryForList.UserScore makeScore(int childCount,
                                                 User user,// Map<Integer, User> userMap,
                                                 Session session,
                                                 boolean useCorrect) {
@@ -148,7 +148,7 @@ public class UserSessionHistory {
     } else {
       userID = user.getUserID();
     }
-    return new AVPHistoryForList.UserScore(count,
+    return new AVPHistoryForList.UserScore(childCount,
         userID,
         value,
         session.isLatest());

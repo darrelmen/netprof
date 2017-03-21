@@ -567,7 +567,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   /**
-   * TODO : why are the numbers different for word examples vs count???
+   * TODO : why are the numbers different for word examples vs childCount???
    *
    * @param phone
    */

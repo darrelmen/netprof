@@ -257,7 +257,7 @@ public class RefResultDecoder {
    * @seex #runMissingInfo
    */
 /*  private void doMissingInfo(final Collection<CommonExercise> exercises) {
-    int count = 0;
+    int childCount = 0;
 
     Map<String, CommonExercise> idToEx = getIdToExercise(exercises);
     if (idToEx == null) return;
@@ -267,7 +267,7 @@ public class RefResultDecoder {
     logger.info("doMissingInfo found " + size + " with missing info");
 
     for (Result res : resultsToDecode) {
-      if (count++ < 20) {
+      if (childCount++ < 20) {
         logger.debug("\t doMissingInfo found " + res);
       }
 
@@ -275,7 +275,7 @@ public class RefResultDecoder {
       //    if (bestAudios.length > 1) {
       CommonExercise exercise = idToEx.get(res.getExerciseID());
       if (exercise != null) {
-        logger.info("doMissingInfo #" + count + " of " + size + " align " + exercise.getOldID() + " and result " + res.getUniqueID());
+        logger.info("doMissingInfo #" + childCount + " of " + size + " align " + exercise.getOldID() + " and result " + res.getUniqueID());
         PretestScore alignmentScore = audioFileHelper.getAlignmentScore(exercise, res.getAnswer(), serverProps.usePhoneToDisplay(), false);
         db.rememberScore(res.getUniqueID(), alignmentScore);
       } else {
@@ -478,7 +478,7 @@ public class RefResultDecoder {
         doEnsure(defaultUserAudio, title, comment, language);
 
       }
-      // if (count > 0 && count % 2000 == 0) logger.debug(getLanguage() + " trimRef examined " + count + " files.");
+      // if (childCount > 0 && childCount % 2000 == 0) logger.debug(getLanguage() + " trimRef examined " + childCount + " files.");
     }
 
     logger.debug(language + " ensure : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
@@ -497,7 +497,7 @@ public class RefResultDecoder {
     List<CommonExercise> rawExercises = db.getExerciseDAO().getRawExercises();
     for (CommonExercise ex : rawExercises) idToEx.put(ex.getID(), ex);
 
-    int count = 0;
+    int childCount = 0;
     Set<String> skip = new HashSet<>(Arrays.asList("slow", "regular", "slow_by_WebRTC", "regular_by_WebRTC"));
     List<Result> results = resultDAO.getResults();
     int skipped = 0;
@@ -530,8 +530,8 @@ public class RefResultDecoder {
               if (result.getModel() == null || !result.getModel().equals(currentModel)) {
                 audioFileHelper.recalcOne(result, exercise);
                 sleep(serverProps.getSleepBetweenDecodes());
-                count++;
-                if (count % 100 == 0) logger.info("recalc " + count + "/" + results.size());
+                childCount++;
+                if (childCount % 100 == 0) logger.info("recalc " + childCount + "/" + results.size());
               } else {
                 currentAlready++;
               }
@@ -550,7 +550,7 @@ public class RefResultDecoder {
       }
     }
 
-    logger.info("recalcStudentAudio did recalc on " + count + "/" + results.size() +
+    logger.info("recalcStudentAudio did recalc on " + childCount + "/" + results.size() +
         " skipped " + skipped +
         " not there " + notThere + " stale exercises " + staleExercise + " currentAlready " + currentAlready);
 
@@ -588,7 +588,7 @@ public class RefResultDecoder {
     List<CommonExercise> rawExercises = db.getExerciseDAO().getRawExercises();
     for (CommonExercise ex : rawExercises) idToEx.put(ex.getID(), ex);
 
-    int count = 0;
+    int childCount = 0;
     Set<String> skip = new HashSet<>(Arrays.asList("slow", "regular", "slow_by_WebRTC", "regular_by_WebRTC"));
     List<Result> results = resultDAO.getResults();
     int skipped = 0;
@@ -621,8 +621,8 @@ public class RefResultDecoder {
               if (result.getModel() == null || !result.getModel().equals(currentModel)) {
                 audioFileHelper.recalcOne(result, exercise);
                 sleep(serverProps.getSleepBetweenDecodes());
-                count++;
-                if (count % 100 == 0) logger.info("recalc " + count + "/" + results.size());
+                childCount++;
+                if (childCount % 100 == 0) logger.info("recalc " + childCount + "/" + results.size());
               } else {
                 currentAlready++;
               }
@@ -641,7 +641,7 @@ public class RefResultDecoder {
       }
     }
 
-    logger.info("recalcStudentAudio did recalc on " + count + "/" + results.size() +
+    logger.info("recalcStudentAudio did recalc on " + childCount + "/" + results.size() +
         " skipped " + skipped +
         " not there " + notThere + " stale exercises " + staleExercise + " currentAlready " + currentAlready);
 
@@ -675,7 +675,7 @@ public class RefResultDecoder {
         exercises.size() + " exercises ");
 
     if (stopDecode) logger.debug("Stop decode true");
-//      int count = 0;
+//      int childCount = 0;
 //      int attrc = 0;
 //      int maleAudio = 0;
 //      int femaleAudio = 0;
@@ -689,8 +689,8 @@ public class RefResultDecoder {
       //Stats stats =
       queueDecodeExercise(language, decodedFiles, exercise);
 //        allstats.add(stats);
-      //stats.count += stats.count;
-      //      if (stats.count > 0 && stats.count % 100 == 0) logger.debug("ref decode - did " + stats.count + " decodes");
+      //stats.childCount += stats.childCount;
+      //      if (stats.childCount > 0 && stats.childCount % 100 == 0) logger.debug("ref decode - did " + stats.childCount + " decodes");
     }
 
     if (consumer == null) {
@@ -803,7 +803,7 @@ public class RefResultDecoder {
                           Collection<AudioAttribute> audioAttributes1) {
     if (!audioAttributes1.isEmpty()) {
       //   stats.maleAudio += audioAttributes1.size();
-      //stats.count +=
+      //stats.childCount +=
       try {
         queue.put(doDecode(language, decodedFiles, exercise, audioAttributes1));
         added++;

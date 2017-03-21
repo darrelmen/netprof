@@ -160,7 +160,7 @@ public class UserListManager implements IUserListManager {
    */
   // set state on predef exercises
 /*  private Set<Integer> setStateOnPredefExercises(Map<Integer, StateCreator> exerciseToState, boolean firstState) {
-    int count = 0;
+    int childCount = 0;
     Set<Integer> userExercisesRemaining = new HashSet<>(exerciseToState.keySet());
     for (Map.Entry<Integer, StateCreator> pair : exerciseToState.entrySet()) {
       CommonExercise predefExercise = userExerciseDAO.getPredefExercise(pair.getKey());
@@ -171,11 +171,11 @@ public class UserListManager implements IUserListManager {
         } else {
           predefExercise.setSecondState(pair.getValue().getState());
         }
-        count++;
+        childCount++;
       }
     }
-    if (count > 0) {
-      logger.debug("got " + userExercisesRemaining.size() + " in userExercisesRemaining, updated " + count + " predef exercises");
+    if (childCount > 0) {
+      logger.debug("got " + userExercisesRemaining.size() + " in userExercisesRemaining, updated " + childCount + " predef exercises");
     }
     return userExercisesRemaining;
   }*/
@@ -187,7 +187,7 @@ public class UserListManager implements IUserListManager {
 /*  private void setStateOnUserExercises(Map<Integer, StateCreator> exerciseToState,
                                        Set<Integer> userExercisesRemaining,
                                        boolean firstState) {
-    int count = 0;
+    int childCount = 0;
     Collection<CommonExercise> userExercises = userExerciseDAO.getByExID(userExercisesRemaining);
 
     for (Shell commonUserExercise : userExercises) {
@@ -201,11 +201,11 @@ public class UserListManager implements IUserListManager {
         } else {
           commonUserExercise.setSecondState(state.getState());
         }
-        count++;
+        childCount++;
       }
     }
-    if (count > 0) {
-      logger.debug("updated " + count + " user exercises");
+    if (childCount > 0) {
+      logger.debug("updated " + childCount + " user exercises");
     }
   }*/
 
@@ -220,7 +220,7 @@ public class UserListManager implements IUserListManager {
     Map<String, Long> exerciseToCreator = annotationDAO.getAnnotatedExerciseToCreator();
     //logger.debug("got " + exerciseToCreator.size() +" in defectIds");
 
-    int count = 0;
+    int childCount = 0;
     Set<String> reviewed = new HashSet<String>(stateMap.keySet());
     long now = System.currentTimeMillis();
 
@@ -230,13 +230,13 @@ public class UserListManager implements IUserListManager {
         if (stateCreator.getState().equals(STATE.UNSET)) { // only happen when we have an old db
           stateMap.put(exid, new ReviewedDAO.StateCreator(STATE.DEFECT, stateCreator.getCreatorID(), now));
           reviewedDAO.setState(exid, STATE.DEFECT, stateCreator.getCreatorID());
-          count++;
+          childCount++;
         }
       }
     }
 
-    if (count > 0) {
-      logger.info("updated " + count + " rows in review table");
+    if (childCount > 0) {
+      logger.info("updated " + childCount + " rows in review table");
     }
     //  return stateMap;
   }*/

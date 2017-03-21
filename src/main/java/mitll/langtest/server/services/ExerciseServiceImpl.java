@@ -1020,7 +1020,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (diff > SLOW_EXERCISE_EMAIL) {
       ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
       String threadInfo = threadGroup.getName() + " = " + threadGroup.activeCount();
-      logger.error(message + " thread count " + threadInfo);
+      logger.error(message + " thread childCount " + threadInfo);
       sendEmailWhenSlow(id, language, diff, threadInfo);
     } else if (diff > MIN_WARN_DURATION) {
       logger.warn(message);

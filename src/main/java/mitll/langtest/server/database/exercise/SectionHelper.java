@@ -60,6 +60,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public static final String TOPIC = "Topic";
   public static final String SUB_TOPIC = "Sub-topic";
   public static final String GRAMMAR = "Grammar";
+  public static final String ANY = "any";
+  public static final String ALL = "all";
   //  private static final String SOUND = "Sound";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
@@ -72,7 +74,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   private SectionNode root = null;
 
   private Set<String> rootTypes = new HashSet<>();
-  private Map<String,String> parentToChildTypes = new HashMap<>();
+  private Map<String, String> parentToChildTypes = new HashMap<>();
 
   public SectionHelper() {
     makeRoot();
@@ -157,6 +159,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
     }
   }
+
 
  /* public List<String> getTypeOrder2() {
     if (predefinedTypeOrder.isEmpty()) {
@@ -268,7 +271,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   @Override
   public SectionNode getNode(SectionNode parent, String type, String name) {
-    if (parent.getChildType().equals(type)) {
+    if (!parent.isLeaf() && parent.getChildType().equals(type)) {
       return getMatch(parent.getChildren(), name);
     } else {
       return null;
@@ -376,7 +379,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    * @param type
    * @param value
    * @return
-   * @see #report()
+   * @see #report
    */
   public Collection<T> getExercisesForSelectionState(String type, String value) {
     Map<String, Collection<String>> typeToSection = new HashMap<>();
@@ -401,57 +404,60 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
    */
   @Override
-  public Map<String, Set<String>> getTypeToMatches(Collection<Pair> pairs) {
-    Map<String, Set<String>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
+  public Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs) {
+    Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
 
-    Set<String> strings1 = typeToMatchPairs.keySet();
-    for (String key : strings1) {
+    // sort values
+  /*  Set<String> types = typeToMatchPairs.keySet();
+    for (String key : types) {
       TreeSet<String> strings = new TreeSet<>(itemSorter);
       strings.addAll(typeToMatchPairs.get(key));
       typeToMatchPairs.put(key, strings);
-    }
+    }*/
 
-    return typeToMatchPairs;
+    return getTypeToMatches(typeToMatchPairs);
   }
 
   /**
    * Assumes a partial path implies = type=any for unmentioned?
    *
    * @param pairs
-   * @param root
+   * @param node
    * @return
    */
   @NotNull
-  private Map<String, Set<String>> getTypeToMatchPairs(List<Pair> pairs, SectionNode root) {
-    Map<String, Set<String>> typeToMatch = new HashMap<>();
+  private Map<String, Map<String, MatchInfo>> getTypeToMatchPairs(List<Pair> pairs, SectionNode node) {
+    //Map<String, Set<MatchInfo>> typeToMatchRet = new HashMap<>();
+    Map<String, Map<String, MatchInfo>> typeToMatch = new HashMap<>();
 
     Iterator<Pair> iterator = pairs.iterator();
     Pair next = iterator.next();
     String type = next.getProperty();
     String toMatch = next.getValue();
 
-    boolean isAll = toMatch.equalsIgnoreCase("any") || toMatch.equalsIgnoreCase("all");
+    boolean isAll = toMatch.equalsIgnoreCase(ANY) || toMatch.equalsIgnoreCase(ALL);
 //    logger.info("to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
-    if (!root.isLeaf() && root.getChildType().equals(type)) {
-      Set<String> matches = new HashSet<>();
+    if (!node.isLeaf() && node.getChildType().equals(type)) {
+      // Set<MatchInfo> matches = new HashSet<>();
+      Map<String, MatchInfo> matches = new HashMap<>();
       typeToMatch.put(type, matches);
 
       Collection<SectionNode> childMatches = null;
 
       if (isAll) {
-        childMatches = root.getChildren();
+        childMatches = node.getChildren();
         for (SectionNode child : childMatches) {
-
           if (!child.getType().equals(type)) {
             logger.error("huh? adding " + child + " to " + type);
           }
 
-          matches.add(child.getName());
+          addOrMerge(matches, child);
         }
       } else {
-        for (SectionNode child : root.getChildren()) {
+        for (SectionNode child : node.getChildren()) {
           if (child.getName().equals(toMatch)) {
-            matches.add(toMatch);
+//            matches.add(new MatchInfo(child));
+            addOrMerge(matches, child);
             childMatches = new ArrayList<>();
             childMatches.add(child);
             break;
@@ -460,45 +466,46 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
 
       if (DEBUG) {
-        logger.info("children of " + root.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
+        logger.info("children of " + node.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
       }
 
       if (childMatches == null || childMatches.isEmpty()) {  // couldn't find matching value
         return typeToMatch;
       } else {
         iterator.remove();
-
         if (DEBUG) logger.info("path now " + pairs);
 
         if (pairs.isEmpty()) {
           for (SectionNode childMatch : childMatches) {
-            recurseAndCount(childMatch, typeToMatch);
+            recurseAndCountMatchInfo(childMatch, typeToMatch);
           }
           return typeToMatch;
         } else {
           if (DEBUG) logger.info("recurse on " + childMatches.size() + " with path " + pairs);
 
           for (SectionNode childMatch : childMatches) {
-            mergeMaps(typeToMatch, getTypeToMatchPairs(new ArrayList<>(pairs), childMatch));
+            Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), childMatch);
+            mergeMaps2(typeToMatch, typeToMatchPairs);
           }
         }
       }
     } else {
-      Set<String> matches = new HashSet<>();
+      Map<String, MatchInfo> matches = new HashMap<>();
       typeToMatch.put(type, matches);
-      Set<String> c = typeToCount.get(type);
-      if (c == null) {
+      Map<String, MatchInfo> matchesForType = typeToMatchInfo.get(type);
+      if (matchesForType == null) {
         logger.warn("no known type " + type);
       } else {
-        matches.addAll(c);
+        matches.putAll(matchesForType);
       }
       iterator.remove();
 
       if (pairs.isEmpty()) {
         logger.error("huh? pairs is empty for type " + type);
       } else {
-        for (SectionNode child : root.getChildren()) {
-          mergeMaps(typeToMatch, getTypeToMatchPairs(pairs, child));
+        for (SectionNode child : node.getChildren()) {
+          Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(pairs, child);
+          mergeMaps2(typeToMatch, typeToMatchPairs);
         }
       }
     }
@@ -506,7 +513,50 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return typeToMatch;
   }
 
-  private void mergeMaps(Map<String, Set<String>> typeToMatch, Map<String, Set<String>> typeToMatch1) {
+
+  private Map<String, Set<MatchInfo>> getTypeToMatches(Map<String, Map<String, MatchInfo>> typeToMatch) {
+    Map<String, Set<MatchInfo>> typeToMatchRet = new HashMap<>();
+    for (Map.Entry<String, Map<String, MatchInfo>> pair : typeToMatch.entrySet()) {
+      typeToMatchRet.put(pair.getKey(), new TreeSet<>(pair.getValue().values()));
+    }
+    return typeToMatchRet;
+  }
+
+  private void addOrMerge(Map<String, MatchInfo> matches, SectionNode child) {
+    String name = child.getName();
+    MatchInfo matchInfo = matches.get(name);
+    if (matchInfo == null) {
+      matches.put(name, new MatchInfo(child));
+    } else {
+      matchInfo.incr(child.getCount());
+    }
+  }
+
+
+  private void recurseAndCountMatchInfo(SectionNode node, Map<String, Map<String, MatchInfo>> typeToCount) {
+    String childType = node.getChildType();
+
+    if (childType != null) { // i.e. not leaf
+      // logger.info("recurseAndCount on " + node.getName() + " child type " + childType);
+      Map<String, MatchInfo> members = typeToCount.get(childType);
+      if (members == null) {
+        typeToCount.put(childType, members = new HashMap<String, MatchInfo>());
+      }
+
+      for (SectionNode child : node.getChildren()) {
+        if (!child.getType().equals(childType)) {
+          logger.error("child " + child + " doesn't match " + childType);
+        }
+
+        addOrMerge(members, child);
+        // members.add(child.getName());
+        recurseAndCountMatchInfo(child, typeToCount);
+      }
+    }
+  }
+
+  private void mergeMaps(Map<String, Set<String>> typeToMatch,
+                         Map<String, Set<String>> typeToMatch1) {
     for (Map.Entry<String, Set<String>> pair : typeToMatch1.entrySet()) {
       String key = pair.getKey();
       Set<String> currentMatches = typeToMatch.get(key);
@@ -517,6 +567,42 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         currentMatches.addAll(matches);
       }
     }
+  }
+
+  private void mergeMaps2(Map<String, Map<String, MatchInfo>> current,
+                          Map<String, Map<String, MatchInfo>> toMergeIn) {
+    for (Map.Entry<String, Map<String, MatchInfo>> mergePair : toMergeIn.entrySet()) {
+      String type = mergePair.getKey();
+      Map<String, MatchInfo> currentMatches = current.get(type);
+      Map<String, MatchInfo> mergeMatches = mergePair.getValue();
+      if (currentMatches == null) {
+        current.put(type, mergeMatches);
+      } else {
+//        Map<String, MatchInfo> currentNameToInfo = getNameToInfo(currentMatches);
+//        Map<String, MatchInfo> toMergeNameToInfo = getNameToInfo(mergeMatches);
+        Set<String> toAdd = new HashSet<>(mergeMatches.keySet());
+
+        // so for every name that overlap, increment the count
+        for (Map.Entry<String, MatchInfo> currentNameToInfo : currentMatches.entrySet()) {
+          String name = currentNameToInfo.getKey();
+          MatchInfo matchInfo = mergeMatches.get(name);
+          if (matchInfo != null) {
+            currentNameToInfo.getValue().incr(matchInfo.getCount());
+            toAdd.remove(name);
+          }
+        }
+
+        // for every new name, add the match info
+        for (String name : toAdd) currentMatches.put(name, mergeMatches.get(name));
+        //currentMatches.addAll(mergeMatches);
+      }
+    }
+  }
+
+  private Map<String, MatchInfo> getNameToInfo(Set<MatchInfo> currentMatches) {
+    Map<String, MatchInfo> nameToInfo = new HashMap<>();
+    for (MatchInfo info : currentMatches) nameToInfo.put(info.getValue(), info);
+    return nameToInfo;
   }
 
   @NotNull
@@ -536,17 +622,12 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
     } else {
       for (SectionNode child : root.getChildren()) {
-        Map<String, Set<String>> typeToMatch1 = getTypeToMatch(type, value, child);
-        mergeMaps(typeToMatch, typeToMatch1);
+        mergeMaps(typeToMatch, getTypeToMatch(type, value, child));
       }
     }
 
     return typeToMatch;
   }
-
-//  private void addChild(SectionNode child,Map<String, Set<String>> typeToMatch) {
-//    typeToMatch.put(child.getProperty(),child.getChildren())
-//  }
 
   /**
    * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
@@ -862,6 +943,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   Map<String, Set<String>> typeToCount = new HashMap<>();
+  Map<String, Map<String, MatchInfo>> typeToMatchInfo = new HashMap<>();
+  Map<String, Set<MatchInfo>> typeToDistinct = new HashMap();
 
   /**
    * @param predefinedTypeOrder
@@ -884,7 +967,15 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     typeToCount = new HashMap<>();
     recurseAndCount(root, typeToCount);
 
-    logger.info("rememberTypesInOrder type->count " + typeToCount);
+    typeToMatchInfo = new HashMap<>();
+    recurseAndCountMatchInfo(root, typeToMatchInfo);
+
+    typeToDistinct = new HashMap<>();
+    for (Map.Entry<String, Map<String, MatchInfo>> p : typeToMatchInfo.entrySet()) {
+      typeToDistinct.put(p.getKey(), new TreeSet<>(p.getValue().values()));
+    }
+
+    logger.info("rememberTypesInOrder type->childCount " + typeToCount);
   }
 
   private void makeRoot() {
@@ -937,13 +1028,19 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     for (List<Pair> pairs : seen) child = rememberOne(child, pairs);
     recurseAndCount(root, typeToCount = new HashMap<String, Set<String>>());
 
-    logger.info("rememberTypesFor type->count " + typeToCount);
+    logger.info("rememberTypesFor type->childCount " + typeToCount);
   }
 
-  public Map<String, Set<String>> getTypeToDistinct() {
-    return typeToCount;
+  public Map<String, Set<MatchInfo>> getTypeToDistinct() {
+    return typeToDistinct;
   }
 
+  /**
+   * @param child
+   * @param pairs
+   * @return
+   * @see #addExercise
+   */
   private SectionNode rememberOne(SectionNode child, List<Pair> pairs) {
     for (Pair pair : pairs) {
       child = child.getChild(pair.getProperty(), pair.getValue());
@@ -985,12 +1082,12 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     Set<String> typesToInclude1 = new HashSet<>(typesInOrder);
 
     logger.info("request is       " + typeToSelection);
-    Map<String, Set<String>> typeToMatches =  getTypeToMatches(typeToSelection);
+    Map<String, Set<MatchInfo>> typeToMatches = getTypeToMatches(typeToSelection);
     logger.info("typeToMatches is " + typeToMatches);
 
     boolean someEmpty = false;
     for (String type : typesInOrder) {
-      Set<String> matches = typeToMatches.get(type);
+      Set<MatchInfo> matches = typeToMatches.get(type);
       if (matches == null || matches.isEmpty()) {
         typesToInclude1.remove(type);
         logger.info("removing " + type);
@@ -1000,21 +1097,19 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     if (someEmpty) {
       List<Pair> typeToSelection2 = new ArrayList<>();
-      logger.info("back off including  " +typesToInclude1);
+      logger.info("back off including  " + typesToInclude1);
       for (Pair pair : typeToSelection) {
         if (typesToInclude1.contains(pair.getProperty())) {
           typeToSelection2.add(pair);
-        }
-        else {
-          typeToSelection2.add(new Pair(pair.getProperty(),"all"));
+        } else {
+          typeToSelection2.add(new Pair(pair.getProperty(), "all"));
         }
       }
       logger.info("try search again with " + typeToSelection2);
 
-      return new FilterResponse(getTypeToMatches(typeToSelection2), typesToInclude1);
+      return new FilterResponse(request.getReqID(), getTypeToMatches(typeToSelection2), typesToInclude1);
     } else {
-      return new FilterResponse(typeToMatches, typesToInclude1);
+      return new FilterResponse(request.getReqID(), typeToMatches, typesToInclude1);
     }
   }
-
 }

@@ -104,7 +104,7 @@ public class Report {
   private static final String ALL_RECORDINGS1 = "allRecordings";
   private static final String DEVICE_RECORDINGS1 = "deviceRecordings";
   private static final String MONTH1 = "month";
-  private static final String COUNT = "count";
+  private static final String COUNT = "childCount";
   private static final String YTD = COUNT;
   private static final String YTD1 = " YTD ";
   private static final String REF_AUDIO_RECORDINGS = "Ref Audio Recordings";
@@ -937,7 +937,7 @@ public class Report {
                                  String tableLabel,
                                  JSONArray jsonArray,
                                  int year) {
-    // writeMonthToCSV(monthToCount, tableLabel.isEmpty() ? count : tableLabel, language, year);
+    // writeMonthToCSV(monthToCount, tableLabel.isEmpty() ? childCount : tableLabel, language, year);
     return getIntCountTable(unit, count, jsonArray, MONTH1, monthToCount);
   }
 
@@ -1205,7 +1205,7 @@ public class Report {
   }
 
   /**
-   * Don't count the same audio twice.
+   * Don't childCount the same audio twice.
    *
    * @param result
    * @param seen

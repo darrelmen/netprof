@@ -110,7 +110,7 @@ public class SmallVocabDecoder {
    * @see ASRScoring#getUniqueTokensInLM
    */
   List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
-    // count the tokens
+    // childCount the tokens
     final Map<String, Integer> sc = new HashMap<String, Integer>();
     for (String sentence : sentences) {
       for (String token : getTokens(sentence)) {

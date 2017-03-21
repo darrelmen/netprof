@@ -52,8 +52,9 @@ import java.util.stream.Collectors;
 public class SectionNode implements IsSerializable, Comparable<SectionNode> {
   private String type; // redundant
   private String name;
+  private int count;
 
-  private List<SectionNode> children = null;//Collections.emptyList();// ArrayList<SectionNode>();
+  private List<SectionNode> children = null;
 
   private String childType;
 
@@ -69,45 +70,33 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
     this.name = name;
   }
 
-  /**
-   * @paramx node
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addChildren
-   */
-/*  public void addChild(SectionNode node) {
-    children.add(node);
-  }*/
-  public String getName() {
-    return name;
-  }
-
   public String getType() {
     return type;
   }
 
+  public String getName() {
+    return name;
+  }
 
-  //@Deprecated
   public boolean isLeaf() {
     return children == null || children.isEmpty();
   }
 
-  //  @Deprecated
   public Collection<SectionNode> getChildren() {
     return isLeaf() ? Collections.emptyList() : children;
   }
-/*
 
-  public Collection<SectionNode> getChildren() {
-    if (typeToChildren.isEmpty()) return Collections.emptyList();
-    else return typeToChildren.values().iterator().next();
-  }
-*/
-
-  public int count() {
-    if (children.isEmpty()) return 1;
+  /**
+   * JUST FOR TESTING
+   *
+   * @return
+   */
+  public int childCount() {
+    if (isLeaf()) return 1;
     else {
       int total = 0;
       for (SectionNode child : children) {
-        total += child.count();
+        total += child.childCount();
       }
       return total;
     }
@@ -119,49 +108,12 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
   }
 
   public boolean equals(Object other) {
-    if (other instanceof SectionNode) return compareTo((SectionNode) other) == 0;
-    else return false;
-  }
-
-  public String toComplete(int level) {
-    StringBuilder builder = new StringBuilder();
-    for (SectionNode sectionNode : children) {
-      for (int i = 0; i < level; i++) builder.append("\t");
-      builder.append(sectionNode.toComplete(level + 1));
-      builder.append("\n");
-    }
-    return
-        //getProperty() + "=" +
-        name + " children are " + childType +
-            (this.children.isEmpty() ? "" : (" : [(" + this.children.size() + "), " + builder.toString() + "]"));
-  }
-
-  public String toString() {
-    String example = isLeaf() ? "" : children.toString();//children.get(0).toString();
-    return
-        //  getProperty() + "="       +
-        name + "" + //(typeToChildren.isEmpty() ? "" : " " + typeToChildren) +
-            (isLeaf() ? "" : (" " + childType +
-                " : [" +
-                //"(" + this.children.size() + ")" +
-                //" : " +
-                example + "]"));
-  }
-
-  public String easy() {
-    return name + " " + childType + " " + children.size();
+    return other instanceof SectionNode && compareTo((SectionNode) other) == 0;
   }
 
   public SectionNode getChild(String type, String value) {
-    //Set<SectionNode> sectionNodes = typeToChildren.computeIfAbsent(type, p -> new TreeSet<>());
-
     if (childType == null) childType = type;
-    //Set<SectionNode> sectionNodes = typeToChildren.get(type);
     if (children == null) children = new ArrayList<>();
-//      typeToChildren.put(type, sectionNodes = new TreeSet<SectionNode>());
-
-    // System.out.println("for " + this + " now " + typeToChildren);
-
     SectionNode e;
     List<SectionNode> collect = children
         .stream()
@@ -182,6 +134,7 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
         //  System.out.println("2 now " + typeToChildren + " " + e);
       }
     }
+    e.count++;
     return e;
   }
 
@@ -196,7 +149,34 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
     return childType;
   }
 
-//  public void setChildType(String childType) {
-//    this.childType = childType;
-//  }
+  public String toComplete(int level) {
+    StringBuilder builder = new StringBuilder();
+    for (SectionNode sectionNode : children) {
+      for (int i = 0; i < level; i++) builder.append("\t");
+      builder.append(sectionNode.toComplete(level + 1));
+      builder.append("\n");
+    }
+    return
+        //getProperty() + "=" +
+        name + " children are " + childType +
+            (this.children.isEmpty() ? "" : (" : [(" + this.children.size() + "), " + builder.toString() + "]"));
+  }
+
+  public String toString() {
+    String example = isLeaf() ? "" : children.toString();
+    return
+        name + "/" +count+
+            "" +
+            (isLeaf() ? "" : (" " + childType +
+                " : [" +
+                example + "]"));
+  }
+
+  public String easy() {
+    return name + " " + childType + " " + children.size();
+  }
+
+  public int getCount() {
+    return count;
+  }
 }

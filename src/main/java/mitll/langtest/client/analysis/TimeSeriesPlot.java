@@ -96,7 +96,7 @@ class TimeSeriesPlot extends DivWidget {
   }
 
   /**
-   * Show count in session if small - since error bars won't be displayed.
+   * Show childCount in session if small - since error bars won't be displayed.
    * @param toolTipData
    * @param seriesName1
    * @return

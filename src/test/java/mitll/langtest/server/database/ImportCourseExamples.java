@@ -123,7 +123,7 @@ public class ImportCourseExamples {
 /*  private static void copyAudio(Map<Integer, Map<String, Result>> userToResultsRegular, Map<Integer, Integer> oldToNew,
                                 IAudioDAO audioDAO,
                                 String destAudioDir, String candidateAudioDir) {
-    int count = 0;
+    int childCount = 0;
     int bad = 0;
     for (Map.Entry<Integer, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
       //for (Long userid : userToExIdToResult.getKey())
@@ -131,8 +131,8 @@ public class ImportCourseExamples {
       Map<String, Result> exIdToResult = userToExIdToResult.getValue();
       logger.debug("num = " + exIdToResult.size() + " exercises->results ");
       for (Result r : exIdToResult.values()) {
-        if (count %  100 == 0) {
-          logger.debug("\tcount " + count +
+        if (childCount %  100 == 0) {
+          logger.debug("\tchildCount " + childCount +
             " result = " + r.getUniqueID() + " for " + r.getCompoundID() + " type " + r.getAudioType() + " path " + r.getAnswer());
         }
 
@@ -147,9 +147,9 @@ public class ImportCourseExamples {
           } else {
             FileUtils.copyFile(srcFile, destFile);
 
-            count++;
-            if (count % 100 == 0) {
-              logger.debug("\tcount " + count + " copied to " + destFile.getAbsolutePath());
+            childCount++;
+            if (childCount % 100 == 0) {
+              logger.debug("\tchildCount " + childCount + " copied to " + destFile.getAbsolutePath());
             }
           }
         } catch (IOException e) {
@@ -157,7 +157,7 @@ public class ImportCourseExamples {
         }
       }
     }
-    logger.debug("copied " + count + " files, found " + bad + " bad src audio paths");
+    logger.debug("copied " + childCount + " files, found " + bad + " bad src audio paths");
   }*/
 
 /*  public static void main(String []arg){

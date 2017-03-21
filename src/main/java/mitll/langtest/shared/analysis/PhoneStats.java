@@ -110,7 +110,7 @@ public class PhoneStats implements Serializable {
   }
 
   public String toString() {
-    return "count " + count + " initial " + getInitial() + " current " + getCurrent() +
+    return "childCount " + count + " initial " + getInitial() + " current " + getCurrent() +
         (getSessions() != null ? " num sessions " + getSessions().size() + " : " + getSessions() : "");
   }
 
