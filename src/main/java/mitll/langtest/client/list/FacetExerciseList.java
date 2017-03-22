@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.list;
 
-
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
@@ -647,7 +646,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   * @seex #rememberAndLoadFirst(List, CommonExercise, String)
+   * @seex #rememberAndLoadFirst
    */
   @Override
   protected void loadFirstExercise(String searchIfAny) {

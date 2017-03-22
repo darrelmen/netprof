@@ -1006,6 +1006,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return (T) byID;
   }
 
+  @Override
+  public <T1 extends Shell> Collection<T1> getFullExercises(Collection<Integer> ids, boolean isFlashcardReq) {
+
+    List<T1> exercises = new ArrayList<>();
+    for (int id : ids) exercises.add(getExercise(id, isFlashcardReq));
+    return exercises;
+  }
+
   private <T extends Shell> T getExercise(String exid, boolean isFlashcardReq) {
     int exid1 = -1;
     try {
@@ -1015,7 +1023,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
     return getExercise(exid1, isFlashcardReq);
   }
-
 
   /**
    * @param id

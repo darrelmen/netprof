@@ -159,8 +159,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = History.getToken();
-    //String idFromToken = ;
-    //   int exidFromToken = Integer.parseInt(getIDFromToken(token));
     int exidFromToken = getIDFromToken(token);
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
         "' vs new exercise " + exerciseID + " instance " + getInstance());*/
@@ -172,8 +170,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     } else {
       if (DEBUG)
         logger.info("pushFirstSelection : (" + getInstance() + ") pushNewItem " + exerciseID + " vs " + exidFromToken);
-      int toUse = getValidExerciseID(exerciseID);
-      pushNewItem(searchIfAny, toUse);
+      pushNewItem(searchIfAny, getValidExerciseID(exerciseID));
     }
   }
 
@@ -210,6 +207,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     }
   }
 
+  /**
+   * Fall back to first if invalid id and list not empty.
+   * @param exerciseID
+   * @return
+   */
   private int getValidExerciseID(int exerciseID) {
     return hasExercise(exerciseID) ? exerciseID : isEmpty() ? -1 : getFirst().getID();
   }

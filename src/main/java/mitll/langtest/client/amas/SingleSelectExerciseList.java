@@ -380,7 +380,7 @@ public abstract class SingleSelectExerciseList
       vp.add(startOver);
     }*/
 
-    innerContainer.setWidget(vp);
+    innerContainer.add(vp);
   }
 
 /*  private Button getStartOver() {

@@ -204,6 +204,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    *
    * @param searchIfAny
    * @param exerciseID
+   * @see #rememberAndLoadFirst(List, String, String, int)
    */
   protected void goToFirst(String searchIfAny, int exerciseID) {
     if (listOptions.isShowFirstNotCompleted()) {
@@ -514,7 +515,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param itemID
-   * @see #useExercise
+   * @see #showExercise
    */
   public void markCurrentExercise(int itemID) {
     pagingContainer.markCurrentExercise(itemID);

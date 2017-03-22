@@ -91,8 +91,9 @@ public class AVPHelper extends NPFHelper {
   @Override
   PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
     PagingExerciseList<CommonShell, CommonExercise> widgets =
-        new NPExerciseList<ListSectionWidget>(right, controller,
-            listOptions) {
+        new NPExerciseList<ListSectionWidget>(right,
+            controller,
+            listOptions.setIncorrectFirst(true)) {
           @Override
           protected void onLastItem() {
           } // TODO : necessary?

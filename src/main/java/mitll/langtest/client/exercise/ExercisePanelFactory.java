@@ -46,7 +46,6 @@ import mitll.langtest.shared.exercise.Shell;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ExercisePanelFactory <T extends Shell, U extends Shell> {
-//  protected final LangTestDatabaseAsync service;
   protected final ExerciseController controller;
   protected ListInterface<T> exerciseList;
 

@@ -33,6 +33,7 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
@@ -73,7 +74,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   private static final int MAX_MSG_LEN = 200;
 
-  protected SimplePanel innerContainer;
+  protected DivWidget innerContainer;
   protected final ExerciseServiceAsync service;
   private final UserFeedback feedback;
   private ExercisePanelFactory<T, U> factory;
@@ -121,7 +122,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
 //    if (DEBUG) logger.info("ExerciseList.addWidgets for currentExerciseVPanel " + currentExerciseVPanel.getElement().getExID() + " instance " + getInstance());
-    this.innerContainer = new SimplePanel();
+    this.innerContainer = new DivWidget();
     innerContainer.getElement().setId("ExerciseList_innerContainer");
     currentExerciseVPanel.add(innerContainer);
     innerContainer.addStyleName("floatLeft");
@@ -167,10 +168,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @seex NPFHelper#reload
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
    */
-  public void reload() {
-    //logger.info("reload -");
-    getExercises(getUser());
-  }
+  public void reload() {  getExercises(getUser());  }
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#doAfterEditComplete
@@ -218,17 +216,20 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   abstract void pushNewItem(String search, int exerciseID);
 
+  /**
+   * TODO : Cheesy...
+   */
   public void onResize() {
-    Widget current = innerContainer.getWidget();
+  /*  Widget current = innerContainer.getWidget(0);
     if (current != null) {
       if (current instanceof RequiresResize) {
         // if (DEBUG || true) logger.info("resizing right side for " + instance + " " + current.getClass());
         ((RequiresResize) current).onResize();
       }
-      /*else {
+      *//*else {
         logger.warning("huh?  right side is not resizable " + instance + " " + current.getClass());
-      }*/
-    }
+      }*//*
+    }*/
     //   else {
 //      logger.warning("huh? no right side of exercise list");
     //  }
@@ -436,7 +437,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 //    if (exerciseID < 0) {
 //      loadFirstExercise();
 //    }
-
     goToFirst(searchIfAny, exerciseID);
   }
 
@@ -517,9 +517,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   protected abstract T getFirst();
 
-  protected boolean hasExercise(int id) {
-    return byID(id) != null;
-  }
+  boolean hasExercise(int id) {  return byID(id) != null;  }
 
   public abstract T byID(int name);
 
@@ -573,11 +571,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (cachedNext != null && cachedNext.getID() == itemID) {
       if (DEBUG)
         logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + getInstance());
-      useExercise(cachedNext);
+      showExercise(cachedNext);
     } else {
       pendingReq = true;
       if (DEBUG || true) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
-      service.getExercise(itemID, listOptions.isIncorrectFirst(), new ExerciseAsyncCallback());
+      service.getExercise(itemID, false, new ExerciseAsyncCallback());
     }
 
     // go get next and cache it
@@ -589,7 +587,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (!isOnLastItem(i)) {
       T next = getAt(i + 1);
 
-      service.getExercise(next.getID(), listOptions.isIncorrectFirst(), new AsyncCallback<U>() {
+      service.getExercise(next.getID(), false, new AsyncCallback<U>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -601,7 +599,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         }
       });
     }
-
   }
 
   private int getUser() {
@@ -635,7 +632,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       if (result == null) {
         Window.alert("Unfortunately there's a configuration error and we can't find this exercise.");
       } else {
-        useExercise(result);
+        showExercise(result);
       }
     }
   }
@@ -645,17 +642,17 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #rememberAndLoadFirst
    * @see ExerciseAsyncCallback#onSuccess
    */
-  protected void useExercise(final U commonExercise) {
-    //  logger.info("ExerciseList.useExercise : commonExercise " + commonExercise.getOldID());
+  protected void showExercise(final U commonExercise) {
+    //  logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getOldID());
     // String itemID = commonExercise.getOldID();
     markCurrentExercise(commonExercise.getID());
 
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-/*        logger.info("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
+/*        logger.info("ExerciseList.showExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
       " or " + getCurrentExerciseID() + " instance " + instance);*/
-
-        createdPanel = makeExercisePanel(commonExercise);
+        createdPanel = factory.getExercisePanel(commonExercise);
+        innerContainer.add(createdPanel);
       }
     });
 
@@ -669,14 +666,16 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param exercise
-   * @see #useExercise
+   * @see #showExercise
    */
+/*
   private Panel makeExercisePanel(U exercise) {
     if (DEBUG) logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + getInstance());
     Panel exercisePanel = factory.getExercisePanel(exercise);
-    innerContainer.setWidget(exercisePanel);
+    innerContainer.add(exercisePanel);
     return exercisePanel;
   }
+*/
 
   /**
    * @param current
@@ -699,7 +698,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @param currentID
    * @return
-   * @see #useExercise
+   * @see #showExercise
    */
   public int getIndex(int currentID) {
     T shell = byID(currentID);
@@ -720,16 +719,19 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @see #removeExercise
    */
-  //@Override
   void removeCurrentExercise() {
-    Widget current = innerContainer.getWidget();
+  /*  Widget current = innerContainer.getWidget();
     if (current != null) {
       if (!innerContainer.remove(current)) {
         logger.warning("\tdidn't remove current widget");
-      } else innerContainer.getParent().removeStyleName("shadowBorder");
+      } else
+
+        innerContainer.getParent().removeStyleName("shadowBorder");
     } else {
       logger.warning("\tremoveCurrentExercise : no inner current widget for " + reportLocal());
-    }
+    }*/
+    innerContainer.clear();
+    innerContainer.getParent().removeStyleName("shadowBorder");
   }
 
   private String reportLocal() {
@@ -746,7 +748,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   void showEmptyExercise() {
     createdPanel = new SimplePanel(new Heading(3, "<b>Your search or selection did not match any items.</b>"));
     createdPanel.getElement().setId(EMPTY_PANEL);
-    innerContainer.setWidget(createdPanel);
+    innerContainer.add(createdPanel);
   }
 
   @Override

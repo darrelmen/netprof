@@ -35,6 +35,7 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.exercise.*;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,4 +45,6 @@ public interface ExerciseServiceAsync {
   <T extends Shell> void getExercise(int exid, boolean isFlashcardReq, AsyncCallback<T> async);
 
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
+
+  <T extends Shell> void getFullExercises(Collection<Integer> ids, boolean isFlashcardReq, AsyncCallback<Collection<T>> async);
 }
