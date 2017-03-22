@@ -228,12 +228,16 @@ public class AudioExport {
 
     logger.info("writeToStream overall name " + overallName);
     if (!skipAudio) {
-      writeFolderContents(zOut, toWrite, audioDAO,
+      writeFolderContents(zOut,
+          toWrite,
+          audioDAO,
           overallName,
-          isEnglish(language1), getCountryCode(language1), options, language1);
-
+          isEnglish(language1),
+          getCountryCode(language1),
+          options,
+          language1);
     } else {
-      logger.info("skip audio export.");
+      logger.info("writeToStream skip audio export.");
     }
 
     addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, baseName, isDefectList);
@@ -330,8 +334,13 @@ public class AudioExport {
     }
   }
 
+  /**
+   * @see #writeToStream
+   * @param language1
+   * @return
+   */
   private String getCountryCode(String language1) {
-    return LTSFactory.getID(LTSFactory.Language.valueOf(language1.toUpperCase()));
+    return LTSFactory.getLocale(language1);
   }
 
   private void addSpreadsheetToZip(Collection<CommonExercise> toWrite, Collection<String> typeOrder,
@@ -376,7 +385,6 @@ public class AudioExport {
                                    IAudioDAO audioDAO,
                                    String overallName,
                                    boolean isEnglish,
-                                   //   int projid,
                                    String countryCode,
                                    AudioExportOptions options,
                                    String language) throws Exception {

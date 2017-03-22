@@ -33,6 +33,7 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.SectionNode;
 
@@ -54,6 +55,7 @@ public class ProjectStartupInfo implements IsSerializable {
   private Map<String, Set<MatchInfo>> typeToDistinct;
   private Set<String> rootNodes;
   private Map<String, String> parentToChild;
+  private String locale;
 
   public ProjectStartupInfo() {
   } // for serialization
@@ -72,7 +74,9 @@ public class ProjectStartupInfo implements IsSerializable {
                             List<String> typeOrder,
                             Collection<SectionNode> sectionNodes,
                             int projectid,
-                            String language, boolean hasModel,
+                            String language,
+                            String locale,
+                            boolean hasModel,
                             Map<String, Set<MatchInfo>> typeToDistinct,
                             Set<String> rootNodes,
                             Map<String, String> parentToChild) {
@@ -81,6 +85,7 @@ public class ProjectStartupInfo implements IsSerializable {
     this.sectionNodes = sectionNodes;
     this.projectid = projectid;
     this.language = language;
+    this.locale = locale;
     this.hasModel = hasModel;
     this.typeToDistinct = typeToDistinct;
     this.rootNodes = rootNodes;
@@ -135,5 +140,9 @@ public class ProjectStartupInfo implements IsSerializable {
 
   public Map<String, String> getParentToChild() {
     return parentToChild;
+  }
+
+  public String getLocale() {
+    return locale;
   }
 }

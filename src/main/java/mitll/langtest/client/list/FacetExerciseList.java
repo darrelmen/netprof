@@ -56,6 +56,13 @@ import java.util.logging.Logger;
 public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
+  public static final String ENGLISH_ASC = "English (A-Z)";
+  public static final String ENGLISH_DSC = "English (Z-A)";
+  public static final String LENGTH_SHORT_TO_LONG = "Length : short to long";
+  public static final String LENGTH_LONG_TO_SHORT = "Length : long to short";
+  public static final String SCORE_LOW_TO_HIGH = "Score : low to high";
+  public static final String SCORE_DSC = "Score : high to low";
+
   public static final int MAX_TO_SHOW = 4;
   private static final int TOTAL = 32;
   private static final String SHOW_LESS = "<i>View fewer</i>";
@@ -96,75 +103,113 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     listHeader.add(w);
     w.add(new HTML("Sort by"));
     getSortBox(controller, w);
+    locale = controller.getProjectStartupInfo().getLocale();
+    logger.info("for " + controller.getLanguage() + " " + locale);
     //   w1.add(new )
     //  logger.info("made ex list....");
   }
 
+  private String locale;
+
   private void getSortBox(ExerciseController controller, DivWidget w) {
     ListBox w1 = new ListBox();
     w.add(w1);
-    w1.addItem("English");
     String language = controller.getLanguage();
-    w1.addItem(language);
-    String item = "Length - Short To Long";
-    w1.addItem(item);
-    String item1 = "Length - Long To Short";
-    w1.addItem(item1);
-    String score = "Score";
-    w1.addItem(score);
+
+
+    w1.addItem(ENGLISH_ASC);
+    w1.addItem(ENGLISH_DSC);
+    String langASC = language + " ascending";
+    w1.addItem(langASC);
+    String langDSC = language + " descending";
+    w1.addItem(langDSC);
+    w1.addItem(LENGTH_SHORT_TO_LONG);
+    w1.addItem(LENGTH_LONG_TO_SHORT);
+    w1.addItem(SCORE_LOW_TO_HIGH);
+    w1.addItem(SCORE_DSC);
     w1.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
         String selectedValue = w1.getSelectedValue();
-        if (selectedValue.equals(item)) {
-          logger.info("by difficulty ");
-          sortBy(new Comparator<CommonShell>() {
-            @Override
-            public int compare(CommonShell o1, CommonShell o2) {
-              int i = Integer.valueOf(o1.getNumPhones()).compareTo(o2.getNumPhones());
-              return compareShells(o1, o2, i);
-            }
+        if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
+          sortBy((o1, o2) -> {
+            return compareShells(o1, o2, compPhones(o1, o2));
           });
-        } else if (selectedValue.equals(item1)) {
-          logger.info("by difficulty other way ");
-          sortBy(new Comparator<CommonShell>() {
-            @Override
-            public int compare(CommonShell o1, CommonShell o2) {
-              int i = -1 * Integer.valueOf(o1.getNumPhones()).compareTo(o2.getNumPhones());
-              return compareShells(o1, o2, i);
-            }
+        } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
+          sortBy((o1, o2) -> {
+            int i = -1 * compPhones(o1, o2);
+            return compareShells(o1, o2, i);
           });
-        } else if (selectedValue.equals("English")) {
-          sortBy(new Comparator<CommonShell>() {
-            @Override
-            public int compare(CommonShell o1, CommonShell o2) {
-              return o1.getEnglish().compareTo(o2.getEnglish());
-            }
+        } else if (selectedValue.equals(ENGLISH_ASC)) {
+          sortBy((o1, o2) -> compEnglish(o1, o2));
+        } else if (selectedValue.equals(ENGLISH_DSC)) {
+          sortBy((o1, o2) -> -1 * compEnglish(o1, o2));
+        } else if (selectedValue.equals(langASC)) {
+          sortBy((o1, o2) -> compForeign(o1, o2));
+        } else if (selectedValue.equals(langDSC)) {
+          sortBy((o1, o2) -> -1 * compForeign(o1, o2));
+        } else if (selectedValue.equals(SCORE_LOW_TO_HIGH)) {
+          sortBy((o1, o2) -> {
+            int i = Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+            return compareShells(o1, o2, i);
           });
-        } else if (selectedValue.equals(language)) {
-          sortBy(new Comparator<CommonShell>() {
-            @Override
-            public int compare(CommonShell o1, CommonShell o2) {
-              return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
-            }
-          });
-        } else if (selectedValue.equals(score)) {
-          sortBy(new Comparator<CommonShell>() {
-            @Override
-            public int compare(CommonShell o1, CommonShell o2) {
-              int i = Float.valueOf(o1.getScore()).compareTo(o2.getScore());
-              return compareShells(o1, o2, i);
-            }
+        } else if (selectedValue.equals(SCORE_DSC)) {
+          sortBy((o1, o2) -> {
+            int i = -1 * Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+            return compareShells(o1, o2, i);
           });
         }
       }
     });
   }
 
+  private int compPhones(CommonShell o1, CommonShell o2) {
+    return Integer.valueOf(o1.getNumPhones()).compareTo(o2.getNumPhones());
+  }
+/*
+  private String getLocale(String lang) {
+    switch (lang) {
+      case "Pashto":
+        return "ps";
+      case "Spanish":
+        return "es";
+      default:
+        return "en";
+    }
+  }*/
+
   private int compareShells(CommonShell o1, CommonShell o2, int i) {
-    if (i == 0) i = o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
-    if (i == 0) i = o1.getEnglish().compareTo(o2.getEnglish());
+    if (i == 0) i = compForeign(o1, o2);
+    if (i == 0) i = compEnglish(o1, o2);
     return i;
+  }
+
+  public native int compare(String source, String target); /*-{
+      return source.localeCompare(target);
+  }-*/
+
+  public native int compareWithLocale(String source, String target, String locale); /*-{
+      return source.localeCompare(target, locale);
+  }-*/
+
+
+  public static native int compareAgain(String source, String target) /*-{
+      return source.localeCompare(target);
+  }-*/;
+
+  public static native int compareAgainLocale(String source, String target, String locale) /*-{
+      return source.localeCompare(target);
+  }-*/;
+
+  private int compForeign(CommonShell o1, CommonShell o2) {
+    //   return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
+    //  return compareWithLocale(o1.getForeignLanguage(), o2.getForeignLanguage(), locale);
+   // return compareAgain(o1.getForeignLanguage(), o2.getForeignLanguage());
+    return compareAgainLocale(o1.getForeignLanguage(), o2.getForeignLanguage(),locale);
+  }
+
+  private int compEnglish(CommonShell o1, CommonShell o2) {
+    return o1.getEnglish().trim().toLowerCase().compareTo(o2.getEnglish().toLowerCase().trim());
   }
 
   /**
@@ -183,6 +228,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     addWidgets();
     return false;
   }
+
 
   /**
    * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
@@ -258,7 +304,6 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     }
 
     addFacetsForReal(typeToDistinct, nav);
-    makeDefaultSelections();
     pushFirstListBoxSelection();
   }
 
@@ -683,50 +728,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     // keep the download link info in sync with the selection
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
     //  logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
-
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
-
-/*    if (typeToSection.isEmpty()) {
-   //   showDefaultStatus();
-    } else {
-      StringBuilder status = new StringBuilder();
-      // logger.info("\tshowSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
-      for (String type : typeOrder) {
-        Collection<String> selectedItems = typeToSection.get(type);
-        if (selectedItems != null) {
-          List<String> sorted = new ArrayList<>();
-          for (String selectedItem : selectedItems) {
-            sorted.add(selectedItem);
-          }
-          Collections.sort(sorted);
-          StringBuilder status2 = new StringBuilder();
-          for (String item : sorted) status2.append(item).append(", ");
-          String s = status2.toString();
-          if (!s.isEmpty()) s = s.substring(0, s.length() - 2);
-          String statusForType = type + " " + s;
-          status.append(statusForType).append(" and ");
-        }
-      }
-
-      String text = status.toString();
-      if (text.length() > 0) text = text.substring(0, text.length() - " and ".length());
-      statusHeader.setText(text);
-    }*/
-  }
-
-/*
-  private void showDefaultStatus() {
-    statusHeader.setText(SHOWING_ALL_ENTRIES);
-  }
-*/
-
-
-  /**
-   * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.amas.ExerciseListWrapper)
-   */
-  @Override
-  protected void gotEmptyExerciseList() {
-    showEmptySelection();
   }
 
   /**
@@ -744,17 +746,18 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   }
 
   /**
-   * @seex #addChoiceRow
+   * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.amas.ExerciseListWrapper)
    */
-  private void makeDefaultSelections() {
-    //for (SectionWidget v : sectionWidgetContainer.getValues()) v.selectFirst();
+  @Override
+  protected void gotEmptyExerciseList() {
+    // showEmptySelection();
   }
 
   protected FacetContainer getSectionWidgetContainer() {
     return new FacetContainer() {
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
-        logger.info("restoreListBoxState t->sel " + selectionState);
+        // logger.info("restoreListBoxState t->sel " + selectionState);
 
         Map<String, String> newTypeToSelection = new HashMap<>();
         for (String type : typeOrder) {
@@ -769,14 +772,14 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
       @Override
       public String getHistoryToken() {
         StringBuilder builder = new StringBuilder();
-        logger.info("getHistoryToken t->sel " + typeToSelection);
+        //logger.info("getHistoryToken t->sel " + typeToSelection);
 
         for (Map.Entry<String, String> pair : typeToSelection.entrySet()) {
           builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
         }
 
         String s = builder.toString();
-        logger.info("getHistoryToken token " + s);
+        //logger.info("getHistoryToken token " + s);
 
         return s;
       }
@@ -785,22 +788,6 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
       public int getNumSelections() {
         return 0;
       }
-
-      /**
-       * @see #restoreListBoxState(SelectionState, Collection)
-       * @param type
-       * @param sections
-       */
-//      protected void selectItem(String type, Collection<String> sections) {
-//        SectionWidget widget = sectionWidgetContainer.getWidget(type);
-//        widget.selectItem(sections.iterator().next());
-//      }
     };
   }
-
-/*  private class FacetWidget {
-    void selectItem(String item) {
-// ?
-    }
-  }*/
 }

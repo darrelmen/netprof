@@ -48,6 +48,7 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
+import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -592,6 +593,7 @@ public class ProjectManagement implements IProjectManagement {
             sectionHelper.getSectionNodesForTypes(),
             project1.id(),
             project1.language(),
+            LTSFactory.getLocale(project1.language()),
             hasModel(project1),
             sectionHelper.getTypeToDistinct(),
             sectionHelper.getRootTypes(),

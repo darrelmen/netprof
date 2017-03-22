@@ -72,8 +72,8 @@ public class LTSFactory {
     FRENCH,
     GERMAN,
     HINDI,
-    JAPANESE,
     IRAQI,
+    JAPANESE,
     LEVANTINE,
     KOREAN,
     MANDARIN,
@@ -93,7 +93,9 @@ public class LTSFactory {
   private final LTS unknown = new EmptyLTS();
   private LTS ltsForLanguage = unknown; /// attempt to deal with undefined LTS...
 
-  public static boolean isEmpty(LTS lts) { return lts.getClass() == EmptyLTS.class; }
+  public static boolean isEmpty(LTS lts) {
+    return lts.getClass() == EmptyLTS.class;
+  }
 
   /**
    * TODO : what about Japanese, Korean, ... for LTS?
@@ -106,7 +108,7 @@ public class LTSFactory {
    */
   private LTSFactory(Language thisLanguage) {
     this.thisLanguage = thisLanguage;
-   // logger.info("got " +thisLanguage + " " + thisLanguage.name());
+    // logger.info("got " +thisLanguage + " " + thisLanguage.name());
     String name = thisLanguage.name();
     String classPrefix = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
     String className = "corpus." + classPrefix + "LTS";
@@ -139,7 +141,9 @@ public class LTSFactory {
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
    */
-  public LTS getLTSClass() { return ltsForLanguage; }
+  public LTS getLTSClass() {
+    return ltsForLanguage;
+  }
 
   /**
    * @param thisLanguage
@@ -159,9 +163,9 @@ public class LTSFactory {
   }
 
   /**
-   * @see Scoring#sort(List)
    * @param toSort
    * @param <T>
+   * @see Scoring#sort
    */
   public <T extends CommonExercise> void sort(List<T> toSort) {
     Collator collator = getCollator();
@@ -181,40 +185,69 @@ public class LTSFactory {
     });
   }
 
+  public static String getLocale(String language1) {
+    Language lang = null;
+    try {
+      lang = Language.valueOf(language1.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.error("getLocale for unknown language " + language1);
+      lang = Language.ENGLISH;
+    }
+    return LTSFactory.getID(lang);
+  }
+
   /**
+   * Consistent with BCP 47.
+   * <p>
+   * These are based on lookups in <a href='http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry'>subtag-registry</a>
+   * <p>
+   * Also see <a href='https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation'>Locale identification and negotiation</a>
+   *
    * @param lang
    * @return
-   * @see AudioExport#writeContextToStream
+   * @see AudioExport#getCountryCode
    */
-  public static String getID(Language lang) {
+  private static String getID(Language lang) {
     String locale = "en";
     switch (lang) {
       case ARABIC:
         locale = "ar";
         break;
+      case CROATIAN:
+        locale = "hr";
+        break;
       case DARI:
-        locale = "da";
+        locale = "prs";
         break;
       case EGYPTIAN:
-        locale = "ae";
+        locale = "arz";
         break;
-      case FARSI:
+      case FARSI:  // or Persian
         locale = "fa";
+        break;
+      case FRENCH:
+        locale = "fr";
+        break;
+      case GERMAN:
+        locale = "de";
+        break;
+      case HINDI:
+        locale = "hi";
+        break;
+      case IRAQI:
+        locale = "ar-IQ";
+        break;
+      case JAPANESE:
+        locale = "ja";
         break;
       case KOREAN:
         locale = "ko";
         break;
-      case JAPANESE:
-        locale = "jp";
-        break;
-      case IRAQI:
-        locale = "iq";
-        break;
       case LEVANTINE:
-        locale = "al";
+        locale = "ar-SY";
         break;
       case MANDARIN:
-        locale = "mn";
+        locale = "cmn";
         break;
       case MSA:
         locale = "ar";
@@ -225,11 +258,17 @@ public class LTSFactory {
       case RUSSIAN:
         locale = "ru";
         break;
+      case SERBIAN:
+        locale = "sr";
+        break;
+      case SORANI: // Kurdish sorani
+        locale = "ku";
+        break;
       case SPANISH:
         locale = "es";
         break;
       case SUDANESE:
-        locale = "as";
+        locale = "apd";
         break;
       case TAGALOG:
         locale = "tl";

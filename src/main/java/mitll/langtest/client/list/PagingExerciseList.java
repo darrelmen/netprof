@@ -262,7 +262,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     if (optionalWidget != null) column.add(optionalWidget);
 
     boolean sort = listOptions.isSort();
-    if (sort) logger.warning("sorting table for " + this);
+    //if (sort) logger.warning("sorting table for " + this);
     // row 2
     add(pagingContainer.getTableWithPager(sort));
   }
