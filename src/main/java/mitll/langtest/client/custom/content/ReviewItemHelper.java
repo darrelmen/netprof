@@ -40,9 +40,9 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
@@ -172,7 +172,7 @@ public class ReviewItemHelper extends NPFHelper {
         }
 
         @Override
-        protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
+        protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
           // row 1
           Panel column = new FlowPanel();
           add(column);

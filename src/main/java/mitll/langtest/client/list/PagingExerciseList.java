@@ -45,9 +45,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PopupHelper;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.*;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.*;
 
@@ -74,7 +72,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   protected final ExerciseController controller;
   protected ClickablePagingContainer<T> pagingContainer;
 
-  private TypeAhead typeAhead;
+  private ITypeAhead typeAhead;
   long userListID = -1;
   private int unaccountedForVertical = 160;
   private boolean onlyExamples;
@@ -103,15 +101,15 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 //    if (showFirstNotCompleted) logger.info("show first completed for " + instance);
   }
 
-  public void sortBy(Comparator<T> comp) {
+   void sortBy(Comparator<T> comp) {
     pagingContainer.sortBy(comp);
     loadFirst();
   }
 
-  @Override
+/*  @Override
   protected Set<Integer> getKeys() {
     return pagingContainer.getKeys();
-  }
+  }*/
 
   @Override
   public void setState(int id, STATE state) {
@@ -145,7 +143,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @paramx setTypeAheadText
    * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
-  void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+  void loadExercises(String selectionState,
+                     String prefix,
+                     boolean onlyWithAudioAnno,
+                     boolean onlyUnrecorded,
+                     boolean onlyDefaultUser,
+                     boolean onlyUninspected) {
     scheduleWaitTimer();
     logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
@@ -179,7 +182,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @return
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
+   * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
   abstract protected ClickablePagingContainer<T> makePagingContainer();
 
@@ -221,13 +224,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     }
     return super.findFirstExercise();
   }
-
-  public void report() {
-    for (T es : pagingContainer.getExercises()) {
-      logger.info(userListID + " has " + es);
-    }
-  }
-
   /**
    * TODO : Not sure if this is needed anymore
    *
@@ -239,7 +235,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param v
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList
+   * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList
    */
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
@@ -248,23 +244,24 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * add left side components
+   * add left side components to vertical panel - rows in a
    *
    * @param pagingContainer
    * @see #addComponents
    */
-  protected void addTableWithPager(ClickablePagingContainer<T> pagingContainer) {
+  protected void addTableWithPager(SimplePagingContainer<T> pagingContainer) {
     // row 1
     Panel column = new FlowPanel();
     add(column);
     addTypeAhead(column);
-    DivWidget optionalWidget = getOptionalWidget();
-    if (optionalWidget != null) column.add(optionalWidget);
 
-    boolean sort = listOptions.isSort();
-    //if (sort) logger.warning("sorting table for " + this);
+    {
+      DivWidget optionalWidget = getOptionalWidget();
+      if (optionalWidget != null) column.add(optionalWidget);
+    }
+
     // row 2
-    add(pagingContainer.getTableWithPager(sort));
+    add(pagingContainer.getTableWithPager(listOptions.isSort()));
   }
 
   /**
@@ -311,18 +308,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     loadExercises(getHistoryTokenFromUIState(text, -1), text, false, false, false, false);
   }
 
-  void scheduleWaitTimer() {
-    if (waitTimer != null) {
-      waitTimer.cancel();
-    }
-    waitTimer = new Timer() {
-      @Override
-      public void run() {
-        waitCursor.setUrl(animated);
-      }
-    };
-    waitTimer.schedule(700);
-  }
 
   String getTypeAheadText() {
     return typeAhead != null ? typeAhead.getText() : "";
@@ -366,14 +351,23 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     waitCursor.setUrl(white);
   }
 
+  void scheduleWaitTimer() {
+    if (waitTimer != null) {
+      waitTimer.cancel();
+    }
+    waitTimer = new Timer() {
+      @Override
+      public void run() {
+        waitCursor.setUrl(animated);
+      }
+    };
+    waitTimer.schedule(700);
+  }
+
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#gotEmptyExerciseList
+   * @see SimpleSelectExerciseList#gotEmptyExerciseList
    */
-  protected void showEmptySelection() {
-/*
-    logger.info("for " + getInstance() +
-        " showing no items match relative to " + typeAhead.getWidget().getElement().getExID() + " parent " + typeAhead.getWidget().getParent().getElement().getExID());
-*/
+  void showEmptySelection() {
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
@@ -476,9 +470,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see ExerciseList#rememberExercises(List)
    */
   @Override
-  public void addExercise(T es) {
-    pagingContainer.addExercise(es);
-  }
+  public void addExercise(T es) {    pagingContainer.addExercise(es);  }
 
   /**
    * @param after
@@ -537,7 +529,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pagingContainer.redraw();
   }
 
-  boolean isOnlyExamples() {
+  private boolean isOnlyExamples() {
     return onlyExamples;
   }
 

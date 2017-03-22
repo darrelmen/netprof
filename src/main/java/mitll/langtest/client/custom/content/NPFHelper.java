@@ -94,7 +94,6 @@ public class NPFHelper implements RequiresResize {
     this.controller = controller;
     this.showQC = showQC;
     this.showFirstNotCompleted = showFirstNotCompleted;
-    //   logger.info("this " + this.getClass() + " shows first completed = " + showFirstNotCompleted);
   }
 
   /**

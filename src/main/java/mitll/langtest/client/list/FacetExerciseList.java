@@ -33,19 +33,18 @@
 package mitll.langtest.client.list;
 
 
-import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +52,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget> {
+public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
+  //extends NPExerciseList<ListSectionWidget> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   public static final String ENGLISH_ASC = "English (A-Z)";
@@ -70,7 +70,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   public static final String ANY = "Any";
   public static final String MENU_ITEM = "menuItem";
 
-  private static final int CLASSROOM_VERTICAL_EXTRA = 270;
+  //  private static final int CLASSROOM_VERTICAL_EXTRA = 270;
 
   private List<String> typeOrder;
   private final Panel sectionPanel;
@@ -83,141 +83,86 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
    * @param controller
    * @param listOptions
    * @param listHeader
+   * @see
    */
   public FacetExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
                            ExerciseController controller,
-                           ListOptions listOptions, DivWidget listHeader) {
+                           ListOptions listOptions,
+                           DivWidget listHeader) {
     super(currentExerciseVPanel, controller, listOptions.setShowTypeAhead(true));
 
     sectionPanel = new DivWidget();
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
+
+
     secondRow.add(sectionPanel);
-    setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
+    setUnaccountedForVertical(0);//CLASSROOM_VERTICAL_EXTRA);
     downloadHelper = new DownloadHelper(this);
 
     this.listHeader = listHeader;
+
+    DivWidget breadRow = new DivWidget();
+    //  breadRow.addStyleName("floatLeftList");
+    breadRow.add(new HTML("breadcrumbs go here"));
+    listHeader.add(breadRow);
+//    left.add()
+
+    DivWidget pagerAndSort = new DivWidget();
+
+    listHeader.add(pagerAndSort);
+    pagerAndSort.add(tableWithPager);
+    tableWithPager.addStyleName("floatLeftList");
+    pagerAndSort.add(addSortBox(controller));
+
+//    pagingContainer.hide();
+  }
+
+  @NotNull
+  private DivWidget addSortBox(ExerciseController controller) {
     DivWidget w = new DivWidget();
     w.addStyleName("floatRight");
-    listHeader.add(w);
-    w.add(new HTML("Sort by"));
-    getSortBox(controller, w);
-    locale = controller.getProjectStartupInfo().getLocale();
-    logger.info("for " + controller.getLanguage() + " " + locale);
-    //   w1.add(new )
-    //  logger.info("made ex list....");
-  }
-
-  private String locale;
-
-  private void getSortBox(ExerciseController controller, DivWidget w) {
-    ListBox w1 = new ListBox();
+    HTML w1 = new HTML("Sort by");
+    w1.addStyleName("rightFiveMargin");
+    w1.addStyleName("floatLeftList");
     w.add(w1);
-    String language = controller.getLanguage();
-
-
-    w1.addItem(ENGLISH_ASC);
-    w1.addItem(ENGLISH_DSC);
-    String langASC = language + " ascending";
-    w1.addItem(langASC);
-    String langDSC = language + " descending";
-    w1.addItem(langDSC);
-    w1.addItem(LENGTH_SHORT_TO_LONG);
-    w1.addItem(LENGTH_LONG_TO_SHORT);
-    w1.addItem(SCORE_LOW_TO_HIGH);
-    w1.addItem(SCORE_DSC);
-    w1.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        String selectedValue = w1.getSelectedValue();
-        if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
-          sortBy((o1, o2) -> {
-            return compareShells(o1, o2, compPhones(o1, o2));
-          });
-        } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
-          sortBy((o1, o2) -> {
-            int i = -1 * compPhones(o1, o2);
-            return compareShells(o1, o2, i);
-          });
-        } else if (selectedValue.equals(ENGLISH_ASC)) {
-          sortBy((o1, o2) -> compEnglish(o1, o2));
-        } else if (selectedValue.equals(ENGLISH_DSC)) {
-          sortBy((o1, o2) -> -1 * compEnglish(o1, o2));
-        } else if (selectedValue.equals(langASC)) {
-          sortBy((o1, o2) -> compForeign(o1, o2));
-        } else if (selectedValue.equals(langDSC)) {
-          sortBy((o1, o2) -> -1 * compForeign(o1, o2));
-        } else if (selectedValue.equals(SCORE_LOW_TO_HIGH)) {
-          sortBy((o1, o2) -> {
-            int i = Float.valueOf(o1.getScore()).compareTo(o2.getScore());
-            return compareShells(o1, o2, i);
-          });
-        } else if (selectedValue.equals(SCORE_DSC)) {
-          sortBy((o1, o2) -> {
-            int i = -1 * Float.valueOf(o1.getScore()).compareTo(o2.getScore());
-            return compareShells(o1, o2, i);
-          });
-        }
-      }
-    });
+    w.add(new ListSorting<>(this).getSortBox(controller));
+    return w;
   }
 
-  private int compPhones(CommonShell o1, CommonShell o2) {
-    return Integer.valueOf(o1.getNumPhones()).compareTo(o2.getNumPhones());
-  }
-/*
-  private String getLocale(String lang) {
-    switch (lang) {
-      case "Pashto":
-        return "ps";
-      case "Spanish":
-        return "es";
-      default:
-        return "en";
-    }
-  }*/
 
-  private int compareShells(CommonShell o1, CommonShell o2, int i) {
-    if (i == 0) i = compForeign(o1, o2);
-    if (i == 0) i = compEnglish(o1, o2);
-    return i;
-  }
+  @Override
+  protected void addMinWidthStyle(Panel leftColumn) {  }
 
-  public native int compare(String source, String target); /*-{
-      return source.localeCompare(target);
-  }-*/
+  Panel tableWithPager;
 
-  public native int compareWithLocale(String source, String target, String locale); /*-{
-      return source.localeCompare(target, locale);
-  }-*/
-
-
-  public static native int compareAgain(String source, String target) /*-{
-      return source.localeCompare(target);
-  }-*/;
-
-  public static native int compareAgainLocale(String source, String target, String locale) /*-{
-      return source.localeCompare(target);
-  }-*/;
-
-  private int compForeign(CommonShell o1, CommonShell o2) {
-    //   return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
-    //  return compareWithLocale(o1.getForeignLanguage(), o2.getForeignLanguage(), locale);
-   // return compareAgain(o1.getForeignLanguage(), o2.getForeignLanguage());
-    return compareAgainLocale(o1.getForeignLanguage(), o2.getForeignLanguage(),locale);
-  }
-
-  private int compEnglish(CommonShell o1, CommonShell o2) {
-    return o1.getEnglish().trim().toLowerCase().compareTo(o2.getEnglish().toLowerCase().trim());
+  protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
+    tableWithPager = pagingContainer.getTableWithPager(listOptions.isSort());
   }
 
   /**
-   * @see PagingExerciseList#PagingExerciseList
+   * @return
+   * @see mitll.langtest.client.list.PagingExerciseList#addComponents
    */
-  @Override
-  protected void addComponents() {
-    addTableWithPager(makePagingContainer());
+  protected ClickablePagingContainer<CommonShell> makePagingContainer() {
+    //  final PagingExerciseList<CommonShell, CommonExercise> outer = this;
+//    if (logger == null) {
+//      logger = Logger.getLogger("NPExerciseList");
+//    }
+//    logger.info("makePagingContainer : for " + getInstance() + " show first not complete " + showFirstNotCompleted);
+
+    pagingContainer =
+        new ClickablePagingContainer<CommonShell>(controller
+        ) {
+          public void gotClickOnItem(CommonShell e) {
+          }
+
+          @Override
+          protected void addColumnsToTable(boolean sortEnglish) {
+          }
+        };
+    return pagingContainer;
   }
 
   /**
@@ -229,7 +174,6 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
     return false;
   }
 
-
   /**
    * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
@@ -238,6 +182,7 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   @Override
   public void addWidgets() {
     sectionPanel.clear();
+    addTypeAhead(sectionPanel);
     sectionPanel.add(typeOrderContainer = getWidgetsForTypes());
   }
 
@@ -252,8 +197,6 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   private Panel getWidgetsForTypes() {
     final UnorderedList container = new UnorderedList();
     container.getElement().setId("typeOrderContainer");
-//    container.getElement().getStyle().setPaddingLeft(2, Style.Unit.PX);
-//    container.getElement().getStyle().setPaddingRight(2, Style.Unit.PX);
     getTypeOrder(container);
     return container;
   }
@@ -261,11 +204,8 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   private void getTypeOrder(final UnorderedList container) {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     typeOrder = projectStartupInfo.getTypeOrder();
-    //  logger.info("getTypeOrder type order is " + typeOrder);
     addFacets(container, projectStartupInfo.getRootNodes(), projectStartupInfo.getTypeToDistinct());
   }
-
-  private Panel firstTypeRow;
 
   /**
    * structure
@@ -317,31 +257,6 @@ public abstract class FacetExerciseList extends NPExerciseList<ListSectionWidget
   private void setTypeToSelection(Map<String, String> typeToSelection) {
     this.typeToSelection = typeToSelection;
   }
-
-/*
-  private static class TypeInfo {
-    private String selection;
-    private boolean showAll;
-
-    public TypeInfo(String selection,boolean showAll) {
-      this.selection = selection;
-      this.showAll = showAll;
-    }
-
-    public String getSelection() {
-      return selection;
-    }
-
-    public boolean isShowAll() {
-      return showAll;
-    }
-
-    public String toString() { return selection + (showAll ? "show all":""); }
-
-    public void setShowAll(boolean showAll) {
-      this.showAll = showAll;
-    }
-  }*/
 
   /**
    * ul

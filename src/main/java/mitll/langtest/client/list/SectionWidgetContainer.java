@@ -44,10 +44,11 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 4/27/16.
  */
-public abstract class SectionWidgetContainer<T extends SectionWidget> implements FacetContainer {
+public class SectionWidgetContainer<T extends SectionWidget> implements FacetContainer {
   private final Logger logger = Logger.getLogger("SectionWidgetContainer");
 
   private static final boolean DEBUG = false;
+  static final String ANY = "Clear";
 
   private final Map<String, T> typeToBox = new HashMap<>();
 
@@ -201,7 +202,7 @@ public abstract class SectionWidgetContainer<T extends SectionWidget> implements
   }
 
   protected String getAnySelectionValue() {
-    return HistoryExerciseList.ANY;
+    return ANY;
   }
 
   /**
@@ -256,7 +257,7 @@ public abstract class SectionWidgetContainer<T extends SectionWidget> implements
    * @param sections
    * @see #restoreListBoxState
    */
-  protected abstract void selectItem(String type, Collection<String> sections);
+  protected void selectItem(String type, Collection<String> sections) {}
 //  {
 //    logger.warning("doing NO OP");
 //  }

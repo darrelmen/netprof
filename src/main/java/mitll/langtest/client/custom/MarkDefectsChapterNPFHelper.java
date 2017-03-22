@@ -40,10 +40,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
-import mitll.langtest.client.exercise.DefectEvent;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -109,7 +106,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override
-          protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer) {
+          protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
             // row 1
             Panel column = new FlowPanel();
             add(column);

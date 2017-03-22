@@ -60,17 +60,15 @@ import java.util.logging.Logger;
  * Time: 3:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell, V extends SectionWidget>
+public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell>
     extends PagingExerciseList<T, U>
     implements ValueChangeHandler<String> {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
 
-  public static final String SECTION_SEPARATOR = SelectionState.SECTION_SEPARATOR;
-  public static final String ANY = "Clear";
-
+  static final String SECTION_SEPARATOR = SelectionState.SECTION_SEPARATOR;
   private HandlerRegistration handlerRegistration;
   protected long userID;
-  protected final FacetContainer sectionWidgetContainer;
+  private final FacetContainer sectionWidgetContainer;
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
@@ -116,8 +114,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
     String s = (hasItemID ?
         super.getHistoryTokenFromUIState(search, id) :
-        "search=" + search ) + SECTION_SEPARATOR+
-        sectionWidgetContainer.getHistoryToken() +SECTION_SEPARATOR+
+        "search=" + search) + SECTION_SEPARATOR +
+        sectionWidgetContainer.getHistoryToken() + SECTION_SEPARATOR +
         instanceSuffix;
 
     if (DEBUG || true) {
@@ -472,10 +470,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         if (DEBUG) {
           logger.info("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
               "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
-              " instance " + getInstance() +
+              " instance " + getInstance() //+
               //" user " + controller.getUser() +
 //              " unrecorded " + getUnrecorded() +
-              " only examples " + isOnlyExamples());
+              //" only examples " + isOnlyExamples()
+          );
         }
         getExerciseIDs(typeToSection, prefix, exerciseID, request);
       } catch (Exception e) {
@@ -541,7 +540,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see PagingExerciseList#loadExercises
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  public SelectionState getSelectionState(String token) {
+  protected SelectionState getSelectionState(String token) {
     return new SelectionState(token, !allowPlusInURL);
   }
 

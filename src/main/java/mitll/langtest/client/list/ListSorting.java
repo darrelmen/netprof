@@ -1,0 +1,131 @@
+package mitll.langtest.client.list;
+
+import com.github.gwtbootstrap.client.ui.ListBox;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
+
+import java.util.Comparator;
+
+/**
+ * Created by go22670 on 3/22/17.
+ */
+public class ListSorting<T extends CommonShell, U extends Shell> {
+  private final PagingExerciseList<T, U> exerciseList;
+  private String locale;
+
+  public static final String ENGLISH_ASC = "English (A-Z)";
+  public static final String ENGLISH_DSC = "English (Z-A)";
+  public static final String LENGTH_SHORT_TO_LONG = "Length : short to long";
+  public static final String LENGTH_LONG_TO_SHORT = "Length : long to short";
+  public static final String SCORE_LOW_TO_HIGH = "Score : low to high";
+  public static final String SCORE_DSC = "Score : high to low";
+
+  public static final int MAX_TO_SHOW = 4;
+  public static final String ANY = "Any";
+  public static final String MENU_ITEM = "menuItem";
+
+  ListSorting(PagingExerciseList<T, U> exerciseList) {
+    this.exerciseList = exerciseList;
+    locale = exerciseList.controller.getProjectStartupInfo().getLocale();
+  }
+
+  private void sortBy(Comparator<T> comp) {
+    exerciseList.sortBy(comp);
+  }
+
+  ListBox getSortBox(ExerciseController controller) {
+    ListBox w1 = new ListBox();
+
+    String language = controller.getLanguage();
+
+    w1.addItem(ENGLISH_ASC);
+    w1.addItem(ENGLISH_DSC);
+    String langASC = language + " ascending";
+    w1.addItem(langASC);
+    String langDSC = language + " descending";
+    w1.addItem(langDSC);
+    w1.addItem(LENGTH_SHORT_TO_LONG);
+    w1.addItem(LENGTH_LONG_TO_SHORT);
+    w1.addItem(SCORE_LOW_TO_HIGH);
+    w1.addItem(SCORE_DSC);
+    w1.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        String selectedValue = w1.getSelectedValue();
+        if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
+          sortBy((o1, o2) -> {
+            return compareShells(o1, o2, compPhones(o1, o2));
+          });
+        } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
+          sortBy((o1, o2) -> {
+            int i = -1 * compPhones(o1, o2);
+            return compareShells(o1, o2, i);
+          });
+        } else if (selectedValue.equals(ENGLISH_ASC)) {
+          sortBy((o1, o2) -> compEnglish(o1, o2));
+        } else if (selectedValue.equals(ENGLISH_DSC)) {
+          sortBy((o1, o2) -> -1 * compEnglish(o1, o2));
+        } else if (selectedValue.equals(langASC)) {
+          sortBy((o1, o2) -> compForeign(o1, o2));
+        } else if (selectedValue.equals(langDSC)) {
+          sortBy((o1, o2) -> -1 * compForeign(o1, o2));
+        } else if (selectedValue.equals(SCORE_LOW_TO_HIGH)) {
+          sortBy((o1, o2) -> {
+            int i = Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+            return compareShells(o1, o2, i);
+          });
+        } else if (selectedValue.equals(SCORE_DSC)) {
+          sortBy((o1, o2) -> {
+            int i = -1 * Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+            return compareShells(o1, o2, i);
+          });
+        }
+      }
+    });
+
+    return w1;
+  }
+
+  private int compPhones(CommonShell o1, CommonShell o2) {
+    return Integer.valueOf(o1.getNumPhones()).compareTo(o2.getNumPhones());
+  }
+
+
+  private int compareShells(CommonShell o1, CommonShell o2, int i) {
+    if (i == 0) i = compForeign(o1, o2);
+    if (i == 0) i = compEnglish(o1, o2);
+    return i;
+  }
+
+  public native int compare(String source, String target); /*-{
+      return source.localeCompare(target);
+  }-*/
+
+  public native int compareWithLocale(String source, String target, String locale); /*-{
+      return source.localeCompare(target, locale);
+  }-*/
+
+
+  public static native int compareAgain(String source, String target) /*-{
+      return source.localeCompare(target);
+  }-*/;
+
+  public static native int compareAgainLocale(String source, String target, String locale) /*-{
+      return source.localeCompare(target);
+  }-*/;
+
+  private int compForeign(CommonShell o1, CommonShell o2) {
+    //   return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
+    //  return compareWithLocale(o1.getForeignLanguage(), o2.getForeignLanguage(), locale);
+    // return compareAgain(o1.getForeignLanguage(), o2.getForeignLanguage());
+    return compareAgainLocale(o1.getForeignLanguage(), o2.getForeignLanguage(), locale);
+  }
+
+  private int compEnglish(CommonShell o1, CommonShell o2) {
+    return o1.getEnglish().trim().toLowerCase().compareTo(o2.getEnglish().toLowerCase().trim());
+  }
+
+}

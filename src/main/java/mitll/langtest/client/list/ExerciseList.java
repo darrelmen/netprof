@@ -72,7 +72,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
 
   private static final int MAX_MSG_LEN = 200;
-  // boolean incorrectFirstOrder = false;
 
   protected SimplePanel innerContainer;
   protected final ExerciseServiceAsync service;
@@ -83,7 +82,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   protected Panel createdPanel;
   private int lastReqID = 0;
   final boolean allowPlusInURL;
-  // private final String instance;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
   boolean doShuffle;
 
@@ -113,7 +111,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.userState = controller.getUserState();
     this.controller = controller;
-    //this.incorrectFirstOrder = listOptions.isIncorrectFirst();
     addWidgets(currentExerciseVPanel);
     getElement().setId("ExerciseList_" + listOptions.getInstance());
   }
@@ -175,6 +172,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     getExercises(getUser());
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#doAfterEditComplete
+   */
   @Override
   public void reloadWithCurrent() {
     reloadWith(getCurrentExerciseID());
@@ -365,7 +365,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private void dealWithRPCError(Throwable caught) {
     String message = caught.getMessage();
     if (message != null && message.length() > MAX_MSG_LEN) message = message.substring(0, MAX_MSG_LEN);
-    if (!message.trim().equals("0")) {
+    if (message != null && !message.trim().equals("0")) {
       feedback.showErrorMessage("Server error", "Please clear your cache and reload the page. (" +
           message +
           ")");
@@ -438,20 +438,15 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 //    }
 
     goToFirst(searchIfAny, exerciseID);
-
-    listLoaded();
   }
 
   protected void goToFirst(String searchIfAny, int exerciseID) {
     if (exerciseID < 0) {
       loadFirstExercise(searchIfAny);
     } else {
-      logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny +"'");
+      logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny + "'");
       pushFirstSelection(exerciseID, searchIfAny);
     }
-  }
-
-  protected void listLoaded() {
   }
 
   private boolean isStaleResponse(ExerciseListWrapper result) {
@@ -546,24 +541,15 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     if (hasExercise(id)) {
-//      if (//!getCurrentExerciseID().equals(id) ||
-//          createdPanel == null ||
-//          (
-//              createdPanel.getElement().getExID().equals(EMPTY_PANEL))) {
       askServerForExercise(id);
-//      } else {
-//        logger.info("got " + hasExercise(id) + " current " + getCurrentExerciseID() + " vs " + id);
-//      }
-    }
-/*    else if (id != EditItem.NEW_EXERCISE_ID) {
-      logger.warning("checkAndAskServer : can't load " + id);
-    }*/
-    else {
+    } else {
       logger.warning("checkAndAskServer : skipping request for " + id);
     }
   }
 
+/*
   protected abstract Set<Integer> getKeys();
+*/
 
   @Override
   public boolean loadByID(int id) {
@@ -701,7 +687,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     int i = getIndex(current.getID());
     if (i == -1) {
       logger.warning("ExerciseList.getNextExercise : huh? couldn't find " + current +
-          " in " + getSize() + " exercises : " + getKeys());
+          " in " + getSize() //+ " exercises : " + getKeys()
+      );
     } else {
       Shell next = getAt(i + 1);
       if (DEBUG) logger.info("ExerciseList.getNextExercise " + next);
@@ -842,8 +829,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     leftColumn.addStyleName("floatLeft");
     addMinWidthStyle(leftColumn);
 
-    leftColumn.getElement().getStyle().setProperty("minHeight", LIST_HEIGHT +
-        "px");
+    leftColumn.getElement().getStyle().setProperty("minHeight", LIST_HEIGHT + "px");
 
     leftColumn.add(getWidget());
     return leftColumn;
@@ -906,8 +892,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     listeners.add(listener);
   }
 
-  protected abstract List<T> getInOrder();
-
   /**
    * @param doShuffle
    * @see mitll.langtest.client.flashcard.FlashcardPanel#gotShuffleClick(boolean)
@@ -926,9 +910,15 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     this.doShuffle = doShuffle;
   }
 
+  /**
+   * JUST FOR AMAS
+   * @return
+   */
   public Collection<Integer> getIDs() {
     Set<Integer> ids = new HashSet<>();
     for (T cs : getInOrder()) ids.add(cs.getID());
     return ids;
   }
+
+  protected abstract List<T> getInOrder();
 }

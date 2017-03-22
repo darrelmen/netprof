@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/16/14.
  */
-public abstract class SimplePagingContainer<T> implements RequiresResize {
+public abstract class SimplePagingContainer<T> implements RequiresResize, ExerciseContainer<T> {
   private final Logger logger = Logger.getLogger("SimplePagingContainer");
 
   private static final boolean DEBUG = false;
@@ -74,6 +74,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
 
   protected SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
+    this.dataProvider = new ListDataProvider<T>();
   }
 
   /**
@@ -82,27 +83,33 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
    * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
    */
   public Panel getTableWithPager(boolean sortEnglish) {
-    this.dataProvider = new ListDataProvider<T>();
-
     makeCellTable(sortEnglish);
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
 
     // Create a SimplePager.
-    final SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, true, true);
+    final SimplePager pager =
+        new SimplePager(SimplePager.TextLocation.CENTER, true, true);
 
     // Set the cellList as the display.
     pager.setDisplay(table);
 
     Panel column = new FlowPanel();
     column.add(pager);
+
     column.add(table);
     table.addStyleName("floatLeft");
 
     setMaxWidth();
     return column;
   }
+
+  /**
+   * @param sortEnglish
+   * @see #configureTable
+   */
+  abstract protected void addColumnsToTable(boolean sortEnglish);
 
   protected void setMaxWidth() {
     table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
@@ -149,11 +156,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
   protected void addSelectionModel() {
   }
 
-  /**
-   * @param sortEnglish
-   * @see #configureTable
-   */
-  abstract protected void addColumnsToTable(boolean sortEnglish);
 
   public void flush() {
     if (comp != null) {
@@ -179,9 +181,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
   protected void clear() {
     List<T> list = getList();
     if (list == null) {
-      int user = controller.getUserState().getUser();
-      String suffix = this.getClass() + " for " + " user " +
-          user;
+      String suffix = this.getClass() + " for " + " user " + controller.getUserState().getUser();
       if (table == null) {
         controller.logMessageOnServer("no table for " + suffix, controller.getLanguage());
       } else {
@@ -194,6 +194,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
     }
   }
 
+  /**
+   * The data provider list.
+   * @return
+   */
   protected List<T> getList() {
     return dataProvider == null ? null : dataProvider.getList();
   }
@@ -279,10 +283,15 @@ public abstract class SimplePagingContainer<T> implements RequiresResize {
 
   Comparator<T> comp;
 
+  @Override
   public void sortBy(Comparator<T> comp) {
     this.comp = comp;
     Collections.sort(getList(), comp);
    // table.redraw();
+  }
+
+  public void hide() {
+    table.setVisible(false);
   }
 
   public interface TableResources extends CellTable.Resources {

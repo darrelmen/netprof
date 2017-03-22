@@ -50,12 +50,13 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * Not used anymore...
+ */
+@Deprecated
 public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectionWidget> {
   private final Logger logger = Logger.getLogger("SimpleSelectExerciseList");
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
-//  private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
-
-  //  private final Heading statusHeader = new Heading(4);
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;

@@ -33,15 +33,10 @@
 package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.client.exercise.*;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-
-import java.util.Collection;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -49,7 +44,7 @@ import java.util.Collection;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public abstract class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise, V> {
+public abstract class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise> {
   //private Logger logger = Logger.getLogger("NPExerciseList");
   protected NPExerciseList(Panel currentExerciseVPanel,
                            ExerciseController controller,
@@ -57,21 +52,14 @@ public abstract class NPExerciseList<V extends SectionWidget> extends HistoryExe
     super(currentExerciseVPanel, controller, listOptions);
   }
 
-  @Override
-  protected FacetContainer getSectionWidgetContainer() {
-    return new SectionWidgetContainer<V>() {
-      @Override
-      protected void selectItem(String type, Collection<String> sections) {
-
-      }
-    };
-  }
-
   protected  NPExerciseList(Panel currentExerciseVPanel,
                             ExerciseController controller,
                             String instance) {
     super(currentExerciseVPanel, controller, new ListOptions().setInstance(instance));
   }
+
+  @Override
+  protected FacetContainer getSectionWidgetContainer() { return new SectionWidgetContainer<V>();  }
 
   /**
    * @return

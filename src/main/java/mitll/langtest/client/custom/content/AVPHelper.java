@@ -35,9 +35,9 @@ package mitll.langtest.client.custom.content;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.ListSectionWidget;
@@ -98,7 +98,7 @@ public class AVPHelper extends NPFHelper {
           } // TODO : necessary?
 
           @Override
-          protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
+          protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
             pagingContainer.getTableWithPager(true);
           }
 

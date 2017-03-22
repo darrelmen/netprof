@@ -105,7 +105,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
       bottomRowDiv.addStyleName("mainBlock");
       bottomRowDiv.getElement().setId("rightSideDiv");
 
-      listHeader.addStyleName("listHeader");
+     // listHeader.addStyleName("listHeader");
       bottomRowDiv.add(listHeader);
     }
 

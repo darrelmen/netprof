@@ -120,7 +120,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
 
           @Override
-          protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer) {
+          protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
             // row 1
             Panel column = new FlowPanel();
             add(column);

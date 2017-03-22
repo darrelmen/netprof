@@ -71,7 +71,7 @@ import static mitll.langtest.shared.answer.ActivityType.AUTOCRT;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class SingleSelectExerciseList
-    extends HistoryExerciseList<AmasExerciseImpl, AmasExerciseImpl, ButtonBarSectionWidget> {
+    extends HistoryExerciseList<AmasExerciseImpl, AmasExerciseImpl> {
   private final Logger logger = Logger.getLogger("SingleSelectExerciseList");
   private static final int NUM_CHOICES = 3;
 

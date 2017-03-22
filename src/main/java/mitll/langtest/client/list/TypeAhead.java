@@ -53,7 +53,9 @@ import mitll.langtest.client.LangTest;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/25/14.
  */
-public class TypeAhead {
+public class TypeAhead implements ITypeAhead {
+  public static final int WIDTH = 180-32;
+  public static final int RIGHT_MARIGN_FOR_SEARCH = 10;
   //private Logger logger = Logger.getLogger("TypeAhead");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final TextBox typeAhead = new TextBox();
@@ -81,10 +83,21 @@ public class TypeAhead {
     }
   }
 
+  @Override
   public String getText() {
     return typeAhead.getText();
   }
 
+  @Override
+  public void setText(String text) {
+    typeAhead.setText(text);
+  }
+
+  /**
+   * @see PagingExerciseList#showEmptySelection
+   * @return
+   */
+  @Override
   public Widget getWidget() {
     return typeAhead;
   }
@@ -93,7 +106,7 @@ public class TypeAhead {
    * On key up, do something, like go get a new list given a search term.
    */
   private void makeTypeAhead() {
-    typeAhead.setWidth("240px");
+    typeAhead.setWidth(WIDTH + "px");
     typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT);
     getTypeAhead().getElement().setId("ExerciseList_TypeAhead");
 
@@ -133,7 +146,7 @@ public class TypeAhead {
     Icon child = new Icon(IconType.SEARCH);
 
     Style style = child.getElement().getStyle();
-    style.setMarginRight(5, Style.Unit.PX);
+    style.setMarginRight(RIGHT_MARIGN_FOR_SEARCH, Style.Unit.PX);
     style.setColor("gray");
     flow.add(child);
     flow.add(getTypeAhead());
@@ -169,7 +182,4 @@ public class TypeAhead {
    */
   TextBox getTypeAhead() {   return typeAhead;  }
 
-  public void setText(String text) {
-    typeAhead.setText(text);
-  }
 }

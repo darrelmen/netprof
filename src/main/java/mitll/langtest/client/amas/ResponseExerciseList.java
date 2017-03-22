@@ -59,6 +59,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -131,7 +132,8 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
    * @see #addComponents()
    */
   protected ClickablePagingContainer<AmasExerciseImpl> makePagingContainer() {
-    final PagingExerciseList<AmasExerciseImpl, AmasExerciseImpl> outer = this;
+   // final PagingExerciseList<AmasExerciseImpl, AmasExerciseImpl> outer = this;
+    final ListInterface<AmasExerciseImpl> outer = this;
     pagingContainer = new ClickablePagingContainer<AmasExerciseImpl>(controller) {
       @Override
       public void gotClickOnItem(AmasExerciseImpl e) {
