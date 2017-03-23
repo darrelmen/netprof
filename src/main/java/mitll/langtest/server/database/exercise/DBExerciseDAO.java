@@ -121,7 +121,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
           userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
-
       //userExerciseDAO.useExToPhones(exerciseToPhoneForProject);
 
       logger.info("readExercises" +
@@ -149,20 +148,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           " readExercises got " + allNonContextExercises.size() + " predef exercises");
 
 //      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
-
       Map<Integer, CommonExercise> idToContext =
           getIDToExercise(userExerciseDAO.getContextByProject(
               typeOrder,
               getSectionHelper(),
               exerciseToPhoneForProject, fullProject, allByProject, exToAttrs
           ));
-
-      // logger.info(prefix + " idToContext " + idToContext.size());
+      logger.info("project " +project+ " idToContext " + idToContext.size());
 
       attachContextExercises(allNonContextExercises, userExerciseDAO.getAllRelated(projid), idToContext);
 
       return allNonContextExercises;
-
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -191,16 +187,27 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 */
 
+  /**
+   * @see #readExercises
+   * @param allNonContextExercises
+   * @param related
+   * @param idToContext
+   */
   private void attachContextExercises(List<CommonExercise> allNonContextExercises,
                                       Collection<SlickRelatedExercise> related,
-                                      //Map<Integer, CommonExercise> idToEx,
                                       Map<Integer, CommonExercise> idToContext) {
     int attached = 0;
     int c = 0;
+    String prefix = "Project " + project.name();
 
     Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
-    String prefix = "Project " + project.name();
-    for (SlickRelatedExercise relatedExercise : related) {
+
+    logger.info("attach context " + allNonContextExercises.size());
+    logger.info("related        " + related.size());
+    logger.info("idToContext    " + idToContext.size());
+    logger.info("idToEx         " + idToEx.size());
+
+     for (SlickRelatedExercise relatedExercise : related) {
       CommonExercise root = idToEx.get(relatedExercise.exid());
       if (root != null) {
         CommonExercise context = idToContext.get(relatedExercise.contextexid());

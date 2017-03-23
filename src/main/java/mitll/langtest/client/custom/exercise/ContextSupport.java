@@ -39,7 +39,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
-class ContextSupport<T extends CommonExercise> {
+public class ContextSupport<T extends CommonExercise> {
   private Logger logger = Logger.getLogger("ContextSupport");
 
   private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b

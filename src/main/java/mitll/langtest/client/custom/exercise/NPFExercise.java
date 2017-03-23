@@ -99,11 +99,8 @@ abstract class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    */
   NPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer,
               ExerciseOptions options
-              //float screenPortion,
-              //boolean addKeyHandler, String instance, boolean allowRecording
   ) {
     super(e, controller, listContainer, options);
-//        new ExerciseOptions(screenPortion, addKeyHandler, instance, allowRecording, true));
   }
 
   /**

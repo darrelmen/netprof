@@ -34,6 +34,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListInterface;
@@ -75,6 +76,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   /**
    * TODO : somehow put this behind an interface...?
+   *
    * @param es
    * @see ListInterface#simpleRemove(int)
    */
@@ -103,6 +105,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     redraw();
   }
 
+
   /**
    * @param v
    * @see mitll.langtest.client.list.PagingExerciseList#setUnaccountedForVertical(int)
@@ -129,6 +132,20 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   public int getIndex(T t) {
     return getList().indexOf(t);
+  }
+
+  public Collection<Integer> getVisibleIDs() {
+    List<Integer> visible = new ArrayList<>();
+    Range visibleRange = getVisibleRange();
+    int start = visibleRange.getStart();
+    int length = visibleRange.getLength();
+    int end = Math.min(getList().size(), start + length);
+    logger.info("get from " + start + " to " + end + " vs " + getList().size());
+    for (int i = start; i < end; i++) {
+      T at = getAt(i);
+      visible.add(at.getID());
+    }
+    return visible;
   }
 
   public T getAt(int i) {
@@ -209,7 +226,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     if (getList() == null || getList().isEmpty()) return;
 
     T t = idToExercise.get(itemID);
-    markCurrent(getList().indexOf(t), t);
+    markCurrent(getIndex(t), t);
   }
 
   private void markCurrent(int i, T itemToSelect) {

@@ -318,7 +318,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
      * @see #getEntry
      */
     private Widget getEntry(final String field, ExerciseAnnotation annotation, Widget contentWidget) {
-      return getCommentBox(true).getEntry(field, contentWidget, annotation);
+      return getCommentBox(true).getEntry(field, contentWidget, annotation, true);
     }
 
     /**

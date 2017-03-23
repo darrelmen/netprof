@@ -502,7 +502,9 @@ fieldset > legend {
 }
 
 .Instruction-data {
+    /*
     color: #CC6600;
+    */
     font-size: larger;
     font-weight: bold;
     word-wrap: break-word; /* Internet Explorer 5.5+ */
@@ -513,7 +515,9 @@ fieldset > legend {
 }
 
 .Instruction-data-with-wrap {
+    /*
     color: #CC6600;
+    */
     font-size: 28px;
     font-weight: bold;
     word-wrap: break-word; /* Internet Explorer 5.5+ */
@@ -533,13 +537,17 @@ fieldset > legend {
 }
 
 .Instruction-data-with-wrap-keep-word {
+    /*
     color: #CC6600;
-    font-size: 28px;
+    */
+    font-size: 24px;
+    /*
     font-weight: bold;
+    */
     word-wrap: normal; /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
-    font-family: sans-serif;
+    font-family: Arial, sans-serif;
     line-height: 100%;
     float: left;
 }
@@ -597,13 +605,19 @@ fieldset > legend {
 }
 
 .pashtofont {
+    /*
     font-family: 'Pashto Kror Asiatype', 'HSPashto', 'HSTahoma', Arial, Helvetica, sans-serif;
+    */
+    font-family: Arial, Helvetica, sans-serif;
     font-size: x-large;
     margin-bottom: 5px;
 }
 
 .pashtofont td {
+    /*
     font-family: 'Pashto Kror Asiatype', 'HSPashto', 'HSTahoma', Arial, Helvetica, sans-serif;
+    */
+    font-family: Arial, Helvetica, sans-serif;
     font-size: x-large;
 }
 
@@ -1149,7 +1163,10 @@ body .btn-toolbar > .btn-group > .btn.active {
 }
 
 .underline {
+    /*
     text-decoration: underline;
+    */
+    color: #2b95d0;
 }
 
 .boxShadow {
@@ -1688,7 +1705,6 @@ h1, h2, h3, h4, h5, h6 {
     font-family: BentonMedium;
     font-weight: 400;
 }*/
-
 
 .listHeader {
     font-family: BentonRegular;

@@ -47,6 +47,7 @@ import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -197,7 +198,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     db.addScoresForAll(userid, exercises);
   }
 
-  private void addScores(int userid, List<CommonShell> exercises) {
+  private <X extends CommonShell> void addScores(int userid, List<X> exercises) {
     db.addScores(userid, exercises);
   }
 
@@ -396,7 +397,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
     ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);
 
-    addScores(userID, exerciseShells);
+    addScores(userID, exerciseShells1);
     logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper);
     return exerciseListWrapper;
   }
@@ -940,24 +941,27 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     int projectID = getProjectID();
     int userID = getUserIDFromSession();
 
-    long then = System.currentTimeMillis();
-    Collection<CommonExercise> exercises = getExercises();
-    long then2 = System.currentTimeMillis();
+    return getAnnotatedExercise(userID, projectID, exid, isFlashcardReq);
+  }
 
+  @Nullable
+  private <T extends Shell> T getAnnotatedExercise(int userID, int projectID, int exid, boolean isFlashcardReq) {
+    long then2 = System.currentTimeMillis();
+    Collection<CommonExercise> exercises = getExercises();
     CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 
     long now = System.currentTimeMillis();
     String language = getLanguage();
     if (now - then2 > WARN_DUR) {
-      logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " +
+      logger.debug("getAnnotatedExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " +
           exid + " for " + userID);
     }
 
     if (byID == null) {
-      logger.error("getExercise : huh? couldn't find exercise with id '" + exid + "' when examining " +
+      logger.error("getAnnotatedExercise : huh? couldn't find exercise with id '" + exid + "' when examining " +
           exercises.size() + " items");
     } else {
-      logger.debug("getExercise : (" + language +
+      logger.debug("getAnnotatedExercise : (" + language +
               ") project " + projectID +
               " find exercise " + exid + " for " + userID + " : " + byID
           //+"\n\tcontext" + byID.getDirectlyRelated()
@@ -966,7 +970,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
       now = System.currentTimeMillis();
       if (now - then2 > WARN_DUR) {
-        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to " +
+        logger.debug("getAnnotatedExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to " +
             "exercise " + exid + " for " + userID);
       }
 //      then2 = System.currentTimeMillis();
@@ -989,7 +993,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 //        }
 //      }
     }
-    checkPerformance(exid, then);
+    checkPerformance(exid, then2);
 
     if (byID != null) {
 /*
@@ -1007,10 +1011,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   @Override
-  public <T1 extends Shell> Collection<T1> getFullExercises(Collection<Integer> ids, boolean isFlashcardReq) {
+  public Collection<CommonExercise> getFullExercises(Collection<Integer> ids, boolean isFlashcardReq) {
+    List<CommonExercise> exercises = new ArrayList<>();
 
-    List<T1> exercises = new ArrayList<>();
-    for (int id : ids) exercises.add(getExercise(id, isFlashcardReq));
+    int projectID = getProjectID();
+    int userID = getUserIDFromSession();
+    for (int exid : ids) exercises.add(getAnnotatedExercise(userID, projectID, exid, isFlashcardReq));
+
+    addScores(userID, exercises);
     return exercises;
   }
 
@@ -1030,21 +1038,21 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExercise(String, boolean)
    */
   private void checkPerformance(int id, long then) {
-    long now;
-    now = System.currentTimeMillis();
-    long diff = now - then;
-    String language = getLanguage();
+    long diff = System.currentTimeMillis() - then;
 
-    String message = "getExercise : (" + language + ") took " + diff + " millis to get exercise " + id;// + " : " + threadInfo;
-    if (diff > SLOW_EXERCISE_EMAIL) {
-      ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
-      String threadInfo = threadGroup.getName() + " = " + threadGroup.activeCount();
-      logger.error(message + " thread childCount " + threadInfo);
-      sendEmailWhenSlow(id, language, diff, threadInfo);
-    } else if (diff > MIN_WARN_DURATION) {
-      logger.warn(message);
-    } else if (diff > MIN_DEBUG_DURATION) {
-      logger.debug(message);
+    if (diff > MIN_DEBUG_DURATION) {
+      String language = getLanguage();
+      String message = "getExercise : (" + language + ") took " + diff + " millis to get exercise " + id;// + " : " + threadInfo;
+      if (diff > SLOW_EXERCISE_EMAIL) {
+        ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+        String threadInfo = threadGroup.getName() + " = " + threadGroup.activeCount();
+        logger.error(message + " thread childCount " + threadInfo);
+        sendEmailWhenSlow(id, language, diff, threadInfo);
+      } else if (diff > MIN_WARN_DURATION) {
+        logger.warn(message);
+      } else if (diff > MIN_DEBUG_DURATION) {
+        logger.debug(message);
+      }
     }
   }
 

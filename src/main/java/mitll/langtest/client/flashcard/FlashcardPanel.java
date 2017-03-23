@@ -298,7 +298,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
         true);
 
     DivWidget left = new DivWidget();
-    left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE)));
+    left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE), true));
     left.addStyleName("floatLeft");
     left.getElement().setId("leftCommentBoxContainer");
     // left.setWidth("50%");

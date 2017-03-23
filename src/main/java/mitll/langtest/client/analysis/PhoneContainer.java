@@ -505,6 +505,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     table.addColumnSortHandler(columnSortHandler);
   }
 
+
+
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
     addReview();

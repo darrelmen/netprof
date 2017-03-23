@@ -16,12 +16,12 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   private final PagingExerciseList<T, U> exerciseList;
   private String locale;
 
-  public static final String ENGLISH_ASC = "English : A-Z";
-  public static final String ENGLISH_DSC = "English : Z-A";
-  public static final String LENGTH_SHORT_TO_LONG = "Length : short to long";
-  public static final String LENGTH_LONG_TO_SHORT = "Length : long to short";
-  public static final String SCORE_LOW_TO_HIGH = "Score : low to high";
-  public static final String SCORE_DSC = "Score : high to low";
+  private static final String ENGLISH_ASC = "English : A-Z";
+  private static final String ENGLISH_DSC = "English : Z-A";
+  private static final String LENGTH_SHORT_TO_LONG = "Length : short to long";
+  private static final String LENGTH_LONG_TO_SHORT = "Length : long to short";
+  private static final String SCORE_LOW_TO_HIGH = "Score : low to high";
+  private static final String SCORE_DSC = "Score : high to low";
 
   public static final int MAX_TO_SHOW = 4;
   public static final String ANY = "Any";

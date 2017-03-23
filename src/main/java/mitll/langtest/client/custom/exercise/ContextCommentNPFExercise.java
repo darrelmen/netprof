@@ -343,7 +343,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
    * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return getCommentBox().getEntry(field, getContentWidget(label, value, false), annotation);
+    return getCommentBox().getEntry(field, getContentWidget(label, value, false), annotation, true);
   }
 
   /**
@@ -356,7 +356,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
     return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, getInstance()) {
       @Override
       protected void addAudioRadioButton(Panel vp, RadioButton fast, AudioAttribute audioAttribute) {
-        vp.add(getCommentBox().getEntry(audioPath, fast, exercise.getAnnotation(path)));
+        vp.add(getCommentBox().getEntry(audioPath, fast, exercise.getAnnotation(path), true));
       }
 
       @Override

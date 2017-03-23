@@ -68,6 +68,7 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.project.ProjectOps;
 import mitll.langtest.client.scoring.ExerciseOptions;
+import mitll.langtest.client.scoring.ExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -80,6 +81,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -196,7 +198,20 @@ public class Navigation implements RequiresResize, ShowTab {
     this.lifecycleSupport = lifecycleSupport;
     storage = new KeyStorage(controller);
 
-    learnHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(controller, null
+    learnHelper = getLearnHelper(controller);
+    if (controller.getProps().hasDialog()) {
+      makeDialogWindow(service, controller);
+    }
+
+    markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
+    practiceHelper = new PracticeHelper(controller);
+    recorderHelper      = new RecorderNPFHelper(controller, true,  learnHelper);
+    recordExampleHelper = new RecorderNPFHelper(controller, false, learnHelper);
+  }
+
+  @NotNull
+  private SimpleChapterNPFHelper<CommonShell, CommonExercise> getLearnHelper(final ExerciseController controller) {
+    return new SimpleChapterNPFHelper<CommonShell, CommonExercise>(controller, null
     ) {
       @Override
       protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
@@ -225,26 +240,15 @@ public class Navigation implements RequiresResize, ShowTab {
         return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            if (controller.getProps().canPracticeContext()) {
-              return new ContextCommentNPFExercise<>(e, controller, exerciseList, CLASSROOM);
-            } else {
-              return new CommentNPFExercise<>(e, controller, exerciseList,
+
+              return new ExercisePanel<>(e, controller, exerciseList,
                   new ExerciseOptions()
                       .setInstance(CLASSROOM));
-            }
+
           }
         };
       }
     };
-
-    if (controller.getProps().hasDialog()) {
-      makeDialogWindow(service, controller);
-    }
-
-    markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
-    practiceHelper = new PracticeHelper(controller);
-    recorderHelper      = new RecorderNPFHelper(controller, true,  learnHelper);
-    recordExampleHelper = new RecorderNPFHelper(controller, false, learnHelper);
   }
 
   /**

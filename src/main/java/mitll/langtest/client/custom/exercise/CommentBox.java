@@ -66,6 +66,7 @@ import java.util.logging.Logger;
  * @since 9/8/14.
  */
 public class CommentBox extends PopupContainerFactory {
+  public static final int ENTRY_VISIBLE_LENGTH = 70;
   private final Logger logger = Logger.getLogger("CommentBox");
 
   private static final int MAX_LENGTH = 500;
@@ -105,10 +106,10 @@ public class CommentBox extends PopupContainerFactory {
    * @return
    * @see CommentNPFExercise#getContext
    */
-  Widget getNoPopup(String field,
-                    Widget content,
-                    final ExerciseAnnotation annotation,
-                    AnnotationExercise toSet) {
+  public Widget getNoPopup(String field,
+                           Widget content,
+                           final ExerciseAnnotation annotation,
+                           AnnotationExercise toSet) {
     TextBox commentEntryText = new TextBox();
     Panel commentAndOK = new HorizontalPanel();
 
@@ -125,7 +126,7 @@ public class CommentBox extends PopupContainerFactory {
       commentEntryText.setText(initialText);
     });
 
-    commentEntryText.setVisibleLength(70);
+    commentEntryText.setVisibleLength(ENTRY_VISIBLE_LENGTH);
     final Button commentButton = new Button();
     commentButton.addClickHandler(clickEvent -> {
       commentAndOK.setVisible(true);
@@ -135,12 +136,11 @@ public class CommentBox extends PopupContainerFactory {
     if (!initialText.isEmpty()) {
       commentEntryText.setText(initialText);
       if (commentEntryText.getVisibleLength() < initialText.length()) {
-        commentEntryText.setVisibleLength(70);
+        commentEntryText.setVisibleLength(ENTRY_VISIBLE_LENGTH);
       }
     }
 
 //    commentEntryText.addStyleName("topFiveMargin");
-
     commentAndOK.add(commentEntryText);
     commentAndOK.add(ok);
     commentAndOK.add(cancel);
@@ -200,16 +200,23 @@ public class CommentBox extends PopupContainerFactory {
    * @param field      of the exerciseID to comment on
    * @param content    to wrap
    * @param annotation to get current comment from
+   * @param showInitially
    * @return three part widget -- content, comment button, and clear button
    * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getEntry
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
-  public Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
+  public Widget getEntry(String field, Widget content, ExerciseAnnotation annotation, boolean showInitially) {
     field = fixAudioField(field);
     final HidePopupTextBox commentEntryText = getCommentBox(field);
 
     final Button commentButton = new Button();
     Button clearButton = getClearButton(commentEntryText, commentButton, field);
+
+    if (!showInitially) {
+      commentButton.setVisible(false);
+      clearButton.setVisible(false);
+    }
+
     commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
     commentPopup.addAutoHidePartner(commentButton.getElement()); // fix for bug Wade found where click didn't toggle comment
     configureTextBox(annotation != null ? annotation.getComment() : null, commentEntryText, commentPopup);
@@ -272,7 +279,7 @@ public class CommentBox extends PopupContainerFactory {
    * @param commentEntryText
    * @param clearButton
    * @return
-   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, ExerciseAnnotation)
+   * @see #getEntry(String, Widget, ExerciseAnnotation, boolean)
    */
   private DecoratedPopupPanel makeCommentPopup(String field,
                                                Button commentButton,
@@ -301,7 +308,7 @@ public class CommentBox extends PopupContainerFactory {
    * @param commentButton
    * @param field
    * @return
-   * @see #getEntry(String, Widget, ExerciseAnnotation)
+   * @see #getEntry(String, Widget, ExerciseAnnotation, boolean)
    */
   private Button getClearButton(final TextBox commentEntryText,
                                 final Widget commentButton,
@@ -347,9 +354,7 @@ public class CommentBox extends PopupContainerFactory {
      * @see #makeCommentPopup(String, Button, HidePopupTextBox, Button)
      */
     void configure(final TextBox commentBox, final Widget commentButton, final Widget clearButton) {
-
       addCloseHandler(event ->
-
       {
         registration.logEvent(commentBox, "Comment_TextBox", exerciseID, "submit comment '" + commentBox.getValue() + "'");
         commentComplete(commentBox, field, commentButton, clearButton);
@@ -379,7 +384,7 @@ public class CommentBox extends PopupContainerFactory {
    * @param comment
    * @param commentEntry
    * @return
-   * @see #getEntry(String, com.google.gwt.user.client.ui.Widget, ExerciseAnnotation)
+   * @see #getEntry(String, Widget, ExerciseAnnotation, boolean)
    */
   private void configureCommentButton(final Button commentButton,
                                       final boolean alreadyMarkedCorrect,

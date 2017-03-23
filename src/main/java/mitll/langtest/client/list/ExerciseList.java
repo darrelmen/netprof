@@ -91,7 +91,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private boolean pendingReq = false;
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private UserState userState;
   ListOptions listOptions;
 
@@ -226,7 +226,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * TODO : Cheesy...
    */
-  public void onResize() {
+//  public abstract void onResize();
+  //{
   /*  Widget current = innerContainer.getWidget(0);
     if (current != null) {
       if (current instanceof RequiresResize) {
@@ -240,7 +241,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     //   else {
 //      logger.warning("huh? no right side of exercise list");
     //  }
-  }
+ // }
 
   /**
    * @see ListInterface#getExercises(long)
@@ -400,7 +401,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param caught
    * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onFailure(Throwable)
    */
-  private void dealWithRPCError(Throwable caught) {
+  protected void dealWithRPCError(Throwable caught) {
     String message = caught.getMessage();
     if (message != null && message.length() > MAX_MSG_LEN) message = message.substring(0, MAX_MSG_LEN);
     if (message != null && !message.trim().equals("0")) {
@@ -564,7 +565,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   protected abstract T getFirst();
 
-  private int getFirstID() {  return getFirst().getID();  }
+  int getFirstID() {  return getFirst().getID();  }
 
   boolean hasExercise(int id) {  return byID(id) != null;  }
 
@@ -668,11 +669,15 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       public void execute() {
 /*        logger.info("ExerciseList.showExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
       " or " + getCurrentExerciseID() + " instance " + instance);*/
-        createdPanel = factory.getExercisePanel(commonExercise);
-        innerContainer.add(createdPanel);
+        addExerciseWidget(commonExercise);
       }
     });
 
+  }
+
+  protected void addExerciseWidget(U commonExercise) {
+    createdPanel = factory.getExercisePanel(commonExercise);
+    innerContainer.add(createdPanel);
   }
 
   public int getCurrentExerciseID() {
@@ -734,8 +739,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     } else {
       logger.warning("\tremoveCurrentExercise : no inner current widget for " + reportLocal());
     }*/
-    innerContainer.clear();
+    clearExerciseContainer();
     innerContainer.getParent().removeStyleName("shadowBorder");
+  }
+
+  void clearExerciseContainer() {
+    innerContainer.clear();
   }
 
 /*

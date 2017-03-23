@@ -191,7 +191,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     Collection<SlickRefResult> slickRefResults = dao.byExAndAnswer(exid, answer);
     long now = System.currentTimeMillis();
     if (now - then > 20) logger.info("took " + (now - then) + " to lookup " + exid);
-    if (slickRefResults.isEmpty()) return null;
+    if (slickRefResults.isEmpty()) {
+      logger.info("no results for " + exid + " and " + answer);
+      return null;
+    }
     else return fromSlick(slickRefResults.iterator().next());
   }
 

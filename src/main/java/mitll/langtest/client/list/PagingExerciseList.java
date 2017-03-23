@@ -504,11 +504,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void onResize() {
-    super.onResize();
+   // super.onResize();
     pagingContainer.onResize(getCurrentExercise());
   }
 
   /**
+   * Scrolls container to visible range, if needed.
    * @param itemID
    * @see #showExercise
    */

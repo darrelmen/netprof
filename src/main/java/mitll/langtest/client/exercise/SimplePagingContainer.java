@@ -40,11 +40,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -90,7 +89,13 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     // Create a SimplePager.
     final SimplePager pager =
-        new SimplePager(SimplePager.TextLocation.CENTER, true, true);
+        new SimplePager(SimplePager.TextLocation.CENTER, true, true) {
+          @Override
+          protected void onRangeOrRowCountChanged() {
+            super.onRangeOrRowCountChanged();
+            gotRangeChange();
+          }
+        };
 
     // Set the cellList as the display.
     pager.setDisplay(table);
@@ -104,6 +109,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     setMaxWidth();
     return column;
   }
+
+  protected void gotRangeChange() {}
 
   /**
    * @param sortEnglish
@@ -159,7 +166,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   public void flush() {
     if (comp != null) {
-      Collections.sort(getList(),comp);
+      Collections.sort(getList(), comp);
     }
     dataProvider.flush();
     table.setRowCount(getList().size());
@@ -196,6 +203,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   /**
    * The data provider list.
+   *
    * @return
    */
   protected List<T> getList() {
@@ -215,7 +223,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     }
   }
 
-  int getNumTableRowsGivenScreenHeight() {
+  protected int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
     int pixelsAbove = header + verticalUnaccountedFor;
     if (table.getElement().getAbsoluteTop() > 0) {
@@ -263,31 +271,45 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     getList().add(item);
   }
 
+  /**
+   * @param i
+   * @see ClickablePagingContainer#markCurrent
+   */
   protected void scrollToVisible(int i) {
-    int pageNum = i / table.getPageSize();
-    int newIndex = pageNum * table.getPageSize();
-    if (i < table.getPageStart()) {
+    int pageSize = table.getPageSize();
+
+    int pageNum = i / pageSize;
+    int newIndex = pageNum * pageSize;
+
+    int pageStart = table.getPageStart();
+
+    if (i < pageStart) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
       //  if (ClickablePagingContainer.DEBUG) logger.info("new start of prev page " + newStart + " vs current " + table.getVisibleRange());
-      table.setVisibleRange(newStart, table.getPageSize());
+      table.setVisibleRange(newStart, pageSize);
     } else {
-      int pageEnd = table.getPageStart() + table.getPageSize();
+      int pageEnd = table.getPageStart() + pageSize;
       if (i >= pageEnd) {
-        int newStart = Math.max(0, Math.min(table.getRowCount() - table.getPageSize(), newIndex));   // not sure how this happens, but need Math.max(0,...)
+        int newStart = Math.max(0, Math.min(table.getRowCount() - pageSize, newIndex));   // not sure how this happens, but need Math.max(0,...)
 //        if (ClickablePagingContainer.DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
 //            " vs current " + table.getVisibleRange());
-        table.setVisibleRange(newStart, table.getPageSize());
+        table.setVisibleRange(newStart, pageSize);
       }
     }
   }
 
-  Comparator<T> comp;
+  public Range getVisibleRange() {
+    return table.getVisibleRange();
+  }
+
+  private Comparator<T> comp;
 
   @Override
   public void sortBy(Comparator<T> comp) {
     this.comp = comp;
+    logger.info("about to sort ");
     Collections.sort(getList(), comp);
-   // table.redraw();
+    logger.info("finished sort ");
   }
 
   public void hide() {

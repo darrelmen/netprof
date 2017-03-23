@@ -343,7 +343,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         .collect(Collectors.toList());
 
     Map<Integer, SlickExerciseScore> correctAndScoresForReal = dao.exidAndScoreWhere(userid, collect);
-    logger.info("for " + userid + " checking " + exercises.size() + " found " + correctAndScoresForReal.size() + " scores");
+   // logger.info("for " + userid + " checking " + exercises.size() + " found " + correctAndScoresForReal.size() + " scores");
     setScores(exercises, correctAndScoresForReal);
   }
 
@@ -352,14 +352,27 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     setScores(exercises, dao.exidAndScore(userid));
   }
 
-  private <T extends CommonShell> void setScores(Collection<T> exercises, Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
+  /**
+   * Consider a cache here - this isn't going to change much
+   *
+   * @param exercises
+   * @param correctAndScoresForReal
+   * @param <T>
+   */
+  private <T extends CommonShell> void setScores(Collection<T> exercises,
+                                                 Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
+    long then = System.currentTimeMillis();
+    int c = 0;
     for (T ex : exercises) {
       SlickExerciseScore slickExerciseScore = correctAndScoresForReal.get(ex.getID());
       if (slickExerciseScore != null) {
         ex.getMutableShell().setScore(slickExerciseScore.pronscore());
-        logger.info("Set "+ ex.getID() + " to "+ slickExerciseScore.pronscore());
+        c++;
+//        logger.info("Set "+ ex.getID() + " to "+ slickExerciseScore.pronscore());
       }
     }
+    long now = System.currentTimeMillis();
+    logger.info("setScores took " + (now - then) + " to get " + c + " scores");
   }
 
   Map<Integer, SlickExerciseScore> getCorrectAndScoresForReal(int userid, Collection<Integer> exids) {

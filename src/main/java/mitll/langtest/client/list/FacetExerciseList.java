@@ -39,6 +39,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.Range;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -52,6 +53,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
+  public static final int ITEMS_TO_SHOW = 5;
   //extends NPExerciseList<ListSectionWidget> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
@@ -69,12 +71,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   public static final String ANY = "Any";
   public static final String MENU_ITEM = "menuItem";
 
-  //  private static final int CLASSROOM_VERTICAL_EXTRA = 270;
-
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
-  DivWidget listHeader;
+ // private DivWidget listHeader;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -95,18 +95,17 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
 
-
     secondRow.add(sectionPanel);
     setUnaccountedForVertical(0);//CLASSROOM_VERTICAL_EXTRA);
+
     downloadHelper = new DownloadHelper(this);
 
-    this.listHeader = listHeader;
+   // this.listHeader = listHeader;
 
     DivWidget breadRow = new DivWidget();
     //  breadRow.addStyleName("floatLeftList");
     breadRow.add(new HTML("breadcrumbs go here"));
     listHeader.add(breadRow);
-//    left.add()
 
     DivWidget pagerAndSort = new DivWidget();
 
@@ -114,8 +113,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     pagerAndSort.add(tableWithPager);
     tableWithPager.addStyleName("floatLeftList");
     pagerAndSort.add(addSortBox(controller));
-
-//    pagingContainer.hide();
   }
 
   @NotNull
@@ -132,7 +129,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
 
   @Override
-  protected void addMinWidthStyle(Panel leftColumn) {  }
+  protected void addMinWidthStyle(Panel leftColumn) {
+  }
 
   Panel tableWithPager;
 
@@ -160,6 +158,16 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           protected void addColumnsToTable(boolean sortEnglish) {
           }
+
+          @Override
+          protected void gotRangeChange() {
+            askServerForExercise(-1);
+          }
+
+          @Override
+          protected int getNumTableRowsGivenScreenHeight() {
+            return ITEMS_TO_SHOW;
+          }
         };
     return pagingContainer;
   }
@@ -185,10 +193,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     sectionPanel.add(typeOrderContainer = getWidgetsForTypes());
 
     //pushFirstListBoxSelection();
-
-    String currentToken = getHistoryToken();
-    SelectionState selectionState = getSelectionState(currentToken);
-    restoreUIState(selectionState);
+    restoreUIState(getSelectionState(getHistoryToken()));
   }
 
   private Panel typeOrderContainer;
@@ -210,11 +215,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     typeOrder = projectStartupInfo.getTypeOrder();
 
-    Collection<String> rootNodes = controller.getProjectStartupInfo().getRootNodes();
-
-    this.rootNodesInOrder = new HashSet<>(controller.getProjectStartupInfo().getTypeOrder());
-    this.rootNodesInOrder.retainAll(rootNodes);
-   // addFacets(container, projectStartupInfo.getRootNodes(), projectStartupInfo.getTypeToDistinct());
+    this.rootNodesInOrder = new HashSet<>(projectStartupInfo.getTypeOrder());
+    this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
+    // addFacets(container, projectStartupInfo.getRootNodes(), projectStartupInfo.getTypeToDistinct());
   }
 
   /**
@@ -279,7 +282,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    *
    * @paramx rootNodes
    * @paramx rootNodesInOrder
-   * @see #addFacets
+   * @seez #addFacets
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
     logger.info("addFacetsForReal\n\tfor " +
@@ -650,7 +653,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void showSelectionState(SelectionState selectionState) {
     // keep the download link info in sync with the selection
-   // Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
+    // Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
     //  logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
   }
@@ -715,5 +718,38 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         return 0;
       }
     };
+  }
+
+  /**
+   * TODO : do different thing for AVP.
+   *
+   * TODO : scroll to visible item
+   *
+   * goes ahead and asks the server for the next item so we don't have to wait for it.
+   *
+   * @param itemID
+   * @see ListInterface#checkAndAskServer(int)
+   */
+  protected void askServerForExercise(int itemID) {
+    service.getFullExercises(pagingContainer.getVisibleIDs(), false, new AsyncCallback<Collection<CommonExercise>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        dealWithRPCError(caught);
+      }
+
+      @Override
+      public void onSuccess(Collection<CommonExercise> result) {
+        clearExerciseContainer();
+
+        logger.info("onSuccess ading " +result.size());
+        for (CommonExercise exercise:result) {
+          addExerciseWidget(exercise);
+        }
+
+        if (!result.isEmpty()) {
+          markCurrentExercise(result.iterator().next().getID());
+        }
+      }
+    });
   }
 }

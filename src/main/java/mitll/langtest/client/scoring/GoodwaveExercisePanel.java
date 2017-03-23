@@ -78,7 +78,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
-
   /**
    *
    */
@@ -89,7 +88,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
-
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private static final String MEANING = "Meaning";
 

@@ -212,7 +212,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @return
    */
   private int getValidExerciseID(int exerciseID) {
-    return hasExercise(exerciseID) ? exerciseID : isEmpty() ? -1 : getFirst().getID();
+    return hasExercise(exerciseID) ? exerciseID : isEmpty() ? -1 : getFirstID();
   }
 
   /**
@@ -277,7 +277,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
     if (currentToken.equals(historyToken)) {
       if (isEmpty() || historyToken.isEmpty()) {
-        if (DEBUG) logger.info("pushNewSectionHistoryToken : noSectionsGetExercises for" +
+        if (DEBUG) logger.info("pushNewSectionHistoryToken : calling noSectionsGetExercises for" +
             "\n\ttoken '" + historyToken +
             "' " + "\n\tcurrent has " + getSize() + " instance " + getInstance());
 
@@ -359,9 +359,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   protected void restoreListBoxState(SelectionState selectionState) {
     logger.info("restoreListBoxState restore " + selectionState);
-    ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
-    Collection<String> typeOrder = startupInfo.getTypeOrder();
-    sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
+    sectionWidgetContainer.restoreListBoxState(selectionState, controller.getProjectStartupInfo().getTypeOrder());
   }
 
   /**
@@ -443,8 +441,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                                boolean onlyDefaultUser,
                                boolean onlyUninspected) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
-/*    logger.info("HistoryExerciseList.loadExercises : looking for " +
-      "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());*/
+    logger.info("HistoryExerciseList.loadExercises : looking for " +
+      "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
     loadExercisesUsingPrefix(typeToSection, prefix, -1, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
   }
 
@@ -529,11 +527,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                               int exerciseID,
                               ExerciseListRequest request) {
     scheduleWaitTimer();
-    String selectionID = userListID + "_" + typeToSection.toString();
     logger.info("getExerciseIDs for '" + prefix + "'");
     service.getExerciseIds(
         request,
-        new SetExercisesCallback(selectionID, prefix, exerciseID, request));
+        new SetExercisesCallback(userListID + "_" + typeToSection.toString(), prefix, exerciseID, request));
   }
 
   /**

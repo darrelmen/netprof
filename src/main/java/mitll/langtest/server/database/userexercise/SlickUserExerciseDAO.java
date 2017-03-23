@@ -604,6 +604,7 @@ public class SlickUserExerciseDAO
       logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allPairs);
     }
+    logger.info("getExercises created " + copy.size());
     return copy;
   }
 
@@ -783,7 +784,11 @@ public class SlickUserExerciseDAO
     int projectid = lookup.getID();
     Collection<String> attributeTypes = getAttributeTypes(projectid);
 
-    return getExercises(dao.getAllContextPredefByProject(projectid), typeOrder, sectionHelper,
+    List<SlickExercise> allContextPredefByProject = dao.getAllContextByProject(projectid);
+
+    logger.info("For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
+
+    return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
         exerciseToPhoneForProject, lookup, allByProject, exToAttrs, attributeTypes, false);
   }
 

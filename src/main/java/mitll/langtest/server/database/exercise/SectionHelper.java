@@ -102,8 +102,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       List<String> types = new ArrayList<>();
       //  types.addAll(typeToSectionToTypeToSections.keySet());
       types.addAll(typeToUnitToLesson.keySet());
-      logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
-      logger.info("getTypeOrder typeToCount = " + typeToCount);
+      if (DEBUG) logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
+      if (DEBUG) logger.info("getTypeOrder typeToCount = " + typeToCount);
 
       if (types.isEmpty()) {
         types.addAll(typeToCount.keySet());
@@ -125,12 +125,12 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       // put sound at end...
       putSoundAtEnd(types);
       // }
-      logger.info("getTypeOrder types " + types);
+      if (DEBUG)  logger.info("getTypeOrder types " + types);
 
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-      logger.info("getTypeOrder validTypes " + validTypes);
+      if (DEBUG) logger.info("getTypeOrder validTypes " + validTypes);
 
       List<String> valid = new ArrayList<>(predefinedTypeOrder);
       valid.retainAll(validTypes);
