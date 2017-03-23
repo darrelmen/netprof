@@ -69,7 +69,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   static final String SEARCH = "Search";
   private static final int TEN_SECONDS = 10 * 60 * 1000;
 
-  protected final ExerciseController controller;
   protected ClickablePagingContainer<T> pagingContainer;
 
   private ITypeAhead typeAhead;
@@ -94,22 +93,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
                      ExerciseController controller,
                      ListOptions listOptions) {
     super(currentExerciseVPanel, factory, controller, listOptions);
-    this.controller = controller;
-
     addComponents();
     getElement().setId("PagingExerciseList_" + getInstance());
-//    if (showFirstNotCompleted) logger.info("show first completed for " + instance);
   }
 
-   void sortBy(Comparator<T> comp) {
+  void sortBy(Comparator<T> comp) {
     pagingContainer.sortBy(comp);
     loadFirst();
   }
-
-/*  @Override
-  protected Set<Integer> getKeys() {
-    return pagingContainer.getKeys();
-  }*/
 
   @Override
   public void setState(int id, STATE state) {
@@ -122,7 +113,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public void reload(Map<String, Collection<String>> typeToSection) {  }
+  public void reload(Map<String, Collection<String>> typeToSection) {
+  }
 
   /**
    * Add two rows -- the search box and then the item list
@@ -225,6 +217,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     }
     return super.findFirstExercise();
   }
+
   /**
    * TODO : Not sure if this is needed anymore
    *
@@ -302,7 +295,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private Stack<Long> pendingRequests = new Stack<>();
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
-      logger.info("got type ahead '" + text + " set text " + setTypeAheadText);// + "' at " + new Date(keypressTimestamp));
+    logger.info("got type ahead '" + text + " set text " + setTypeAheadText);// + "' at " + new Date(keypressTimestamp));
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
@@ -345,7 +338,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  protected void gotExercises(boolean success) {
+  protected void showFinishedGettingExercises() {
     if (waitTimer != null) {
       waitTimer.cancel();
     }
@@ -471,7 +464,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see ExerciseList#rememberExercises(List)
    */
   @Override
-  public void addExercise(T es) {    pagingContainer.addExercise(es);  }
+  public void addExercise(T es) {
+    pagingContainer.addExercise(es);
+  }
 
   /**
    * @param after

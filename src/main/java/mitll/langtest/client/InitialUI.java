@@ -447,7 +447,7 @@ public class InitialUI implements UILifecycle {
       }
     });*/
     crumbs.add(lang);
-    logger.info("getBreadcrumbs adding step for " + lang);
+  //  logger.info("getBreadcrumbs adding step for " + lang);
     //return lang;
   }
 

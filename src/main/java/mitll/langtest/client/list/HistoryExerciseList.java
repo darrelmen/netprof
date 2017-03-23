@@ -70,8 +70,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected long userID;
   private final FacetContainer sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
-  private static final boolean DEBUG = false;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
+  private static final boolean DEBUG = true;
 
   /**
    * @param currentExerciseVPanel
@@ -118,9 +118,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         sectionWidgetContainer.getHistoryToken() + SECTION_SEPARATOR +
         instanceSuffix;
 
-    if (DEBUG || true) {
-      logger.info("getHistoryTokenFromUIState '" + s + "'");
-    }
+    if (DEBUG) logger.info("getHistoryTokenFromUIState '" + s + "'");
+
     return s;
   }
 
@@ -158,7 +157,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see ExerciseList#loadFirstExercise(String)
    */
   void pushFirstSelection(int exerciseID, String searchIfAny) {
-    String token = History.getToken();
+    String token = getHistoryToken();
     int exidFromToken = getIDFromToken(token);
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
         "' vs new exercise " + exerciseID + " instance " + getInstance());*/
@@ -233,7 +232,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       logger.info("HistoryExerciseList.pushNewItem : push history '" + historyToken + "' search '" + search + "' : " + exerciseID);
     }
 
-    String currentToken = History.getToken();
+    String currentToken = getHistoryToken();
 //    if (DEBUG)
 //      logger.info("HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' vs new id '" + exerciseID + "'");
     if (currentToken != null && (historyToken.equals(currentToken) || trimmedToken.equals(currentToken))) {
@@ -257,12 +256,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    *
    * @see SimpleSelectExerciseList#addChoiceRow
    */
-  protected void pushFirstListBoxSelection() {
-    if (History.getToken().isEmpty()) {
-      //logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
+  void pushFirstListBoxSelection() {
+    if (getHistoryToken().isEmpty()) {
+      logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
       pushNewSectionHistoryToken();
     } else {
-      //logger.info("pushFirstListBoxSelection fire history for token from URL: " + initToken + " instance " + getInstance());
+      logger.info("pushFirstListBoxSelection fire history for token from URL: " + getHistoryToken() + " instance " + getInstance());
       History.fireCurrentHistoryState();
     }
   }
@@ -272,7 +271,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #pushFirstListBoxSelection
    */
   protected void pushNewSectionHistoryToken() {
-    String currentToken = History.getToken();
+    String currentToken = getHistoryToken();
     SelectionState selectionState = getSelectionState(currentToken);
     String historyToken = getHistoryTokenFromUIState(getTypeAheadText(), selectionState.getItem());
 
@@ -293,14 +292,17 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     }
   }
 
+  protected String getHistoryToken() {
+    return History.getToken();
+  }
+
   /**
    * For when we want to reload the list, but not by pushing state onto the URL.
    *
-   * @seex mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
+   * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
    */
   public void reloadFromState() {
-    String currentToken = History.getToken();
-    SelectionState selectionState = getSelectionState(currentToken);
+    SelectionState selectionState = getSelectionState(getHistoryToken());
     String typeAheadText = getTypeAheadText();
 
     ExerciseListRequest request =
@@ -329,7 +331,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   protected void setHistoryItem(String historyToken) {
-    if (DEBUG) logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+    if (DEBUG || true) logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
 
@@ -346,38 +348,40 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     pushNewItem(getTypeAheadText(), itemID);
   }
 
-  protected void ignoreStaleRequest(ExerciseListWrapper<T> result) {
-    popRequest();
-  }
+  protected void ignoreStaleRequest(ExerciseListWrapper<T> result) { popRequest();  }
 
   /**
    * Given a selectionState state, make sure the list boxes are consistent with it.
    *
    * @param selectionState
-   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @see #onValueChange
+   * @see #restoreUIState
    */
   protected void restoreListBoxState(SelectionState selectionState) {
-    //   logger.info("restoreListBoxState restore " + selectionState);
+    logger.info("restoreListBoxState restore " + selectionState);
     ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
     Collection<String> typeOrder = startupInfo.getTypeOrder();
     sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
   }
 
   /**
-   * Respond to push a history token.
+   * Respond to push of a history token.
    *
    * @param event
+   * @see #pushNewItem(String, int)
+   * @see #setHistoryItem(String)
    */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
     // if (DEBUG_ON_VALUE_CHANGE) logger.info("HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
-    SelectionState selectionState = getSelectionState(event.getValue());
+    String value = event.getValue();
+    SelectionState selectionState = getSelectionState(value);
 //    logger.info("onValueChange " + event.getValue() + " sel " + selectionState);
     String instance1 = selectionState.getInstance();
 
     if (!instance1.equals(getInstance()) && instance1.length() > 0) {
       if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info("onValueChange : skipping event " + event.getValue() + " for instance '" + instance1 +
+        logger.info("onValueChange : skipping event " + value + " for instance '" + instance1 +
             "' that is not mine '" + getInstance() + "'");
       }
       if (getCreatedPanel() == null) {
@@ -387,9 +391,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       return;
     }
     if (DEBUG_ON_VALUE_CHANGE) {
-      logger.info("HistoryExerciseList.onValueChange : originalValue '" + event.getValue() +
+      logger.info("HistoryExerciseList.onValueChange : originalValue '" + value +
           "'" +
-          " token is '" + event.getValue() + "' for " + instance1 + " vs my instance " + getInstance());
+          " token is '" + value + "' for " + instance1 + " vs my instance " + getInstance());
     }
 
     restoreUIState(selectionState);
@@ -397,7 +401,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     try {
       loadFromSelectionState(selectionState, selectionState);
     } catch (Exception e) {
-      logger.warning("HistoryExerciseList.onValueChange " + event.getValue() + " badly formed. Got " + e);
+      logger.warning("HistoryExerciseList.onValueChange " + value + " badly formed. Got " + e);
     }
   }
 
@@ -406,16 +410,16 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @return true if we're just clicking on a different item in the list and don't need to reload the exercise list
    */
   protected void restoreUIState(SelectionState selectionState) {
-    String search = selectionState.getSearch();
     restoreListBoxState(selectionState);
     if (DEBUG_ON_VALUE_CHANGE) {
-      logger.info("HistoryExerciseList.onValueChange : selectionState '" + selectionState + "' search from token '" + search +
+      logger.info("HistoryExerciseList.onValueChange : selectionState '" + selectionState +
+          "' search from token '" + selectionState.getSearch() +
           "'");
     }
 
     // if (timeOfLastRequest >= getTimeOfLastKeyPress()) {
     //   logger.info("restoreUIState time of last " + new Date(timeOfLastRequest) + " > " + new Date(getTimeOfLastKeyPress()));
-    setTypeAheadText(search);
+    setTypeAheadText(selectionState.getSearch());
     //  }
     //  else {
     //    logger.info("restoreUIState ----> key press is newer ");
@@ -472,10 +476,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         if (DEBUG) {
           logger.info("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
               "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
-              " instance " + getInstance() //+
-              //" user " + controller.getUser() +
-//              " unrecorded " + getUnrecorded() +
-              //" only examples " + isOnlyExamples()
+              " instance " + getInstance()
           );
         }
         getExerciseIDs(typeToSection, prefix, exerciseID, request);
@@ -502,6 +503,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 //  public void reload(Map<String, Collection<String>> typeToSection) {
 //    loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), false, -1);
 //  }
+
   public SelectionState getSelectionState() {
     return getSelectionState(getHistoryTokenFromUIState("", -1));
   }
@@ -515,6 +517,13 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         .setOnlyUninspected(onlyUninspected);
   }
 
+  /**
+   * @see #loadExercisesUsingPrefix(Map, String, int, boolean, boolean, boolean, boolean)
+   * @param typeToSection
+   * @param prefix
+   * @param exerciseID
+   * @param request
+   */
   private void getExerciseIDs(Map<String, Collection<String>> typeToSection,
                               String prefix,
                               int exerciseID,
@@ -549,7 +558,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   /**
    * @param userID
    * @see PagingExerciseList#loadExercises
-   * @see #pushNewSectionHistoryToken()
+   * @see #pushNewSectionHistoryToken
    */
   protected void noSectionsGetExercises(long userID) {
     super.getExercises(userID);

@@ -183,6 +183,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     sectionPanel.clear();
     addTypeAhead(sectionPanel);
     sectionPanel.add(typeOrderContainer = getWidgetsForTypes());
+
+    //pushFirstListBoxSelection();
+
+    String currentToken = getHistoryToken();
+    SelectionState selectionState = getSelectionState(currentToken);
+    restoreUIState(selectionState);
   }
 
   private Panel typeOrderContainer;
@@ -196,14 +202,19 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private Panel getWidgetsForTypes() {
     final UnorderedList container = new UnorderedList();
     container.getElement().setId("typeOrderContainer");
-    getTypeOrder(container);
+    getTypeOrder();
     return container;
   }
 
-  private void getTypeOrder(final UnorderedList container) {
+  private void getTypeOrder() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     typeOrder = projectStartupInfo.getTypeOrder();
-    addFacets(container, projectStartupInfo.getRootNodes(), projectStartupInfo.getTypeToDistinct());
+
+    Collection<String> rootNodes = controller.getProjectStartupInfo().getRootNodes();
+
+    this.rootNodesInOrder = new HashSet<>(controller.getProjectStartupInfo().getTypeOrder());
+    this.rootNodesInOrder.retainAll(rootNodes);
+   // addFacets(container, projectStartupInfo.getRootNodes(), projectStartupInfo.getTypeToDistinct());
   }
 
   /**
@@ -230,12 +241,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @paramx rootNodes
    * @see #getTypeOrder
    */
+/*
   private void addFacets(
       final UnorderedList nav,
       Collection<String> types,
       Map<String, Set<MatchInfo>> typeToDistinct) {
-    logger.info("addChoiceRow for user = " + controller.getUser() + " got rootNodesInOrder " +
-        types);// + " num root nodes " + rootNodes.size());
+*//*    logger.info("addChoiceRow for user = " + controller.getUser() + " got rootNodesInOrder " +
+        types);// + " num root nodes " + rootNodes.size());*//*
 
     if (types.isEmpty()) {
       logger.warning("addChoiceRow : huh? rootNodesInOrder is empty?");
@@ -245,6 +257,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     addFacetsForReal(typeToDistinct, nav);
     pushFirstListBoxSelection();
   }
+  */
 
   /**
    * TODO : for now only single selection
@@ -273,11 +286,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         " nodes" +
         "\n\tand " + rootNodesInOrder.size() +
         " type->distinct " + typeToValues.keySet() + "\n\ttype->sel " + typeToSelection);
-    Collection<String> rootNodes = controller.getProjectStartupInfo().getRootNodes();
-
-    this.rootNodesInOrder = new HashSet<>(controller.getProjectStartupInfo().getTypeOrder());
-    this.rootNodesInOrder.retainAll(rootNodes);
-
     // nav -
     //   ul
     UnorderedList allTypesContainer = new UnorderedList(); //ul
@@ -291,8 +299,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       boolean hasSelection = typeToSelection.containsKey(type);
       ListItem liForDimensionForType = getLIDimension(hasSelection);
       allTypesContainer.add(liForDimensionForType);
-      Panel typeHeader = hasSelection ? getTypeHeader(type) : getSimpleHeader(type);
-      liForDimensionForType.add(typeHeader);
+      liForDimensionForType.add(hasSelection ? getTypeHeader(type) : getSimpleHeader(type));
 
       // nav
       //  ul
@@ -447,7 +454,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     addMatchInfoTooltip(type, key, span);
     span.addStyleName(MENU_ITEM);
     Anchor anchor = getAnchor(key.getValue());
-    anchor.addClickHandler(getHandler(type, key.getValue()));
+    anchor.addClickHandler(getChoiceHandler(type, key.getValue()));
     anchor.addStyleName("choice");
     span.add(anchor);
 
@@ -528,13 +535,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   @NotNull
-  private ClickHandler getHandler(final String type, final String key) {
+  private ClickHandler getChoiceHandler(final String type, final String key) {
     return new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         Map<String, String> candidate = new HashMap<>(typeToSelection);
         candidate.put(type, key);
-        //      logger.info("getHandler t->sel " + typeToSelection);
+        //      logger.info("getChoiceHandler t->sel " + typeToSelection);
         getTypeToValue(candidate);
       }
     };
@@ -550,6 +557,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * TODO : consider reqid check to deal with races...
    *
    * @param typeToSelection
+   * @see #addRemoveClickHandler(String, Anchor)
+   * @see #getChoiceHandler(String, String)
+   * @see #getSectionWidgetContainer()
    */
   private void getTypeToValue(Map<String, String> typeToSelection) {
     List<Pair> pairs = new ArrayList<>();
@@ -626,7 +636,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-    // logger.info("restoreListBoxState " + selectionState);
+    logger.info("restoreListBoxState " + selectionState);
     super.restoreListBoxState(selectionState);
     showSelectionState(selectionState);
   }
@@ -640,7 +650,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void showSelectionState(SelectionState selectionState) {
     // keep the download link info in sync with the selection
-    Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
+   // Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
     //  logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
   }
@@ -669,6 +679,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   protected FacetContainer getSectionWidgetContainer() {
     return new FacetContainer() {
+
+
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
         // logger.info("restoreListBoxState t->sel " + selectionState);

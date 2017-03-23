@@ -131,7 +131,7 @@ public class NPFHelper implements RequiresResize {
       addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
       // logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
-      rememberAndLoadFirst(ul, toSelect);
+      rememberAndLoadFirstFromUserList(ul, toSelect);
     }
   }
 
@@ -159,7 +159,7 @@ public class NPFHelper implements RequiresResize {
 
     Panel hp = doInternalLayout(ul, instanceName);
     if (loadExercises) {
-      rememberAndLoadFirst(ul, toSelect);
+      rememberAndLoadFirstFromUserList(ul, toSelect);
     }
     return hp;
   }
@@ -241,7 +241,7 @@ public class NPFHelper implements RequiresResize {
    * @see #doNPF
    * @see #showNPF
    */
-  private void rememberAndLoadFirst(final UserList<CommonShell> ul, HasID toSelect) {
+  private void rememberAndLoadFirstFromUserList(final UserList<CommonShell> ul, HasID toSelect) {
     npfExerciseList.setUserListID(ul.getID());
 
     List<CommonShell> copy = new ArrayList<>();

@@ -1086,10 +1086,7 @@ public class ListManager implements RequiresResize {
     }
   }
 
-  private String getInstanceName(boolean isReview) {
-    String s = isReview ? REVIEW : COMMENT;
-    return s + "_edit";
-  }
+  private String getInstanceName(boolean isReview) {    return isReview ? REVIEW : COMMENT + "_edit";  }
 
   /**
    * @param ul

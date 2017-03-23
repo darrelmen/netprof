@@ -65,8 +65,9 @@ import java.util.logging.Logger;
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize {
-  public static final int LIST_HEIGHT = 450;
   private final Logger logger = Logger.getLogger("ExerciseList");
+
+  private static final int LIST_HEIGHT = 450;
   /**
    * @see #showEmptyExercise
    */
@@ -78,7 +79,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   protected final ExerciseServiceAsync service;
   private final UserFeedback feedback;
   private ExercisePanelFactory<T, U> factory;
-  private final ExerciseController controller;
+  protected final ExerciseController controller;
 
   protected Panel createdPanel;
   private int lastReqID = 0;
@@ -217,6 +218,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   abstract void pushNewItem(String search, int exerciseID);
 
   /**
+   *
+   * @return
+   */
+  abstract ActivityType getActivityType();
+
+  /**
    * TODO : Cheesy...
    */
   public void onResize() {
@@ -235,17 +242,17 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     //  }
   }
 
+  /**
+   * @see ListInterface#getExercises(long)
+   */
+  protected abstract void showFinishedGettingExercises();
+
+  protected abstract List<T> rememberExercises(List<T> result);
+
+
   public Panel getCreatedPanel() {
     return createdPanel;
   }
-
-  /**
-   * TODO : horrible hack here to get role of request.
-   *
-   * @return
-   */
-  abstract ActivityType getActivityType();
-
 
   public String getInstance() {
     return listOptions.getInstance();
@@ -257,12 +264,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see ListInterface#getExercises(long)
+   * @see #getExercises
    */
   class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
     private final String selectionID;
     private final String searchIfAny;
     private final int exerciseID;
+
     private final ExerciseListRequest request;
 
     /**
@@ -281,11 +289,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
     public void onFailure(Throwable caught) {
       logger.warning("SetExercisesCallback.onFailure " + lastReqID);
-      gotExercises(false);
+      showFinishedGettingExercises();
       dealWithRPCError(caught);
     }
 
     public void onSuccess(ExerciseListWrapper<T> result) {
+      showFinishedGettingExercises();
       if (DEBUG) logger.info("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
         if (DEBUG)
@@ -294,32 +303,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       } else {
         lastSuccessfulRequest = request;
         if (DEBUG) logger.info("onSuccess last req now " + lastSuccessfulRequest);
-        gotExercises(result);
+        checkForEmptyExerciseList(result.getExercises().isEmpty());
         int idToUse = exerciseID == -1 ? result.getFirstExercise() == null ? -1 : result.getFirstExercise().getID() : exerciseID;
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
       }
     }
   }
 
-  protected abstract void ignoreStaleRequest(ExerciseListWrapper<T> result);
 
-  private void gotExercises(ExerciseListWrapper<T> result) {
-    gotExercises(true);
-    if (DEBUG) logger.info("ExerciseList.gotExercises result = " + result);
-
-    boolean isEmpty = result.getExercises().isEmpty();
-    if (isEmpty) {
-      gotEmptyExerciseList();
-    } else {
-      //  logger.info("list non empty");
-    }
-  }
-
-  protected abstract void gotExercises(boolean success);
-
-  /**
-   * @see #reloadWith
-   */
   private class SetExercisesCallbackWithID implements AsyncCallback<ExerciseListWrapper<T>> {
     private final int id;
 
@@ -333,11 +324,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     public void onFailure(Throwable caught) {
-      gotExercises(false);
+      showFinishedGettingExercises();
+
       dealWithRPCError(caught);
     }
 
     public void onSuccess(ExerciseListWrapper<T> result) {
+      showFinishedGettingExercises();
+
       if (DEBUG)
         logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " +
             id);
@@ -346,7 +340,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
           logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
               " b/c before latest " + lastReqID);
       } else {
-        gotExercises(result);
+        checkForEmptyExerciseList(result.getExercises().isEmpty());
         List<T> exercises = result.getExercises();
         exercises = rememberExercises(exercises);
         for (ListChangeListener<T> listener : listeners) {
@@ -356,6 +350,49 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
         pushFirstSelection(id, "");
       }
+    }
+  }
+
+  /**
+   * @see #askServerForExercise
+   */
+  private class ExerciseAsyncCallback implements AsyncCallback<U> {
+    @Override
+    public void onFailure(Throwable caught) {
+      pendingReq = false;
+      if (caught instanceof IncompatibleRemoteServiceException) {
+        Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
+            "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
+            ")");
+      } else {
+        if (!caught.getMessage().trim().equals("0")) {
+          Window.alert("Message from server: " + caught.getMessage());
+        }
+        if (DEBUG) logger.info("ex " + caught.getMessage() + " " + caught);
+      }
+    }
+
+    @Override
+    public void onSuccess(U result) {
+      pendingReq = false;
+
+      if (result == null) {
+        Window.alert("Unfortunately there's a configuration error and we can't find this exercise.");
+      } else {
+        showExercise(result);
+      }
+    }
+  }
+
+  protected abstract void ignoreStaleRequest(ExerciseListWrapper<T> result);
+
+  /**
+   * @see #reloadWith
+   */
+  private void checkForEmptyExerciseList(boolean isEmpty) {
+    // if (DEBUG) logger.info("ExerciseList.gotExercises result = " + result);
+    if (isEmpty) {
+      gotEmptyExerciseList();
     }
   }
 
@@ -390,7 +427,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * Calls remember exercises -- interacts with flashcard mode and the shuffle option there.
    * <p>
-   * Has override for headstart selection of a specific exercise.
+   * Has override for headstart selection of a specific exercise???
    * <p>
    * Previously we would first ask the server for the exercise list and then ask for the first exercise on
    * the list, making the user/client wait for both calls to finish before displaying the first item.
@@ -440,6 +477,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     goToFirst(searchIfAny, exerciseID);
   }
 
+  /**
+   * TODO : Why would we want to include both a search term and an exercise id???
+   *
+   * @param searchIfAny
+   * @param exerciseID
+   * @see #rememberAndLoadFirst(List, String, String, int)
+   */
   protected void goToFirst(String searchIfAny, int exerciseID) {
     if (exerciseID < 0) {
       loadFirstExercise(searchIfAny);
@@ -453,7 +497,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return result.getReqID() < lastReqID;
   }
 
-  protected abstract List<T> rememberExercises(List<T> result);
 
   /**
    * Worry about deleting the currently visible item.
@@ -494,14 +537,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       if (DEBUG) logger.info("loadFirstExercise (" + getInstance() + ") : current exercises is empty?");
       removeCurrentExercise();
     } else {
-      T toLoad = findFirstExercise();
-      if (DEBUG) logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + getInstance());
-      pushFirstSelection(toLoad.getID(), searchIfAny);
+ //     int firstID = findFirstID();
+     // if (DEBUG) logger.info("loadFirstExercise ex id =" + firstID + " instance " + getInstance());
+      pushFirstSelection(findFirstID(), searchIfAny);
     }
   }
 
   public void loadFirst() {
-    pushFirstSelection(getFirst().getID(), "");
+    pushFirstSelection(getFirstID(), "");
   }
 
   protected abstract boolean isEmpty();
@@ -515,7 +558,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return getFirst();
   }
 
+  private int findFirstID() {
+    return findFirstExercise().getID();
+  }
+
   protected abstract T getFirst();
+
+  private int getFirstID() {  return getFirst().getID();  }
 
   boolean hasExercise(int id) {  return byID(id) != null;  }
 
@@ -544,10 +593,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       logger.warning("checkAndAskServer : skipping request for " + id);
     }
   }
-
-/*
-  protected abstract Set<Integer> getKeys();
-*/
 
   @Override
   public boolean loadByID(int id) {
@@ -609,40 +654,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     cachedNext = null;
   }
 
-  private class ExerciseAsyncCallback implements AsyncCallback<U> {
-    @Override
-    public void onFailure(Throwable caught) {
-      pendingReq = false;
-      if (caught instanceof IncompatibleRemoteServiceException) {
-        Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
-            "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
-            ")");
-      } else {
-        if (!caught.getMessage().trim().equals("0")) {
-          Window.alert("Message from server: " + caught.getMessage());
-        }
-        if (DEBUG) logger.info("ex " + caught.getMessage() + " " + caught);
-      }
-    }
-
-    @Override
-    public void onSuccess(U result) {
-      pendingReq = false;
-
-      if (result == null) {
-        Window.alert("Unfortunately there's a configuration error and we can't find this exercise.");
-      } else {
-        showExercise(result);
-      }
-    }
-  }
-
   /**
    * @param commonExercise
    * @see #rememberAndLoadFirst
    * @see ExerciseAsyncCallback#onSuccess
    */
-  protected void showExercise(final U commonExercise) {
+  void showExercise(final U commonExercise) {
     //  logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getOldID());
     // String itemID = commonExercise.getOldID();
     markCurrentExercise(commonExercise.getID());
@@ -663,19 +680,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   protected abstract T getCurrentExercise();
-
-  /**
-   * @param exercise
-   * @see #showExercise
-   */
-/*
-  private Panel makeExercisePanel(U exercise) {
-    if (DEBUG) logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + getInstance());
-    Panel exercisePanel = factory.getExercisePanel(exercise);
-    innerContainer.add(exercisePanel);
-    return exercisePanel;
-  }
-*/
 
   /**
    * @param current
@@ -734,9 +738,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     innerContainer.getParent().removeStyleName("shadowBorder");
   }
 
+/*
   private String reportLocal() {
     return "list " + getInstance() + " id " + getElement().getId();
   }
+*/
 
   private void removeComponents() {
     super.clear();
