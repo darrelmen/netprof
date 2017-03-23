@@ -109,7 +109,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
       bottomRowDiv.add(listHeader);
     }
 
-    Panel bottomRow = new HorizontalPanel();
+  //  Panel bottomRow = new HorizontalPanel();
+    Panel bottomRow = new DivWidget();
     bottomRow.add(exerciseListContainer);
     bottomRow.getElement().setId("NPFHelper_bottomRow");
     styleBottomRow(bottomRow);

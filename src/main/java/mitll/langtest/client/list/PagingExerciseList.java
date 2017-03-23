@@ -288,9 +288,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public void searchBoxEntry(String text) {
     if (listOptions.isShowTypeAhead()) {
       logger.info("searchBoxEntry type ahead '" + text + "'");
+
+      // why would this be a bad idea?
+      setTypeAheadText(text);
       gotTypeAheadEvent(text, true);
     }
   }
+
+
 
   private Stack<Long> pendingRequests = new Stack<>();
 
@@ -303,7 +308,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
 
-  String getTypeAheadText() {
+  public String getTypeAheadText() {
     return typeAhead != null ? typeAhead.getText() : "";
   }
 

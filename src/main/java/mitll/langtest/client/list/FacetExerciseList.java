@@ -143,12 +143,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see mitll.langtest.client.list.PagingExerciseList#addComponents
    */
   protected ClickablePagingContainer<CommonShell> makePagingContainer() {
-    //  final PagingExerciseList<CommonShell, CommonExercise> outer = this;
-//    if (logger == null) {
-//      logger = Logger.getLogger("NPExerciseList");
-//    }
-//    logger.info("makePagingContainer : for " + getInstance() + " show first not complete " + showFirstNotCompleted);
-
     pagingContainer =
         new ClickablePagingContainer<CommonShell>(controller
         ) {
@@ -748,6 +742,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
         if (!result.isEmpty()) {
           markCurrentExercise(result.iterator().next().getID());
+        }
+        else {
+          // TODO : what's happening here?
+          //showEmptyExercise();
         }
       }
     });

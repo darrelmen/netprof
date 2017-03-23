@@ -118,55 +118,76 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
         addEntry(exercise, t);
       }
     }
+
+    for (CommonExercise ex : exercise.getDirectlyRelated()) {
+      addEnglish(exercise, ex.getEnglish());
+      if (includeForeign) {
+        addForeign(isMandarin, hasClickableCharacters, exercise, ex.getForeignLanguage(), ex.getTransliteration());
+      }
+    }
   }
 
   /**
    * Mandarin has a special tokenizer.
    *
-   * @param smallVocabDecoder
    * @param isMandarin
    * @param hasClickableCharacters
    * @param exercise
+   * @paramz smallVocabDecoder
    */
   private void addForeign(boolean isMandarin, boolean hasClickableCharacters,
                           T exercise) {
     String fl = exercise.getForeignLanguage();
+    String transliteration = exercise.getTransliteration();
+
+    addForeign(isMandarin, hasClickableCharacters, exercise, fl, transliteration);
+  }
+
+  private void addForeign(boolean isMandarin, boolean hasClickableCharacters, T exercise, String fl, String transliteration) {
     if (fl != null && !fl.isEmpty()) {
-      fl = getTrimmed(fl);
-      addEntryToTrie(new ExerciseWrapper<>(fl, exercise));
+      addFL(isMandarin, hasClickableCharacters, exercise, fl);
+      addTransliteration(transliteration, exercise);
+    }
+  }
 
-      Collection<String> tokens = isMandarin ? getMandarinTokens(exercise) : smallVocabDecoder.getTokens(fl);
-      for (String token : tokens) {
-        addEntry(exercise, token);
-        // String noAccents = removeDiacritics(token);
-        String noAccents = StringUtils.stripAccents(token);
+  private void addTransliteration(String transliteration, T exercise) {
+    for (String token : smallVocabDecoder.getTokens(transliteration)) {
+      addEntry(exercise, token);
+      String noAccents = StringUtils.stripAccents(token);
 
-        if (!token.equals(noAccents) && !noAccents.isEmpty()) {
-          addEntry(exercise, noAccents);
-        }
+      if (!token.equals(noAccents) && !noAccents.isEmpty()) {
+        addEntry(exercise, noAccents);
       }
+      //addEntry(exercise, removeDiacritics(token));
+    }
+  }
 
-      if (hasClickableCharacters) {
-        addClickableCharacters(exercise, fl);
+  private void addFL(boolean isMandarin, boolean hasClickableCharacters, T exercise, String fl) {
+    fl = getTrimmed(fl);
+    addEntryToTrie(new ExerciseWrapper<>(fl, exercise));
+
+    Collection<String> tokens = isMandarin ? getMandarinTokens(fl) : smallVocabDecoder.getTokens(fl);
+    for (String token : tokens) {
+      addEntry(exercise, token);
+      // String noAccents = removeDiacritics(token);
+      String noAccents = StringUtils.stripAccents(token);
+
+      if (!token.equals(noAccents) && !noAccents.isEmpty()) {
+        addEntry(exercise, noAccents);
       }
+    }
 
-      String transliteration = exercise.getTransliteration();
-
-      for (String token : smallVocabDecoder.getTokens(transliteration)) {
-        addEntry(exercise, token);
-        String noAccents = StringUtils.stripAccents(token);
-
-        if (!token.equals(noAccents) && !noAccents.isEmpty()) {
-          addEntry(exercise, noAccents);
-        }
-        //addEntry(exercise, removeDiacritics(token));
-      }
+    if (hasClickableCharacters) {
+      addClickableCharacters(exercise, fl);
     }
   }
 
   private void addEnglish(T exercise) {
     String english = exercise.getEnglish();
+    addEnglish(exercise, english);
+  }
 
+  private void addEnglish(T exercise, String english) {
     if (english != null && !english.isEmpty()) {
       String trimmed = getTrimmed(english);
 
@@ -200,8 +221,13 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     return addEntryToTrie(new ExerciseWrapper<>(token.toLowerCase(), exercise));
   }
 
-  private Collection<String> getMandarinTokens(T e) {
-    return smallVocabDecoder.getMandarinTokens(e.getForeignLanguage());
+//  private Collection<String> getMandarinTokens(T e) {
+//    String foreignLanguage = e.getForeignLanguage();
+//    return getMandarinTokens(foreignLanguage);
+//  }
+
+  private Collection<String> getMandarinTokens(String foreignLanguage) {
+    return smallVocabDecoder.getMandarinTokens(foreignLanguage);
   }
 
   /**
@@ -212,7 +238,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    */
   public List<T> getExercises(String prefix) {
     String trimmed = getTrimmed(prefix);
-  //  logger.info("trim '" + prefix.toLowerCase() + "' = '" + trimmed + "'");
+    //  logger.info("trim '" + prefix.toLowerCase() + "' = '" + trimmed + "'");
     return getMatches(trimmed);
   }
 
@@ -225,9 +251,9 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
      * @param useEnglish
      * @see ExerciseTrie#ExerciseTrie
      */
-    ExerciseWrapper(T e, boolean useEnglish) {
-      this((useEnglish ? e.getEnglish().toLowerCase() : e.getForeignLanguage().toLowerCase()), e);
-    }
+//    ExerciseWrapper(T e, boolean useEnglish) {
+//      this((useEnglish ? e.getEnglish().toLowerCase() : e.getForeignLanguage().toLowerCase()), e);
+//    }
 
     ExerciseWrapper(String value, T e) {
       this.value = value;

@@ -3,10 +3,8 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.custom.exercise.ContextAudioChoices;
 import mitll.langtest.client.custom.exercise.ContextSupport;
@@ -69,57 +67,80 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
     this.controller = controller;
 
     getElement().setId("ExercisePanel");
-
     addStyleName("cardBorderShadow");
     addStyleName("bottomFiveMargin");
+
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
+
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
+
     add(getItemContent(commonExercise));
   }
 
   /**
+   * Row 1: FL - ENGLISH
+   * Row 2: AltFL
+   * Row 3: Transliteration
+   * Row 4: Meaning
+   * Row 5: context sentence fl - eng
+   *
    * @return
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
    */
-
   protected Widget getItemContent(final T e) {
     //Panel column = new VerticalPanel();
-    Panel column = new DivWidget();
-    column.getElement().setId("CommentNPFExercise_QuestionContent");
-    column.setWidth("100%");
+    Panel card = new DivWidget();
+    card.getElement().setId("CommentNPFExercise_QuestionContent");
 
-    DivWidget row = new DivWidget();
-    row.getElement().setId("QuestionContent_item");
+    card.setWidth("100%");
+    int numRows = 2;
+    int row = 0;
 
-    Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
-    entry.addStyleName("floatLeft");
-    row.add(entry);
-
-//    addContextButton(e, row);
-    column.add(row);
-
-    addAltFL(e, column);
-    addTransliteration(e, column);
+    boolean meaningValid = isMeaningValid(e);
+    boolean isAltValid = isValid(e.getAltFL());
+    boolean isTranslitValid = isValid(e.getTransliteration());
 
     boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
-    boolean meaningValid = isMeaningValid(e);
     boolean useMeaningInsteadOfEnglish = isEnglish && meaningValid;
     String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
 
-/*
-    logger.info("getItemContent meaningValid " + meaningValid + " is english " + isEnglish + " use it " + useMeaningInsteadOfEnglish + "" +
-        " english " + english);
-        */
+    if (meaningValid) numRows++;
+    if (isAltValid) numRows++;
+    if (isTranslitValid) numRows++;
+    Grid grid = new Grid(numRows, 2);
+    grid.getColumnFormatter().setWidth(0, "50%");
+    grid.getColumnFormatter().setWidth(1, "50%");
 
-    if (!english.isEmpty() && !english.equals("N/A")) {
-      column.add(getEntry(e, QCNPFExercise.ENGLISH, english, false, false, false, showInitially));
+    for (int i = 0; i < numRows; i++) {
+      grid.getRowFormatter().setStyleName(i, "bottomFiveMargin");
     }
+    card.add(grid);
+
+    //DivWidget row = new DivWidget();
+    //row.getElement().setId("QuestionContent_item");
+
+    Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
+    //entry.addStyleName("floatLeft");
+    //row.add(entry);
+    grid.setWidget(row, 0, entry);
+
+    if (isValid(english)) {
+      Widget entry1 = getEntry(e, QCNPFExercise.ENGLISH, english, false, false, false, showInitially);
+      entry1.addStyleName("rightsidecolor");
+      grid.setWidget(row++, 1, entry1);
+    }
+
+    Widget widget = addAltFL(e);
+    if (widget != null) grid.setWidget(row++, 0, widget);
+    Widget widget1 = addTransliteration(e);
+    if (widget1 != null) grid.setWidget(row++, 0, widget1);
 
     if (!useMeaningInsteadOfEnglish && meaningValid) {
-      column.add(getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially));
+      Widget entry1 = getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially);
+      if (entry1 != null) grid.setWidget(row++, 0, entry1);
     }
 
-    DivWidget container = new DivWidget();
+   // DivWidget container = new DivWidget();
     String foreignLanguage = e.getForeignLanguage();
     String altFL = e.getAltFL();
 
@@ -127,32 +148,57 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
 
     for (CommonExercise contextEx : e.getDirectlyRelated()) {
       logger.info("Add context " + contextEx.getID());
-      container.add(getContext(contextEx, foreignLanguage, altFL));
+      Panel context = getContext(contextEx, foreignLanguage, altFL);
+      if (context != null) {
+        context.getElement().getStyle().setPadding(10, Style.Unit.PX);
+        grid.setWidget(row, 0, context);
+      }
+
+      String contextTranslation = contextEx.getEnglish();
+
+      boolean same = contextEx.getForeignLanguage().equals(contextTranslation);
+      if (!same) {
+        Widget widget2 = addContextTranslation(contextEx, contextTranslation);
+        if (widget2 != null) {
+          widget2.addStyleName("rightsidecolor");
+          widget2.getElement().getStyle().setPadding(10, Style.Unit.PX);
+          grid.setWidget(row, 1, widget2);
+        }
+      }
+      //container.add(context);
     }
 
-    column.add(container);
+    for (int i = 0; i < numRows; i++) {
+      grid.getRowFormatter().setStyleName(i, "bottomFiveMargin");
+    }
+    //card.add(container);
 
-    return column;
+    return card;
   }
 
-  private void addAltFL(T e, Panel column) {
+  private Widget addAltFL(T e) {
     String translitSentence = e.getAltFL().trim();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
-      column.add(getEntry(e, QCNPFExercise.ALTFL, translitSentence, true, true, false, showInitially));
-    }
+      return getEntry(e, QCNPFExercise.ALTFL, translitSentence, true, true, false, showInitially);
+    } else return null;
   }
 
-  private void addTransliteration(T e, Panel column) {
+  private Widget addTransliteration(T e) {
     String translitSentence = e.getTransliteration();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
-      column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, translitSentence, false, true, false, showInitially));
+      return getEntry(e, QCNPFExercise.TRANSLITERATION, translitSentence, false, true, false, showInitially);
     }
+    return null;
   }
 
   private boolean isMeaningValid(T e) {
-    return e.getMeaning() != null && !e.getMeaning().trim().isEmpty();
+    String meaning = e.getMeaning();
+    return isValid(meaning);
   }
 
+  private boolean isValid(String meaning) {
+    return meaning != null && !meaning.trim().isEmpty() && !meaning.equals("N/A");
+  }
 
   private ContextSupport<T> contextSupport = new ContextSupport<T>();
 
@@ -164,77 +210,29 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
    */
   private <U extends CommonAudioExercise> Panel getContext(U exercise, String itemText, String altText) {
     String context = exercise.getForeignLanguage();
-    String contextTranslation = exercise.getEnglish();
-
-    boolean same = context.equals(contextTranslation);
 
     if (!context.isEmpty()) {
-      Panel hp = new HorizontalPanel();
+      Panel hp = new DivWidget();
       new ContextAudioChoices(controller, exercise, exercise.getID()).addGenderChoices(hp);
-
-//      String highlightedVocabItemInContext = highlightVocabItemInContext(exercise, itemText);
-
-//      Panel contentWidget =
-//          clickableWords.getClickableWords(highlightedVocabItemInContext, true, false, false);
-      //String field = QCNPFExercise.CONTEXT;
-      //ExerciseAnnotation annotation = exercise.getAnnotation(field);
-
-//      logger.info("getContext context " + exercise.getID() + " : " + annotation);
-
-/*
-      Widget commentRow = getCommentBox(false)
-          .getNoPopup(
-              field,
-              contentWidget,
-              annotation,
-              exercise);
-*/
-
-
       Panel contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
           true, false, false);
+
       Widget commentRow =
           getCommentBox(true).getEntry(QCNPFExercise.CONTEXT, contentWidget,
               exercise.getAnnotation(QCNPFExercise.CONTEXT), showInitially);
 
-      Panel vp = new VerticalPanel();
-      vp.add(commentRow);
-      addContextTranslation(exercise, contextTranslation, same, vp);
-      hp.add(vp);
+      hp.add(commentRow);
       return hp;
     } else {
       return null;
     }
   }
 
-  /**
-   * Add underlines of item tokens in context sentence.
-   * <p>
-   * TODO : don't do this - make spans with different colors
-   * <p>
-   * Worries about lower case/upper case mismatch.
-   *
-   * @param e
-   * @param context
-   * @return
-   * @see #getContext
-   */
-  private String highlightVocabItemInContext(CommonShell e, String context) {
-    return new ContextSupport<>().getHighlightedSpan(context, e.getForeignLanguage());
-  }
-
-  private void addContextTranslation(AnnotationExercise e, String contextTranslation, boolean same, Panel vp) {
-    if (!contextTranslation.isEmpty() && !same) {
-/*      Panel contentWidget =
-          clickableWords.getClickableWords(contextTranslation, true, false, false);*/
-  /*    Widget translationEntry = getCommentBox(false).getNoPopup(QCNPFExercise.CONTEXT_TRANSLATION, contentWidget,
-          e.getAnnotation(QCNPFExercise.CONTEXT_TRANSLATION),
-          exercise);*/
-
-      Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, contextTranslation, false, false, false, showInitially);
-
-      vp.add(translationEntry);
+  private Widget addContextTranslation(AnnotationExercise e, String contextTranslation) {
+    if (!contextTranslation.isEmpty()) {
+      return getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, contextTranslation, false, false, false, showInitially);
     }
+    else return null;
   }
 
 

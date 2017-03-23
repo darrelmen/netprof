@@ -182,6 +182,8 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    */
   void searchBoxEntry(String text);
 
+  String getTypeAheadText();
+
   int getIndex(int currentID);
 
   void markCurrentExercise(int id);

@@ -7,18 +7,21 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.InlineHTML;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 3/23/17.
  */
 public class ClickableWords<T extends CommonExercise> {
+  public static final double THRESHOLD = 0.3;
+  private final Logger logger = Logger.getLogger("ClickableWords");
+
   private boolean isJapanese = false;
 
   private final T exercise;
@@ -27,10 +30,10 @@ public class ClickableWords<T extends CommonExercise> {
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
-  private static final String MEANING = "Meaning";
+  //private static final String MEANING = "Meaning";
   private final ListInterface listContainer;
 
-  public ClickableWords(ListInterface listContainer, T exercise, String language) {
+  ClickableWords(ListInterface listContainer, T exercise, String language) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
@@ -43,10 +46,10 @@ public class ClickableWords<T extends CommonExercise> {
    * @paramx nameValueRow
    * @seex #getContentWidget(String, String, boolean)
    */
-  public DivWidget getClickableWords(String value,
-                                     boolean isFL,
-                                     boolean isTranslit,
-                                     boolean isMeaning) {
+  DivWidget getClickableWords(String value,
+                              boolean isFL,
+                              boolean isTranslit,
+                              boolean isMeaning) {
     DivWidget horizontal = new DivWidget();
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
@@ -64,11 +67,11 @@ public class ClickableWords<T extends CommonExercise> {
     return horizontal;
   }
 
-  public DivWidget getClickableWordsHighlight(String value,
-                                              String highlight,
-                                              boolean isFL,
-                                              boolean isTranslit,
-                                              boolean isMeaning) {
+  DivWidget getClickableWordsHighlight(String value,
+                                       String highlight,
+                                       boolean isFL,
+                                       boolean isTranslit,
+                                       boolean isMeaning) {
     DivWidget horizontal = new DivWidget();
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
@@ -99,8 +102,8 @@ public class ClickableWords<T extends CommonExercise> {
 
   private boolean isMatch(String token, String next) {
     String context = removePunct(token.toLowerCase());
-    String vocab = removePunct(next.toLowerCase());
-    return context.equals(vocab) || (context.startsWith(vocab) && ((float)vocab.length()/(float)context.length()) > 0.5);
+    String vocab   = removePunct(next.toLowerCase());
+    return context.equals(vocab) || (context.startsWith(vocab));// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
   }
 
   @NotNull
@@ -136,8 +139,15 @@ public class ClickableWords<T extends CommonExercise> {
                                        HasDirection.Direction dir,
                                        final String html, boolean chineseCharacter,
                                        boolean addStyle) {
-    String toShow = addStyle ? "<u>" + html + "</u>" : html;
+    String toShow = html;//addStyle ? "<u>" + html + "</u>" : html;
     final InlineHTML w = new InlineHTML(toShow, dir);
+
+    if (addStyle) w.addStyleName("contextmatch");
+
+    String typeAheadText = listContainer.getTypeAheadText().toLowerCase();
+    if (isMatch(html, typeAheadText)) {//html.toLowerCase().contains(typeAheadText) && ((float)typeAheadText.length()/(float)html.length()) > THRESHOLD) {
+      w.addStyleName("searchmatch");
+    }
 
     String noPunct = removePunct(html);
     if (!noPunct.isEmpty()) {
@@ -148,7 +158,14 @@ public class ClickableWords<T extends CommonExercise> {
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
               String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
+
+              logger.info("from " + html);
+              logger.info("to   " + s1);
+
               String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
+
+              logger.info("finally   " + s2);
+
               listContainer.searchBoxEntry(s2);
             }
           });

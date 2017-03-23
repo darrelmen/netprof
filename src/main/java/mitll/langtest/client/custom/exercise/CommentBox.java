@@ -241,11 +241,19 @@ public class CommentBox extends PopupContainerFactory {
   }
 
   private Panel getCommentAndButtonsRow(String field, Widget content, Button commentButton, Button clearButton) {
-    Panel row = new HorizontalPanel();
+    Panel row = new DivWidget();
+//    Panel row = new HorizontalPanel();
     row.getElement().setId("comment_and_clear_container_for_" + field);
-    if (content != null) row.add(content);
+    if (content != null) {
+      row.add(content);
+      content.addStyleName("floatLeftList");
+    }
     row.add(commentButton);
+    commentButton.addStyleName("floatLeftList");
+
     row.add(clearButton);
+    clearButton.addStyleName("floatLeftList");
+
     return row;
   }
 
