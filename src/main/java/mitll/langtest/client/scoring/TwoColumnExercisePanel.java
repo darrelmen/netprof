@@ -249,7 +249,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (!context.isEmpty()) {
       Panel hp = new DivWidget();
-      new ContextAudioChoices(controller, exercise, exercise.getID()).addGenderChoices(hp);
+      hp.addStyleName("inlineFlex");
+      //new ContextAudioChoices(controller, exercise, exercise.getID()).addGenderChoices(hp);
+
+      AudioAttribute audioAttrPrefGender = exercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
+
+      if (audioAttrPrefGender != null) {
+        PlayAudioPanel w = new PlayAudioPanel(controller, audioAttrPrefGender.getAudioRef());
+        hp.add(w);
+      }
+
       Panel contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
           true, false, false);
 

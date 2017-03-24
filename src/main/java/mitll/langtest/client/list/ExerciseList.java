@@ -849,13 +849,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     leftColumn.addStyleName("floatLeftAndClear");
     addMinWidthStyle(leftColumn);
 
-    leftColumn.getElement().getStyle().setProperty("minHeight", LIST_HEIGHT + "px");
 
     leftColumn.add(getWidget());
     return leftColumn;
   }
 
   protected void addMinWidthStyle(Panel leftColumn) {
+    leftColumn.getElement().getStyle().setProperty("minHeight", LIST_HEIGHT + "px");
     leftColumn.addStyleName("minWidth");
     leftColumn.getElement().getStyle().setPaddingRight(10, Style.Unit.PX);
   }

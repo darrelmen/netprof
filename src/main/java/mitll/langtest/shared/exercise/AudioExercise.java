@@ -35,6 +35,7 @@ package mitll.langtest.shared.exercise;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.user.MiniUser;
 import net.liftweb.util.AU;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -186,15 +187,24 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular) {
+    Collection<AudioAttribute> collect = getAudioPrefGender(isMale);
+    Optional<AudioAttribute> max = collect.stream()
+        .filter(p -> p.isRegularSpeed() && isRegular || p.isSlow() && !isRegular)
+        .max((o1, o2) -> -1 * Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
+    return max.orElse(null);
+  }
+  public AudioAttribute getAudioAttrPrefGender(boolean isMale) {
+    Collection<AudioAttribute> audioPrefGender = getAudioPrefGender(isMale);
+    return audioPrefGender.isEmpty()?null:audioPrefGender.iterator().next();
+  }
+  @NotNull
+  private Collection<AudioAttribute> getAudioPrefGender(boolean isMale) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes();
     Collection<AudioAttribute> collect = audioAttributes.stream().filter(p -> p.isMale() == isMale).collect(Collectors.toList());
     if (collect.isEmpty()) {
       collect = audioAttributes;
     }
-    Optional<AudioAttribute> max = collect.stream()
-        .filter(p -> p.isRegularSpeed() && isRegular || p.isSlow() && !isRegular)
-        .max((o1, o2) -> -1 * Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
-    return max.orElse(null);
+    return collect;
   }
 
   /**
