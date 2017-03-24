@@ -99,7 +99,7 @@ public class ListOperations {
     textBox.setText(current);
     final Button newListButton = new Button(ADD_MEDIA);
     configureNewListButton(newListButton);
-    newListButton.addStyleName("floatLeftList");
+    newListButton.addStyleName("floatLeft");
 
     Tooltip tooltip = new TooltipHelper().addTooltip(newListButton, ADD_MEDIA);
 
@@ -186,13 +186,13 @@ public class ListOperations {
       if (mediaURL.startsWith("<iframe")) {
         HTML w = new HTML(mediaURL);
         docContainer.add(w);
-        w.addStyleName("floatLeftList");
+        w.addStyleName("floatLeft");
       } else {
         Frame frame = new Frame(mediaURL);
         frame.setHeight(315 +          "px");
         frame.setWidth(615+"px");
         DivWidget container = new DivWidget();
-        container.addStyleName("floatLeftList");
+        container.addStyleName("floatLeft");
         container.add(frame);
         docContainer.add(container);
       }
@@ -206,7 +206,7 @@ public class ListOperations {
     richTextArea.setWidth(TEXT_WIDTH + "px");
     widgets.addStyleName("leftFiveMargin");
     docContainer.add(widgets);
-    widgets.addStyleName("floatLeftList");
+    widgets.addStyleName("floatLeft");
 
 
     richTextArea.addBlurHandler(new BlurHandler() {
@@ -263,7 +263,7 @@ public class ListOperations {
     Anchor downloadLink = new DownloadLink(controller).getDownloadLink(listID, linkid, ul.getName());
     Node child = downloadLink.getElement().getChild(0);
     AnchorElement.as(child).getStyle().setColor("#333333");
-    downloadLink.addStyleName("floatLeftList");
+    downloadLink.addStyleName("floatLeft");
     return downloadLink;
   }
 

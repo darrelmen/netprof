@@ -86,7 +86,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
     row.getElement().setId("QuestionContent_item");
 
     Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getForeignLanguage());
-    entry.addStyleName("floatLeft");
+    entry.addStyleName("floatLeftAndClear");
     row.add(entry);
 
 //    addContextButton(e, row);

@@ -46,5 +46,5 @@ public interface ExerciseServiceAsync {
 
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
 
-  void getFullExercises(Collection<Integer> ids, boolean isFlashcardReq, AsyncCallback<Collection<CommonExercise>> async);
+  void getFullExercises(int reqid, Collection<Integer> ids, boolean isFlashcardReq, AsyncCallback<ExerciseListWrapper<CommonExercise>> async);
 }

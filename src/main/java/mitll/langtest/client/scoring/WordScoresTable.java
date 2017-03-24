@@ -29,7 +29,7 @@ public class WordScoresTable {
     Widget table2 = getWordTable(result);
     table2.addStyleName("topFiveMargin");
     table2.addStyleName("leftFiveMargin");
-    table2.addStyleName("floatLeft");
+    table2.addStyleName("floatLeftAndClear");
     return table2;
   }
 

@@ -64,6 +64,8 @@ public interface IAudioDAO extends IDAO {
    */
   int attachAudioToExercise(CommonExercise firstExercise, String language);
 
+  void attachAudioToExercises(Collection<CommonExercise> exercises, String language);
+
   /**
    * @see
    * @param firstExercise
@@ -123,4 +125,5 @@ public interface IAudioDAO extends IDAO {
   void makeSureAudioIsThere(int projectID, String language, boolean validateAll);
 
   String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise);
+
 }

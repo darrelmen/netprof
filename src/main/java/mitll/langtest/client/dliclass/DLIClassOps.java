@@ -158,7 +158,7 @@ public class DLIClassOps implements RequiresResize {
 
   private DivWidget addDiv(DivWidget content) {
     DivWidget left = new DivWidget();
-    left.addStyleName("floatLeft");
+    left.addStyleName("floatLeftAndClear");
     content.add(left);
     return left;
   }

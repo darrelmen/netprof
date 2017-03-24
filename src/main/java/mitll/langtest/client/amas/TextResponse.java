@@ -131,7 +131,7 @@ class TextResponse {
     if (controller.isRightAlignContent()) {
       textResponseWidget.addStyleName("floatRight");
     } else {
-      textResponseWidget.addStyleName("floatLeft");
+      textResponseWidget.addStyleName("floatLeftAndClear");
     }
     textResponseWidget.addStyleName("topFiveMargin");
 

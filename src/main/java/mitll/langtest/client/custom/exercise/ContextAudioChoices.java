@@ -28,7 +28,7 @@ public class ContextAudioChoices {
   private final ExerciseController controller;
   private final AudioRefExercise e;
   private final int id;
-  private Logger logger = Logger.getLogger("CommentNPFExercise");
+  private Logger logger = Logger.getLogger("ContextAudioChoices");
 
   //  private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
 //  private static final String HIGHLIGHT_END = "</span>";

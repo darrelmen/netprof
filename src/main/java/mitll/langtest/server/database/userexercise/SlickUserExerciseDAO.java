@@ -298,7 +298,7 @@ public class SlickUserExerciseDAO
     int numToUse = exercisePhoneInfo.getNumPhones();
     if (numToUse == 0) {
       numToUse = exercisePhoneInfo.getNumPhones2();
-      logger.warn("using back off phone childCount " + numToUse);
+//      logger.warn("using back off phone childCount " + numToUse);
     }
 
     exercise.setNumPhones(numToUse);

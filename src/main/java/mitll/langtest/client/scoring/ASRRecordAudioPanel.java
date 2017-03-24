@@ -171,7 +171,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
 
       progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
       scoreBar = getAfterPlayWidget(progressBar);
-      scoreBar.addStyleName("floatLeftList");
+      scoreBar.addStyleName("floatLeft");
 
       scores = new DivWidget();
 
@@ -179,7 +179,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
 
       ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exerciseID);
       addMinicoreListener(historyPanel);
-      historyPanel.addStyleName("floatLeftList");
+      historyPanel.addStyleName("floatLeft");
       scores.add(historyPanel);
       historyPanel.showChart();
 
@@ -197,14 +197,14 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
       HTML label = new HTML("Score");
       label.addStyleName("topFiveMargin");
       label.addStyleName("leftTenMargin");
-      label.addStyleName("floatLeftList");
+      label.addStyleName("floatLeft");
       Panel afterPlayWidget = new DivWidget();
 
       afterPlayWidget.add(label);
       afterPlayWidget.add(progressBar);
 
       progressBar.setWidth("300px");
-      progressBar.addStyleName("floatLeftList");
+      progressBar.addStyleName("floatLeft");
 
       Style style = progressBar.getElement().getStyle();
       style.setMarginTop(5, Style.Unit.PX);

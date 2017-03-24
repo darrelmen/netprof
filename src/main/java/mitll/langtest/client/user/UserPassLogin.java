@@ -342,7 +342,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
    */
   private void getLeftIntro(Panel leftAndRight) {
     DivWidget left = new DivWidget();
-    left.addStyleName("floatLeft");
+    left.addStyleName("floatLeftAndClear");
     left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
     int size = 1;

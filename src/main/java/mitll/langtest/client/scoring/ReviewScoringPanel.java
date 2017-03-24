@@ -254,7 +254,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
             if (!result.getPhoneScores().isEmpty()) {
               DivWidget left = new DivWidget();
-              left.addStyleName("floatLeft");
+              left.addStyleName("floatLeftAndClear");
               left.add(getPhoneScoreTable(result));
 
               belowContainer.add(left);
@@ -271,7 +271,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     Widget table2 = getWordTable(result);
     table2.addStyleName("topFiveMargin");
     table2.addStyleName("leftFiveMargin");
-    table2.addStyleName("floatLeft");
+    table2.addStyleName("floatLeftAndClear");
     return table2;
   }
 

@@ -254,8 +254,8 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
         c.add(doMaleFemale());
         c.setWidth("100%");
         Widget parent = getParent().getParent();
-        parent.removeStyleName("floatLeft");
-        getParent().removeStyleName("floatLeft");
+        parent.removeStyleName("floatLeftAndClear");
+        getParent().removeStyleName("floatLeftAndClear");
         ((Panel) parent).add(c);
         added = true;
       } else {
@@ -283,7 +283,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
       boolean exampleRecord = isExampleRecord();
       Widget entry = getEntry(e, exampleRecord ? QCNPFExercise.CONTEXT : QCNPFExercise.FOREIGN_LANGUAGE,
           contentWidget);
-      entry.addStyleName("floatLeft");
+      entry.addStyleName("floatLeftAndClear");
 
       return entry;
     }

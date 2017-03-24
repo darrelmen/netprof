@@ -49,12 +49,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.SectionWidgetContainer;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -244,7 +242,7 @@ public abstract class SingleSelectExerciseList
     DivWidget bottomRow = new DivWidget();
     bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
     DivWidget left = new DivWidget();
-    left.addStyleName("floatLeftList");
+    left.addStyleName("floatLeft");
     bottomRow.add(left);
     return bottomRow;
   }

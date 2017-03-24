@@ -34,9 +34,11 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.user.MiniUser;
+import net.liftweb.util.AU;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,7 +50,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioExercise extends ExerciseShell {
-  final transient  Logger logger = Logger.getLogger("AudioExercise");
+  final transient Logger logger = Logger.getLogger("AudioExercise");
 
   private static final String SPEED = "speed";
   private static final String REGULAR = "regular";
@@ -164,7 +166,7 @@ public class AudioExercise extends ExerciseShell {
     // long latest = 0;
     for (AudioAttribute audio : getAudioAttributes()) {
       if (audio.matches(name, value)) {
-        if (prefs.contains(audio.getUser().getID())) {
+        if (prefs.contains((long) audio.getUser().getID())) {
           return audio;
         } else {
 
@@ -181,6 +183,18 @@ public class AudioExercise extends ExerciseShell {
 
   public Collection<AudioAttribute> getAudioAttributes() {
     return audioAttributes.values();
+  }
+
+  public AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular) {
+    Collection<AudioAttribute> audioAttributes = getAudioAttributes();
+    Collection<AudioAttribute> collect = audioAttributes.stream().filter(p -> p.isMale() == isMale).collect(Collectors.toList());
+    if (collect.isEmpty()) {
+      collect = audioAttributes;
+    }
+    Optional<AudioAttribute> max = collect.stream()
+        .filter(p -> p.isRegularSpeed() && isRegular || p.isSlow() && !isRegular)
+        .max((o1, o2) -> -1 * Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
+    return max.orElse(null);
   }
 
   /**
@@ -382,9 +396,9 @@ public class AudioExercise extends ExerciseShell {
 
   /**
    * So we probably want the most recent recordings but bias first towards ones that have both fast and slow.
-   *
+   * <p>
    * preferredVoices matches are more important than more recent recordings.
-   *
+   * <p>
    * TODO : somehow associated preferred voices with a project!
    *
    * @param isMale
@@ -394,7 +408,7 @@ public class AudioExercise extends ExerciseShell {
    */
   public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredVoices) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale);
-   // logger.info("\tgetMostRecentAudio userToAudio " + userToAudio + "\n\tpref" + preferredVoices);
+    // logger.info("\tgetMostRecentAudio userToAudio " + userToAudio + "\n\tpref" + preferredVoices);
 
     long bothTimestamp = 0;
     long timestamp = 0;
@@ -416,22 +430,21 @@ public class AudioExercise extends ExerciseShell {
           long timestamp1 = audioAttribute.getTimestamp();
           if (reg && slow && bothTimestamp < timestamp1) {
             //  System.out.println("\t\tlatest is " + new Date(timestamp1));
-            if (bothLatest == null || !preferredVoices.contains((long)bothLatest.getID())) {
+            if (bothLatest == null || !preferredVoices.contains((long) bothLatest.getID())) {
               bothTimestamp = timestamp1;
-   //           logger.info("\t\t\tlatest is " + new Date(bothTimestamp));
+              //           logger.info("\t\t\tlatest is " + new Date(bothTimestamp));
               bothLatest = user;
             }
           }
           if (timestamp <= timestamp1) {
-            if (latest == null || !preferredVoices.contains((long)latest.getID())) {
+            if (latest == null || !preferredVoices.contains((long) latest.getID())) {
               timestamp = timestamp1;
               latest = user;
             }
           }
-        }
-        else {
- //         logger.info("\t\tgetMostRecentAudio found default user " + user);
-       //   defaultUser = user;
+        } else {
+          //         logger.info("\t\tgetMostRecentAudio found default user " + user);
+          //   defaultUser = user;
         }
       }
     }
@@ -526,8 +539,8 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
    * @return
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
    */
   public String getAltFL() {
     return altfl;
@@ -536,6 +549,7 @@ public class AudioExercise extends ExerciseShell {
   /**
    * For instance for languages like serbo-croatian, where the same foreign item may have two different
    * forms.
+   *
    * @param foreignLanguage
    */
   public void setAltFL(String foreignLanguage) {

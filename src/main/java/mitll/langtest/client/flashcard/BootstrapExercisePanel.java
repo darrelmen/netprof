@@ -407,13 +407,13 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     correctIcon.setBaseIcon(correct ? MyCustomIconType.correct : MyCustomIconType.incorrect);
 
     DivWidget iconContainer = new DivWidget();
-    iconContainer.addStyleName("floatLeftList");
+    iconContainer.addStyleName("floatLeft");
 
     iconContainer.add(correctIcon);
     container.add(iconContainer);
 
     DivWidget scoreContainer = new DivWidget();
-    scoreContainer.addStyleName("floatLeftList");
+    scoreContainer.addStyleName("floatLeft");
     //  scoreContainer.setWidth("300px");
 
     scoreContainer.addStyleName("topMargin");

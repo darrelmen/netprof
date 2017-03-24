@@ -33,6 +33,7 @@
 package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
@@ -64,7 +65,10 @@ import java.util.logging.Logger;
  * Time: 11:41 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
+public class PlayAudioPanel
+   // extends HorizontalPanel
+    extends DivWidget
+    implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   /**
@@ -101,8 +105,8 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   public PlayAudioPanel(SoundManagerAPI soundManager, String buttonTitle, Widget optionalToTheRight) {
     this.soundManager = soundManager;
-    setSpacing(10);
-    setVerticalAlignment(ALIGN_MIDDLE);
+  //  setSpacing(10);
+  //  setVerticalAlignment(ALIGN_MIDDLE);
     playLabel = buttonTitle;
     if (buttonTitle.isEmpty()) {
       minWidth = 12;
@@ -115,6 +119,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     addButtons(optionalToTheRight);
   }
 
+  /**
+   * @see PressAndHoldExercisePanel#getPlayAudioPanel
+   * @param controller
+   * @param path
+   */
   public PlayAudioPanel(ExerciseController controller, String path) {
     this(controller.getSoundManager(), "", null);
     loadAudio(path);
@@ -175,12 +184,15 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     playButton.setType(ButtonType.INFO);
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
+    playButton.addStyleName("floatLeft");
     playButton.setEnabled(false);
     add(playButton);
     warnNoFlash.setVisible(false);
     add(warnNoFlash);
 
     if (optionalToTheRight != null) {
+      optionalToTheRight.addStyleName("floatLeft");
+
       //  logger.info("adding " + optionalToTheRight.getElement().getExID() + " to " + getElement().getExID());
       add(optionalToTheRight);
     } else {

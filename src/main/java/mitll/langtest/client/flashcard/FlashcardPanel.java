@@ -299,7 +299,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     DivWidget left = new DivWidget();
     left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE), true));
-    left.addStyleName("floatLeft");
+    left.addStyleName("floatLeftAndClear");
     left.getElement().setId("leftCommentBoxContainer");
     // left.setWidth("50%");
 
@@ -720,7 +720,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     final Button left = new Button();
     controller.register(left, getID(), "prev button");
     left.setIcon(IconType.CARET_LEFT);
-    left.addStyleName("floatLeft");
+    left.addStyleName("floatLeftAndClear");
     left.setSize(ButtonSize.LARGE);
     new TooltipHelper().addTooltip(left, "Left Arrow Key");
     left.addClickHandler(new ClickHandler() {

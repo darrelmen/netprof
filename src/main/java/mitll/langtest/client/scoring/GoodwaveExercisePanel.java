@@ -165,7 +165,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     //  final Panel center = new VerticalPanel();
     final Panel center = new DivWidget();
     center.getElement().setId("GoodwaveVerticalCenter");
-    center.addStyleName("floatLeft");
+    center.addStyleName("floatLeftAndClear");
     // attempt to left justify
 
     makeScorePanel(exercise, options.getInstance());
@@ -302,7 +302,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     Panel div = new SimplePanel(getScoringAudioPanel(e));
     div.getElement().setId("scoringAudioPanel_div");
     div.addStyleName("trueInlineStyle");
-    div.addStyleName("floatLeft");
+    div.addStyleName("floatLeftAndClear");
     addGroupingStyle(div);
     return div;
   }

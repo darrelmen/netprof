@@ -64,6 +64,8 @@ public interface AudioAttributeExercise extends AudioRefExercise {
    */
   AudioAttribute getRecordingsBy(long userID, String speed);
 
+  AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular);
+
   /**
    * @see AudioExport#getAudioAttribute
    * @param isMale

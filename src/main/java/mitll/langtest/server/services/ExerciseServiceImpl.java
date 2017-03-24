@@ -944,6 +944,15 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return getAnnotatedExercise(userID, projectID, exid, isFlashcardReq);
   }
 
+  /**
+   * @param userID
+   * @param projectID
+   * @param exid
+   * @param isFlashcardReq
+   * @param <T>
+   * @return
+   * @see #getExercise(int, boolean)
+   */
   @Nullable
   private <T extends Shell> T getAnnotatedExercise(int userID, int projectID, int exid, boolean isFlashcardReq) {
     long then2 = System.currentTimeMillis();
@@ -1011,15 +1020,29 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   @Override
-  public Collection<CommonExercise> getFullExercises(Collection<Integer> ids, boolean isFlashcardReq) {
+  public ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids, boolean isFlashcardReq) {
     List<CommonExercise> exercises = new ArrayList<>();
 
     int projectID = getProjectID();
     int userID = getUserIDFromSession();
-    for (int exid : ids) exercises.add(getAnnotatedExercise(userID, projectID, exid, isFlashcardReq));
+
+    Set<CommonExercise> toAddAudioTo = new HashSet<>();
+
+    for (int exid : ids) {
+      CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
+      if (byID.getAudioAttributes().isEmpty()) {
+        toAddAudioTo.add(byID);
+      }
+      exercises.add(byID);
+    }
+
+    if (!toAddAudioTo.isEmpty()) {
+      db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
+    }
 
     addScores(userID, exercises);
-    return exercises;
+
+    return new ExerciseListWrapper<>(reqid, exercises, null);
   }
 
   private <T extends Shell> T getExercise(String exid, boolean isFlashcardReq) {

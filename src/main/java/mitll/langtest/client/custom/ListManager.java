@@ -629,7 +629,7 @@ public class ListManager implements RequiresResize {
   }
 
   private void styleListInfo(UIObject widgets) {
-    widgets.addStyleName("floatLeft");
+    widgets.addStyleName("floatLeftAndClear");
     widgets.addStyleName("leftFiveMargin");
     widgets.getElement().getStyle().setMarginBottom(3, Style.Unit.PX);
   }

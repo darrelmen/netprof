@@ -173,7 +173,7 @@ class AudioExerciseContent {
     Heading child = new Heading(5, text);
     child.getElement().setId("audio_exercise_item_header");
     child.addStyleName("leftTenMargin");
-    child.addStyleName("floatLeft");
+    child.addStyleName("floatLeftAndClear");
     child.addStyleName("rightFiveMargin");
     return child;
   }

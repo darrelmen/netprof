@@ -327,7 +327,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
       autoCRTRecordPanel.setWidth("100%");
       FluidContainer outerContainer = new FluidContainer();
       outerContainer.add(autoCRTRecordPanel);
-      outerContainer.addStyleName("floatLeft");
+      outerContainer.addStyleName("floatLeftAndClear");
       outerContainer.getElement().setId("FeedbackRecordPanel_outerContainer");
       outerContainer.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
       ScoreFeedback scoreFeedback = addScoreFeedback(outerContainer, autoCRTRecordPanel);
@@ -427,7 +427,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
     private Panel addScoreFeedback(ScoreFeedback scoreFeedback) {
       SimplePanel simplePanel = new SimplePanel(scoreFeedback.getFeedbackImage());
       simplePanel.getElement().setId("feedbackImageContainer");
-      simplePanel.addStyleName("floatLeft");
+      simplePanel.addStyleName("floatLeftAndClear");
 
       Panel scoreFeedbackRow = scoreFeedback.getSimpleRow(simplePanel, 40);
       scoreFeedback.getScoreFeedback().setWidth(Window.getClientWidth() * 0.5 + "px");

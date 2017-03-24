@@ -1,0 +1,64 @@
+<?xml version="1.0"  encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN"
+"http://www.eclipse.org/jetty/configure.dtd">
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+  <Set name="handler">
+    <New class="org.eclipse.jetty.servlet.ServletContextHandler">
+      <Set name="contextPath">/bestAudio</Set>
+      <Set name="handler">
+	<New class="org.eclipse.jetty.server.handler.ResourceHandler">
+	  <Set name="resourceBase">/opt/netprof/bestAudio/</Set>
+	  <Set name="directoriesListed">true</Set>
+	</New>
+      </Set>
+    </New>
+  </Set>
+
+  <!--
+  <New id="images" class="org.eclipse.jetty.servlet.Context">
+    <Arg><Ref id="Contexts"/></Arg>
+    <Arg>/attach</Arg>
+    <Set name="ResourceBase">/opt/domino/attach/td</Set>
+    <Call name="addServlet">
+      <Arg>org.mortbay.jetty.servlet.DefaultServlet</Arg>
+      <Arg>/*</Arg>
+    </Call>
+  </New> 
+-->  
+<!-- 
+	Unused datasource. Use local simple connection pool when in dev mode instead.
+ <New id="PADatasource" class="org.eclipse.jetty.plus.jndi.Resource">
+	<Arg>jdbc/ParadoxArchiveDB</Arg>
+	<Arg>
+		<New class="net.sourceforge.jtds.jdbcx.JtdsDataSource">
+			<Set name="User">domadmin</Set>
+			<Set name="Password">domino2014</Set>
+			<Set name="DatabaseName">paradox_archive</Set>
+			<Set name="ServerName">172.25.93.152</Set>
+			<Set name="PortNumber">1433</Set>
+		</New>
+	</Arg>
+</New>
+ -->
+ 
+<!-- 
+<Resource name= auth="Container" type="javax.sql.DataSource"
+               maxTotal="10" maxIdle="10" maxWaitMillis="30000"
+               username="" password="" 
+               driverClassName="net.sourceforge.jtds.jdbc.Driver"
+               url="jdbc:jtds:sqlserver://:1433/paradox_archive;instance=SQLEXPRESS"/>
+                -->
+  <!--
+  <Set name="contextPAth">/opt/domino/attach/td</Set>
+  -->
+  <!-- save session details to avoid having to reload after every restart -->
+<!--  <Set name="sessionHandler">
+    <New class="org.eclipse.jetty.server.session.SessionHandler">
+      <Arg>
+        <New class="org.eclipse.jetty.server.session.HashSessionManager">
+          <Set name="storeDirectory">/opt/domino/jetty-test-sess/</Set>
+        </New>
+      </Arg>
+    </New>
+  </Set>-->
+</Configure> 

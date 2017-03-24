@@ -78,14 +78,14 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     twoRows.getElement().setId("NPFHelper_twoRows");
 
     Panel exerciseListContainer = new SimplePanel();
-    exerciseListContainer.addStyleName("floatLeft");
+    exerciseListContainer.addStyleName("floatLeftAndClear");
     exerciseListContainer.getElement().setId("NPFHelper_exerciseListContainer");
 
     // second row ---------------
     Panel topRow = hasTopRow ? new FluidRow() : new FlowPanel("nav");
     topRow.getElement().setId("NPFHelper_" + (hasTopRow ? "topRow" : "leftSide"));
     if (!hasTopRow) {
-      topRow.addStyleName("floatLeftList");
+      topRow.addStyleName("floatLeft");
       topRow.addStyleName("leftBlock");
       topRow.addStyleName("rightFiveMargin");
 
@@ -101,7 +101,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     DivWidget bottomRowDiv = new DivWidget();
     DivWidget listHeader = new DivWidget();
     if (!hasTopRow) {
-      bottomRowDiv.addStyleName("floatLeftList");
+      bottomRowDiv.addStyleName("floatLeft");
       bottomRowDiv.addStyleName("mainBlock");
       bottomRowDiv.getElement().setId("rightSideDiv");
 
@@ -141,7 +141,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   protected Panel getCurrentExercisePanel() {
     FlowPanel currentExerciseVPanel = new FlowPanel();
     currentExerciseVPanel.getElement().setId("NPFHelper_defect_currentExercisePanel");
-    currentExerciseVPanel.addStyleName("floatLeftList");
+    currentExerciseVPanel.addStyleName("floatLeft");
     return currentExerciseVPanel;
   }
 

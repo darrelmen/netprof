@@ -14,14 +14,16 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
+import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.exercise.*;
 
+import java.util.Collections;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 3/23/17.
  */
-public class ExercisePanel<T extends CommonExercise> extends DivWidget {
+public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget {
   private Logger logger = Logger.getLogger("CommentNPFExercise");
 
   public static final String CONTEXT = "Context";
@@ -34,15 +36,15 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
   Image recordImage1;
   Image recordImage2;
 
-  protected final T exercise;
-  protected final ExerciseController controller;
+  private final T exercise;
+  private final ExerciseController controller;
 
   protected final ListServiceAsync listService = GWT.create(ListService.class);
 
-  protected ExerciseOptions options;
-  AnnotationHelper annotationHelper;
-  ClickableWords<T> clickableWords;
-  boolean showInitially = false;
+  // private final ExerciseOptions options;
+  private final AnnotationHelper annotationHelper;
+  private final ClickableWords<T> clickableWords;
+  private final boolean showInitially = false;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -57,16 +59,16 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
    * @paramx includeListButtons
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
-  public ExercisePanel(final T commonExercise,
-                       final ExerciseController controller,
-                       final ListInterface<CommonShell> listContainer,
-                       ExerciseOptions options
+  public TwoColumnExercisePanel(final T commonExercise,
+                                final ExerciseController controller,
+                                final ListInterface<CommonShell> listContainer,
+                                ExerciseOptions options
   ) {
-    this.options = options;
+    //   this.options = options;
     this.exercise = commonExercise;
     this.controller = controller;
 
-    getElement().setId("ExercisePanel");
+    getElement().setId("TwoColumnExercisePanel");
     addStyleName("cardBorderShadow");
     addStyleName("bottomFiveMargin");
 
@@ -87,7 +89,7 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
    * @return
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
    */
-  protected Widget getItemContent(final T e) {
+  private Widget getItemContent(final T e) {
     //Panel column = new VerticalPanel();
     Panel card = new DivWidget();
     card.getElement().setId("CommentNPFExercise_QuestionContent");
@@ -107,7 +109,7 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
     if (meaningValid) numRows++;
     if (isAltValid) numRows++;
     if (isTranslitValid) numRows++;
-    Grid grid = new Grid(numRows, 2);
+    Grid grid = new Grid(numRows, 3);
     grid.getColumnFormatter().setWidth(0, "50%");
     grid.getColumnFormatter().setWidth(1, "50%");
 
@@ -119,19 +121,53 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
     //DivWidget row = new DivWidget();
     //row.getElement().setId("QuestionContent_item");
 
-    Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
+    Widget flEntry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
     //entry.addStyleName("floatLeft");
     //row.add(entry);
-    grid.setWidget(row, 0, entry);
+    DivWidget flContainer = new DivWidget();
+//    flContainer.addStyleName("floatLeft");
+    flContainer.addStyleName("inlineFlex");
+
+    AudioAttribute audioAttribute = e.getAudioAttributePrefGender(controller.getUserManager().isMale(), true);
+
+    if (audioAttribute != null) {
+      PlayAudioPanel w = new PlayAudioPanel(controller, audioAttribute.getAudioRef());
+      DivWidget pap = new DivWidget();
+      pap.addStyleName("floatLeft");
+      pap.add(w);
+      flContainer.add(pap);
+      flEntry.addStyleName("floatLeft");
+    }
+
+    flContainer.add(flEntry);
+    grid.setWidget(row, 0, flContainer);
 
     if (isValid(english)) {
       Widget entry1 = getEntry(e, QCNPFExercise.ENGLISH, english, false, false, false, showInitially);
       entry1.addStyleName("rightsidecolor");
-      grid.setWidget(row++, 1, entry1);
+
+      DivWidget lr = new DivWidget();
+      lr.addStyleName("inlineFlex");
+
+      lr.addStyleName("floatLeft");
+      lr.add(entry1);
+      entry1.addStyleName("floatLeft");
+
+      Widget itemHeader = new UnitChapterItemHelper<>(Collections.emptyList()).getSmall(e);
+      itemHeader.addStyleName("floatRight");
+
+
+//      DivWidget itemDiv = new DivWidget();
+//      itemDiv.addStyleName("floatRight");
+//      itemDiv.add(itemHeader);
+//      lr.add(itemDiv);
+      grid.setWidget(row, 1, lr);
+      grid.setWidget(row++, 2, itemHeader);
     }
 
     Widget widget = addAltFL(e);
     if (widget != null) grid.setWidget(row++, 0, widget);
+
     Widget widget1 = addTransliteration(e);
     if (widget1 != null) grid.setWidget(row++, 0, widget1);
 
@@ -140,7 +176,7 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
       if (entry1 != null) grid.setWidget(row++, 0, entry1);
     }
 
-   // DivWidget container = new DivWidget();
+    // DivWidget container = new DivWidget();
     String foreignLanguage = e.getForeignLanguage();
     String altFL = e.getAltFL();
 
@@ -231,8 +267,7 @@ public class ExercisePanel<T extends CommonExercise> extends DivWidget {
   private Widget addContextTranslation(AnnotationExercise e, String contextTranslation) {
     if (!contextTranslation.isEmpty()) {
       return getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, contextTranslation, false, false, false, showInitially);
-    }
-    else return null;
+    } else return null;
   }
 
 

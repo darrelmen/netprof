@@ -156,12 +156,12 @@ h1 {
     padding-top: 5px;
 }
 
-.floatLeft {
+.floatLeftAndClear {
     float: left;
     clear: none;
 }
 
-.floatLeftList {
+.floatLeft {
     float: left;
 }
 
@@ -234,6 +234,10 @@ h1 {
 
 .inlineBlockStyleOnly {
     display: inline-block;
+}
+
+.inlineFlex {
+    display: inline-flex;
 }
 
 .trueInlineStyle {
@@ -1721,10 +1725,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .contextmatch {
-    color: #3c3c3d;
+    color: #289f58;
+    /*
+    background-color: #38d878;
+    */
 }
 
 .searchmatch {
     font-weight: bold;
-    font-size: 28px;
+    color: #697487;
 }

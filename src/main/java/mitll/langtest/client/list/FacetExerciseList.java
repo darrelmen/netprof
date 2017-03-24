@@ -39,7 +39,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.Range;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -74,7 +73,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
- // private DivWidget listHeader;
+  // private DivWidget listHeader;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -100,20 +99,26 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     downloadHelper = new DownloadHelper(this);
 
-   // this.listHeader = listHeader;
+    // this.listHeader = listHeader;
 
     DivWidget breadRow = new DivWidget();
     //  breadRow.addStyleName("floatLeftList");
-    breadRow.add(new HTML("breadcrumbs go here"));
+
+    // Todo : add this
+
+    // breadRow.add(new HTML("breadcrumbs go here"));
     listHeader.add(breadRow);
 
     DivWidget pagerAndSort = new DivWidget();
 
     listHeader.add(pagerAndSort);
     pagerAndSort.add(tableWithPager);
-    tableWithPager.addStyleName("floatLeftList");
+    tableWithPager.addStyleName("floatLeft");
     pagerAndSort.add(addSortBox(controller));
+
+    finished = true;
   }
+  boolean finished=false;
 
   @NotNull
   private DivWidget addSortBox(ExerciseController controller) {
@@ -121,7 +126,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     w.addStyleName("floatRight");
     HTML w1 = new HTML("Sort by");
     w1.addStyleName("rightFiveMargin");
-    w1.addStyleName("floatLeftList");
+    w1.addStyleName("floatLeft");
     w.add(w1);
     w.add(new ListSorting<>(this).getSortBox(controller));
     return w;
@@ -132,7 +137,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected void addMinWidthStyle(Panel leftColumn) {
   }
 
-  Panel tableWithPager;
+  private Panel tableWithPager;
 
   protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
     tableWithPager = pagingContainer.getTableWithPager(listOptions.isSort());
@@ -155,6 +160,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           protected void gotRangeChange() {
+            logger.info("gotRangeChange for \n\n\n");
             askServerForExercise(-1);
           }
 
@@ -714,40 +720,66 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     };
   }
 
+  private int freqid = 0;
+
   /**
    * TODO : do different thing for AVP.
-   *
+   * <p>
    * TODO : scroll to visible item
-   *
+   * <p>
    * goes ahead and asks the server for the next item so we don't have to wait for it.
    *
    * @param itemID
    * @see ListInterface#checkAndAskServer(int)
    */
   protected void askServerForExercise(int itemID) {
-    service.getFullExercises(pagingContainer.getVisibleIDs(), false, new AsyncCallback<Collection<CommonExercise>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        dealWithRPCError(caught);
-      }
+    Collection<Integer> visibleIDs = pagingContainer.getVisibleIDs();
+    boolean isEmpty = visibleIDs.isEmpty();
 
-      @Override
-      public void onSuccess(Collection<CommonExercise> result) {
-        clearExerciseContainer();
-
-        logger.info("onSuccess ading " +result.size());
-        for (CommonExercise exercise:result) {
-          addExerciseWidget(exercise);
+    if (isEmpty && pagingContainer.isEmpty() && finished) {
+      logger.info("show empty -- " +finished);
+    //  showEmptyExercise();
+    } else {
+      service.getFullExercises(freqid++, visibleIDs, false, new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          dealWithRPCError(caught);
         }
 
-        if (!result.isEmpty()) {
-          markCurrentExercise(result.iterator().next().getID());
+        @Override
+        public void onSuccess(ExerciseListWrapper<CommonExercise> result) {
+          int reqID = result.getReqID();
+
+          if (reqID == freqid - 1) {
+            if (result.getExercises().isEmpty()) {
+              showEmptyExercise();
+            }
+            else {
+              showExercises(result.getExercises());
+            }
+          } else {
+
+            logger.info("\n\n ignoring req " + reqID + " vs current " + freqid);
+          }
         }
-        else {
-          // TODO : what's happening here?
-          //showEmptyExercise();
-        }
-      }
-    });
+      });
+    }
+  }
+
+  private void showExercises(Collection<CommonExercise> result) {
+    clearExerciseContainer();
+
+    logger.info("showExercises onSuccess adding " + result.size());
+    for (CommonExercise exercise : result) {
+      addExerciseWidget(exercise);
+    }
+
+    if (!result.isEmpty()) {
+      markCurrentExercise(result.iterator().next().getID());
+    } else {
+      // TODO : what's happening here?
+      // showEmptyExercise();
+
+    }
   }
 }

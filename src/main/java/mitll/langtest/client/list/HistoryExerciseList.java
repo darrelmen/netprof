@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -76,6 +77,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   /**
    * @param currentExerciseVPanel
    * @param controller
+   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget)
    */
   protected HistoryExerciseList(Panel currentExerciseVPanel,
                                 ExerciseController controller,

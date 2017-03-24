@@ -33,6 +33,7 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -54,7 +55,6 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#addInstructions
    */
   private static final int HEADING_FOR_UNIT_LESSON = 4;
- // public static final String CORRECT = "correct";
   private static final String ITEM = "Item";
 
   private final Collection<String> typeOrder;
@@ -91,13 +91,21 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
    */
-  private Widget getItemHeader(T e) {
+  public Widget getItemHeader(T e) {
     // logger.info("got " + e + " and " + e.getDominoID());
     int dominoID = e.getDominoID();
     int idToUse = dominoID != -1 ? dominoID : e.getID();
     Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + idToUse + "/" + e.getOldID());
-    w.getElement().setId("ItemHeading");
+   // w.getElement().setId("ItemHeading");
     return w;
+  }
+
+  public Widget getSmall(T e) {
+    FlowPanel fp = new FlowPanel("small");
+    int dominoID = e.getDominoID();
+    int idToUse = dominoID != -1 ? dominoID : e.getID();
+    fp.getElement().setInnerText(idToUse + "/" + e.getOldID());
+    return fp;
   }
 
   /**

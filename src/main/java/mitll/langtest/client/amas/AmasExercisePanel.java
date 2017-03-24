@@ -161,7 +161,7 @@ abstract class AmasExercisePanel extends VerticalPanel implements
     Widget itemHeader = AudioExerciseContent.getItemHeader(exerciseList.getIndex(exercise.getID()),
         exerciseList.getSize(), exercise.getOldID());
     idInfoOnLeft.add(itemHeader);
-    itemHeader.addStyleName("floatLeft");
+    itemHeader.addStyleName("floatLeftAndClear");
 
     Heading promptOnRight = new Heading(4, text);
 

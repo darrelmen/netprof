@@ -603,7 +603,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     row.addStyleName("marginBottomTen");
 
     PrevNextList prevNext = getPrevNext(pagingContainer);
-    prevNext.addStyleName("floatLeft");
+    prevNext.addStyleName("floatLeftAndClear");
     row.add(prevNext);
 
     if (newUserExercise.isPredefined()) {//getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
@@ -758,7 +758,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     fixed.setType(ButtonType.PRIMARY);
 
     fixed.addStyleName("leftTenMargin");
-    fixed.addStyleName("floatLeft");
+    fixed.addStyleName("floatLeftAndClear");
     fixed.addStyleName("marginRight");
 
     fixed.addMouseOverHandler(new MouseOverHandler() {

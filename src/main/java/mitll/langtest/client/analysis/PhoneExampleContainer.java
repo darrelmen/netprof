@@ -104,7 +104,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   public Panel getTableWithPager(boolean sortEnglish) {
     Panel tableWithPager = super.getTableWithPager(sortEnglish);
     tableWithPager.getElement().setId("TableScoreHistory");
-    tableWithPager.addStyleName("floatLeft");
+    tableWithPager.addStyleName("floatLeftAndClear");
     return tableWithPager;
   }
 

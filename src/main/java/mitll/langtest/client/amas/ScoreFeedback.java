@@ -100,7 +100,7 @@ class ScoreFeedback {
     feedbackRow.add(left);
     feedbackDummyPanel = new SimplePanel();
     feedbackDummyPanel.setHeight(height + "px");
-    feedbackDummyPanel.addStyleName("floatLeft");
+    feedbackDummyPanel.addStyleName("floatLeftAndClear");
 
     scoreFeedbackColumn = new SimplePanel(feedbackDummyPanel);
     return feedbackRow;

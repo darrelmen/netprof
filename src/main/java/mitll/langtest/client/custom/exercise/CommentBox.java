@@ -246,13 +246,13 @@ public class CommentBox extends PopupContainerFactory {
     row.getElement().setId("comment_and_clear_container_for_" + field);
     if (content != null) {
       row.add(content);
-      content.addStyleName("floatLeftList");
+      content.addStyleName("floatLeft");
     }
     row.add(commentButton);
-    commentButton.addStyleName("floatLeftList");
+    commentButton.addStyleName("floatLeft");
 
     row.add(clearButton);
-    clearButton.addStyleName("floatLeftList");
+    clearButton.addStyleName("floatLeft");
 
     return row;
   }

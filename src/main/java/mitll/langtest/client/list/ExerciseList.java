@@ -124,10 +124,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private void addWidgets(final Panel currentExerciseVPanel) {
 //    if (DEBUG) logger.info("ExerciseList.addWidgets for currentExerciseVPanel " + currentExerciseVPanel.getElement().getExID() + " instance " + getInstance());
     this.innerContainer = new DivWidget();
+    innerContainer.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+    currentExerciseVPanel.getElement().getStyle().setWidth(100, Style.Unit.PCT);
     innerContainer.getElement().setId("ExerciseList_innerContainer");
     currentExerciseVPanel.add(innerContainer);
-    innerContainer.addStyleName("floatLeft");
-    currentExerciseVPanel.addStyleName("floatLeft");
+    innerContainer.addStyleName("floatLeftAndClear");
+    currentExerciseVPanel.addStyleName("floatLeftAndClear");
   }
 
   public void addWidgets() {
@@ -584,11 +586,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void checkAndAskServer(int id) {
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info(getClass() + " : (" + getInstance() + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
     }
 
     if (hasExercise(id)) {
+      logger.info("checkAndAskServer for " + id);
       askServerForExercise(id);
     } else {
       logger.warning("checkAndAskServer : skipping request for " + id);
@@ -843,7 +846,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   public Widget getExerciseListOnLeftSide() {
     Panel leftColumn = new FlowPanel();
     leftColumn.getElement().setId("ExerciseList_leftColumn");
-    leftColumn.addStyleName("floatLeft");
+    leftColumn.addStyleName("floatLeftAndClear");
     addMinWidthStyle(leftColumn);
 
     leftColumn.getElement().getStyle().setProperty("minHeight", LIST_HEIGHT + "px");

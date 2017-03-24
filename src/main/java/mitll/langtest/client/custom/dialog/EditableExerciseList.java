@@ -397,7 +397,7 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
   @NotNull
   private DivWidget getRemoveButtonContainer() {
     DivWidget delW = new DivWidget();
-    delW.addStyleName("floatLeftList");
+    delW.addStyleName("floatLeft");
     delW.addStyleName("leftFiveMargin");
     delW.getElement().getStyle().setClear(Style.Clear.LEFT);
     Button deleteButton = makeDeleteButton();
@@ -413,7 +413,7 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
   @NotNull
   private DivWidget getAddButtonContainer() {
     DivWidget addW = new DivWidget();
-    addW.addStyleName("floatLeftList");
+    addW.addStyleName("floatLeft");
 
     Typeahead exercise = getTypeahead("exercise");
 

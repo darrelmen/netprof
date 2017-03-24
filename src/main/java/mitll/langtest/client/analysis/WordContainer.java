@@ -123,7 +123,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
     int tableHistoryWidth = isNarrow() ? TABLE_HISTORY_WIDTH_NARROW : TABLE_HISTORY_WIDTH;
 
     tableWithPager.setWidth(tableHistoryWidth + "px");
-    tableWithPager.addStyleName("floatLeft");
+    tableWithPager.addStyleName("floatLeftAndClear");
 
     this.sortedHistory = sortedHistory;
 

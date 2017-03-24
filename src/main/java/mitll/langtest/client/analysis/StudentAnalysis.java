@@ -82,7 +82,7 @@ public class StudentAnalysis extends DivWidget {
         // rightSide.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
 
         DivWidget bottom = new DivWidget();
-        bottom.addStyleName("floatLeftList");
+        bottom.addStyleName("floatLeft");
 
         UserContainer userContainer = new UserContainer(vanillaService, controller, rightSide, bottom, showTab, selectedUserKey);
         //DivWidget leftSide = getStudentContainer(userContainer.getTableWithPager(getUserInfos(users)));

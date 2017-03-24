@@ -182,7 +182,7 @@ public class NPFHelper implements RequiresResize {
     // left side
     Panel left = new SimplePanel();
     left.getElement().setId("internalLayout_LeftCol");
-    left.addStyleName("floatLeft");
+    left.addStyleName("floatLeftAndClear");
     hp.add(left);
 
     // right side

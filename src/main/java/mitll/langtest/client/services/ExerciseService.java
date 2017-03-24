@@ -58,7 +58,7 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
    * @return
    */
   <T extends Shell> T getExercise(int exid, boolean isFlashcardReq);
-  Collection<CommonExercise> getFullExercises(Collection<Integer> ids, boolean isFlashcardReq);
+  ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids, boolean isFlashcardReq);
 
   FilterResponse getTypeToValues(FilterRequest request);
 

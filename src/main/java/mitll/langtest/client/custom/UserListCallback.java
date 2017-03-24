@@ -303,7 +303,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     insideContentPanel.addStyleName("leftFiveMargin");*/
 
     Heading h4 = new Heading(4, name, ul.getNumItems() + " items");
-    h4.addStyleName("floatLeft");
+    h4.addStyleName("floatLeftAndClear");
     r1.add(h4);
 
     String description = ul.getDescription();
@@ -386,7 +386,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     Heading h4;
     String classMarker = ul.getClassMarker();
     h4 = new Heading(4, "", classMarker);
-    h4.addStyleName("floatLeft");
+    h4.addStyleName("floatLeftAndClear");
     h4.addStyleName("leftFiveMargin");
     h4.getElement().setId("course");
     return h4;
@@ -395,7 +395,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   private Heading getDescription(String subtext) {
     Heading h4;
     h4 = new Heading(4, "", subtext);
-    h4.addStyleName("floatLeft");
+    h4.addStyleName("floatLeftAndClear");
     h4.addStyleName("leftFiveMargin");
     h4.getElement().setId("desc");
     return h4;

@@ -140,7 +140,7 @@ public class Banner implements RequiresResize {
     flashcard.add(getSubtitle(splashText));
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Banner.NEW_PRO_F1_PNG);
-    flashcardImage.addStyleName("floatLeft");
+    flashcardImage.addStyleName("floatLeftAndClear");
     flashcardImage.addStyleName("rightFiveMargin");
     flashcardImage.getElement().getStyle().setCursor(Style.Cursor.POINTER);
     flashcardImage.addClickHandler(new ClickHandler() {

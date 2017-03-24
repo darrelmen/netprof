@@ -299,7 +299,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private Panel getTableWithPager(List<PhoneAndStats> sortedHistory) {
     Panel tableWithPager = getTableWithPager(true);
     tableWithPager.getElement().setId("TableScoreHistory");
-    tableWithPager.addStyleName("floatLeft");
+    tableWithPager.addStyleName("floatLeftAndClear");
     tableWithPager.addStyleName("leftTenMargin");
 
     addItems(sortedHistory);

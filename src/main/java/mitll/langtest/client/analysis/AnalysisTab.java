@@ -114,7 +114,7 @@ public class AnalysisTab extends DivWidget {
 
     Panel bottom = new HorizontalPanel();
     bottom.getElement().setId("bottom");
-    bottom.addStyleName("floatLeft");
+    bottom.addStyleName("floatLeftAndClear");
 
     if (overallBottom != null) { // are we in student or teacher view
       overallBottom.add(bottom); // teacher
@@ -301,7 +301,7 @@ public class AnalysisTab extends DivWidget {
   private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading w) {
     DivWidget wordsContainer = new DivWidget();
     wordsContainer.getElement().setId(containerID);
-    wordsContainer.addStyleName("floatLeft");
+    wordsContainer.addStyleName("floatLeftAndClear");
     wordsContainer.add(w);
     wordsContainer.add(tableWithPager);
     return wordsContainer;
@@ -338,7 +338,7 @@ public class AnalysisTab extends DivWidget {
 
         // #3 - phone plot
         phonePlot.addStyleName("topMargin");
-        phonePlot.addStyleName("floatLeft");
+        phonePlot.addStyleName("floatLeftAndClear");
         lowerHalf.add(phonePlot);
 
         phoneContainer.showExamplesForSelectedSound();
@@ -350,7 +350,7 @@ public class AnalysisTab extends DivWidget {
     DivWidget sounds = new DivWidget();
     sounds.getElement().setId("SoundsContainer");
     sounds.add(new Heading(3, SOUNDS));
-    sounds.addStyleName("floatLeft");
+    sounds.addStyleName("floatLeftAndClear");
     sounds.add(phones);
     return sounds;
   }

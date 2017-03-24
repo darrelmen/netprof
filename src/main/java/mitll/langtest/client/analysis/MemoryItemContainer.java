@@ -126,7 +126,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     DivWidget leftSide = new DivWidget();
     leftSide.getElement().setId("studentDiv");
-    leftSide.addStyleName("floatLeftList");
+    leftSide.addStyleName("floatLeft");
     if (!title.isEmpty()) {
       leftSide.add(students);
     }
@@ -189,7 +189,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   public Panel getTableWithPager(final Collection<T> users) {
     Panel tableWithPager = getTableWithPager(true);
     tableWithPager.getElement().setId("TableScoreHistory");
-    tableWithPager.addStyleName("floatLeft");
+    tableWithPager.addStyleName("floatLeftAndClear");
 
     int i = 0;
     int index = 0;

@@ -82,16 +82,45 @@ public class ClickableWords<T extends CommonExercise> {
 
     List<String> highlightTokens = getTokens(highlight, flLine, isChineseCharacter);
 
-    Iterator<String> iterator = highlightTokens.iterator();
-    String current = iterator.next();
+    // if the highlight token is not in the display, skip over it -
+    List<String> realHighlight = new ArrayList<>();
+
+    Iterator<String> hIter = highlightTokens.iterator();
+
+    int index = 0;
+
+    for (; hIter.hasNext(); ) {
+      String toFind = hIter.next();
+
+      for (int i = index; i < tokens.size(); i++) {
+        String next = tokens.get(i);
+        if (isMatch(next,toFind)) {
+          index = i;
+          realHighlight.add(toFind);
+          logger.info("- found '" + toFind + "' = '" +next+ "' at " + index);
+
+          break;
+        }
+      }
+    }
+
+    logger.info("real " + realHighlight);
+
+    Iterator<String> iterator = realHighlight.iterator();
+    String toFind = iterator.hasNext() ? iterator.next() : null;
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
     for (String token : tokens) {
-      boolean isMatch = isMatch(token, current);
+      boolean isMatch = toFind != null && isMatch(token, toFind);
 
       if (isMatch && iterator.hasNext()) {
-        current = iterator.next();
+        toFind = iterator.next();
+        logger.info("- highlight '" + toFind + "' = '" +token+ "'");
       }
+      else {
+        logger.fine("-  no highlight '" + toFind + "' vs '" +token+ "'");
+      }
+
       horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch));
     }
 
@@ -103,7 +132,13 @@ public class ClickableWords<T extends CommonExercise> {
   private boolean isMatch(String token, String next) {
     String context = removePunct(token.toLowerCase());
     String vocab   = removePunct(next.toLowerCase());
-    return context.equals(vocab) || (context.startsWith(vocab));// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
+    return context.equals(vocab) || (context.startsWith(vocab) && !vocab.isEmpty());// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
+  }
+
+  private boolean isHardMatch(String token, String next) {
+    String context = removePunct(token.toLowerCase());
+    String vocab   = removePunct(next.toLowerCase());
+    return context.equals(vocab);
   }
 
   @NotNull
@@ -117,7 +152,7 @@ public class ClickableWords<T extends CommonExercise> {
         tokens.add(html);
       }
     } else {
-      tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
+      tokens = new ArrayList<>(Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX)));
     }
 
     if (isRTL(exercise) && flLine) {
@@ -195,7 +230,7 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   protected String removePunct(String t) {
-    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
+    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "").replaceAll("\\p{M}", "");
   }
 
 }

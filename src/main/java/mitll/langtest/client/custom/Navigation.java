@@ -56,8 +56,6 @@ import mitll.langtest.client.contextPractice.DialogViewer;
 import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
-import mitll.langtest.client.custom.exercise.ContextCommentNPFExercise;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -68,7 +66,7 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.project.ProjectOps;
 import mitll.langtest.client.scoring.ExerciseOptions;
-import mitll.langtest.client.scoring.ExercisePanel;
+import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -241,7 +239,7 @@ public class Navigation implements RequiresResize, ShowTab {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
 
-              return new ExercisePanel<>(e, controller, exerciseList,
+              return new TwoColumnExercisePanel<>(e, controller, exerciseList,
                   new ExerciseOptions()
                       .setInstance(CLASSROOM));
 

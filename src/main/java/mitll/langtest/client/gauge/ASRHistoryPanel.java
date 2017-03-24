@@ -173,7 +173,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
       //int i = scores2.indexOf(scoreAndPath);
       int i = scoreAndPaths.size() - (j++);//scores2.indexOf(scoreAndPath);
       Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + i, i);
-      hp.addStyleName("floatLeftList");
+      hp.addStyleName("floatLeft");
       hp.addStyleName("rightTenMargin");
       hp.addStyleName("buttonGroupInset6");
       vp.add(hp);

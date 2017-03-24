@@ -241,6 +241,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return new ArrayList<>();
   }
 
+  @Override
+  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids) {
+    return null;
+  }
+
   /**
    * Defensively protect against duplicate entries for same audio file.
    *

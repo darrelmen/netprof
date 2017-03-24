@@ -163,7 +163,7 @@ class EditableExerciseDialog extends NewUserExercise {
     row.addStyleName("marginBottomTen");
     PrevNextList prevNext = getPrevNext(pagingContainer);
     prevNext.getElement().setId("PrevNextList");
-    prevNext.addStyleName("floatLeft");
+    prevNext.addStyleName("floatLeftAndClear");
     prevNext.addStyleName("rightFiveMargin");
     row.add(prevNext);
 

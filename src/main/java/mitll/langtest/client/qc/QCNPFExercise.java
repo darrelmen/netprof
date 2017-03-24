@@ -359,7 +359,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
   protected Widget getItemContent(T e) {
     Panel column = new FlowPanel();
     column.getElement().setId("QCNPFExercise_QuestionContent");
-    column.addStyleName("floatLeft");
+    column.addStyleName("floatLeftAndClear");
     column.setWidth("100%");
 
     Panel row = new FlowPanel();
@@ -768,7 +768,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
     row.getElement().setId("QCNPFExercise_row_" + field);
 
     row.addStyleName("trueInlineStyle");
-    qcCol.addStyleName("floatLeft");
+    qcCol.addStyleName("floatLeftAndClear");
     row.add(qcCol);
     if (addLeftMargin) {
       content.getElement().getStyle().setMarginLeft(80, Style.Unit.PX);
