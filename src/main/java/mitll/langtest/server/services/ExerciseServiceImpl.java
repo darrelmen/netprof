@@ -1036,6 +1036,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       exercises.add(byID);
     }
 
+    if (ids.size() > toAddAudioTo.size()) {
+      logger.info("getFullExercises decreased from " +ids.size() + " to " + toAddAudioTo.size());
+    }
+    else
+      logger.info("getting "+ ids.size() + " exercises");
+
     if (!toAddAudioTo.isEmpty()) {
       db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
     }

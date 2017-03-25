@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.custom.exercise.ContextAudioChoices;
 import mitll.langtest.client.custom.exercise.ContextSupport;
+import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
@@ -95,7 +96,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     card.getElement().setId("CommentNPFExercise_QuestionContent");
 
     card.setWidth("100%");
-    int numRows = 2;
+    int numRows = 3;
     int row = 0;
 
     boolean meaningValid = isMeaningValid(e);
@@ -181,6 +182,36 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String altFL = e.getAltFL();
 
     logger.info("for " + e.getID() + " found " + e.getDirectlyRelated().size() + " context sentence ");
+
+
+/*
+    ASRRecordAudioPanel panel = new ASRRecordAudioPanel(new BusyPanel() {
+      @Override
+      public boolean isBusy() {
+        return false;
+      }
+
+      @Override
+      public void setBusy(boolean v) {
+
+      }
+    }, controller, e, "learn");
+    */
+
+
+    SimpleRecordAudioPanel panel = new SimpleRecordAudioPanel(new BusyPanel() {
+      @Override
+      public boolean isBusy() {
+        return false;
+      }
+
+      @Override
+      public void setBusy(boolean v) {
+
+      }
+    }, controller, e, "learn");
+
+    grid.setWidget(row++, 0, panel);
 
     for (CommonExercise contextEx : e.getDirectlyRelated()) {
       logger.info("Add context " + contextEx.getID());

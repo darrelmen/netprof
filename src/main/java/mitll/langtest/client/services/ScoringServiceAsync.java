@@ -40,11 +40,14 @@ import mitll.langtest.shared.scoring.PretestScore;
 public interface ScoringServiceAsync {
   void getASRScoreForAudio(int reqid,
                            long resultID,
-                           String testAudioFile, String sentence, String transliteration,
+                           String testAudioFile,
+                           String sentence,
+                           String transliteration,
 
                            ImageOptions imageOptions,
                            int exerciseID,
-                           boolean usePhonemeMap, AsyncCallback<PretestScore> async);
+                           boolean usePhonemeMap,
+                           AsyncCallback<PretestScore> async);
 
   /**
    * JUST FOR DIALOG DEMO

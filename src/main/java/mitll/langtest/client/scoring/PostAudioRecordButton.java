@@ -69,7 +69,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private int exerciseID;
   protected final ExerciseController controller;
   private final boolean recordInResults;
-
+  int buttonWidth;
   /**
    * @param exerciseID
    * @param controller
@@ -77,6 +77,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param recordInResults
    * @param recordButtonTitle
    * @param stopButtonTitle
+   * @param buttonWidth
    * @paramx audioType
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
@@ -85,7 +86,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
                                int index,
                                boolean recordInResults,
                                String recordButtonTitle,
-                               String stopButtonTitle) {
+                               String stopButtonTitle,
+                               int buttonWidth) {
     super(controller.getRecordTimeout(),
         controller.getProps().doClickAndHold(),
         recordButtonTitle,
@@ -95,6 +97,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.index = index;
     this.exerciseID = exerciseID;
     this.controller = controller;
+    this.buttonWidth = buttonWidth;
 
     this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
@@ -102,7 +105,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     Style style = getElement().getStyle();
     style.setMarginTop(1, Style.Unit.PX);
     style.setMarginBottom(1, Style.Unit.PX);
-    setWidth(BUTTON_WIDTH + "px");
+    setWidth(buttonWidth + "px");
   }
 
   public void setExercise(int exercise) {

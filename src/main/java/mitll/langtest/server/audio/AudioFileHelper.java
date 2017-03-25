@@ -314,7 +314,7 @@ public class AudioFileHelper implements AlignDecode {
 
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, file.getPath());
 
-    logger.info("tr = " + recordingInfo.getTranscript());
+//    logger.info("tr = " + recordingInfo.getTranscript());
     return getAudioAnswerDecoding(exercise1,
         audioContext,
         recordingInfo,

@@ -12,9 +12,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.BusyPanel;
@@ -29,21 +27,24 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.logging.Logger;
+
 /**
  * An ASR scoring panel with a record button.
  */
-public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & AudioRefExercise & ScoredExercise>
-    extends ASRScoringAudioPanel<T> {
+public class SimpleRecordAudioPanel<T extends CommonExercise>  extends DivWidget {
+  private Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
-  private static final String REFERENCE = "";
-  private static final String RECORD_YOURSELF = "Record";
+ // private static final String REFERENCE = "";
+  private static final String RECORD_YOURSELF = "";//Record";
   private static final String RELEASE_TO_STOP = "Release";
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
-  private static final String FIRST_RED  = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
+  private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
 
-  public static final int FIRST_STEP  = 35;
+  public static final int FIRST_STEP = 35;
   public static final int SECOND_STEP = 75;
 
   /**
@@ -55,12 +56,17 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
   private MyPlayAudioPanel playAudioPanel;
   private IconAnchor download;
   private Panel downloadContainer;
+  private MiniScoreListener miniScoreListener;
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
    */
   private Image recordImage1;
   private Image recordImage2;
+  protected String audioPath;
+
+  ExerciseController controller;
+  T exercise;
 
   /**
    * @param controller
@@ -68,19 +74,75 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
    * @param instance
    * @see GoodwaveExercisePanel#getAnswerWidget
    */
-  ASRRecordAudioPanel(BusyPanel goodwaveExercisePanel,
-                      ExerciseController controller,
-                      T exercise,
-                      String instance) {
-    super(exercise.getForeignLanguage(),
-        exercise.getTransliteration(), controller,
-        null,
-        REFERENCE, exercise, instance);
+  SimpleRecordAudioPanel(BusyPanel goodwaveExercisePanel,
+                         ExerciseController controller,
+                         T exercise,
+                         String instance) {
+//    super(exercise.getForeignLanguage(),
+//        exercise.getTransliteration(), controller,
+//        null,
+//        REFERENCE, exercise, instance);
+    this.controller = controller;
     this.goodwaveExercisePanel = goodwaveExercisePanel;
     this.index = 1;
-    //   this.historyPanel =
-    getElement().setId("ASRRecordAudioPanel");
+    this.exercise = exercise;
+
+    addWidgets("","");
+
   }
+
+  /**
+   * Replace the html 5 audio tag with our fancy waveform widget.
+   *
+   * @param playButtonSuffix
+   * @param recordButtonTitle
+   * @return
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
+   * @seex #AudioPanel
+   */
+  protected void addWidgets(String playButtonSuffix, String recordButtonTitle) {
+//    logger.info("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle +
+//        " suffix = " + playButtonSuffix + " has audio " + hasAudio());
+
+//    DivWidget divWithRelativePosition = new DivWidget();  // need this for audio position div to work properly
+ //   divWithRelativePosition.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+//    Panel imageContainer = new VerticalPanel();
+//    divWithRelativePosition.add(imageContainer);
+//    imageContainer.getElement().setId("AudioPanel_imageContainer");
+//
+//    int heightForTranscripts = rightMargin > 0 ? 2 * TRANSCRIPT_IMAGE_HEIGHT : 0;
+//    float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts;
+//    imageContainer.setHeight(totalHeight + "px");
+    //  imageContainer.setWidth(getImageWidth()+"px");
+
+    //HorizontalPanel hp = new HorizontalPanel();
+    //hp.setVerticalAlignment(ALIGN_MIDDLE);
+    //hp.getElement().setId("AudioPanel_hp");
+
+    // add widgets to left of play button
+   // Widget toTheRightWidget = getAfterPlayWidget();
+  //  audioPositionPopup = new AudioPositionPopup(imageContainer);
+  //  imageContainer.add(audioPositionPopup);
+
+    //if (hasAudio()) {
+  DivWidget    playAudio = makePlayAudioPanel(null, playButtonSuffix, recordButtonTitle);
+      //hp.add(playAudio);
+      //hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
+
+
+
+    // hp.setWidth("100%");
+
+   // add(hp);
+   // hp.addStyleName("bottomFiveMargin");
+add(playAudio);
+//    add(divWithRelativePosition);
+  }
+
+  public void addMinicoreListener(MiniScoreListener l) {
+    this.miniScoreListener = l;
+  }
+
 
   /**
    * So here we're trying to make the record and play buttons know about each other
@@ -93,7 +155,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
    * @return
    * @see AudioPanel#getPlayButtons
    */
-  @Override
+  //@Override
   protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle) {
     recordImage1 = new Image(UriUtils.fromSafeConstant(FIRST_RED));
     recordImage1.setVisible(false);
@@ -102,13 +164,17 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
 
     postAudioRecordButton = new MyPostAudioRecordButton(controller);
     postAudioRecordButton.getElement().getStyle().setMargin(8, Style.Unit.PX);
-    playAudioPanel = new MyPlayAudioPanel(soundManager, postAudioRecordButton );
+    playAudioPanel = new MyPlayAudioPanel(controller.getSoundManager(), postAudioRecordButton);
     return playAudioPanel;
   }
 
-  protected void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
+  protected void useResult(PretestScore result, //ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
                            boolean scoredBefore, String path) {
-    super.useResult(result, wordTranscript, phoneTranscript, scoredBefore, path);
+//    super.useResult(result, wordTranscript, phoneTranscript, scoredBefore, path);
+
+    if (!scoredBefore && miniScoreListener != null) {
+      miniScoreListener.gotScore(result, path);
+    }
     if (result.getHydecScore() > 0) {
       float zeroToHundred = result.getHydecScore() * 100f;
       //etASRGaugeValue(Math.min(100.0f, zeroToHundred));
@@ -173,7 +239,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
 
       scores.add(scoreBar);
 
-      ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exerciseID);
+      ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID());
       addMinicoreListener(historyPanel);
       historyPanel.addStyleName("floatLeft");
       scores.add(historyPanel);
@@ -205,7 +271,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
       Style style = progressBar.getElement().getStyle();
       style.setMarginTop(5, Style.Unit.PX);
       style.setMarginLeft(5, Style.Unit.PX);
-      style.setMarginBottom(0, Style.Unit.PX );
+      style.setMarginBottom(0, Style.Unit.PX);
 
       afterPlayWidget.setVisible(false);
 
@@ -270,7 +336,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
       @Override
       public void onClick(ClickEvent event) {
         controller.logEvent(download, "DownloadUserAudio_Icon", exercise,
-            "downloading audio file " + audioPath);
+            "downloading audio file ");
       }
     });
     return download;
@@ -281,8 +347,8 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
   }
 
   /**
+   * @seex #useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
    * @see mitll.langtest.server.DownloadServlet#returnAudioFile
-   * @see #useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
    */
   private void setDownloadHref() {
     downloadContainer.setVisible(true);
@@ -312,20 +378,23 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
   private class MyPostAudioRecordButton extends PostAudioRecordButton {
     MyPostAudioRecordButton(ExerciseController controller) {
       super(
-          exerciseID,
+          exercise.getID(),
           controller,
-          ASRRecordAudioPanel.this.index,
+          SimpleRecordAudioPanel.this.index,
           true,
           RECORD_YOURSELF,
           controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop",
-          93);
+          30);
     }
 
     @Override
     public void useResult(AudioAnswer result) {
-      setResultID(result.getResultID());
-      getImagesForPath(result.getPath());
+    //  setResultID(result.getResultID());
+      //   getImagesForPath(result.getPath());
+      audioPath = result.getPath();
       setDownloadHref();
+
+      scoreAudio(result);
     }
 
     @Override
@@ -375,5 +444,14 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
       super.useInvalidResult(result);
       playAudioPanel.setEnabled(false);
     }
+  }
+
+  int reqid=0;
+  private void scoreAudio(AudioAnswer result) {
+    logger.info("use " +result);
+//    controller.getScoringService().getASRScoreForAudio(
+//        reqid, result.getResultID(),
+//        result.getPath(),
+//        erefSentence, transliteration, imageOptions, id, usePhoneToDisplay, async);
   }
 }
