@@ -70,6 +70,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   protected final ExerciseController controller;
   private final boolean recordInResults;
   int buttonWidth;
+  boolean scoreAudioNow;
   /**
    * @param exerciseID
    * @param controller
@@ -78,6 +79,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param recordButtonTitle
    * @param stopButtonTitle
    * @param buttonWidth
+   * @param scoreAudioNow
    * @paramx audioType
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
@@ -87,7 +89,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
                                boolean recordInResults,
                                String recordButtonTitle,
                                String stopButtonTitle,
-                               int buttonWidth) {
+                               int buttonWidth, boolean scoreAudioNow) {
     super(controller.getRecordTimeout(),
         controller.getProps().doClickAndHold(),
         recordButtonTitle,
@@ -98,6 +100,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.exerciseID = exerciseID;
     this.controller = controller;
     this.buttonWidth = buttonWidth;
+    this.scoreAudioNow = scoreAudioNow;
 
     this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
@@ -166,7 +169,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         controller.usingFlashRecorder(),
         "browser",
         controller.getBrowserInfo(),
-        false, // do flashcard
+        scoreAudioNow, // do flashcard
         recordInResults,
         shouldAddToAudioTable(),
         false, // allow alternates

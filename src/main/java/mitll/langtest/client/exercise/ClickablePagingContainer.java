@@ -136,11 +136,32 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   public Collection<Integer> getVisibleIDs() {
     List<Integer> visible = new ArrayList<>();
+
     Range visibleRange = getVisibleRange();
+
+    if (visibleRange.getLength() == 1) {
+      if (isEmpty()) {
+        logger.info("ClickablePagingContainer.getVisibleIDs : no data yet...");
+        return Collections.emptyList();
+      } else {
+        T currentSelection = getCurrentSelection();
+        int id = currentSelection == null ? getFirst().getID() : currentSelection.getID();
+        logger.info("ClickablePagingContainer.getVisibleIDs : get current " + id);
+        //ArrayList<Integer> integers = new ArrayList<>();
+        visible.add(id);
+        return visible;
+      }
+    } else {
+      return getIdsForRange(visibleRange);
+    }
+  }
+
+  protected Collection<Integer> getIdsForRange(Range visibleRange) {
+    List<Integer> visible = new ArrayList<>();
     int start = visibleRange.getStart();
     int length = visibleRange.getLength();
     int end = Math.min(getList().size(), start + length);
-    logger.info("get from " + start + " to " + end + " vs " + getList().size());
+    logger.info("ClickablePagingContainer.getVisibleIDs : get from " + start + " to " + end + " vs " + getList().size());
     for (int i = start; i < end; i++) {
       T at = getAt(i);
       visible.add(at.getID());
@@ -222,6 +243,10 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     }
   }
 
+  /**
+   * @param itemID
+   * @see mitll.langtest.client.list.PagingExerciseList#markCurrentExercise
+   */
   public void markCurrentExercise(int itemID) {
     if (getList() == null || getList().isEmpty()) return;
 
@@ -231,7 +256,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   private void markCurrent(int i, T itemToSelect) {
     if (DEBUG) logger.info(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
-    table.getSelectionModel().setSelected(itemToSelect, true);
+    getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
       int pageEnd = table.getPageStart() + table.getPageSize();
       logger.info("marking " + i + " out of " + table.getRowCount() + " page start " + table.getPageStart() +
@@ -240,6 +265,10 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
     scrollToVisible(i);
     table.redraw();
+  }
+
+  private SelectionModel<? super T> getSelectionModel() {
+    return table.getSelectionModel();
   }
 
   public void clearSelection() {

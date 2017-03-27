@@ -86,7 +86,7 @@ public class PlayAudioPanel
   private String playLabel;
   private String pauseLabel = PAUSE_LABEL;
   private int minWidth = MIN_WIDTH;
-  private final Button playButton;
+  protected Button playButton;
 
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
       "Please add this site to its whitelist.</font>");
@@ -112,8 +112,6 @@ public class PlayAudioPanel
       minWidth = 12;
       pauseLabel = "";
     }
-    playButton = new Button(playLabel);
-    playButton.setIcon(IconType.PLAY);
     id = counter++;
     getElement().setId("PlayAudioPanel_" + id);
     addButtons(optionalToTheRight);
@@ -176,28 +174,36 @@ public class PlayAudioPanel
    * @see #PlayAudioPanel
    */
   protected void addButtons(Widget optionalToTheRight) {
-    playButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        doClick();
-      }
-    });
-    playButton.setType(ButtonType.INFO);
-    playButton.getElement().setId("PlayAudioPanel_playButton");
-    playButton.addStyleName("leftFiveMargin");
-    playButton.addStyleName("floatLeft");
-    playButton.setEnabled(false);
-    add(playButton);
-    warnNoFlash.setVisible(false);
-    add(warnNoFlash);
+    add(playButton = makePlayButton());
+
+    if (false) {
+      warnNoFlash.setVisible(false);
+      add(warnNoFlash);
+    }
 
     if (optionalToTheRight != null) {
       optionalToTheRight.addStyleName("floatLeft");
-
       //  logger.info("adding " + optionalToTheRight.getElement().getExID() + " to " + getElement().getExID());
       add(optionalToTheRight);
     } else {
       // logger.info("NOT adding right optional thing  to " + getElement().getExID());
     }
+  }
+
+  protected Button makePlayButton() {
+    Button playButton = new Button(playLabel);
+    playButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        doClick();
+      }
+    });
+    playButton.setIcon(IconType.PLAY);
+    playButton.setType(ButtonType.INFO);
+    playButton.getElement().setId("PlayAudioPanel_playButton");
+    playButton.addStyleName("leftFiveMargin");
+    playButton.addStyleName("floatLeft");
+    playButton.setEnabled(false);
+    return playButton;
   }
 
   /**

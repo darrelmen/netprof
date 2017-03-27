@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.MiniScoreListener;
+import mitll.langtest.client.scoring.SimpleRecordAudioPanel;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -75,23 +76,20 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    *
    */
   private final List<CorrectAndScore> scores2 = new ArrayList<>();
-//  private final SimplePanel scoreHistoryPanel;
+
   private final ExerciseController controller;
   private final int exerciseID;
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
+   * @see SimpleRecordAudioPanel#getScoreHistory
    */
   public ASRHistoryPanel(ExerciseController controller, int exerciseID) {
     this.controller = controller;
     this.exerciseID = exerciseID;
     addStyleName("leftTenMargin");
-//    addStyleName("floatRight");
     getElement().setId("ASRHistoryPanel");
     addStyleName("bottomFiveMargin");
-
-//    scoreHistoryPanel = new SimplePanel();
-//    scoreHistoryPanel.getElement().setId("ScoreHistoryPanel");
+    addStyleName("inlineFlex");
   }
 
   /**
@@ -103,9 +101,6 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#useResult
    */
   public void gotScore(PretestScore score, String path) {
-    logger.info("gotScore  ");
-//    float hydecScore = ;
- //   scoreHistoryPanel.clear();
     showChart();
     addPlayer();
 
@@ -118,7 +113,6 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    */
   @Override
   public void addScore(CorrectAndScore hydecScore) {
-    //logger.info("addScore  ");
     scores2.add(hydecScore);
   }
 

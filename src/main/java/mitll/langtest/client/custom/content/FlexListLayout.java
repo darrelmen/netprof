@@ -182,7 +182,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
   protected abstract PagingExerciseList<T, U> makeExerciseList(final Panel topRow,
                                                                Panel currentExercisePanel,
-                                                               final String instanceName, DivWidget listHeader);
+                                                               final String instanceName,
+                                                               DivWidget listHeader);
 
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
 

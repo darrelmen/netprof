@@ -74,7 +74,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @param controller
    * @paramx exercise
    * @param instance
-   * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
+   * @see mitll.langtest.client.result.ResultManager#getAsyncTable
    */
   public ReviewScoringPanel(String path,
                             String refSentence,

@@ -102,7 +102,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
                                                                                  String instanceName, DivWidget listHeader) {
 //        logger.info("instance is " + instanceName);
         return new NPFlexSectionExerciseList(controller, topRow, currentExercisePanel,
-            new ListOptions().setInstance(instanceName), listHeader) {
+            new ListOptions().setInstance(instanceName), listHeader, 1) {
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override

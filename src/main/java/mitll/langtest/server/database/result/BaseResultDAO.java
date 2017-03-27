@@ -50,6 +50,7 @@ import org.apache.logging.log4j.Logger;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class BaseResultDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseResultDAO.class);
@@ -61,8 +62,8 @@ public abstract class BaseResultDAO extends DAO {
   private List<CorrectAndScore> cachedResultsForQuery2 = null;
 
   /**
-   * @see SlickResultDAO
    * @param database
+   * @see SlickResultDAO
    */
   BaseResultDAO(Database database) {
     super(database);
@@ -188,6 +189,7 @@ public abstract class BaseResultDAO extends DAO {
 
   /**
    * TODO : do we always want to sort results by user scores?
+   *
    * @param exercises
    * @param userid
    * @param collator
@@ -311,9 +313,9 @@ public abstract class BaseResultDAO extends DAO {
   /**
    * So when updating old data that is missing word and phone alignment information, we have to put it back.
    *
+   * @param language
    * @return to re-process
    * @seex mitll.langtest.server.decoder.RefResultDecoder#doMissingInfo
-   * @param language
    */
 /*  @Override
   public Collection<Result> getResultsToDecode() {
@@ -353,7 +355,7 @@ public abstract class BaseResultDAO extends DAO {
           return cachedResultsForQuery2;
         }
       }
-      List<CorrectAndScore> resultsForQuery = getCorrectAndScoresForReal(language);
+      List<CorrectAndScore> resultsForQuery = getAllCorrectAndScores(language);
 
       synchronized (this) {
         cachedResultsForQuery2 = resultsForQuery;
@@ -367,29 +369,31 @@ public abstract class BaseResultDAO extends DAO {
 
   /**
    * So multiple recordings for the same item are counted as 1.
+   *
    * @return
    * @seex #getUsers
    */
   public UserToCount getUserToNumAnswers() {
     Map<Integer, Integer> idToCount = new HashMap<>();
-   // Map<Integer, Set<Integer>> idToUniqueCount = new HashMap<>();
+    // Map<Integer, Set<Integer>> idToUniqueCount = new HashMap<>();
     for (UserAndTime result : getUserAndTimes()) {
       int userid = result.getUserid();
-  //    int exerciseID = result.getExid();
+      //    int exerciseID = result.getExid();
 
       Integer count = idToCount.get(userid);
       if (count == null) idToCount.put(userid, 1);
       else idToCount.put(userid, count + 1);
 
-     // Set<Integer> uniqueForUser = idToUniqueCount.get(userid);
-    //  if (uniqueForUser == null) idToUniqueCount.put(userid, uniqueForUser = new HashSet<>());
-    //  uniqueForUser.add(exerciseID);
+      // Set<Integer> uniqueForUser = idToUniqueCount.get(userid);
+      //  if (uniqueForUser == null) idToUniqueCount.put(userid, uniqueForUser = new HashSet<>());
+      //  uniqueForUser.add(exerciseID);
     }
     return new UserToCount(idToCount);//, idToUniqueCount);
   }
 
   abstract Collection<UserAndTime> getUserAndTimes();
-  abstract List<CorrectAndScore> getCorrectAndScoresForReal(String language);
+
+  abstract List<CorrectAndScore> getAllCorrectAndScores(String language);
 
   /**
    * @param userID
@@ -401,20 +405,29 @@ public abstract class BaseResultDAO extends DAO {
   public void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest, String language) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest, language);
 
- //   logger.debug("attachScoreHistory score history " + resultsForExercise);
-    int total = 0;
-    float scoreTotal = 0f;
-    for (CorrectAndScore r : resultsForExercise) {
+
+    //   getResultsForExIDInForUser();
+    //   logger.debug("attachScoreHistory score history " + resultsForExercise);
+    // int total = 0;
+    //  float scoreTotal = 0f;
+  /*  for (CorrectAndScore r : resultsForExercise) {
       float pronScore = r.getScore();
       if (pronScore > 0) { // overkill?
         total++;
         scoreTotal += pronScore;
       }
-    }
+    }*/
     MutableExercise mutable = firstExercise.getMutable();
     mutable.setScores(resultsForExercise);
- //   mutable.setAvgScore(total == 0 ? 0f : scoreTotal / total);
+    //   mutable.setAvgScore(total == 0 ? 0f : scoreTotal / total);
   }
+
+  public Map<Integer, List<CorrectAndScore>> getScoreHistories(int userid, Collection<Integer> exercises, String language) {
+    //List<Integer> collect = exercises.stream().map(HasID::getID).collect(Collectors.toList());
+    return getCorrectAndScoreMap(exercises, userid, language);
+  }
+
+  abstract Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language);
 
   /**
    * @param userID
@@ -424,11 +437,17 @@ public abstract class BaseResultDAO extends DAO {
    * @return
    * @see #attachScoreHistory
    */
-  private List<CorrectAndScore> getCorrectAndScores(int userID, HasID firstExercise, boolean isFlashcardRequest, String language) {
-    return getResultsForExIDInForUser(userID, isFlashcardRequest, firstExercise.getID(), language);
+  private List<CorrectAndScore> getCorrectAndScores(int userID,
+                                                    HasID firstExercise,
+                                                    boolean isFlashcardRequest,
+                                                    String language) {
+    return getResultsForExIDInForUser(userID, firstExercise.getID(), isFlashcardRequest, language);
   }
 
-  private List<CorrectAndScore> getResultsForExIDInForUser(int userID, boolean isFlashcardRequest, int id, String language) {
+  private List<CorrectAndScore> getResultsForExIDInForUser(int userID,
+                                                           int id,
+                                                           boolean isFlashcardRequest,
+                                                           String language) {
     return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID, language);
   }
 
@@ -529,8 +548,8 @@ public abstract class BaseResultDAO extends DAO {
    * <p>
    * Multiple answers to the same exercise childCount as one answer.
    *
-   * @return list of duration and numAnswer pairs
    * @param language
+   * @return list of duration and numAnswer pairs
    */
   public SessionInfo getSessions(String language) {
     Map<Integer, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getCorrectAndScores(language));

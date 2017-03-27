@@ -60,18 +60,18 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   private final Collection<String> typeOrder;
 
   /**
-   * @see GoodwaveExercisePanel#getQuestionContent
    * @param typeOrder
+   * @see GoodwaveExercisePanel#getQuestionContent
    */
   public UnitChapterItemHelper(Collection<String> typeOrder) {
     this.typeOrder = typeOrder;
   }
 
   /**
-   * @see GoodwaveExercisePanel#getQuestionContent
    * @param exercise
    * @param vp
    * @return
+   * @see GoodwaveExercisePanel#getQuestionContent
    */
   public Panel addUnitChapterItem(T exercise, Panel vp) {
     Widget itemHeader = getItemHeader(exercise);
@@ -87,6 +87,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
 
   /**
    * Prefer domino id
+   *
    * @param e
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
@@ -96,7 +97,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     int dominoID = e.getDominoID();
     int idToUse = dominoID != -1 ? dominoID : e.getID();
     Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + idToUse + "/" + e.getOldID());
-   // w.getElement().setId("ItemHeading");
+    // w.getElement().setId("ItemHeading");
     return w;
   }
 
@@ -104,7 +105,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     FlowPanel fp = new FlowPanel("small");
     int dominoID = e.getDominoID();
     int idToUse = dominoID != -1 ? dominoID : e.getID();
-    fp.getElement().setInnerText(idToUse + "/" + e.getOldID());
+    fp.getElement().setInnerText("" + idToUse);// + "/" + e.getOldID());
     return fp;
   }
 
@@ -118,7 +119,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
-   // logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
+    // logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
     for (String type : typeOrder) {
       String subtext = exercise.getUnitToValue().get(type);

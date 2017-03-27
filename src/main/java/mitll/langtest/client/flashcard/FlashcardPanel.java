@@ -145,7 +145,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     this.endListener = endListener;
     this.instance = instance;
     this.exerciseList = exerciseList;
-   // this.service = service;
+
     controlState.setStorage(new KeyStorage(controller));
 
     this.soundFeedback = soundFeedback;

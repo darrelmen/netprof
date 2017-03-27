@@ -50,6 +50,7 @@ import mitll.npdata.dao.result.SlickExerciseScore;
 import mitll.npdata.dao.result.SlickUserAndTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -298,8 +299,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
-   * public for amas
-   *
    * @param ids
    * @param userid
    * @param ignoredSession
@@ -317,13 +316,19 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
 
+  public Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language) {
+    List<CorrectAndScore> resultsForExIDInForUser = getResultsForExIDInForUser(ids, userid, "", language);
+    Map<Integer, List<CorrectAndScore>> collect = resultsForExIDInForUser.stream().collect(Collectors.groupingBy(CorrectAndScore::getExid));
+    return collect;
+  }
+
   @Override
   public int getNumResults(int projid) {
     return dao.numRowsForProject(projid);
   }
 
   @Override
-  List<CorrectAndScore> getCorrectAndScoresForReal(String language) {
+  List<CorrectAndScore> getAllCorrectAndScores(String language) {
     return getCorrectAndScores(dao.correctAndScore(), language);
   }
 
@@ -335,6 +340,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return cs;
   }*/
 
+  /**
+   * Scores for indicated exercises for user.
+   *
+   * @param userid
+   * @param exercises
+   * @param <T>
+   */
   @Override
   public <T extends CommonShell> void addScores(int userid, Collection<T> exercises) {
     List<Integer> collect = exercises
@@ -343,10 +355,18 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         .collect(Collectors.toList());
 
     Map<Integer, SlickExerciseScore> correctAndScoresForReal = dao.exidAndScoreWhere(userid, collect);
-   // logger.info("for " + userid + " checking " + exercises.size() + " found " + correctAndScoresForReal.size() + " scores");
+    // logger.info("for " + userid + " checking " + exercises.size() + " found " + correctAndScoresForReal.size() + " scores");
     setScores(exercises, correctAndScoresForReal);
   }
 
+
+  /**
+   * Just ask db for all scores for the user.
+   *
+   * @param userid
+   * @param exercises
+   * @param <T>
+   */
   @Override
   public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
     setScores(exercises, dao.exidAndScore(userid));
@@ -381,15 +401,31 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
     List<CorrectAndScore> cs = new ArrayList<>();
-    for (SlickCorrectAndScore scs : slickCorrectAndScores) cs.add(fromSlickCS(scs, language));
+    String relPrefix = getRelPrefix(language);
+    for (SlickCorrectAndScore scs : slickCorrectAndScores) cs.add(fromSlickCorrectAndScoreWithRelPath(scs, relPrefix));
     return cs;
   }
 
-  private CorrectAndScore fromSlickCS(SlickCorrectAndScore cs, String language) {
+
+
+/*  private List<CorrectAndScore> getCorrectAndScoresWithRelPath(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
+    List<CorrectAndScore> cs = new ArrayList<>();
+    String relPrefix = getRelPrefix(language);
+    for (SlickCorrectAndScore scs : slickCorrectAndScores) cs.add(fromSlickCorrectAndScoreWithRelPath(scs, relPrefix));
+    return cs;
+  }*/
+
+/*  private CorrectAndScore fromSlickCS(SlickCorrectAndScore cs, String language) {
+    String relPrefix = getRelPrefix(language);
+    return fromSlickCorrectAndScoreWithRelPath(cs, relPrefix);
+  }*/
+
+  @NotNull
+  private CorrectAndScore fromSlickCorrectAndScoreWithRelPath(SlickCorrectAndScore cs, String relPrefix) {
     String path = cs.path();
     boolean isLegacy = path.startsWith("answers");
     String filePath = isLegacy ?
-        getRelPrefix(language) + path :
+        relPrefix + path :
         trimPathForWebPage2(path);
 
     return new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),

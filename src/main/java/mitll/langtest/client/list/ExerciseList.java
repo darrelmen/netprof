@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -91,7 +92,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private boolean pendingReq = false;
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private UserState userState;
   ListOptions listOptions;
 
@@ -216,6 +217,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param exerciseID
    * @see Reloadable#loadExercise(int)
    * @see #pushFirstSelection(int, String)
+   * @see HistoryExerciseList#onValueChange(ValueChangeEvent)
    */
   abstract void pushNewItem(String search, int exerciseID);
 
@@ -584,6 +586,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     pushNewItem("", itemID);
   }
 
+  /**
+   * @see HistoryExerciseList#checkAndAskOrFirst
+   * @param id
+   */
   @Override
   public void checkAndAskServer(int id) {
     if (DEBUG || true) {
@@ -664,8 +670,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ExerciseAsyncCallback#onSuccess
    */
   void showExercise(final U commonExercise) {
-    //  logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getOldID());
-    // String itemID = commonExercise.getOldID();
+    logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getID());
     markCurrentExercise(commonExercise.getID());
 
     Scheduler.get().scheduleDeferred(new Command() {
@@ -694,7 +699,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ListInterface#loadNextExercise
    */
   private void getNextExercise(HasID current) {
-    // if (DEBUG) logger.info("ExerciseList.getNextExercise " + current);
+    if (DEBUG) logger.info("ExerciseList.getNextExercise current " + current);
     int i = getIndex(current.getID());
     if (i == -1) {
       logger.warning("ExerciseList.getNextExercise : huh? couldn't find " + current +
@@ -778,7 +783,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public boolean loadNext() {
-    return loadNextExercise(getCurrentExerciseID());
+    int currentExerciseID = getCurrentExerciseID();
+
+    return loadNextExercise(currentExerciseID);
   }
 
   /**
@@ -790,8 +797,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   public boolean loadNextExercise(HasID current) {
     if (DEBUG) logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + getInstance());
     // String id = current.getID();
-    int i = getIndex(current.getID());
-    boolean onLast = isOnLastItem(i);
+   // int i = getIndex(current.getID());
+    boolean onLast = isOnLastItem(getIndex(current.getID()));
 /*    logger.info("ExerciseList.loadNextExercise current is : " + id + " index " + i +
         " of " + getSize() + " last is " + (getSize() - 1) + " on last " + onLast);*/
 

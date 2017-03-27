@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 import java.util.*;
@@ -167,6 +168,17 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
     addColumnsToTable(sortEnglish);
+
+    table.addRangeChangeHandler(new RangeChangeEvent.Handler() {
+      @Override
+      public void onRangeChange(RangeChangeEvent event) {
+        gotRangeChanged(event.getNewRange());
+      }
+    });
+  }
+
+  protected void gotRangeChanged(Range newRange) {
+
   }
 
   protected void addSelectionModel() {

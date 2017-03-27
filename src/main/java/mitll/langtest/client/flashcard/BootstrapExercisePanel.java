@@ -672,7 +672,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   DivWidget getFirstRow(ExerciseController controller) {
     DivWidget firstRow = super.getFirstRow(controller);
     List<CorrectAndScore> scores = exercise.getScores();
-    if (!scores.isEmpty()) {
+    if (scores != null && !scores.isEmpty()) {
       DivWidget historyDiv = new DivWidget();
       historyDiv.getElement().setId("historyDiv");
       firstRow.add(historyDiv);

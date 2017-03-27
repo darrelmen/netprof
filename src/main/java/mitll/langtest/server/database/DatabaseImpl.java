@@ -1783,15 +1783,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return recordedReport;
   }
 
-  @Override
+/*  @Override
   public <T extends CommonShell> void addScores(int userid, Collection<T> exercises) {
     resultDAO.addScores(userid, exercises);
-  }
-
-  @Override
-  public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
-    resultDAO.addScoresForAll(userid, exercises);
-  }
+  }*/
+//
+//  @Override
+//  public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
+//    resultDAO.addScoresForAll(userid, exercises);
+//  }
 
   @Override
   public LogAndNotify getLogAndNotify() {

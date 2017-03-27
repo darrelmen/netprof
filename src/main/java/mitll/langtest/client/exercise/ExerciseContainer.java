@@ -7,6 +7,4 @@ import java.util.Comparator;
  */
 public interface ExerciseContainer<T> {
   void sortBy(Comparator<T> comp);
-
- // void forgetExercise(T es);
 }

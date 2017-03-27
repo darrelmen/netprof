@@ -40,13 +40,11 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.amas.SingleSelectExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Collection;
 import java.util.Map;
@@ -77,7 +75,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   /**
    * @param currentExerciseVPanel
    * @param controller
-   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget)
+   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, int)
    */
   protected HistoryExerciseList(Panel currentExerciseVPanel,
                                 ExerciseController controller,
@@ -203,7 +201,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
-      //  logger.info("\tcheckAndAskOrFirst "+ exerciseID);
+       logger.info("\tcheckAndAskOrFirst "+ exerciseID);
       checkAndAskServer(toUse);
     }
   }

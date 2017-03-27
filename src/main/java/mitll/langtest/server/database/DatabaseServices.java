@@ -106,8 +106,8 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid);
 
-  <T extends CommonShell> void addScores(int userid, Collection<T> exercises);
-  <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises);
+//  <T extends CommonShell> void addScores(int userid, Collection<T> exercises);
+//  <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises);
 
   void rememberScore(int resultID, PretestScore asrScoreForAudio, boolean isCorrect);
 

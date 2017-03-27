@@ -59,7 +59,7 @@ public class SmallVocabDecoder {
 
   /**
    * @param htkDictionary
-   * @see ASRScoring#makeDecoder()
+   * @see ASRScoring#makeDecoder
    */
   public SmallVocabDecoder(HTKDictionary htkDictionary) {
     this.htkDictionary = htkDictionary;
@@ -139,6 +139,16 @@ public class SmallVocabDecoder {
       logger.warn("truncating vocab size from " + vocab.size() + " to " + vocabSizeLimit);
     all.addAll(vocab.subList(0, Math.min(vocab.size(), vocabSizeLimit)));
     return all;
+  }
+
+  public String getSegmented(String longPhrase) {
+    Collection<String> tokens = getTokens(longPhrase);
+    StringBuilder builder = new StringBuilder();
+    for (String token : tokens) {
+      builder.append(segmentation(token.trim()));
+      builder.append(" ");
+    }
+    return builder.toString();
   }
 
   /**

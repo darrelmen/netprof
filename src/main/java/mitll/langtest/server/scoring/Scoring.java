@@ -97,9 +97,9 @@ public abstract class Scoring {
    */
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
-  private static SmallVocabDecoder svDecoderHelper = null;
+  protected SmallVocabDecoder svDecoderHelper = null;
   private final CheckLTS checkLTSHelper;
-  final SmallVocabDecoder svd = new SmallVocabDecoder();
+  //final SmallVocabDecoder svd = new SmallVocabDecoder();
 
   /**
    * By keeping these here, we ensure that we only ever read the dictionary once
@@ -127,7 +127,7 @@ public abstract class Scoring {
     this.deployPath = deployPath;
 
     String persistentLocation = props.getAudioBaseDir();
-    String scoringDir = getScoringDir(persistentLocation);
+    //String scoringDir = getScoringDir(persistentLocation);
 
     this.props = props;
     this.langTestDatabase = langTestDatabase;
@@ -175,18 +175,18 @@ public abstract class Scoring {
    * @seex AutoCRT#getRefs
    * @see ASRWebserviceScoring#runHydra(String, String, String, Collection, String, boolean, int)
    */
-  public static String getSegmented(String longPhrase) {
+/*  public String getSegmented(String longPhrase) {
     Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
-/*    System.err.println("got '" + longPhrase +
+*//*    System.err.println("got '" + longPhrase +
         "' -> '" +tokens +
-        "'");*/
+        "'");*//*
     StringBuilder builder = new StringBuilder();
     for (String token : tokens) {
       builder.append(svDecoderHelper.segmentation(token.trim()));
       builder.append(" ");
     }
     return builder.toString();
-  }
+  }*/
 
   /**
    * Given an audio file without a suffix, check if there are label files, and if so, for each one,
@@ -458,6 +458,10 @@ public abstract class Scoring {
     }
     return pathname;
   }
+
+  /**
+   * @see #Scoring
+   */
 
   private void makeDecoder() {
     if (svDecoderHelper == null && htkDictionary != null) {

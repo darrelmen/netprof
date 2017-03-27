@@ -79,7 +79,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
 
-  private static final SmallVocabDecoder svDecoderHelper = null;
+  //private static final SmallVocabDecoder svDecoderHelper = null;
   private final SLFFile slfFile = new SLFFile();
 
   // TODO make Scores + phoneLab + wordLab an object so have something more descriptive than Object[]
@@ -636,7 +636,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     // reference trans
     String cleaned = slfFile.cleanToken(transcript).trim();
     if (isMandarin) {
-      cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
+      cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + svDecoderHelper.getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
     }
 
     // generate dictionary

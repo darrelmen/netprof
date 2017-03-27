@@ -119,7 +119,7 @@
         <logger name="mitll.hlt.domino.server.user" level="WARN"/>
 
         <root level="debug">
-            <appender-ref ref="STDOUT" level="error"/>
+            <appender-ref ref="STDOUT" level="debug"/>
         </root>
 
     </loggers>

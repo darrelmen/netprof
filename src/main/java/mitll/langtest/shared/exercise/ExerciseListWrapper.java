@@ -33,36 +33,57 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
-  public ExerciseListWrapper() {} // req for serialization
+  public ExerciseListWrapper() {
+  } // req for serialization
 
   private int reqID;
   private List<T> exercises;
   private CommonExercise firstExercise;
+  private Map<Integer, List<CorrectAndScore>> histories;
+
+  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise) {
+    this(reqID, ids, firstExercise, new HashMap<>());
+  }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    * @param reqID
    * @param ids
    * @param firstExercise
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    */
-  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise) {
+  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise,
+                             Map<Integer, List<CorrectAndScore>> histories) {
     this.reqID = reqID;
     this.exercises = ids;
     this.firstExercise = firstExercise;
+    this.histories = histories;
   }
 
   public int getReqID() {
     return reqID;
   }
-  public List<T> getExercises() { return exercises;  }
-  public CommonExercise getFirstExercise() { return firstExercise;  }
+
+  public List<T> getExercises() {
+    return exercises;
+  }
+
+  public CommonExercise getFirstExercise() {
+    return firstExercise;
+  }
 
   public String toString() {
     return "req " + reqID + " has " + exercises.size() + " exercises" +
         (firstExercise != null ? ", first is " + firstExercise.getID() : "");
+  }
+
+  public Map<Integer, List<CorrectAndScore>> getHistories() {
+    return histories;
   }
 }

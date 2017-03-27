@@ -235,7 +235,7 @@ public class DecodeCorrectnessChecker {
    */
   private String getPhraseToDecode(String rawRefSentence, String language) {
     return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL) ?
-        Scoring.getSegmented(rawRefSentence.trim().toUpperCase()) :
+        svd.getSegmented(rawRefSentence.trim().toUpperCase()) :
         rawRefSentence.trim().toUpperCase();
   }
 

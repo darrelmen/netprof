@@ -43,6 +43,7 @@ import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -195,11 +196,22 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   private void addScoresForAll(int userid, List<T> exercises) {
-    db.addScoresForAll(userid, exercises);
+    db.getResultDAO().addScoresForAll(userid, exercises);
   }
 
+  /**
+   * TODO: How does this work with multiple simultaneous users???
+   * <p>
+   * Maybe we should get scores separately?
+   * Or copy exercises?
+   * Or return on separate info channel?
+   *
+   * @param userid
+   * @param exercises
+   * @param <X>
+   */
   private <X extends CommonShell> void addScores(int userid, List<X> exercises) {
-    db.addScores(userid, exercises);
+    db.getResultDAO().addScores(userid, exercises);
   }
 
   /**
@@ -1037,18 +1049,19 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     if (ids.size() > toAddAudioTo.size()) {
-      logger.info("getFullExercises decreased from " +ids.size() + " to " + toAddAudioTo.size());
-    }
-    else
-      logger.info("getting "+ ids.size() + " exercises");
+      logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
+    } else
+      logger.info("getting " + ids.size() + " exercises");
 
     if (!toAddAudioTo.isEmpty()) {
       db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
     }
 
+    Map<Integer, List<CorrectAndScore>> scoreHistories = (exercises.isEmpty()) ? Collections.emptyMap() : db.getResultDAO().getScoreHistories(userID, ids, getLanguage(exercises.get(0)));
+
     addScores(userID, exercises);
 
-    return new ExerciseListWrapper<>(reqid, exercises, null);
+    return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistories);
   }
 
   private <T extends Shell> T getExercise(String exid, boolean isFlashcardReq) {

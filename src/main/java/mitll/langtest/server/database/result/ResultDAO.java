@@ -46,10 +46,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static mitll.langtest.server.database.Database.EXID;
 
@@ -160,13 +157,18 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return new ArrayList<>();
   }
 
-  List<CorrectAndScore> getCorrectAndScoresForReal(String language) {
+  List<CorrectAndScore> getAllCorrectAndScores(String language) {
     try {
       return getScoreResultsSQL(getCSSelect() + " FROM " + RESULTS);
     } catch (SQLException e) {
       logException(e);
       return Collections.emptyList();
     }
+  }
+
+  @Override
+  Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language) {
+    return null;
   }
 
   /**

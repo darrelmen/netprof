@@ -39,6 +39,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.Range;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -52,7 +53,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
-  public static final int ITEMS_TO_SHOW = 5;
+  //public static final int ITEMS_TO_SHOW = 5;
   //extends NPExerciseList<ListSectionWidget> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
@@ -73,7 +74,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
-  // private DivWidget listHeader;
+  int numToShow;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -81,15 +82,18 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @param controller
    * @param listOptions
    * @param listHeader
+   * @param numToShow
    * @see
    */
   public FacetExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
                            ExerciseController controller,
                            ListOptions listOptions,
-                           DivWidget listHeader) {
+                           DivWidget listHeader,
+                           int numToShow) {
     super(currentExerciseVPanel, controller, listOptions.setShowTypeAhead(true));
 
+    this.numToShow = numToShow;
     sectionPanel = new DivWidget();
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
@@ -118,7 +122,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     finished = true;
   }
-  boolean finished=false;
+
+  boolean finished = false;
 
   @NotNull
   private DivWidget addSortBox(ExerciseController controller) {
@@ -161,12 +166,19 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           protected void gotRangeChange() {
             logger.info("gotRangeChange for \n\n\n");
-            askServerForExercise(-1);
+         //   askServerForExercise(-1);
+          }
+
+          @Override
+          protected void gotRangeChanged(Range newRange) {
+            logger.info("gotRangeChanged for " + newRange);
+
+            askServerForExercises(-1, getIdsForRange(newRange));
           }
 
           @Override
           protected int getNumTableRowsGivenScreenHeight() {
-            return ITEMS_TO_SHOW;
+            return numToShow;
           }
         };
     return pagingContainer;
@@ -734,12 +746,20 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   protected void askServerForExercise(int itemID) {
     Collection<Integer> visibleIDs = pagingContainer.getVisibleIDs();
-    boolean isEmpty = visibleIDs.isEmpty();
+    askServerForExercises(itemID, visibleIDs);
+  }
 
+  private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
+    boolean isEmpty = visibleIDs.isEmpty();
     if (isEmpty && pagingContainer.isEmpty() && finished) {
-      logger.info("show empty -- " +finished);
-    //  showEmptyExercise();
+      logger.info("show empty -- " + finished);
+      //  showEmptyExercise();
     } else {
+      if (numToShow == 1 && itemID > 0) {
+        visibleIDs = new ArrayList<>();
+        visibleIDs.add(itemID);
+        logger.info("ask for single -- " + itemID);
+      }
       service.getFullExercises(freqid++, visibleIDs, false, new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -753,9 +773,19 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           if (reqID == freqid - 1) {
             if (result.getExercises().isEmpty()) {
               showEmptyExercise();
-            }
-            else {
-              showExercises(result.getExercises());
+            } else {
+
+              if (numToShow == 1) {
+                if ( getCurrentExerciseID() == result.getExercises().iterator().next().getID()) {
+                  logger.info("skip current " +getCurrentExerciseID());
+                }
+                else {
+                  showExercises(result.getExercises());
+                }
+              }
+              else {
+                showExercises(result.getExercises());
+              }
             }
           } else {
 
@@ -766,8 +796,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
-  private void showExercises(Collection<CommonExercise> result) {
+  protected void showExercises(Collection<CommonExercise> result) {
     clearExerciseContainer();
+
 
     logger.info("showExercises onSuccess adding " + result.size());
     for (CommonExercise exercise : result) {
@@ -775,7 +806,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
 
     if (!result.isEmpty()) {
-      markCurrentExercise(result.iterator().next().getID());
+      int id = result.iterator().next().getID();
+      logger.info("showExercises current now " + id);
+      markCurrentExercise(id);
     } else {
       // TODO : what's happening here?
       // showEmptyExercise();

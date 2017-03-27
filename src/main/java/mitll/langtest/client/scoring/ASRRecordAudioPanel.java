@@ -318,7 +318,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
           true,
           RECORD_YOURSELF,
           controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop",
-          93);
+          93, false);
     }
 
     @Override
