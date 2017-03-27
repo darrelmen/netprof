@@ -423,7 +423,6 @@ public abstract class BaseResultDAO extends DAO {
   }
 
   public Map<Integer, List<CorrectAndScore>> getScoreHistories(int userid, Collection<Integer> exercises, String language) {
-    //List<Integer> collect = exercises.stream().map(HasID::getID).collect(Collectors.toList());
     return getCorrectAndScoreMap(exercises, userid, language);
   }
 

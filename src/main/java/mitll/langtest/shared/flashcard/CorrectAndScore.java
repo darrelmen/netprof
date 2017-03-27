@@ -36,6 +36,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -62,7 +67,9 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   private float userScore;
 
   private String path;
+
   private transient String scoreJson;
+  private Map<NetPronImageType, List<TranscriptSegment>> scores;
 
   public CorrectAndScore() {
   }
@@ -118,6 +125,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
 
   public int getPercentScore() {
     return Math.round(100f * score);
+
   }
 
   public int getExid() {
@@ -167,5 +175,17 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
 
   public String toString() {
     return "id " + getExid() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();
+  }
+
+  public void setJson(String json) {
+    this.scoreJson = json;
+  }
+
+  public Map<NetPronImageType, List<TranscriptSegment>> getScores() {
+    return scores;
+  }
+
+  public void setScores(Map<NetPronImageType, List<TranscriptSegment>> scores) {
+    this.scores = scores;
   }
 }

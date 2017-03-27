@@ -47,6 +47,7 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.client.scoring.SimpleRecordAudioPanel;
+import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -104,7 +105,10 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     showChart();
     addPlayer();
 
-    addScore(new CorrectAndScore(score.getHydecScore(), path));
+    CorrectAndScore hydecScore = new CorrectAndScore(score.getHydecScore(), path);
+    hydecScore.setScores(score.getsTypeToEndTimes());
+    hydecScore.setJson(score.getJson());
+    addScore(hydecScore);
   }
 
   /**
@@ -185,7 +189,8 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   private Panel getAudioAndScore(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath, String title,
                                  int i) {
     Widget w = getAudioWidget(scoreAndPath, title);
-    Widget row = makeRow(tooltipHelper, scoreAndPath);
+ //   Widget row = makeRow(tooltipHelper, scoreAndPath);
+    Widget row = makeRow2(tooltipHelper, scoreAndPath);
     row.addStyleName("leftFiveMargin");
 
     Panel hp = new HorizontalPanel();
@@ -280,6 +285,18 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     row.setWidth(Math.max(3, iScore) + "px");
 
     tooltipHelper.createAddTooltip(row, "Score" + (" " + iScore + "%"), Placement.BOTTOM);
+    return row;
+  }
+
+  private Widget makeRow2(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
+    Widget row = new DivWidget();
+    row.getElement().setInnerHTML(new WordTable().toHTML2(scoreAndPath.getScores()));
+
+    int iScore = scoreAndPath.getPercentScore();
+    row.setWidth(Math.max(3, iScore) + "px");
+    tooltipHelper.createAddTooltip(row, "Score" + (" " + iScore + "%"), Placement.BOTTOM);
+
+
     return row;
   }
 

@@ -34,13 +34,16 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.result.MonitorResult;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.SlickResult;
@@ -406,19 +409,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return cs;
   }
 
-
-
-/*  private List<CorrectAndScore> getCorrectAndScoresWithRelPath(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
-    List<CorrectAndScore> cs = new ArrayList<>();
-    String relPrefix = getRelPrefix(language);
-    for (SlickCorrectAndScore scs : slickCorrectAndScores) cs.add(fromSlickCorrectAndScoreWithRelPath(scs, relPrefix));
-    return cs;
-  }*/
-
-/*  private CorrectAndScore fromSlickCS(SlickCorrectAndScore cs, String language) {
-    String relPrefix = getRelPrefix(language);
-    return fromSlickCorrectAndScoreWithRelPath(cs, relPrefix);
-  }*/
+ ParseResultJson parser = new ParseResultJson(database.getServerProps());
 
   @NotNull
   private CorrectAndScore fromSlickCorrectAndScoreWithRelPath(SlickCorrectAndScore cs, String relPrefix) {
@@ -428,8 +419,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         relPrefix + path :
         trimPathForWebPage2(path);
 
-    return new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
+    CorrectAndScore correctAndScore = new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
         trimPathForWebPage2(filePath), cs.json());
+
+    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parser.readFromJSON(cs.json());
+
+    correctAndScore.setScores(netPronImageTypeListMap);
+    return correctAndScore;
   }
 
   public Map<Integer, Integer> getOldToNew() {

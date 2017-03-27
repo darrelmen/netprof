@@ -75,10 +75,10 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   private static final int ITEM_COL_WIDTH_NARROW = 190;
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 68;
-  static final int PLAY_WIDTH = 42;
-  private static final int NATIVE_WIDTH = PLAY_WIDTH;
-  private static final String NATIVE = "Ref";
-  private static final String PLAY = "Play";
+  private static final int PLAY_WIDTH = 42;
+//  private static final int NATIVE_WIDTH = PLAY_WIDTH;
+//  private static final String NATIVE = "Ref";
+//  private static final String PLAY = "Play";
 
   private static final int TABLE_HISTORY_WIDTH = 430; //380
   private static final int TABLE_HISTORY_WIDTH_NARROW = 360; //380
@@ -104,7 +104,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
     this.heading = w;
   }
 
-  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
+//  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
   //private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
 

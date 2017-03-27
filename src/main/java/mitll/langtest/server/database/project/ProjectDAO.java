@@ -197,6 +197,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @seex PostgresTest#testDeleteEnglish
    */
   public void delete(int id) {
+    logger.info("delete project #"+id);
+
     dao.delete(id);
   }
 

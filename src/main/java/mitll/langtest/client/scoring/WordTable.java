@@ -114,6 +114,15 @@ public class WordTable {
     return builder.toString();
   }
 
+/*
+  public String getTable(String jsonToParse) {
+    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = new ParseResultJson(null)
+        .readFromJSON(jsonToParse);
+
+    return toHTML2(netPronImageTypeListMap);
+  }
+*/
+
   public String toHTML2(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
@@ -138,7 +147,8 @@ public class WordTable {
   }
 
 
-  public Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, boolean showScore) {
+
+  Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, boolean showScore) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
 
     Table table = new Table();
@@ -240,7 +250,7 @@ public class WordTable {
 
   private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
-    List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> words  = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeToEndTime.get(NetPronImageType.PHONE_TRANSCRIPT);
 
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();
