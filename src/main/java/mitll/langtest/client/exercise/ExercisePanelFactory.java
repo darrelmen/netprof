@@ -34,6 +34,8 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
 
 /**
@@ -45,30 +47,32 @@ import mitll.langtest.shared.exercise.Shell;
  * Time: 6:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExercisePanelFactory <T extends Shell, U extends Shell> {
+public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   protected final ExerciseController controller;
   protected ListInterface<T> exerciseList;
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    * @param controller
    * @param exerciseList
+   * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    */
   public ExercisePanelFactory(final ExerciseController controller,
                               ListInterface<T> exerciseList) {
-  //  this.service = service;
     this.controller = controller;
     this.exerciseList = exerciseList;
   }
 
   public void setExerciseList(ListInterface<T> exerciseList) {
-     this.exerciseList = exerciseList;
+    this.exerciseList = exerciseList;
   }
 
+  //public abstract Panel getExercisePanel(U e);
+
   /**
-   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel
    * @param e
+   * @param wrapper
    * @return
+   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel
    */
-  public abstract Panel getExercisePanel(U e);
+  public abstract Panel getExercisePanel(U e, ExerciseListWrapper<CommonExercise> wrapper);
 }

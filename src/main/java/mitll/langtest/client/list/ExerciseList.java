@@ -384,7 +384,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       if (result == null) {
         Window.alert("Unfortunately there's a configuration error and we can't find this exercise.");
       } else {
-        showExercise(result);
+        showExercise(result, null);
       }
     }
   }
@@ -626,7 +626,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (cachedNext != null && cachedNext.getID() == itemID) {
       if (DEBUG)
         logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + getInstance());
-      showExercise(cachedNext);
+      showExercise(cachedNext, null);
     } else {
       pendingReq = true;
       if (DEBUG || true) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
@@ -666,10 +666,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param commonExercise
+   * @param wrapper
    * @see #rememberAndLoadFirst
    * @see ExerciseAsyncCallback#onSuccess
    */
-  void showExercise(final U commonExercise) {
+  void showExercise(final U commonExercise, ExerciseListWrapper<CommonExercise> wrapper) {
     logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getID());
     markCurrentExercise(commonExercise.getID());
 
@@ -677,14 +678,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       public void execute() {
 /*        logger.info("ExerciseList.showExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
       " or " + getCurrentExerciseID() + " instance " + instance);*/
-        addExerciseWidget(commonExercise);
+        addExerciseWidget(commonExercise, wrapper);
       }
     });
 
   }
 
-  protected void addExerciseWidget(U commonExercise) {
-    createdPanel = factory.getExercisePanel(commonExercise);
+  protected void addExerciseWidget(U commonExercise, ExerciseListWrapper<CommonExercise> wrapper) {
+    createdPanel = factory.getExercisePanel(commonExercise, wrapper);
     innerContainer.add(createdPanel);
   }
 

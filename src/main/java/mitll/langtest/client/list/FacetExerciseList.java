@@ -53,8 +53,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
-  //public static final int ITEMS_TO_SHOW = 5;
-  //extends NPExerciseList<ListSectionWidget> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   public static final String ENGLISH_ASC = "English (A-Z)";
@@ -780,11 +778,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                   logger.info("skip current " +getCurrentExerciseID());
                 }
                 else {
-                  showExercises(result.getExercises());
+                  showExercises(result.getExercises(),result);
                 }
               }
               else {
-                showExercises(result.getExercises());
+                showExercises(result.getExercises(),result);
               }
             }
           } else {
@@ -796,13 +794,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
-  protected void showExercises(Collection<CommonExercise> result) {
+  protected void showExercises(Collection<CommonExercise> result, ExerciseListWrapper<CommonExercise> wrapper) {
     clearExerciseContainer();
 
 
     logger.info("showExercises onSuccess adding " + result.size());
     for (CommonExercise exercise : result) {
-      addExerciseWidget(exercise);
+      addExerciseWidget(exercise, wrapper);
     }
 
     if (!result.isEmpty()) {

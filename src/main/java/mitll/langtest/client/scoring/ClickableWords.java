@@ -104,7 +104,7 @@ public class ClickableWords<T extends CommonExercise> {
       }
     }
 
-    logger.info("real " + realHighlight);
+//    logger.info("real " + realHighlight);
 
     Iterator<String> iterator = realHighlight.iterator();
     String toFind = iterator.hasNext() ? iterator.next() : null;
@@ -115,10 +115,10 @@ public class ClickableWords<T extends CommonExercise> {
 
       if (isMatch && iterator.hasNext()) {
         toFind = iterator.next();
-        logger.info("- highlight '" + toFind + "' = '" +token+ "'");
+       // logger.info("- highlight '" + toFind + "' = '" +token+ "'");
       }
       else {
-        logger.fine("-  no highlight '" + toFind + "' vs '" +token+ "'");
+       // logger.fine("-  no highlight '" + toFind + "' vs '" +token+ "'");
       }
 
       horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch));
@@ -135,11 +135,11 @@ public class ClickableWords<T extends CommonExercise> {
     return context.equals(vocab) || (context.startsWith(vocab) && !vocab.isEmpty());// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
   }
 
-  private boolean isHardMatch(String token, String next) {
+/*  private boolean isHardMatch(String token, String next) {
     String context = removePunct(token.toLowerCase());
     String vocab   = removePunct(next.toLowerCase());
     return context.equals(vocab);
-  }
+  }*/
 
   @NotNull
   private List<String> getTokens(String value, boolean flLine, boolean isChineseCharacter) {

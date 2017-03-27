@@ -30,17 +30,19 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget {
+  public static final int PROGRESS_BAR_WIDTH = 260;
   private Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
-  // private static final String REFERENCE = "";
+
   private static final String RECORD_YOURSELF = "";//Record";
   private static final String RELEASE_TO_STOP = "Release";
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
@@ -76,24 +78,20 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @param controller
    * @param exercise
    * @param instance
-   * @see GoodwaveExercisePanel#getAnswerWidget
+   * @param history
+   * @see TwoColumnExercisePanel#getRecordPanel
    */
   SimpleRecordAudioPanel(BusyPanel goodwaveExercisePanel,
                          ExerciseController controller,
                          T exercise,
-                         String instance) {
-//    super(exercise.getForeignLanguage(),
-//        exercise.getTransliteration(), controller,
-//        null,
-//        REFERENCE, exercise, instance);
+                         String instance, List<CorrectAndScore> history) {
     this.controller = controller;
     this.goodwaveExercisePanel = goodwaveExercisePanel;
     this.index = 1;
     this.exercise = exercise;
 
     addWidgets("", "");
-
-    showRecordingHistory(exercise);
+    showRecordingHistory(history);
   }
 
   /**
@@ -114,7 +112,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   public void addMinicoreListener(MiniScoreListener l) {
     this.miniScoreListener = l;
   }
-
 
   /**
    * So here we're trying to make the record and play buttons know about each other
@@ -191,7 +188,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
           postAudioRecordButton1.setEnabled(true);
         }
       }, "", null);
-      getElement().setId("GoodwaveExercisePanel_MyPlayAudioPanel");
+      getElement().setId("SimpleRecordAudio_MyPlayAudioPanel");
     }
 
     /**
@@ -215,10 +212,10 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       scores = new DivWidget();
 
       scores.add(scoreBar = getAfterPlayWidget(progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT)));
-    //  scores.add();
-      firstRow.add(getScoreHistory());
 
       firstRow.add(scores);
+
+      firstRow.add(getScoreHistory());
     }
 
     private DivWidget getRecordFeedback() {
@@ -248,7 +245,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   //    afterPlayWidget.add(label);
       afterPlayWidget.add(progressBar);
 
-      progressBar.setWidth("300px");
+      progressBar.setWidth(PROGRESS_BAR_WIDTH +  "px");
       progressBar.addStyleName("floatLeft");
 
       Style style = progressBar.getElement().getStyle();
@@ -311,7 +308,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private ASRHistoryPanel getScoreHistory() {
     ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID());
     addMinicoreListener(historyPanel);
-    historyPanel.addStyleName("floatLeft");
+    historyPanel.addStyleName("floatRight");
     historyPanel.showChart();
     return historyPanel;
   }
@@ -377,7 +374,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
           true,
           RECORD_YOURSELF,
           controller.getProps().doClickAndHold() ? "" : "Stop",
-          30,
+          -1,
           true);
     }
 
@@ -454,8 +451,14 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 //        erefSentence, transliteration, imageOptions, id, usePhoneToDisplay, async);
   }
 
-  private void showRecordingHistory(T exercise) {
-    addScores(exercise.getScores());
+  /**
+   * @see #SimpleRecordAudioPanel
+   * @param scores
+   */
+  private void showRecordingHistory(List<CorrectAndScore> scores) {
+    if (scores != null) {
+      addScores(scores);
+    }
     miniScoreListener.showChart();
   }
 

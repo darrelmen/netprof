@@ -41,10 +41,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.MutableExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.logging.Logger;
@@ -193,7 +190,7 @@ public class EditItem {
     exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(
         controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise exercise) {
+      public Panel getExercisePanel(CommonExercise exercise, ExerciseListWrapper<CommonExercise> wrapper) {
         Panel panel = new ResizableSimple();
         panel.getElement().setId("EditItemPanel");
 

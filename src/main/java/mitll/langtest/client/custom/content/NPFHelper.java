@@ -52,6 +52,7 @@ import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.ArrayList;
@@ -291,7 +292,7 @@ public class NPFHelper implements RequiresResize {
       final boolean showQC) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
+      public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {

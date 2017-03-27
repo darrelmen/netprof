@@ -108,7 +108,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     Style style = getElement().getStyle();
     style.setMarginTop(1, Style.Unit.PX);
     style.setMarginBottom(1, Style.Unit.PX);
-    setWidth(buttonWidth + "px");
+    if (buttonWidth > 0) {
+      setWidth(buttonWidth + "px");
+    }
   }
 
   public void setExercise(int exercise) {

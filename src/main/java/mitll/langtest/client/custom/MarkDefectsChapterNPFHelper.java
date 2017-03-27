@@ -52,6 +52,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 
 import java.util.logging.Logger;
 
@@ -187,7 +188,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
+      public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
         return new QCNPFExercise<>(e, controller, exerciseList, ActivityType.MARK_DEFECTS.toString());
       }
     };

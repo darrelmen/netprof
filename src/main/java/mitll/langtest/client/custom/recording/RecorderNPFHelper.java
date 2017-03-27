@@ -98,7 +98,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     final String oinstance = exerciseList.getInstance();
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(final CommonExercise e) {
+      public Panel getExercisePanel(final CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
         return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
       }
     };

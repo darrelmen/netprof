@@ -78,6 +78,8 @@ import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -238,9 +240,12 @@ public class Navigation implements RequiresResize, ShowTab {
       protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
         return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
           @Override
-          public Panel getExercisePanel(CommonExercise e) {
+          public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
 
-              return new TwoColumnExercisePanel<>(e, controller, exerciseList,
+
+            List<CorrectAndScore> correctAndScores = wrapper.getHistories().get(e.getID());
+            return new TwoColumnExercisePanel<>(e, controller, exerciseList,
+                  correctAndScores,
                   new ExerciseOptions()
                       .setInstance(CLASSROOM));
 

@@ -156,11 +156,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   /**
    * @param e
+   * @param wrapper
    * @return
    * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel
    */
   @Override
-  public Panel getExercisePanel(T e) {
+  public Panel getExercisePanel(T e, ExerciseListWrapper<CommonExercise> wrapper) {
     currentExercise = e;
     sticky.storeCurrent(e);
     boolean recordingEnabled = controller.isRecordingEnabled();
@@ -267,7 +268,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   }
 
   /**
-   * @see ExercisePanelFactory#getExercisePanel(Shell)
+   * @see ExercisePanelFactory#getExercisePanel(Shell, ExerciseListWrapper)
    */
   private class StatsPracticePanel extends BootstrapExercisePanel<CommonAnnotatable> {
     private Widget container;
