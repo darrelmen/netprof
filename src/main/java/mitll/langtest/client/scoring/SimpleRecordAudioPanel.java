@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.Tooltip;
@@ -43,7 +44,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
   private static final String RECORD_YOURSELF = "";//Record";
-//  private static final String RELEASE_TO_STOP = "Release";
+  //  private static final String RELEASE_TO_STOP = "Release";
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
@@ -118,10 +119,10 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * to the extent that when we're recording, we can't play audio, and when we're playing
    * audio, we can't record. We also mark the widget as busy so we can't move on to a different exercise.
    *
+   * @return
    * @paramx toTheRightWidget
    * @paramx buttonTitle
    * @paramx recordButtonTitle
-   * @return
    * @see AudioPanel#getPlayButtons
    * @see #addWidgets(String, String)
    */
@@ -150,12 +151,12 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
                            boolean scoredBefore,
                            String path) {
 //    super.useResult(result, wordTranscript, phoneTranscript, scoredBefore, path);
-    if (!scoredBefore && miniScoreListener != null) {
+    boolean isValid = result.getHydecScore() > 0;
+    if (!scoredBefore && miniScoreListener != null && isValid) {
       miniScoreListener.gotScore(result, path);
     }
-    if (result.getHydecScore() > 0) {
+    if (isValid) {
       float zeroToHundred = result.getHydecScore() * 100f;
-      //etASRGaugeValue(Math.min(100.0f, zeroToHundred));
       playAudioPanel.showScore(Math.min(100.0f, zeroToHundred));
     } else {
       playAudioPanel.hideScore();
@@ -222,7 +223,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       recordFeedback = new DivWidget();
       recordFeedback.addStyleName("inlineFlex");
       recordFeedback.getElement().setId("recordFeedbackImageContainer");
-    //  recordFeedback.setWidth("32px");
+      //  recordFeedback.setWidth("32px");
       recordFeedback.add(recordImage1);
       recordFeedback.add(recordImage2);
       recordFeedback.add(waitCursorHelper.getWaitCursor());
@@ -244,10 +245,10 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
       Panel afterPlayWidget = new DivWidget();
 
-  //    afterPlayWidget.add(label);
+      //    afterPlayWidget.add(label);
       afterPlayWidget.add(progressBar);
 
-      progressBar.setWidth(PROGRESS_BAR_WIDTH +  "px");
+      progressBar.setWidth(PROGRESS_BAR_WIDTH + "px");
       progressBar.addStyleName("floatLeft");
 
       Style style = progressBar.getElement().getStyle();
@@ -276,10 +277,12 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
       progressBar.setPercent(100 * percent);
       progressBar.setText("" + Math.round(score));//(score));
-      progressBar.setColor(score > SECOND_STEP ?
-          ProgressBarBase.Color.SUCCESS : score > FIRST_STEP ?
-          ProgressBarBase.Color.WARNING :
-          ProgressBarBase.Color.DANGER);
+      progressBar.setColor(
+          score > SECOND_STEP ?
+              ProgressBarBase.Color.SUCCESS :
+              score > FIRST_STEP ?
+              ProgressBarBase.Color.WARNING :
+              ProgressBarBase.Color.DANGER);
 
       scoreBar.setVisible(true);
       scores.setVisible(true);
@@ -292,7 +295,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     private DivWidget addDownloadAudioWidget() {
       DivWidget downloadContainer = new DivWidget();
-     // downloadContainer.setWidth("40px");
+      // downloadContainer.setWidth("40px");
 
       DivWidget north = new DivWidget();
       north.add(download = getDownloadIcon());
@@ -447,20 +450,25 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   int reqid = 0;
 
   /**
-   * @see #useResult(PretestScore, boolean, String)
    * @param result
+   * @see #useResult(PretestScore, boolean, String)
    */
   private void scoreAudio(AudioAnswer result) {
     logger.info("use " + result);
 
     scoreFeedback.clear();
-    scoreFeedback.add(new WordScoresTable().getStyledWordTable(result.getPretestScore()));
-    useResult(result.getPretestScore(),false,result.getPath());
+    if (result.getPretestScore().getHydecScore() > 0) {
+      scoreFeedback.add(new WordScoresTable().getStyledWordTable(result.getPretestScore()));
+    }
+    else {
+      scoreFeedback.add(new Heading(4,"Score low, try again."));
+    }
+    useResult(result.getPretestScore(), false, result.getPath());
   }
 
   /**
-   * @see #SimpleRecordAudioPanel
    * @param scores
+   * @see #SimpleRecordAudioPanel
    */
   private void showRecordingHistory(List<CorrectAndScore> scores) {
     if (scores != null) {
