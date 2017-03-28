@@ -77,17 +77,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private int unaccountedForVertical = 160;
   private boolean onlyExamples;
 
-//  private Timer waitTimer = null;
-//  private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
-//  private final SafeUri white    = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
-
-  /**
-   * @see #addTypeAhead(Panel)
-   * @see #scheduleWaitTimer
-   * @see #showFinishedGettingExercises
-   */
- // private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
-
   /**
    * @param currentExerciseVPanel
    * @param factory
@@ -100,9 +89,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
                      ExerciseController controller,
                      ListOptions listOptions) {
     super(currentExerciseVPanel, factory, controller, listOptions);
+    this.waitCursorHelper = new WaitCursorHelper();
     addComponents();
     getElement().setId("PagingExerciseList_" + getInstance());
-    this.waitCursorHelper = new WaitCursorHelper();
   }
 
   void sortBy(Comparator<T> comp) {
