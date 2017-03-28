@@ -1061,6 +1061,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     addScores(userID, exercises);
 
+/*
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        getProject().ensureAudio(toAddAudioTo);
+      }
+    }).start();
+
+    */
+
     return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistories);
   }
 

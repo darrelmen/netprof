@@ -118,7 +118,6 @@ public class ParseResultJson {
     if (!json.equals("null")) {  // not exactly sure how this can happen...
       try {
         JsonElement parse1 = parser.parse(json);
-
         JsonObject parse = parse1.getAsJsonObject();
         imageTypeMapMap = readFromJSON(parse, WORDS, W, usePhones, wordToPronunciations);
       } catch (Exception e) {
@@ -128,7 +127,9 @@ public class ParseResultJson {
       }
     }
 
-    if (imageTypeMapMap.isEmpty()) logger.warn("json " + json + " produced empty events map");
+    if (imageTypeMapMap.isEmpty()) {
+      logger.warn("json " + json + " produced empty events map " + wordToPronunciations);
+    }
     else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
       if (warn++ < 2) logger.warn("parseJsonString no words for " + json);
       // throw new Exception();

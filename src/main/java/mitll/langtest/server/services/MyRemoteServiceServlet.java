@@ -198,8 +198,8 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   }
 
   /**
-   * @see #getUserIDFromSession
    * @return
+   * @see #getUserIDFromSession
    */
   private int getUserIDFromSessionNoCheck() {
     return securityManager.getUserIDFromRequest(getThreadLocalRequest());
@@ -230,7 +230,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       if (loggedInUser != null) {
         db.setStartupInfo(loggedInUser);
       }
-logger.info("Got here = "+loggedInUser);
+//logger.info("Got here = "+loggedInUser);
       return loggedInUser;
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -522,7 +522,9 @@ logger.info("Got here = "+loggedInUser);
     }
   }
 
-  protected ISection<CommonExercise> getSectionHelper() { return db.getSectionHelper(getProjectID());  }
+  protected ISection<CommonExercise> getSectionHelper() {
+    return db.getSectionHelper(getProjectID());
+  }
 
   protected AudioFileHelper getAudioFileHelper() {
     if (serverProps.isAMAS()) {

@@ -77,7 +77,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     this.dataProvider = new ListDataProvider<T>();
   }
 
-  boolean stillSettingUp = true;
+  //boolean stillSettingUp = true;
   /**
    * @param sortEnglish
    * @return
@@ -88,7 +88,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
-    logger.info("still setting up... starting");
+   // logger.info("still setting up... starting");
 
     // Create a SimplePager.
     final SimplePager pager =
@@ -96,10 +96,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
           @Override
           protected void onRangeOrRowCountChanged() {
             super.onRangeOrRowCountChanged();
-            if (!stillSettingUp) {
-              logger.info("not still setting up...");
-              gotRangeChange();
-            }
+         //   if (!stillSettingUp) {
+   //           logger.info("not still setting up...");
+         //     gotRangeChange();
+        //    }
           }
         };
 
@@ -113,9 +113,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     table.addStyleName("floatLeftAndClear");
 
     setMaxWidth();
-    stillSettingUp = false;
+ //   stillSettingUp = false;
 
-    logger.info("still setting up... over");
+//    logger.info("still setting up... over");
 
     return column;
   }

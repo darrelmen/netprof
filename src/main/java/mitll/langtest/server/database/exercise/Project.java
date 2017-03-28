@@ -286,7 +286,6 @@ public class Project implements PronunciationLookup {
   }
 */
 
-
   @Override
   public String getPronunciations(String transcript, String transliteration) {
     return hasModel() ? audioFileHelper.getPronunciations(transcript, transliteration) : "";
@@ -342,5 +341,9 @@ public class Project implements PronunciationLookup {
 
   public String toString() {
     return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
+  }
+
+  public void ensureAudio(Set<CommonExercise> toAddAudioTo) {
+    refResultDecoder.ensure(getLanguage(),toAddAudioTo);
   }
 }

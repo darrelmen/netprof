@@ -91,6 +91,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     getElement().setId("ASRHistoryPanel");
     addStyleName("bottomFiveMargin");
     addStyleName("inlineFlex");
+    setWidth("100%");
   }
 
   /**

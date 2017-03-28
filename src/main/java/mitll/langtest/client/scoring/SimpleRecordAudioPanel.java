@@ -21,6 +21,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.WaitCursorHelper;
+import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -30,6 +31,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -134,7 +136,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     waitCursorHelper = new WaitCursorHelper();
 
     postAudioRecordButton = new MyPostAudioRecordButton(controller);
-    // postAudioRecordButton.getElement().getStyle().setMargin(8, Style.Unit.PX);
     postAudioRecordButton.addStyleName("leftFiveMargin");
     postAudioRecordButton.addStyleName("rightFiveMargin");
 
@@ -147,20 +148,37 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @param scoredBefore
    * @param path
    */
-  protected void useResult(PretestScore result, //ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
-                           boolean scoredBefore,
-                           String path) {
+  protected void useResult(PretestScore result, boolean scoredBefore, String path) {
 //    super.useResult(result, wordTranscript, phoneTranscript, scoredBefore, path);
     boolean isValid = result.getHydecScore() > 0;
     if (!scoredBefore && miniScoreListener != null && isValid) {
       miniScoreListener.gotScore(result, path);
     }
+    getReadyToPlayAudio(path);
     if (isValid) {
       float zeroToHundred = result.getHydecScore() * 100f;
       playAudioPanel.showScore(Math.min(100.0f, zeroToHundred));
     } else {
       playAudioPanel.hideScore();
     }
+  }
+
+  @Nullable
+  private String getReadyToPlayAudio(String path) {
+   // logger.info("get ready to play " +path);
+    path = getPath(path);
+    if (path != null) {
+      this.audioPath = path;
+    }
+    if (playAudioPanel != null) {
+     // logger.info("startSong ready to play " +path);
+      playAudioPanel.startSong(path);
+    }
+    return path;
+  }
+
+  private String getPath(String path) {
+    return CompressedAudio.getPath(path);
   }
 
   private class MyPlayAudioPanel extends PlayAudioPanel {
@@ -383,6 +401,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     @Override
     public void useResult(AudioAnswer result) {
       audioPath = result.getPath();
+     // path = getReadyToPlayAudio(path);
+
       setDownloadHref();
       scoreAudio(result);
       waitCursorHelper.showFinished();

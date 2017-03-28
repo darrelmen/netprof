@@ -136,10 +136,9 @@ public class ButtonFactory implements EventLogger {
               props != null &&
               controller != null &&
               service != null) {
-            //          String turkID = props.getTurkID();
             String browserInfo = controller.getBrowserInfo();
 
-            if (//turkID != null &&
+            if (
                 browserInfo != null) {
               //logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
 

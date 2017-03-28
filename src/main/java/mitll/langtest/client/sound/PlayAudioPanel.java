@@ -66,10 +66,7 @@ import java.util.logging.Logger;
  * Time: 11:41 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PlayAudioPanel
-    // extends HorizontalPanel
-    extends DivWidget
-    implements AudioControl {
+public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   private static final IconType PLAY = IconType.PLAY;
@@ -89,10 +86,8 @@ public class PlayAudioPanel
   private String playLabel;
   private String pauseLabel = PAUSE_LABEL;
   private int minWidth = MIN_WIDTH;
-  //protected Widget playButtonWidget;
   protected Button playButton;
-  // protected Button playSlowButton;
-  boolean isSlow;
+  private boolean isSlow;
 
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
       "Please add this site to its whitelist.</font>");
@@ -125,7 +120,6 @@ public class PlayAudioPanel
     isSlow = doSlow;
 
     addButtons(optionalToTheRight);
-
   }
 
   /**
@@ -202,10 +196,7 @@ public class PlayAudioPanel
     }
   }
 
-  // private final Image turtle = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32.png"));
-
   /**
-   * @param doSlow
    * @return
    * @see PlayAudioPanel#addButtons
    */
@@ -220,9 +211,6 @@ public class PlayAudioPanel
 
     showPlayIcon(playButton);
 
-//    if (isSlow) {
-//      styleSlowIcon(playButton);
-//    }
     playButton.setType(ButtonType.INFO);
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
@@ -314,16 +302,15 @@ public class PlayAudioPanel
     // logger.info("setPlayButtonText now playing = " + isPlaying());
     playButton.setText(html);
     if (playing1) {
-      playButton.setIcon( IconType.PAUSE);
+      playButton.setIcon(IconType.PAUSE);
 
       playButton.getElement().getStyle().setPaddingBottom(4, Style.Unit.PX);
       playButton.getElement().getStyle().setPaddingLeft(12, Style.Unit.PX);
       playButton.getElement().getStyle().setPaddingRight(12, Style.Unit.PX);
-    }
-    else {
+    } else {
       showPlayIcon(playButton);
     }
-  //  playButton.setIcon(playing1 ? IconType.PAUSE : PLAY);
+    //  playButton.setIcon(playing1 ? IconType.PAUSE : PLAY);
   }
 
   private boolean isPlaying() {

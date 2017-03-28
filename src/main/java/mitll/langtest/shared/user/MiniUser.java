@@ -66,10 +66,6 @@ public class MiniUser implements HasID, Comparable<HasID> {
    * @param isAdmin
    */
   public MiniUser(int id, int age, boolean isMale, String userID, boolean isAdmin) {
-//    setFields(id, age, isMale, userID, isAdmin);
-//  }
-//
-//  private void setFields(int id, int age, boolean isMale, String userID, boolean isAdmin) {
     this.id = id;
     this.age = age;
     this.isMale = isMale;

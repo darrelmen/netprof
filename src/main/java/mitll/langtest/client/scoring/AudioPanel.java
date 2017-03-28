@@ -48,6 +48,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -396,6 +397,20 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
   public String getImagesForPath(String path) {
+    path = getReadyToPlayAudio(path);
+
+    // wait for rest of page to do layout before asking for the images
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        getImages();
+      }
+    });
+
+    return path;
+  }
+
+  @Nullable
+  public String getReadyToPlayAudio(String path) {
     path = getPath(path);
     if (DEBUG) logger.info("AudioPanel : " + getElement().getId() + " getImagesForPath " + path);
     if (path != null) {
@@ -405,14 +420,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     if (playAudio != null) {
       playAudio.startSong(path);
     }
-
-    // wait for rest of page to do layout before asking for the images
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        getImages();
-      }
-    });
-
     return path;
   }
 

@@ -290,7 +290,6 @@ public class SlickUserExerciseDAO
                                                 ISection<CommonExercise> sectionHelper,
                                                 Map<Integer, ExercisePhoneInfo> exToPhones,
                                                 PronunciationLookup lookup,
-                                                //    List<List<Pair>> allPairs,
                                                 Exercise exercise,
                                                 Collection<String> attrTypes) {
     ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, exToPhones, lookup);
@@ -303,11 +302,7 @@ public class SlickUserExerciseDAO
 
     exercise.setNumPhones(numToUse);
 
-    List<Pair> pairs = addPhoneInfo(slick, baseTypeOrder, sectionHelper, exercise,
-        //allPairs,
-        attrTypes);
-
-    // allPairs.add(pairs);
+    List<Pair> pairs = addPhoneInfo(slick, baseTypeOrder, sectionHelper, exercise, attrTypes);
 
     return pairs;
   }
@@ -351,6 +346,12 @@ public class SlickUserExerciseDAO
     return exercisePhoneInfo;
   }
 
+  /**
+   * @see #getExercisePhoneInfo(SlickExercise, Map, PronunciationLookup)
+   * @param slick
+   * @param lookup
+   * @return
+   */
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(SlickExercise slick, PronunciationLookup lookup) {
     String foreignlanguage = slick.foreignlanguage();
@@ -592,6 +593,8 @@ public class SlickUserExerciseDAO
     List<String> baseTypeOrder = getBaseTypeOrder(lookup);
 
     List<CommonExercise> copy = new ArrayList<>();
+
+    long then = System.currentTimeMillis();
     for (SlickExercise slickExercise : all) {
       Exercise exercise = makeExercise(slickExercise);
       addAttributeToExercise(allByProject, exToAttrs, exercise);
@@ -599,6 +602,9 @@ public class SlickUserExerciseDAO
       allPairs.add(addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, exToPhones, lookup, exercise, attrTypes));
       copy.add(exercise);
     }
+
+    long now = System.currentTimeMillis();
+    if (now-then>50) logger.info("took " +(now-then) + " to attach attributes to " + all.size() + " exercises.");
 
     if (addTypesToSection) {
       logger.info("getExercises type order " + typeOrder);

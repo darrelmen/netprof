@@ -15,6 +15,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -138,18 +139,35 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 //    flContainer.addStyleName("floatLeft");
     flContainer.getElement().setId("flWidget");
 
-    AudioAttribute audioAttribute = e.getAudioAttributePrefGender(controller.getUserManager().isMale(), true);
+    UserManager userManager = controller.getUserManager();
+    boolean male = userManager.isMale();
+
+    //  male = false;
+
+    logger.info("current user " + userManager.getUserID() + " male = " + male);
+
+    AudioAttribute audioAttribute = e.getAudioAttributePrefGender(male, true);
 
     if (audioAttribute != null) {
+      logger.info("found audio for gender male = " + male + "  audio is male " + audioAttribute.isMale() + " by " + audioAttribute.getUser());
+
+      if (audioAttribute.isMale() != male) {
+        for (AudioAttribute attr : e.getAudioAttributes()) {
+          logger.info("no match - for ex " + e.getID() +
+              "  had " + attr.getID() + " " + attr.isMale() + " by " + attr.getUser());
+        }
+      }
       PlayAudioPanel w = new PlayAudioPanel(controller, audioAttribute.getAudioRef(), false);
       DivWidget pap = new DivWidget();
       pap.addStyleName("floatLeft");
       pap.addStyleName("inlineFlex");
       pap.add(w);
 
-      AudioAttribute slow = e.getAudioAttributePrefGender(controller.getUserManager().isMale(), false);
+      AudioAttribute slow = e.getAudioAttributePrefGender(male, false);
 
       if (slow != null) {
+        logger.info("found slow audio for gender male = " + male + "  audio is male " + slow.isMale() + " by " + slow.getUser());
+
         PlayAudioPanel w1 = new PlayAudioPanel(controller, slow.getAudioRef(), true);
         w1.addStyleName("floatLeft");
         pap.add(w1);
@@ -245,7 +263,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String foreignLanguage = e.getForeignLanguage();
     String altFL = e.getAltFL();
 
-  //  logger.info("for " + e.getID() + " found " + e.getDirectlyRelated().size() + " context sentence ");
+    //  logger.info("for " + e.getID() + " found " + e.getDirectlyRelated().size() + " context sentence ");
 
 //    grid.setWidget(row++, 0, panel);
     rowWidget = getRowWidget();

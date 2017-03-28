@@ -427,8 +427,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   @NotNull
   private Map<String, Map<String, MatchInfo>> getTypeToMatchPairs(List<Pair> pairs, SectionNode node) {
-    //Map<String, Set<MatchInfo>> typeToMatchRet = new HashMap<>();
     Map<String, Map<String, MatchInfo>> typeToMatch = new HashMap<>();
+
+    if (pairs.isEmpty()) {
+      logger.warn("getTypeToMatchPairs no pairs for " +node);
+      return typeToMatch;
+    }
+
 
     Iterator<Pair> iterator = pairs.iterator();
     Pair next = iterator.next();

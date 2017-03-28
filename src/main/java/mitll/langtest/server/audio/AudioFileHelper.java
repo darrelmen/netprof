@@ -141,6 +141,12 @@ public class AudioFileHelper implements AlignDecode {
     this.project = project;
   }
 
+  /**
+   * @see Project#getPronunciations
+   * @param transcript
+   * @param transliteration
+   * @return
+   */
   public String getPronunciations(String transcript, String transliteration) {
     return webserviceScoring.getPronunciations(transcript, transliteration, true);
   }

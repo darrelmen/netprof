@@ -162,14 +162,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           }
 
           @Override
-          protected void gotRangeChange() {
-            logger.info("gotRangeChange for \n\n\n");
-         //   askServerForExercise(-1);
-          }
-
-          @Override
           protected void gotRangeChanged(Range newRange) {
-            logger.info("gotRangeChanged for " + newRange);
+           // logger.info("gotRangeChanged for " + newRange);
 
             askServerForExercises(-1, getIdsForRange(newRange));
           }

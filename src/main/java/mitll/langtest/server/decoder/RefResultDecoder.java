@@ -427,12 +427,14 @@ public class RefResultDecoder {
     }
   }
 
-  private void ensure(String language,
-                      Collection<CommonExercise> exercises, Map<Integer, List<AudioAttribute>> exToAudio) {
+  public void ensure(String language,
+                      Collection<CommonExercise> exercises) {
 //      String installPath = pathHelper.getInstallPath();
     int numResults = db.getRefResultDAO().getNumResults();
     logger.debug(language + " writeRefDecode : found " +
-        numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio, examining " +
+        numResults +
+        " in ref results table vs " +
+//        exToAudio.size() + " exercises with audio, examining " +
         exercises.size() + " exercises");
 
     if (stopDecode) logger.debug("Stop decode true");

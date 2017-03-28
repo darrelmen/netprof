@@ -193,10 +193,12 @@ public class AudioExercise extends ExerciseShell {
         .max((o1, o2) -> -1 * Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
     return max.orElse(null);
   }
+
   public AudioAttribute getAudioAttrPrefGender(boolean isMale) {
     Collection<AudioAttribute> audioPrefGender = getAudioPrefGender(isMale);
-    return audioPrefGender.isEmpty()?null:audioPrefGender.iterator().next();
+    return audioPrefGender.isEmpty() ? null : audioPrefGender.iterator().next();
   }
+
   @NotNull
   private Collection<AudioAttribute> getAudioPrefGender(boolean isMale) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes();

@@ -201,7 +201,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
-       logger.info("\tcheckAndAskOrFirst "+ exerciseID);
+    //   logger.info("\tcheckAndAskOrFirst "+ exerciseID);
       checkAndAskServer(toUse);
     }
   }

@@ -493,7 +493,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (exerciseID < 0) {
       loadFirstExercise(searchIfAny);
     } else {
-      logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny + "'");
+     // logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny + "'");
       pushFirstSelection(exerciseID, searchIfAny);
     }
   }
@@ -592,12 +592,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   @Override
   public void checkAndAskServer(int id) {
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info(getClass() + " : (" + getInstance() + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
     }
 
     if (hasExercise(id)) {
-      logger.info("checkAndAskServer for " + id);
+     // logger.info("checkAndAskServer for " + id);
       askServerForExercise(id);
     } else {
       logger.warning("checkAndAskServer : skipping request for " + id);
