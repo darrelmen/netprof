@@ -54,21 +54,25 @@ import mitll.langtest.client.LangTest;
  * @since 9/25/14.
  */
 public class TypeAhead implements ITypeAhead {
-  public static final int WIDTH = 180-32;
-  public static final int RIGHT_MARIGN_FOR_SEARCH = 10;
   //private Logger logger = Logger.getLogger("TypeAhead");
-  private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
+
+  private static final int WIDTH = 180-32;
+  private static final int RIGHT_MARIGN_FOR_SEARCH = 10;
+  //private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final TextBox typeAhead = new TextBox();
+  private WaitCursorHelper waitCursorHelper;
 
   /**
    * @param column
-   * @param waitCursor
+   * @param waitCursorHelper
    * @param title
    * @param hasFirstFocus
    * @see mitll.langtest.client.list.PagingExerciseList#addTypeAhead
    */
-  TypeAhead(Panel column, Image waitCursor, String title, boolean hasFirstFocus) {
+  TypeAhead(Panel column, WaitCursorHelper waitCursorHelper, String title, boolean hasFirstFocus) {
     makeTypeAhead();
+    Widget waitCursor = waitCursorHelper.getWaitCursor();
+    this.waitCursorHelper = waitCursorHelper;
     column.add(title.equals(PagingExerciseList.SEARCH) ? getSearch(waitCursor) : getControlGroup(waitCursor, title));
     checkFocus(hasFirstFocus);
   }
@@ -127,7 +131,7 @@ public class TypeAhead implements ITypeAhead {
   public void gotTypeAheadEntry(String text) {
   }
 
-  private Widget getControlGroup(Image waitCursor, String title) {
+  private Widget getControlGroup(Widget waitCursor, String title) {
     Panel flow = new HorizontalPanel();
     flow.add(getTypeAhead());
     flow.add(waitCursor);
@@ -141,7 +145,7 @@ public class TypeAhead implements ITypeAhead {
    * @param waitCursor
    * @return
    */
-  private Widget getSearch(Image waitCursor) {
+  private Widget getSearch(Widget waitCursor) {
     Panel flow = new HorizontalPanel();
     Icon child = new Icon(IconType.SEARCH);
 
@@ -154,9 +158,9 @@ public class TypeAhead implements ITypeAhead {
     return flow;
   }
 
-  private void configureWaitCursor(Image waitCursor) {
+  private void configureWaitCursor(Widget waitCursor) {
     waitCursor.getElement().getStyle().setMarginTop(-7, Style.Unit.PX);
-    waitCursor.setUrl(white);
+    waitCursorHelper.showFinished();
   }
 
   /**
@@ -181,5 +185,4 @@ public class TypeAhead implements ITypeAhead {
    * @see PagingExerciseList#addTypeAhead(Panel)
    */
   TextBox getTypeAhead() {   return typeAhead;  }
-
 }

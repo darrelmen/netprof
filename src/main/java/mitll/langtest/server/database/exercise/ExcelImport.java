@@ -77,6 +77,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private static final String MEANING = "meaning";
   private static final String ID = "id";
   private static final String WORD = "word";
+  public static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
 
   private final List<String> errors = new ArrayList<String>();
   private final String file;
@@ -349,12 +350,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                 predefinedTypeOrder.add(col);
                 weekName = col;
               } else {
-                if (col.toLowerCase().contains(language.toLowerCase())) {
-                  logger.debug("skipping col " + col);
-                } else {
-                  //  logger.debug("adding col '" + col + "' at  " +i + " vs '" +language+ "'");
-                  colToHeader.put(i, col);
-                }
+                addColToHeaderForProperty(colToHeader, col, i);
               }
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = i;
@@ -369,14 +365,14 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               predefinedTypeOrder.add(col);
               weekName = col;
             } else {
-              colToHeader.put(i, col);
+              addColToHeaderForProperty(colToHeader, col, i);
             }
           }
           if (usePredefinedTypeOrder) {
             getSectionHelper().setPredefinedTypeOrder(predefinedTypeOrder);
           }
 
-          if (DEBUG) logger.debug("readFromSheet columns" +
+          if (DEBUG || true) logger.debug("readFromSheet columns" +
               " word index " + colIndexOffset +
               " altfl " + altIndex +
               " week " + weekIndex +
@@ -502,6 +498,24 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exercises;
   }
 
+  private void addColToHeaderForProperty(Map<Integer, String> colToHeader, String col, int i) {
+    if (col.toLowerCase().contains(language.toLowerCase())) {
+      logger.debug("readFromSheet skipping col " + col);
+    } else {
+      logger.debug("readFromSheet adding col '" + col + "' at  " +i + " vs '" +language+ "'");
+      colToHeader.put(i, col);
+    }
+  }
+
+  /**
+   *
+   * @param colToHeader
+   * @param pairToAttr
+   * @param attrToItself
+   * @param next
+   * @return
+   * @see #readFromSheet
+   */
   @NotNull
   private List<ExerciseAttribute> getExerciseAttributes(Map<Integer, String> colToHeader,
                                                         Map<String, ExerciseAttribute> pairToAttr,
@@ -509,26 +523,28 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                                                         Row next) {
     List<ExerciseAttribute> toAdd = new ArrayList<>();
     for (Map.Entry<Integer, String> pair : colToHeader.entrySet()) {
-      Integer key = pair.getKey();
-      String value = getCell(next, key);
+      String value = getCell(next, pair.getKey());
       if (!value.isEmpty()) {
         String property = pair.getValue();
 
-        String key1 = property + "-" + value;
-        ExerciseAttribute exerciseAttribute1 = pairToAttr.get(key1);
+        String propertyValuePair = property + "-" + value;
+        ExerciseAttribute exerciseAttribute1 = pairToAttr.get(propertyValuePair);
         if (exerciseAttribute1 == null) {
           exerciseAttribute1 = new ExerciseAttribute(property, value);
      //     logger.info("Remember attr " + exerciseAttribute1);
-          pairToAttr.put(key1, exerciseAttribute1);
+          pairToAttr.put(propertyValuePair, exerciseAttribute1);
+          if (pairToAttr.size() > REASONABLE_PROPERTY_SPACE_LIMIT) {
+            logger.warn("getExerciseAttributes more than " +pairToAttr.size() + " distinct values for property " + property);
+          }
         }
         toAdd.add(exerciseAttribute1);
       }
     }
 
-    String key = toAdd.toString();
-    List<ExerciseAttribute> exerciseAttributes = attrToItself.get(key);
+    String attributeSet = toAdd.toString();
+    List<ExerciseAttribute> exerciseAttributes = attrToItself.get(attributeSet);
     if (exerciseAttributes == null) {
-      attrToItself.put(key, exerciseAttributes = toAdd);
+      attrToItself.put(attributeSet, exerciseAttributes = toAdd);
      // logger.info("Remember attr list " + exerciseAttributes);
     }
     return exerciseAttributes;

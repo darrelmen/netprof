@@ -97,7 +97,7 @@ public class ClickableWords<T extends CommonExercise> {
         if (isMatch(next,toFind)) {
           index = i;
           realHighlight.add(toFind);
-          logger.info("- found '" + toFind + "' = '" +next+ "' at " + index);
+          //logger.info("- found '" + toFind + "' = '" +next+ "' at " + index);
 
           break;
         }
@@ -194,12 +194,12 @@ public class ClickableWords<T extends CommonExercise> {
             public void execute() {
               String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
 
-              logger.info("from " + html);
-              logger.info("to   " + s1);
+          //    logger.info("from " + html);
+          //    logger.info("to   " + s1);
 
               String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
 
-              logger.info("finally   " + s2);
+            //  logger.info("finally   " + s2);
 
               listContainer.searchBoxEntry(s2);
             }

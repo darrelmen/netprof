@@ -149,7 +149,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & Audio
 
     /**
      * @param optionalToTheRight
-     * @see PlayAudioPanel#PlayAudioPanel(SoundManagerAPI, String, Widget)
+     * @see PlayAudioPanel#PlayAudioPanel(SoundManagerAPI, String, Widget, boolean)
      */
     @Override
     protected void addButtons(Widget optionalToTheRight) {

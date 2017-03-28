@@ -1733,5 +1733,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .searchmatch {
     font-weight: bold;
+    /*
     color: #697487;
+    */
+    background-color: rgba(56, 216, 120, 0.35);
+}
+
+.leftMarginForFields {
+    margin-left: 86px;
 }

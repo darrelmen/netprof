@@ -345,7 +345,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     logger.info("addPlayAndVoiceChoices choosing to play " + toUse);
     logger.info("addPlayAndVoiceChoices path             " + path);
     if (path != null) {
-      contextPlay = new PlayAudioPanel(controller, path)
+      contextPlay = new PlayAudioPanel(controller, path, false)
           .setPlayLabel("")
           .setPauseLabel("")
           .setMinWidth(12);

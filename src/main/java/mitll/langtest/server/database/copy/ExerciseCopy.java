@@ -142,7 +142,7 @@ class ExerciseCopy {
       List<ExerciseAttribute> attributes = ex.getAttributes();
 
       List<Integer> joins = null;
-      if (!attributes.isEmpty()) {
+      if (attributes != null && !attributes.isEmpty()) {
         exToJoins.put(ex.getOldID(), joins = new ArrayList<Integer>());
         for (ExerciseAttribute attribute : attributes) {
           boolean contains = known.contains(attribute);
@@ -151,7 +151,7 @@ class ExerciseCopy {
             known.add(attribute);
             id = slickUEDAO.addAttribute(projectid, now, importUser, attribute);
             attrToID.put(attribute, id);
-            logger.info("addPredef " + attribute + " = " + id);
+          //  logger.info("addPredef " + attribute + " = " + id);
           } else {
             id = attrToID.get(attribute);
           }

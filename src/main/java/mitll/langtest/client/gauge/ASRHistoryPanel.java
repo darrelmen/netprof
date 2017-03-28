@@ -126,17 +126,13 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    * @see MiniScoreListener#gotScore(PretestScore, String)
    */
   public void showChart() {
-    //logger.info("show chart ");
     clear();
-    //Panel vp = new HorizontalPanel();
-   /* List<CorrectAndScore> scoreAndPaths =*/ addHistory(this);
-    //add(vp);
+    addHistory(this);
   }
 
   //call this after adding the widget to the page
   @Override
   public void onLoad() {
-    // System.out.println("looking for dom element id " + id + " width " + canvas.getOffsetWidth() );
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         addPlayer();
@@ -293,9 +289,8 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     row.getElement().setInnerHTML(new WordTable().toHTML2(scoreAndPath.getScores()));
 
     int iScore = scoreAndPath.getPercentScore();
-    row.setWidth(Math.max(3, iScore) + "px");
+   // row.setWidth(Math.max(3, iScore) + "px");
     tooltipHelper.createAddTooltip(row, "Score" + (" " + iScore + "%"), Placement.BOTTOM);
-
 
     return row;
   }

@@ -60,7 +60,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
   public static final int MIN_DURATION = 150;
-  private static final int BUTTON_WIDTH = 93; // was 68
+  //private static final int BUTTON_WIDTH = 93; // was 68
 
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
@@ -111,6 +111,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     if (buttonWidth > 0) {
       setWidth(buttonWidth + "px");
     }
+//    else {
+//      setWidth(32 + "px");
+//
+//    }
   }
 
   public void setExercise(int exercise) {
@@ -122,7 +126,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   /**
-   * @see RecordButton#stop(long)
+   * @see RecordButton#stop
    * @param duration
    */
   public void stopRecording(long duration) {
@@ -146,7 +150,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @see RecordingListener#stopRecording
    * @param base64EncodedWavFile
    */
-  private void postAudioFile(String base64EncodedWavFile) {
+  protected void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
 

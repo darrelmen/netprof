@@ -69,8 +69,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected long userID;
   private final FacetContainer sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
-  private static final boolean DEBUG = true;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
+  private static final boolean DEBUG = false;
 
   /**
    * @param currentExerciseVPanel
@@ -526,7 +526,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                               String prefix,
                               int exerciseID,
                               ExerciseListRequest request) {
-    scheduleWaitTimer();
+    waitCursorHelper.scheduleWaitTimer();
     logger.info("getExerciseIDs for '" + prefix + "'");
     service.getExerciseIds(
         request,

@@ -68,6 +68,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   static final String SEARCH = "Search";
   private static final int TEN_SECONDS = 10 * 60 * 1000;
+  protected final WaitCursorHelper waitCursorHelper;
 
   protected ClickablePagingContainer<T> pagingContainer;
 
@@ -76,10 +77,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private int unaccountedForVertical = 160;
   private boolean onlyExamples;
 
-  private Timer waitTimer = null;
-  private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
-  private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
-  private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
+//  private Timer waitTimer = null;
+//  private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
+//  private final SafeUri white    = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
+
+  /**
+   * @see #addTypeAhead(Panel)
+   * @see #scheduleWaitTimer
+   * @see #showFinishedGettingExercises
+   */
+ // private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
 
   /**
    * @param currentExerciseVPanel
@@ -95,6 +102,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     super(currentExerciseVPanel, factory, controller, listOptions);
     addComponents();
     getElement().setId("PagingExerciseList_" + getInstance());
+    this.waitCursorHelper = new WaitCursorHelper();
   }
 
   void sortBy(Comparator<T> comp) {
@@ -141,7 +149,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
                      boolean onlyUnrecorded,
                      boolean onlyDefaultUser,
                      boolean onlyUninspected) {
-    scheduleWaitTimer();
+    waitCursorHelper.scheduleWaitTimer();
     logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
 
@@ -267,7 +275,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void addTypeAhead(Panel column) {
     if (listOptions.isShowTypeAhead()) {
-      typeAhead = new TypeAhead(column, waitCursor, SEARCH, true) {
+      typeAhead = new TypeAhead(column, waitCursorHelper, SEARCH, true) {
         @Override
         public void gotTypeAheadEntry(String text) {
           gotTypeAheadEvent(text, false);
@@ -343,25 +351,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  protected void showFinishedGettingExercises() {
-    if (waitTimer != null) {
-      waitTimer.cancel();
-    }
-    waitCursor.setUrl(white);
-  }
-
-  void scheduleWaitTimer() {
-    if (waitTimer != null) {
-      waitTimer.cancel();
-    }
-    waitTimer = new Timer() {
-      @Override
-      public void run() {
-        waitCursor.setUrl(animated);
-      }
-    };
-    waitTimer.schedule(700);
-  }
+  protected void showFinishedGettingExercises() { waitCursorHelper.showFinished(); }
 
   /**
    * @see SimpleSelectExerciseList#gotEmptyExerciseList

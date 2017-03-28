@@ -32,8 +32,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 import java.util.Arrays;
 
 /**
@@ -48,21 +46,21 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseAttribute extends Pair {
-//  private String property;
-//  private String value;
+/*
   private int id;
+*/
 
   public ExerciseAttribute() {
   }
 
-  private ExerciseAttribute(int id, String status, String value) {
-    super(status,value);
-    this.id = id;
+  public ExerciseAttribute(String status, String value) {
+    super(status, value);
   }
 
-  public ExerciseAttribute(String status, String value) {
-    this(-1, status, value);
-  }
+/*  private ExerciseAttribute(int id, String status, String value) {
+    super(status,value);
+    this.id = id;
+  }*/
 
   public void setValue(String value) {
     this.value = value;
@@ -85,7 +83,9 @@ public class ExerciseAttribute extends Pair {
     }
   }
 
+/*
   public int getId() {
     return id;
   }
+*/
 }

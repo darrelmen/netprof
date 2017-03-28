@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget {
   private final List<CorrectAndScore> correctAndScores;
-  private Logger logger = Logger.getLogger("CommentNPFExercise");
+  private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   public static final String CONTEXT = "Context";
 
@@ -115,17 +115,17 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (meaningValid) numRows++;
     if (isAltValid) numRows++;
     if (isTranslitValid) numRows++;
-  //  Grid grid = new Grid(numRows, 3);
+    //  Grid grid = new Grid(numRows, 3);
 
-   // DivWidget grid = new DivWidget();
-  //  grid.setWidth("100%");
+    // DivWidget grid = new DivWidget();
+    //  grid.setWidth("100%");
     //grid.getColumnFormatter().setWidth(0, "50%");
     //grid.getColumnFormatter().setWidth(1, "50%");
 
     //for (int i = 0; i < numRows; i++) {
     //  grid.getRowFormatter().setStyleName(i, "bottomFiveMargin");
-   // }
-   // card.add(grid);
+    // }
+    // card.add(grid);
     Panel grid = card;
 
     //DivWidget row = new DivWidget();
@@ -141,13 +141,22 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     AudioAttribute audioAttribute = e.getAudioAttributePrefGender(controller.getUserManager().isMale(), true);
 
     if (audioAttribute != null) {
-      PlayAudioPanel w = new PlayAudioPanel(controller, audioAttribute.getAudioRef());
+      PlayAudioPanel w = new PlayAudioPanel(controller, audioAttribute.getAudioRef(), false);
       DivWidget pap = new DivWidget();
       pap.addStyleName("floatLeft");
+      pap.addStyleName("inlineFlex");
       pap.add(w);
+
+      AudioAttribute slow = e.getAudioAttributePrefGender(controller.getUserManager().isMale(), false);
+
+      if (slow != null) {
+        PlayAudioPanel w1 = new PlayAudioPanel(controller, slow.getAudioRef(), true);
+        w1.addStyleName("floatLeft");
+        pap.add(w1);
+      }
       flContainer.add(pap);
-      flEntry.addStyleName("floatLeft");
     }
+    flEntry.addStyleName("floatLeft");
 
     flContainer.add(flEntry);
     //grid.setWidget(row, 0, flContainer);
@@ -173,15 +182,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       Widget itemHeader = new UnitChapterItemHelper<>(Collections.emptyList()).getSmall(e);
       itemHeader.addStyleName("floatRight");
-      DivWidget itemContainer= new DivWidget();
+      DivWidget itemContainer = new DivWidget();
       itemContainer.add(itemHeader);
-    itemContainer.addStyleName("floatRight");
+      itemContainer.addStyleName("floatRight");
 
 //      DivWidget itemDiv = new DivWidget();
 //      itemDiv.addStyleName("floatRight");
 //      itemDiv.add(itemHeader);
 //      lr.add(itemDiv);
-     // grid.setWidget(row, 1, lr);
+      // grid.setWidget(row, 1, lr);
       lr.setWidth("50%");
       rowWidget.add(lr);
 //      grid.setWidget(row++, 2, itemHeader);
@@ -199,7 +208,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //grid.setWidget(row++, 0, widget);
       rowWidget = getRowWidget();
       rowWidget.getElement().setId("altflrow");
-
+      rowWidget.addStyleName("leftMarginForFields");
       rowWidget.add(widget);
 
       grid.add(rowWidget);
@@ -207,11 +216,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     Widget widget1 = addTransliteration(e);
     if (widget1 != null) {
-     // grid.setWidget(row++, 0, widget1);
+      // grid.setWidget(row++, 0, widget1);
 
       rowWidget = getRowWidget();
       rowWidget.add(widget1);
       rowWidget.getElement().setId("transliterationrow");
+      rowWidget.addStyleName("leftMarginForFields");
 
       grid.add(rowWidget);
     }
@@ -219,11 +229,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (!useMeaningInsteadOfEnglish && meaningValid) {
       Widget meaningWidget = getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially);
       if (meaningWidget != null) {
-    //    grid.setWidget(row++, 0, meaningWidget);
+        //    grid.setWidget(row++, 0, meaningWidget);
 
         rowWidget = getRowWidget();
 
         rowWidget.getElement().setId("meaningRow");
+        rowWidget.addStyleName("leftMarginForFields");
+
         grid.add(rowWidget);
         rowWidget.add(meaningWidget);
       }
@@ -233,7 +245,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String foreignLanguage = e.getForeignLanguage();
     String altFL = e.getAltFL();
 
-    logger.info("for " + e.getID() + " found " + e.getDirectlyRelated().size() + " context sentence ");
+  //  logger.info("for " + e.getID() + " found " + e.getDirectlyRelated().size() + " context sentence ");
 
 //    grid.setWidget(row++, 0, panel);
     rowWidget = getRowWidget();
@@ -251,7 +263,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       Panel context = getContext(contextEx, foreignLanguage, altFL);
       if (context != null) {
         context.getElement().getStyle().setPadding(10, Style.Unit.PX);
-       // grid.setWidget(row, 0, context);
+        // grid.setWidget(row, 0, context);
         rowWidget.add(context);
         context.setWidth("50%");
       }
@@ -266,7 +278,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           contextTransWidget.setWidth("50%");
 
           contextTransWidget.getElement().getStyle().setPadding(10, Style.Unit.PX);
-    //      grid.setWidget(row, 1, contextTransWidget);
+          //      grid.setWidget(row, 1, contextTransWidget);
 
           rowWidget.add(contextTransWidget);
         }
@@ -294,16 +306,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private SimpleRecordAudioPanel getRecordPanel(T e) {
     return new SimpleRecordAudioPanel(new BusyPanel() {
-        @Override
-        public boolean isBusy() {
-          return false;
-        }
+      @Override
+      public boolean isBusy() {
+        return false;
+      }
 
-        @Override
-        public void setBusy(boolean v) {
+      @Override
+      public void setBusy(boolean v) {
 
-        }
-      }, controller, e, "learn", correctAndScores);
+      }
+    }, controller, e, "learn", correctAndScores);
   }
 
   @NotNull
@@ -364,7 +376,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       AudioAttribute audioAttrPrefGender = exercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
 
       if (audioAttrPrefGender != null) {
-        PlayAudioPanel w = new PlayAudioPanel(controller, audioAttrPrefGender.getAudioRef());
+        PlayAudioPanel w = new PlayAudioPanel(controller, audioAttrPrefGender.getAudioRef(), false);
         hp.add(w);
       }
 

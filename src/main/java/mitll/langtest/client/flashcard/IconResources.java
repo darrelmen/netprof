@@ -87,4 +87,7 @@ public interface IconResources extends ClientBundle {
 
   @Source( "resources/gray_48x48.png")
   com.google.gwt.resources.client.ImageResource gray();
+
+  @Source( "resources/turtle_16_selected.png")
+  com.google.gwt.resources.client.ImageResource turtle();
 }

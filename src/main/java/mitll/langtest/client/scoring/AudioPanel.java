@@ -451,7 +451,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
   protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String buttonTitle,
                                               String recordButtonTitle) {
-    return new PlayAudioPanel(soundManager, buttonTitle, toTheRightWidget);
+    return new PlayAudioPanel(soundManager, buttonTitle, toTheRightWidget, false);
   }
 
   /**

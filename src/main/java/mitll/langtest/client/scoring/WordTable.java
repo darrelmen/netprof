@@ -126,15 +126,17 @@ public class WordTable {
   public String toHTML2(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
+
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
-      TranscriptSegment word = pair.getKey();
-      float score = word.getScore();
-      String event = word.getEvent();
-      String coloredSpan = getColoredSpan(event, score);
-      builder.append(coloredSpan);
+      builder.append(getColoredSpanForSegment(pair));
     }
 
     return builder.toString();
+  }
+
+  private String getColoredSpanForSegment(Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
+    TranscriptSegment word = pair.getKey();
+    return getColoredSpan(word.getEvent(), word.getScore());
   }
 
   public String getColoredSpan(String event, float score) {
@@ -145,8 +147,6 @@ public class WordTable {
     builder.append("</span>");
     return builder.toString();
   }
-
-
 
   Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, boolean showScore) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);

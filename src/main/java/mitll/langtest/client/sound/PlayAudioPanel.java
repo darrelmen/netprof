@@ -37,12 +37,13 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.MyCustomIconType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,10 +67,12 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel
-   // extends HorizontalPanel
+    // extends HorizontalPanel
     extends DivWidget
     implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
+
+  private static final IconType PLAY = IconType.PLAY;
 
   /**
    * @see #setPlayButtonText
@@ -86,7 +89,10 @@ public class PlayAudioPanel
   private String playLabel;
   private String pauseLabel = PAUSE_LABEL;
   private int minWidth = MIN_WIDTH;
+  //protected Widget playButtonWidget;
   protected Button playButton;
+  // protected Button playSlowButton;
+  boolean isSlow;
 
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
       "Please add this site to its whitelist.</font>");
@@ -101,29 +107,35 @@ public class PlayAudioPanel
    * @param soundManager
    * @param buttonTitle
    * @param optionalToTheRight
+   * @param doSlow
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, String buttonTitle, Widget optionalToTheRight) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, String buttonTitle, Widget optionalToTheRight, boolean doSlow) {
     this.soundManager = soundManager;
-  //  setSpacing(10);
-  //  setVerticalAlignment(ALIGN_MIDDLE);
+    //  setSpacing(10);
+    //  setVerticalAlignment(ALIGN_MIDDLE);
     playLabel = buttonTitle;
     if (buttonTitle.isEmpty()) {
       minWidth = 12;
       pauseLabel = "";
     }
     id = counter++;
-    getElement().setId("PlayAudioPanel_" + id);
+    getElement().setId("PlayAudioPanel_" + (doSlow ? "slow" : "") + id);
+
+    isSlow = doSlow;
+
     addButtons(optionalToTheRight);
+
   }
 
   /**
-   * @see PressAndHoldExercisePanel#getPlayAudioPanel
    * @param controller
    * @param path
+   * @param doSlow
+   * @see PressAndHoldExercisePanel#getPlayAudioPanel
    */
-  public PlayAudioPanel(ExerciseController controller, String path) {
-    this(controller.getSoundManager(), "", null);
+  public PlayAudioPanel(ExerciseController controller, String path, boolean doSlow) {
+    this(controller.getSoundManager(), "", null, doSlow);
     loadAudio(path);
     this.currentPath = path;
   }
@@ -143,7 +155,7 @@ public class PlayAudioPanel
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    */
   public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String buttonTitle, Widget optionalToTheRight) {
-    this(soundManager, buttonTitle, optionalToTheRight);
+    this(soundManager, buttonTitle, optionalToTheRight, false);
     addPlayListener(playListener);
   }
 
@@ -190,20 +202,49 @@ public class PlayAudioPanel
     }
   }
 
+  // private final Image turtle = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32.png"));
+
+  /**
+   * @param doSlow
+   * @return
+   * @see PlayAudioPanel#addButtons
+   */
   protected Button makePlayButton() {
     Button playButton = new Button(playLabel);
+
     playButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         doClick();
       }
     });
-    playButton.setIcon(IconType.PLAY);
+
+    showPlayIcon(playButton);
+
+//    if (isSlow) {
+//      styleSlowIcon(playButton);
+//    }
     playButton.setType(ButtonType.INFO);
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
     playButton.setEnabled(false);
     return playButton;
+  }
+
+  private void styleSlowIcon(Button playButton) {
+    Style style = playButton.getElement().getStyle();
+    style.setPaddingBottom(3, Style.Unit.PX);
+    style.setPaddingLeft(6, Style.Unit.PX);
+    style.setPaddingRight(6, Style.Unit.PX);
+  }
+
+  private void showPlayIcon(Button playButton) {
+    if (isSlow) {
+      playButton.setBaseIcon(MyCustomIconType.turtle);
+      styleSlowIcon(playButton);
+    } else {
+      playButton.setIcon(PLAY);
+    }
   }
 
   /**
@@ -272,7 +313,17 @@ public class PlayAudioPanel
     String html = playing1 ? pauseLabel : playLabel;
     // logger.info("setPlayButtonText now playing = " + isPlaying());
     playButton.setText(html);
-    playButton.setIcon(playing1 ? IconType.PAUSE : IconType.PLAY);
+    if (playing1) {
+      playButton.setIcon( IconType.PAUSE);
+
+      playButton.getElement().getStyle().setPaddingBottom(4, Style.Unit.PX);
+      playButton.getElement().getStyle().setPaddingLeft(12, Style.Unit.PX);
+      playButton.getElement().getStyle().setPaddingRight(12, Style.Unit.PX);
+    }
+    else {
+      showPlayIcon(playButton);
+    }
+  //  playButton.setIcon(playing1 ? IconType.PAUSE : PLAY);
   }
 
   private boolean isPlaying() {
@@ -283,7 +334,8 @@ public class PlayAudioPanel
     playing = false;
     if (DEBUG) logger.info(new Date() + " setPlayLabel playing " + playing);
     playButton.setText(playLabel);
-    playButton.setIcon(IconType.PLAY);
+
+    showPlayIcon(playButton);
 
     for (PlayListener playListener : playListeners) playListener.playStopped();
   }
@@ -312,11 +364,11 @@ public class PlayAudioPanel
     if (currentSound != null & soundManager != null) {
       soundManager.pause(currentSound);
       float start1 = startInSeconds * 1000f;
-      float end1   = endInSeconds   * 1000f;
+      float end1 = endInSeconds * 1000f;
       int s = Math.round(start1);
       int e = Math.round(end1);
 
-    //  logger.info("playing from " + s + " to " + e);
+      //  logger.info("playing from " + s + " to " + e);
       soundManager.playInterval(currentSound, s, e);
     }
   }
@@ -512,8 +564,8 @@ public class PlayAudioPanel
   }
 
   /**
-   * @see
    * @param val
+   * @see
    */
   public void setEnabled(boolean val) {
     playButton.setEnabled(val);

@@ -19,6 +19,7 @@ import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.gauge.SimpleColumnChart;
+import mitll.langtest.client.list.WaitCursorHelper;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -29,7 +30,6 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -42,9 +42,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
-
   private static final String RECORD_YOURSELF = "";//Record";
-  private static final String RELEASE_TO_STOP = "Release";
+//  private static final String RELEASE_TO_STOP = "Release";
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
@@ -68,6 +67,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   private Image recordImage1;
   private Image recordImage2;
+  WaitCursorHelper waitCursorHelper;
+
   protected String audioPath;
 
   ExerciseController controller;
@@ -104,8 +105,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
    */
   protected void addWidgets(String playButtonSuffix, String recordButtonTitle) {
-    DivWidget playAudio = makePlayAudioPanel(null, playButtonSuffix, recordButtonTitle);
-    add(playAudio);
+    add(makePlayAudioPanel());
     add(scoreFeedback = new DivWidget());
   }
 
@@ -118,19 +118,19 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * to the extent that when we're recording, we can't play audio, and when we're playing
    * audio, we can't record. We also mark the widget as busy so we can't move on to a different exercise.
    *
-   * @param toTheRightWidget
-   * @param buttonTitle
-   * @param recordButtonTitle
+   * @paramx toTheRightWidget
+   * @paramx buttonTitle
+   * @paramx recordButtonTitle
    * @return
    * @see AudioPanel#getPlayButtons
    * @see #addWidgets(String, String)
    */
-  //@Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle) {
+  protected PlayAudioPanel makePlayAudioPanel() {
     recordImage1 = new Image(UriUtils.fromSafeConstant(FIRST_RED));
     recordImage1.setVisible(false);
     recordImage2 = new Image(UriUtils.fromSafeConstant(SECOND_RED));
     recordImage2.setVisible(false);
+    waitCursorHelper = new WaitCursorHelper();
 
     postAudioRecordButton = new MyPostAudioRecordButton(controller);
     // postAudioRecordButton.getElement().getStyle().setMargin(8, Style.Unit.PX);
@@ -188,6 +188,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
           postAudioRecordButton1.setEnabled(true);
         }
       }, "", null);
+
       getElement().setId("SimpleRecordAudio_MyPlayAudioPanel");
     }
 
@@ -202,7 +203,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       add(firstRow);
 
       firstRow.add(playButton = makePlayButton());
-      //super.addButtons(optionalToTheRight);
 
       firstRow.add(postAudioRecordButton);
 
@@ -220,10 +220,12 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     private DivWidget getRecordFeedback() {
       recordFeedback = new DivWidget();
+      recordFeedback.addStyleName("inlineFlex");
       recordFeedback.getElement().setId("recordFeedbackImageContainer");
-      recordFeedback.setWidth("32px");
+    //  recordFeedback.setWidth("32px");
       recordFeedback.add(recordImage1);
       recordFeedback.add(recordImage2);
+      recordFeedback.add(waitCursorHelper.getWaitCursor());
       return recordFeedback;
     }
 
@@ -267,7 +269,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
      * @see #useResult
      */
     void showScore(double score) {
-      //   double score = result.getDynamicRange();
       double percent = score / 100d;
       String color = SimpleColumnChart.getColor((float) percent);
 
@@ -280,8 +281,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
           ProgressBarBase.Color.WARNING :
           ProgressBarBase.Color.DANGER);
 
-      //   progressBar.getElement().getStyle().setBackgroundColor(color);
-
       scoreBar.setVisible(true);
       scores.setVisible(true);
     }
@@ -293,7 +292,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     private DivWidget addDownloadAudioWidget() {
       DivWidget downloadContainer = new DivWidget();
-      downloadContainer.setWidth("40px");
+     // downloadContainer.setWidth("40px");
 
       DivWidget north = new DivWidget();
       north.add(download = getDownloadIcon());
@@ -380,12 +379,10 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     @Override
     public void useResult(AudioAnswer result) {
-      //  setResultID(result.getResultID());
-      //   getImagesForPath(result.getPath());
       audioPath = result.getPath();
       setDownloadHref();
-
       scoreAudio(result);
+      waitCursorHelper.showFinished();
     }
 
     @Override
@@ -401,6 +398,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
       recordImage1.setVisible(true);
       downloadContainer.setVisible(false);
+      waitCursorHelper.hide();
     }
 
     @Override
@@ -413,6 +411,13 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
       recordImage1.setVisible(false);
       recordImage2.setVisible(false);
+      waitCursorHelper.show();
+    }
+
+    @Override
+    protected void postAudioFile(String base64EncodedWavFile) {
+      super.postAudioFile(base64EncodedWavFile);
+      waitCursorHelper.scheduleWaitTimer();
     }
 
     @Override
@@ -434,21 +439,23 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     protected void useInvalidResult(AudioAnswer result) {
       super.useInvalidResult(result);
       playAudioPanel.setEnabled(false);
+      waitCursorHelper.showFinished();
+      waitCursorHelper.hide();
     }
   }
 
   int reqid = 0;
 
+  /**
+   * @see #useResult(PretestScore, boolean, String)
+   * @param result
+   */
   private void scoreAudio(AudioAnswer result) {
     logger.info("use " + result);
 
     scoreFeedback.clear();
     scoreFeedback.add(new WordScoresTable().getStyledWordTable(result.getPretestScore()));
     useResult(result.getPretestScore(),false,result.getPath());
-//    controller.getScoringService().getASRScoreForAudio(
-//        reqid, result.getResultID(),
-//        result.getPath(),
-//        erefSentence, transliteration, imageOptions, id, usePhoneToDisplay, async);
   }
 
   /**
@@ -457,16 +464,10 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   private void showRecordingHistory(List<CorrectAndScore> scores) {
     if (scores != null) {
-      addScores(scores);
-    }
-    miniScoreListener.showChart();
-  }
-
-  void addScores(Collection<CorrectAndScore> scores) {
-    if (scores != null) {
       for (CorrectAndScore score : scores) {
         miniScoreListener.addScore(score);
       }
     }
+    miniScoreListener.showChart();
   }
 }
