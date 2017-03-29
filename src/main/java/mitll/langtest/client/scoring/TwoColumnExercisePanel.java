@@ -69,7 +69,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                 List<CorrectAndScore> correctAndScores,
                                 ExerciseOptions options
   ) {
-    //   this.options = options;
     this.exercise = commonExercise;
     this.controller = controller;
 

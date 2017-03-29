@@ -691,6 +691,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     }*/
   }
 
+  public void updatePhones(int id,int count){}
   /**
    * Build the nested hierarchy represented in the section helper.
    * So we can ask for things like all exercises in Chapter 1.

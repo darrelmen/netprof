@@ -97,4 +97,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   Map<Integer,String> getIDToFL(int projid);
 
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe);
+
+  void updatePhones(int id,int count);
 }

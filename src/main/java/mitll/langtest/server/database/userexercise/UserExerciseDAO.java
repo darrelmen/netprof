@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -529,7 +530,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         rs.getBoolean(OVERRIDE),
         unitToValue,
         date.getTime(),
-        -1, false, System.currentTimeMillis());
+        -1, false,
+        System.currentTimeMillis(),-1);
   }
 
   //  private Map<String, List<AudioAttribute>> exToAudio;

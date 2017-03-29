@@ -32,14 +32,12 @@
 
 package mitll.langtest.server.database.userexercise;
 
-import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.server.database.exercise.PronunciationLookup;
 import mitll.npdata.dao.SlickExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -48,6 +46,7 @@ public class ExercisePhoneInfo {
 
   private int numPhones = 0;
   private int numPhones2 = 0;
+
   /**
    * Unique set...?
    */
@@ -66,7 +65,7 @@ public class ExercisePhoneInfo {
   }
 
   /**
-   * @see SlickUserExerciseDAO#fromSlickToExercise
+   * @see SlickUserExerciseDAO#getExercisePhoneInfo(SlickExercise, PronunciationLookup)
    * @param phoneString
    */
   public ExercisePhoneInfo(String phoneString) {
@@ -89,6 +88,10 @@ public class ExercisePhoneInfo {
 
   }
 
+  /**
+   * @deprecated nobody uses this currently...
+   * @return
+   */
   public Collection<String> getPhones() {
     return phones;
   }

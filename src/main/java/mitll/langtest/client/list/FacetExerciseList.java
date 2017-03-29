@@ -163,7 +163,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           protected void gotRangeChanged(Range newRange) {
-           // logger.info("gotRangeChanged for " + newRange);
+            // logger.info("gotRangeChanged for " + newRange);
 
             askServerForExercises(-1, getIdsForRange(newRange));
           }
@@ -752,6 +752,22 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         visibleIDs.add(itemID);
         logger.info("ask for single -- " + itemID);
       }
+
+      long then = System.currentTimeMillis();
+      controller.getAudioService().ensureAudioForIDs(controller.getProjectStartupInfo().getProjectid(), visibleIDs,
+          new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              long now = System.currentTimeMillis();
+              logger.info("OK, ensured audio... in " + (now - then) + " millis");
+            }
+          });
+
       service.getFullExercises(freqid++, visibleIDs, false, new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -768,15 +784,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
             } else {
 
               if (numToShow == 1) {
-                if ( getCurrentExerciseID() == result.getExercises().iterator().next().getID()) {
-                  logger.info("skip current " +getCurrentExerciseID());
+                if (getCurrentExerciseID() == result.getExercises().iterator().next().getID()) {
+                  logger.info("skip current " + getCurrentExerciseID());
+                } else {
+                  showExercises(result.getExercises(), result);
                 }
-                else {
-                  showExercises(result.getExercises(),result);
-                }
-              }
-              else {
-                showExercises(result.getExercises(),result);
+              } else {
+                showExercises(result.getExercises(), result);
               }
             }
           } else {

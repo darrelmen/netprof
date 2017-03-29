@@ -2,6 +2,8 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.exercise.Project;
 
+import java.util.Collection;
+
 /**
  * Created by go22670 on 3/8/17.
  */
@@ -15,6 +17,8 @@ public interface ProjectServices {
   Project getProjectForUser(int userid);
 
   Project getProject(int projectid);
+
+  Collection<Project> getProjects();
 
   void configureProject(Project project);
 

@@ -44,7 +44,6 @@ public class ProjectInfo implements HasID, IsSerializable {
   private ProjectStatus status;
   private int displayOrder;
   private int id;
-  //private List<ProjectInfo> children = new ArrayList<>();
   private long created;
   private int port = -1;
 
@@ -72,7 +71,7 @@ public class ProjectInfo implements HasID, IsSerializable {
     this.displayOrder = displayOrder;
     this.countryCode = countryCode;
     try {
-      this.port = port == null ? -1: Integer.parseInt(port);
+      this.port = port == null ? -1 : Integer.parseInt(port);
     } catch (NumberFormatException e) {
       // bad port
     }
@@ -136,4 +135,6 @@ public class ProjectInfo implements HasID, IsSerializable {
   public int getPort() {
     return port;
   }
+
+  public String toString() { return getName() + " " + getStatus() + " lang " + language; }
 }

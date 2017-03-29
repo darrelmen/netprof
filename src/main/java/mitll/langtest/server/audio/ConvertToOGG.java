@@ -11,8 +11,9 @@ import java.io.IOException;
  */
 class ConvertToOGG extends AudioBase {
   private static final Logger logger = LogManager.getLogger(ConvertToOGG.class);
-  private static final boolean DEBUG = true;
-  private static final boolean SPEW = true;
+
+  private static final boolean DEBUG = false;
+  private static final boolean SPEW = false;
   private static final String OGG = ".ogg";
 
   boolean writeOGG(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {

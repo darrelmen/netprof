@@ -56,7 +56,7 @@ public class AttachAudio {
   private int missingExerciseCount = 0;
   private int c = 0;
   private Map<Integer, List<AudioAttribute>> exToAudio;
-  private String language;
+  private final String language;
   private boolean checkAudioTranscript = true;
   private final AudioCheck audioCheck;
   private Map<String, List<AudioAttribute>> transcriptToAudio;
@@ -64,7 +64,7 @@ public class AttachAudio {
   /**
    * This needs to be consistent with reporting and filtering, let's turn it off for now.
    */
-  private boolean useTranscriptToAudio = false;
+  private final boolean useTranscriptToAudio = false;
 
   /**
    * TODO : is it OK not to do setExToAudio initially???
@@ -135,7 +135,7 @@ public class AttachAudio {
    * @see ExcelImport#attachAudio
    * @see ExcelImport#getRawExercises()
    */
-  public <T extends CommonExercise> int attachAudio(T imported, Collection<Integer> transcriptChanged) {
+  private <T extends CommonExercise> void attachAudio(T imported, Collection<Integer> transcriptChanged) {
     int id = imported.getID();
     int missing = 0;
 //    logger.info("Attach audio to " + imported);
@@ -166,7 +166,6 @@ public class AttachAudio {
         missing = attachAudio(imported, missing, transcriptToAudio.get(transcript), transcriptChanged, new HashSet<>());
       }
     }
-    return missing;
   }
 
   //int spew = 0;
@@ -291,11 +290,11 @@ public class AttachAudio {
 
   /**
    * @see BaseExerciseDAO#attachAudio
-   * @param exercises
-   * @param exToAudio
-   * @param transcriptChanged
+   * @paramx exercises
+   * @paramx exToAudio
+   * @paramx transcriptChanged
    */
-  void attachAllAudio(List<CommonExercise> exercises,
+/*  void attachAllAudio(List<CommonExercise> exercises,
                              Map<Integer, List<AudioAttribute>> exToAudio,
                              Set<Integer> transcriptChanged) {
     int c = 0;
@@ -311,7 +310,7 @@ public class AttachAudio {
         allTranscripts.remove(audioAttribute.getTranscript().toLowerCase());
       }
 
- /*     if (i < 25) {
+ *//*     if (i < 25) {
         if (c++ < 25) {
           logger.warn(language + " (" + exercises.size() +
               ") -----------> adding old school audio for " + ex.getID() + " : " + serverProps.getLessonPlan());
@@ -320,12 +319,12 @@ public class AttachAudio {
         if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
           attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
         }
-      }*/
+      }*//*
     }
     logger.info("attachAudio found " + allTranscripts.size() + " orphan audio cuts - ");// + allTranscripts);
-  }
+  }*/
 
-  @NotNull
+/*  @NotNull
   private Set<String> getAllTranscripts(Map<Integer, List<AudioAttribute>> exToAudio) {
     Set<String> allTranscripts = new HashSet<>();
     for (List<AudioAttribute> audioAttributes : exToAudio.values()) {
@@ -334,7 +333,7 @@ public class AttachAudio {
       }
     }
     return allTranscripts;
-  }
+  }*/
 
   /**
    * Remember a map of transcript to audio - so we can possibly use it later...?
@@ -342,7 +341,7 @@ public class AttachAudio {
    * @param exToAudio
    * @param multiPron
    */
-  public void setExToAudio(Map<Integer, List<AudioAttribute>> exToAudio, Set<String> multiPron) {
+/*  private void setExToAudio(Map<Integer, List<AudioAttribute>> exToAudio, Set<String> multiPron) {
     this.exToAudio = exToAudio;
 
 
@@ -367,7 +366,7 @@ public class AttachAudio {
         }
       }
     }
-  }
+  }*/
 
   /**
    * Get set of fl words have multiple english equivalents.
@@ -380,7 +379,7 @@ public class AttachAudio {
    * @param all
    * @return
    */
-  public Set<String> getMultiPronWords(Collection<CommonExercise> all) {
+/*  private Set<String> getMultiPronWords(Collection<CommonExercise> all) {
     Map<String, String> seen = new HashMap<>();
     Set<String> multiPron = new HashSet<>();
 
@@ -402,5 +401,5 @@ public class AttachAudio {
         "  multi def words ");
 
     return multiPron;
-  }
+  }*/
 }

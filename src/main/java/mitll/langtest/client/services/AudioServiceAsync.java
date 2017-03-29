@@ -39,6 +39,8 @@ import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
 
+import java.util.Collection;
+
 public interface AudioServiceAsync {
   void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,
@@ -61,4 +63,8 @@ public interface AudioServiceAsync {
   void checkAudio(int projectid, AsyncCallback<Void> async);
 
   void recalcRefAudio(int id, AsyncCallback<Void> asyncCallback);
+
+  void ensureAllAudio(AsyncCallback<Void> async);
+
+  void ensureAudioForIDs(int projid, Collection<Integer> ids, AsyncCallback<Void> async);
 }

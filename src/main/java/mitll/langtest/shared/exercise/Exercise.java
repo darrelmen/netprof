@@ -210,12 +210,16 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   boolean isOverride,
                   Map<String, String> unitToValue,
                   long modifiedTimestamp,
-                  int projectid, boolean candecode, long lastChecked) {
+                  int projectid,
+                  boolean candecode,
+                  long lastChecked,
+                  int numPhones) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, altFL, "", transliteration, projectid, candecode, lastChecked);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
     this.safeToDecode = candecode;
+    this.numPhones = numPhones;
   }
 
   /**

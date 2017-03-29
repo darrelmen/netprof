@@ -52,6 +52,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * does image generation here too - since it's done from a file.
@@ -66,7 +69,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private static final int MP3_LENGTH = MP3.length();
 
   private static final boolean DEBUG = false;
-  private static final boolean WARN_MISSING_FILE = true;
+  private static final boolean WARN_MISSING_FILE = false;
 
   private AudioConversion audioConversion;
   private PathWriter pathWriter;
@@ -194,34 +197,121 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         logger.info("wrote compressed...");
       }
     } catch (Exception e) {
-      logger.error("Got " +e, e);
+      logger.error("Got " + e, e);
     }
 
     return audioAnswer;
   }
 
-  private void ensureCompressedAudio(int user,
-                                     CommonExercise commonShell,
-                                     String path,
-                                     AudioType audioType,
-                                     String language) {
+  /**
+   * Kick off a thread to do this... so we can return.
+   */
+  public void ensureAllAudio() {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        db.getProjects().forEach(project -> ensureAudio(project.getID()));
+      }
+    }).start();
+  }
+
+  @Override
+  public void checkAudio(int projectid) {
+    Project project = db.getProject(projectid);
+    logger.info("0 checkAudio - for project " + projectid + " " + project);
+    long then = System.currentTimeMillis();
+    db.getAudioDAO().makeSureAudioIsThere(projectid, project.getLanguage(), true);
+    long now = System.currentTimeMillis();
+    if (now - then > 100) logger.info("1 checkAudio - took " + (now - then) + " millis to check audio");
+
+    ensureAudio(projectid);
+  }
+
+  /**
+   * This could take a long time - lots of files, shell out for each one...
+   * @param projectid
+   */
+  private void ensureAudio(int projectid) {
+    long now = System.currentTimeMillis();
+    long then;
+    then = now;
+    List<CommonExercise> exercises = db.getExercises(projectid);
+    now = System.currentTimeMillis();
+    if (now - then > 100) logger.info("2 checkAudio - took " + (now - then) + " millis to get exercises");
+
+    ensureAudioForExercises( exercises);
+  }
+
+  public void ensureAudioForIDs(int projid, Collection<Integer> ids) {
+    ensureAudioForExercises(ids.stream().map(id -> db.getCustomOrPredefExercise(projid,id)).collect(Collectors.toList()));
+  }
+
+  private void ensureAudioForExercises(  List<CommonExercise> exercises) {
+    long now = System.currentTimeMillis();
+    long then;
+    String language = getLanguage();
+    then = now;
+    db.getAudioDAO().attachAudioToExercises(exercises, language);
+    now = System.currentTimeMillis();
+    if (now - then > 100) logger.info("3  checkAudio - took " + (now - then) + " millis to attach audio");
+
+    then = now;
+    int c = 0;
+    int success = 0;
+    for (CommonExercise e : exercises) {
+      if (e != null) {
+        for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
+          c++;
+          if (c < 10) {
+//            logger.info("checkAudio e.g. ensure audio for " + audioAttribute + " on " + e);
+          }
+          try {
+            boolean didit = ensureCompressedAudio(audioAttribute.getUserid(), e, audioAttribute.getAudioRef(), audioAttribute.getAudioType(), language);
+            if (didit) success++;
+            if (c % 1000 == 0) logger.debug("checkAudio checked " + c + ", success = " + success);
+          } catch (Exception e1) {
+            logger.warn("Got " +e1 + " for exercise " +e.getID() + " : " + audioAttribute.getAudioRef());
+          }
+        }
+      }
+    }
+    now = System.currentTimeMillis();
+    if (now - then > 100) {
+      logger.info("4 checkAudio - took " + (now - then) + " millis to ensure ogg and mp3 for " + c + " attributes, " + success + " files successful");
+    }
+  }
+
+
+  /**
+   * @param user
+   * @param commonShell
+   * @param path
+   * @param audioType
+   * @param language
+   * @see #writeAudioFile
+   */
+  private boolean ensureCompressedAudio(int user,
+                                        CommonExercise commonShell,
+                                        String path,
+                                        AudioType audioType,
+                                        String language) {
     String userID = getUserID(user);
     if (userID == null) {
       logger.warn("ensureCompressedEquivalent huh? no user for " + user);
     }
 
     boolean noExerciseYet = commonShell == null;
-    String title   = noExerciseYet ? "unknown" : commonShell.getForeignLanguage();
+    String title = noExerciseYet ? "unknown" : commonShell.getForeignLanguage();
     String comment = noExerciseYet ? "unknown" : commonShell.getEnglish();
     if (audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) && !noExerciseYet) {
       if (commonShell.hasContext()) {
         CommonExercise contextSentence = commonShell.getDirectlyRelated().iterator().next();
-        title   = contextSentence.getForeignLanguage();
+        title = contextSentence.getForeignLanguage();
         comment = contextSentence.getEnglish();
       }
     }
 
-    ensureMP3(path, new TrackInfo(title, userID, comment, language));
+    return ensureMP3(path, new TrackInfo(title, userID, comment, language));
   }
 
   /**
@@ -237,7 +327,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     // if (!wavFile.startsWith(serverProps.getAudioBaseDir()))
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
-      logger.debug("ensureMP3 : trying " + wavFile);
+      if (DEBUG) logger.debug("ensureMP3 : trying " + wavFile);
       // File test = new File(parent + File.separator + language, wavFile);
       File test = new File(wavFile);
       if (!test.exists()) {
@@ -245,7 +335,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           logger.warn("ensureMP3 : can't find " + test.getAbsolutePath());// + " under " + parent + " trying config... ");
         }
         parent = serverProps.getAudioBaseDir();// + File.separator + language;
-        logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
+        if (DEBUG)
+          logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
       }
 
 /*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
@@ -257,12 +348,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       String s = audioConversion.ensureWriteMP3(parent, wavFile, false, trackInfo);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
       if (isMissing) {
-        logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + trackInfo);
+        if (spew++ < 10 || spew % 1000 == 0) {
+          logger.error("ensureMP3 : (count = " + spew + ")" +
+              " can't find " + wavFile + " under " + parent + " for " + trackInfo);
+        }
       }
       return !isMissing;
     }
     return false;
   }
+
+  private int spew = 0;
 
   private String getUserID(int user) {
     User userBy = getUserBy(user);
@@ -342,7 +438,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       // what state should we mark recorded audio?
       setExerciseState(idToUse, user, exercise1);
     } catch (Exception e) {
-      logger.error("got "+e,e);
+      logger.error("got " + e, e);
     }
     return audioAttribute;
   }
@@ -530,14 +626,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
 
-  @Override
-  public void checkAudio(int projectid) {
-    db.getAudioDAO().makeSureAudioIsThere(projectid, db.getProject(projectid).getLanguage(), true);
-  }
-
   public void recalcRefAudio(int projid) {
     Project project = db.getProject(projid);
-    logger.info("recalc ref audio on " +project);
+    logger.info("recalc ref audio on " + project);
     project.recalcRefAudio();
   }
 }

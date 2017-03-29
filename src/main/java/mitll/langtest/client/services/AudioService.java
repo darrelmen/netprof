@@ -42,8 +42,11 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
+
+import java.util.Collection;
 
 @RemoteServiceRelativePath("audio-manager")
 public interface AudioService extends RemoteService {
@@ -69,8 +72,7 @@ public interface AudioService extends RemoteService {
                              boolean doFlashcard,
                              boolean recordInResults,
                              boolean addToAudioTable,
-                             boolean allowAlternates)/* throws DominoSessionException*/;
-
+                             boolean allowAlternates);
 
   /**
    * TODO : why exerciseID a String
@@ -85,7 +87,13 @@ public interface AudioService extends RemoteService {
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
                                      String exerciseID);
 
+  /**
+   * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio(ProjectInfo)
+   * @param projectid
+   */
   void checkAudio(int projectid);
+  void ensureAllAudio();
+  void ensureAudioForIDs(int projid, Collection<Integer> ids);
 
   void recalcRefAudio(int projectid);
 }

@@ -65,7 +65,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   //  private static final String SOUND = "Sound";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
-  boolean DEBUG = false;
+  private boolean DEBUG = false;
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
 /*  private final Map<String,
@@ -125,7 +125,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       // put sound at end...
       putSoundAtEnd(types);
       // }
-      if (DEBUG)  logger.info("getTypeOrder types " + types);
+      if (DEBUG) logger.info("getTypeOrder types " + types);
 
       return types;
     } else {
@@ -430,7 +430,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     Map<String, Map<String, MatchInfo>> typeToMatch = new HashMap<>();
 
     if (pairs.isEmpty()) {
-      logger.warn("getTypeToMatchPairs no pairs for " +node);
+      logger.warn("getTypeToMatchPairs no pairs for " + node);
       return typeToMatch;
     }
 
@@ -961,10 +961,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     if (seen.isEmpty()) logger.error("huh? no types to remember?");
 
-    logger.info("rememberTypesInOrder type order " + predefinedTypeOrder +
+    if (DEBUG) logger.info("rememberTypesInOrder type order " + predefinedTypeOrder +
         " root " + root.getName() +
         " children  " + root.getChildren().size() +
         " num seen " + seen.size());
+
     for (List<Pair> pairs : seen) {
       child = rememberOne(predefinedTypeOrder, child, pairs);
     }

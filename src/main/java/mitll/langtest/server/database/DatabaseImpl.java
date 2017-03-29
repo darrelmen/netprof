@@ -740,6 +740,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return projectManagement.getProject(projectid);
   }
 
+  public Collection<Project> getProjects()  { return projectManagement.getProjects(); }
+
   /**
    * A little dusty...
    *

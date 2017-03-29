@@ -45,9 +45,11 @@
         <!--
             The SMTP mailer appears to only work when smtp debug is true.
           -->
+ <!--
         <SMTP name="Mail" subject="Web App netprof error on host ${hostName}" to="${sys:log.mailto}"
               from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
               bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
+              -->
 
         <RollingFile name="LogFile"
                      fileName="/opt/netprof/logs/netprof-app.log"

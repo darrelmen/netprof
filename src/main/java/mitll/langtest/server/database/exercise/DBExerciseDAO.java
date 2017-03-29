@@ -273,8 +273,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
     sectionHelper.setParentToChildTypes(parentToChild);
 
-    logger.info("roots " + rootTypes);
-    logger.info("parentToChild " + parentToChild);
+//    logger.info("roots " + rootTypes);
+ //   logger.info("parentToChild " + parentToChild);
   }
 
   private Collection<String> getAttributeTypes() {   return userExerciseDAO.getAttributeTypes(project.id()); }
@@ -287,10 +287,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     return idToEx;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @param safe
+   * @param unsafe
+   */
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
     userExerciseDAO.getDao().updateCheckedBulk(safe, true);
     userExerciseDAO.getDao().updateCheckedBulk(unsafe, false);
   }
+
+  public void updatePhones(int id, int count) { userExerciseDAO.getDao().updatePhones(id,count);  }
 
   public String toString() {
     return "DBExerciseDAO for " + project;

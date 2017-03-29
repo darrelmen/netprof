@@ -455,8 +455,20 @@ public class UserSecurityManager implements IUserSecurityManager {
     }
   }
 
+  /**
+   * Not sure when the attribute would be missing...
+   * @param session
+   * @return
+   */
   private Integer getUserIDFromSession(HttpSession session) {
-    return (Integer) session.getAttribute(USER_SESSION_ATT);
+    Object attribute = session.getAttribute(USER_SESSION_ATT);
+    if (attribute == null) {
+      log.warn("huh? no attribute " + USER_SESSION_ATT +  " on session?");
+      return -1;
+    }
+    else {
+      return (Integer) attribute;
+    }
   }
 
   /**

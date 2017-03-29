@@ -395,7 +395,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
       }
     }
     long now = System.currentTimeMillis();
-    logger.info("setScores took " + (now - then) + " to get " + c + " scores");
+    if (now-then >100) {
+      logger.info("setScores took " + (now - then) + " to get " + c + " scores");
+    }
   }
 
   Map<Integer, SlickExerciseScore> getCorrectAndScoresForReal(int userid, Collection<Integer> exids) {

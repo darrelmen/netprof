@@ -59,7 +59,7 @@ public class AudioConversion extends AudioBase {
   private static final boolean SPEW = true;
   private static final String MP3 = ".mp3";
   public static final String WAV = ".wav";
-  private static final String OGG = ".ogg";
+  //private static final String OGG = ".ogg";
   private final AudioCheck audioCheck;
   private static final int MIN_WARN_DUR = 30;
 
@@ -68,7 +68,7 @@ public class AudioConversion extends AudioBase {
   private final long trimMillisAfter;
   private ServerProperties props;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param props
@@ -359,7 +359,7 @@ public class AudioConversion extends AudioBase {
    * @param overwrite
    * @param trackInfo
    * @return
-   * @see mitll.langtest.server.DatabaseServlet#ensureMP3
+   * @see mitll.langtest.server.services.AudioServiceImpl#ensureMP3
    */
   public String ensureWriteMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo) {
     if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
@@ -385,8 +385,9 @@ public class AudioConversion extends AudioBase {
   private String writeMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo) {
     File absolutePathToWav = new File(pathToWav); // LAZY - what should it be?
     if (!absolutePathToWav.exists()) {
-      if (spew3++ < 100) {
-        logger.info("writeMP3 can't find " + absolutePathToWav.getAbsolutePath() + " trying under " + realContextPath);
+      if (spew3++ < 100 && spew3 % 100 == 0) {
+        logger.info("writeMP3 can't find " + pathToWav +
+            " trying under " + realContextPath);
       }
       absolutePathToWav = getAbsoluteFile(realContextPath, pathToWav);
     }
@@ -425,7 +426,7 @@ public class AudioConversion extends AudioBase {
           logger.error("writeMP3 File missing for " + absolutePathToWav + " for " + trackInfo.getArtist());
         return false;
       }
-      logger.info("writeMP3 path is " + mp3.getAbsolutePath() + " : exists = " + mp3.exists());
+      if (DEBUG) logger.info("writeMP3 path is " + mp3.getAbsolutePath() + " : exists = " + mp3.exists());
     }
     return true;
   }

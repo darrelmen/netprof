@@ -19,10 +19,14 @@ import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.logging.Logger;
+
 /**
  * Created by go22670 on 1/17/17.
  */
 class ProjectEditForm extends UserDialog {
+  private final Logger logger = Logger.getLogger("ProjectEditForm");
+
   private final EventRegistration eventRegistration;
   private final ProjectOps projectOps;
   private ListBox statusBox;
@@ -158,26 +162,48 @@ class ProjectEditForm extends UserDialog {
 
   private Button getCheckAudio(final ProjectInfo info) {
     Button w = new Button("Check Audio", IconType.STETHOSCOPE);
-    w.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        w.setEnabled(false);
-        feedback.setText("Please wait...");
+    w.addClickHandler(event -> {
+      w.setEnabled(false);
+      feedback.setText("Please wait...");
 
-        audioServiceAsync.checkAudio(info.getID(), new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            w.setEnabled(true);
+      logger.info("check audio for " + info);
 
-          }
+      audioServiceAsync.checkAudio(info.getID(), new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          w.setEnabled(true);
 
-          @Override
-          public void onSuccess(Void result) {
-            w.setEnabled(true);
-            feedback.setText("Audio check complete.");
-          }
-        });
-      }
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          w.setEnabled(true);
+          feedback.setText("Audio check complete.");
+        }
+      });
+    });
+    return w;
+  }
+
+  private Button getEnsureAudio() {
+    Button w = new Button("Ensure ALL Audio", IconType.STETHOSCOPE);
+    w.addClickHandler(event -> {
+      w.setEnabled(false);
+      feedback.setText("Please wait... for a long time.");
+
+      audioServiceAsync.ensureAllAudio( new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          w.setEnabled(true);
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          w.setEnabled(true);
+          feedback.setText("All Audio check is ongoing.");
+        }
+      });
     });
     return w;
   }
