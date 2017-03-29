@@ -208,13 +208,13 @@ public class AudioFileHelper implements AlignDecode {
         }
 
         if (!safe.isEmpty() || !unsafe.isEmpty()) {
-          logger.info("marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
+          logger.info("checkLTSAndCountPhones marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
         }
 
         project.getExerciseDAO().markSafeUnsafe(safe, unsafe);
 
         if (count > 0) {
-          logger.warn("huh? out of " + exercises.size() + " LTS fails on " + count);
+          logger.warn("checkLTSAndCountPhones huh? out of " + exercises.size() + " LTS fails on " + count);
         }
       }
     }

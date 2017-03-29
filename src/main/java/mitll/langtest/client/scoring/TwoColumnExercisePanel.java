@@ -1,9 +1,14 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.custom.exercise.ContextSupport;
@@ -12,9 +17,11 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -48,6 +55,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final AnnotationHelper annotationHelper;
   private final ClickableWords<T> clickableWords;
   private final boolean showInitially = false;
+  UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -83,6 +91,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
 
     this.correctAndScores = correctAndScores;
+    commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
   }
 
@@ -141,14 +150,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     UserManager userManager = controller.getUserManager();
     boolean male = userManager.isMale();
 
-    //  male = false;
-
-    logger.info("current user " + userManager.getUserID() + " male = " + male);
-
+  //  logger.info("current user " + userManager.getUserID() + " male = " + male);
     AudioAttribute audioAttribute = e.getAudioAttributePrefGender(male, true);
 
     if (audioAttribute != null) {
-      logger.info("found audio for gender male = " + male + "  audio is male " + audioAttribute.isMale() + " by " + audioAttribute.getUser());
+//      logger.info("found audio for gender male = " + male + "  audio is male " + audioAttribute.isMale() + " by " + audioAttribute.getUser());
 
       if (audioAttribute.isMale() != male) {
         for (AudioAttribute attr : e.getAudioAttributes()) {
@@ -192,16 +198,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       englishWidget.addStyleName("floatLeft");
       englishWidget.setWidth("90%");
 
-
       DivWidget lr = getHorizDiv();
       lr.addStyleName("floatLeft");
       lr.add(englishWidget);
 
-      Widget itemHeader = new UnitChapterItemHelper<>(Collections.emptyList()).getSmall(e);
+//      Widget itemHeader = commonExerciseUnitChapterItemHelper.getSmall(e);
+      InlineLabel itemHeader = commonExerciseUnitChapterItemHelper.getLabel(e);
+      showPopup(itemHeader, commonExerciseUnitChapterItemHelper.getUnitLessonForExercise2(e));
       itemHeader.addStyleName("floatRight");
       DivWidget itemContainer = new DivWidget();
       itemContainer.add(itemHeader);
       itemContainer.addStyleName("floatRight");
+
 
 //      DivWidget itemDiv = new DivWidget();
 //      itemDiv.addStyleName("floatRight");
@@ -282,21 +290,25 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         context.getElement().getStyle().setPadding(10, Style.Unit.PX);
         // grid.setWidget(row, 0, context);
         rowWidget.add(context);
-        context.setWidth("50%");
+        context.setWidth("100%");
       }
 
       String contextTranslation = contextEx.getEnglish();
 
       boolean same = contextEx.getForeignLanguage().equals(contextTranslation);
       if (!same) {
+        if (context != null) {
+          context.setWidth("50%");
+        }
+
         Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation);
+
         if (contextTransWidget != null) {
           contextTransWidget.addStyleName("rightsidecolor");
           contextTransWidget.setWidth("50%");
 
           contextTransWidget.getElement().getStyle().setPadding(10, Style.Unit.PX);
           //      grid.setWidget(row, 1, contextTransWidget);
-
           rowWidget.add(contextTransWidget);
         }
       }
@@ -318,6 +330,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     //card.add(container);
 
     return card;
+  }
+
+  private void showPopup(InlineLabel label, String toShow) {
+    label.addMouseOverHandler(new MouseOverHandler() {
+      @Override
+      public void onMouseOver(MouseOverEvent event) {
+        Popover widgets = new BasicDialog().showPopover(label,
+            null,
+            toShow, Placement.LEFT);
+        widgets.setHideDelay(2000);
+      }
+    });
   }
 
   @NotNull

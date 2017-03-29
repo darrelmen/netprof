@@ -562,7 +562,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-    logger.info("setStartupInfo : For user " + userWhere + " projid " + projid);
+    logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
 
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
@@ -582,9 +582,6 @@ public class ProjectManagement implements IProjectManagement {
         SlickProject project1 = project.getProject();
         List<String> typeOrder = getTypeOrder(project);
 
-//        Collection<SectionNode> sectionNodesForTypes =
-//            project.getSectionHelper().getSectionNodesForTypes(typeOrder);
-
         ISection<CommonExercise> sectionHelper = project.getSectionHelper();
 
         ProjectStartupInfo startupInfo = new ProjectStartupInfo(
@@ -599,13 +596,15 @@ public class ProjectManagement implements IProjectManagement {
             sectionHelper.getRootTypes(),
             sectionHelper.getParentToChildTypes());
 
+/*
         logger.info("setStartupInfo : For " + userWhere +
             "\n\t " + typeOrder +
             "\n\tSet startup info " + startupInfo);
+*/
 
         userWhere.setStartupInfo(startupInfo);
 
-        logger.info("setStartupInfo - got here");
+//        logger.info("setStartupInfo - got here");
       }
     }
   }
@@ -616,32 +615,7 @@ public class ProjectManagement implements IProjectManagement {
    * @return
    */
   @NotNull
-  private List<String> getTypeOrder(Project project) {
-    List<String> typeOrder = project.getTypeOrder();
-    logger.info("project " + project.getID() + " type order " + typeOrder);
-
-  //  boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
-    boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
-
-    //if (!sound) {
-    //   logger.warn("getTypeOrder : sound hierarchy missing for " + project);
-    // }
-    //else {
-
-//    typeOrder.add(SlickUserExerciseDAO.SOUND);
-    // }
-
-/*
-    if (!diff) {
-    } else if (SlickUserExerciseDAO.ADD_PHONE_LENGTH) {
-      typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
-    }
-    logger.info("project " + project.getID() + " type order " + typeOrder);
-*/
-
-
-    return typeOrder;
-  }
+  private List<String> getTypeOrder(Project project) {  return project.getTypeOrder();  }
 
   private boolean hasModel(SlickProject project1) {
     return getModel(project1) != null;

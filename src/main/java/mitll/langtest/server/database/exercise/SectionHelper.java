@@ -160,51 +160,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     }
   }
 
-
- /* public List<String> getTypeOrder2() {
-    if (predefinedTypeOrder.isEmpty()) {
-      List<String> types = new ArrayList<>();
-      //  types.addAll(root.keySet());
-      //   logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
-
-      if (types.isEmpty()) {
-        types.addAll(typeToUnitToLesson.keySet());
-      } else {
-        Collections.sort(types, new Comparator<String>() {
-          @Override
-          public int compare(String o1, String o2) {
-            int first = typeToSectionToTypeToSections.get(o1).size();
-            int second = typeToSectionToTypeToSections.get(o2).size();
-            return new Integer(first).compareTo(second);
-          }
-        });
-
-        // TODO : I feel like I did this before...?
-        // put sound at end...
-        putSoundAtEnd(types);
-      }
-//      logger.info("getTypeOrder types " + types);
-
-      return types;
-    } else {
-      Set<String> validTypes = typeToUnitToLesson.keySet();
-      //    logger.info("getTypeOrder validTypes " + validTypes);
-
-      List<String> valid = new ArrayList<>(predefinedTypeOrder);
-      valid.retainAll(validTypes);
-      return valid;
-    }
-  }*/
-
   public void putSoundAtEnd(List<String> types) {
-    //  String sound = SOUND;
     putAtEnd(types, TOPIC);
     putAtEnd(types, SUB_TOPIC);
     putAtEnd(types, GRAMMAR);
-    //  putAtEnd(types, SOUND);
-    //  putAtEnd(types, DIFFICULTY);
   }
-
 
   private void putAtEnd(List<String> types, String sound) {
     if (types.contains(sound)) {
@@ -229,32 +189,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return true;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.server.json.JsonExport#getContentAsJson
-   */
-/*  @Override
-  public Collection<SectionNode> getSectionNodesForTypes() {
-    List<String> typeOrder = getTypeOrder();
-    logger.info("using type order " + typeOrder);
-    return getChildren(typeOrder);
-  }*/
   @Override
   public Collection<SectionNode> getSectionNodesForTypes() {
     return root.getChildren();
   }
 
-  /**
-   * @return
-   * @paramx typeOrder
-   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo
-   */
-/*
-  @Override
-  public Collection<SectionNode> getSectionNodesForTypes(List<String> typeOrder) {
-    return getChildren(typeOrder);
-  }
-*/
   @Override
   public SectionNode getFirstNode(String name) {
     Collection<SectionNode> sectionNodesForTypes = getSectionNodesForTypes();
@@ -406,15 +345,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   @Override
   public Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs) {
     Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
-
-    // sort values
-  /*  Set<String> types = typeToMatchPairs.keySet();
-    for (String key : types) {
-      TreeSet<String> strings = new TreeSet<>(itemSorter);
-      strings.addAll(typeToMatchPairs.get(key));
-      typeToMatchPairs.put(key, strings);
-    }*/
-
     return getTypeToMatches(typeToMatchPairs);
   }
 
@@ -1087,9 +1017,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     for (Pair pair : typeToSelection) typesInOrder.add(pair.getProperty());
     Set<String> typesToInclude1 = new HashSet<>(typesInOrder);
 
-    logger.info("request is       " + typeToSelection);
+//    logger.info("getTypeToValues request is       " + typeToSelection);
     Map<String, Set<MatchInfo>> typeToMatches = getTypeToMatches(typeToSelection);
-    logger.info("typeToMatches is " + typeToMatches);
+//    logger.info("getTypeToValues typeToMatches is " + typeToMatches);
 
     boolean someEmpty = false;
     for (String type : typesInOrder) {

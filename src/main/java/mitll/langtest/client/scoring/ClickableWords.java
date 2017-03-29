@@ -130,9 +130,15 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   private boolean isMatch(String token, String next) {
-    String context = removePunct(token.toLowerCase());
-    String vocab   = removePunct(next.toLowerCase());
-    return context.equals(vocab) || (context.startsWith(vocab) && !vocab.isEmpty());// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
+    if (next.isEmpty()) return false;
+    else {
+      String context = removePunct(token.toLowerCase());
+      String vocab = removePunct(next.toLowerCase());
+      boolean b = context.equals(vocab) || (context.startsWith(vocab) && !vocab.isEmpty());
+
+     // if (b) logger.info("match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
+      return b;// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
+    }
   }
 
 /*  private boolean isHardMatch(String token, String next) {

@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.phone;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.AnswerInfo;
@@ -50,11 +51,19 @@ import java.util.List;
 import java.util.Map;
 
 public class RecordWordAndPhone {
-  private static final Logger logger = LogManager.getLogger(DatabaseImpl.class);
+  private static final Logger logger = LogManager.getLogger(RecordWordAndPhone.class);
+  private static final boolean DEBUG = false;
+
+
   private static final String SIL = "sil";
   private final IWordDAO wordDAO;
   private final IPhoneDAO<Phone> phoneDAO;
 
+  /**
+   * @param wordDAO
+   * @param phoneDAO
+   * @see DatabaseImpl#initializeDAOs
+   */
   public RecordWordAndPhone(IWordDAO wordDAO, IPhoneDAO<Phone> phoneDAO) {
     this.wordDAO = wordDAO;
     this.phoneDAO = phoneDAO;
@@ -64,21 +73,26 @@ public class RecordWordAndPhone {
    * @param answer
    * @param answerID
    * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
+   * @see DatabaseImpl#recordWordAndPhoneInfo(AudioAnswer, long)
    */
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
-    if (pretestScore == null) {
-      logger.debug(" : recordWordAndPhoneInfo pretest score is null for " + answer + " and result id " + answerID);
-    } else {
-      logger.debug(" : recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and result id " + answerID);
+
+    if (DEBUG) {
+      if (pretestScore == null) {
+        logger.debug(" : recordWordAndPhoneInfo pretest score is null for " + answer + " and result id " + answerID);
+      } else {
+        logger.debug(" : recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and result id " + answerID);
+      }
     }
+
     recordWordAndPhoneInfo(answerID, pretestScore);
   }
 
   /**
    * @param answerID
    * @param pretestScore
-   * @see #rememberScore(int, PretestScore)
+   * @see DatabaseImpl#rememberScore
    */
   public void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
@@ -102,7 +116,7 @@ public class RecordWordAndPhone {
       for (TranscriptSegment segment : words) {
         String event = segment.getEvent();
         if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals(SIL)) {
-          long wid =wordDAO.addWord(new Word(answerID, event, windex++, segment.getScore()));
+          long wid = wordDAO.addWord(new Word(answerID, event, windex++, segment.getScore()));
           for (TranscriptSegment pseg : phones) {
             if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
               String pevent = pseg.getEvent();

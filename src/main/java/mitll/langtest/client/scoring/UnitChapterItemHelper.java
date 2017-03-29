@@ -33,11 +33,10 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.shared.exercise.CommonExercise;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -92,7 +91,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
    */
-  public Widget getItemHeader(T e) {
+  private Widget getItemHeader(T e) {
     // logger.info("got " + e + " and " + e.getDominoID());
     int dominoID = e.getDominoID();
     int idToUse = dominoID != -1 ? dominoID : e.getID();
@@ -109,13 +108,32 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     return fp;
   }
 
+  public Widget getSmall2(T e) {
+    FlowPanel fp = new FlowPanel("small");
+    String text = getID(e);
+    fp.getElement().setInnerText(text);// + "/" + e.getOldID());
+    new TooltipHelper().addTooltip(fp, getUnitLessonForExercise2(e));
+    return fp;
+  }
+
+  @NotNull
+  private String getID(T e) {
+    int dominoID = e.getDominoID();
+    int idToUse = dominoID != -1 ? dominoID : e.getID();
+    return "" + idToUse;
+  }
+
+  public InlineLabel getLabel(T e) {
+    return  new InlineLabel(getID(e));
+  }
+
   /**
    * Show unit and chapter info for every item.
    *
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
    */
-  private Panel getUnitLessonForExercise(T exercise) {
+  public Panel getUnitLessonForExercise(T exercise) {
     Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
@@ -130,5 +148,29 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
       }
     }
     return flow;
+  }
+
+  public String getUnitLessonForExercise2(T exercise) {
+    StringBuilder builder = new StringBuilder();
+    //builder.append("<html><body>");
+    for (String type : typeOrder) {
+      String subtext = exercise.getUnitToValue().get(type);
+      if (subtext != null && !subtext.isEmpty()) {
+        //    Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
+        String html =
+          //  "<div>" +
+                "<span>" +
+            "<h5>" + type + "<small style='margin-left:5px'>" + subtext + "</small>" +
+            "</h5>" +
+
+                 //   "</div>";
+        "</span>";
+        builder.append(html);
+      }
+    }
+    //builder.append("</body></html>");
+
+    logger.info("for " +exercise.getID()+ " return " + builder);
+    return builder.toString();
   }
 }

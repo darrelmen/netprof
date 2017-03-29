@@ -68,8 +68,7 @@ import java.util.logging.Logger;
  * @since
  */
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
-  private Logger logger = Logger.getLogger("ASRHistoryPanel");
-
+  //private Logger logger = Logger.getLogger("ASRHistoryPanel");
   private static final int NUM_TO_SHOW = 2;
   private static final int HEIGHT = 18;
 
@@ -87,9 +86,9 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   public ASRHistoryPanel(ExerciseController controller, int exerciseID) {
     this.controller = controller;
     this.exerciseID = exerciseID;
-    addStyleName("leftTenMargin");
+   // addStyleName("leftTenMargin");
     getElement().setId("ASRHistoryPanel");
-    addStyleName("bottomFiveMargin");
+   // addStyleName("bottomFiveMargin");
     addStyleName("inlineFlex");
     setWidth("100%");
   }
@@ -185,17 +184,24 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    */
   private Panel getAudioAndScore(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath, String title,
                                  int i) {
-    Widget w = getAudioWidget(scoreAndPath, title);
  //   Widget row = makeRow(tooltipHelper, scoreAndPath);
-    Widget row = makeRow2(tooltipHelper, scoreAndPath);
-    row.addStyleName("leftFiveMargin");
+//    Widget row = makeRow2(tooltipHelper, scoreAndPath);
 
-    Panel hp = new HorizontalPanel();
-    hp.add(w);
-    DivWidget container = new DivWidget();
-    container.setWidth("100px");
-    container.add(row);
-    hp.add(container);
+ //   Panel hp = new HorizontalPanel();
+    Panel hp = new DivWidget();
+    hp.addStyleName("inlineFlex");
+    hp.setWidth("100%");
+    hp.add(getAudioWidget(scoreAndPath, title));
+
+    //DivWidget container = new DivWidget();
+    //container.setWidth("100px");
+
+
+    Widget coloredTable = makeRow2(tooltipHelper, scoreAndPath);
+    //container.add(coloredTable);
+
+    hp.add(coloredTable);
+
     long timestamp = scoreAndPath.getTimestamp();
     // logger.info("timestamp " + timestamp);
     String format = timestamp > 0 ?  this.format.format(new Date(timestamp)) : "";
@@ -287,11 +293,12 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
   private Widget makeRow2(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
-    row.getElement().setInnerHTML(new WordTable().toHTML2(scoreAndPath.getScores()));
+    row.getElement().setInnerHTML(new WordTable().makeColoredTable(scoreAndPath.getScores()));
 
     int iScore = scoreAndPath.getPercentScore();
    // row.setWidth(Math.max(3, iScore) + "px");
     tooltipHelper.createAddTooltip(row, "Score" + (" " + iScore + "%"), Placement.BOTTOM);
+    row.addStyleName("leftFiveMargin");
 
     return row;
   }

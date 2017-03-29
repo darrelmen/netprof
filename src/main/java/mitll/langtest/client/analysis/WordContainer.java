@@ -265,7 +265,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
 
       @Override
       public SafeHtml getValue(WordScore shell) {
-        String columnText = new WordTable().toHTML2(shell.getTranscript());
+        String columnText = new WordTable().makeColoredTable(shell.getTranscript());
         if (columnText.isEmpty()) {
           CommonShell exercise = getShell(shell.getExid());
           // logger.info("getItemColumn : column text empty for id " + shell.getExID() + " and found ex " + exercise);

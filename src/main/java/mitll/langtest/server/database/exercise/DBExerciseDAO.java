@@ -165,28 +165,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     return Collections.emptyList();
   }
 
-
-/*
-
-  private void putSoundAtEnd(List<String> types) {
-    getSectionHelper().putSoundAtEnd(types);
-    //  String sound = SOUND;
-    putAtEnd(types, "Sub-topic");
-    putAtEnd(types, "Grammar");
-    putAtEnd(types, SOUND);
-    putAtEnd(types, DIFFICULTY);
-  }
-*/
-
-/*
-  private void putAtEnd(List<String> types, String sound) {
-    if (types.contains(sound)) {
-      types.remove(sound);
-      types.add(sound);
-    }
-  }
-*/
-
   /**
    * @see #readExercises
    * @param allNonContextExercises

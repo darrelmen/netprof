@@ -225,6 +225,18 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
+   * TODO : for now only single selection
+   */
+  private Map<String, String> typeToSelection = new HashMap<>();
+  private final Map<String, Boolean> typeToShowAll = new HashMap<>();
+  private Set<String> rootNodesInOrder = new HashSet<>();
+
+  private void setTypeToSelection(Map<String, String> typeToSelection) {
+    this.typeToSelection = typeToSelection;
+  }
+
+
+  /**
    * structure
    * nav
    * header (optional)
@@ -242,51 +254,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * click on header, removes selection of choice
    * click on choice, down select for that choice
    *
-   * @param nav
-   * @param types
-   * @param typeToDistinct
-   * @paramx rootNodes
-   * @see #getTypeOrder
-   */
-/*
-  private void addFacets(
-      final UnorderedList nav,
-      Collection<String> types,
-      Map<String, Set<MatchInfo>> typeToDistinct) {
-*//*    logger.info("addChoiceRow for user = " + controller.getUser() + " got rootNodesInOrder " +
-        types);// + " num root nodes " + rootNodes.size());*//*
-
-    if (types.isEmpty()) {
-      logger.warning("addChoiceRow : huh? rootNodesInOrder is empty?");
-      return;
-    }
-
-    addFacetsForReal(typeToDistinct, nav);
-    pushFirstListBoxSelection();
-  }
-  */
-
-  /**
-   * TODO : for now only single selection
-   */
-  private Map<String, String> typeToSelection = new HashMap<>();
-  private final Map<String, Boolean> typeToShowAll = new HashMap<>();
-  private Set<String> rootNodesInOrder = new HashSet<>();
-
-  private void setTypeToSelection(Map<String, String> typeToSelection) {
-    this.typeToSelection = typeToSelection;
-  }
-
-  /**
    * ul
    * li - each dimension
    * span - header
    * ul - choices in each dimension
    * li - choice - with span (qty)
    *
-   * @paramx rootNodes
-   * @paramx rootNodesInOrder
-   * @seez #addFacets
+   * @see #getTypeToValue
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
     logger.info("addFacetsForReal\n\tfor " +
@@ -465,10 +439,17 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     anchor.addStyleName("choice");
     span.add(anchor);
 
-    FlowPanel qty = getSpan();
+    String countLabel = "" + key.getCount();
+
+    Anchor qty = //getSpan();
+    getAnchor(countLabel);
+    qty.addClickHandler(getChoiceHandler(type, key.getValue()));
+
     qty.addStyleName("qty");
-    qty.getElement().setInnerHTML("" + key.getCount());
+//    qty.getElement().setInnerHTML(countLabel);
+
     span.add(qty);
+
     return span;
   }
 
@@ -543,14 +524,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   @NotNull
   private ClickHandler getChoiceHandler(final String type, final String key) {
-    return new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        Map<String, String> candidate = new HashMap<>(typeToSelection);
-        candidate.put(type, key);
-        //      logger.info("getChoiceHandler t->sel " + typeToSelection);
-        getTypeToValue(candidate);
-      }
+    return event -> {
+      Map<String, String> candidate = new HashMap<>(typeToSelection);
+      candidate.put(type, key);
+      getTypeToValue(candidate);
     };
   }
 
@@ -593,7 +570,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           public void onSuccess(FilterResponse response) {
             Map<String, Set<MatchInfo>> result = response.getTypeToValues();
-            logger.info("getTypeToValues for " + pairs + " got " + result);
+          //  logger.info("getTypeToValues for " + pairs + " got " + result);
             boolean b = changeSelection(response.getTypesToInclude(), typeToSelection);
 
             setTypeToSelection(typeToSelection);
@@ -805,9 +782,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected void showExercises(Collection<CommonExercise> result, ExerciseListWrapper<CommonExercise> wrapper) {
     clearExerciseContainer();
 
-
-    logger.info("showExercises onSuccess adding " + result.size());
+//    logger.info("showExercises onSuccess adding " + result.size());
     for (CommonExercise exercise : result) {
+      logger.info("ex " + exercise.getID() + " " + exercise.getUnitToValue());
       addExerciseWidget(exercise, wrapper);
     }
 

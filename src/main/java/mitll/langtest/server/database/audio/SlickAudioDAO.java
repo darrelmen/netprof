@@ -180,8 +180,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     long then = System.currentTimeMillis();
     Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDs(exids);
     long now = System.currentTimeMillis();
-    if (now - then > 20)
+
+    if (now - then > 30) {
       logger.warn("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() + " attr for " + exids.size());
+    }
 
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
     for (Map.Entry<Integer, List<SlickAudio>> pair : byExerciseID.entrySet()) {

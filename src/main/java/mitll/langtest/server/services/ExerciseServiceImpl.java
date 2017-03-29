@@ -1049,9 +1049,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     if (ids.size() > toAddAudioTo.size()) {
-      logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
+//      logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
     } else
-      logger.info("getting " + ids.size() + " exercises");
+//      logger.info("getting " + ids.size() + " exercises");
 
     if (!toAddAudioTo.isEmpty()) {
       db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
@@ -1060,16 +1060,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Map<Integer, List<CorrectAndScore>> scoreHistories = (exercises.isEmpty()) ? Collections.emptyMap() : db.getResultDAO().getScoreHistories(userID, ids, getLanguage(exercises.get(0)));
 
     addScores(userID, exercises);
-
-/*
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        getProject().ensureAudio(toAddAudioTo);
-      }
-    }).start();
-
-    */
 
     return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistories);
   }

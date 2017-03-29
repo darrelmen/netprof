@@ -57,6 +57,8 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class WordTable {
+  public static final String TR = "tr";
+  public static final String TD = "td";
   private final Logger logger = Logger.getLogger("WordTable");
 
   public String toHTML(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, String filter) {
@@ -119,11 +121,11 @@ public class WordTable {
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = new ParseResultJson(null)
         .readFromJSON(jsonToParse);
 
-    return toHTML2(netPronImageTypeListMap);
+    return makeColoredTable(netPronImageTypeListMap);
   }
 */
 
-  public String toHTML2(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+  public String makeColoredTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
 
@@ -156,74 +158,83 @@ public class WordTable {
     table.getElement().getStyle().clearWidth();
     table.removeStyleName("table");
 
-    HTMLPanel srow = new HTMLPanel("tr", "");
+    HTMLPanel srow = new HTMLPanel(TR, "");
     table.add(srow);
 
-    HTMLPanel row = new HTMLPanel("tr", "");
+    HTMLPanel row = new HTMLPanel(TR, "");
     table.add(row);
 
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
       TranscriptSegment word = pair.getKey();
 
-      TableHeader header = new TableHeader(word.getEvent());
-      alignCenter(header);
-      setColor(word, header);
-      table.add(header);
+      String wordLabel = word.getEvent();
+      if (!wordLabel.equals("SIL")) {
+        TableHeader header = new TableHeader(wordLabel);
+        alignCenter(header);
+        setColor(word, header);
+        table.add(header);
 
-      HTMLPanel col;
-      srow.add(col = new HTMLPanel("td", ""));
+        HTMLPanel col;
+        srow.add(col = new HTMLPanel(TD, ""));
 
-      HTML wscore = showScore ? getScore(word) : new HTML();
-      alignCenter(wscore);
-      col.add(wscore);
+        HTML wscore = showScore ? getScore(word) : new HTML();
+        alignCenter(wscore);
+        col.add(wscore);
 
-      if (!showScore) {
-        wscore.getElement().getStyle().setHeight(0, Style.Unit.PX);
-      }
-
-      Table pTable = new Table();
-      pTable.removeStyleName("table");
-
-      col = new HTMLPanel("td", "");
-      col.getElement().getStyle().clearBorderStyle();
-      col.add(pTable);
-      row.add(col);
-
-      // TODO : remove this???
-      HTMLPanel row2 = new HTMLPanel("tr", "");
-      pTable.add(row2);
-
-      HTMLPanel scoreRow = new HTMLPanel("tr", "");
-      pTable.add(scoreRow);
-      if (!showScore) {
-        scoreRow.getElement().getStyle().setHeight(0, Style.Unit.PX);
-      }
-      for (TranscriptSegment phone : pair.getValue()) {
-        String event = phone.getEvent();
-        if (!event.equals("sil")) {
-          TableHeader h = new TableHeader(event);
-          alignCenter(h);
-          pTable.add(h);
-          setColor(phone, h);
-
-          //  HTML score = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
-          HTML score = showScore ? getScore(phone) : new HTML();
-          alignCenter(score);
-          score.getElement().getStyle().setWidth(25, Style.Unit.PX);
-
-          col = new HTMLPanel("td", "");
-
-          if (!showScore) {
-            score.getElement().getStyle().setHeight(0, Style.Unit.PX);
-          }
-          col.add(score);
-
-          scoreRow.add(col);
+        if (!showScore) {
+          wscore.getElement().getStyle().setHeight(0, Style.Unit.PX);
         }
+
+        Table pTable = new Table();
+        pTable.removeStyleName("table");
+
+        col = new HTMLPanel(TD, "");
+        col.getElement().getStyle().clearBorderStyle();
+        col.add(pTable);
+        row.add(col);
+
+        // TODO : remove this???
+        HTMLPanel row2 = new HTMLPanel(TR, "");
+        pTable.add(row2);
+
+        HTMLPanel scoreRow = new HTMLPanel(TR, "");
+        pTable.add(scoreRow);
+        if (!showScore) {
+          scoreRow.getElement().getStyle().setHeight(0, Style.Unit.PX);
+        }
+        addPhonesBelowWord(showScore, pair.getValue(), pTable, scoreRow);
       }
     }
 
     return table;
+  }
+
+  private void addPhonesBelowWord(boolean showScore, List<TranscriptSegment> value, Table pTable, HTMLPanel scoreRow) {
+    HTMLPanel col;
+   // List<TranscriptSegment> value = pair.getValue();
+    for (TranscriptSegment phone : value) {
+      String phoneLabel = phone.getEvent();
+      if (!phoneLabel.equals("sil")) {
+        TableHeader h = new TableHeader(phoneLabel);
+        alignCenter(h);
+        pTable.add(h);
+        setColor(phone, h);
+
+        //  HTML score = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
+        HTML score = showScore ? getScore(phone) : new HTML();
+        alignCenter(score);
+        score.getElement().getStyle().setWidth(25, Style.Unit.PX);
+
+        col = new HTMLPanel(TD, "");
+
+        if (!showScore) {
+          score.getElement().getStyle().setHeight(0, Style.Unit.PX);
+        }
+        col.add(score);
+
+        scoreRow.add(col);
+      }
+    }
   }
 
   @NotNull

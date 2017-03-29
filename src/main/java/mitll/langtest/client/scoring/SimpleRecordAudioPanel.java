@@ -165,13 +165,13 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   @Nullable
   private String getReadyToPlayAudio(String path) {
-   // logger.info("get ready to play " +path);
+    // logger.info("get ready to play " +path);
     path = getPath(path);
     if (path != null) {
       this.audioPath = path;
     }
     if (playAudioPanel != null) {
-     // logger.info("startSong ready to play " +path);
+      // logger.info("startSong ready to play " +path);
       playAudioPanel.startSong(path);
     }
     return path;
@@ -218,6 +218,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     @Override
     protected void addButtons(Widget optionalToTheRight) {
       DivWidget firstRow = new DivWidget();
+      firstRow.addStyleName("topFiveMargin");
       firstRow.addStyleName("inlineFlex");
       add(firstRow);
 
@@ -234,14 +235,15 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
       firstRow.add(scores);
 
-      firstRow.add(getScoreHistory());
+      ASRHistoryPanel scoreHistory = getScoreHistory();
+      firstRow.add(scoreHistory);
     }
 
     private DivWidget getRecordFeedback() {
       recordFeedback = new DivWidget();
       recordFeedback.addStyleName("inlineFlex");
       recordFeedback.getElement().setId("recordFeedbackImageContainer");
-      //  recordFeedback.setWidth("32px");
+      recordFeedback.setWidth("32px");
       recordFeedback.add(recordImage1);
       recordFeedback.add(recordImage2);
       recordFeedback.add(waitCursorHelper.getWaitCursor());
@@ -299,8 +301,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
           score > SECOND_STEP ?
               ProgressBarBase.Color.SUCCESS :
               score > FIRST_STEP ?
-              ProgressBarBase.Color.WARNING :
-              ProgressBarBase.Color.DANGER);
+                  ProgressBarBase.Color.WARNING :
+                  ProgressBarBase.Color.DANGER);
 
       scoreBar.setVisible(true);
       scores.setVisible(true);
@@ -324,6 +326,10 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
+  /**
+   * @see MyPlayAudioPanel#addButtons(Widget)
+   * @return
+   */
   @NotNull
   private ASRHistoryPanel getScoreHistory() {
     ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID());
@@ -401,7 +407,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     @Override
     public void useResult(AudioAnswer result) {
       audioPath = result.getPath();
-     // path = getReadyToPlayAudio(path);
+      // path = getReadyToPlayAudio(path);
 
       setDownloadHref();
       scoreAudio(result);
@@ -479,9 +485,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     scoreFeedback.clear();
     if (result.getPretestScore().getHydecScore() > 0) {
       scoreFeedback.add(new WordScoresTable().getStyledWordTable(result.getPretestScore()));
-    }
-    else {
-      scoreFeedback.add(new Heading(4,"Score low, try again."));
+    } else {
+      scoreFeedback.add(new Heading(4, "Score low, try again."));
     }
     useResult(result.getPretestScore(), false, result.getPath());
   }
