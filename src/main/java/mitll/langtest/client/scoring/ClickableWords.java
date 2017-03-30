@@ -94,7 +94,7 @@ public class ClickableWords<T extends CommonExercise> {
 
       for (int i = index; i < tokens.size(); i++) {
         String next = tokens.get(i);
-        if (isMatch(next,toFind)) {
+        if (isMatch(next, toFind)) {
           index = i;
           realHighlight.add(toFind);
           //logger.info("- found '" + toFind + "' = '" +next+ "' at " + index);
@@ -115,10 +115,9 @@ public class ClickableWords<T extends CommonExercise> {
 
       if (isMatch && iterator.hasNext()) {
         toFind = iterator.next();
-       // logger.info("- highlight '" + toFind + "' = '" +token+ "'");
-      }
-      else {
-       // logger.fine("-  no highlight '" + toFind + "' vs '" +token+ "'");
+        // logger.info("- highlight '" + toFind + "' = '" +token+ "'");
+      } else {
+        // logger.fine("-  no highlight '" + toFind + "' vs '" +token+ "'");
       }
 
       horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch));
@@ -130,22 +129,18 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   private boolean isMatch(String token, String next) {
-    if (next.isEmpty()) return false;
+    if (next.isEmpty()) {
+      return false;
+    }
     else {
       String context = removePunct(token.toLowerCase());
       String vocab = removePunct(next.toLowerCase());
       boolean b = context.equals(vocab) || (context.startsWith(vocab) && !vocab.isEmpty());
 
-     // if (b) logger.info("match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
+      // if (b) logger.info("match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
       return b;// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
     }
   }
-
-/*  private boolean isHardMatch(String token, String next) {
-    String context = removePunct(token.toLowerCase());
-    String vocab   = removePunct(next.toLowerCase());
-    return context.equals(vocab);
-  }*/
 
   @NotNull
   private List<String> getTokens(String value, boolean flLine, boolean isChineseCharacter) {
@@ -200,12 +195,12 @@ public class ClickableWords<T extends CommonExercise> {
             public void execute() {
               String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
 
-          //    logger.info("from " + html);
-          //    logger.info("to   " + s1);
+              //    logger.info("from " + html);
+              //    logger.info("to   " + s1);
 
               String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
 
-            //  logger.info("finally   " + s2);
+              //  logger.info("finally   " + s2);
 
               listContainer.searchBoxEntry(s2);
             }

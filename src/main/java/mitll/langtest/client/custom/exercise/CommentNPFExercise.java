@@ -98,8 +98,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param e
    * @param controller
    * @param listContainer
-   * @param instance
-   * @param allowRecording
+   * @paramx instance
+   * @paramx allowRecording
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
@@ -345,7 +345,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     logger.info("addPlayAndVoiceChoices choosing to play " + toUse);
     logger.info("addPlayAndVoiceChoices path             " + path);
     if (path != null) {
-      contextPlay = new PlayAudioPanel(controller, path, false)
+      contextPlay = new PlayAudioPanel(controller.getSoundManager(), path, false)
           .setPlayLabel("")
           .setPauseLabel("")
           .setMinWidth(12);

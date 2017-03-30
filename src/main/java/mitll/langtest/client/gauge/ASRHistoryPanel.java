@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * ASR Scoring panel -- shows phonemes.
@@ -70,7 +69,7 @@ import java.util.logging.Logger;
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   //private Logger logger = Logger.getLogger("ASRHistoryPanel");
   private static final int NUM_TO_SHOW = 2;
-  private static final int HEIGHT = 18;
+  //private static final int HEIGHT = 18;
 
   /**
    *
@@ -86,9 +85,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   public ASRHistoryPanel(ExerciseController controller, int exerciseID) {
     this.controller = controller;
     this.exerciseID = exerciseID;
-   // addStyleName("leftTenMargin");
     getElement().setId("ASRHistoryPanel");
-   // addStyleName("bottomFiveMargin");
     addStyleName("inlineFlex");
     setWidth("100%");
   }
@@ -184,22 +181,12 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    */
   private Panel getAudioAndScore(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath, String title,
                                  int i) {
- //   Widget row = makeRow(tooltipHelper, scoreAndPath);
-//    Widget row = makeRow2(tooltipHelper, scoreAndPath);
-
- //   Panel hp = new HorizontalPanel();
     Panel hp = new DivWidget();
     hp.addStyleName("inlineFlex");
     hp.setWidth("100%");
     hp.add(getAudioWidget(scoreAndPath, title));
 
-    //DivWidget container = new DivWidget();
-    //container.setWidth("100px");
-
-
-    Widget coloredTable = makeRow2(tooltipHelper, scoreAndPath);
-    //container.add(coloredTable);
-
+    Widget coloredTable = makeColoredTable(tooltipHelper, scoreAndPath);
     hp.add(coloredTable);
 
     long timestamp = scoreAndPath.getTimestamp();
@@ -282,41 +269,30 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    * @return
    * @see #getAudioAndScore
    */
-  private Widget makeRow(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
+/*  private Widget makeRow(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = getRow(scoreAndPath);
     int iScore = scoreAndPath.getPercentScore();
     row.setWidth(Math.max(3, iScore) + "px");
 
     tooltipHelper.createAddTooltip(row, "Score" + (" " + iScore + "%"), Placement.BOTTOM);
     return row;
-  }
+  }*/
 
-  private Widget makeRow2(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
+  private Widget makeColoredTable(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
     row.getElement().setInnerHTML(new WordTable().makeColoredTable(scoreAndPath.getScores()));
 
-    int iScore = scoreAndPath.getPercentScore();
-   // row.setWidth(Math.max(3, iScore) + "px");
-    tooltipHelper.createAddTooltip(row, "Score" + (" " + iScore + "%"), Placement.BOTTOM);
+    tooltipHelper.createAddTooltip(row, "Score" + (" " + scoreAndPath.getPercentScore() + "%"), Placement.BOTTOM);
     row.addStyleName("leftFiveMargin");
 
     return row;
   }
 
-  /*private Widget makeRow2(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath, String prefix) {
-    Widget row = getRow(scoreAndPath);
-    int iScore = scoreAndPath.getPercentScore();
-    row.setWidth(iScore + "px");
-
-    tooltipHelper.createAddTooltip(row, prefix, Placement.BOTTOM);
-    return row;
-  }
-*/
-  private Widget getRow(CorrectAndScore scoreAndPath) {
+/*  private Widget getRow(CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
     row.setHeight(HEIGHT + "px");
     row.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(scoreAndPath.getScore()));
     row.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
     return row;
-  }
+  }*/
 }

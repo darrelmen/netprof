@@ -179,7 +179,7 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
   }
 
   private Panel getPlayAudioPanel() {
-    playAudioPanel = new PlayAudioPanel(controller, "", false);
+    playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), "", false);
     playAudioPanel.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
     playAudioPanel.getElement().getStyle().setMarginLeft(20, Style.Unit.PX);
     playAudioPanel.setEnabled(false);

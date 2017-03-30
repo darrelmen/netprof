@@ -39,7 +39,10 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.analysis.PhoneExampleContainer;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.gauge.SimpleColumnChart;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
@@ -57,10 +60,17 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class WordTable {
-  public static final String TR = "tr";
-  public static final String TD = "td";
   private final Logger logger = Logger.getLogger("WordTable");
 
+  private static final String TR = "tr";
+  private static final String TD = "td";
+
+  /**
+   * @see PhoneExampleContainer#getItemColumn
+   * @param netPronImageTypeToEndTime
+   * @param filter
+   * @return
+   */
   public String toHTML(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, String filter) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
@@ -116,15 +126,11 @@ public class WordTable {
     return builder.toString();
   }
 
-/*
-  public String getTable(String jsonToParse) {
-    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = new ParseResultJson(null)
-        .readFromJSON(jsonToParse);
-
-    return makeColoredTable(netPronImageTypeListMap);
-  }
-*/
-
+  /**
+   * @see mitll.langtest.client.gauge.ASRHistoryPanel#makeColoredTable
+   * @param netPronImageTypeToEndTime
+   * @return
+   */
   public String makeColoredTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
@@ -199,9 +205,11 @@ public class WordTable {
 
         HTMLPanel scoreRow = new HTMLPanel(TR, "");
         pTable.add(scoreRow);
+
         if (!showScore) {
           scoreRow.getElement().getStyle().setHeight(0, Style.Unit.PX);
         }
+
         addPhonesBelowWord(showScore, pair.getValue(), pTable, scoreRow);
       }
     }
@@ -211,7 +219,6 @@ public class WordTable {
 
   private void addPhonesBelowWord(boolean showScore, List<TranscriptSegment> value, Table pTable, HTMLPanel scoreRow) {
     HTMLPanel col;
-   // List<TranscriptSegment> value = pair.getValue();
     for (TranscriptSegment phone : value) {
       String phoneLabel = phone.getEvent();
       if (!phoneLabel.equals("sil")) {
@@ -243,8 +250,7 @@ public class WordTable {
   }
 
   private void setColor(TranscriptSegment phone, TableHeader h) {
-    String color1 = SimpleColumnChart.getColor(phone.getScore());
-    h.getElement().getStyle().setBackgroundColor(color1);
+    h.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(phone.getScore()));
   }
 
   private void alignCenter(UIObject header) {

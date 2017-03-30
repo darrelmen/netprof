@@ -69,8 +69,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private int exerciseID;
   protected final ExerciseController controller;
   private final boolean recordInResults;
-  int buttonWidth;
-  boolean scoreAudioNow;
+  //private final int buttonWidth;
+  private final boolean scoreAudioNow;
+
   /**
    * @param exerciseID
    * @param controller
@@ -80,8 +81,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param stopButtonTitle
    * @param buttonWidth
    * @param scoreAudioNow
-   * @paramx audioType
-   * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
+   * @seex GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
   public PostAudioRecordButton(int exerciseID,
                                final ExerciseController controller,
@@ -89,7 +89,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
                                boolean recordInResults,
                                String recordButtonTitle,
                                String stopButtonTitle,
-                               int buttonWidth, boolean scoreAudioNow) {
+                               int buttonWidth,
+                               boolean scoreAudioNow) {
     super(controller.getRecordTimeout(),
         controller.getProps().doClickAndHold(),
         recordButtonTitle,
@@ -99,14 +100,14 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.index = index;
     this.exerciseID = exerciseID;
     this.controller = controller;
-    this.buttonWidth = buttonWidth;
+    //this.buttonWidth = buttonWidth;
     this.scoreAudioNow = scoreAudioNow;
 
     this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
     controller.register(this, exerciseID);
     Style style = getElement().getStyle();
-    style.setMarginTop(1, Style.Unit.PX);
+    //style.setMarginTop(1, Style.Unit.PX);
     style.setMarginBottom(1, Style.Unit.PX);
     if (buttonWidth > 0) {
       setWidth(buttonWidth + "px");

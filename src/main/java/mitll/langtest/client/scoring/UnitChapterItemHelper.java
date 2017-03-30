@@ -124,7 +124,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   }
 
   public InlineLabel getLabel(T e) {
-    return  new InlineLabel(getID(e));
+    return new InlineLabel(getID(e));
   }
 
   /**
@@ -158,19 +158,19 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
       if (subtext != null && !subtext.isEmpty()) {
         //    Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
         String html =
-          //  "<div>" +
-                "<span>" +
-            "<h5>" + type + "<small style='margin-left:5px'>" + subtext + "</small>" +
-            "</h5>" +
+            //  "<div>" +
+            "<span>" +
+                "<h5>" + type + "<small style='margin-left:5px'>" + subtext + "</small>" +
+                "</h5>" +
 
-                 //   "</div>";
-        "</span>";
+                //   "</div>";
+                "</span>";
         builder.append(html);
       }
     }
     //builder.append("</body></html>");
 
-    logger.info("for " +exercise.getID()+ " return " + builder);
+    //   logger.info("for " +exercise.getID()+ " return " + builder);
     return builder.toString();
   }
 }

@@ -14,25 +14,17 @@ public class WaitCursorHelper {
   private Timer waitTimer = null;
   private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
-  private int delayMillis = 700;
+  private static final int delayMillis = 700;
 
   /**
-   * @see #addTypeAhead
-   * @see #scheduleWaitTimer
-   * @see #showFinishedGettingExercises
+   * @seex #addTypeAhead
+   * @seex #scheduleWaitTimer
+   * @seex #showFinishedGettingExercises
    */
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
 
   public Widget getWaitCursor() {
     return waitCursor;
-  }
-
-  public void hide() {
-    waitCursor.setVisible(false);
-  }
-
-  public void show() {
-    waitCursor.setVisible(true);
   }
 
   public void showFinished() {
@@ -44,6 +36,7 @@ public class WaitCursorHelper {
 
   private void hideWaitCursor() {
     waitCursor.setUrl(white);
+    hide();
   }
 
   public void scheduleWaitTimer() {
@@ -54,9 +47,17 @@ public class WaitCursorHelper {
       @Override
       public void run() {
         waitCursor.setUrl(animated);
-        waitCursor.setVisible(true);
+        show();
       }
     };
     waitTimer.schedule(delayMillis);
+  }
+
+  public void hide() {
+    waitCursor.setVisible(false);
+  }
+
+  public void show() {
+    waitCursor.setVisible(true);
   }
 }

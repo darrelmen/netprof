@@ -128,8 +128,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @param doSlow
    * @see PressAndHoldExercisePanel#getPlayAudioPanel
    */
-  public PlayAudioPanel(ExerciseController controller, String path, boolean doSlow) {
-    this(controller.getSoundManager(), "", null, doSlow);
+  public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow) {
+    this(soundManager, "", null, doSlow);
     loadAudio(path);
     this.currentPath = path;
   }

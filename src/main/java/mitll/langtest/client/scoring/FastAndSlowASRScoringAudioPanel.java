@@ -231,11 +231,11 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAtt
    * @param vp
    * @param audioAttributes
    * @param instance
-   * @see AudioPanel AudioPanel#getAfterPlayWidget
+   * @see AudioPanel AudioPanel#getProgressBarContainer
    * @see #getGenderChoices(Panel, Map, Map, Collection, String)
    */
   private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes, String instance) {
-/*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getOldID() +
+/*      System.out.println("getProgressBarContainer : for exercise " +exercise.getOldID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
     RadioButton regular = null;
     AudioAttribute regAttr = null;
@@ -350,7 +350,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAtt
 
   /**
    * @param vp
-   * @see AudioPanel AudioPanel#getAfterPlayWidget
+   * @see AudioPanel AudioPanel#getProgressBarContainer
    */
   protected void addNoRefAudioWidget(Panel vp) {
     vp.add(new Label(NO_REFERENCE_AUDIO));
