@@ -119,7 +119,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     DivWidget flContainer = getHorizDiv();
     flContainer.getElement().setId("flWidget");
 
-    flContainer.add(recordPanel.getPostAudioRecordButton());
+    DivWidget recordButtonContainer = new DivWidget();
+
+    recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
+    flContainer.add(recordButtonContainer);
     AudioAttribute audioAttribute = e.getAudioAttributePrefGender(controller.getUserManager().isMale(), true);
 
     if (audioAttribute != null) {
@@ -289,9 +292,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     label.addMouseOverHandler(new MouseOverHandler() {
       @Override
       public void onMouseOver(MouseOverEvent event) {
-        Popover widgets = new BasicDialog().showPopover(label,
+        new BasicDialog().showPopover(
+            label,
             null,
-            toShow, Placement.LEFT);
+            toShow,
+            Placement.LEFT);
         // widgets.setHideDelay(2000);
       }
     });

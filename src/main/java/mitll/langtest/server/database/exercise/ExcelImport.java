@@ -443,7 +443,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                       context, altcontext, contextTranslation,
                       hasAudioIndex ? getCell(next, audioIndex) : "");
 
-              imported.setAttributes(exerciseAttributes);
+              if (imported != null) imported.setAttributes(exerciseAttributes);
 
 //              logger.info("attr for " + imported.getOldID() + " are " + imported.getAttributes());
               String id1 = imported == null ? idToUse : imported.getOldID();
