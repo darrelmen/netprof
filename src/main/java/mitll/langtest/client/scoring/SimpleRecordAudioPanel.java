@@ -42,7 +42,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private static final int PROGRESS_BAR_WIDTH = 260;
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
-  // private static final String RECORD_YOURSELF = "";//Record";
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
@@ -73,7 +72,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   ExerciseController controller;
   T exercise;
   private DivWidget scoreFeedback;
-  //private Widget scoreBar;
   private ProgressBar progressBar;
   private boolean hasScoreHistory = false;
 
@@ -176,6 +174,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller);
     postAudioRecordButton.addStyleName("leftFiveMargin");
+    postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
     //postAudioRecordButton.addStyleName("rightFiveMargin");
 
     playAudioPanel = new MyPlayAudioPanel(controller.getSoundManager(), postAudioRecordButton);

@@ -14,6 +14,7 @@ import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.ScoringServiceAsync;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
@@ -27,6 +28,11 @@ import java.util.logging.Logger;
 class ProjectEditForm extends UserDialog {
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
+
+  private static final int MIN_LENGTH_USER_ID = 4;
+  static final int USER_ID_MAX_LENGTH = 5;
+
+
   private final EventRegistration eventRegistration;
   private final ProjectOps projectOps;
   private ListBox statusBox;
@@ -36,6 +42,8 @@ class ProjectEditForm extends UserDialog {
   private ScoringServiceAsync scoringServiceAsync;
 
   private HTML feedback;
+  private FormField hydraPort;
+  private FormField model;
 
   /**
    * @param projectOps
@@ -78,29 +86,34 @@ class ProjectEditForm extends UserDialog {
   protected Form getUserForm() {
     Form signInForm = new Form() {
       protected void onLoad() {
-        scoringServiceAsync.isHydraRunning(info.getID(), new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-
-          }
-
-          @Override
-          public void onSuccess(Boolean result) {
-            if (!result) {
-              if (info.getPort() == -1) {
-                feedback.setText("No Hydra service for this language.");
-              } else {
-                feedback.setText("Hydra service is not available on port " + info.getPort());
-              }
-            }
-          }
-        });
+        checkIsHydraRunning();
       }
     };
     signInForm.addStyleName("topMargin");
     signInForm.addStyleName("formRounded");
     signInForm.getElement().getStyle().setBackgroundColor("white");
     return signInForm;
+  }
+
+  private void checkIsHydraRunning() {
+    scoringServiceAsync.isHydraRunning(info.getID(), new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        if (!result) {
+          int port = info.getPort();
+          if (port == -1) {
+            feedback.setText("No Hydra service for this language.");
+          } else {
+            feedback.setText("Hydra service is not available on port " + port);
+          }
+        }
+      }
+    });
   }
 
   @NotNull
@@ -117,9 +130,28 @@ class ProjectEditForm extends UserDialog {
   }
 
   private void gotClick() {
-    String value = statusBox.getValue();
+    ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
 
-    info.setStatus(ProjectStatus.valueOf(value));
+    if (status == ProjectStatus.EVALUATION || status == ProjectStatus.PRODUCTION) {
+      try {
+        int i = Integer.parseInt(hydraPort.getSafeText());
+        info.setPort(i);
+
+        if (model.isEmpty()) {
+          markError(model, "Please enter a language model directory.");
+//          return;
+        }
+
+      } catch (NumberFormatException e) {
+        markError(hydraPort, "Please enter a port number for the service.");
+        return;
+      }
+    }
+
+
+    info.setStatus(status);
+
+    info.setModelsDir(model.getSafeText());
 
     projectServiceAsync.update(info, new AsyncCallback<Boolean>() {
       @Override
@@ -149,15 +181,45 @@ class ProjectEditForm extends UserDialog {
 
     setBox(info.getStatus());
 
-    fieldset.add(getCheckAudio(info));
-    fieldset.add(getRecalcRefAudio(info));
+    fieldset.add(new Heading(5, "Hydra Port"));
+    hydraPort = getHydraPort(fieldset, info.getPort());
+    fieldset.add(new Heading(5, "Language Model"));
+    model = getModel(fieldset, info.getModelsDir());
 
     feedback = new HTML();
     feedback.addStyleName("topFiveMargin");
     feedback.addStyleName("bottomFiveMargin");
     fieldset.add(feedback);
 
+
+    fieldset.add(getCheckAudio(info));
+    fieldset.add(getRecalcRefAudio(info));
+
     return fieldset;
+  }
+
+  private FormField getHydraPort(Fieldset fieldset, int currentPort) {
+    FormField userField =
+        addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Hydra Port");
+    userField.box.addStyleName("topMargin");
+    userField.box.addStyleName("rightFiveMargin");
+    userField.box.getElement().setId("hydraPort");
+    userField.box.setWidth("50px");
+    if (currentPort > 0)
+      userField.box.setText("" + currentPort);
+    return userField;
+  }
+
+  private FormField getModel(Fieldset fieldset, String model) {
+    FormField userField =
+        addControlFormFieldWithPlaceholder(fieldset, false, 5, 100, "Language Model");
+    //  userField.box.addStyleName("topMargin");
+    userField.box.addStyleName("rightFiveMargin");
+    userField.box.getElement().setId("languageModel");
+    userField.box.setWidth(SIGN_UP_WIDTH);
+    if (model != null)
+      userField.box.setText("" + model);
+    return userField;
   }
 
   private Button getCheckAudio(final ProjectInfo info) {
@@ -191,7 +253,7 @@ class ProjectEditForm extends UserDialog {
       w.setEnabled(false);
       feedback.setText("Please wait... for a long time.");
 
-      audioServiceAsync.ensureAllAudio( new AsyncCallback<Void>() {
+      audioServiceAsync.ensureAllAudio(new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           w.setEnabled(true);

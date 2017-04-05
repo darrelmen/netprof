@@ -108,6 +108,7 @@ public class AudioFileHelper implements AlignDecode {
    */
   private Map<String, Integer> phoneToCount;
 
+  @Deprecated
   private boolean useOldSchoolServiceOnly = false;
   private AudioConversion audioConversion;
   private boolean isNoModel;
@@ -131,14 +132,17 @@ public class AudioFileHelper implements AlignDecode {
     this.serverProps = serverProperties;
     this.db = db;
     this.logAndNotify = langTestDatabase;
-    this.language = project.getLanguage();
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
-    isNoModel = project.isNoModel();
+
     this.mp3Support = new MP3Support(pathHelper);
     audioConversion = new AudioConversion(serverProps);
+
+    this.language = project.getLanguage();
+    isNoModel = project.isNoModel();
     makeASRScoring(project);
-    makeDecodeCorrectnessChecker();
     this.project = project;
+
+    makeDecodeCorrectnessChecker();
   }
 
   /**

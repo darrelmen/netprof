@@ -93,12 +93,13 @@ public class ProjectOps implements RequiresResize {
     left.getElement().setId("productionProjects");
     left.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
 
-    //DivWidget right = addDiv(content);
     DivWidget detail = addDiv(content);
+    detail.getElement().setId("projectDetail");
+
     detail.getElement().getStyle().setClear(Style.Clear.LEFT);
     detail.addStyleName("leftFiveMargin");
 
-    currentContent = left;
+    currentContent  = left;
     currentUserForm = detail;
     showInitialState(left, detail);
   }
@@ -221,20 +222,12 @@ public class ProjectOps implements RequiresResize {
     projectServiceAsync.getAll(new AsyncCallback<List<ProjectInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
-
       }
 
       @Override
       public void onSuccess(List<ProjectInfo> projectInfos) {
         Panel hp = new HorizontalPanel();
-
         projectContainers.clear();
-//        DivWidget contentP = new DivWidget();
-//        hp.add(contentP);
-//
-//        DivWidget content1 = getProjectListContainer(hp);
-//        DivWidget content2 = getProjectListContainer(hp);
-//        DivWidget content3 = getProjectListContainer(hp);
 
         boolean first = true;
         for (ProjectStatus status : ProjectStatus.values()) {
@@ -244,19 +237,10 @@ public class ProjectOps implements RequiresResize {
             hp.add(contentP);
           } else {
             contentP = getProjectListContainer(hp);
-
           }
           showProjects(projectInfos, status, contentP, userForm, first);
           first = false;
         }
-/*
-        showProjectList(contentP, projectInfos, userForm, "Projects", "Production", ProjectStatus.PRODUCTION, true);
-
-        showProjects(projectInfos, DEVELOPMENT, content1, userForm);
-        showProjectList(content2, projectInfos, userForm, "Projects", "Evaluation", ProjectStatus.EVALUATION, false);
-        showProjectList(content3, projectInfos, userForm, "Projects", "Retired", ProjectStatus.RETIRED, false);
-*/
-
         content.clear();
         content.add(hp);
 
@@ -308,15 +292,15 @@ public class ProjectOps implements RequiresResize {
     List<ProjectInfo> filtered = projectInfos.stream()
         .filter(p -> p.getStatus() == status).collect(Collectors.toList());
 
-    ProjectContainer<ProjectInfo> projectContainer = getProjectContainer(content, filtered, userForm, rowHeader, listTitle, selectFirst);
-    //  this.projectContainer = projectContainer;
+    ProjectContainer<ProjectInfo> projectContainer =
+        getProjectContainer(content, filtered, userForm, rowHeader, listTitle, selectFirst);
     projectContainers.add(projectContainer);
     return projectContainer;
   }
 
   private final List<ProjectContainer<?>> projectContainers = new ArrayList<>();
 
-  public void clearOthers(ProjectContainer<?> current) {
+   void clearOthers(ProjectContainer<?> current) {
     //logger.info("clearOthers of " + current);
     for (ProjectContainer<?> container : projectContainers) {
       if (current != container) {

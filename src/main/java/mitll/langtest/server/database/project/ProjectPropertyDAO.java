@@ -42,6 +42,7 @@ import mitll.npdata.dao.SlickProjectProperty;
 import mitll.npdata.dao.project.ProjectPropertyDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -62,7 +63,6 @@ class ProjectPropertyDAO extends BaseSlickDAO implements IDAO {
   }
 
   /**
-   *
    * @param projid
    * @param modified
    * @param key
@@ -72,16 +72,52 @@ class ProjectPropertyDAO extends BaseSlickDAO implements IDAO {
    * @see ProjectDAO#addProperty
    */
   public void add(int projid, long modified, String key, String value, String propertyType, String parent) {
-    dao.insert(new SlickProjectProperty(-1,
+    SlickProjectProperty property = getProperty(projid, modified, key, value, propertyType, parent);
+    int id = dao.insert(property);
+    logger.info("inserted " + property + " with id " + id);
+  }
+
+  @NotNull
+  private SlickProjectProperty getProperty(int projid,
+                                           long modified,
+                                           String key,
+                                           String value,
+                                           String propertyType,
+                                           String parent) {
+    return new SlickProjectProperty(-1,
         new Timestamp(modified),
         projid,
         key,
-        value, propertyType, parent,false));
+        value,
+        propertyType,
+        parent,
+        false);
   }
 
-  public void update(SlickProjectProperty property) { dao.update(property); }
+  SlickProjectProperty getCopy(SlickProjectProperty projectProperty, String key, String value) {
+    return new SlickProjectProperty(projectProperty.id(),
+        new Timestamp(System.currentTimeMillis()),
+        projectProperty.projid(),
+        key,
+        value,
+        projectProperty.propertytype(),
+        projectProperty.parent(),
+        false);
+  }
+
+  public void update(SlickProjectProperty property) {
+    dao.update(property);
+  }
 
   public Collection<SlickProjectProperty> getAll() {
     return dao.getAll();
+  }
+
+  public Collection<SlickProjectProperty> getAllForProject(int projid) {
+    return dao.getAllForProject(projid);
+  }
+
+  public Collection<SlickProjectProperty> byProjectAndKey(int projid, String key) {
+    return dao.byProjectAndKey(projid, key);
   }
 }

@@ -538,7 +538,8 @@ public class BasicDialog {
     }
   }
 
-  FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
+  protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword,
+                                                         int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
     user.setPlaceholder(hint);

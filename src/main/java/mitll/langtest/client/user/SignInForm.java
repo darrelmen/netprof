@@ -89,11 +89,7 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getForgotPassword
    */
   private static final String ENTER_A_USER_NAME = "Enter a user name.";
-  //  private static final String CHECK_EMAIL = "Check Email";
-//  private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
-//  private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
-//  private static final int EMAIL_POPUP_DELAY = 4000;
 
   private FormField userField;
   /**
@@ -103,8 +99,6 @@ public class SignInForm extends UserDialog implements SignIn {
 
   private Button signIn;
 
-  //private DecoratedPopupPanel resetEmailPopup;
-  // private Button sendEmail;
   private final EventRegistration eventRegistration;
   private final UserPassDialog userPassLogin;
   private final SignUp signUpForm;
@@ -171,13 +165,12 @@ public class SignInForm extends UserDialog implements SignIn {
     userField = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
     userField.box.addStyleName("topMargin");
     userField.box.addStyleName("rightFiveMargin");
-    userField.box.getElement().setId("Use`rname_Box_SignIn");
+    userField.box.getElement().setId("Username_Box_SignIn");
     userField.box.setWidth(SIGN_UP_WIDTH);
 
     userField.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
-        // signInHasFocus = true;
         userPassLogin.setSignInHasFocus();
         eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "focus in username field");
       }

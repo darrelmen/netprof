@@ -36,7 +36,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.HasID;
 
-public class ProjectInfo implements HasID, IsSerializable {
+public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   private String name;
   private String language;
   private String course;
@@ -45,7 +45,9 @@ public class ProjectInfo implements HasID, IsSerializable {
   private int displayOrder;
   private int id;
   private long created;
+
   private int port = -1;
+  private String modelsDir;
 
   public ProjectInfo() {
   } // for serialization
@@ -61,7 +63,7 @@ public class ProjectInfo implements HasID, IsSerializable {
                      ProjectStatus status,
                      int displayOrder,
                      String countryCode,
-                     String port) {
+                     String port, String modelsDir) {
     this.language = language;
     this.id = projectid;
     this.name = name;
@@ -75,6 +77,7 @@ public class ProjectInfo implements HasID, IsSerializable {
     } catch (NumberFormatException e) {
       // bad port
     }
+    this.modelsDir = modelsDir;
   }
 
   public String getLanguage() {
@@ -128,6 +131,7 @@ public class ProjectInfo implements HasID, IsSerializable {
     return countryCode;
   }
 
+  @Override
   public void setStatus(ProjectStatus status) {
     this.status = status;
   }
@@ -136,5 +140,19 @@ public class ProjectInfo implements HasID, IsSerializable {
     return port;
   }
 
-  public String toString() { return getName() + " " + getStatus() + " lang " + language; }
+  public void setPort(int port) {
+    this.port = port;
+  }
+
+  public String getModelsDir() {
+    return modelsDir;
+  }
+
+  public void setModelsDir(String modelsDir) {
+    this.modelsDir = modelsDir;
+  }
+
+  public String toString() {
+    return getName() + " " + getStatus() + " lang " + language;
+  }
 }
