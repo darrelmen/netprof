@@ -13,7 +13,7 @@ import java.util.Properties;
 /**
  * Created by go22670 on 10/26/16.
  */
-class CreateProject {
+public class CreateProject {
   private static final Logger logger = LogManager.getLogger(CreateProject.class);
   public static final String MODEL_PROPERTY_TYPE = "model";
 

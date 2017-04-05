@@ -96,7 +96,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
   }
 
   protected int getPageSize() {
-    return 31;
+    return 10;
   }
 
   protected int getNameCompare(T o1, T o2) {

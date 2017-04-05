@@ -168,7 +168,7 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testGerman() {
-    copyProd("German");
+    copyDev("German");
   }
 
   @Test

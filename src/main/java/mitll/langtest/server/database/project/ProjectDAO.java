@@ -35,6 +35,7 @@ package mitll.langtest.server.database.project;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.UserProjectDAO;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -49,6 +50,9 @@ import org.apache.logging.log4j.Logger;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+
+import static mitll.langtest.server.ServerProperties.MODELS_DIR;
+import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_PORT;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
   private static final Logger logger = LogManager.getLogger(ProjectDAO.class);
@@ -104,13 +108,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   @Override
   public boolean update(int userid, ProjectInfo projectInfo) {
-    Project currentProject = database.getProject(projectInfo.getID());
+    int projid = projectInfo.getID();
+    Project currentProject = database.getProject(projid);
 
     SlickProject project = currentProject.getProject();
     Timestamp now = new Timestamp(System.currentTimeMillis());
     Timestamp created = new Timestamp(projectInfo.getCreated());
 
-    SlickProject changed = new SlickProject(projectInfo.getID(),
+    SlickProject changed = new SlickProject(projid,
         userid,
         created,
         now,
@@ -133,15 +138,34 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       logger.error("didn't update " + projectInfo + " for current " + currentProject);
     }
 
+    addOrUpdate(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
+    addOrUpdate(projid, MODELS_DIR, projectInfo.getModelsDir());
     return didChange;
+  }
+
+  private void addOrUpdate(int projid, String key, String port) {
+    logger.info("addOrUpdate " +projid + " " + key + "="+port);
+
+    ProjectPropertyDAO propertyDAO = getProjectPropertyDAO();
+    Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.byProjectAndKey(projid, key);
+    if (slickProjectProperties.isEmpty()) {
+      propertyDAO.add(projid, System.currentTimeMillis(),
+          key, port, CreateProject.MODEL_PROPERTY_TYPE, "");
+    } else {
+      if (slickProjectProperties.size() > 1)
+        logger.error("addOrUpdate got back " + slickProjectProperties.size() + " properties for " + key);
+      SlickProjectProperty next = slickProjectProperties.iterator().next();
+      logger.info("update " + next);
+      SlickProjectProperty copy = propertyDAO.getCopy(next, key, port);
+      propertyDAO.update(copy);
+    }
   }
 
   private SlickProject getDefaultProject() {
     Collection<SlickProject> aDefault = dao.getDefault();
     if (aDefault.isEmpty()) {
       return null;
-    }
-    else {
+    } else {
       return aDefault.iterator().next();
     }
 //    return aDefault.isEmpty() ? null : aDefault.iterator().next();
@@ -197,7 +221,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @seex PostgresTest#testDeleteEnglish
    */
   public void delete(int id) {
-    logger.info("delete project #"+id);
+    logger.info("delete project #" + id);
 
     dao.delete(id);
   }
@@ -270,7 +294,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   *
    * @param project
    * @param key
    * @param value

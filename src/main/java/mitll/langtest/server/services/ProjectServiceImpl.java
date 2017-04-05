@@ -59,7 +59,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
             ProjectStatus.valueOf(project.status()),
             project.displayorder(),
             project.countrycode(),
-             project.getProp(ServerProperties.WEBSERVICE_HOST_PORT))
+            project.getProp(ServerProperties.WEBSERVICE_HOST_PORT),
+            project.getProp(ServerProperties.MODELS_DIR))
         )
         .collect(Collectors.toList());
   }
@@ -75,17 +76,21 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
   @Override
   public boolean update(ProjectInfo info) {
-    int currentUser = getUserIDFromSession();
     Project currentProject = db.getProject(info.getID());
-    boolean wasRetired = false;
-    if (currentProject != null) {
-      wasRetired = currentProject.getStatus() == ProjectStatus.RETIRED;
-    }
-    boolean update = getProjectDAO().update(currentUser, info);
+    boolean wasRetired = getWasRetired(currentProject);
+    boolean update = getProjectDAO().update(getUserIDFromSession(), info);
     if (update && wasRetired) {
       db.configureProject(db.getProject(info.getID()));
     }
     db.getProjectManagement().refreshProjects();
     return update;
+  }
+
+  private boolean getWasRetired(Project currentProject) {
+    boolean wasRetired = false;
+    if (currentProject != null) {
+      wasRetired = currentProject.getStatus() == ProjectStatus.RETIRED;
+    }
+    return wasRetired;
   }
 }

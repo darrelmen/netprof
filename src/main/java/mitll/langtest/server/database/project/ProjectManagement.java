@@ -317,6 +317,10 @@ public class ProjectManagement implements IProjectManagement {
     setExerciseDAO(project);
   }
 
+  public void forgetProject(int projid) {
+    idToProject.remove(projid);
+  }
+
   /**
    * After changing project status - e.g. to retired - we need to update the SlickProject on the project.
    *
@@ -324,20 +328,23 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void refreshProjects() {
-    Collection<SlickProject> all = projectDAO.getAll();
-    Map<Integer, SlickProject> idToSlickProject = new HashMap<>();
-    for (SlickProject project : all) idToSlickProject.put(project.id(), project);
+    Map<Integer, SlickProject> idToSlickProject = getIdToProjectMap();
 
     for (Project project : idToProject.values()) {
       SlickProject project1 = project.getProject();
-
-      int id = project1.id();
-
-      SlickProject update = idToSlickProject.get(id);
-      //  logger.info("Was " + project.getProject());
+      SlickProject update = idToSlickProject.get(project1.id());
+      logger.info("refreshProjects Was " + project.getProject() + " " + project.isNoModel());
       project.setProject(update);
-      //  logger.info("Now " + project.getProject());
+      logger.info("refreshProjects Now " + project.getProject() + " " + project.isNoModel());
     }
+  }
+
+  @NotNull
+  private Map<Integer, SlickProject> getIdToProjectMap() {
+    Collection<SlickProject> all = projectDAO.getAll();
+    Map<Integer, SlickProject> idToSlickProject = new HashMap<>();
+    for (SlickProject project : all) idToSlickProject.put(project.id(), project);
+    return idToSlickProject;
   }
 
   /**
@@ -497,11 +504,7 @@ public class ProjectManagement implements IProjectManagement {
     Set<Integer> knownProjects = idToProject.keySet();
 
     if (project == null) {
-      Collection<SlickProject> all = projectDAO.getAll();
-
-      Set<Integer> dbProjects = all.stream().map(SlickProject::id).collect(Collectors.toSet());
-
-      dbProjects.removeAll(knownProjects);
+      Set<Integer> dbProjects = getNewProjects(knownProjects);
 
       if (!dbProjects.isEmpty()) {
         logger.debug("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
@@ -519,6 +522,14 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
     return project;
+  }
+
+  @NotNull
+  private Set<Integer> getNewProjects(Set<Integer> knownProjects) {
+    Set<Integer> dbProjects = projectDAO.getAll().stream().map(SlickProject::id).collect(Collectors.toSet());
+
+    dbProjects.removeAll(knownProjects);
+    return dbProjects;
   }
 
 /*  public Project getProjectForgiving(int projectid) {
@@ -575,7 +586,7 @@ public class ProjectManagement implements IProjectManagement {
       Project project = getProject(projid);
 
       if (project.getStatus() == ProjectStatus.RETIRED && !userWhere.isAdmin()) {
-        logger.info("project is retired - so kicking the user back to project choice screen.");
+        logger.info("setStartupInfo project is retired - so kicking the user back to project choice screen.");
       } else {
         configureProject(project, true);
 
@@ -596,11 +607,9 @@ public class ProjectManagement implements IProjectManagement {
             sectionHelper.getRootTypes(),
             sectionHelper.getParentToChildTypes());
 
-/*
         logger.info("setStartupInfo : For " + userWhere +
             "\n\t " + typeOrder +
             "\n\tSet startup info " + startupInfo);
-*/
 
         userWhere.setStartupInfo(startupInfo);
 
@@ -611,11 +620,14 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * For now, not adding difficulty or sound as properties - sort by difficulty though.
+   *
    * @param project
    * @return
    */
   @NotNull
-  private List<String> getTypeOrder(Project project) {  return project.getTypeOrder();  }
+  private List<String> getTypeOrder(Project project) {
+    return project.getTypeOrder();
+  }
 
   private boolean hasModel(SlickProject project1) {
     return getModel(project1) != null;

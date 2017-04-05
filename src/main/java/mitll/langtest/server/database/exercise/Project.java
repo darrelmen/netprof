@@ -60,7 +60,7 @@ public class Project implements PronunciationLookup {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
   private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
-  private static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
   private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
 
   private SlickProject project;

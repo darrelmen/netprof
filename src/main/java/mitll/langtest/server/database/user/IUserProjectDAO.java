@@ -57,6 +57,6 @@ public interface IUserProjectDAO extends IDAO {
    * @param userid
    */
   void forget(int userid);
- // Collection<SlickUserProject> getAll();
+
   int mostRecentByUser(int user);
 }

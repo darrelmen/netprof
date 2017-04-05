@@ -443,7 +443,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                       context, altcontext, contextTranslation,
                       hasAudioIndex ? getCell(next, audioIndex) : "");
 
-              imported.setAttributes(exerciseAttributes);
+              if (imported != null) imported.setAttributes(exerciseAttributes);
 
 //              logger.info("attr for " + imported.getOldID() + " are " + imported.getAttributes());
               String id1 = imported == null ? idToUse : imported.getOldID();
@@ -498,10 +498,14 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exercises;
   }
 
+  Set<String> toSkip = new HashSet<>(Arrays.asList("Translation".toLowerCase(),"Transliteration".toLowerCase()));
+
   private void addColToHeaderForProperty(Map<Integer, String> colToHeader, String col, int i) {
-    if (col.toLowerCase().contains(language.toLowerCase())) {
+    String s = language.toLowerCase();
+    String lcCol = col.toLowerCase();
+    if (lcCol.contains(s) || toSkip.contains(lcCol)) {
       logger.debug("readFromSheet skipping col " + col);
-    } else {
+    } else if (!col.isEmpty()){
       logger.debug("readFromSheet adding col '" + col + "' at  " +i + " vs '" +language+ "'");
       colToHeader.put(i, col);
     }

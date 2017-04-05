@@ -496,10 +496,10 @@ public class BasicDialog {
    * @param placement
    * @see RecordButton#showTooLoud()
    */
-  public Popover showPopover(Widget w, String heading, String message, Placement placement) {
-    Popover popover = new Popover();
-    showPopover(popover, w, heading, message, placement, true);
-    return popover;
+  public void showPopover(Widget w, String heading, String message, Placement placement) {
+    //Popover popover = new Popover();
+    showPopover(new Popover(), w, heading, message, placement, true);
+    //return popover;
   }
 
   /**
@@ -538,7 +538,8 @@ public class BasicDialog {
     }
   }
 
-  FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
+  protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword,
+                                                         int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
     user.setPlaceholder(hint);
