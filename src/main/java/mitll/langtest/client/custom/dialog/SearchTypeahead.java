@@ -38,8 +38,9 @@ public class SearchTypeahead {
 
   public SearchTypeahead(ExerciseController controller, FeedbackExerciseList feedbackExerciseList) {
     this.controller = controller;
-    this.feedbackExerciseList =feedbackExerciseList;
+    this.feedbackExerciseList = feedbackExerciseList;
   }
+
   /**
    * @param whichField
    * @param w
@@ -150,8 +151,6 @@ public class SearchTypeahead {
     return suggestions;
   }
 
-
-
   private ExerciseSuggestion getSuggestion(String[] searchWords, CommonShell resp) {
     String formattedSuggestion = resp.getForeignLanguage() + " - " + resp.getEnglish();
     String lowerCaseSuggestion = normalizeSuggestion(formattedSuggestion);
@@ -170,9 +169,11 @@ public class SearchTypeahead {
    * @see #makeSuggestionResponse
    */
   private ExerciseSuggestion createSuggestion(String replacementString,
-                                                                   @IsSafeHtml String displayString, CommonShell shell) {
+                                              @IsSafeHtml String displayString,
+                                              CommonShell shell) {
     return new ExerciseSuggestion(replacementString, displayString, shell);
   }
+
   /**
    * Normalize the search key by making it lower case, removing multiple spaces,
    * apply whitespace masks, and make it lower case.
@@ -183,7 +184,7 @@ public class SearchTypeahead {
     search = normalizeSuggestion(search);
 
     // Remove all excess whitespace from the search string.
-    search = search.replaceAll(NORMALIZE_TO_SINGLE_WHITE_SPACE,WHITESPACE_STRING);
+    search = search.replaceAll(NORMALIZE_TO_SINGLE_WHITE_SPACE, WHITESPACE_STRING);
 
     return search.trim();
   }

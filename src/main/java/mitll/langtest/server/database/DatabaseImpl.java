@@ -408,7 +408,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public Connection getConnection(String who) {
     if (connection == null) {
-      logger.warn("no connection created " + who + " use h2 property = " + serverProps.useH2());
+      if (serverProps.useH2()) {
+        logger.warn("getConnection no connection created " + who + " use h2 property = " + serverProps.useH2());
+      }
       return null;
     } else {
       return connection.getConnection(who);
@@ -1517,9 +1519,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see DownloadServlet#writeAllAudio
    */
   public void writeUserListAudio(OutputStream out, int projectid) throws Exception {
-    new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(projectid),
-        getExercises(projectid), installPath,
-        getProject(projectid).getLanguage());
+    new AudioExport(getServerProps()).writeZipJustOneAudio(
+        out,
+        getSectionHelper(projectid),
+        getExercises(projectid),
+        installPath,
+        getProject(projectid).getLanguage()
+    );
   }
 
   /**
@@ -1598,7 +1604,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     for (CommonExercise exercise : exercises) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
-        audioDAO.attachAudio(exercise, /*installPath, configDir,*/ audioAttributes, project.getLanguage());
+        audioDAO.attachAudio(exercise, audioAttributes, project.getLanguage());
       }
       //if (!debug) ensureMP3s(exercise);
       // exercises.add(getJsonForExercise(exercise));

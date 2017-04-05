@@ -75,7 +75,7 @@ public class AudioExport {
    * @param typeToSection
    * @param sectionHelper
    * @param exercisesForSelectionState
-   * @param language1
+   * @param language
    * @param audioDAO
    * @param isDefectList
    * @throws Exception
@@ -85,15 +85,21 @@ public class AudioExport {
                        Map<String, Collection<String>> typeToSection,
                        ISection<?> sectionHelper,
                        Collection<CommonExercise> exercisesForSelectionState,
-                       String language1,
+                       String language,
                        IAudioDAO audioDAO,
                        boolean isDefectList,
                        AudioExportOptions options,
                        boolean isEnglish) throws Exception {
     List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState,isEnglish);
     boolean skipAudio = typeToSection.isEmpty() && !options.isAllContext();
+
     logger.info("writeZip skip audio = " + skipAudio);
-    writeToStream(copy, audioDAO, getPrefix(typeToSection, typeOrder), typeOrder, language1, out,
+
+    writeToStream(copy, audioDAO,
+        getPrefix(typeToSection, typeOrder),
+        typeOrder,
+        language,
+        out,
         skipAudio, isDefectList, options);
   }
 
@@ -123,6 +129,25 @@ public class AudioExport {
   }
 
   /**
+   * @param out
+   * @param sectionHelper
+   * @param exercisesForSelectionState
+   * @param audioDirectory
+   * @param language
+   * @throws Exception
+   * @see mitll.langtest.server.database.DatabaseImpl#writeUserListAudio
+   */
+  public void writeZipJustOneAudio(OutputStream out,
+                                   ISection<?> sectionHelper,
+                                   Collection<? extends CommonExercise> exercisesForSelectionState,
+                                   String audioDirectory,
+                                   String language) throws Exception {
+    List<CommonExercise> copy = new ArrayList<>(exercisesForSelectionState);
+    new ExerciseSorter(sectionHelper.getTypeOrder()).sortByTooltip(copy);
+    writeToStreamJustOneAudio(copy, audioDirectory, out, language);
+  }
+
+  /**
    * @see #writeZip
    * @param sectionHelper
    * @param exercisesForSelectionState
@@ -140,25 +165,6 @@ public class AudioExport {
                                                     Collection<? extends CommonExercise> exercisesForSelectionState) {
     this.typeOrder = sectionHelper.getTypeOrder();
     return new ArrayList<>(exercisesForSelectionState);
-  }
-
-  /**
-   * @param out
-   * @param sectionHelper
-   * @param exercisesForSelectionState
-   * @param audioDirectory
-   * @param language
-   * @throws Exception
-   * @see mitll.langtest.server.database.DatabaseImpl#writeUserListAudio
-   */
-  public void writeZipJustOneAudio(OutputStream out,
-                                   ISection<?> sectionHelper,
-                                   Collection<? extends CommonExercise> exercisesForSelectionState,
-                                   String audioDirectory,
-                                   String language) throws Exception {
-    List<CommonExercise> copy = new ArrayList<>(exercisesForSelectionState);
-    new ExerciseSorter(sectionHelper.getTypeOrder()).sortByTooltip(copy);
-    writeToStreamJustOneAudio(copy, audioDirectory, out, language);
   }
 
   /**

@@ -54,15 +54,7 @@ import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
-/*
-  public static final String ENGLISH_ASC = "English (A-Z)";
-  public static final String ENGLISH_DSC = "English (Z-A)";
-  public static final String LENGTH_SHORT_TO_LONG = "Length : short to long";
-  public static final String LENGTH_LONG_TO_SHORT = "Length : long to short";
-  public static final String SCORE_LOW_TO_HIGH = "Score : low to high";
-  public static final String SCORE_DSC = "Score : high to low";
 
-  public static final int MAX_TO_SHOW = 4;*/
   private static final int TOTAL = 32;
   private static final String SHOW_LESS = "<i>View fewer</i>";
   private static final String SHOW_MORE = "<i>View all</i>";
@@ -100,8 +92,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     setUnaccountedForVertical(0);//CLASSROOM_VERTICAL_EXTRA);
 
     downloadHelper = new DownloadHelper(this);
-
-    // this.listHeader = listHeader;
 
     DivWidget breadRow = new DivWidget();
     //  breadRow.addStyleName("floatLeftList");
@@ -164,7 +154,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           protected void gotRangeChanged(Range newRange) {
             // logger.info("gotRangeChanged for " + newRange);
-
             askServerForExercises(-1, getIdsForRange(newRange));
           }
 

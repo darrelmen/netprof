@@ -142,7 +142,9 @@ public class ExerciseToPhone {
 //          exToWordToPronunciations.put(exid, wordToProns = new HashMap<String, List<List<String>>>());
         Map<String, List<List<String>>> wordToProns = new HashMap<String, List<List<String>>>();
 
-        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJsonAndGetProns(exjson.scorejson(), wordToProns);
+        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
+            parseResultJson.parseJsonAndGetProns(exjson.scorejson(), wordToProns);
+
         int numWords = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT).size();
 
         for (Map.Entry<String, List<List<String>>> pair : wordToProns.entrySet()) {

@@ -102,7 +102,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
     if (!defResult.isEmpty()) {
       defaultResult = defResult.iterator().next();
-      logger.info("default " + defaultResult);
+//      logger.info("default " + defaultResult);
       return defaultResult.id();
     } else {
       logger.info("nope - no default result ");

@@ -41,7 +41,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -1284,7 +1283,7 @@ public class AudioFileHelper implements AlignDecode {
   private HTKDictionary readDictionary(Project project, String installPath) {
     HTKDictionary htkDictionary = null;
     try {
-      htkDictionary = makeDict(installPath, project.getModelsDir());
+      htkDictionary = makeDict(project.getModelsDir());
     } catch (Exception e) {
       logger.error("for now got " + e, e);
     }
@@ -1295,17 +1294,21 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see #makeASRScoring
    */
-  private HTKDictionary makeDict(String installPath, String modelsDir) {
+  private HTKDictionary makeDict(String modelsDir) {
+/*
     logger.info("makeDict :" +
         "\n\tinstall path " + installPath +
         "\n\tmodelsDir    " + modelsDir);
+        */
+
     String scoringDir = Scoring.getScoringDir(serverProps.getDcodrBaseDir());
     String dictFile =
         new ConfigFileCreator(serverProps.getProperties(), scoringDir, modelsDir).getDictFile();
 
-    logger.info("makeDict :" +
-        "\n\tscoringDir :'" + installPath + "'" +
-        "\n\tdictFile     " + dictFile);
+/*    logger.info("makeDict :" +
+        "\n\tscoringDir '" + installPath + "'" +
+        "\n\tdictFile    " + dictFile);*/
+
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
       File file = new File(dictFile);

@@ -128,7 +128,7 @@ public class ParseResultJson {
     }
 
     if (imageTypeMapMap.isEmpty()) {
-      logger.warn("json " + json + " produced empty events map " + wordToPronunciations);
+      logger.warn("parseJsonString json '" + json + "' produced empty events map " + wordToPronunciations);
     }
     else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
       if (warn++ < 2) logger.warn("parseJsonString no words for " + json);
@@ -136,6 +136,9 @@ public class ParseResultJson {
     }
     return imageTypeMapMap;
   }
+
+  Map<NetPronImageType, List<TranscriptSegment>> emptyMap = new HashMap<>();
+
 
   /**
    * @param json
@@ -147,13 +150,23 @@ public class ParseResultJson {
   public Map<NetPronImageType, List<TranscriptSegment>> readFromJSON(String json) {
     if (json.isEmpty()) {
       logger.warn("json is empty?");
+      return emptyMap;
     }
-    if (json.equals("{}")) {
+    else if (json.equals("{}") || json.equals("null")) {
       logger.warn("json is " + json);
+      return emptyMap;
     }
-    return getNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
+    else {
+      return getNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
+    }
   }
 
+  /**
+   * @see mitll.langtest.server.database.userexercise.ExerciseToPhone#getExToPhonePerProject
+   * @param json
+   * @param wordToPronunciations
+   * @return
+   */
   public Map<NetPronImageType, List<TranscriptSegment>> parseJsonAndGetProns(String json,
                                                                              Map<String, List<List<String>>> wordToPronunciations) {
     return getNetPronImageTypeToEndTimes(parseJsonString(json, false, wordToPronunciations));

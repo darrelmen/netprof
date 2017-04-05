@@ -294,7 +294,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     ServerProperties serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
 
     File configDir = serverInitializationManagerNetProf.getConfigDir();
-    logger.info("readProperties configDir from props " + configDir);
+//    logger.info("readProperties configDir from props " + configDir);
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     this.configDir = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
@@ -306,13 +306,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
       db = makeDatabaseImpl(this.serverProps.getH2Database());
 
-      logger.info("readProperties made database " + db);
+//      logger.info("readProperties made database " + db);
 
       securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
-      logger.info("readProperties made securityManager " + securityManager);
+  //    logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
 
-      logger.info("readProperties shareDB ");
+    //  logger.info("readProperties shareDB ");
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
@@ -347,7 +347,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.debug("hmm... found existing database reference " + databaseReference);
     }
     servletContext.setAttribute(DATABASE_REFERENCE, db);
-    logger.info("shareDB shared db " + servletContext.getAttribute(DATABASE_REFERENCE));
+//    logger.info("shareDB shared db " + servletContext.getAttribute(DATABASE_REFERENCE));
   }
 
   /**
@@ -356,13 +356,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see LangTestDatabaseImpl#init()
    */
   private void setInstallPath(DatabaseServices db) {
-//    String lessonPlanFile = getLessonPlan();
-//    if (lessonPlanFile != null &&
-//        !serverProps.getLessonPlan().startsWith("http") &&
-//        !new File(lessonPlanFile).exists()) {
-//      logger.error("couldn't find lesson plan file " + lessonPlanFile);
-//    }
-    //  String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
     String installPath = pathHelper.getInstallPath();
     logger.debug("setInstallPath " + installPath);
     db.setInstallPath(installPath, "");

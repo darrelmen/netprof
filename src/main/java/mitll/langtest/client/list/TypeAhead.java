@@ -56,7 +56,7 @@ import mitll.langtest.client.LangTest;
 public class TypeAhead implements ITypeAhead {
   //private Logger logger = Logger.getLogger("TypeAhead");
 
-  private static final int WIDTH = 180-32;
+  private static final int WIDTH = 180 - 32;
   private static final int RIGHT_MARIGN_FOR_SEARCH = 10;
   private final TextBox typeAhead = new TextBox();
   private WaitCursorHelper waitCursorHelper;
@@ -97,8 +97,8 @@ public class TypeAhead implements ITypeAhead {
   }
 
   /**
-   * @see PagingExerciseList#showEmptySelection
    * @return
+   * @see PagingExerciseList#showEmptySelection
    */
   @Override
   public Widget getWidget() {
@@ -117,10 +117,19 @@ public class TypeAhead implements ITypeAhead {
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         //  logger.info("got key up " + event);
-        gotTypeAheadEntry(getTypeAhead().getText());
+        String current = getTypeAhead().getText();
+
+        if (previous.equals(current)) {
+
+        } else {
+          gotTypeAheadEntry(current);
+          previous = current;
+        }
       }
     });
   }
+
+  private String previous = "";
 
   /**
    * Subclass please.
@@ -140,9 +149,9 @@ public class TypeAhead implements ITypeAhead {
   }
 
   /**
-   * @see #TypeAhead
    * @param waitCursor
    * @return
+   * @see #TypeAhead
    */
   private Widget getSearch(Widget waitCursor) {
     Panel flow = new HorizontalPanel();
@@ -183,5 +192,7 @@ public class TypeAhead implements ITypeAhead {
    * @return
    * @see PagingExerciseList#addTypeAhead(Panel)
    */
-  TextBox getTypeAhead() {   return typeAhead;  }
+  TextBox getTypeAhead() {
+    return typeAhead;
+  }
 }
