@@ -83,7 +83,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private TypeAhead typeAhead;
   long userListID = -1;
   private int unaccountedForVertical = 160;
-//  private boolean unrecorded, defaultAudioFilter;
+  //  private boolean unrecorded, defaultAudioFilter;
   private boolean onlyExamples;
 
   private Timer waitTimer = null;
@@ -145,6 +145,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * Add two rows -- the search box and then the item list
+   *
    * @see #PagingExerciseList
    */
   protected void addComponents() {
@@ -292,8 +293,15 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       typeAhead = new TypeAhead(column, waitCursor, SEARCH, true, controller.getLanguage()) {
         @Override
         public void gotTypeAheadEntry(String text) {
-          gotTypeAheadEvent(text, false);
-          controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
+         // String current = typeAhead.getText();
+
+//          if (current.equals(text)) {
+//            logger.info("skip no change");
+//          } else {
+            pagingContainer.setHighlight(text);
+            gotTypeAheadEvent(text, false);
+            controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
+       //   }
         }
       };
     }
@@ -313,7 +321,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private Stack<Long> pendingRequests = new Stack<>();
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
-    //  logger.info("got type ahead '" + text + "' at " + new Date(keypressTimestamp));
+    logger.info("gotTypeAheadEvent got type ahead '" + text + "' at " + new Date(System.currentTimeMillis()));
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
@@ -346,6 +354,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       if (typeAhead != null) {
         //   logger.info("Set type ahead to '" + t + "'");
         typeAhead.setText(t);
+        pagingContainer.setHighlight(t);
       }
     } else {
       popRequest();

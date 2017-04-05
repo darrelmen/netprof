@@ -76,6 +76,8 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   private final boolean showExerciseState;
   //  private final String instance;
   private int FLLength = MAX_LENGTH_ID;
+  private String highlight = "";
+  private SearchHighlighter searchHighlighter = new SearchHighlighter();
 
   /**
    * @param controller
@@ -210,6 +212,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
       @Override
       public SafeHtml getValue(T shell) {
         String columnText = getEnglishText(shell);
+      //  columnText = getQueryHighlighted(columnText);
 
         if (!showExerciseState) {
           return getColumnToolTip(columnText);
@@ -264,14 +267,35 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   }
 
   private String truncate(String columnText) {
-    int lengthToUse = MAX_LENGTH_ID;
-    if (columnText.length() > lengthToUse) columnText = columnText.substring(0, lengthToUse - 3) + TRUNCATED;
-    return columnText;
+//    int lengthToUse = MAX_LENGTH_ID;
+//    if (columnText.length() > lengthToUse) {
+//      String substring = columnText.substring(0, lengthToUse - 3);
+//      columnText = getQueryHighlighted(substring) + TRUNCATED;
+//    }
+    return getQueryHighlighted(columnText);
   }
 
   private String truncateFL(String columnText) {
-    if (columnText.length() > FLLength) columnText = columnText.substring(0, FLLength - 3) + TRUNCATED;
-    return columnText;
+    if (highlight.isEmpty()) {
+      if (columnText.length() > FLLength) {
+        String substring = columnText.substring(0, FLLength - 3);
+        return substring + TRUNCATED;
+      } else {
+        return columnText;
+      }
+    } else {
+      return getQueryHighlighted(columnText);
+    }
+  }
+
+  private String getQueryHighlighted(String columnText) {
+    if (columnText.length() > FLLength) {
+      String substring = columnText.substring(0, FLLength - 3);
+      String queryHighlightString = searchHighlighter.getQueryHighlightString(substring, highlight);
+      return queryHighlightString + TRUNCATED;
+    } else {
+      return searchHighlighter.getQueryHighlightString(columnText, highlight);
+    }
   }
 
   /**
@@ -324,5 +348,9 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
       toShow = meaning.isEmpty() ? english : meaning;
     }
     return toShow;
+  }
+
+  public void setHighlight(String highlight) {
+    this.highlight = highlight;
   }
 }

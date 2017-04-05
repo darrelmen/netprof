@@ -1301,6 +1301,19 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public CommonExercise getCustomOrPredefExercise(String id) {
     CommonExercise userEx = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
 
+    // check if it's been removed
+    if (userEx != null) {
+      Collection<AddRemoveDAO.IdAndTime> removeByID = addRemoveDAO.getRemoveByID(id);
+
+      if (!removeByID.isEmpty()) {
+        if (DEBUG) logger.debug("getCustomOrPredefExercise exid " + id + " has been removed...");
+        userEx = null;
+      }
+      else {
+        logger.debug("getCustomOrPredefExercise exid " + id + " has NOT been removed...");
+      }
+    }
+
     return chooseWhichExercise(id, userEx);
   }
 
@@ -1323,9 +1336,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     if (userEx == null) {
       toRet = getExercise(id);
-//      logger.info("chooseWhichExercise got predef " + toRet);
+      //logger.info("chooseWhichExercise got predef " + toRet);
     } else {
-//      logger.info("chooseWhichExercise got user ex for " + id);
+      //logger.info("chooseWhichExercise got user ex for " + id);
       long updateTime = userEx.getUpdateTime();
       CommonExercise predef = getExercise(id);
 

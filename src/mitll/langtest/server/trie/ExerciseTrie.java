@@ -117,6 +117,8 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
       ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(exercise, false);
       addEntryToTrie(textEntityDescription);
 
+      addSubstrings(exercise,fl);
+
       Collection<String> tokens = isMandarin ?
           getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(fl);
 
@@ -165,6 +167,19 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
       Character character = c;
       if (!Character.isSpaceChar(c)) {
         addEntry(exercise, character.toString());
+      }
+    }
+  }
+
+  private void addSubstrings(T exercise, String fl) {
+
+    for (int i = 0; i< fl.length(); i++) {
+      String substring = fl.substring(i);
+      char c = substring.charAt(0);
+  //    Character character = c;
+      if (!Character.isSpaceChar(c)) {
+        addEntry(exercise, substring);
+//        logger.info("adding " + substring);
       }
     }
   }

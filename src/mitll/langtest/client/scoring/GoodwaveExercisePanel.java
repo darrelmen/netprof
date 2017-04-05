@@ -64,6 +64,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -403,15 +404,15 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     // TODO : for now, since we need to deal with underline... somehow...
     // and when clicking inside dialog, seems like we need to dismiss dialog...
     if (label.contains(CONTEXT)) {
-      InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
-      englishPhrase.addStyleName(INSTRUCTION_DATA_WITH_WRAP);
+      InlineHTML thePhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
+      thePhrase.addStyleName(INSTRUCTION_DATA_WITH_WRAP);
       if (label.contains("Meaning")) {
-        englishPhrase.addStyleName("englishFont");
+        thePhrase.addStyleName("englishFont");
       }
-      if (isPashto()) englishPhrase.addStyleName("pashtofont");
-      nameValueRow.add(englishPhrase);
-      addTooltip(englishPhrase, label.replaceAll(":", ""));
-      englishPhrase.addStyleName("leftFiveMargin");
+      if (isPashto()) thePhrase.addStyleName("pashtofont");
+      nameValueRow.add(thePhrase);
+      addTooltip(thePhrase, label.replaceAll(":", ""));
+      thePhrase.addStyleName("leftFiveMargin");
     } else {
       getClickableWords(label, value, nameValueRow);
     }
@@ -461,7 +462,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   private boolean isRTLContent(String content) {
-    return controller.isRightAlignContent() || WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
+    return /*controller.isRightAlignContent() || */WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
   }
 
   private InlineHTML makeClickableText(String label, String value, final String html, boolean chineseCharacter) {
@@ -500,7 +501,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     if (label.contains("Meaning")) {
       w.addStyleName("englishFont");
     }
-    if (isPashto()) {
+
+    if (isPashto() && ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT.equals(label)) {
       w.addStyleName("pashtofont");
     }
     if (!chineseCharacter) w.addStyleName("rightFiveMargin");

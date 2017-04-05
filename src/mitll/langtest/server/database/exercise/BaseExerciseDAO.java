@@ -530,7 +530,7 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
         CommonExercise remove = idToExercise.get(id.getId());
         if (remove != null && remove.getUpdateTime() < id.getTimestamp()) {
           idToExercise.remove(id.getId());
-          logger.warn("remove : " + remove);
+          logger.warn("removeExercises : remove : " + remove);
           boolean remove1 = exercises.remove(remove);
           if (!remove1) logger.error("huh? remove inconsistency??");
           getSectionHelper().removeExercise(remove);

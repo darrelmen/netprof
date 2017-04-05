@@ -113,11 +113,19 @@ public class TypeAhead {
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         //  logger.info("got key up " + event);
-        gotTypeAheadEntry(getTypeAhead().getText());
+        String current = getTypeAhead().getText();
+        if (current.equals(previous)) {
+
+        }
+        else {
+          gotTypeAheadEntry(current);
+        }
+        previous = current;
       }
     });
   }
 
+  String previous = "";
   /**
    * Subclass please.
    *

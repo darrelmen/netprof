@@ -151,6 +151,11 @@ public class AddRemoveDAO extends DAO {
     return getIds(REMOVE);
   }
 
+  public Collection<IdAndTime> getRemoveByID(String id) {
+    logger.info("asking for " + id);
+    return getByID(REMOVE, id);
+  }
+
   private Collection<IdAndTime> getIds(String operation) {
     String sql = "SELECT DISTINCT " +
         EXERCISEID + "," +
@@ -162,6 +167,24 @@ public class AddRemoveDAO extends DAO {
         operation +
         "'";
 
+    return getIdAndTimes(sql);
+  }
+
+  private Collection<IdAndTime> getByID(String operation, String id) {
+    String sql = "SELECT DISTINCT " +
+        EXERCISEID + "," +
+        MODIFIED +
+        " from " + ADDREMOVE +
+        " where " +
+        OPERATION +
+        "='" +
+        operation +
+        "' " + "AND " + EXERCISEID + "='" + id + "'";
+
+    return getIdAndTimes(sql);
+  }
+
+  private Collection<IdAndTime> getIdAndTimes(String sql) {
     Set<IdAndTime> lists = Collections.emptySet();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
@@ -175,8 +198,10 @@ public class AddRemoveDAO extends DAO {
         lists.add(new IdAndTime(id, mod));
       }
 
-      // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
-      if (!lists.isEmpty()) logger.debug("getReviewed yielded " + lists.size());
+      //logger.debug("getIdAndTimes sql " + sql + " yielded " + lists.size());
+      if (!lists.isEmpty()) {
+        logger.debug("getIdAndTimes yielded " + lists.size());
+      }
       finish(connection, statement, rs, sql);
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql, e);

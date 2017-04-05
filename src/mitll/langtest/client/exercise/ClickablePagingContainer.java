@@ -248,4 +248,6 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
       return events;
     }
   }
+
+  public void setHighlight(String highlight) {};
 }

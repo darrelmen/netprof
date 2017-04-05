@@ -369,7 +369,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         role.equals(Result.AUDIO_TYPE_RECORDER), getLanguage().equalsIgnoreCase("english"));
   }
 
-  private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises, boolean predefExercises) {
+  private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID,
+                                                                      Collection<T> exercises,
+                                                                      boolean predefExercises) {
     ExerciseTrie<T> fullTrie = this.fullTrie;
     return getExercisesForSearchWithTrie(prefix, userID, exercises, predefExercises, fullTrie);
   }

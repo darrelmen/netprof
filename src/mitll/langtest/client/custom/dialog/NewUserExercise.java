@@ -415,7 +415,7 @@ class NewUserExercise extends BasicDialog {
   private void styleForPashto(TextBoxBase box) {
     Style style = box.getElement().getStyle();
     style.setProperty("fontSize", "xx-large");
-    style.setProperty("fontFamily", "'Pashto Kror Asiatype','HSPashto','HSTahoma',Arial,Helvetica,sans-serif");
+    style.setProperty("fontFamily", "Arial,Helvetica,sans-serif");
     box.setHeight("35px");
   }
 
