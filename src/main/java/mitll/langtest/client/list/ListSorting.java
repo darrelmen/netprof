@@ -62,39 +62,43 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
     w1.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        String selectedValue = w1.getSelectedValue();
-        if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
-          sortBy((o1, o2) -> {
-            return compareShells(o1, o2, compPhones(o1, o2));
-          });
-        } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
-          sortBy((o1, o2) -> {
-            int i = -1 * compPhones(o1, o2);
-            return compareShells(o1, o2, i);
-          });
-        } else if (selectedValue.equals(ENGLISH_ASC)) {
-          sortBy((o1, o2) -> compEnglish(o1, o2));
-        } else if (selectedValue.equals(ENGLISH_DSC)) {
-          sortBy((o1, o2) -> -1 * compEnglish(o1, o2));
-        } else if (selectedValue.equals(langASC)) {
-          sortBy((o1, o2) -> compForeign(o1, o2));
-        } else if (selectedValue.equals(langDSC)) {
-          sortBy((o1, o2) -> -1 * compForeign(o1, o2));
-        } else if (selectedValue.equals(SCORE_LOW_TO_HIGH)) {
-          sortBy((o1, o2) -> {
-            int i = Float.valueOf(o1.getScore()).compareTo(o2.getScore());
-            return compareShells(o1, o2, i);
-          });
-        } else if (selectedValue.equals(SCORE_DSC)) {
-          sortBy((o1, o2) -> {
-            int i = -1 * Float.valueOf(o1.getScore()).compareTo(o2.getScore());
-            return compareShells(o1, o2, i);
-          });
-        }
+        ListSorting.this.onChange(w1, langASC, langDSC);
       }
     });
 
     return w1;
+  }
+
+  private void onChange(ListBox w1, String langASC, String langDSC) {
+    String selectedValue = w1.getSelectedValue();
+    if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
+      sortBy((o1, o2) -> {
+        return compareShells(o1, o2, compPhones(o1, o2));
+      });
+    } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
+      sortBy((o1, o2) -> {
+        int i = -1 * compPhones(o1, o2);
+        return compareShells(o1, o2, i);
+      });
+    } else if (selectedValue.equals(ENGLISH_ASC)) {
+      sortBy((o1, o2) -> compEnglish(o1, o2));
+    } else if (selectedValue.equals(ENGLISH_DSC)) {
+      sortBy((o1, o2) -> -1 * compEnglish(o1, o2));
+    } else if (selectedValue.equals(langASC)) {
+      sortBy((o1, o2) -> compForeign(o1, o2));
+    } else if (selectedValue.equals(langDSC)) {
+      sortBy((o1, o2) -> -1 * compForeign(o1, o2));
+    } else if (selectedValue.equals(SCORE_LOW_TO_HIGH)) {
+      sortBy((o1, o2) -> {
+        int i = Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+        return compareShells(o1, o2, i);
+      });
+    } else if (selectedValue.equals(SCORE_DSC)) {
+      sortBy((o1, o2) -> {
+        int i = -1 * Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+        return compareShells(o1, o2, i);
+      });
+    }
   }
 
   private int compPhones(CommonShell o1, CommonShell o2) {

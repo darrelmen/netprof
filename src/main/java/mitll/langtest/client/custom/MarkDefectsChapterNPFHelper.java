@@ -100,10 +100,11 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
-                                                                                 String instanceName, DivWidget listHeader) {
+                                                                                 String instanceName,
+                                                                                 DivWidget listHeader, DivWidget footer) {
 //        logger.info("instance is " + instanceName);
         return new NPFlexSectionExerciseList(controller, topRow, currentExercisePanel,
-            new ListOptions().setInstance(instanceName), listHeader, 1) {
+            new ListOptions().setInstance(instanceName), listHeader, footer, 1) {
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override

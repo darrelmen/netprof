@@ -38,6 +38,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -48,7 +49,7 @@ import mitll.langtest.shared.exercise.Shell;
  * @since 1/9/14.
  */
 public class PrevNextList<T extends Shell> extends HorizontalPanel {
-  private final ExerciseController controller;
+  private final EventRegistration controller;
   private Button prev, next;
   private final ListInterface<T> container;
   private boolean disableNext = true;
@@ -60,7 +61,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
    * @param controller
    * @see EditableExerciseDialog#addFields
    */
-  PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext, ExerciseController controller) {
+  PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext, EventRegistration controller) {
     this.container = listContainer;
     this.disableNext = disableNext;
     this.controller = controller;
@@ -70,7 +71,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
     getElement().setId("PrevNextList");
   }
 
-  private void makePrevButton(final T exercise) {
+  public void makePrevButton(final T exercise) {
     this.prev = new Button("Previous");
     prev.getElement().setId("PrevNextList_Previous");
    // controller.register(prev, exercise == null ? "" :exercise.getID());
@@ -85,7 +86,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
     add(prev);
   }
 
-  private void makeNextButton(final T exercise) {
+  public void makeNextButton(final T exercise) {
     this.next = new Button("Next");
     next.getElement().setId("nextButton");
     controller.register(next, exercise.getID());
@@ -103,7 +104,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
     });
   }
 
-  private void clickPrev() {
+  protected void clickPrev() {
     if (prev.isEnabled() && prev.isVisible()) {
       boolean onFirst = container.loadPrev();
       prev.setEnabled(!onFirst);
@@ -112,7 +113,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
 
   /**
    */
-  private void clickNext() {
+  protected void clickNext() {
     if (next.isEnabled() && next.isVisible()) {
       boolean onLast = container.loadNext();
       next.setEnabled(!disableNext || !onLast);

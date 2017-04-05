@@ -77,7 +77,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     this.dataProvider = new ListDataProvider<T>();
   }
 
-  //boolean stillSettingUp = true;
+  SimplePager pager;
+
   /**
    * @param sortEnglish
    * @return
@@ -88,7 +89,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
-   // logger.info("still setting up... starting");
+    // logger.info("still setting up... starting");
 
     // Create a SimplePager.
     final SimplePager pager =
@@ -96,13 +97,14 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
           @Override
           protected void onRangeOrRowCountChanged() {
             super.onRangeOrRowCountChanged();
-         //   if (!stillSettingUp) {
-   //           logger.info("not still setting up...");
-         //     gotRangeChange();
-        //    }
+            //   if (!stillSettingUp) {
+            //           logger.info("not still setting up...");
+            //     gotRangeChange();
+            //    }
           }
         };
 
+    this.pager = pager;
     // Set the cellList as the display.
     pager.setDisplay(table);
 
@@ -113,14 +115,31 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     table.addStyleName("floatLeftAndClear");
 
     setMaxWidth();
- //   stillSettingUp = false;
+    //   stillSettingUp = false;
 
 //    logger.info("still setting up... over");
 
     return column;
   }
 
-  protected void gotRangeChange() {}
+  public boolean hasNextPage() {
+    return pager.hasNextPage();
+  }
+
+  public boolean hasPrevPage() {
+    return pager.hasPreviousPage();
+  }
+
+  public void nextPage() {
+    pager.nextPage();
+  }
+
+  public void prevPage() {
+    pager.previousPage();
+  }
+
+  protected void gotRangeChange() {
+  }
 
   /**
    * @param sortEnglish
@@ -335,6 +354,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   public void hide() {
     table.setVisible(false);
+  }
+
+  public Integer getRealPageSize() {
+    return pager.getPageSize();
   }
 
   public interface TableResources extends CellTable.Resources {

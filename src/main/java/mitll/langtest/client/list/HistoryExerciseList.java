@@ -75,7 +75,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   /**
    * @param currentExerciseVPanel
    * @param controller
-   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, int)
+   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, DivWidget, int)
    */
   protected HistoryExerciseList(Panel currentExerciseVPanel,
                                 ExerciseController controller,

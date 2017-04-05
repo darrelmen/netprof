@@ -224,15 +224,16 @@ public class Navigation implements RequiresResize, ShowTab {
            * @param currentExercisePanel
            * @param instanceName
            * @param listHeader
+           * @param footer
            * @return
            */
           @Override
           protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                      Panel currentExercisePanel,
                                                                                      String instanceName,
-                                                                                     DivWidget listHeader) {
+                                                                                     DivWidget listHeader, DivWidget footer) {
             return new NPFlexSectionExerciseList(outerC, topRow, currentExercisePanel,
-                new ListOptions(instanceName), listHeader, NUM_TO_SHOW);
+                new ListOptions(instanceName), listHeader, footer, NUM_TO_SHOW);
           }
         };
       }
@@ -241,8 +242,6 @@ public class Navigation implements RequiresResize, ShowTab {
         return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
-
-
             List<CorrectAndScore> correctAndScores = wrapper.getHistories().get(e.getID());
             return new TwoColumnExercisePanel<>(e, controller, exerciseList,
                   correctAndScores,

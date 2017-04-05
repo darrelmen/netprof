@@ -86,8 +86,8 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
-                                                                                 String instanceName, DivWidget listHeader) {
-        return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel, new ListOptions(instanceName), listHeader, 1) {
+                                                                                 String instanceName, DivWidget listHeader, DivWidget footer) {
+        return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel, new ListOptions(instanceName), listHeader, footer, 1) {
           @Override
           protected CommonShell findFirstExercise() {
             int currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();

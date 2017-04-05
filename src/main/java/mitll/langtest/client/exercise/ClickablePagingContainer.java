@@ -56,6 +56,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   private static final boolean DEBUG = false;
   private final Map<Integer, T> idToExercise = new HashMap<>();
+ // private int pageSize;
 
   public ClickablePagingContainer(ExerciseController controller) {
     super(controller);
@@ -158,7 +159,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   protected Collection<Integer> getIdsForRange(Range visibleRange) {
     List<Integer> visible = new ArrayList<>();
-    int start = visibleRange.getStart();
+    int start  = visibleRange.getStart();
     int length = visibleRange.getLength();
     int end = Math.min(getList().size(), start + length);
     logger.info("ClickablePagingContainer.getVisibleIDs : get from " + start + " to " + end + " vs " + getList().size());
@@ -290,6 +291,11 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
       table.redraw();
       markCurrent(currentExercise);
     }
+  }
+
+  public void setPageSize(int pageSize) {
+    table.setPageSize(pageSize);
+    table.redraw();
   }
 
   public static class ClickableCell extends SafeHtmlCell {

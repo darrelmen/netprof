@@ -108,7 +108,7 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   protected FlexListLayout getMyListLayout(SimpleChapterNPFHelper outer) {
     return new MyFlexListLayout(controller, outer) {
       @Override
-      protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
+      protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader, DivWidget footer) {
         exerciseList = new ResponseExerciseList(topRow, currentExercisePanel, controller, instanceName);
         return exerciseList;
       }

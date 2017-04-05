@@ -32,11 +32,19 @@
 
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
@@ -72,14 +80,16 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @param controller
    * @param listOptions
    * @param listHeader
+   * @param footer
    * @param numToShow
-   * @see
+   * @see mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList(ExerciseController, Panel, Panel, ListOptions, DivWidget, DivWidget, int)
    */
   public FacetExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
                            ExerciseController controller,
                            ListOptions listOptions,
                            DivWidget listHeader,
+                           DivWidget footer,
                            int numToShow) {
     super(currentExerciseVPanel, controller, listOptions.setShowTypeAhead(true));
 
@@ -89,26 +99,126 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     sectionPanel.addStyleName("rightFiveMargin");
 
     secondRow.add(sectionPanel);
-    setUnaccountedForVertical(0);//CLASSROOM_VERTICAL_EXTRA);
+    setUnaccountedForVertical(0);
 
+    // TODO : connect this back up
     downloadHelper = new DownloadHelper(this);
 
     DivWidget breadRow = new DivWidget();
+    breadRow.getElement().setId("breadRow");
     //  breadRow.addStyleName("floatLeftList");
 
     // Todo : add this
-
     // breadRow.add(new HTML("breadcrumbs go here"));
     listHeader.add(breadRow);
 
     DivWidget pagerAndSort = new DivWidget();
+    pagerAndSort.getElement().setId("pagerAndSort");
 
     listHeader.add(pagerAndSort);
     pagerAndSort.add(tableWithPager);
     tableWithPager.addStyleName("floatLeft");
     pagerAndSort.add(addSortBox(controller));
 
+    addPrevNextPage(footer);
     finished = true;
+  }
+
+  private Button prev, next;
+
+  private void addPrevNextPage(DivWidget footer) {
+    DivWidget buttonDiv = new DivWidget();
+    buttonDiv.addStyleName("floatRight");
+    {
+      Button prev = new com.github.gwtbootstrap.client.ui.Button("Previous Page");
+      prev.getElement().setId("PrevNextList_Previous");
+      prev.setType(ButtonType.SUCCESS);
+      prev.setIcon(IconType.CARET_LEFT);
+      // Range range = pagingContainer.getVisibleRange();
+      // prev.setEnabled(range.getStart() > 0);
+
+      prev.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          prev.setEnabled(false);
+          pagingContainer.prevPage();
+          //enablePrevNext();
+        }
+      });
+      this.prev = prev;
+      buttonDiv.add(prev);
+    }
+
+    {
+      Button next = new com.github.gwtbootstrap.client.ui.Button("Next Page");
+      next.getElement().setId("PrevNextList_Next");
+      next.setType(ButtonType.SUCCESS);
+      next.setIcon(IconType.CARET_RIGHT);
+      // Range range = pagingContainer.getVisibleRange();
+      // next.setEnabled(range.getLength() + range.getStart() < pagingContainer.getSize());
+      next.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          next.setEnabled(false);
+          pagingContainer.nextPage();
+          // enablePrevNext();
+          //next.setEnabled(true);
+
+        }
+      });
+
+      buttonDiv.add(next);
+      this.next = next;
+      next.addStyleName("leftTenMargin");
+    }
+
+    footer.add(buttonDiv);
+    buttonDiv.addStyleName("alignCenter");
+
+    ListBox pagesize = new ListBox();
+    HTML w = new HTML("View:");
+    w.addStyleName("floatLeft");
+    footer.add(w);
+    footer.add(pagesize);
+    pagesize.addStyleName("floatLeft");
+
+    int i = 0;
+    for (Integer num : Arrays.asList(5, 10, 25, 50)) {
+      pagesize.addItem(num + " items/page", "" + num);
+      if (pagingContainer.getRealPageSize().equals(num)) {
+        pagesize.setItemSelected(i,true);
+      }
+      i++;
+    }
+
+
+/*    pagesize.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        onPageSizeChange(pagesize);
+      }
+    });*/
+    pagesize.addChangeHandler(new ChangeHandler() {
+
+      public void onChange(ChangeEvent event) {
+       onPageSizeChange(pagesize);
+      }
+    });
+
+    hidePrevNext();
+    enablePrevNext();
+  }
+
+  private void onPageSizeChange(ListBox pagesize) {
+    String value = pagesize.getValue();
+    int i = Integer.parseInt(value);
+    pagingContainer.setPageSize(i);
+    Window.scrollTo (0 ,0);
+  }
+
+  private void enablePrevNext() {
+    prev.setEnabled(pagingContainer.hasPrevPage());
+    next.setEnabled(pagingContainer.hasNextPage());
   }
 
   private boolean finished = false;
@@ -242,7 +352,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * rules -
    * click on header, removes selection of choice
    * click on choice, down select for that choice
-   *
+   * <p>
    * ul
    * li - each dimension
    * span - header
@@ -431,7 +541,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     String countLabel = "" + key.getCount();
 
     Anchor qty = //getSpan();
-    getAnchor(countLabel);
+        getAnchor(countLabel);
     qty.addClickHandler(getChoiceHandler(type, key.getValue()));
 
     qty.addStyleName("qty");
@@ -559,7 +669,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           public void onSuccess(FilterResponse response) {
             Map<String, Set<MatchInfo>> result = response.getTypeToValues();
-          //  logger.info("getTypeToValues for " + pairs + " got " + result);
+            //  logger.info("getTypeToValues for " + pairs + " got " + result);
             boolean b = changeSelection(response.getTypesToInclude(), typeToSelection);
 
             setTypeToSelection(typeToSelection);
@@ -738,6 +848,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         @Override
         public void onFailure(Throwable caught) {
           dealWithRPCError(caught);
+          hidePrevNext();
         }
 
         @Override
@@ -747,9 +858,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           if (reqID == freqid - 1) {
             if (result.getExercises().isEmpty()) {
               showEmptyExercise();
+              hidePrevNext();
             } else {
 
               if (numToShow == 1) {
+                hidePrevNext();
                 if (getCurrentExerciseID() == result.getExercises().iterator().next().getID()) {
                   logger.info("skip current " + getCurrentExerciseID());
                 } else {
@@ -757,6 +870,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                 }
               } else {
                 showExercises(result.getExercises(), result);
+                showPrevNext();
               }
             }
           } else {
@@ -768,17 +882,28 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
+  private void hidePrevNext() {
+    prev.setVisible(false);
+    next.setVisible(false);
+  }
+
+  private void showPrevNext() {
+    prev.setVisible(true);
+    next.setVisible(true);
+    enablePrevNext();
+  }
+
   private void showExercises(Collection<CommonExercise> result, ExerciseListWrapper<CommonExercise> wrapper) {
     clearExerciseContainer();
 //    logger.info("showExercises onSuccess adding " + result.size());
     for (CommonExercise exercise : result) {
-   //   logger.info("ex " + exercise.getID() + " " + exercise.getUnitToValue());
+      //   logger.info("ex " + exercise.getID() + " " + exercise.getUnitToValue());
       addExerciseWidget(exercise, wrapper);
     }
 
     if (!result.isEmpty()) {
       int id = result.iterator().next().getID();
-     // logger.info("showExercises current now " + id);
+      // logger.info("showExercises current now " + id);
       markCurrentExercise(id);
     } else {
       // TODO : what's happening here?

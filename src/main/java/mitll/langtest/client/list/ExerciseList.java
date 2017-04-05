@@ -681,10 +681,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         addExerciseWidget(commonExercise, wrapper);
       }
     });
-
   }
 
-  protected void addExerciseWidget(U commonExercise, ExerciseListWrapper<CommonExercise> wrapper) {
+  /**
+   * @see FacetExerciseList#showExercises(Collection, ExerciseListWrapper)
+   * @param commonExercise
+   * @param wrapper
+   */
+   void addExerciseWidget(U commonExercise, ExerciseListWrapper<CommonExercise> wrapper) {
     createdPanel = factory.getExercisePanel(commonExercise, wrapper);
     innerContainer.add(createdPanel);
   }
