@@ -58,7 +58,6 @@ public class TypeAhead implements ITypeAhead {
 
   private static final int WIDTH = 180-32;
   private static final int RIGHT_MARIGN_FOR_SEARCH = 10;
-  //private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final TextBox typeAhead = new TextBox();
   private WaitCursorHelper waitCursorHelper;
 

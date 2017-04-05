@@ -14,38 +14,32 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
-import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SuggestOracle;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.*;
+import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.client.list.ListSectionWidget;
+import mitll.langtest.client.list.NPExerciseList;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 2/14/17.
  */
-class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
+class EditableExerciseList extends NPExerciseList<ListSectionWidget> implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
-
-  private static final String STRONG = "strong";
-  private static final int DISPLAY_ITEMS = 15;
   private static final String ADD = "Add";
 
   /**
@@ -53,9 +47,10 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
    */
   private static final String REMOVE_FROM_LIST = "Remove from list";
 
-  private EditItem editItem;
-  private UserList<CommonShell> list;
+  private final EditItem editItem;
+  private final UserList<CommonShell> list;
   private final ListServiceAsync listService = GWT.create(ListService.class);
+  private final SearchTypeahead searchTypeahead;
   private TextBox quickAddText;
   private HTML message;
 
@@ -83,316 +78,25 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
     this.list = list;
 
     if (list.isEmpty()) delete.setEnabled(false);
+    this.searchTypeahead = new SearchTypeahead(controller, this);
   }
 
   protected DivWidget getOptionalWidget() {
     DivWidget widgets = new DivWidget();
     widgets.addStyleName("bottomFiveMargin");
 
-    DivWidget addW = getAddButtonContainer();
-    widgets.add(addW);
-
-    DivWidget delW = getRemoveButtonContainer();
-    widgets.add(delW);
+    widgets.add(getAddButtonContainer());
+    widgets.add(getRemoveButtonContainer());
 
     addListChangedListener((items, selectionID) -> enableRemove(!isEmpty()));
+
     return widgets;
   }
 
-  private int req = 0;
-  private CommonShell currentExercise = null;
-
-  /**
-   * @param whichField
-   * @param w
-   * @param <T>
-   * @return
-   * @see #getTypeahead
-   */
-  private <T extends CommonShell> Typeahead getTypeaheadUsing(final String whichField, TextBox w) {
-    SuggestOracle oracle = new SuggestOracle() {
-      @Override
-      public void requestSuggestions(final Request request, final Callback callback) {
-        logger.info("make request for '" + request.getQuery() + "'");
-
-        ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
-            .setPrefix(w.getText())
-            .setLimit(DISPLAY_ITEMS)
-            .setAddFirst(false);
-
-        controller.getExerciseService().getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
-              @Override
-              public void onFailure(Throwable caught) {
-              }
-
-              @Override
-              public void onSuccess(ExerciseListWrapper<T> result) {
-                logger.info("getTypeaheadUsing got req back " + result.getReqID() + " vs " + req);
-                makeSuggestionResponse(result, callback, request);
-              }
-            }
-        );
-      }
-    };
-    Typeahead typeahead = new Typeahead(oracle);
-    typeahead.setDisplayItemCount(DISPLAY_ITEMS);
-    typeahead.setMatcherCallback(new Typeahead.MatcherCallback() {
-      @Override
-      public boolean compareQueryToItem(String query, String item) {
-        return true;
-      }
-    });
-    typeahead.setUpdaterCallback(new Typeahead.UpdaterCallback() {
-      @Override
-      public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
-        ExerciseSuggestion exerciseSuggestion = (ExerciseSuggestion) selectedSuggestion;
-        currentExercise = exerciseSuggestion.getShell();
-        return selectedSuggestion.getReplacementString();
-      }
-    });
-
-    w.getElement().setId("TextBox_" + whichField);
-    typeahead.setWidget(w);
-    return typeahead;
-  }
-
-  /**
-   * @param result
-   * @param callback
-   * @param request
-   * @see #getTypeaheadUsing
-   */
-  private void makeSuggestionResponse(ExerciseListWrapper<? extends CommonShell> result,
-                                      SuggestOracle.Callback callback,
-                                      SuggestOracle.Request request) {
-    List<? extends CommonShell> exercises = result.getExercises();
-    exercises.sort(new Comparator<CommonShell>() {
-      @Override
-      public int compare(CommonShell o1, CommonShell o2) {
-        return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
-      }
-    });
-
-    int size = exercises.size();
-    if (size == 0) currentExercise = null;
-    int limit = request.getLimit();
-
-    if (size > limit) {
-      logger.info("makeSuggestionResponse From " + size + " to " + limit);
-      exercises = exercises.subList(0, limit);
-    }
-
-    int numberTruncated = Math.max(0, size - limit);
-    //  logger.info("trunc " + numberTruncated);
-
-    SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), exercises));
-    response.setMoreSuggestionsCount(numberTruncated);
-
-    try {
-      callback.onSuggestionsReady(request, response);
-    } catch (Exception e) {
-      logger.warning("got " + e);
-    }
-  }
-
-  @NotNull
-  private Collection<SuggestOracle.Suggestion> getSuggestions(String query, List<? extends CommonShell> exercises) {
-    Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<>();
-    //  logger.info("getSuggestions converting " + exercises.size());
+  @Override
+  public void clearMessage() {
     message.setText("");
-    //String before = query;
-    query = normalizeSearch(query);
-
-    //  logger.info("getSuggestions before '" + before + "'");
-    //  logger.info("getSuggestions after  '" + query + "'");
-
-    String[] searchWords = query.split(WHITESPACE_STRING);
-    //  logger.info("getSuggestions searchWords length '" + searchWords.length + "'");
-
-    for (CommonShell resp : exercises) {
-      //suggestions.add(new ExerciseSuggestion(resp));
-      ExerciseSuggestion suggestion = getSuggestion(searchWords, resp);
-
-/*      ExerciseSuggestion suggestion = createSuggestion(resp.getForeignLanguage(),
-          resp.getForeignLanguage() + " - " + resp.getEnglish(),
-          resp.getID());
-      */
-      suggestions.add(suggestion);
-    }
-//    logger.info("getSuggestions returning " + suggestions.size());
-    return suggestions;
   }
-
-  private ExerciseSuggestion getSuggestion(String[] searchWords, CommonShell resp) {
-    int cursor = 0;
-    int index = 0;
-    String formattedSuggestion = resp.getForeignLanguage() + " - " + resp.getEnglish();
-    String candidate = normalizeSuggestion(formattedSuggestion);
-    // Create strong search string.
-    SafeHtmlBuilder accum = new SafeHtmlBuilder();
-
-    while (true) {
-      WordBounds wordBounds = findNextWord(candidate, searchWords, index);
-      if (wordBounds == null) {
-        break;
-      }
-      if (wordBounds.startIndex == 0 ||
-          WHITESPACE_CHAR == candidate.charAt(wordBounds.startIndex - 1)) {
-        String part1 = formattedSuggestion.substring(cursor, wordBounds.startIndex);
-        String part2 = formattedSuggestion.substring(wordBounds.startIndex,
-            wordBounds.endIndex);
-        cursor = wordBounds.endIndex;
-        accum.appendEscaped(part1);
-        accum.appendHtmlConstant("<" + STRONG + ">");
-        accum.appendEscaped(part2);
-        accum.appendHtmlConstant("</" + STRONG + ">");
-      }
-      index = wordBounds.endIndex;
-    }
-
-//    // Check to make sure the search was found in the string.
-//    if (cursor == 0) {
-//      continue;
-//    }
-
-    accum.appendEscaped(formattedSuggestion.substring(cursor));
-
-    // logger.info(resp.getID() + " formatted     " + formattedSuggestion);
-    String displayString = accum.toSafeHtml().asString();
-    // logger.info(resp.getID() + " displayString " + displayString);
-    ExerciseSuggestion suggestion = createSuggestion(resp.getForeignLanguage(),
-        displayString,
-        resp);
-
-    return suggestion;
-  }
-
-  /**
-   * Regular expression used to collapse all whitespace in a query string.
-   */
-  private static final String NORMALIZE_TO_SINGLE_WHITE_SPACE = "\\s+";
-
-  /**
-   * Normalize the search key by making it lower case, removing multiple spaces,
-   * apply whitespace masks, and make it lower case.
-   */
-  private String normalizeSearch(String search) {
-    // Use the same whitespace masks and case normalization for the search
-    // string as was used with the candidate values.
-    search = normalizeSuggestion(search);
-
-    // Remove all excess whitespace from the search string.
-    search = search.replaceAll(NORMALIZE_TO_SINGLE_WHITE_SPACE,
-        WHITESPACE_STRING);
-
-    return search.trim();
-  }
-
-  /**
-   * @see #makeSuggestionResponse
-   */
-    /*    @Override
-        public String getDisplayString() {
-          return resp.getForeignLanguage() + " - " + resp.getEnglish();
-        }
-
-        @Override
-        public String getReplacementString() {
-          return resp.getForeignLanguage();
-        }*/
-  protected ExerciseSuggestion createSuggestion(
-      String replacementString, @IsSafeHtml String displayString, CommonShell shell) {
-    return new ExerciseSuggestion(replacementString, displayString, shell);
-  }
-
-  /**
-   * Takes the formatted suggestion, makes it lower case and blanks out any
-   * existing whitespace for searching.
-   */
-  private String normalizeSuggestion(String formattedSuggestion) {
-    // Formatted suggestions should already have normalized whitespace. So we
-    // can skip that step.
-
-    // Lower case suggestion.
-    formattedSuggestion = formattedSuggestion.toLowerCase(Locale.ROOT);
-
-    // Apply whitespace.
-//    if (whitespaceChars != null) {
-//      for (int i = 0; i < whitespaceChars.length; i++) {
-//        char ignore = whitespaceChars[i];
-//        formattedSuggestion = formattedSuggestion.replace(ignore,
-//            WHITESPACE_CHAR);
-//      }
-//    }
-    return formattedSuggestion;
-  }
-
-  private static class ExerciseSuggestion //implements SuggestOracle.Suggestion {
-      extends MultiWordSuggestOracle.MultiWordSuggestion {
-    //private int exid;
-    CommonShell shell;
-
-    public ExerciseSuggestion(String repl, String disp, CommonShell shell) {
-      super(repl, disp);
-      this.shell = shell;
-    }
-
-    public ExerciseSuggestion() {
-    }
-
-    public CommonShell getShell() {
-      return shell;
-    }
-
-  }
-
-  /**
-   * Returns a {@link MultiWordSuggestOracle.WordBounds} representing the first word in {@code
-   * searchWords} that is found in candidate starting at {@code indexToStartAt}
-   * or {@code null} if no words could be found.
-   */
-  private WordBounds findNextWord(String candidate, String[] searchWords, int indexToStartAt) {
-    WordBounds firstWord = null;
-    for (String word : searchWords) {
-      int index = candidate.indexOf(word, indexToStartAt);
-      if (index != -1) {
-        WordBounds newWord = new WordBounds(index, word.length());
-        if (firstWord == null || newWord.compareTo(firstWord) < 0) {
-          firstWord = newWord;
-        }
-      }
-    }
-    return firstWord;
-  }
-
-
-  /**
-   * A class reresenting the bounds of a word within a string.
-   * <p>
-   * The bounds are represented by a {@code startIndex} (inclusive) and
-   * an {@code endIndex} (exclusive).
-   */
-  private static class WordBounds implements Comparable<WordBounds> {
-
-    final int startIndex;
-    final int endIndex;
-
-    public WordBounds(int startIndex, int length) {
-      this.startIndex = startIndex;
-      this.endIndex = startIndex + length;
-    }
-
-    public int compareTo(WordBounds that) {
-      int comparison = this.startIndex - that.startIndex;
-      if (comparison == 0) {
-        comparison = that.endIndex - this.endIndex;
-      }
-      return comparison;
-    }
-  }
-
-  private static final char WHITESPACE_CHAR = ' ';
-  private static final String WHITESPACE_STRING = " ";
 
   @NotNull
   private DivWidget getRemoveButtonContainer() {
@@ -405,10 +109,9 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
     return delW;
   }
 
-
   /**
-   * @see #getOptionalWidget
    * @return
+   * @see #getOptionalWidget
    */
   @NotNull
   private DivWidget getAddButtonContainer() {
@@ -423,14 +126,18 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
 
     addW.add(add);
 
-    message = new HTML();
+    addW.add(message = getFeedback());
+    return addW;
+  }
+
+  private HTML getFeedback() {
+    HTML message = new HTML();
     message.setHeight("20px");
     message.addStyleName("leftFiveMargin");
     message.addStyleName("bottomFiveMargin");
     message.addStyleName("serverResponseLabelError");
     message.getElement().getStyle().setClear(Style.Clear.LEFT);
-    addW.add(message);
-    return addW;
+    return message;
   }
 
   /**
@@ -448,10 +155,10 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
     quickAddText.addKeyUpHandler(new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-        currentExercise = null;
+        searchTypeahead.clearCurrentExercise();
       }
     });
-    return getTypeaheadUsing(whichField, quickAddText);
+    return searchTypeahead.getTypeaheadUsing(whichField, quickAddText);
   }
 
   @NotNull
@@ -471,14 +178,14 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
 
 
   private void onClickAdd(Button add) {
-    if (currentExercise != null) {
+    if (searchTypeahead.getCurrentExercise() != null) {
       if (isOnList()) {
         // TODO : warn user already added.
         message.setText("This is already in the list.");
         enableButton(add);
       } else {
         message.setText("");
-        listService.addItemToUserList(list.getID(), currentExercise.getID(), new AsyncCallback<Void>() {
+        listService.addItemToUserList(list.getID(), searchTypeahead.getCurrentExercise().getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
             enableButton(add);
@@ -487,7 +194,7 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
           @Override
           public void onSuccess(Void result) {
             enableButton(add);
-            showNewItem(currentExercise);
+            showNewItem(searchTypeahead.getCurrentExercise());
           }
         });
       }
@@ -497,43 +204,44 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
         enableButton(add);
         message.setText("Please enter some text.");
       } else {
-        controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            enableButton(add);
-          }
-
-          @Override
-          public void onSuccess(Boolean result) {
-            enableButton(add);
-
-/*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
-            " before adding/changing " + newUserExercise + " -> " + result);*/
-            if (result) {
-              listService.newExercise(
-                  list.getID(),
-                  makeNewExercise(safeText),
-                  new AsyncCallback<CommonExercise>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                    }
-
-                    @Override
-                    public void onSuccess(CommonExercise newExercise) {
-                      showNewItem(newExercise);
-                    }
-                  });
-            } else {
-              message.setText("The item " +
-                  " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
-
-//            markError(foreignLang, "The " + FOREIGN_LANGUAGE +
-//                " text is not in our " + getLanguage() + " dictionary. Please edit.");
-            }
-          }
-        });
+        checkIsValidPhrase(add, safeText);
       }
     }
+  }
+
+  private void checkIsValidPhrase(Button add, String safeText) {
+    controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        enableButton(add);
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        enableButton(add);
+
+/*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
+        " before adding/changing " + newUserExercise + " -> " + result);*/
+        if (result) {
+          listService.newExercise(
+              list.getID(),
+              makeNewExercise(safeText),
+              new AsyncCallback<CommonExercise>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+
+                @Override
+                public void onSuccess(CommonExercise newExercise) {
+                  showNewItem(newExercise);
+                }
+              });
+        } else {
+          message.setText("The item " +
+              " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
+        }
+      }
+    });
   }
 
   private void enableButton(Button add) {
@@ -551,11 +259,11 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
 
   private boolean isOnList() {
     boolean found = false;
-    if (currentExercise == null) return false;
+    if (searchTypeahead.getCurrentExercise() == null) return false;
 
     List<CommonShell> exercises = list.getExercises();
     for (CommonShell shell : exercises) {
-      if (shell.getID() == currentExercise.getID()) {
+      if (shell.getID() == searchTypeahead.getCurrentExercise().getID()) {
         found = true;
         break;
       }
@@ -576,18 +284,9 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
 
     gotClickOnItem(currentExercise);
     markCurrentExercise(currentExercise.getID());
-
- /*   Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        //logger.info("check init flash");
-        gotClickOnItem(currentExercise);
-        markCurrentExercise(currentExercise.getID());
-       // redraw();
-      }
-    });*/
   }
 
-  public String getSafeText(TextBox box) {
+  private String getSafeText(TextBox box) {
     return sanitize(box.getText()).replaceAll("&#39;", "'");
   }
 
@@ -624,12 +323,12 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
    * @paramx uniqueID
    * @see EditableExerciseList#makeDeleteButton
    */
-  void deleteItem(final int exid,
-                  // final long uniqueID,
-                  final PagingExerciseList<?, ?> exerciseList,
-                  final ReloadableContainer learnContainer,
-                  final EditableExerciseList editableExerciseList,
-                  Button button) {
+  private void deleteItem(final int exid,
+                          // final long uniqueID,
+                          final PagingExerciseList<?, ?> exerciseList,
+                          final ReloadableContainer learnContainer,
+                          final EditableExerciseList editableExerciseList,
+                          Button button) {
     listService.deleteItemFromList(list.getID(), exid, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -695,7 +394,7 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> {
     });
   }
 
-  public void enableRemove(boolean enabled) {
+  private void enableRemove(boolean enabled) {
     delete.setEnabled(enabled);
   }
 }
