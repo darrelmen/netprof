@@ -368,7 +368,7 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
           " has ref " + hasRefAudio + " valid audio result " + result);
 
       playAudioPanel.setEnabled(true);
-      playAudioPanel.loadAudioAgain(result.getPath());
+      playAudioPanel.loadAudio(result.getPath());
 
       if (prevRecording) {
         addIcon(IconType.CHECK);

@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 3/23/17.
+ * @deprecated
  */
 public class ContextAudioChoices {
   private final ExerciseController controller;
@@ -33,15 +34,15 @@ public class ContextAudioChoices {
   //  private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
 //  private static final String HIGHLIGHT_END = "</span>";
 
-  private static final String CONTEXT_SENTENCE = "Context Sentence";
+ // private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String DEFAULT = "Default";
 
-  private static final String NO_REFERENCE_AUDIO = "No reference audio";
+//  private static final String NO_REFERENCE_AUDIO = "No reference audio";
   private static final String M = "M";
   private static final String F = "F";
   public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
   public static final String SPACE_REGEX = " ";
-  private static final String REF_AUDIO = "refAudio";
+//  private static final String REF_AUDIO = "refAudio";
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;

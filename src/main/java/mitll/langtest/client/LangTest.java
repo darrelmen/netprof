@@ -767,12 +767,12 @@ public class LangTest implements
   }
 
   @Override
-  public void register(Button button, int exid) {
+  public void register(UIObject button, int exid) {
     register(button, "" + exid);
   }
 
   @Override
-  public void register(Button button, String exid) {
+  public void register(UIObject button, String exid) {
     buttonFactory.register(this, button, exid);
   }
 

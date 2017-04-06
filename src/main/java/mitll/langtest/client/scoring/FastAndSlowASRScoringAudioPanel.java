@@ -60,7 +60,7 @@ import java.util.logging.Logger;
  * @since 10/16/15.
  */
 public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAttributeExercise> extends ASRScoringAudioPanel<T> {
-  private Logger logger = null;
+  //private Logger logger = null;
 
   public static final int RIGHT_MARGIN = 23;
 
@@ -74,7 +74,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAtt
 
   private static final String M = "M";
   private static final String F = "F";
-
+SpeedStorage speedStorage;
   /**
    * @param exercise
    * @param path
@@ -92,6 +92,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAtt
         controller1,
         controller1.getProps().showSpectrogram(), RIGHT_MARGIN, REFERENCE, exercise, instance);
 //        Result.AUDIO_TYPE_PRACTICE);
+
   }
 
   /**
@@ -105,6 +106,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAtt
    */
   @Override
   protected Widget getAfterPlayWidget() {
+    speedStorage = new SpeedStorage(controller,instance);
    // logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
     final Panel rightSide = new VerticalPanel();
 
@@ -259,7 +261,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAtt
       }
     }
 
-    boolean choseRegularSpeed = isRegularSpeed();
+    boolean choseRegularSpeed = speedStorage.isRegularSpeed();
     if (regular != null) {
       addAudioRadioButton(vp, regular, regAttr);
       final AudioAttribute innerRegAttr = regAttr;
@@ -268,7 +270,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAtt
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerRegAttr);
-          storeIsRegular(true);
+          speedStorage.storeIsRegular(true);
           controller.logEvent(innerRegular, RADIO_BUTTON, exercise.getID(), SELECTED_AUDIO + innerRegAttr.getAudioRef());
         }
       });
@@ -283,7 +285,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAtt
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerSlowAttr);
-          storeIsRegular(false);
+          speedStorage.storeIsRegular(false);
           controller.logEvent(innerSlow, RADIO_BUTTON, exercise.getID(), SELECTED_AUDIO + innerSlowAttr.getAudioRef());
         }
       });
@@ -306,46 +308,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise & AudioAtt
     }
 //    if (firstAttr == null)
 //      logger.warning("huh? no attribute ");
-  }
-
-  private boolean isRegularSpeed() {
-    return isRegularSpeed(getStorageKey());
-  }
-
-  private boolean isRegularSpeed(String selectedUserKey) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      String item = localStorageIfSupported.getItem(selectedUserKey);
-      //    logger.info("isRegularSpeed value for " + selectedUserKey + "='" + item+ "'");
-      if (item != null) {
-        return item.toLowerCase().equals("true");
-      } else {
-        storeIsRegular(true);
-        return true;
-      }
-    }
-    // else {
-    return false;
-    // }
-  }
-
-  private String getStorageKey(ExerciseController controller, String appTitle) {
-    return getStoragePrefix(controller, appTitle) + "audioSpeed";
-  }
-
-  private String getStoragePrefix(ExerciseController controller, String appTitle) {
-    return appTitle + ":" + controller.getUser() + ":" + instance + ":";
-  }
-
-  private void storeIsRegular(boolean shouldKeepAudio) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      localStorageIfSupported.setItem(getStorageKey(), "" + shouldKeepAudio);
-    }
-  }
-
-  private String getStorageKey() {
-    return getStorageKey(controller, controller.getLanguage());
   }
 
   /**

@@ -39,6 +39,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -72,22 +73,26 @@ public class ButtonFactory implements EventLogger {
   }
 
   @Override
-  public void register(ExerciseController controller, final Button button, final String exid) {
+  public void register(ExerciseController controller, final UIObject button, final String exid) {
     registerButton(button, exid, controller.getUserState().getUser());
   }
 
-  private void registerButton(final Button button, final String exid, final int userid) {
-    registerButton(button, new EventContext(exid, button.getText(), userid));
+  private void registerButton(final UIObject button, final String exid, final int userid) {
+    String text = ((HasText)button).getText();
+    registerButton(button, new EventContext(exid, text, userid));
   }
 
   @Override
-  public void registerButton(final Button button, EventContext context) {
-    button.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        logEvent(button, "button", context);
-      }
-    });
+  public void registerButton(final UIObject button, EventContext context) {
+    if (button instanceof HasClickHandlers) {
+      HasClickHandlers button1 = (HasClickHandlers) button;
+      button1.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          logEvent(button, "button", context);
+        }
+      });
+    }
   }
 
   @Override

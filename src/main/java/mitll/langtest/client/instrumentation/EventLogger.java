@@ -45,9 +45,9 @@ import mitll.langtest.client.exercise.ExerciseController;
  * @since 3/25/2014.
  */
 public interface EventLogger {
-  void register(ExerciseController controller, Button button, String exid);
+  void register(ExerciseController controller, UIObject button, String exid);
 
-  void registerButton(Button button, EventContext context);
+  void registerButton(UIObject button, EventContext context);
 
   void registerWidget(HasClickHandlers clickable, UIObject uiObject, EventContext context);
 

@@ -34,6 +34,7 @@ package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
@@ -69,7 +70,7 @@ import java.util.logging.Logger;
 public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
-  private static final IconType PLAY = IconType.PLAY;
+  protected static final IconType PLAY = IconType.PLAY;
 
   /**
    * @see #setPlayButtonText
@@ -83,10 +84,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
 
-  private String playLabel;
+  protected String playLabel;
   private String pauseLabel = PAUSE_LABEL;
   private int minWidth = MIN_WIDTH;
-  protected Button playButton;
+  protected IconAnchor playButton;
   private boolean isSlow;
 
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
@@ -107,8 +108,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   public PlayAudioPanel(SoundManagerAPI soundManager, String buttonTitle, Widget optionalToTheRight, boolean doSlow) {
     this.soundManager = soundManager;
-    //  setSpacing(10);
-    //  setVerticalAlignment(ALIGN_MIDDLE);
     playLabel = buttonTitle;
     if (buttonTitle.isEmpty()) {
       minWidth = 12;
@@ -123,21 +122,24 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   /**
-   * @param controller
+   * @param soundManager
    * @param path
    * @param doSlow
-   * @see PressAndHoldExercisePanel#getPlayAudioPanel
+   * @seex PressAndHoldExercisePanel#getPlayAudioPanel
    */
   public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow) {
     this(soundManager, "", null, doSlow);
     loadAudio(path);
-    this.currentPath = path;
   }
 
   public PlayAudioPanel setPlayLabel(String label) {
     this.playLabel = label;
-    playButton.setText(playLabel);
+    setText();
     return this;
+  }
+
+  protected void setText() {
+    playButton.setText(playLabel);
   }
 
   /**
@@ -200,7 +202,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @return
    * @see PlayAudioPanel#addButtons
    */
-  protected Button makePlayButton() {
+  protected IconAnchor makePlayButton() {
     Button playButton = new Button(playLabel);
 
     playButton.addClickHandler(new ClickHandler() {
@@ -210,29 +212,32 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     });
 
     showPlayIcon(playButton);
+    stylePlayButton(playButton);
+    return playButton;
+  }
 
+  protected void stylePlayButton(Button playButton) {
     playButton.setType(ButtonType.INFO);
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
     playButton.setEnabled(false);
-    return playButton;
   }
 
-  private void styleSlowIcon(Button playButton) {
-    Style style = playButton.getElement().getStyle();
-    style.setPaddingBottom(3, Style.Unit.PX);
-    style.setPaddingLeft(6, Style.Unit.PX);
-    style.setPaddingRight(6, Style.Unit.PX);
-  }
-
-  private void showPlayIcon(Button playButton) {
+  protected void showPlayIcon(IconAnchor playButton) {
     if (isSlow) {
       playButton.setBaseIcon(MyCustomIconType.turtle);
       styleSlowIcon(playButton);
     } else {
       playButton.setIcon(PLAY);
     }
+  }
+
+  private void styleSlowIcon(Widget playButton) {
+    Style style = playButton.getElement().getStyle();
+    style.setPaddingBottom(3, Style.Unit.PX);
+    style.setPaddingLeft(6, Style.Unit.PX);
+    style.setPaddingRight(6, Style.Unit.PX);
   }
 
   /**
@@ -257,8 +262,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   /**
    * @see #addButtons(Widget)
    */
-  private void doClick() {
-    if (playButton.isVisible() && playButton.isEnabled()) {
+  protected void doClick() {
+    if (playButton.isVisible() && isEnabled()) {
       if (isPlaying()) {
         pause();  // somehow get exception here?
       } else {
@@ -267,6 +272,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       }
     }
   }
+
 
   public void doPause() {
     if (isPlaying()) {
@@ -313,6 +319,18 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     //  playButton.setIcon(playing1 ? IconType.PAUSE : PLAY);
   }
 
+  protected boolean isEnabled() {
+    return playButton.isEnabled();
+  }
+
+  /**
+   * @param val
+   * @see
+   */
+  public void setEnabled(boolean val) {
+    playButton.setEnabled(val);
+  }
+
   private boolean isPlaying() {
     return playing;
   }
@@ -320,7 +338,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   private void setPlayLabel() {
     playing = false;
     if (DEBUG) logger.info(new Date() + " setPlayLabel playing " + playing);
-    playButton.setText(playLabel);
+    setText();
 
     showPlayIcon(playButton);
 
@@ -376,13 +394,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     }
   }
 
-  private String loadAudio(String path) {
-    path = CompressedAudio.getPath(path);
-    if (isPlaying()) pause();
-    startSong(path);
-    return path;
-  }
-
   /**
    * @param path
    * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getShowGroup
@@ -393,7 +404,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     } else {
 //      logger.info("playAudio - " + path);
       loadAudio(path);
-      this.currentPath = path;
 
       addSimpleListener(new SimpleAudioListener() {
         @Override
@@ -412,12 +422,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     }
   }
 
-  public void loadAudioAgain(String path) {
-    loadAudio(path);
-    setPath(path);
-  }
-
-  private void setPath(String path) {
+  public void loadAudio(String path) {
+    path = CompressedAudio.getPath(path);
+    if (isPlaying()) pause();
+    startSong(path);
     this.currentPath = path;
   }
 
@@ -551,18 +559,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   /**
-   * @param val
-   * @see
-   */
-  public void setEnabled(boolean val) {
-    playButton.setEnabled(val);
-  }
-
-  /**
    * @return
    * @see mitll.langtest.client.exercise.RecordAudioPanel#getPlayButton()
    */
-  public Button getPlayButton() {
+  public Widget getPlayButton() {
     return playButton;
   }
 

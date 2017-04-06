@@ -44,8 +44,6 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -81,8 +79,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
-  public static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(5, 10, 25, 50);
-  public static final String ITEMS_PAGE = " items/page";
+  private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(5, 10, 25, 50);
+  private static final String ITEMS_PAGE = " items/page";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final int TOTAL = 32;
@@ -148,57 +146,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private Button prev, next;
-  DivWidget sortBox;
+  private final DivWidget sortBox;
 
   private void addPrevNextPage(DivWidget footer) {
     DivWidget buttonDiv = new DivWidget();
     buttonDiv.addStyleName("floatRight");
-    {
-      Button prev = new com.github.gwtbootstrap.client.ui.Button("Previous Page");
-      prev.getElement().setId("PrevNextList_Previous");
-      prev.setType(ButtonType.SUCCESS);
-      prev.setIcon(IconType.CARET_LEFT);
-      prev.setIconSize(IconSize.LARGE);
-
-      // Range range = pagingContainer.getVisibleRange();
-      // prev.setEnabled(range.getStart() > 0);
-
-      prev.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          prev.setEnabled(false);
-          pagingContainer.prevPage();
-          scrollToTop();
-          //enablePrevNext();
-        }
-      });
-      this.prev = prev;
-      buttonDiv.add(prev);
-    }
-
-    {
-      Button next = new com.github.gwtbootstrap.client.ui.Button("Next Page");
-      next.getElement().setId("PrevNextList_Next");
-      next.setType(ButtonType.SUCCESS);
-      next.setIcon(IconType.CARET_RIGHT);
-      next.setIconPosition(IconPosition.RIGHT);
-      next.setIconSize(IconSize.LARGE);
-      // Range range = pagingContainer.getVisibleRange();
-      // next.setEnabled(range.getLength() + range.getStart() < pagingContainer.getSize());
-      next.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          next.setEnabled(false);
-          pagingContainer.nextPage();
-          scrollToTop();
-
-        }
-      });
-
-      buttonDiv.add(next);
-      this.next = next;
-      next.addStyleName("leftTenMargin");
-    }
+    addPrevPageButton(buttonDiv);
+    addNextPageButton(buttonDiv);
 
     footer.add(buttonDiv);
     buttonDiv.addStyleName("alignCenter");
@@ -207,6 +161,51 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     hidePrevNext();
     enablePrevNext();
+  }
+
+  private void addPrevPageButton(DivWidget buttonDiv) {
+    Button prev = new Button("Previous Page");
+    prev.getElement().setId("PrevNextList_Previous");
+    prev.setType(ButtonType.SUCCESS);
+    prev.setIcon(IconType.CARET_LEFT);
+    prev.setIconSize(IconSize.LARGE);
+
+    // Range range = pagingContainer.getVisibleRange();
+    // prev.setEnabled(range.getStart() > 0);
+
+    prev.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        prev.setEnabled(false);
+        pagingContainer.prevPage();
+        scrollToTop();
+        //enablePrevNext();
+      }
+    });
+    this.prev = prev;
+    buttonDiv.add(prev);
+  }
+
+  private void addNextPageButton(DivWidget buttonDiv) {
+    Button next = new Button("Next Page");
+    next.getElement().setId("PrevNextList_Next");
+    next.setType(ButtonType.SUCCESS);
+    next.setIcon(IconType.CARET_RIGHT);
+    next.setIconPosition(IconPosition.RIGHT);
+    next.setIconSize(IconSize.LARGE);
+    next.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        next.setEnabled(false);
+        pagingContainer.nextPage();
+        scrollToTop();
+
+      }
+    });
+
+    buttonDiv.add(next);
+    this.next = next;
+    next.addStyleName("leftTenMargin");
   }
 
   private ListBox pagesize;
@@ -887,6 +886,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void getExercises(Collection<Integer> visibleIDs) {
     long then = System.currentTimeMillis();
     hidePrevNext();
+
     service.getFullExercises(freqid++, visibleIDs, false,
         new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
           @Override

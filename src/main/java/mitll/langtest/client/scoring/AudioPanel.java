@@ -149,7 +149,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
   }
 
-  public Button getPlayButton() {
+  public Widget getPlayButton() {
     return hasAudio() ? playAudio.getPlayButton() : null;
   }
 

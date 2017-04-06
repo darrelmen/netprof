@@ -958,7 +958,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
             @Override
             public void onSuccess(Void result) {
               getWaveform().setVisible(false);
-              getPlayButton().setEnabled(false);
+              setEnabled(false);
               if (comment != null) {
                 comment.setVisible(false);
               }

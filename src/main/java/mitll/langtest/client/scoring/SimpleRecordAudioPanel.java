@@ -179,7 +179,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     playAudioPanel = new ChoicePlayAudioPanel(this,
         controller.getSoundManager(),
         postAudioRecordButton,
-        exercise.getID(), controller);
+        exercise, controller);
     //  playAudioPanel.setVisible(false);
     playAudioPanel.hidePlayButton();
     return playAudioPanel;
@@ -296,7 +296,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private DivWidget getPlayButtonDiv() {
     DivWidget divForPlay = new DivWidget();
 
-    Button playButton = playAudioPanel.getPlayButton();
+    Widget playButton = playAudioPanel.getPlayButton();
     playButton.addStyleName("topFiveMargin");
 
     divForPlay.add(playButton);

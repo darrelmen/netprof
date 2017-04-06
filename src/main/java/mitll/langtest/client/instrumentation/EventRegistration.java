@@ -47,8 +47,8 @@ import mitll.langtest.shared.exercise.Shell;
 public interface EventRegistration {
   EventLogger getButtonFactory();
 
-  void register(Button button, int exid);
-  void register(Button button, String exid);
+  void register(UIObject button, int exid);
+  void register(UIObject button, String exid);
   void register(Button button);
 
   void register(Button button, int exid, String context);
