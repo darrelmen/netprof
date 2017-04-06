@@ -64,7 +64,7 @@ public abstract class UserDialog extends BasicDialog {
 
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
-  protected static final String SIGN_UP_WIDTH = 366 +
+  protected static final String SIGN_UP_WIDTH = 266 +
       "px";
 
   final PropertyHandler props;

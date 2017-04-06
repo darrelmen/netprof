@@ -177,7 +177,7 @@ class ProjectEditForm extends UserDialog {
         fieldset,
         "",
         statusBox = getBox(editButton))
-        .setWidth(SIGN_UP_WIDTH);
+        .setWidth("366px");
 
     setBox(info.getStatus());
 
@@ -216,7 +216,7 @@ class ProjectEditForm extends UserDialog {
     //  userField.box.addStyleName("topMargin");
     userField.box.addStyleName("rightFiveMargin");
     userField.box.getElement().setId("languageModel");
-    userField.box.setWidth(SIGN_UP_WIDTH);
+    userField.box.setWidth("366px");
     if (model != null)
       userField.box.setText("" + model);
     return userField;

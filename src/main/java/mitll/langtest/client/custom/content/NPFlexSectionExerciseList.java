@@ -57,14 +57,17 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
    * @param listOptions
    * @param listHeader
    * @param footer
-   *@param numToShow  @seex mitll.langtest.client.custom.Navigation#makePracticeHelper
+   * @param numToShow
+   * @seex mitll.langtest.client.custom.Navigation#makePracticeHelper
    * @see FlexListLayout#makeExerciseList(Panel, Panel, String, DivWidget, DivWidget)
    */
   public NPFlexSectionExerciseList(ExerciseController controller,
                                    Panel topRow,
                                    Panel currentExercisePanel,
                                    ListOptions listOptions,
-                                   DivWidget listHeader, DivWidget footer, int numToShow) {
+                                   DivWidget listHeader,
+                                   DivWidget footer,
+                                   int numToShow) {
     super(topRow, currentExercisePanel, controller, listOptions, listHeader, footer, numToShow);
   }
 

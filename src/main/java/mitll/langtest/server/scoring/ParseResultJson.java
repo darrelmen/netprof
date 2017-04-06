@@ -129,8 +129,7 @@ public class ParseResultJson {
 
     if (imageTypeMapMap.isEmpty()) {
       logger.warn("parseJsonString json '" + json + "' produced empty events map " + wordToPronunciations);
-    }
-    else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
+    } else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
       if (warn++ < 2) logger.warn("parseJsonString no words for " + json);
       // throw new Exception();
     }
@@ -151,21 +150,19 @@ public class ParseResultJson {
     if (json.isEmpty()) {
       logger.warn("json is empty?");
       return emptyMap;
-    }
-    else if (json.equals("{}") || json.equals("null")) {
+    } else if (json.equals("{}") || json.equals("null")) {
       logger.warn("json is " + json);
       return emptyMap;
-    }
-    else {
+    } else {
       return getNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
     }
   }
 
   /**
-   * @see mitll.langtest.server.database.userexercise.ExerciseToPhone#getExToPhonePerProject
    * @param json
    * @param wordToPronunciations
    * @return
+   * @see mitll.langtest.server.database.userexercise.ExerciseToPhone#getExToPhonePerProject
    */
   public Map<NetPronImageType, List<TranscriptSegment>> parseJsonAndGetProns(String json,
                                                                              Map<String, List<List<String>>> wordToPronunciations) {
@@ -214,7 +211,7 @@ public class ParseResultJson {
           }
         }
       } catch (Exception e) {
-        logger.debug("no json array at " + words1 + " in " + jsonObject, e);
+        logger.debug("no json array at '" + words1 + "' in " + jsonObject, e);
       }
     } else {
       logger.warn("skipping '" + words1 + "' '" + w1);// + " has " + jsonObject.());
@@ -244,7 +241,8 @@ public class ParseResultJson {
                                String tokenKey,
                                JsonObject phone,
                                boolean usePhone) {
-    String token = phone.get(tokenKey).getAsString();
+    JsonElement jsonElement = phone.get(tokenKey);
+    String token = (jsonElement.isJsonPrimitive()) ? jsonElement.getAsString() : "word";
     double pscore = phone.get(S).getAsDouble();
     double pstart = phone.has(STR) ? phone.get(STR).getAsDouble() : 0d;
     double pend = phone.has(END) ? phone.get(END).getAsDouble() : 0d;
@@ -254,5 +252,6 @@ public class ParseResultJson {
 
     phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
     return token;
+
   }
 }

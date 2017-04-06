@@ -66,8 +66,6 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
     this.exerciseList = exerciseList;
   }
 
-  //public abstract Panel getExercisePanel(U e);
-
   /**
    * @param e
    * @param wrapper

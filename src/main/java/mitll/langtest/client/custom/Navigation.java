@@ -54,19 +54,12 @@ import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
 import mitll.langtest.client.contextPractice.DialogViewer;
 import mitll.langtest.client.contextPractice.DialogWindow;
-import mitll.langtest.client.custom.content.FlexListLayout;
-import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.project.ProjectOps;
-import mitll.langtest.client.scoring.ExerciseOptions;
-import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -78,8 +71,6 @@ import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -103,7 +94,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String STUDENT_ANALYSIS = "Student Analysis";
-  private static final String CLASSROOM = "classroom";
+  public static final String CLASSROOM = "classroom";
 
   private static final String CHAPTERS = "Learn Pronunciation";
 
@@ -212,46 +203,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @NotNull
   private SimpleChapterNPFHelper<CommonShell, CommonExercise> getLearnHelper(final ExerciseController controller) {
-    return new SimpleChapterNPFHelper<CommonShell, CommonExercise>(controller, null
-    ) {
-      @Override
-      protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-        ExerciseController outerC = controller;
-        return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
-          /**
-           * @see FlexListLayout#makeNPFExerciseList
-           * @param topRow
-           * @param currentExercisePanel
-           * @param instanceName
-           * @param listHeader
-           * @param footer
-           * @return
-           */
-          @Override
-          protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
-                                                                                     Panel currentExercisePanel,
-                                                                                     String instanceName,
-                                                                                     DivWidget listHeader, DivWidget footer) {
-            return new NPFlexSectionExerciseList(outerC, topRow, currentExercisePanel,
-                new ListOptions(instanceName), listHeader, footer, NUM_TO_SHOW);
-          }
-        };
-      }
-
-      protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-        return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
-          @Override
-          public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
-            List<CorrectAndScore> correctAndScores = wrapper.getHistories().get(e.getID());
-            return new TwoColumnExercisePanel<>(e, controller, exerciseList,
-                  correctAndScores,
-                  new ExerciseOptions()
-                      .setInstance(CLASSROOM));
-
-          }
-        };
-      }
-    };
+    return new NewLearnHelper(controller);
   }
 
   /**
@@ -830,4 +782,5 @@ public class Navigation implements RequiresResize, ShowTab {
 
     if (listManager != null) listManager.onResize();
   }
+
 }

@@ -793,9 +793,9 @@ public class LangTest implements
 
   @Override
   public void logEvent(UIObject button, String widgetType, Shell ex, String context) {
-    logger.info("logEvent START ex " + ex + " in " + context);
+    //logger.info("logEvent START ex " + ex + " in " + context);
     buttonFactory.logEvent(button, widgetType, new EventContext("" + ex.getID(), context, getUser()));
-    logger.info("logEvent END   ex " + ex + " in " + context);
+    //logger.info("logEvent END   ex " + ex + " in " + context);
 
   }
 

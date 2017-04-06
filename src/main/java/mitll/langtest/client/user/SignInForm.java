@@ -139,7 +139,7 @@ public class SignInForm extends UserDialog implements SignIn {
 
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("password_login_box");
-    hp.addStyleName("leftFiveMargin");
+    //hp.addStyleName("leftFiveMargin");
 
     password = addPasswordField(fieldset, hp);
 
@@ -179,9 +179,14 @@ public class SignInForm extends UserDialog implements SignIn {
     sendEmail = new SendEmail(eventRegistration, userField);
   }
 
+  /**
+   *
+   * @param fieldset
+   * @param hp
+   * @return
+   */
   private FormField addPasswordField(Fieldset fieldset, Panel hp) {
-    FormField password;
-    password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    FormField password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     TextBoxBase box = password.box;
     box.addFocusHandler(new FocusHandler() {
       @Override
@@ -191,7 +196,7 @@ public class SignInForm extends UserDialog implements SignIn {
       }
     });
 
-    hp.add(box);
+    hp.add(password.getGroup());
     box.addStyleName("rightFiveMargin");
 
     return password;

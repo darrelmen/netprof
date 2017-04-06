@@ -538,12 +538,17 @@ public class BasicDialog {
     }
   }
 
-  protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword,
-                                                         int minLength, int maxLength, String hint) {
+  protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox,
+                                                         boolean isPassword,
+                                                         int minLength,
+                                                         int maxLength,
+                                                         String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
     user.setPlaceholder(hint);
-    return getSimpleFormField(dialogBox, user, minLength);
+    FormField simpleFormField = getSimpleFormField(dialogBox, user, minLength);
+    simpleFormField.getGroup().getElement().setId("controlGroup_"+hint);
+    return simpleFormField;
   }
 
   private final Map<Widget, Popover> widgetToPopover = new HashMap<Widget, Popover>();
@@ -564,16 +569,16 @@ public class BasicDialog {
     popover.reconfigure();
   }
 
-  protected FormField getSimpleFormField(Panel dialogBox, TextBox user, int minLength) {
+   FormField getSimpleFormField(Panel dialogBox, TextBox user, int minLength) {
     final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
     return new FormField(user, userGroup, minLength);
   }
 
   static class MyPopover extends Popover {
-    public MyPopover() {
+     MyPopover() {
     }
 
-    public void dontFireAgain() {
+     void dontFireAgain() {
       hide();
       setTrigger(Trigger.MANUAL);
       reconfigure();

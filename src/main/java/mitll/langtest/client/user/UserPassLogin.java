@@ -74,7 +74,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
-  private static final int LEFT_SIDE_WIDTH = 483;
+  private static final int LEFT_SIDE_WIDTH = 453;
   //private static final String VALID_EMAIL = "Please enter a valid email address.";
   private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation.";//"Get feedback on your pronunciation";
   private static final String THIRD_BULLET = "Create and share vocab lists for study and review.";//"Make your own lists of words to study later or to share.";
@@ -235,7 +235,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     styleLink(forgotPassword);
 
     Panel hp2 = new HorizontalPanel();
-
+hp2.getElement().setId("hp_forgotuser_pass_help_row");
     hp2.add(forgotUser);
     hp2.add(forgotPassword);
     hp2.add(getHelpButton());
@@ -343,6 +343,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private void getLeftIntro(Panel leftAndRight) {
     DivWidget left = new DivWidget();
     left.addStyleName("floatLeftAndClear");
+   // left.addStyleName("rightFiveMargin");
     left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
     int size = 1;
