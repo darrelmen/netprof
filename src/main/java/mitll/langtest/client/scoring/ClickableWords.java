@@ -6,10 +6,19 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -19,8 +28,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 3/23/17.
  */
 public class ClickableWords<T extends CommonExercise> {
-  public static final double THRESHOLD = 0.3;
   private final Logger logger = Logger.getLogger("ClickableWords");
+
+  public static final double THRESHOLD = 0.3;
 
   private boolean isJapanese = false;
 
@@ -32,12 +42,20 @@ public class ClickableWords<T extends CommonExercise> {
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   //private static final String MEANING = "Meaning";
   private final ListInterface listContainer;
+  ExerciseServiceAsync exerciseServiceAsync;
 
-  ClickableWords(ListInterface listContainer, T exercise, String language) {
+  /**
+   * @param listContainer
+   * @param exercise
+   * @param language
+   * @param exerciseServiceAsync
+   */
+  ClickableWords(ListInterface listContainer, T exercise, String language, ExerciseServiceAsync exerciseServiceAsync) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
+    this.exerciseServiceAsync = exerciseServiceAsync;
   }
 
   /**
@@ -59,7 +77,7 @@ public class ClickableWords<T extends CommonExercise> {
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
     for (String token : tokens) {
-      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, false));
+      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, false, isFL));
     }
 
     horizontal.addStyleName("leftFiveMargin");
@@ -120,7 +138,7 @@ public class ClickableWords<T extends CommonExercise> {
         // logger.fine("-  no highlight '" + toFind + "' vs '" +token+ "'");
       }
 
-      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch));
+      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch, isFL));
     }
 
     horizontal.addStyleName("leftFiveMargin");
@@ -131,8 +149,7 @@ public class ClickableWords<T extends CommonExercise> {
   private boolean isMatch(String token, String next) {
     if (next.isEmpty()) {
       return false;
-    }
-    else {
+    } else {
       String context = removePunct(token.toLowerCase());
       String vocab = removePunct(next.toLowerCase());
       boolean b = context.equals(vocab) || (context.startsWith(vocab) && !vocab.isEmpty());
@@ -173,10 +190,12 @@ public class ClickableWords<T extends CommonExercise> {
 
   private InlineHTML makeClickableText(boolean isMeaning,
                                        HasDirection.Direction dir,
-                                       final String html, boolean chineseCharacter,
-                                       boolean addStyle) {
+                                       final String html,
+                                       boolean chineseCharacter,
+                                       boolean addStyle, boolean isFL) {
     String toShow = html;//addStyle ? "<u>" + html + "</u>" : html;
-    final InlineHTML w = new InlineHTML(toShow, dir);
+    //final InlineHTML w = new InlineHTML(toShow, dir);
+    final MyClickable w = new MyClickable(toShow, dir);
 
     if (addStyle) w.addStyleName("contextmatch");
 
@@ -194,14 +213,7 @@ public class ClickableWords<T extends CommonExercise> {
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
               String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
-
-              //    logger.info("from " + html);
-              //    logger.info("to   " + s1);
-
               String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
-
-              //  logger.info("finally   " + s2);
-
               listContainer.searchBoxEntry(s2);
             }
           });
@@ -211,6 +223,10 @@ public class ClickableWords<T extends CommonExercise> {
         @Override
         public void onMouseOver(MouseOverEvent mouseOverEvent) {
           w.addStyleName("underline");
+          if (!w.isHas()) {
+  //          addTool(toShow,isFL,w);
+            w.setHas(true);
+          }
         }
       });
       w.addMouseOutHandler(new MouseOutHandler() {
@@ -228,6 +244,39 @@ public class ClickableWords<T extends CommonExercise> {
     if (!chineseCharacter) w.addStyleName("rightFiveMargin");
 
     return w;
+  }
+
+  private static class MyClickable extends InlineHTML {
+    private boolean has =false;
+    public MyClickable(@IsSafeHtml String html, Direction dir) { super(html,dir);}
+    public void setHas(boolean val) { this.has = val;}
+
+    public boolean isHas() {
+      return has;
+    }
+  }
+/*  private void addTool(String toShow, boolean isFL, Widget w) {
+    exerciseServiceAsync.getExerciseIds(new ExerciseListRequest().setPrefix(toShow),
+        new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(ExerciseListWrapper<CommonShell> result) {
+            if (!result.getExercises().isEmpty()) {
+              CommonShell next = result.getExercises().iterator().next();
+              if (isFL) {
+                logger.info("adding " + next.getEnglish());
+                addTooltip(next.getEnglish(), w);
+              }
+            }
+          }
+        });
+  }*/
+  private void addTooltip(String value, Widget span) {
+    new TooltipHelper().addTooltip(span, value);
   }
 
   protected String removePunct(String t) {

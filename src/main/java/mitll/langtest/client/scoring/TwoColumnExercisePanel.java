@@ -86,7 +86,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
 
-    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
+    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(),controller.getExerciseService());
 
     this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());

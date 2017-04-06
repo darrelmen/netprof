@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -43,25 +42,42 @@ import com.github.gwtbootstrap.client.ui.constants.IconPosition;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.FilterRequest;
+import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.MatchInfo;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
@@ -124,13 +140,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     listHeader.add(pagerAndSort);
     pagerAndSort.add(tableWithPager);
     tableWithPager.addStyleName("floatLeft");
-    pagerAndSort.add(addSortBox(controller));
+    this.sortBox = addSortBox(controller);
+    pagerAndSort.add(sortBox);
 
     addPrevNextPage(footer);
     finished = true;
   }
 
   private Button prev, next;
+  DivWidget sortBox;
 
   private void addPrevNextPage(DivWidget footer) {
     DivWidget buttonDiv = new DivWidget();
@@ -210,6 +228,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     for (Integer num : PAGE_SIZE_CHOICES) {
       pagesize.addItem(num + ITEMS_PAGE, "" + num);
     }
+//    pagesize.addFocusHandler(new FocusHandler() {
+//      @Override
+//      public void onFocus(FocusEvent event) {
+//        pagesize.setFocus(false);
+//      }
+//    });
 
     pagesize.addChangeHandler(event -> onPageSizeChange(pagesize));
     return pagesize;
@@ -232,6 +256,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void onPageSizeChange(ListBox pagesize) {
+    pagesize.setFocus(false);
     String value = pagesize.getValue();
     int i = Integer.parseInt(value);
     pagingContainer.setPageSize(i);
@@ -925,12 +950,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     prev.setVisible(false);
     next.setVisible(false);
     pageSizeContainer.setVisible(false);
+    sortBox.setVisible(false);
+    clearExerciseContainer();
   }
 
   private void showPrevNext() {
     prev.setVisible(true);
     next.setVisible(true);
     pageSizeContainer.setVisible(true);
+    sortBox.setVisible(true);
 
     enablePrevNext();
   }

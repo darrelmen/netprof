@@ -88,7 +88,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
       topRow.addStyleName("floatLeft");
       topRow.addStyleName("leftBlock");
       topRow.addStyleName("rightFiveMargin");
-
+twoRows.addStyleName("inlineFlex");
       FlowPanel section = new FlowPanel("section");
       section.addStyleName("sidebar");
 
@@ -104,7 +104,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
       bottomRowDiv.addStyleName("floatLeft");
       bottomRowDiv.addStyleName("mainBlock");
       bottomRowDiv.getElement().setId("rightSideDiv");
-
+      bottomRowDiv.setWidth("75%");
       // listHeader.addStyleName("listHeader");
       bottomRowDiv.add(listHeader);
     }
@@ -114,6 +114,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     bottomRow.add(exerciseListContainer);
     bottomRow.getElement().setId("NPFHelper_bottomRow");
     styleBottomRow(bottomRow);
+    if (!hasTopRow)bottomRow.setWidth("100%");
 
     bottomRowDiv.add(bottomRow);
     twoRows.add(bottomRowDiv);
