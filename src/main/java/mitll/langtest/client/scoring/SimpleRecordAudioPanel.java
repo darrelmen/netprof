@@ -1,6 +1,5 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.Tooltip;
@@ -49,7 +48,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private final BusyPanel goodwaveExercisePanel;
 
   private PostAudioRecordButton postAudioRecordButton;
-  private ChoicePlayAudioPanel playAudioPanel;
+  private RecorderPlayAudioPanel playAudioPanel;
   // private IconAnchor download;
   // private Panel downloadContainer;
   private MiniScoreListener miniScoreListener;
@@ -161,27 +160,22 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see #addWidgets
    */
   private PlayAudioPanel makePlayAudioPanel() {
-//    recordImage1 = new Image(UriUtils.fromSafeConstant(FIRST_RED));
-//    recordImage1.setVisible(false);
-//    recordImage1.setWidth("32px");
-//    recordImage2 = new Image(UriUtils.fromSafeConstant(SECOND_RED));
-//    recordImage2.setVisible(false);
-//    recordImage2.setWidth("32px");
-
     waitCursorHelper = new WaitCursorHelper();
     waitCursorHelper.hide();
 
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller);
     postAudioRecordButton.addStyleName("leftFiveMargin");
     postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
-    //postAudioRecordButton.addStyleName("rightFiveMargin");
 
-    playAudioPanel = new ChoicePlayAudioPanel(this,
+    playAudioPanel = new RecorderPlayAudioPanel(this,
         controller.getSoundManager(),
         postAudioRecordButton,
-        exercise, controller);
+        exercise,
+        controller,
+        false);
     //  playAudioPanel.setVisible(false);
     playAudioPanel.hidePlayButton();
+
     return playAudioPanel;
   }
 
@@ -422,7 +416,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   @Nullable
   private String getReadyToPlayAudio(String path) {
     // logger.info("get ready to play " +path);
-    path = getPath(path);
+    path = CompressedAudio.getPath(path);
     if (path != null) {
       this.audioPath = path;
     }
@@ -431,10 +425,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       playAudioPanel.startSong(path);
     }
     return path;
-  }
-
-  private String getPath(String path) {
-    return CompressedAudio.getPath(path);
   }
 
   /**

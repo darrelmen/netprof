@@ -53,6 +53,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.amas.AMASInitialUI;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -215,6 +216,7 @@ import java.util.logging.Logger;
  * 2.0.2
  * 2.0.3
  * 2.0.4
+ *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements
@@ -223,7 +225,7 @@ public class LangTest implements
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
-  public static final String VERSION_INFO = "2.0.4";
+  public static final String VERSION_INFO = "2.0.6";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -237,6 +239,7 @@ public class LangTest implements
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
+  // services
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final AudioServiceAsync audioService = GWT.create(AudioService.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
@@ -260,12 +263,16 @@ public class LangTest implements
   private UILifecycle initialUI;
   public static EventBus EVENT_BUS = GWT.create(SimpleEventBus.class);
 
+  private KeyStorage storage;// = new KeyStorage(this);
+
   /**
    * This gets called first.
    * <p>
    * Make an exception handler that displays the exception.
    */
   public void onModuleLoad() {
+    //  KeyStorage storage = new KeyStorage(this);
+
     // set uncaught exception handler
     dealWithExceptions();
     askForStartupInfo();
@@ -318,6 +325,7 @@ public class LangTest implements
 
   /**
    * after we change state
+   *
    * @see ProjectOps#refreshStartupInfo
    */
   public void refreshStartupInfo() {
@@ -484,7 +492,7 @@ public class LangTest implements
 
     buttonFactory = new ButtonFactory(service, props, this);
 
-    userManager = new UserManager(this,this, userService, props);
+    userManager = new UserManager(this, this, userService, props);
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
@@ -516,7 +524,7 @@ public class LangTest implements
         showErrorMessage("Configuration Error", message);
       }
 
-     // loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
+      // loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
     }
   }
 
@@ -628,7 +636,7 @@ public class LangTest implements
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
   private void makeFlashContainer() {
-   // logger.info("makeFlashContainer - called");
+    // logger.info("makeFlashContainer - called");
     MicPermission micPermission = new MicPermission() {
       /**
        * @see mitll.langtest.client.recorder.WebAudioRecorder
@@ -694,7 +702,7 @@ public class LangTest implements
 
   @Override
   public ProjectStartupInfo getProjectStartupInfo() {
-  //  logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
+    //  logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
   }
 
@@ -704,7 +712,7 @@ public class LangTest implements
 
   public void clearStartupInfo() {
     this.projectStartupInfo = null;
-  //  logger.info("clearStartupInfo   ");
+    //  logger.info("clearStartupInfo   ");
   }
 
   public Collection<String> getTypeOrder() {
@@ -840,16 +848,6 @@ public class LangTest implements
     userManager.checkLogin();
   }
 
-  /**
-   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
-   */
-  @Deprecated
-  public void checkUser() {
-//    if (userManager.isUserExpired()) {
-//      checkLogin();
-//    }
-  }
-
   public boolean showCompleted() {
     return isReviewMode() || hasPermission(User.Permission.RECORD_AUDIO);
   }
@@ -908,6 +906,8 @@ public class LangTest implements
     return props.isRightAlignContent() || initialUI.isRTL();
   }
 
+  // services
+
   public LangTestDatabaseAsync getService() {
     return service;
   }
@@ -931,6 +931,7 @@ public class LangTest implements
   public ScoringServiceAsync getScoringService() {
     return scoringServiceAsync;
   }
+
   public ExerciseServiceAsync getExerciseService() {
     return exerciseServiceAsync;
   }
@@ -966,7 +967,7 @@ public class LangTest implements
    * @see RecordButton.RecordingListener#stopRecording(long)
    */
   public void stopRecording(WavCallback wavCallback) {
-    logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
+    // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
     flashRecordPanel.stopRecording(wavCallback);
   }
 
@@ -1020,5 +1021,11 @@ public class LangTest implements
 
   public void logout() {
     initialUI.logout();
+  }
+
+  public KeyStorage getStorage() {
+
+    if (storage == null) storage = new KeyStorage(this);
+    return storage;
   }
 }

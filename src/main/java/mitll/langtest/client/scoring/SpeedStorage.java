@@ -5,15 +5,21 @@ import mitll.langtest.client.exercise.ExerciseController;
 
 /**
  * Created by go22670 on 4/6/17.
+ * @deprecated redundant with key storage
  */
 public class SpeedStorage {
   private final String instance;
   private final ExerciseController controller;
+  private String speedKey = "audioSpeed";
 
   public SpeedStorage(ExerciseController controller, String instance) {
     this.controller = controller;
     this.instance = instance;
-    ;
+  }
+
+  public SpeedStorage(ExerciseController controller, String instance, String speedKey) {
+    this(controller, instance);
+    this.speedKey = speedKey;
   }
 
   public boolean isRegularSpeed() {
@@ -28,7 +34,7 @@ public class SpeedStorage {
       if (item != null) {
         return item.toLowerCase().equals("true");
       } else {
-        storeIsRegular(true);
+        storeIsSet(true);
         return true;
       }
     }
@@ -38,14 +44,14 @@ public class SpeedStorage {
   }
 
   private String getStorageKey(ExerciseController controller, String appTitle) {
-    return getStoragePrefix(controller, appTitle) + "audioSpeed";
+    return getStoragePrefix(controller, appTitle) + speedKey;
   }
 
   private String getStoragePrefix(ExerciseController controller, String appTitle) {
     return appTitle + ":" + controller.getUser() + ":" + instance + ":";
   }
 
-  public void storeIsRegular(boolean speed) {
+  public void storeIsSet(boolean speed) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(getStorageKey(), "" + speed);

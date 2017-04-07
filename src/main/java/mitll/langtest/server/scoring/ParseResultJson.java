@@ -108,7 +108,11 @@ public class ParseResultJson {
   private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json,
                                                                       boolean usePhones,
                                                                       Map<String, List<List<String>>> wordToPronunciations) {
-    if (json.isEmpty()) throw new IllegalArgumentException("json is empty");
+    if (json.isEmpty()) {
+      //logger.warn("json is empty");
+      return Collections.emptyMap();
+    }
+
     //   else {
 //      logger.warn("json = " + json);
     // }
@@ -148,10 +152,10 @@ public class ParseResultJson {
    */
   public Map<NetPronImageType, List<TranscriptSegment>> readFromJSON(String json) {
     if (json.isEmpty()) {
-      logger.warn("json is empty?");
+      //logger.warn("json is empty?");
       return emptyMap;
     } else if (json.equals("{}") || json.equals("null")) {
-      logger.warn("json is " + json);
+     // logger.warn("json is " + json);
       return emptyMap;
     } else {
       return getNetPronImageTypeToEndTimes(parseJsonString(json, false, null));

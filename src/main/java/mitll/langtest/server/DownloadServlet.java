@@ -117,7 +117,7 @@ public class DownloadServlet extends DatabaseServlet {
         if (projid == -1) {
           logger.warn("no current project for request " );
           response.setContentType("text/html");
-          response.getOutputStream().write("stale session".getBytes());
+          response.getOutputStream().write("no project for request".getBytes());
           closeOutputStream(response);
           return;
         }

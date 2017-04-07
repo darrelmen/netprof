@@ -39,7 +39,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -51,7 +50,6 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -270,7 +268,7 @@ SpeedStorage speedStorage;
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerRegAttr);
-          speedStorage.storeIsRegular(true);
+          speedStorage.storeIsSet(true);
           controller.logEvent(innerRegular, RADIO_BUTTON, exercise.getID(), SELECTED_AUDIO + innerRegAttr.getAudioRef());
         }
       });
@@ -285,7 +283,7 @@ SpeedStorage speedStorage;
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerSlowAttr);
-          speedStorage.storeIsRegular(false);
+          speedStorage.storeIsSet(false);
           controller.logEvent(innerSlow, RADIO_BUTTON, exercise.getID(), SELECTED_AUDIO + innerSlowAttr.getAudioRef());
         }
       });

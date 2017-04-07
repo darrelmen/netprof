@@ -47,6 +47,7 @@ public enum MyCustomIconType implements BaseIconType {
   stop, // Our runtime access
   white, // Our runtime access
   gray, // Our runtime access
+  rabbit, // Our runtime access
   turtle, // Our runtime access
   incorrect; // Our runtime access
 

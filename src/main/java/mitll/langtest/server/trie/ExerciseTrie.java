@@ -165,6 +165,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private void addFL(boolean isMandarin, boolean hasClickableCharacters, T exercise, String fl) {
     fl = getTrimmed(fl);
     addEntryToTrie(new ExerciseWrapper<>(fl, exercise));
+    addSubstrings(exercise, fl);
 
     Collection<String> tokens = isMandarin ? getMandarinTokens(fl) : smallVocabDecoder.getTokens(fl);
     for (String token : tokens) {
@@ -212,6 +213,18 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
       Character character = c;
       if (!Character.isSpaceChar(c)) {
         addEntry(exercise, character.toString());
+      }
+    }
+  }
+
+  private void addSubstrings(T exercise, String fl) {
+    for (int i = 0; i < fl.length(); i++) {
+      String substring = fl.substring(i);
+      char c = substring.charAt(0);
+      //    Character character = c;
+      if (!Character.isSpaceChar(c)) {
+        addEntry(exercise, substring);
+//        logger.info("adding " + substring);
       }
     }
   }

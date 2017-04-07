@@ -60,7 +60,7 @@ import java.util.Map;
 public class UserManagement {
   private static final Logger logger = LogManager.getLogger(UserManagement.class);
   private final IUserDAO userDAO;
- // private final IUserPermissionDAO permissionDAO;
+  // private final IUserPermissionDAO permissionDAO;
   private final IResultDAO resultDAO;
 
   /**
@@ -71,7 +71,7 @@ public class UserManagement {
   public UserManagement(IUserDAO userDAO, IResultDAO resultDAO/*, IUserPermissionDAO permissionDAO*/) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
-   // this.permissionDAO = permissionDAO;
+    // this.permissionDAO = permissionDAO;
   }
 
 
@@ -119,11 +119,11 @@ public class UserManagement {
 
   /**
    * For now, only teachers get pending requests...
+   *
    * @param user
    * @return
    * @see #addUser(HttpServletRequest, SignUpUser)
    * @see mitll.langtest.server.rest.RestUserManagement#addUser(HttpServletRequest, String, String, String, JSONObject)
-   *
    */
   public User addUser(SignUpUser user) {
     User user1 = userDAO.addUser(user);
@@ -157,8 +157,8 @@ public class UserManagement {
   }
 
   /**
-   * @see DatabaseImpl#usersToJSON
    * @return
+   * @see DatabaseImpl#usersToJSON
    */
   public JSON usersToJSON() {
     return new UserDAOToExcel().toJSON(getUsers());
@@ -170,16 +170,26 @@ public class UserManagement {
    * <p>
    * TODO : percent complete should be done from audio table, not result table
    * TODO : passing in empty language - is that OK
+   *
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    * @see #usersToXLSX
    */
   public List<User> getUsers() {
-    Map<Integer, Float> userToRate = resultDAO.getSessions("").getUserToRate();
+    // TODO : this is really expensive - right now we reparse all the json when we get it out of the database.
+    //Map<Integer, Float> userToRate = resultDAO.getSessions("").getUserToRate();
     List<User> users = null;
     try {
+      long then = System.currentTimeMillis();
       UserToCount idToCount = resultDAO.getUserToNumAnswers();
+      long now = System.currentTimeMillis();
+      if (now - then > 20) logger.info("getUsers took " + (now - then) + " millis to get user->num answers");
+      then = now;
+
       users = userDAO.getUsers();
+      now = System.currentTimeMillis();
+      if (now - then > 20) logger.info("getUsers took " + (now - then) + " millis to get " + users.size() + " users");
+
       Collections.sort(users);
 
       //int total = exerciseDAO.getRawExercises().size();
@@ -188,9 +198,9 @@ public class UserManagement {
         if (numResults != null) {
           u.setNumResults(numResults);
 
-          if (userToRate.containsKey(u.getID())) {
-            u.setRate(userToRate.get(u.getID()));
-          }
+          //    if (userToRate.containsKey(u.getID())) {
+          //     u.setRate(userToRate.get(u.getID()));
+          //  }
           //  int size = idToCount.idToUniqueCount.get(u.getID()).size();
 
           // TODO : put this back

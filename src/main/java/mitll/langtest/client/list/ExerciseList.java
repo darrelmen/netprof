@@ -622,7 +622,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ListInterface#checkAndAskServer(int)
    */
   protected void askServerForExercise(int itemID) {
-    userState.checkUser();
+   // userState.checkUser();
     if (cachedNext != null && cachedNext.getID() == itemID) {
       if (DEBUG)
         logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + getInstance());

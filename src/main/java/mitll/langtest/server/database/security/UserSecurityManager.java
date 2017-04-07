@@ -69,7 +69,7 @@ public class UserSecurityManager implements IUserSecurityManager {
 
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
-  private MyRemoteServiceServlet userService;
+  //private MyRemoteServiceServlet userService;
 
   /**
    * @param userDAO
@@ -77,11 +77,10 @@ public class UserSecurityManager implements IUserSecurityManager {
    * @see
    */
   public UserSecurityManager(IUserDAO userDAO,
-                             IUserSessionDAO userSessionDAO,
-                             MyRemoteServiceServlet userService) {
+                             IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
-    this.userService = userService;
+    //this.userService = userService;
     //startShiro();
   }
 
@@ -443,14 +442,15 @@ public class UserSecurityManager implements IUserSecurityManager {
    */
   public int getUserIDFromRequest(HttpServletRequest request) {
     if (request == null) {
-      log.error("how can request be null?", new Exception());
+      log.error("getUserIDFromRequest how can request be null?", new Exception());
       return -1;
     } else {
       HttpSession session = getCurrentSession(request);
-      if (session != null) {
-        return getUserIDFromSession(session);
-      } else {
+      if (session == null) {
+        log.info("no current session for request " +request);
         return -1;
+      } else {
+        return getUserIDFromSession(session);
       }
     }
   }
@@ -463,7 +463,7 @@ public class UserSecurityManager implements IUserSecurityManager {
   private Integer getUserIDFromSession(HttpSession session) {
     Object attribute = session.getAttribute(USER_SESSION_ATT);
     if (attribute == null) {
-      log.warn("huh? no attribute " + USER_SESSION_ATT +  " on session?");
+      log.warn("getUserIDFromSession huh? no attribute " + USER_SESSION_ATT +  " on session?");
       return -1;
     }
     else {

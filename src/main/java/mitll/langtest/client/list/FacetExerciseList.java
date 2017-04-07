@@ -975,7 +975,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       Scheduler.get().scheduleDeferred(new Command() {
         public void execute() {
           addExerciseWidget(exercise, wrapper);
-          logger.info("ex " + exercise.getID() + " now " +innerContainer.getElement().getChildCount());
+          //logger.info("ex " + exercise.getID() + " now " +innerContainer.getElement().getChildCount());
           if (numToShow != 1) {
             int childCount = innerContainer.getElement().getChildCount();
             if (childCount == size) {

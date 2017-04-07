@@ -216,8 +216,7 @@ public class Banner implements RequiresResize {
    * @paramx events
    * @see #makeNPFHeaderRow
    */
-  private void makeCogMenu(List<LinkAndTitle> choices
-  ) {
+  private void makeCogMenu(List<LinkAndTitle> choices) {
     cogMenu = makeMenu(choices);
     cogMenu.addStyleName("cogStyle");
   }
@@ -337,9 +336,12 @@ public class Banner implements RequiresResize {
 
     public NavLink add(Dropdown dropdown) {
       NavLink monitoringC = new NavLink(title);
-      if (linkURL != null) monitoringC.setHref(linkURL);
-      else
+      if (linkURL != null) {
+        monitoringC.setHref(linkURL);
+      }
+      else {
         monitoringC.addClickHandler(clickHandler);
+      }
 
       dropdown.add(monitoringC);
       return monitoringC;

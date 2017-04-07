@@ -32,9 +32,16 @@
 
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.LifecycleSupport;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
+
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -43,43 +50,59 @@ import mitll.langtest.client.exercise.ExerciseController;
  * @since 3/5/14.
  */
 public class KeyStorage {
+  private Logger logger = Logger.getLogger("KeyStorage");
+
   private ExerciseController controller;
-  private final boolean debug = false;
+  private final boolean DEBUG = false;
   private String language;
   private int user;
+  private boolean showedAlert = false;
 
+  /**
+   * @see ListManager#ListManager(ExerciseController, TabPanel, ReloadableContainer)
+   * @see Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback, LifecycleSupport)
+   * @param controller
+   */
   public KeyStorage(ExerciseController controller) {
     this(controller.getLanguage(), controller.getUserState().getUser());
     this.controller = controller;
   }
 
   /**
-   * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin
    * @param language
    * @param user
+   * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin
    */
   private KeyStorage(String language, int user) {
     this.language = language;
     this.user = user;
   }
 
-  private final boolean showedAlert = false;
+
+  public void setBoolean(String name, boolean val) {
+    storeValue(name, "" + val);
+  }
+
+  public boolean isTrue(String name) {
+    return getValue(name).equals("true");
+  }
+
   public void storeValue(String name, String toStore) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
       String localStorageKey = getLocalStorageKey(name);
       try {
         localStorageIfSupported.setItem(localStorageKey, toStore);
       } catch (Exception e) {
         if (!showedAlert) {
+          showedAlert = true;
           Window.alert("Your web browser does not support storing settings locally. " +
               "In Safari, the most common cause of this is using Private Browsing Mode. " +
               "Some settings may not save or some features may not work properly for you.");
         }
       }
-      if (debug) System.out.println("KeyStorage : (" + localStorageKey+
-        ") storeValue " + name + "="+toStore + " : " + getValue(name));
+      if (DEBUG) logger.info("KeyStorage : (" + localStorageKey +
+          ") storeValue " + name + "=" + toStore + " : " + getValue(name));
     }
   }
 
@@ -89,39 +112,40 @@ public class KeyStorage {
 
       String localStorageKey = getLocalStorageKey(name);
       String item = localStorageIfSupported.getItem(localStorageKey);
-      if (debug) System.out.println("KeyStorage : (" +localStorageKey+ ")" + " name " + name + "=" +item);
+      //  if (debug) System.out.println("KeyStorage : (" +localStorageKey+ ")" + " name " + name + "=" +item);
       if (item == null) item = "";
       return item;
-    }
-    else {
+    } else {
       return "";
     }
   }
 
-  public boolean hasValue(String name) { return !getValue(name).isEmpty(); }
+  public boolean hasValue(String name) {
+    return !getValue(name).isEmpty();
+  }
 
   public void removeValue(String name) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
       localStorageIfSupported.removeItem(getLocalStorageKey(name));
-      if (debug) System.out.println("KeyStorage : removeValue " + name);
-
+      //if (debug) System.out.println("KeyStorage : removeValue " + name);
     }
   }
 
   private String getLocalStorageKey(String name) {
     if (controller != null) {
       language = controller.getLanguage();          // necessary???
-      user = controller.getUser();
+      user     = controller.getUser();
     }
 
     return getKey(name);
   }
 
   protected String getKey(String name) {
-    return "Navigation_" + language + "_" + user + "_" +name;
+    return "Navigation_" + language + "_" + user + "_" + name;
   }
 
-  public String toString() { return getKey(""); }
+  public String toString() {
+    return getKey("");
+  }
 }

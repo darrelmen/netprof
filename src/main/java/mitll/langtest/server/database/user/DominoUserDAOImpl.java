@@ -832,6 +832,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return kindToUse;
   }
 
+  Set<String> unknownRoles = new HashSet<>();
+
   @NotNull
   private User.Kind getKindForRole(String firstRole) {
     if (firstRole.equals("PoM")) firstRole = User.Kind.PROJECT_ADMIN.getRole();
@@ -845,7 +847,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         User.Kind kindByName = getKindByName(firstRole);
         if (kindByName == null) {
           if (!firstRole.startsWith("ILR")) {
-            logger.warn("getUserKind no user for " + firstRole);
+            if (unknownRoles.contains(firstRole)) {
+
+            }
+            else {
+              logger.warn("getUserKind no user for " + firstRole + " : now seen these unmapped roles " +unknownRoles);
+              unknownRoles.add(firstRole);
+            }
           }
           kind = User.Kind.STUDENT;
         } else {

@@ -96,6 +96,11 @@
     display: inline-block;
 }
 
+@sprite .myBaseIcon_rabbit {
+    gwt-image: "rabbit";
+    display: inline-block;
+}
+
 @sprite .myBaseIcon_turtle {
     gwt-image: "turtle";
     display: inline-block;

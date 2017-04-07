@@ -47,7 +47,5 @@ public interface UserState {
 
   boolean hasPermission(User.Permission permission);
 
-  void checkUser();
-
   void logout();
 }

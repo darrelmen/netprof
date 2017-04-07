@@ -308,7 +308,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
 //      logger.info("readProperties made database " + db);
 
-      securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO(), this);
+      securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
   //    logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
 

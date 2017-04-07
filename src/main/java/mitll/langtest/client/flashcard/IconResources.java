@@ -40,16 +40,19 @@ import com.google.gwt.resources.client.CssResource;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
- * */
+ */
 public interface IconResources extends ClientBundle {
 
-  /** Get access to the css resource during gwt compilation */
+  /**
+   * Get access to the css resource during gwt compilation
+   */
   @CssResource.NotStrict
   @Source("resources/css/baseIcons.css")
   CssResource css();
 
-  /** Our sample image icon. Makes the image resource for the gwt-compiler's css composer accessible */
+  /**
+   * Our sample image icon. Makes the image resource for the gwt-compiler's css composer accessible
+   */
   @Source("resources/blueSpaceBar.png")
   com.google.gwt.resources.client.ImageResource enter();
 
@@ -63,31 +66,35 @@ public interface IconResources extends ClientBundle {
   @Source("resources/media-record-3_32x32.png")
   com.google.gwt.resources.client.ImageResource record1Small();
 
-  @Source( "resources/media-record-4.png")
+  @Source("resources/media-record-4.png")
   com.google.gwt.resources.client.ImageResource record2();
 
-  @Source( "resources/media-record-4_32x32.png")
+  @Source("resources/media-record-4_32x32.png")
   com.google.gwt.resources.client.ImageResource record2Small();
 
-  @Source( "resources/checkmark48.png")
+  @Source("resources/checkmark48.png")
   com.google.gwt.resources.client.ImageResource correct();
 
 
-  @Source( "resources/redx48.png")
+  @Source("resources/redx48.png")
   com.google.gwt.resources.client.ImageResource incorrect();
 
-  @Source( "resources/record.png")
+  @Source("resources/record.png")
   com.google.gwt.resources.client.ImageResource record();
 
-  @Source( "resources/stop.png")
+  @Source("resources/stop.png")
   com.google.gwt.resources.client.ImageResource stop();
 
-  @Source( "resources/white_48x48.png")
+  @Source("resources/white_48x48.png")
   com.google.gwt.resources.client.ImageResource white();
 
-  @Source( "resources/gray_48x48.png")
+  @Source("resources/gray_48x48.png")
   com.google.gwt.resources.client.ImageResource gray();
 
-  @Source( "resources/turtle_16_selected.png")
+  // @Source( "resources/turtle_16_selected.png")
+  @Source("resources/rabbit_32x21.png")
+  com.google.gwt.resources.client.ImageResource rabbit();
+
+  @Source("resources/turtle_32x21.png")
   com.google.gwt.resources.client.ImageResource turtle();
 }

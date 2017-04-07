@@ -20,7 +20,6 @@ import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -86,7 +85,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
 
-    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(),controller.getExerciseService());
+    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), controller.getExerciseService());
 
     this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
@@ -113,37 +112,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     boolean useMeaningInsteadOfEnglish = isEnglish && meaningValid;
     String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
 
-    SimpleRecordAudioPanel<T> recordPanel = getRecordPanel(e);
-
-    DivWidget flContainer = getHorizDiv();
-    flContainer.getElement().setId("flWidget");
-
-    DivWidget recordButtonContainer = new DivWidget();
-
-    recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
-    flContainer.add(recordButtonContainer);
-    AudioAttribute audioAttribute = e.getAudioAttributePrefGender(controller.getUserManager().isMale(), true);
-
-    if (audioAttribute != null) {
-//      logger.info("found audio for gender male = " + male + "  audio is male " + audioAttribute.isMale() + " by " + audioAttribute.getUser());
-/*      if (audioAttribute.isMale() != male) {
-        for (AudioAttribute attr : e.getAudioAttributes()) {
-          logger.info("no match - for ex " + e.getID() +
-              "  had " + attr.getID() + " " + attr.isMale() + " by " + attr.getUser());
-        }
-      }*/
-      flContainer.add(getPlayAudioPanel(e, audioAttribute));
-    }
-
-    Widget flEntry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
-    flEntry.addStyleName("floatLeft");
-    flContainer.add(flEntry);
-
     DivWidget rowWidget = getRowWidget();
-    rowWidget.add(flContainer);
     rowWidget.getElement().setId("firstRow");
 
-    flContainer.setWidth("50%");
+    SimpleRecordAudioPanel<T> recordPanel = makeFirstRow(e, rowWidget);
+
     card.add(rowWidget);
 
     if (isValid(english)) {
@@ -156,10 +129,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       rowWidget.add(lr);
 
-      rowWidget = getRowWidget();
-      rowWidget.getElement().setId("secondRow");
+      //rowWidget = getRowWidget();
+      //rowWidget.getElement().setId("secondRow");
 
-      card.add(rowWidget);
+      //     card.add(rowWidget);
     }
 
     addField(card, addAltFL(e), "altflrow");
@@ -185,6 +158,40 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     addContext(e, card, rowWidget);
 
     return card;
+  }
+
+  @NotNull
+  private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget) {
+    SimpleRecordAudioPanel<T> recordPanel = getRecordPanel(e);
+
+    DivWidget flContainer = getHorizDiv();
+    flContainer.getElement().setId("flWidget");
+
+    DivWidget recordButtonContainer = new DivWidget();
+
+    recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
+    flContainer.add(recordButtonContainer);
+    AudioAttribute audioAttribute = e.getAudioAttributePrefGender(controller.getUserManager().isMale(), true);
+
+    if (audioAttribute != null) {
+//      logger.info("found audio for gender male = " + male + "  audio is male " + audioAttribute.isMale() + " by " + audioAttribute.getUser());
+/*      if (audioAttribute.isMale() != male) {
+        for (AudioAttribute attr : e.getAudioAttributes()) {
+          logger.info("no match - for ex " + e.getID() +
+              "  had " + attr.getID() + " " + attr.isMale() + " by " + attr.getUser());
+        }
+      }*/
+      flContainer.add(getPlayAudioPanel(e));
+    }
+
+    Widget flEntry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
+    flEntry.addStyleName("floatLeft");
+    flContainer.add(flEntry);
+    flContainer.setWidth("50%");
+
+
+    rowWidget.add(flContainer);
+    return recordPanel;
   }
 
   private void addContext(T e, Panel card, DivWidget rowWidget) {
@@ -229,22 +236,22 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   @NotNull
-  private DivWidget getPlayAudioPanel(T e, AudioAttribute audioAttribute) {
-    UserManager userManager = controller.getUserManager();
-    boolean male = userManager.isMale();
+  private DivWidget getPlayAudioPanel(T e) {
+    //UserManager userManager = controller.getUserManager();
+    //boolean male = userManager.isMale();
+    // PlayAudioPanel w = new PlayAudioPanel(controller.getSoundManager(), audioAttribute.getAudioRef(), false);
+    PlayAudioPanel w = new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller);
+//    DivWidget pap = new DivWidget();
+//    pap.getElement().setId("playAudioContainer");
+//    pap.addStyleName("floatLeft");
+//    pap.addStyleName("inlineFlex");
+//    pap.add(w);
 
-    PlayAudioPanel w = new PlayAudioPanel(controller.getSoundManager(), audioAttribute.getAudioRef(), false);
-    DivWidget pap = new DivWidget();
-    pap.getElement().setId("playAudioContainer");
-    pap.addStyleName("floatLeft");
-    pap.addStyleName("inlineFlex");
-    pap.add(w);
-
-    addSlow(e, male, pap);
-    return pap;
+    //  addSlow(e, male, pap);
+    return w;
   }
 
-  private void addSlow(T e, boolean male, DivWidget pap) {
+/*  private void addSlow(T e, boolean male, DivWidget pap) {
     AudioAttribute slow = e.getAudioAttributePrefGender(male, false);
 
     if (slow != null) {
@@ -253,7 +260,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       w1.addStyleName("floatLeft");
       pap.add(w1);
     }
-  }
+  }*/
 
   @NotNull
   private DivWidget getItemWidget(T e) {

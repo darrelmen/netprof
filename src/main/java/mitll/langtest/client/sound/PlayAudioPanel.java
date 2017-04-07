@@ -43,7 +43,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
 
 import java.util.ArrayList;
@@ -182,7 +181,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #PlayAudioPanel
    */
   protected void addButtons(Widget optionalToTheRight) {
-    add(playButton = makePlayButton());
+    playButton = makePlayButton(this);
+
+//    add();
 
     if (false) {
       warnNoFlash.setVisible(false);
@@ -201,8 +202,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   /**
    * @return
    * @see PlayAudioPanel#addButtons
+   * @param toAddTo
    */
-  protected IconAnchor makePlayButton() {
+  protected IconAnchor makePlayButton(DivWidget toAddTo) {
     Button playButton = new Button(playLabel);
 
     playButton.addClickHandler(new ClickHandler() {
@@ -213,6 +215,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
     showPlayIcon(playButton);
     stylePlayButton(playButton);
+    toAddTo.add(playButton);
     return playButton;
   }
 
@@ -267,10 +270,15 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       if (isPlaying()) {
         pause();  // somehow get exception here?
       } else {
-        for (PlayListener playListener : playListeners) playListener.playStarted();
-        play();
+
+        startPlaying();
       }
     }
+  }
+
+  protected void startPlaying() {
+    for (PlayListener playListener : playListeners) playListener.playStarted();
+    play();
   }
 
 

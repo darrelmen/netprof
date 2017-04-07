@@ -36,6 +36,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.WavCallback;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.*;
@@ -135,4 +136,6 @@ public interface ExerciseController extends EventRegistration {
   boolean usingFlashRecorder();
 
   boolean isMicAvailable();
+
+  KeyStorage getStorage();
 }

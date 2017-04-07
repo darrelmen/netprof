@@ -88,19 +88,15 @@ public class UserTable extends PagerTable {
    * @param props
    * @see mitll.langtest.client.LangTest.UsersClickHandler#onClick(ClickEvent)
    */
-  public UserTable(PropertyHandler props, boolean isAdmin) {
+  UserTable(PropertyHandler props, boolean isAdmin) {
     this.props = props;
     this.isAdmin = isAdmin;
   }
 
   /**
-   * @see mitll.langtest.client.LangTest.UsersClickHandler
+   * @see UserMenu.UsersClickHandler
    */
-  public void showUsers(final UserServiceAsync service) {
-    showDialog(service);
-  }
-
-  private void showDialog(final UserServiceAsync service) {
+  void showUsers(final UserServiceAsync service) {
     // Create the resetEmailPopup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText(REGISTERED_USERS);
