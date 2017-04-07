@@ -36,7 +36,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   public static final String IS_REG = "isReg";
   public static final String MALE = "male";
   public static final String SLOW = "slow";
-  private int exid;
+
   private ExerciseController controller;
   private CommonExercise exercise;
 
@@ -64,10 +64,9 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         },
         "",
         null);
-    this.exid = exercise.getID();
+    //this.exid = exercise.getID();
     this.exercise = exercise;
     this.controller = exerciseController;
-
     getElement().setId("ChoicePlayAudioPanel");
   }
 
@@ -106,6 +105,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
+    playButton.addStyleName("choiceplay");
+
   }
 
   private void addChoices(SplitDropdownButton playButton) {
@@ -170,32 +171,14 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
   @NotNull
   private NavLink addAudioChoice(SplitDropdownButton playButton, boolean isMale1, boolean isReg) {
-   // String male = isMale1 ? "Male" : "Female";
-   // String regular = isReg ? "Regular" : "Slow";
     NavLink widget = new NavLink();//male + " " + regular + " Speed");
     playButton.add(widget);
-
-//    if (isMale1) {
-//    IconAnchor w = new IconAnchor();
-//    w.setIconSize(IconSize.THREE_TIMES);
-//    w.setIcon(isMale1 ? IconType.MALE : IconType.FEMALE);
-//    widget.add(w);
-
     widget.setIcon(isMale1 ? IconType.MALE : IconType.FEMALE);
     widget.setIconSize(IconSize.TWO_TIMES);
-    //  }
-
-//    if (!isReg) {
-    //    widget.setBaseIcon(isReg?MyCustomIconType.rabbit:          MyCustomIconType.turtle);
-
     IconAnchor speed = new IconAnchor();
-    //speed.setIconSize(IconSize.THREE_TIMES);
     speed.setBaseIcon(isReg ? MyCustomIconType.rabbit : MyCustomIconType.turtle);
     widget.add(speed);
     speed.addStyleName("leftFiveMargin");
-    //  }
-playButton.getMenuWiget().getElement().getStyle().clearProperty("minWidth");
-//    playButton.getElement().getStyle().setProperty("minWidth","80px");
     return widget;
   }
 
@@ -226,7 +209,6 @@ playButton.getMenuWiget().getElement().getStyle().clearProperty("minWidth");
     playAudio(audioRef);
     controller.getStorage().setBoolean(IS_MALE, isMale);
     controller.getStorage().setBoolean(IS_REG, isReg);
-    //speedStorage.storeIsSet(shouldKeepAudio);
   }
 
   private AudioAttribute getAtSpeed(Map<MiniUser, List<AudioAttribute>> malesMap, boolean isReg) {
@@ -244,11 +226,9 @@ playButton.getMenuWiget().getElement().getStyle().clearProperty("minWidth");
   public void hidePlayButton() {
     playButton.setVisible(false);
   }
-
   public void showPlayButton() {
     playButton.setVisible(true);
   }
-
 
   /**
    * @param optionalToTheRight

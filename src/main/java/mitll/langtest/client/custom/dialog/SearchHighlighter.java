@@ -65,7 +65,7 @@ public class SearchHighlighter {
     return formattedSuggestion;
   }
 
-
+boolean debug=true;
   /**
    * @param searchWords
    * @param suggestion
@@ -77,7 +77,7 @@ public class SearchHighlighter {
     // Create strong search string.
     SafeHtmlBuilder accum = new SafeHtmlBuilder();
 
-    // logger.info(" suggestion '" + suggestion+"'");
+    if (debug)  logger.info(" getHighlightedString suggestion '" + suggestion+"'");
     //  logger.info(" lowerCase  '" + lowerCaseSuggestion+"'");
 
     int cursor = 0;
@@ -85,7 +85,7 @@ public class SearchHighlighter {
     int n = 100;
     while (n-- > 0) {
       WordBounds wordBounds = findNextWord(lowerCaseSuggestion, searchWords, index);
-      //  logger.info("\tat " + index + " got " + wordBounds);
+      if (debug) logger.info("\tgetHighlightedString at " + index + " got " + wordBounds);
       if (wordBounds == null) {
         break;
       }
@@ -154,7 +154,7 @@ public class SearchHighlighter {
   private WordBounds findNextWord(String candidate, String[] searchWords, int indexToStartAt) {
     WordBounds firstWord = null;
     for (String word : searchWords) {
-      if (word.isEmpty()) logger.warning("got empty search term");
+      if (word.isEmpty()) logger.warning("findNextWord got empty search term");
       else {
         int index = candidate.indexOf(word, indexToStartAt);
         if (index != -1) {

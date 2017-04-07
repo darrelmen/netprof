@@ -152,7 +152,7 @@ public class ClickableWords<T extends CommonExercise> {
     } else {
       String context = removePunct(token.toLowerCase());
       String vocab = removePunct(next.toLowerCase());
-      boolean b = context.equals(vocab) || (context.startsWith(vocab) && !vocab.isEmpty());
+      boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
 
       // if (b) logger.info("match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
       return b;// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);

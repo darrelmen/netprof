@@ -43,7 +43,10 @@ import org.apache.logging.log4j.Logger;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -218,13 +221,16 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addSubstrings(T exercise, String fl) {
-    for (int i = 0; i < fl.length(); i++) {
-      String substring = fl.substring(i);
-      char c = substring.charAt(0);
-      //    Character character = c;
-      if (!Character.isSpaceChar(c)) {
+    List<String> tokens = smallVocabDecoder.getTokens(fl);
+
+    List<String> collect = tokens.stream().map(String::toLowerCase).collect(Collectors.toList());
+    for (String token : new HashSet<>(collect)) {
+      for (int i = 0; i < token.length(); i++) {
+        String substring = token.substring(i);
+        char c = substring.charAt(0);
         addEntry(exercise, substring);
 //        logger.info("adding " + substring);
+
       }
     }
   }
@@ -258,15 +264,6 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private static class ExerciseWrapper<T extends CommonShell> implements TextEntityValue<T> {
     private final String value;
     private final T e;
-
-    /**
-     * @param e
-     * @param useEnglish
-     * @see ExerciseTrie#ExerciseTrie
-     */
-//    ExerciseWrapper(T e, boolean useEnglish) {
-//      this((useEnglish ? e.getEnglish().toLowerCase() : e.getForeignLanguage().toLowerCase()), e);
-//    }
 
     ExerciseWrapper(String value, T e) {
       this.value = value;
