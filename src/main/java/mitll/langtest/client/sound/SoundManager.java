@@ -33,6 +33,7 @@
 package mitll.langtest.client.sound;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -42,6 +43,8 @@ import java.util.Date;
  *
  */
 class SoundManager {
+  protected static final Logger logger = Logger.getLogger("SoundManager");
+
   private static boolean onreadyWasCalled = false;
   private final static boolean   debug = false;
   public static native void initialize() /*-{
@@ -140,14 +143,15 @@ class SoundManager {
    * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
    */
   public static void loaded(){
-     if (debug) System.out.println(new Date() + " : Got loaded call!");
+
+  //  if (debug) System.out.println(new Date() + " : Got loaded call!");
   }
 
   /**
    * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
    */
   public static void ontimeout(){
-    if (debug) System.out.println(new Date() + " : Got ontimeout call!");
+   // if (debug) System.out.println(new Date() + " : Got ontimeout call!");
     //Window.alert("Do you have a flashblocker on?  Please add this site to your whitelist.");
   }
 
@@ -155,7 +159,7 @@ class SoundManager {
    * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
    */
   public static void myready(){
-    if (debug) System.out.println(new Date() + " : Got myready call!");
+   // if (debug) System.out.println(new Date() + " : Got myready call!");
     onreadyWasCalled = true;
   }
 
@@ -164,19 +168,18 @@ class SoundManager {
   }
 
 	public static void songFinished(Sound sound){
-    if (debug) System.out.println("sound finished " +sound);
+   // if (debug) System.out.println("sound finished " +sound);
 		sound.getParent().songFinished();
 	}
 
 	public static void songFirstLoaded(Sound sound, double durationEstimate){
-    if (debug) System.out.println("songFirstLoaded sound " +sound);
+  //  if (debug) System.out.println("songFirstLoaded sound " +sound);
 
     sound.getParent().songFirstLoaded(durationEstimate);
 	}
 
 	public static void songLoaded(Sound sound, double duration){
-    if (debug) System.out.println("songLoaded sound " +sound + " with dur " +duration);
-
+    logger.info("songLoaded sound " +sound + " with dur " +duration);
     sound.getParent().songLoaded(duration);
 	}
 

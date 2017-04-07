@@ -61,10 +61,13 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private static final Logger logger = LogManager.getLogger(ExerciseTrie.class);
 
   private static final int TOOLONG_TO_WAIT = 150;
-  private static final String MANDARIN = "Mandarin";
+
   private static final String ENGLISH = "English";
+
+  private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
+
   private SmallVocabDecoder smallVocabDecoder;
 
   /**
@@ -89,7 +92,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
-    boolean isKorean = language.equalsIgnoreCase(KOREAN);
+    boolean isKorean   = language.equalsIgnoreCase(KOREAN);
     boolean isJapanese = language.equalsIgnoreCase(JAPANESE);
     boolean hasClickableCharacters = isMandarin || isKorean || isJapanese;
 
@@ -101,7 +104,8 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     long now = System.currentTimeMillis();
 
     if (now - then > TOOLONG_TO_WAIT) {
-      logger.debug("getExercisesForSelectionState : took " + (now - then) + " millis to build ");
+      logger.debug("ExerciseTrie : took " + (now - then) +
+          " millis to build trie for " + language + " over " + exercisesForState.size() + " exercises.");
     }
   }
 
@@ -170,7 +174,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     addEntryToTrie(new ExerciseWrapper<>(fl, exercise));
     addSubstrings(exercise, fl);
 
-    Collection<String> tokens = isMandarin ? getMandarinTokens(fl) : smallVocabDecoder.getTokens(fl);
+    Collection<String> tokens = smallVocabDecoder.getTokensAllLanguages(isMandarin, fl);
     for (String token : tokens) {
       addEntry(exercise, token);
       // String noAccents = removeDiacritics(token);
@@ -185,6 +189,10 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
       addClickableCharacters(exercise, fl);
     }
   }
+
+//  private Collection<String> getTokensAllLanguages(boolean isMandarin, String fl) {
+//    return isMandarin ? smallVocabDecoder.getMandarinTokens(fl) : smallVocabDecoder.getTokens(fl);
+//  }
 
   private void addEnglish(T exercise) {
     String english = exercise.getEnglish();
@@ -235,15 +243,9 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
-  private boolean addEntry(T exercise, String token) {
-    //logger.info("add token '" + token + "' for  " + exercise.getID());
-    return addEntryToTrie(new ExerciseWrapper<>(token.toLowerCase(), exercise));
+  private void addEntry(T exercise, String token) {
+    addEntryToTrie(new ExerciseWrapper<>(token.toLowerCase(), exercise));
   }
-
-//  private Collection<String> getMandarinTokens(T e) {
-//    String foreignLanguage = e.getForeignLanguage();
-//    return getMandarinTokens(foreignLanguage);
-//  }
 
   private Collection<String> getMandarinTokens(String foreignLanguage) {
     return smallVocabDecoder.getMandarinTokens(foreignLanguage);

@@ -151,11 +151,14 @@ public class SmallVocabDecoder {
     return builder.toString();
   }
 
+  public Collection<String> getTokensAllLanguages(boolean isMandarin, String fl) {
+    return isMandarin ? getMandarinTokens(fl) : getTokens(fl);
+  }
   /**
    * @param sentence
    * @return
-   * @see Scoring#getSegmented(String)
-   * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile(Collection, boolean, boolean)
+   * @see Scoring#getSegmented
+   * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
   public List<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
@@ -186,6 +189,8 @@ public class SmallVocabDecoder {
    * <p>
    * Also removes the chinese unicode bullet character, like in Bill Gates.
    *
+   * TODO : really slow - why not smarter?
+   *
    * @param sentence
    * @return
    * @see #getTokens(String)
@@ -193,16 +198,23 @@ public class SmallVocabDecoder {
    * @see ASRScoring#getScoresFromHydec
    */
   public String getTrimmed(String sentence) {
-    //String orig = sentence;
-    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\u2219", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("/", " ");
-    // logger.debug("after  convert " + sentence);
 
-    String trim = sentence.replaceAll("'", "").replaceAll("\\p{P}", " ").replaceAll("\\s+", " ").trim();
-/*
-    logger.debug("from '" +sentence+
-        "' => '" +trim+
-        "'");
-*/
+    sentence = sentence
+        .replaceAll("\\u2022", " ")
+        .replaceAll("\\u2219", " ")
+        .replaceAll("\\p{Z}+", " ")
+        .replaceAll(";", " ")
+        .replaceAll("~", " ")
+        .replaceAll("\\u2191", " ")
+        .replaceAll("\\u2193", " ")
+        .replaceAll("/", " ");
+
+
+    String trim = sentence
+        .replaceAll("'", "")
+        .replaceAll("\\p{P}", " ")
+        .replaceAll("\\s+", " ").trim();
+
 
     return trim;
   }

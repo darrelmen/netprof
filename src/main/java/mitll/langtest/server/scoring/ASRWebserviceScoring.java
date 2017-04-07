@@ -103,9 +103,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
-  private final String ip;
-  private final int port;
+//  private final String ip;
+//  private final int port;
   private boolean available = false;
+  Project project;
 
   /**
    * @param deployPath
@@ -123,8 +124,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
     alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-    ip = project.getWebserviceIP();
-    port = project.getWebservicePort();
+    this.project = project;
+    String ip = getWebserviceIP();
+    int port = getWebservicePort();
 
     if (port != -1) {
       setAvailable();
@@ -134,6 +136,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         logger.info("\n\nASRWebserviceScoring CAN talk to " + ip + ":" + port);
       }
     }
+  }
+
+  private int getWebservicePort() {
+    return project.getWebservicePort();
+  }
+
+  private String getWebserviceIP() {
+    return project.getWebserviceIP();
   }
 
   public void setAvailable() {
@@ -149,7 +159,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   public boolean isAvailableCheckNow() {
-    return new HTTPClient().isAvailable(ip, port, "dcodr");
+    return new HTTPClient().isAvailable(getWebserviceIP(), getWebservicePort(), "dcodr");
   }
 
   /**
@@ -444,14 +454,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   /**
    * TODO : add failure case back in
+   *
    * @param transcript
    * @param transliteration
    * @return
    */
   public int getNumPhones(String transcript, String transliteration) {
-    String[] translitTokens = transliteration.toLowerCase().split(" ");
+    //  String[] translitTokens = transliteration.toLowerCase().split(" ");
     String[] transcriptTokens = transcript.split(" ");
-    boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
+    //  boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
     int index = 0;
 
     int total = 0;
@@ -703,7 +714,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   @NotNull
   private HTTPClient getDcodr() {
-    return new HTTPClient(ip, port, "dcodr");
+    return new HTTPClient(getWebserviceIP(), getWebservicePort(), "dcodr");
   }
 
   private String getCleanedTranscript(String cleaned, String sep) {
@@ -743,7 +754,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
       return resultsStr;
     } catch (Exception e) {
-      logger.error("running on " + port + " with " + hydraInput + " got " + e, e);
+      logger.error("runHydra : running on port " + getWebservicePort() + " sent " + hydraInput + " got " + e, e);
       return "";
     }
   }

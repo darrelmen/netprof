@@ -79,9 +79,11 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
-  private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(5, 10, 25, 50);
-  private static final String ITEMS_PAGE = " items/page";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
+
+public static int FIRST_PAGE_SIZE = 2;
+  private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, 5, 10, 25, 50);
+  private static final String ITEMS_PAGE = " items/page";
 
   private static final int TOTAL = 32;
   private static final String SHOW_LESS = "<i>View fewer</i>";
@@ -101,8 +103,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @param listOptions
    * @param listHeader
    * @param footer
-   * @param numToShow
-   * @see mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList(ExerciseController, Panel, Panel, ListOptions, DivWidget, DivWidget, int)
+   * @paramx numToShow
+   * @see mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   public FacetExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
@@ -794,8 +796,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected void loadFirstExercise(String searchIfAny) {
     // logger.info("loadFirstExercise : ---");
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-      logger.info("loadFirstExercise : current exercises is empty?");
-      gotEmptyExerciseList();
+      logger.info("loadFirstExercise : current exercises is empty");
+  //    gotEmptyExerciseList();
     } else {
       super.loadFirstExercise(searchIfAny);
     }
@@ -806,7 +808,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void gotEmptyExerciseList() {
-    // showEmptySelection();
+    clearExerciseContainer();
+    showEmptySelection();
+    hidePrevNext();
   }
 
   protected FacetContainer getSectionWidgetContainer() {
@@ -903,7 +907,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
             if (reqID == freqid - 1) {
               if (result.getExercises().isEmpty()) {
-                showEmptyExercise();
+                //showEmptyExercise();
                 hidePrevNext();
               } else {
                 if (numToShow == 1) {

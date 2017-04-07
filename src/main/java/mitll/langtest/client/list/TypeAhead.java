@@ -53,9 +53,8 @@ import mitll.langtest.client.LangTest;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/25/14.
  */
-public class TypeAhead implements ITypeAhead {
+public abstract class TypeAhead implements ITypeAhead {
   //private Logger logger = Logger.getLogger("TypeAhead");
-
   private static final int WIDTH = 180 - 32;
   private static final int RIGHT_MARIGN_FOR_SEARCH = 10;
   private final TextBox typeAhead = new TextBox();
@@ -136,8 +135,7 @@ public class TypeAhead implements ITypeAhead {
    *
    * @param text
    */
-  public void gotTypeAheadEntry(String text) {
-  }
+  public abstract void gotTypeAheadEntry(String text);
 
   private Widget getControlGroup(Widget waitCursor, String title) {
     Panel flow = new HorizontalPanel();

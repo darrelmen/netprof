@@ -66,6 +66,7 @@ import java.util.logging.Logger;
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize {
+  public static final String EMPTY_SEARCH = "<b>Your search or selection did not match any items.</b>";
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final int LIST_HEIGHT = 450;
@@ -774,7 +775,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Compare with google response for this state.
    */
   void showEmptyExercise() {
-    createdPanel = new SimplePanel(new Heading(3, "<b>Your search or selection did not match any items.</b>"));
+    logger.info("showEmptyExercise --- ");
+    createdPanel = new SimplePanel(new Heading(3, EMPTY_SEARCH));
     createdPanel.getElement().setId(EMPTY_PANEL);
     innerContainer.add(createdPanel);
   }
@@ -788,9 +790,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public boolean loadNext() {
-    int currentExerciseID = getCurrentExerciseID();
-
-    return loadNextExercise(currentExerciseID);
+    return loadNextExercise(getCurrentExerciseID());
   }
 
   /**

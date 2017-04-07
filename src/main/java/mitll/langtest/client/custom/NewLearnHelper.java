@@ -6,6 +6,7 @@ import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ExerciseOptions;
@@ -45,7 +46,7 @@ class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
         return new NPFlexSectionExerciseList(outerC, topRow, currentExercisePanel,
-            new ListOptions(instanceName), listHeader, footer, Navigation.NUM_TO_SHOW);
+            new ListOptions(instanceName), listHeader, footer, FacetExerciseList.FIRST_PAGE_SIZE);
       }
     };
   }

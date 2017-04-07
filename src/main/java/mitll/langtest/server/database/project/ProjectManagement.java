@@ -191,7 +191,7 @@ public class ProjectManagement implements IProjectManagement {
     boolean isConfigured = project.getExerciseDAO().isConfigured();
     if (skipRetired || isConfigured) {
       if (isConfigured) {
-        // logger.debug("configureProject project already configured " + project.getProject().id());
+        logger.debug("configureProject project already configured " + project.getProject().id());
       } else {
         logger.info("skipping fully loading project " + project + " since it's retired");
       }
@@ -333,9 +333,9 @@ public class ProjectManagement implements IProjectManagement {
     for (Project project : idToProject.values()) {
       SlickProject project1 = project.getProject();
       SlickProject update = idToSlickProject.get(project1.id());
-      logger.info("refreshProjects Was " + project.getProject() + " " + project.isNoModel());
+      //logger.info("refreshProjects Was " + project.getProject() + " " + project.isNoModel());
       project.setProject(update);
-      logger.info("refreshProjects Now " + project.getProject() + " " + project.isNoModel());
+      //logger.info("refreshProjects Now " + project.getProject() + " " + project.isNoModel());
     }
   }
 

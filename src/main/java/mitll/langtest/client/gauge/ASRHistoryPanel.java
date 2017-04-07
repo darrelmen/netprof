@@ -69,7 +69,6 @@ import java.util.List;
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   //private Logger logger = Logger.getLogger("ASRHistoryPanel");
   private static final int NUM_TO_SHOW = 2;
-  //private static final int HEIGHT = 18;
 
   /**
    *
@@ -184,17 +183,23 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     Panel hp = new DivWidget();
     hp.addStyleName("inlineFlex");
     hp.setWidth("100%");
-    hp.add(getAudioWidget(scoreAndPath, title));
+    Anchor audioWidget = getAudioWidget(scoreAndPath, title);
+    DivWidget audioContainer = new DivWidget();
+    audioContainer.add(audioWidget);
+    hp.add(audioContainer);
 
-    Widget coloredTable = makeColoredTable(tooltipHelper, scoreAndPath);
-    hp.add(coloredTable);
+    hp.add(makeColoredTable(tooltipHelper, scoreAndPath));
 
-    long timestamp = scoreAndPath.getTimestamp();
-    // logger.info("timestamp " + timestamp);
-    String format = timestamp > 0 ?  this.format.format(new Date(timestamp)) : "";
-    hp.add(getDownload(scoreAndPath.getPath(), i, format));
+    IconAnchor download = getDownload(scoreAndPath.getPath(), i, getDateToDisplay(scoreAndPath.getTimestamp()));
+    DivWidget downloadC = new DivWidget();
+    downloadC.add(download);
+    hp.add(downloadC);
 
     return hp;
+  }
+
+  private String getDateToDisplay(long timestamp) {
+    return timestamp > 0 ?  this.format.format(new Date(timestamp)) : "";
   }
 
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d");
@@ -280,11 +285,10 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
   private Widget makeColoredTable(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
+//    row.addStyleName("inlineFlex");
     row.getElement().setInnerHTML(new WordTable().makeColoredTable(scoreAndPath.getScores()));
-
     tooltipHelper.createAddTooltip(row, "Score" + (" " + scoreAndPath.getPercentScore() + "%"), Placement.BOTTOM);
     row.addStyleName("leftFiveMargin");
-
     return row;
   }
 

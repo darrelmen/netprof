@@ -46,31 +46,33 @@ import java.util.logging.Logger;
 public class SoundManagerStatic implements SoundManagerAPI {
   private final Logger logger = Logger.getLogger("SoundManagerStatic");
 
-  private final boolean debug = false;
+  private static final boolean DEBUG = false;
 
   public SoundManagerStatic() {
     exportStaticMethods();
     initialize();
   }
 
-  public void initialize() {  SoundManager.initialize();  }
+  public void initialize() {
+    SoundManager.initialize();
+  }
 
   /**
    * This always seems to be true, whether or not a flash blocker is active.
+   *
    * @return
    */
   public boolean isReady() {
-    boolean ready = SoundManager.isReady();
-    return ready;
+    return SoundManager.isReady();
   }
 
   /**
    * Did the SoundManager load properly (i.e. if it uses Flash, was that installed and allowed to load?)
+   *
    * @return
    */
   public boolean isOK() {
-    boolean ok = SoundManager.isOK();
-    return ok;
+    return SoundManager.isOK();
   }
 
   /**
@@ -85,6 +87,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
   public void createSound(Sound sound, String title, String file) {
 //    if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
     if (SoundManager.isReady() && SoundManager.isOK()) {
+      if (DEBUG) logger.info("SoundManagerStatic.createSound " + sound);
       SoundManager.createSound(sound, title, file);
     }
   }
@@ -95,14 +98,14 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   /**
-     * @param sound
-     * @see mitll.langtest.client.sound.PlayAudioPanel#destroySound()
-     * @see mitll.langtest.client.sound.SoundFeedback#destroySound()
-     */
+   * @param sound
+   * @see mitll.langtest.client.sound.PlayAudioPanel#destroySound()
+   * @see mitll.langtest.client.sound.SoundFeedback#destroySound()
+   */
   public void destroySound(Sound sound) {
-  //  if (debug) System.out.println("SoundManagerStatic.destroy " + sound);
     if (SoundManager.isReady() && SoundManager.isOK()) {
       try {
+        if (DEBUG) logger.info("SoundManagerStatic.destroy " + sound);
         SoundManager.destroySound(sound);
       } catch (Exception e) {
         e.printStackTrace();
@@ -115,7 +118,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void play(Sound sound) {
-    //if (debug) System.out.println("SoundManagerStatic.play " + sound);
+    if (DEBUG) logger.info("SoundManagerStatic.play " + sound);
     try {
       SoundManager.play(sound);
     } catch (Exception e) {
@@ -124,16 +127,8 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void setPosition(Sound sound, double position) {
-   // if (debug) System.out.println("SoundManagerStatic.setPosition " +sound);
-
     SoundManager.setPosition(sound, position);
   }
-
-/*
-  public void setPositionAndPlay(Sound sound, double position) {
-    SoundManager.setPositionAndPlay(sound, position);
-  }
-*/
 
   public void playInterval(Sound sound, int start, int end) {
     SoundManager.playInterval(sound, start, end);
@@ -147,8 +142,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void loaded() {
-    if (debug) logger.info("SoundManagerStatic.loaded ");
-
+    if (DEBUG) logger.info("SoundManagerStatic.loaded ");
     SoundManager.loaded();
   }
 

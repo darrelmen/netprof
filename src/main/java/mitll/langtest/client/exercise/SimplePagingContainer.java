@@ -77,7 +77,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     this.dataProvider = new ListDataProvider<T>();
   }
 
-  SimplePager pager;
+  private SimplePager pager;
 
   /**
    * @param sortEnglish

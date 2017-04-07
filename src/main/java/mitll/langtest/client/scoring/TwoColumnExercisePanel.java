@@ -131,13 +131,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       rowWidget.add(lr);
     }
 
-    addField(card, addAltFL(e), "altflrow");
+/*    addField(card, addAltFL(e), "altflrow");
     addField(card, addTransliteration(e), "transliterationrow");
 
     if (!useMeaningInsteadOfEnglish && meaningValid) {
       Widget meaningWidget = getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially);
       addField(card, meaningWidget, "meaningRow");
-    }
+    }*/
 
     //  logger.info("for " + e.getID() + " found " + e.getDirectlyRelated().size() + " context sentence ");
 
@@ -164,30 +164,43 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     flContainer.getElement().setId("flWidget");
 
     DivWidget recordButtonContainer = new DivWidget();
-
     recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
     flContainer.add(recordButtonContainer);
-    AudioAttribute audioAttribute = e.getAudioAttributePrefGender(controller.getUserManager().isMale(), true);
 
-    if (audioAttribute != null) {
-//      logger.info("found audio for gender male = " + male + "  audio is male " + audioAttribute.isMale() + " by " + audioAttribute.getUser());
-/*      if (audioAttribute.isMale() != male) {
-        for (AudioAttribute attr : e.getAudioAttributes()) {
-          logger.info("no match - for ex " + e.getID() +
-              "  had " + attr.getID() + " " + attr.isMale() + " by " + attr.getUser());
-        }
-      }*/
+    if (hasAudio(e)) {
       flContainer.add(getPlayAudioPanel(e));
     }
 
     Widget flEntry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
     flEntry.addStyleName("floatLeft");
-    flContainer.add(flEntry);
+
+    DivWidget fieldContainer = new DivWidget();
+    fieldContainer.getElement().setId("fieldContainer");
+    fieldContainer.add(flEntry);
+
+    addField(fieldContainer, addAltFL(e), "altflrow");
+    addField(fieldContainer, addTransliteration(e), "transliterationrow");
+
+    boolean meaningValid = isMeaningValid(e);
+    boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
+    boolean useMeaningInsteadOfEnglish = isEnglish && meaningValid;
+
+    if (!useMeaningInsteadOfEnglish && meaningValid) {
+      Widget meaningWidget = getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially);
+      addField(fieldContainer, meaningWidget, "meaningRow");
+    }
+
+
+    flContainer.add(fieldContainer);
     flContainer.setWidth("50%");
 
 
     rowWidget.add(flContainer);
     return recordPanel;
+  }
+
+  private boolean hasAudio(T e) {
+    return e.getAudioAttributePrefGender(controller.getUserManager().isMale(), true) != null;
   }
 
   private void addContext(T e, Panel card, DivWidget rowWidget) {
@@ -260,12 +273,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private void addField(Panel grid, Widget widget, String altflrow) {
     if (widget != null) {
-      DivWidget rowWidget;
-      rowWidget = getRowWidget();
-      rowWidget.getElement().setId(altflrow);
-      rowWidget.addStyleName("leftMarginForFields");
-      rowWidget.add(widget);
-      grid.add(rowWidget);
+//      DivWidget rowWidget = getRowWidget();
+//      rowWidget.getElement().setId(altflrow);
+//     // rowWidget.addStyleName("leftMarginForFields");
+//      // rowWidget.addStyleName("floatLeft");
+//      rowWidget.add(widget);
+      widget.addStyleName("topFiveMargin");
+      grid.add(widget);
     }
   }
 
@@ -422,6 +436,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                           String value, ExerciseAnnotation annotation, boolean isFL, boolean isTranslit,
                           boolean isMeaning, boolean showInitially) {
     Panel contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning);
+    if (!isFL) contentWidget.addStyleName("topFiveMargin");
     return getCommentBox(true).getEntry(field, contentWidget, annotation, showInitially);
   }
 }

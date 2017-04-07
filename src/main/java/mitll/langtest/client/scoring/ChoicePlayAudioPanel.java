@@ -79,7 +79,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
-      //    logger.info("choosing different audio for " + exercise.getID());
+     // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
       addChoices(null);
     }
   }
@@ -111,7 +111,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   private void configureButton2(SplitDropdownButton playButton) {
     playButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        doClick();
+//        logger.info("configureButton2 got click on play " + this);
+        playAudio();
       }
     });
 
@@ -130,13 +131,14 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     boolean isReg = controller.getStorage().isTrue(IS_REG);
     boolean isSlow = !isReg;
 
-
     Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices, true);
     Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, true);
 
- /*
+/*
+
     logger.info("addChoices For " + exercise.getID() + " " + exercise.getEnglish() + " "+
         " male " + isMale + " is reg " + isReg + " male map " + malesMap.size() + " female map " + femalesMap.size());
+
 */
 
     AudioAttribute toUse = null;
@@ -179,8 +181,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     if (toUse == null) toUse = fallback;
     setEnabled(toUse != null);
     if (toUse != null) {
-      loadAudio(toUse.getAudioRef());
-//      current = toUse;
+      rememberAudio(toUse.getAudioRef());
     }
   }
 
@@ -214,6 +215,9 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void playAndRemember(String audioRef, boolean isMale, boolean isReg) {
+    logger.info("playAndRemember " +audioRef);
+
+    doPause();
     playAudio(audioRef);
     controller.getStorage().setBoolean(IS_MALE, isMale);
     controller.getStorage().setBoolean(IS_REG, isReg);
@@ -223,9 +227,10 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
   private AudioAttribute getAtSpeed(Map<MiniUser, List<AudioAttribute>> malesMap, boolean isReg) {
     Collection<List<AudioAttribute>> values = malesMap.values();
+
     for (List<AudioAttribute> attrs : values) {
       for (AudioAttribute audioAttribute : attrs) {
-        if (isReg && audioAttribute.isRegularSpeed() || !isReg && audioAttribute.isSlow()) {
+        if (isReg && audioAttribute.isRegularSpeed() || (!isReg && audioAttribute.isSlow())) {
           return audioAttribute;
 
         }

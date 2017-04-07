@@ -50,7 +50,7 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> implements 
   private final EditItem editItem;
   private final UserList<CommonShell> list;
   private final ListServiceAsync listService = GWT.create(ListService.class);
-  private final SearchTypeahead searchTypeahead;
+  private  SearchTypeahead searchTypeahead;
   private TextBox quickAddText;
   private HTML message;
 
@@ -78,7 +78,7 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> implements 
     this.list = list;
 
     if (list.isEmpty()) delete.setEnabled(false);
-    this.searchTypeahead = new SearchTypeahead(controller, this);
+   // this.searchTypeahead = new SearchTypeahead(controller, this);
   }
 
   protected DivWidget getOptionalWidget() {
@@ -158,6 +158,8 @@ class EditableExerciseList extends NPExerciseList<ListSectionWidget> implements 
         searchTypeahead.clearCurrentExercise();
       }
     });
+    this.searchTypeahead = new SearchTypeahead(controller, this);
+
     return searchTypeahead.getTypeaheadUsing(whichField, quickAddText);
   }
 

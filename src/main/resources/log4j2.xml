@@ -167,7 +167,7 @@
         </logger>
 
         <root level="debug">
-            <appender-ref ref="Mail" level="debug"/>
+            <appender-ref ref="LogFile" level="debug"/>
         </root>
     </loggers>
 </configuration>

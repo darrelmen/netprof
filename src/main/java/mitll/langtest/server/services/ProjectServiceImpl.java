@@ -74,6 +74,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     return getProjectDAO().exists(projectid);
   }
 
+  /**
+   * @see mitll.langtest.client.project.ProjectEditForm#gotClick
+   * @param info
+   * @return
+   */
   @Override
   public boolean update(ProjectInfo info) {
     Project currentProject = db.getProject(info.getID());

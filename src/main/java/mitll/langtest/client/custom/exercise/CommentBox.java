@@ -242,7 +242,6 @@ public class CommentBox extends PopupContainerFactory {
 
   private Panel getCommentAndButtonsRow(String field, Widget content, Button commentButton, Button clearButton) {
     Panel row = new DivWidget();
-//    Panel row = new HorizontalPanel();
     row.getElement().setId("comment_and_clear_container_for_" + field);
     if (content != null) {
       row.add(content);

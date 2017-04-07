@@ -87,7 +87,7 @@ public abstract class Scoring {
   final ServerProperties props;
   final LogAndNotify langTestDatabase;
 
-  private static final double KEEP_THRESHOLD = 0.3;
+//  private static final double KEEP_THRESHOLD = 0.3;
 
   static final int FOREGROUND_VOCAB_LIMIT = 100;
   static final int VOCAB_SIZE_LIMIT = 200;
@@ -99,13 +99,11 @@ public abstract class Scoring {
 
   protected SmallVocabDecoder svDecoderHelper = null;
   private final CheckLTS checkLTSHelper;
-  //final SmallVocabDecoder svd = new SmallVocabDecoder();
 
   /**
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
   final HTKDictionary htkDictionary;
-  //private final ConfigFileCreator configFileCreator;
   final boolean isMandarin;
 
   /**
@@ -126,7 +124,7 @@ public abstract class Scoring {
           Project project) {
     this.deployPath = deployPath;
 
-    String persistentLocation = props.getAudioBaseDir();
+ //   String persistentLocation = props.getAudioBaseDir();
     //String scoringDir = getScoringDir(persistentLocation);
 
     this.props = props;

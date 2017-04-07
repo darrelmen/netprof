@@ -90,7 +90,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation implements RequiresResize, ShowTab {
-  public static final int NUM_TO_SHOW = 5;
+ // public static final int NUM_TO_SHOW = 5;
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String STUDENT_ANALYSIS = "Student Analysis";

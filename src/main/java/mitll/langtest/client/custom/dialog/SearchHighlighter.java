@@ -65,7 +65,9 @@ public class SearchHighlighter {
     return formattedSuggestion;
   }
 
-boolean debug=true;
+  private boolean debug = false;
+
+  private WordBoundsFactory factory = new WordBoundsFactory();
   /**
    * @param searchWords
    * @param suggestion
@@ -77,26 +79,27 @@ boolean debug=true;
     // Create strong search string.
     SafeHtmlBuilder accum = new SafeHtmlBuilder();
 
-    if (debug)  logger.info(" getHighlightedString suggestion '" + suggestion+"'");
+    if (debug) logger.info(" getHighlightedString suggestion '" + suggestion + "'");
     //  logger.info(" lowerCase  '" + lowerCaseSuggestion+"'");
 
     int cursor = 0;
     int index = 0;
     int n = 100;
     while (n-- > 0) {
-      WordBounds wordBounds = findNextWord(lowerCaseSuggestion, searchWords, index);
+      WordBounds wordBounds = factory.findNextWord(lowerCaseSuggestion, searchWords, index);
       if (debug) logger.info("\tgetHighlightedString at " + index + " got " + wordBounds);
       if (wordBounds == null) {
         break;
       }
 //      if (wordBounds.startIndex == 0 ||
 //          WHITESPACE_CHAR == lowerCaseSuggestion.charAt(wordBounds.startIndex - 1)) {
-      String part1 = suggestion.substring(cursor, wordBounds.startIndex);
-      String part2 = suggestion.substring(wordBounds.startIndex, wordBounds.endIndex);
+      //String part1 = suggestion.substring(cursor, wordBounds.startIndex);
+     // String part2 = suggestion.substring(wordBounds.startIndex, wordBounds.endIndex);
+      String[] parts = wordBounds.getParts(suggestion, cursor);
       cursor = wordBounds.endIndex;
-      accum.appendEscaped(part1);
+      accum.appendEscaped(parts[0]);
       accum.appendHtmlConstant("<" + STRONG + ">");
-      accum.appendEscaped(part2);
+      accum.appendEscaped(parts[1]);
       accum.appendHtmlConstant("</" + STRONG + ">");
 //      }
       index = wordBounds.endIndex;
@@ -118,40 +121,11 @@ boolean debug=true;
 
 
   /**
-   * A class reresenting the bounds of a word within a string.
-   * <p>
-   * The bounds are represented by a {@code startIndex} (inclusive) and
-   * an {@code endIndex} (exclusive).
-   */
-  private static class WordBounds implements Comparable<WordBounds> {
-    final int startIndex;
-    final int endIndex;
-
-    WordBounds(int startIndex, int length) {
-      this.startIndex = startIndex;
-      this.endIndex = startIndex + length;
-    }
-
-    public int compareTo(WordBounds that) {
-      int comparison = this.startIndex - that.startIndex;
-      if (comparison == 0) {
-        comparison = that.endIndex - this.endIndex;
-      }
-      return comparison;
-    }
-
-    public String toString() {
-      return "[" + startIndex + "-" + endIndex + "]";
-    }
-  }
-
-
-  /**
    * Returns a {@link MultiWordSuggestOracle.WordBounds} representing the first word in {@code
    * searchWords} that is found in candidate starting at {@code indexToStartAt}
    * or {@code null} if no words could be found.
    */
-  private WordBounds findNextWord(String candidate, String[] searchWords, int indexToStartAt) {
+/*  private WordBounds findNextWord(String candidate, String[] searchWords, int indexToStartAt) {
     WordBounds firstWord = null;
     for (String word : searchWords) {
       if (word.isEmpty()) logger.warning("findNextWord got empty search term");
@@ -166,7 +140,7 @@ boolean debug=true;
       }
     }
     return firstWord;
-  }
+  }*/
 
   private static final String WHITESPACE_STRING = " ";
 }

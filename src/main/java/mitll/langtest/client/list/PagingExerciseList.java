@@ -297,7 +297,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private Stack<Long> pendingRequests = new Stack<>();
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
-    logger.info("got type ahead '" + text + " set text " + setTypeAheadText);// + "' at " + new Date(keypressTimestamp));
+    logger.info("gotTypeAheadEvent got type ahead '" + text + " set text " + setTypeAheadText);// + "' at " + new Date(keypressTimestamp));
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }

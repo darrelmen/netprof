@@ -192,21 +192,22 @@ public class ClickableWords<T extends CommonExercise> {
                                        HasDirection.Direction dir,
                                        final String html,
                                        boolean chineseCharacter,
-                                       boolean addStyle, boolean isFL) {
-    String toShow = html;//addStyle ? "<u>" + html + "</u>" : html;
-    //final InlineHTML w = new InlineHTML(toShow, dir);
-    final MyClickable w = new MyClickable(toShow, dir);
+                                       boolean addStyle,
+                                       boolean isFL) {
+    final InlineHTML w = new InlineHTML(html, dir);
+    //final MyClickable w = new MyClickable(toShow, dir);
 
     if (addStyle) w.addStyleName("contextmatch");
 
-    String typeAheadText = listContainer.getTypeAheadText().toLowerCase();
-    if (isMatch(html, typeAheadText)) {//html.toLowerCase().contains(typeAheadText) && ((float)typeAheadText.length()/(float)html.length()) > THRESHOLD) {
+    //String typeAheadText = listContainer.getTypeAheadText().toLowerCase();
+    if (isMatch(html, listContainer.getTypeAheadText().toLowerCase())) {//html.toLowerCase().contains(typeAheadText) && ((float)typeAheadText.length()/(float)html.length()) > THRESHOLD) {
       w.addStyleName("searchmatch");
     }
 
     String noPunct = removePunct(html);
     if (!noPunct.isEmpty()) {
       w.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+
       w.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent clickEvent) {
@@ -219,22 +220,8 @@ public class ClickableWords<T extends CommonExercise> {
           });
         }
       });
-      w.addMouseOverHandler(new MouseOverHandler() {
-        @Override
-        public void onMouseOver(MouseOverEvent mouseOverEvent) {
-          w.addStyleName("underline");
-          if (!w.isHas()) {
-  //          addTool(toShow,isFL,w);
-            w.setHas(true);
-          }
-        }
-      });
-      w.addMouseOutHandler(new MouseOutHandler() {
-        @Override
-        public void onMouseOut(MouseOutEvent mouseOutEvent) {
-          w.removeStyleName("underline");
-        }
-      });
+      w.addMouseOverHandler(mouseOverEvent -> w.addStyleName("underline"));
+      w.addMouseOutHandler (mouseOutEvent  -> w.removeStyleName("underline"));
     }
 
     w.addStyleName("Instruction-data-with-wrap-keep-word");
@@ -247,34 +234,41 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   private static class MyClickable extends InlineHTML {
-    private boolean has =false;
-    public MyClickable(@IsSafeHtml String html, Direction dir) { super(html,dir);}
-    public void setHas(boolean val) { this.has = val;}
+    private boolean has = false;
+
+    public MyClickable(@IsSafeHtml String html, Direction dir) {
+      super(html, dir);
+    }
+
+    public void setHas(boolean val) {
+      this.has = val;
+    }
 
     public boolean isHas() {
       return has;
     }
   }
-/*  private void addTool(String toShow, boolean isFL, Widget w) {
-    exerciseServiceAsync.getExerciseIds(new ExerciseListRequest().setPrefix(toShow),
-        new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
-          @Override
-          public void onFailure(Throwable caught) {
 
-          }
+  /*  private void addTool(String toShow, boolean isFL, Widget w) {
+      exerciseServiceAsync.getExerciseIds(new ExerciseListRequest().setPrefix(toShow),
+          new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
+            @Override
+            public void onFailure(Throwable caught) {
 
-          @Override
-          public void onSuccess(ExerciseListWrapper<CommonShell> result) {
-            if (!result.getExercises().isEmpty()) {
-              CommonShell next = result.getExercises().iterator().next();
-              if (isFL) {
-                logger.info("adding " + next.getEnglish());
-                addTooltip(next.getEnglish(), w);
+            }
+
+            @Override
+            public void onSuccess(ExerciseListWrapper<CommonShell> result) {
+              if (!result.getExercises().isEmpty()) {
+                CommonShell next = result.getExercises().iterator().next();
+                if (isFL) {
+                  logger.info("adding " + next.getEnglish());
+                  addTooltip(next.getEnglish(), w);
+                }
               }
             }
-          }
-        });
-  }*/
+          });
+    }*/
   private void addTooltip(String value, Widget span) {
     new TooltipHelper().addTooltip(span, value);
   }

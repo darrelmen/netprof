@@ -145,10 +145,10 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * @see Project#getPronunciations
    * @param transcript
    * @param transliteration
    * @return
+   * @see Project#getPronunciations
    */
   public String getPronunciations(String transcript, String transliteration) {
     return webserviceScoring.getPronunciations(transcript, transliteration, true);
@@ -1275,10 +1275,8 @@ public class AudioFileHelper implements AlignDecode {
   private void makeASRScoring(Project project) {
     if (webserviceScoring == null) {
       String installPath = pathHelper.getInstallPath();
-      //    String installPath = serverProps.getAudioBaseDir();
-      HTKDictionary htkDictionary = readDictionary(project, installPath);
-      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
-    //  oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
+      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify,
+          readDictionary(project, installPath), project);
     }
     asrScoring = webserviceScoring;
   }

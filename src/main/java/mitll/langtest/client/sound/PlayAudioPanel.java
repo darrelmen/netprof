@@ -43,6 +43,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.flashcard.MyCustomIconType;
 
 import java.util.ArrayList;
@@ -68,6 +69,7 @@ import java.util.logging.Logger;
  */
 public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
+  private static final boolean DEBUG = false;
 
   protected static final IconType PLAY = IconType.PLAY;
 
@@ -76,7 +78,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   private static final String PAUSE_LABEL = "pause";
   private static final int MIN_WIDTH = 40;
-  private static final boolean DEBUG = false;
   private static final String FILE_MISSING = "FILE_MISSING";
   private String currentPath = null;
 
@@ -183,12 +184,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected void addButtons(Widget optionalToTheRight) {
     playButton = makePlayButton(this);
 
-//    add();
-
-    if (false) {
+/*    if (false) {
       warnNoFlash.setVisible(false);
       add(warnNoFlash);
-    }
+    }*/
 
     if (optionalToTheRight != null) {
       optionalToTheRight.addStyleName("floatLeft");
@@ -266,17 +265,21 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #addButtons(Widget)
    */
   protected void doClick() {
+    //logger.info("PlayAudioPanel doClick " + playing + " " +currentPath);
+
     if (playButton.isVisible() && isEnabled()) {
       if (isPlaying()) {
+        if (DEBUG) logger.info("PlayAudioPanel doClick pause " + playing + " " +currentPath);
         pause();  // somehow get exception here?
       } else {
+        if (DEBUG) logger.info("PlayAudioPanel doClick start " + playing + " " +currentPath);
 
         startPlaying();
       }
     }
   }
 
-  protected void startPlaying() {
+  private void startPlaying() {
     for (PlayListener playListener : playListeners) playListener.playStarted();
     play();
   }
@@ -304,7 +307,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #doClick()
    */
   private void play() {
-    if (DEBUG) logger.info("PlayAudioPanel :play " + playing);
+    if (DEBUG) {
+      logger.info("PlayAudioPanel play " + playing + " " +currentPath);
+    }
     playing = true;
     setPlayButtonText();
     soundManager.play(currentSound);
@@ -402,22 +407,30 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     }
   }
 
+  public void playAudio() {
+    logger.info("playAudio " +currentPath);
+    playAudio(currentPath);
+  }
+
   /**
    * @param path
    * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getShowGroup
+   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#playAndRemember
    */
   public void playAudio(String path) {
-    if (currentPath.equals(path)) {
+    if (currentPath.equals(path) && currentSound != null) {
       doClick();
     } else {
-//      logger.info("playAudio - " + path);
+      logger.info("playAudio - new path " + path);
       loadAudio(path);
 
       addSimpleListener(new SimpleAudioListener() {
         @Override
         public void songLoaded(double duration) {
+          logger.info("playAudio - songLoaded " + path + " this " + this);
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
+              logger.info("playAudio - songLoaded calling doClick  " + path);
               doClick();
             }
           });
@@ -431,17 +444,30 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   public void loadAudio(String path) {
-    path = CompressedAudio.getPath(path);
+    if (DEBUG) logger.info("playAudio - loadAudio " + path);
+    String fixedPath = rememberAudio(path);
     if (isPlaying()) pause();
     startSong(path);
-    this.currentPath = path;
+    if (DEBUG) logger.info("playAudio - loadAudio finished " + fixedPath);
+  }
+
+  public String rememberAudio(String path) {
+    if (DEBUG)  logger.info("rememberAudio - path " + path);
+    destroySound();
+
+    this.currentPath = CompressedAudio.getPath(path);
+    return currentPath;
   }
 
   /**
+   * destroy any other current sound first...
+   *
    * Check if soundmanager loaded properly, warn if it didn't.
    *
    * @param path to audio file on server
-   * @see mitll.langtest.client.scoring.AudioPanel#getImagesForPath(String)
+   * @see mitll.langtest.client.scoring.AudioPanel#getReadyToPlayAudio
+   * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#getReadyToPlayAudio
+   * @see #loadAudio
    */
   public void startSong(String path) {
     if (!path.equals(FILE_MISSING)) {
@@ -450,7 +476,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       if (soundManager.isReady()) {
         //if (DEBUG) logger.info(new Date() + " Sound manager is ready.");
         if (soundManager.isOK()) {
-          if (DEBUG)
+        //  if (DEBUG)
             logger.info("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
 
           destroySound();
@@ -483,10 +509,11 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   private void destroySound() {
     if (currentSound != null) {
-      if (DEBUG)
-        logger.info("PlayAudioPanel.destroySound : (" + getElement().getId() + ") destroy sound " + currentSound);
+      //if (DEBUG)
+   //  logger.info("PlayAudioPanel.destroySound : (" + getElement().getId() + ") destroy sound " + currentSound);
 
       this.soundManager.destroySound(currentSound);
+      currentSound = null;
     }
   }
 
@@ -535,12 +562,13 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see SoundManager#songLoaded(Sound, double)
    */
   public void songLoaded(double duration) {
-    if (DEBUG) logger.info("PlayAudioPanel.songLoaded : " + this);
+   // if (DEBUG) logger.info("PlayAudioPanel.songLoaded : " + this);
 
     if (listener != null) {
       listener.songLoaded(duration);
     }
     if (simpleAudioListener != null) {
+      if (DEBUG) logger.info("PlayAudioPanel.songLoaded : " + this);
       simpleAudioListener.songLoaded(duration);
     }
 //    else {
@@ -575,7 +603,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   public void playCurrent() {
-    if (DEBUG) logger.info("PlayAudioPanel :play " + playing);
+    if (DEBUG) logger.info("PlayAudioPanel :playCurrent " + playing);
     playing = true;
     setPlayButtonText();
     soundManager.play(currentSound);
@@ -592,6 +620,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   public String toString() {
-    return "PlayAudioPanel #" + id;
+    return "PlayAudioPanel #" + id + " : " + currentPath;
   }
 }

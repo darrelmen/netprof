@@ -66,7 +66,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private long updateTime = 0;
 
   private Collection<CommonExercise> directlyRelated = new ArrayList<>();
-  //  private Collection<CommonExercise> mentions = new ArrayList<>();
+
   private boolean safeToDecode;
   private transient long safeToDecodeLastChecked;
 
@@ -85,6 +85,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private int dominoID = -1;
 
   private transient List<ExerciseAttribute> attributes;
+
+  private List<String> tokens = new ArrayList<>();
 
   // for serialization
   public Exercise() {
@@ -572,5 +574,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   public void setNumPhones(int numPhones) {
     this.numPhones = numPhones;
+  }
+
+  public List<String> getTokens() {
+    return tokens;
+  }
+
+  public void setTokens(List<String> tokens) {
+    this.tokens = tokens;
   }
 }

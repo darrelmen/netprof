@@ -77,8 +77,7 @@ import java.util.logging.Logger;
  */
 public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
   private Logger logger = Logger.getLogger("CommentNPFExercise");
-
-  //  private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
+//  private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
 //  private static final String HIGHLIGHT_END = "</span>";
 
   private static final String CONTEXT_SENTENCE = "Context Sentence";
