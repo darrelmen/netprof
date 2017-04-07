@@ -770,7 +770,7 @@ public class LangTest implements
   }
 
   @Override
-  public void register(Button button) {
+  public void register(UIObject button) {
     buttonFactory.register(this, button, "N/A");
   }
 

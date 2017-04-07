@@ -49,7 +49,7 @@ public interface EventRegistration {
 
   void register(UIObject button, int exid);
   void register(UIObject button, String exid);
-  void register(Button button);
+  void register(UIObject button);
 
   void register(Button button, int exid, String context);
   void register(Button button, String exid, String context);
