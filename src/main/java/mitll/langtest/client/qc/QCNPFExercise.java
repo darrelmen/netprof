@@ -414,8 +414,8 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
     if (!e.hasRefAudio()) {
       return addNoRefAudio(e);
     } else {
-      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true);
-      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false);
+      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true,false);
+      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false,false);
 
       List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
       List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);

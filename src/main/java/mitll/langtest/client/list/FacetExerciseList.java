@@ -244,7 +244,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         int i = 0;
         for (Integer num : PAGE_SIZE_CHOICES) {
           if (pagingContainer.getRealPageSize().equals(num)) {
-            logger.info("initial selection: size is " + num);
+       //     logger.info("initial selection: size is " + num);
             pagesize.setItemSelected(i, true);
           }
           i++;

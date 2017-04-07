@@ -12,6 +12,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
@@ -27,13 +28,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/5/17.
  */
 class ChoicePlayAudioPanel extends PlayAudioPanel {
-  public static final String IS_MALE = "isMale";
-  public static final String IS_REG = "isReg";
+  protected final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
+  private static final String IS_MALE = "isMale";
+  private static final String IS_REG = "isReg";
   public static final String MALE = "male";
   public static final String SLOW = "slow";
 
@@ -44,7 +47,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
    * @paramx soundManager
    * @paramx postAudioRecordButton1
    * @paramx xgoodwaveExercisePanel
-   * @see TwoColumnExercisePanel#getPlayAudioPanel(CommonExercise, AudioAttribute)
+   * @see TwoColumnExercisePanel#getPlayAudioPanel
    */
   public ChoicePlayAudioPanel(
       SoundManagerAPI soundManager,
@@ -68,7 +71,19 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     this.exercise = exercise;
     this.controller = exerciseController;
     getElement().setId("ChoicePlayAudioPanel");
+
+    LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> {
+      gotAudioSelected(authenticationEvent.getExid());
+    });
   }
+
+  private void gotAudioSelected(int exid) {
+    if (exercise != null && exid != exercise.getID()) {
+      //    logger.info("choosing different audio for " + exercise.getID());
+      addChoices(null);
+    }
+  }
+
 
   /**
    * @param toAddTo
@@ -106,18 +121,23 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
     playButton.addStyleName("choiceplay");
-
   }
 
   private void addChoices(SplitDropdownButton playButton) {
     Collection<Long> preferredVoices = Collections.emptyList();
-    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
-    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+    boolean isMale = isMale();
+    boolean isFemale = !isMale();
+    boolean isReg = controller.getStorage().isTrue(IS_REG);
+    boolean isSlow = !isReg;
 
-    KeyStorage storage = controller.getStorage();
-    boolean hasGender = storage.hasValue(IS_MALE);
-    boolean isMale = hasGender && storage.getValue(IS_MALE).equals(MALE) || controller.getUserManager().isMale();
-    boolean isSlow = storage.getValue(IS_REG).equals(SLOW);
+
+    Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices, true);
+    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, true);
+
+ /*
+    logger.info("addChoices For " + exercise.getID() + " " + exercise.getEnglish() + " "+
+        " male " + isMale + " is reg " + isReg + " male map " + malesMap.size() + " female map " + femalesMap.size());
+*/
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
@@ -126,7 +146,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       AudioAttribute mr = getAtSpeed(malesMap, true);
       if (mr != null) {
         if (playButton != null) addAudioChoice(playButton, true, true, mr);
-        if (isMale && !isSlow) toUse = mr;
+        if (isMale && isReg) toUse = mr;
         else fallback = mr;
       }
     }
@@ -142,7 +162,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       AudioAttribute fr = getAtSpeed(femalesMap, true);
       if (fr != null) {
         if (playButton != null) addAudioChoice(playButton, false, true, fr);
-        if (!isMale && !isSlow) toUse = fr;
+        if (isFemale && isReg) toUse = fr;
         if (fallback == null) fallback = fr;
       }
     }
@@ -151,7 +171,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       AudioAttribute fs = getAtSpeed(femalesMap, false);
       if (fs != null) {
         if (playButton != null) addAudioChoice(playButton, false, false, fs);
-        if (!isMale && !isSlow) toUse = fs;
+        if (isFemale && isSlow) toUse = fs;
         if (fallback == null) fallback = fs;
       }
     }
@@ -160,8 +180,14 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     setEnabled(toUse != null);
     if (toUse != null) {
       loadAudio(toUse.getAudioRef());
-      current = toUse;
+//      current = toUse;
     }
+  }
+
+  private boolean isMale() {
+    KeyStorage storage = controller.getStorage();
+    boolean hasGender = storage.hasValue(IS_MALE);
+    return hasGender && storage.isTrue(IS_MALE) || (!hasGender && controller.getUserManager().isMale());
   }
 
   private void addAudioChoice(SplitDropdownButton playButton, boolean isMale1, boolean isReg, AudioAttribute mr) {
@@ -182,24 +208,6 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     return widget;
   }
 
-  private AudioAttribute current = null;
-
-  private boolean matchesUserChoices() {
-    if (current != null) {
-      KeyStorage storage = controller.getStorage();
-      return (!storage.hasValue(IS_MALE) || current.isMale() == storage.isTrue(IS_MALE)) &&
-          (!storage.hasValue(IS_REG) || current.isRegularSpeed() == storage.isTrue(IS_REG));
-    } else return false;
-  }
-
-  @Override
-  protected void startPlaying() {
-/*    if (!matchesUserChoices()) {
-      addChoices(null);
-    }*/
-    super.startPlaying();
-  }
-
   @NotNull
   private ClickHandler getChoiceHandler(AudioAttribute mr, boolean isMale, boolean isReg) {
     return event -> playAndRemember(mr.getAudioRef(), isMale, isReg);
@@ -209,10 +217,13 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     playAudio(audioRef);
     controller.getStorage().setBoolean(IS_MALE, isMale);
     controller.getStorage().setBoolean(IS_REG, isReg);
+
+    LangTest.EVENT_BUS.fireEvent(new AudioSelectedEvent(exercise == null ? -1 : exercise.getID()));
   }
 
   private AudioAttribute getAtSpeed(Map<MiniUser, List<AudioAttribute>> malesMap, boolean isReg) {
-    for (List<AudioAttribute> attrs : malesMap.values()) {
+    Collection<List<AudioAttribute>> values = malesMap.values();
+    for (List<AudioAttribute> attrs : values) {
       for (AudioAttribute audioAttribute : attrs) {
         if (isReg && audioAttribute.isRegularSpeed() || !isReg && audioAttribute.isSlow()) {
           return audioAttribute;
@@ -226,6 +237,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   public void hidePlayButton() {
     playButton.setVisible(false);
   }
+
   public void showPlayButton() {
     playButton.setVisible(true);
   }

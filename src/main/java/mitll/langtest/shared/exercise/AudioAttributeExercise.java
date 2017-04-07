@@ -84,7 +84,8 @@ public interface AudioAttributeExercise extends AudioRefExercise {
   /**
    * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
    * @param isMale
+   * @param includeContext
    * @return
    */
-  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredUsers);
+  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredUsers, boolean includeContext);
 }

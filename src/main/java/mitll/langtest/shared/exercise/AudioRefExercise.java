@@ -66,5 +66,5 @@ public interface AudioRefExercise {
    */
   List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap);
 
-  Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale);
+  Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale, boolean includeContext);
 }

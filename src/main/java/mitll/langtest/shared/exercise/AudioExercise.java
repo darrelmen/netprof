@@ -34,7 +34,6 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.user.MiniUser;
-import net.liftweb.util.AU;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -259,7 +258,7 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @param isMale
    * @return
-   * @see #getUserMap(boolean)
+   * @see #getUserMap(boolean, boolean)
    */
   public Collection<AudioAttribute> getByGender(boolean isMale) {
     List<AudioAttribute> males = new ArrayList<AudioAttribute>();
@@ -337,13 +336,13 @@ public class AudioExercise extends ExerciseShell {
 
   /**
    * @param isMale
+   * @param includeContext
    * @return
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
    * List of audio is sorted to show regular before slow.
    */
-  public Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale) {
-    Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale);
-
+  public Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale, boolean includeContext) {
+    Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale, includeContext);
     sortRegBeforeSlow(userToAudio);
     return userToAudio;
   }
@@ -363,16 +362,17 @@ public class AudioExercise extends ExerciseShell {
    * Skip context audio
    *
    * @param isMale
+   * @param includeContext
    * @return
    * @see #getMostRecentAudio
-   * @see #getUserMap(boolean)
+   * @see #getUserMap(boolean, boolean)
    */
-  public Map<MiniUser, List<AudioAttribute>> getUserToAudio(boolean isMale) {
+  public Map<MiniUser, List<AudioAttribute>> getUserToAudio(boolean isMale, boolean includeContext) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = new HashMap<MiniUser, List<AudioAttribute>>();
     Collection<AudioAttribute> byGender = getByGender(isMale);
 
     for (AudioAttribute attribute : byGender) {
-      if (!attribute.getAttributeKeys().contains(CONTEXT)) {
+      if (!attribute.getAttributeKeys().contains(CONTEXT) || includeContext) {
         List<AudioAttribute> audioAttributes1 = userToAudio.get(attribute.getUser());
         if (audioAttributes1 == null)
           userToAudio.put(attribute.getUser(), audioAttributes1 = new ArrayList<AudioAttribute>());
@@ -415,12 +415,15 @@ public class AudioExercise extends ExerciseShell {
    *
    * @param isMale
    * @param preferredVoices if we find audio from preferred voices, we will use it, no matter how old it is
+   * @param includeContext
    * @return singleton map not containing default user -
    * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
    */
-  public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredVoices) {
-    Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale);
-    // logger.info("\tgetMostRecentAudio userToAudio " + userToAudio + "\n\tpref" + preferredVoices);
+  public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale,
+                                                                Collection<Long> preferredVoices,
+                                                                boolean includeContext) {
+    Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale, includeContext);
+    //logger.info("\tgetMostRecentAudio userToAudio " + userToAudio + "\n\tpref" + preferredVoices + "\n\tinclude "+includeContext);
 
     long bothTimestamp = 0;
     long timestamp = 0;

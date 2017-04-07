@@ -627,11 +627,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         return null; // no user with this id?
       }
 
-      Map<MiniUser, List<AudioAttribute>> userMap = exercise.getUserMap(orDefault == MiniUser.Gender.Male);
+      Map<MiniUser, List<AudioAttribute>> userMap = exercise.getUserMap(orDefault == MiniUser.Gender.Male,false);
       Collection<List<AudioAttribute>> audioByMatchingGender = userMap.values();
 
       if (audioByMatchingGender.isEmpty()) { // ok, no audio with matching gender, fall back to other audio
-        userMap = exercise.getUserMap(orDefault != MiniUser.Gender.Male);
+        userMap = exercise.getUserMap(orDefault != MiniUser.Gender.Male,false);
         audioByMatchingGender = userMap.values();
       }
 

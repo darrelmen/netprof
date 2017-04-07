@@ -7,11 +7,16 @@ import com.google.gwt.event.shared.GwtEvent;
  */
 public class AudioChangedEvent extends GwtEvent<AudioChangedEventHandler> {
   public static Type<AudioChangedEventHandler> TYPE = new Type<>();
-  String source;
+  private String source;
+
   public AudioChangedEvent(String source) {
-    this.source =source;
+    this.source = source;
   }
-  public String getSource() { return source;}
+
+  public String getSource() {
+    return source;
+  }
+
   @Override
   public Type<AudioChangedEventHandler> getAssociatedType() {
     return TYPE;

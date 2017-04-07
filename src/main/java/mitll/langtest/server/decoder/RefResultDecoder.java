@@ -380,8 +380,8 @@ public class RefResultDecoder {
         // TODO : get this from the project via the exercise
         String language = "";
 
-        Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
-        Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+        Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices, false);
+        Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, false);
 
         List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
         boolean maleEmpty = maleUsers.isEmpty();
@@ -451,8 +451,8 @@ public class RefResultDecoder {
     for (CommonExercise exercise : exercises) {
       if (stopDecode) return;
 
-      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
-      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices, false);
+      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, false);
 
       List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
       boolean maleEmpty = maleUsers.isEmpty();
@@ -771,8 +771,8 @@ public class RefResultDecoder {
     }*/
 
     Set<Long> preferredVoices = Collections.emptySet();//.getPreferredVoices();
-    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
-    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices, false);
+    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, false);
 
     List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
     boolean maleEmpty = maleUsers.isEmpty();

@@ -208,7 +208,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private Collection<AudioAttribute> getDisplayedAudio(AudioAttributeExercise exercise, boolean isMale) {
     Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
-    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(isMale, preferredVoices);
+    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(isMale, preferredVoices, false);
     List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
     boolean maleEmpty = maleUsers.isEmpty();
 
@@ -240,7 +240,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
                                 TabPanel tabPanel,
                                 boolean isMale,
                                 Collection<AudioAttribute> displayed) {
-    Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(isMale);
+    Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(isMale,false);
     List<MiniUser> maleUsers = audioAttributeExercise.getSortedUsers(malesMap);
     addTabsForUsers(newUserExercise, tabPanel, malesMap, maleUsers, displayed);
   }

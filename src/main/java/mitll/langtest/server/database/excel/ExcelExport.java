@@ -180,7 +180,7 @@ public class ExcelExport {
     annotation = exercise.getAnnotation(CONTEXT_TRANSLATION);
     row.createCell(j++).setCellValue(annotation == null || annotation.isCorrect() ? "" : annotation.getComment());
 
-    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
+    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices, false);
 //        logger.debug("for ex " + exercise.getID() + " males " + malesMap);
 //        if (malesMap.isEmpty()) {
 //          logger.debug("ex " + exercise.getID() + " males   " + exercise.getUserMap(true));
@@ -189,7 +189,7 @@ public class ExcelExport {
 
     addColsForGender(exercise, row, j, malesMap, exercise.getSortedUsers(malesMap), defaultUserAudio);
 
-    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, false);
 //        logger.debug("for ex " + exercise.getID() + " females " + femalesMap);
 //        if (femalesMap.isEmpty()) {
 //          logger.debug("ex " + exercise.getID() + " females " + exercise.getUserMap(false));

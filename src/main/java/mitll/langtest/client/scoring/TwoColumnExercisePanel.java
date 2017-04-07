@@ -31,9 +31,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 3/23/17.
  */
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget {
-  public static final int CONTEXT_PADDING = 10;
-  private final List<CorrectAndScore> correctAndScores;
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
+
+  private static final int CONTEXT_PADDING = 10;
+  private final List<CorrectAndScore> correctAndScores;
 
   public static final String CONTEXT = "Context";
 
@@ -128,11 +129,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       lr.add(getItemWidget(e));
 
       rowWidget.add(lr);
-
-      //rowWidget = getRowWidget();
-      //rowWidget.getElement().setId("secondRow");
-
-      //     card.add(rowWidget);
     }
 
     addField(card, addAltFL(e), "altflrow");
@@ -237,30 +233,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private DivWidget getPlayAudioPanel(T e) {
-    //UserManager userManager = controller.getUserManager();
-    //boolean male = userManager.isMale();
-    // PlayAudioPanel w = new PlayAudioPanel(controller.getSoundManager(), audioAttribute.getAudioRef(), false);
     PlayAudioPanel w = new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller);
-//    DivWidget pap = new DivWidget();
-//    pap.getElement().setId("playAudioContainer");
-//    pap.addStyleName("floatLeft");
-//    pap.addStyleName("inlineFlex");
-//    pap.add(w);
-
-    //  addSlow(e, male, pap);
     return w;
   }
-
-/*  private void addSlow(T e, boolean male, DivWidget pap) {
-    AudioAttribute slow = e.getAudioAttributePrefGender(male, false);
-
-    if (slow != null) {
-      //      logger.info("found slow audio for gender male = " + male + "  audio is male " + slow.isMale() + " by " + slow.getUser());
-      PlayAudioPanel w1 = new PlayAudioPanel(controller.getSoundManager(), slow.getAudioRef(), true);
-      w1.addStyleName("floatLeft");
-      pap.add(w1);
-    }
-  }*/
 
   @NotNull
   private DivWidget getItemWidget(T e) {
@@ -372,7 +347,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @return
    * @seex #addContextButton
    */
-  private <U extends CommonAudioExercise> Panel getContext(U exercise, String itemText) {
+  private Panel getContext(CommonExercise exercise, String itemText) {
     String context = exercise.getForeignLanguage();
 
     if (!context.isEmpty()) {
@@ -381,8 +356,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       AudioAttribute audioAttrPrefGender = exercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
 
       if (audioAttrPrefGender != null) {
-        PlayAudioPanel w = new PlayAudioPanel(controller.getSoundManager(), audioAttrPrefGender.getAudioRef(), false);
-        hp.add(w);
+        //logger.info("context audio " + audioAttrPrefGender.getExid() + " "+ audioAttrPrefGender.getAudioRef() + " "+audioAttrPrefGender.getTranscript());
+        hp.add(new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller));
       }
 
       Panel contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,

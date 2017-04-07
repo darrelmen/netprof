@@ -191,6 +191,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.exid = exid;
   }
 
+  @Deprecated
   @Override
   public String getID() {
     return exid + "/1";
@@ -207,7 +208,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   public boolean isSlow() {
-    return matches(SPEED, SLOW);
+    return matches(SPEED, SLOW) || audioType.equals(AudioType.CONTEXT_SLOW);
   }
 
   public AudioType getAudioType() {
@@ -224,7 +225,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   public boolean isRegularSpeed() {
     String speed = getSpeed();
-    return speed != null && speed.equalsIgnoreCase(REGULAR);
+    return speed != null && speed.equalsIgnoreCase(REGULAR) || audioType == AudioType.CONTEXT_REGULAR;
   }
 
   public String getSpeed() {

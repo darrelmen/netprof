@@ -37,6 +37,7 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -56,7 +57,6 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   private static final boolean DEBUG = false;
   private final Map<Integer, T> idToExercise = new HashMap<>();
- // private int pageSize;
 
   public ClickablePagingContainer(ExerciseController controller) {
     super(controller);
@@ -157,12 +157,18 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     }
   }
 
+  /**
+   *
+   * @param visibleRange
+   * @return
+   * @see FacetExerciseList#makePagingContainer
+   */
   protected Collection<Integer> getIdsForRange(Range visibleRange) {
     List<Integer> visible = new ArrayList<>();
     int start  = visibleRange.getStart();
     int length = visibleRange.getLength();
     int end = Math.min(getList().size(), start + length);
-    logger.info("ClickablePagingContainer.getVisibleIDs : get from " + start + " to " + end + " vs " + getList().size());
+   // logger.info("ClickablePagingContainer.getVisibleIDs : get from " + start + " to " + end + " vs " + getList().size());
     for (int i = start; i < end; i++) {
       T at = getAt(i);
       visible.add(at.getID());
