@@ -179,7 +179,7 @@ class SoundManager {
 	}
 
 	public static void songLoaded(Sound sound, double duration){
-    logger.info("songLoaded sound " +sound + " with dur " +duration);
+  //  logger.info("songLoaded sound " +sound + " with dur " +duration);
     sound.getParent().songLoaded(duration);
 	}
 

@@ -421,16 +421,16 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     if (currentPath.equals(path) && currentSound != null) {
       doClick();
     } else {
-      logger.info("playAudio - new path " + path);
+      if (DEBUG) logger.info("playAudio - new path " + path);
       loadAudio(path);
 
       addSimpleListener(new SimpleAudioListener() {
         @Override
         public void songLoaded(double duration) {
-          logger.info("playAudio - songLoaded " + path + " this " + this);
+          if (DEBUG)  logger.info("playAudio - songLoaded " + path + " this " + this);
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
-              logger.info("playAudio - songLoaded calling doClick  " + path);
+              if (DEBUG)   logger.info("playAudio - songLoaded calling doClick  " + path);
               doClick();
             }
           });
