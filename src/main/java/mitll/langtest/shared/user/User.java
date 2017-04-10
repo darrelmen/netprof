@@ -33,6 +33,7 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.banner.UserTable;
 import mitll.langtest.client.user.SignUpForm;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
@@ -399,7 +400,7 @@ public class User extends MiniUser {
 
   /**
    * @return
-   * @see mitll.langtest.client.user.UserTable#getTable
+   * @see UserTable#getTable
    */
   public int getNumResults() {
     return numResults;

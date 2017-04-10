@@ -48,6 +48,7 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.sorter.ExerciseComparator;
@@ -99,7 +100,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
    * @see SetCompleteDisplay#getScoreHistory
    */
   public Panel getTableWithPager(List<ExerciseCorrectAndScore> sortedHistory) {
-    Panel tableWithPager = getTableWithPager(true);
+    Panel tableWithPager = getTableWithPager(new ListOptions());
     tableWithPager.getElement().setId("TableScoreHistory");
 
     int last = -1;

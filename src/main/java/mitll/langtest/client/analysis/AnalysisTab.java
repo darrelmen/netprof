@@ -48,6 +48,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -333,7 +334,7 @@ public class AnalysisTab extends DivWidget {
         lowerHalf.add(getSoundsContainer(phones));
 
         // #2 - word examples
-        Panel examples = exampleContainer.getTableWithPager(true);
+        Panel examples = exampleContainer.getTableWithPager(new ListOptions());
         lowerHalf.add(getWordExamples(examples));
 
         // #3 - phone plot

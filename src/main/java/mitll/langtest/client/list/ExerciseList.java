@@ -677,8 +677,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-/*        logger.info("ExerciseList.showExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
-      " or " + getCurrentExerciseID() + " instance " + instance);*/
+        logger.info("ExerciseList.showExercise : item id " + commonExercise.getID() + " currentExercise " +getCurrentExercise() +
+      " or " + getCurrentExerciseID() );
         addExerciseWidget(commonExercise, wrapper);
       }
     });
@@ -691,6 +691,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
    void addExerciseWidget(U commonExercise, ExerciseListWrapper<CommonExercise> wrapper) {
     createdPanel = factory.getExercisePanel(commonExercise, wrapper);
+    logger.info("Add exercise widget "  + commonExercise.getID());
     innerContainer.add(createdPanel);
   }
 
@@ -753,11 +754,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     } else {
       logger.warning("\tremoveCurrentExercise : no inner current widget for " + reportLocal());
     }*/
+    logger.info("removeCurrentExercise clear container --- >");
     clearExerciseContainer();
     innerContainer.getParent().removeStyleName("shadowBorder");
   }
 
   void clearExerciseContainer() {
+    logger.info("clearing container --- >");
     innerContainer.clear();
   }
 

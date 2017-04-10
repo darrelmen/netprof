@@ -52,6 +52,8 @@ import mitll.langtest.client.LifecycleSupport;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
+import mitll.langtest.client.banner.NewLearnHelper;
+import mitll.langtest.client.banner.PracticeHelper;
 import mitll.langtest.client.contextPractice.DialogViewer;
 import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
@@ -69,10 +71,7 @@ import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,8 +88,7 @@ import java.util.logging.Logger;
  * Time: 8:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Navigation implements RequiresResize, ShowTab {
- // public static final int NUM_TO_SHOW = 5;
+public class Navigation implements RequiresResize, ShowTab, INavigation {
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String STUDENT_ANALYSIS = "Student Analysis";
@@ -154,7 +152,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private final KeyStorage storage;
   private ListManager listManager;
-  private final UserFeedback feedback;
+//  private final UserFeedback feedback;
 
   private TabPanel tabPanel;
   private TabAndContent studyLists;
@@ -186,11 +184,11 @@ public class Navigation implements RequiresResize, ShowTab {
                     LifecycleSupport lifecycleSupport) {
     this.userManager = userManager;
     this.controller = controller;
-    this.feedback = feedback;
+  //  this.feedback = feedback;
     this.lifecycleSupport = lifecycleSupport;
     storage = new KeyStorage(controller);
 
-    learnHelper = getLearnHelper(controller);
+    learnHelper = new NewLearnHelper(controller);
     if (controller.getProps().hasDialog()) {
       makeDialogWindow(service, controller);
     }
@@ -201,14 +199,10 @@ public class Navigation implements RequiresResize, ShowTab {
     recordExampleHelper = new RecorderNPFHelper(controller, false, learnHelper);
   }
 
-  @NotNull
-  private SimpleChapterNPFHelper<CommonShell, CommonExercise> getLearnHelper(final ExerciseController controller) {
-    return new NewLearnHelper(controller);
-  }
-
   /**
    * @see mitll.langtest.client.InitialUI#configureUIGivenUser
    */
+  @Override
   public void showInitialState() {
     addTabs();
     if (noPrevClickedTab()) {   // no previous tab
@@ -216,6 +210,16 @@ public class Navigation implements RequiresResize, ShowTab {
     } else {
       selectPreviousTab();
     }
+  }
+
+  @Override
+  public void showLearn() {
+
+  }
+
+  @Override
+  public void showDrill() {
+
   }
 
   /**
@@ -288,10 +292,11 @@ public class Navigation implements RequiresResize, ShowTab {
    * TODO : clean this up - why a horrible hack for learn tab?
    *
    * @return
-   * @see #getTabPanel
+   * @see #getNavigation
    * @see InitialUI#showNavigation
    */
-  public Widget getTabPanel() {
+  @Override
+  public Widget getNavigation() {
     tabPanel = new TabPanel();
     tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     tabPanel.getElement().setId("tabPanel");
@@ -317,7 +322,7 @@ public class Navigation implements RequiresResize, ShowTab {
     boolean wasChapters = targetName.contains(CHAPTERS);
     Panel createdPanel = learnHelper.getCreatedPanel();
     boolean hasCreated = createdPanel != null;
-    // logger.info("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
+    // logger.info("getNavigation : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
     if (wasChapters) {
       //  logger.info("\taddShowHandler got chapters! created panel was revealed class " + createdPanel.getClass());
       if (hasCreated && (createdPanel instanceof GoodwaveExercisePanel)) {
@@ -335,7 +340,7 @@ public class Navigation implements RequiresResize, ShowTab {
         Panel createdPanel1 = practiceHelper.getCreatedPanel();
         if (createdPanel1 != null) {
           if (createdPanel1 instanceof FlashcardPanel) {
-            //       logger.info("getTabPanel : practice : got shown event : '" + showEvent + "' target '" + targetName + "'");
+            //       logger.info("getNavigation : practice : got shown event : '" + showEvent + "' target '" + targetName + "'");
             ((FlashcardPanel) createdPanel1).wasRevealed();
           } else {
             logger.warning("huh? flashcard panel was a " + createdPanel1.getClass());
@@ -355,7 +360,7 @@ public class Navigation implements RequiresResize, ShowTab {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTabAndLogEvent(RECORD_AUDIO, recorderTab);
-        recorderHelper.showNPF(recorderTab, "record_Audio");
+        recorderHelper.showNPF(recorderTab.getContent(), "record_Audio");
       }
     });
 
@@ -365,7 +370,7 @@ public class Navigation implements RequiresResize, ShowTab {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTabAndLogEvent(RECORD_EXAMPLE, recordExampleTab);
-        recordExampleHelper.showNPF(recordExampleTab, "record_Example_Audio");
+        recordExampleHelper.showNPF(recordExampleTab.getContent(), "record_Example_Audio");
       }
     });
   }
@@ -385,7 +390,7 @@ public class Navigation implements RequiresResize, ShowTab {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTabAndLogEvent(MARK_DEFECTS, recorderTab);
-        markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
+        markDefectsHelper.showNPF(markDefectsTab.getContent(), MARK_DEFECTS1);
       }
     });
 
@@ -433,7 +438,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #addAnalysis()
    */
   private void showAnalysis() {
-    learnHelper.showNPF(chapters, LEARN);
+    learnHelper.showNPF(chapters.getContent(), LEARN);
 
     analysis.getContent().clear();
     ShowTab showTab = this;
@@ -446,7 +451,7 @@ public class Navigation implements RequiresResize, ShowTab {
    */
   private void showStudentAnalysis() {
     //  logger.info("show student analysis");
-    learnHelper.showNPF(chapters, LEARN);
+    learnHelper.showNPF(chapters.getContent(), LEARN);
     studentAnalysis.getContent().clear();
     studentAnalysis.getContent().add(new StudentAnalysis(exerciseServiceAsync, controller, this));
   }
@@ -497,7 +502,7 @@ public class Navigation implements RequiresResize, ShowTab {
     chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CHAPTERS);
     chapters.getTab().addClickHandler(event -> {
       checkAndMaybeClearTabAndLogEvent(CHAPTERS, chapters);
-      learnHelper.showNPF(chapters, LEARN);
+      learnHelper.showNPF(chapters.getContent(), LEARN);
     });
   }
 
@@ -515,7 +520,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private void showPracticeTab() {
     if (practiceTab != null) {
       checkAndMaybeClearTabAndLogEvent(PRACTICE, practiceTab);
-      practiceHelper.showNPF(practiceTab, PRACTICE);
+      practiceHelper.showNPF(practiceTab.getContent(), PRACTICE);
       practiceHelper.hideList();
     }
   }
@@ -529,7 +534,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
         public void onSuccess() {
           reallyAddDialogTab();
-          showPreviouslySelectedTab();
+          showPreviousState();
         }
       });
     }
@@ -581,7 +586,7 @@ public class Navigation implements RequiresResize, ShowTab {
   /**
    *
    */
-  public void showPreviouslySelectedTab() {
+  public void showPreviousState() {
     if (noPrevClickedTab()) {   // no previous tab
       showDefaultInitialTab(true);
     } else {
@@ -668,17 +673,17 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (clickedTab.equals(PRACTICE_DIALOG)) {
         dialogWindow.viewDialog(dialog.getContent());
       } else if (clickedTab.equals(CHAPTERS)) {
-        learnHelper.showNPF(chapters, LEARN);
+        learnHelper.showNPF(chapters.getContent(), LEARN);
       } else if (clickedTab.equals(PROJECTS)) {
         ProjectOps ops = new ProjectOps(controller, lifecycleSupport);
         ops.show(projects);
         projects.setResizeable(ops);
       } else if (clickedTab.equals(RECORD_AUDIO)) {
-        recorderHelper.showNPF(recorderTab, AudioType.RECORDER.toString());
+        recorderHelper.showNPF(recorderTab.getContent(), AudioType.RECORDER.toString());
       } else if (clickedTab.equals(RECORD_EXAMPLE)) {
-        recordExampleHelper.showNPF(recordExampleTab, AudioType.CONTEXT_REGULAR.toString());
+        recordExampleHelper.showNPF(recordExampleTab.getContent(), AudioType.CONTEXT_REGULAR.toString());
       } else if (clickedTab.equals(MARK_DEFECTS) && markDefectsTab != null) {
-        markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
+        markDefectsHelper.showNPF(markDefectsTab.getContent(), CONTENT1);
       } else if (clickedTab.equals(PRACTICE) && practiceTab != null) {
         showPracticeTab();
       } else if (clickedTab.equals(ANALYSIS) && analysis != null) {
@@ -706,7 +711,7 @@ public class Navigation implements RequiresResize, ShowTab {
     if (setClickedStorage) {
       checkAndMaybeClearTab(CHAPTERS);
     }
-    learnHelper.showNPF(chapters, LEARN);
+    learnHelper.showNPF(chapters.getContent(), LEARN);
 
     tabPanel.selectTab(nameToIndex.get(CHAPTERS));
     clickOnTab(nameToTab.get(CHAPTERS));
@@ -782,5 +787,4 @@ public class Navigation implements RequiresResize, ShowTab {
 
     if (listManager != null) listManager.onResize();
   }
-
 }

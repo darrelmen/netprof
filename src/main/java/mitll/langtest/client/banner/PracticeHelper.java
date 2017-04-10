@@ -30,11 +30,12 @@
  *
  */
 
-package mitll.langtest.client.custom;
+package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -55,13 +56,13 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/4/16.
  */
-class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("PracticeHelper");
 
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
 
-  PracticeHelper(ExerciseController controller) { super(controller, null);  }
+  public PracticeHelper(ExerciseController controller) { super(controller, null);  }
 
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
@@ -87,7 +88,8 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
-        return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel, new ListOptions(instanceName), listHeader, footer, 1) {
+        return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel,
+            new ListOptions(instanceName).setShowPager(false), listHeader, footer, 1) {
           @Override
           protected CommonShell findFirstExercise() {
             int currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();

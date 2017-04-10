@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client.flashcard;
+package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
@@ -43,13 +43,13 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.InitialUI;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.UILifecycle;
+import mitll.langtest.client.*;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.shared.user.User;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +62,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
-public class Banner implements RequiresResize {
+public class Banner implements RequiresResize, IBanner {
   private final Logger logger = Logger.getLogger("Banner");
 
   private static final String ABOUT_NET_PRO_F = "About NetProF";
@@ -84,6 +84,7 @@ public class Banner implements RequiresResize {
   private final String HREF;
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
   private static final String DOCUMENTATION = "User Manual";
+  //private final NewContentChooser navigation;
 
   private Paragraph appName;
   private Image flashcardImage;
@@ -94,20 +95,35 @@ public class Banner implements RequiresResize {
   private Panel qc, recordAudio;
   private Dropdown cogMenu;
   private final PropertyHandler props;
-  private List<NavLink> adminLinks = new ArrayList<>();
-  private UILifecycle lifecycle;
+  private final List<NavLink> adminLinks = new ArrayList<>();
+  private final UILifecycle lifecycle;
+  LifecycleSupport lifecycleSupport;
+  UserMenu userMenu;
 
   /**
    * @see mitll.langtest.client.InitialUI#InitialUI
    */
-  public Banner(PropertyHandler props, UILifecycle lifecycle) {
+  public Banner(PropertyHandler props,
+                UILifecycle lifecycle,
+                LifecycleSupport lifecycleSupport,
+                UserMenu userMenu,
+                ExerciseController controller) {
     this.props = props;
-    HREF = "mailto:" +
+    HREF = getMailTo(props);
+    this.lifecycle = lifecycle;
+    this.lifecycleSupport = lifecycleSupport;
+    this.userMenu = userMenu;//new UserMenu(langTest, userManager, this);
+    //this.navigation = new NewContentChooser(controller);
+  }
+
+  @NotNull
+  private String getMailTo(PropertyHandler props) {
+    return "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
         //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
-    this.lifecycle = lifecycle;
   }
+
 
   /**
    * @param splashText
@@ -116,10 +132,18 @@ public class Banner implements RequiresResize {
    * @paramx reload
    * @see InitialUI#makeHeaderRow()
    */
-  public Panel makeNPFHeaderRow(String splashText,
-                                boolean isBeta, String userName, HTML browserInfo,
-                                List<Banner.LinkAndTitle> choices
+  @Override
+  public Panel getBanner(
+
+
   ) {
+    String splashText = props.getSplash();
+    boolean isBeta = props.isBeta();
+    String userName = "";
+    HTML browserInfo = getReleaseStatus();
+    List<LinkAndTitle> choices =
+        userMenu.getCogMenuChoices();
+
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -190,6 +214,22 @@ public class Banner implements RequiresResize {
     return headerRow;
   }
 
+  @Override
+  public void setNavigation(INavigation navigation) {
+
+  }
+
+  BrowserCheck browserCheck = new BrowserCheck();
+
+  /**
+   * @return
+   * @see #makeHeaderRow()
+   */
+  private HTML getReleaseStatus() {
+    browserCheck.getBrowserAndVersion();
+    return new HTML(lifecycleSupport.getInfoLine());
+  }
+
   /**
    * @param splashText
    * @return
@@ -202,6 +242,7 @@ public class Banner implements RequiresResize {
     return subtitle;
   }
 
+  @Override
   public void setSubtitle() {
     this.subtitle.setText(RECORDING_DISABLED);
     subtitle.removeStyleName("subtitleForeground");
@@ -221,6 +262,7 @@ public class Banner implements RequiresResize {
     cogMenu.addStyleName("cogStyle");
   }
 
+  @Override
   public void reflectPermissions(Collection<User.Permission> permissions) {
     boolean hasAudio = permissions.contains(User.Permission.RECORD_AUDIO);
     qc.clear();
@@ -248,6 +290,7 @@ public class Banner implements RequiresResize {
    * @see mitll.langtest.client.InitialUI#handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
    * @see mitll.langtest.client.InitialUI#showLogin
    */
+  @Override
   public void setCogVisible(boolean val) {
     cogMenu.setVisible(val);
     userNameWidget.setVisible(val);
@@ -257,6 +300,7 @@ public class Banner implements RequiresResize {
    * @param v
    * @see mitll.langtest.client.InitialUI#showUserPermissions(long) (long)
    */
+  @Override
   public void setBrowserInfo(String v) {
     browserInfo.setHTML(v);
   }
@@ -308,7 +352,7 @@ public class Banner implements RequiresResize {
     adminLinks.clear();
     for (LinkAndTitle linkAndTitle : choicesToAdd) {
       NavLink add = linkAndTitle.add(w);
-      if (linkAndTitle.isAdminChoice) adminLinks.add(add);
+      if (linkAndTitle.isAdminChoice()) adminLinks.add(add);
     }
     return w;
   }
@@ -320,40 +364,6 @@ public class Banner implements RequiresResize {
     w.setIconSize(IconSize.LARGE);
     w.add(getAbout());
     return w;
-  }
-
-  public static class LinkAndTitle {
-    ClickHandler clickHandler;
-    String title;
-    boolean isAdminChoice;
-    private String linkURL;
-
-    public LinkAndTitle(String title, ClickHandler click, boolean isAdminChoice) {
-      this.title = title;
-      this.clickHandler = click;
-      this.isAdminChoice = isAdminChoice;
-    }
-
-    public NavLink add(Dropdown dropdown) {
-      NavLink monitoringC = new NavLink(title);
-      if (linkURL != null) {
-        monitoringC.setHref(linkURL);
-      }
-      else {
-        monitoringC.addClickHandler(clickHandler);
-      }
-
-      dropdown.add(monitoringC);
-      return monitoringC;
-    }
-
-    public String getLinkURL() {
-      return linkURL;
-    }
-
-    public void setLinkURL(String linkURL) {
-      this.linkURL = linkURL;
-    }
   }
 
   private NavLink getAbout() {
@@ -373,7 +383,7 @@ public class Banner implements RequiresResize {
           String versionInfo = LangTest.VERSION_INFO;
           String releaseDate = props.getReleaseDate();
           String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
-          String model = props.getModelDir().replaceAll("models.", "");
+          //String model = props.getModelDir().replaceAll("models.", "");
           values = java.util.Arrays.asList(
               //   props.getLanguage(),
               versionInfo,
@@ -401,6 +411,7 @@ public class Banner implements RequiresResize {
     return about;
   }
 
+  @Override
   public void setVisibleAdmin(boolean visibleAdmin) {
     for (NavLink choice : adminLinks) choice.setVisible(visibleAdmin);
   }
@@ -409,6 +420,7 @@ public class Banner implements RequiresResize {
    * @param name
    * @see mitll.langtest.client.LangTest#gotUser
    */
+  @Override
   public void setUserName(String name) {
     this.userNameWidget.setText(name);
   }

@@ -81,8 +81,8 @@ import java.util.logging.Logger;
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
-public static int FIRST_PAGE_SIZE = 2;
-  private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, 5, 10, 25, 50);
+  public static int FIRST_PAGE_SIZE = 5;
+  private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, /*5,*/ 10, 25, 50);
   private static final String ITEMS_PAGE = " items/page";
 
   private static final int TOTAL = 32;
@@ -219,8 +219,8 @@ public static int FIRST_PAGE_SIZE = 2;
     w.addStyleName("floatLeft");
     w.addStyleName("topFiveMargin");
     w.addStyleName("rightFiveMargin");
-   // footer.add(w);
-     pageSizeContainer = new DivWidget();
+    // footer.add(w);
+    pageSizeContainer = new DivWidget();
     footer.add(pageSizeContainer);
     pageSizeContainer.add(w);
     pageSizeContainer.add(pagesize);
@@ -246,7 +246,7 @@ public static int FIRST_PAGE_SIZE = 2;
         int i = 0;
         for (Integer num : PAGE_SIZE_CHOICES) {
           if (pagingContainer.getRealPageSize().equals(num)) {
-       //     logger.info("initial selection: size is " + num);
+            //     logger.info("initial selection: size is " + num);
             pagesize.setItemSelected(i, true);
           }
           i++;
@@ -295,7 +295,7 @@ public static int FIRST_PAGE_SIZE = 2;
   private Panel tableWithPager;
 
   protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
-    tableWithPager = pagingContainer.getTableWithPager(listOptions.isSort());
+    tableWithPager = pagingContainer.getTableWithPager(listOptions);
   }
 
   /**
@@ -770,7 +770,7 @@ public static int FIRST_PAGE_SIZE = 2;
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-    logger.info("restoreListBoxState " + selectionState);
+    //logger.info("restoreListBoxState " + selectionState);
     super.restoreListBoxState(selectionState);
     showSelectionState(selectionState);
   }
@@ -797,7 +797,7 @@ public static int FIRST_PAGE_SIZE = 2;
     // logger.info("loadFirstExercise : ---");
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       logger.info("loadFirstExercise : current exercises is empty");
-  //    gotEmptyExerciseList();
+      //    gotEmptyExerciseList();
     } else {
       super.loadFirstExercise(searchIfAny);
     }
@@ -808,6 +808,7 @@ public static int FIRST_PAGE_SIZE = 2;
    */
   @Override
   protected void gotEmptyExerciseList() {
+    logger.info("got empty exercise list.");
     clearExerciseContainer();
     showEmptySelection();
     hidePrevNext();
@@ -870,6 +871,7 @@ public static int FIRST_PAGE_SIZE = 2;
   }
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
+
     boolean isEmpty = visibleIDs.isEmpty();
     if (isEmpty && pagingContainer.isEmpty() && finished) {
       logger.info("show empty -- ");
@@ -910,8 +912,9 @@ public static int FIRST_PAGE_SIZE = 2;
                 //showEmptyExercise();
                 hidePrevNext();
               } else {
-                if (numToShow == 1) {
-                  hidePrevNext();
+                if (numToShow == 1) { // hack for avp
+                  hidePrevNextWidgets();
+
                   if (getCurrentExerciseID() == result.getExercises().iterator().next().getID()) {
                     logger.info("skip current " + getCurrentExerciseID());
                   } else {
@@ -951,11 +954,15 @@ public static int FIRST_PAGE_SIZE = 2;
   }
 
   private void hidePrevNext() {
+    hidePrevNextWidgets();
+    clearExerciseContainer();
+  }
+
+  private void hidePrevNextWidgets() {
     prev.setVisible(false);
     next.setVisible(false);
     pageSizeContainer.setVisible(false);
     sortBox.setVisible(false);
-    clearExerciseContainer();
   }
 
   private void showPrevNext() {
@@ -967,6 +974,11 @@ public static int FIRST_PAGE_SIZE = 2;
     enablePrevNext();
   }
 
+  /**
+   * @see
+   * @param result
+   * @param wrapper
+   */
   private void showExercises(Collection<CommonExercise> result, ExerciseListWrapper<CommonExercise> wrapper) {
     clearExerciseContainer();
 
@@ -978,6 +990,7 @@ public static int FIRST_PAGE_SIZE = 2;
       //   logger.info("ex " + exercise.getID() + " " + exercise.getUnitToValue());
       Scheduler.get().scheduleDeferred(new Command() {
         public void execute() {
+          logger.info("showExercises ex " + exercise.getID() + " " + exercise.getUnitToValue());
           addExerciseWidget(exercise, wrapper);
           //logger.info("ex " + exercise.getID() + " now " +innerContainer.getElement().getChildCount());
           if (numToShow != 1) {

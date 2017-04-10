@@ -53,6 +53,7 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneSession;
@@ -297,7 +298,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @see #getTableWithPager(PhoneReport)
    */
   private Panel getTableWithPager(List<PhoneAndStats> sortedHistory) {
-    Panel tableWithPager = getTableWithPager(true);
+    Panel tableWithPager = getTableWithPager(new ListOptions());
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
     tableWithPager.addStyleName("leftTenMargin");

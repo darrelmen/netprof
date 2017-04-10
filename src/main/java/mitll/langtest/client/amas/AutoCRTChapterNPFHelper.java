@@ -90,8 +90,8 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   }
 
   @Override
-  public void addNPFToContent(Panel listContent, String instanceName) {
-    super.addNPFToContent(listContent, instanceName);
+  public void showContent(Panel listContent, String instanceName) {
+    super.showContent(listContent, instanceName);
     //if (!controller.getProps().isAdminView()) {
     hideList();
     //}

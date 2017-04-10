@@ -51,6 +51,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -118,7 +119,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
    * @see AnalysisTab#getWordScores
    */
   public Panel getTableWithPager(List<WordScore> sortedHistory) {
-    Panel tableWithPager = getTableWithPager(true);
+    Panel tableWithPager = getTableWithPager(new ListOptions());
     tableWithPager.getElement().setId("WordContainerScoreHistory");
     int tableHistoryWidth = isNarrow() ? TABLE_HISTORY_WIDTH_NARROW : TABLE_HISTORY_WIDTH;
 

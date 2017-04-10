@@ -43,6 +43,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
+import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.domino.common.*;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserState;
@@ -74,7 +75,7 @@ public class ChangePasswordView extends Composite {
   private final UserServiceAsync userServiceAsync;
 
   /**
-   * @see mitll.langtest.client.user.UserMenu.ChangePasswordClickHandler
+   * @see UserMenu.ChangePasswordClickHandler
    * @param editUser
    * @param forcePWChange
    * @param userState

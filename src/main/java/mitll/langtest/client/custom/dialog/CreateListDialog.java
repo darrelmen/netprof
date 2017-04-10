@@ -93,7 +93,7 @@ public class CreateListDialog extends BasicDialog {
   /**
    * @param thirdRow
    * @seex
-   * @see mitll.langtest.client.custom.Navigation#getTabPanel
+   * @see mitll.langtest.client.custom.Navigation#getNavigation
    */
   public void doCreate(Panel thirdRow) {
     thirdRow.clear();

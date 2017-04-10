@@ -49,6 +49,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordAndScore;
 
@@ -99,10 +100,10 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   /**
    * @return
    * @see SetCompleteDisplay#getScoreHistory
-   * @param sortEnglish
+   * @param listOptions
    */
-  public Panel getTableWithPager(boolean sortEnglish) {
-    Panel tableWithPager = super.getTableWithPager(sortEnglish);
+  public Panel getTableWithPager(ListOptions listOptions) {
+    Panel tableWithPager = super.getTableWithPager(listOptions);
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
     return tableWithPager;

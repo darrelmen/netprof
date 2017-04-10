@@ -139,7 +139,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             add(filterOnly);
 
             // row 3
-            add(pagingContainer.getTableWithPager(true));
+            add(pagingContainer.getTableWithPager(new ListOptions()));
             setOnlyExamples(!doNormalRecording);
 
             addEventHandler(instanceName);

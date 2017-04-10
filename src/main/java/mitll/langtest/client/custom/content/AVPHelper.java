@@ -100,7 +100,7 @@ public class AVPHelper extends NPFHelper {
 
           @Override
           protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
-            pagingContainer.getTableWithPager(true);
+            pagingContainer.getTableWithPager(listOptions);
           }
 
           @Override

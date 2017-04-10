@@ -45,11 +45,17 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.custom.Navigation;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.IBanner;
+import mitll.langtest.client.banner.NewBanner;
+import mitll.langtest.client.banner.NewContentChooser;
+import mitll.langtest.client.banner.UserMenu;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.project.ProjectChoices;
 import mitll.langtest.client.services.UserService;
@@ -60,7 +66,6 @@ import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 
@@ -84,7 +89,7 @@ public class InitialUI implements UILifecycle {
   private static final int NO_USER_INITIAL = -2;
 
   private final UserManager userManager;
-  private final UserMenu userMenu;
+ // private final UserMenu userMenu;
 
   /**
    * @see #configureUIGivenUser
@@ -101,9 +106,9 @@ public class InitialUI implements UILifecycle {
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private final UserServiceAsync userService = GWT.create(UserService.class);
+  private final UserServiceAsync userService    = GWT.create(UserService.class);
 
-  private final Banner banner;
+  private final IBanner banner;
 
   protected Panel headerRow;
 
@@ -112,8 +117,8 @@ public class InitialUI implements UILifecycle {
    */
   private Breadcrumbs breadcrumbs;
   protected Panel contentRow;
-  private Navigation navigation;
-  private final BrowserCheck browserCheck = new BrowserCheck();
+  private INavigation navigation;
+ // private final BrowserCheck browserCheck = new BrowserCheck();
   private Container verticalContainer;
   private static final boolean DEBUG = false;
   private final ProjectChoices choices;
@@ -129,9 +134,12 @@ public class InitialUI implements UILifecycle {
     this.userManager = userManager;
     this.controller = langTest;
     userFeedback = langTest;
-    this.userMenu = new UserMenu(langTest, userManager, this);
+  //  UserMenu userMenu = new UserMenu(langTest, userManager, this);
     this.choices = new ProjectChoices(langTest, this);
-    banner = new Banner(props,this);
+    //banner = new Banner(props, this, langTest, userMenu, langTest);
+    UserMenu userMenu = new UserMenu(langTest, userManager, this);
+    logger.info("made user menu"+ userMenu);
+    banner = new NewBanner(userManager, this, userMenu);
   }
 
   /**
@@ -205,13 +213,7 @@ public class InitialUI implements UILifecycle {
     // logger.info("talks to domino " + props.talksToDomino());
     reload = (props.talksToDomino()) ? reload : null;
 
-    List<Banner.LinkAndTitle> choices =
-        userMenu.getCogMenuChoices();
-
-    Widget bannerRow = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
-        getReleaseStatus(),
-        choices
-    );
+    Widget bannerRow = banner.getBanner();
 
     headerRow = new FluidRow();
     headerRow.add(new Column(12, bannerRow));
@@ -231,13 +233,16 @@ public class InitialUI implements UILifecycle {
    * @return
    * @see #makeHeaderRow()
    */
+/*
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
     return new HTML(lifecycleSupport.getInfoLine());
   }
+*/
 
   /**
    * NO NO NO don't do this
+   *
    * @return
    */
   @Deprecated
@@ -304,6 +309,7 @@ public class InitialUI implements UILifecycle {
   }
 
   Heading child;
+
   /**
    * * TODO : FIX ME for headstart?
    *
@@ -349,7 +355,7 @@ public class InitialUI implements UILifecycle {
     if (contentRow.getElement().getChildCount() <= 2) {
       // logger.info("showNavigation : - add to content root");
       contentRow.remove(child);
-      contentRow.add(navigation.getTabPanel());
+      contentRow.add(navigation.getNavigation());
     } else {
       logger.info("showNavigation : first row has " + contentRow.getElement().getChildCount() + " child(ren) - not adding tab panel???");
     }
@@ -447,7 +453,7 @@ public class InitialUI implements UILifecycle {
       }
     });*/
     crumbs.add(lang);
-  //  logger.info("getBreadcrumbs adding step for " + lang);
+    //  logger.info("getBreadcrumbs adding step for " + lang);
     //return lang;
   }
 
@@ -476,14 +482,16 @@ public class InitialUI implements UILifecycle {
   }
 
   private void makeNavigation() {
-    navigation = new Navigation(service, userManager, controller, userFeedback, lifecycleSupport);
+   // navigation = new Navigation(service, userManager, controller, userFeedback, lifecycleSupport);
+    navigation = new NewContentChooser(controller);
+    banner.setNavigation(navigation);
   }
 
   /**
-   * @deprecated
    * @return
    * @see #populateRootPanel
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel
+   * @deprecated
    */
   private boolean showOnlyOneExercise() {
     return props.getExercise_title() != null;
@@ -641,7 +649,7 @@ public class InitialUI implements UILifecycle {
       logger.info("ignoring got user for current user " + userID);
       if (navigation != null) {
         showNavigation();
-        navigation.showPreviouslySelectedTab();
+        navigation.showPreviousState();
       } else {
         logger.warning("how can navigation be null????");
       }
@@ -650,7 +658,7 @@ public class InitialUI implements UILifecycle {
       banner.setCogVisible(true);
       banner.setVisibleAdmin(
           user.isAdmin() ||
-             // props.isAdminView() ||
+              // props.isAdminView() ||
               user.getUserKind() == User.Kind.PROJECT_ADMIN ||
               user.isCD());
     }
@@ -693,8 +701,8 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   *
    * TODO : move breadcrumbs up into banner
+   *
    * @see #addProjectChoices
    */
   private void addBreadcrumbs() {

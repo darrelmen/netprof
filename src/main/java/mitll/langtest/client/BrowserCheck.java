@@ -118,7 +118,7 @@ public class BrowserCheck {
    * @return
    * @see LangTest#getBrowserInfo()
    */
-  String getBrowserAndVersion() {
+  public String getBrowserAndVersion() {
     return getBrowser(getUserAgent());
   }
 

@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client.user;
+package mitll.langtest.client.banner;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.Style;
@@ -46,6 +46,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.user.User;

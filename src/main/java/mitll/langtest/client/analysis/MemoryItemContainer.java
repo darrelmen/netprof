@@ -57,6 +57,7 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Collection;
@@ -187,7 +188,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<T> users) {
-    Panel tableWithPager = getTableWithPager(true);
+    Panel tableWithPager = getTableWithPager(new ListOptions());
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
 

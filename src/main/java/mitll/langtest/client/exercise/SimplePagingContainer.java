@@ -43,6 +43,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.list.ListOptions;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -80,12 +81,12 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   private SimplePager pager;
 
   /**
-   * @param sortEnglish
+   * @param listOptions
    * @return
    * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
    */
-  public Panel getTableWithPager(boolean sortEnglish) {
-    makeCellTable(sortEnglish);
+  public Panel getTableWithPager(ListOptions listOptions) {
+    makeCellTable(listOptions.isSort());
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
@@ -107,7 +108,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     this.pager = pager;
     // Set the cellList as the display.
     pager.setDisplay(table);
-
+    pager.setVisible(listOptions.isShowPager());
     Panel column = new FlowPanel();
     column.add(pager);
 

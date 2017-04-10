@@ -260,7 +260,7 @@ abstract class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   /**
    * Every time this panel becomes visible again, we need to check the lists for this user.
    *
-   * @see Navigation#getTabPanel()
+   * @see Navigation#getNavigation()
    */
   @Override
   public void wasRevealed() {

@@ -83,7 +83,7 @@ public class AMASInitialUI extends InitialUI {
     contentRow.add(lifecycleSupport.getFlashRecordPanel());
     lifecycleSupport.recordingModeSelect();
     learnHelper = new AutoCRTChapterNPFHelper(service, userFeedback, null, controller, exerciseServiceAsync);
-    learnHelper.addNPFToContent(contentRow, "");
+    learnHelper.showContent(contentRow, "");
   }
 
   @Override

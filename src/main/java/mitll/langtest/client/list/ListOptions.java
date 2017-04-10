@@ -14,6 +14,7 @@ public class ListOptions {
   private boolean incorrectFirst = false;
   private boolean showFirstNotCompleted = false;
   private ActivityType activityType = UNSET;
+  private boolean showPager = true;
 
   public ListOptions() {
   }
@@ -32,12 +33,17 @@ public class ListOptions {
     return this;
   }
 
+  public ListOptions setShowPager(boolean val) {
+    this.showPager = val;
+    return this;
+  }
+
   public ListOptions setShowFirstNotCompleted(boolean val) {
     this.showFirstNotCompleted = val;
     return this;
   }
 
- public ListOptions setIncorrectFirst(boolean val) {
+  public ListOptions setIncorrectFirst(boolean val) {
     this.incorrectFirst = val;
     return this;
   }
@@ -79,5 +85,9 @@ public class ListOptions {
 
   ActivityType getActivityType() {
     return activityType;
+  }
+
+  public boolean isShowPager() {
+    return showPager;
   }
 }

@@ -34,6 +34,7 @@ package mitll.langtest.server.services;
 
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.banner.UserTable;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
@@ -225,7 +226,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @return
-   * @see mitll.langtest.client.user.UserTable#showDialog
+   * @see UserTable#showDialog
    */
   public List<User> getUsers() {
     return db.getUserManagement().getUsers();

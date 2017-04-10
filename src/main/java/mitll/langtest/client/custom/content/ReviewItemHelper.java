@@ -191,7 +191,7 @@ public class ReviewItemHelper extends NPFHelper {
           add(checkBox);
 
           // row 3
-          add(pagingContainer.getTableWithPager(true));
+          add(pagingContainer.getTableWithPager(new ListOptions()));
         }
 
         @Override

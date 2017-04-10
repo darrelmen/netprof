@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
-import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
@@ -50,6 +49,8 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.HasID;
 
+import java.util.logging.Logger;
+
 /**
  * Lets you show a user list with a paging container...
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -60,8 +61,8 @@ import mitll.langtest.shared.exercise.HasID;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonExercise>
-    implements ReloadableContainer, RequiresResize {
-//  private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
+    implements ReloadableContainer, RequiresResize, ExerciseListContent {
+  private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
   private boolean madeNPFContent = false;
 
   protected final ExerciseController controller;
@@ -97,14 +98,15 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see Navigation#addTabs
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
    */
-  void showNPF(TabAndContent tabAndContent, String instanceName) {
+  public void showNPF(DivWidget content, String instanceName) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
-    DivWidget content = tabAndContent.getContent();
+   // DivWidget content = tabAndContent.getContent();
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
       //    logger.info("\t: adding npf content instanceName = " + instanceName);
-      addNPFToContent(content, instanceName);
+      showContent(content, instanceName);
     }
+
   }
 
   /**
@@ -112,7 +114,8 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @param instanceName
    * @see #showNPF
    */
-  protected void addNPFToContent(Panel listContent, String instanceName) {
+  @Override
+  public void showContent(Panel listContent, String instanceName) {
     listContent.add(doNPF(instanceName));
     listContent.addStyleName("userListBackground");
   }
@@ -124,10 +127,10 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    *
    * @param instanceName
    * @return
-   * @see #addNPFToContent(Panel, String)
+   * @see #showContent(Panel, String)
    */
   private Panel doNPF(String instanceName) {
-//    logger.info(getClass() + " : doNPF instanceName = " + instanceName);
+    logger.info(getClass() + " : doNPF instanceName = " + instanceName);
     Panel widgets = flexListLayout.doInternalLayout(-1, instanceName, false);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
@@ -135,7 +138,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   /**
    * @return
-   * @see Navigation#getTabPanel()
+   * @see Navigation#getNavigation()
    */
   public ListInterface<?> getExerciseList() {
     return npfExerciseList;
@@ -150,7 +153,8 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see Navigation#addPracticeTab()
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
    */
-  protected void hideList() {
+  @Override
+  public void hideList() {
     npfExerciseList.hide();
   }
 

@@ -119,7 +119,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             add(uninspectedOnly = getUninspectedCheckbox());
 
             // row 3
-            add(pagingContainer.getTableWithPager(true));
+            add(pagingContainer.getTableWithPager(new ListOptions()));
 
             addEventHandler(instanceName, this);
           }

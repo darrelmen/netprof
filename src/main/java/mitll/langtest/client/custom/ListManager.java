@@ -132,7 +132,7 @@ public class ListManager implements RequiresResize {
   /**
    * @param controller
    * @param tabPanel
-   * @see Navigation#getTabPanel
+   * @see Navigation#getNavigation
    */
   public ListManager(final ExerciseController controller,
                      TabPanel tabPanel,
@@ -303,7 +303,7 @@ public class ListManager implements RequiresResize {
   /**
    * @param onlyMine
    * @param onlyVisited
-   * @seex #getTabPanel
+   * @seex #getNavigation
    * @see #showMyLists
    * @see #deleteList(com.github.gwtbootstrap.client.ui.Button, mitll.langtest.shared.custom.UserList, boolean)
    * @see #clickOnYourLists(long)

@@ -210,6 +210,8 @@ public class UserManager {
     }
   }
 
+  public boolean hasUser() { return getUserID() != null; }
+
 /*
   public int getUserPasswordHash() {
     if (Storage.isLocalStorageSupported()) {

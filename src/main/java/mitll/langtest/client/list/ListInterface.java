@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -160,7 +159,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
 
   /**
    * @return
-   * @see Navigation#getTabPanel()
+   * @see Navigation#getNavigation()
    */
   Panel getCreatedPanel();
 

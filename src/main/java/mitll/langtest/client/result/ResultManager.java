@@ -49,6 +49,7 @@ import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.scoring.AudioPanel;
@@ -137,7 +138,7 @@ public class ResultManager extends PagerTable {
   }
 
   /**
-   * @see mitll.langtest.client.user.UserMenu.ResultsClickHandler
+   * @see UserMenu.ResultsClickHandler
    */
   public void showResults() {
     req = 0;

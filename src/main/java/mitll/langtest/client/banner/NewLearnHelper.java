@@ -1,7 +1,9 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -21,7 +23,7 @@ import java.util.List;
 /**
  * Created by go22670 on 4/5/17.
  */
-class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   public NewLearnHelper(ExerciseController controller) {
     super(controller, null);
   }
