@@ -178,6 +178,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void setUserName(String name) {
     userDrop.setTitle(name);
+    userDrop.setText(name);
   }
 
   @Override

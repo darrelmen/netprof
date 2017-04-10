@@ -691,7 +691,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
    void addExerciseWidget(U commonExercise, ExerciseListWrapper<CommonExercise> wrapper) {
     createdPanel = factory.getExercisePanel(commonExercise, wrapper);
-    logger.info("Add exercise widget "  + commonExercise.getID());
+   // logger.info("Add exercise widget "  + commonExercise.getID());
     innerContainer.add(createdPanel);
   }
 
