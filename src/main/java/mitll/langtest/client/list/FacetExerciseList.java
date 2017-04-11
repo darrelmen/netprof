@@ -698,7 +698,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void getTypeToValue(Map<String, String> typeToSelection) {
     List<Pair> pairs = new ArrayList<>();
 
-    for (String type : typeOrder) {
+    for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
       String s = typeToSelection.get(type);
       if (s == null) {
         pairs.add(new Pair(type, ANY));
@@ -817,7 +817,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected FacetContainer getSectionWidgetContainer() {
     return new FacetContainer() {
 
-
+      /**
+       * @see HistoryExerciseList#restoreListBoxState
+       * @param selectionState
+       * @param typeOrder
+       */
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
         // logger.info("restoreListBoxState t->sel " + selectionState);
