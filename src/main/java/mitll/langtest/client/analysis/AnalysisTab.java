@@ -85,21 +85,23 @@ public class AnalysisTab extends DivWidget {
   private final Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
 
   /**
-   * @param service
    * @param controller
-   * @param userid
-   * @param minRecordings
    * @see Navigation#showAnalysis()
    * @see UserContainer#gotClickOnItem
    */
-  public AnalysisTab(final ExerciseServiceAsync service,
-                     final ExerciseController controller,
-                     final int userid,
-                     final ShowTab showTab, String userChosenID, int minRecordings, DivWidget overallBottom) {
-    this.controller = controller;
+  public AnalysisTab(final ExerciseController controller,
+                     final ShowTab showTab,
+                     int minRecordings,
+                     DivWidget overallBottom
+  ) {
     getElement().setId("AnalysisTab");
+
+    this.controller = controller;
     Icon playFeedback = new Icon(IconType.PLAY);
-    analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings, controller.getSoundManager(), playFeedback);
+    int userid = controller.getUser();
+    String userChosenID = controller.getUserManager().getUserID();
+    analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid, userChosenID, minRecordings,
+        controller.getSoundManager(), playFeedback);
 
     Panel timeControls = new HorizontalPanel();
     timeControls.add(getTimeGroup());

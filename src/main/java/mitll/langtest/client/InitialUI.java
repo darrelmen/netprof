@@ -355,6 +355,7 @@ public class InitialUI implements UILifecycle {
     if (contentRow.getElement().getChildCount() <= 2) {
       // logger.info("showNavigation : - add to content root");
       contentRow.remove(child);
+      if (navigation == null) makeNavigation(); // TODO : cheesy
       contentRow.add(navigation.getNavigation());
     } else {
       logger.info("showNavigation : first row has " + contentRow.getElement().getChildCount() + " child(ren) - not adding tab panel???");

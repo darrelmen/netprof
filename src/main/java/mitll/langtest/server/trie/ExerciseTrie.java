@@ -235,7 +235,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     for (String token : new HashSet<>(collect)) {
       for (int i = 0; i < token.length(); i++) {
         String substring = token.substring(i);
-        char c = substring.charAt(0);
+        //char c = substring.charAt(0);
         addEntry(exercise, substring);
 //        logger.info("adding " + substring);
 
@@ -247,9 +247,9 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     addEntryToTrie(new ExerciseWrapper<>(token.toLowerCase(), exercise));
   }
 
-  private Collection<String> getMandarinTokens(String foreignLanguage) {
+/*  private Collection<String> getMandarinTokens(String foreignLanguage) {
     return smallVocabDecoder.getMandarinTokens(foreignLanguage);
-  }
+  }*/
 
   /**
    * @param prefix

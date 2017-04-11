@@ -39,8 +39,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.analysis.UserInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,9 +61,13 @@ public class StudentAnalysis extends DivWidget {
   private static final String OR_MORE_RECORDINGS = "5 or more recordings";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
-  public StudentAnalysis(final ExerciseServiceAsync vanillaService, final ExerciseController controller,
+  public StudentAnalysis(final ExerciseController controller,
                          final ShowTab showTab) {
     String appTitle = controller.getProps().getAppTitle();
+    logger.info("StudentAnalysis got here " + appTitle);
+
+    getElement().setId("StudentAnalysis");
+
     final String selectedUserKey = getSelectedUserKey(controller, appTitle);
 
     analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
@@ -74,29 +78,37 @@ public class StudentAnalysis extends DivWidget {
 
       @Override
       public void onSuccess(Collection<UserInfo> users) {
-        DivWidget rightSide = new DivWidget();
-        rightSide.getElement().setId("rightSide");
-        rightSide.getElement().getStyle().setMarginLeft(LEFT_MARGIN, Style.Unit.PX);
-        // rightSide.addStyleName("floatNone");
-        // rightSide.addStyleName("floatLeftList");
-        // rightSide.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
-
+        DivWidget rightSide = getRightSide();
         DivWidget bottom = new DivWidget();
         bottom.addStyleName("floatLeft");
+        bottom.getElement().setId("StudentAnalysis_bottom");
 
-        UserContainer userContainer = new UserContainer(vanillaService, controller, rightSide, bottom, showTab, selectedUserKey);
+        logger.info("onSuccess get users " + users.size());
+        logger.info("onSuccess bottom " + bottom.getElement().getId());
+        UserContainer userContainer = new UserContainer(controller, rightSide, bottom, showTab, selectedUserKey);
         //DivWidget leftSide = getStudentContainer(userContainer.getTableWithPager(getUserInfos(users)));
-        DivWidget leftSide = userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS);
 
-        DivWidget top = getTop(rightSide, leftSide);
+        DivWidget top = getTop(userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS), rightSide);
 
         add(top);
         add(bottom);
+
+        logger.info("onSuccess added top and bottom " + top.getElement().getId());
+        logger.info("onSuccess added top and bottom " + bottom.getElement().getId());
+
       }
     });
   }
 
-  private DivWidget getTop(DivWidget rightSide, DivWidget leftSide) {
+  @NotNull
+  private DivWidget getRightSide() {
+    DivWidget rightSide = new DivWidget();
+    rightSide.getElement().setId("rightSide");
+    rightSide.getElement().getStyle().setMarginLeft(LEFT_MARGIN, Style.Unit.PX);
+    return rightSide;
+  }
+
+  private DivWidget getTop(DivWidget leftSide, DivWidget rightSide) {
     DivWidget top = new DivWidget();
     top.getElement().setId("top");
     //top.addStyleName("inlineBlockStyleOnly");

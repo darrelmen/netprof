@@ -42,6 +42,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -761,6 +762,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   void clearExerciseContainer() {
     logger.info("clearing container --- >");
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//    logger.info("call stack "+ exceptionAsString);
     innerContainer.clear();
   }
 

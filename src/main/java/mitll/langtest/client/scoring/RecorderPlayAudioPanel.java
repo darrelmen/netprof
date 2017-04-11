@@ -47,13 +47,13 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   private int exid;
   private ExerciseController controller;
   boolean showChoices;
+
   /**
    * @param soundManager
    * @param postAudioRecordButton1
-   * @paramx xgoodwaveExercisePanel
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  public RecorderPlayAudioPanel(SimpleRecordAudioPanel simpleRecordAudioPanel,
+  public RecorderPlayAudioPanel(//SimpleRecordAudioPanel simpleRecordAudioPanel,
                                 SoundManagerAPI soundManager,
                                 final PostAudioRecordButton postAudioRecordButton1,
                                 CommonExercise exercise,
@@ -74,27 +74,14 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
         "",
         null);
     this.exid = exercise.getID();
-//    this.exercise = exercise;
     this.controller = exerciseController;
     this.showChoices = showChoices;
-    firstRow.add(getRecordFeedback(simpleRecordAudioPanel.getWaitCursor()));
+    // DivWidget recordFeedback = getRecordFeedback(simpleRecordAudioPanel.getWaitCursor());
+    // firstRow.add(recordFeedback);
     downloadContainer = addDownloadAudioWidget();
-    firstRow.add(simpleRecordAudioPanel.getScoreHistory());
+  //  firstRow.add(simpleRecordAudioPanel.getScoreHistory());
 
-    getElement().setId("SimpleRecordAudio_MyPlayAudioPanel");
-  }
-
-  /**
-   * @param toAddTo
-   * @return
-   * @see PlayAudioPanel#addButtons
-   */
-  protected IconAnchor makePlayButton(DivWidget toAddTo) {
-
-      Button playButton = new Button(playLabel);
-      configureButton(playButton);
-      toAddTo.add(playButton);
-      return playButton;
+    getElement().setId("RecorderPlayAudioPanel");
   }
 
   private void configureButton(Button playButton) {
@@ -139,21 +126,33 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    */
   @Override
   protected void addButtons(Widget optionalToTheRight) {
-    DivWidget firstRow = new DivWidget();
-    firstRow.addStyleName("inlineFlex");
-    add(firstRow);
-
     playButton = makePlayButton(this);
     // firstRow.add(playButton = makePlayButton());
+  /*  DivWidget firstRow = new DivWidget();
+    firstRow.addStyleName("inlineFlex");
+    firstRow.getElement().setId("recordingContainer");
+    firstRow.setWidth("100%");
+    add(firstRow);
 
-    this.firstRow = firstRow;
+    this.firstRow = firstRow;*/
     //   firstRow.add(getRecordFeedback());
     // firstRow.add(downloadContainer = addDownloadAudioWidget());
     // downloadContainer = addDownloadAudioWidget();
     //f//irstRow.add(simpleRecordAudioPanel.getScoreHistory());
   }
 
-  DivWidget firstRow;
+  /**
+   * @param toAddTo
+   * @return
+   * @see PlayAudioPanel#addButtons
+   */
+  protected IconAnchor makePlayButton(DivWidget toAddTo) {
+    Button playButton = new Button(playLabel);
+    configureButton(playButton);
+   // toAddTo.add(playButton);
+    return playButton;
+  }
+//  private DivWidget firstRow;
 
   /**
    * @return
@@ -163,11 +162,16 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     return downloadContainer;
   }
 
-  private DivWidget getRecordFeedback(Widget waitCursor) {
+  /**
+   * @param waitCursor
+   * @return
+   * @see SimpleRecordAudioPanel#addWidgets
+   */
+  DivWidget getRecordFeedback(Widget waitCursor) {
     DivWidget recordFeedback = new DivWidget();
     recordFeedback.addStyleName("inlineFlex");
+    recordFeedback.addStyleName("floatLeft");
     recordFeedback.getElement().setId("recordFeedbackImageContainer");
-    //   recordFeedback.setWidth("32px");
 
     recordImage1 = new Image(UriUtils.fromSafeConstant(FIRST_RED));
     recordImage1.setVisible(false);
@@ -178,8 +182,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
     recordFeedback.add(recordImage1);
     recordFeedback.add(recordImage2);
-    //Widget waitCursor = simpleRecordAudioPanel.waitCursorHelper.getWaitCursor();
-    //waitCursor.setVisible(false);
     recordFeedback.add(waitCursor);
     return recordFeedback;
   }
@@ -191,8 +193,8 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
     downloadContainer.add(download = getDownloadIcon());
     downloadContainer.setVisible(false);
-    downloadContainer.addStyleName("leftFiveMargin");
 
+    downloadContainer.addStyleName("leftFiveMargin");
     downloadContainer.addStyleName("rightFiveMargin");
     downloadContainer.addStyleName("topFiveMargin");
 

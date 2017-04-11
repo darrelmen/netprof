@@ -10,6 +10,8 @@ public interface INavigation {
 
   void showLearn();
   void showDrill();
+  void showProgress();
+  void showLists();
 
   Widget getNavigation();
 

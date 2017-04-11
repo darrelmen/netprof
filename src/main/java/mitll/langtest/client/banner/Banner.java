@@ -61,6 +61,7 @@ import java.util.logging.Logger;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @deprecated
  */
 public class Banner implements RequiresResize, IBanner {
   private final Logger logger = Logger.getLogger("Banner");

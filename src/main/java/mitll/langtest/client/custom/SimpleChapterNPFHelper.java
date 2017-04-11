@@ -158,6 +158,10 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     npfExerciseList.hide();
   }
 
+  public void loadExercise(int exid) {
+    npfExerciseList.loadExercise(exid);
+  }
+
   /**
    * This is important - this is where the actual content is chosen.
    *

@@ -42,17 +42,17 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
   private ExerciseController controller;
   private CommonExercise exercise;
+  boolean includeContext = false;
 
   /**
-   * @paramx soundManager
-   * @paramx postAudioRecordButton1
-   * @paramx xgoodwaveExercisePanel
    * @see TwoColumnExercisePanel#getPlayAudioPanel
+   * @see TwoColumnExercisePanel#getContext(CommonExercise, String)
    */
   public ChoicePlayAudioPanel(
       SoundManagerAPI soundManager,
       CommonExercise exercise,
-      ExerciseController exerciseController) {
+      ExerciseController exerciseController,
+      boolean includeContext) {
     super(soundManager, new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -67,7 +67,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         },
         "",
         null);
-    //this.exid = exercise.getID();
+  this.includeContext = includeContext;
     this.exercise = exercise;
     this.controller = exerciseController;
     getElement().setId("ChoicePlayAudioPanel");
@@ -80,7 +80,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
      // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
-      addChoices(null);
+      addChoices(null, includeContext);
     }
   }
 
@@ -98,7 +98,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        addChoices(playButton);
+        addChoices(playButton, includeContext);
       }
     });
 
@@ -124,15 +124,17 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     playButton.addStyleName("choiceplay");
   }
 
-  private void addChoices(SplitDropdownButton playButton) {
+  private void addChoices(SplitDropdownButton playButton, boolean includeContext) {
     Collection<Long> preferredVoices = Collections.emptyList();
     boolean isMale = isMale();
     boolean isFemale = !isMale();
     boolean isReg = controller.getStorage().isTrue(IS_REG);
     boolean isSlow = !isReg;
 
-    Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices, true);
-    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, true);
+    Map<MiniUser, List<AudioAttribute>> malesMap   =
+        exercise.getMostRecentAudio(true, preferredVoices, includeContext);
+    Map<MiniUser, List<AudioAttribute>> femalesMap =
+        exercise.getMostRecentAudio(false, preferredVoices, includeContext);
 
 /*
 

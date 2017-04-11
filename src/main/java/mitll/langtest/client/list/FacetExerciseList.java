@@ -871,7 +871,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
-
     boolean isEmpty = visibleIDs.isEmpty();
     if (isEmpty && pagingContainer.isEmpty() && finished) {
       logger.info("show empty -- ");
@@ -885,7 +884,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       ensureAudio(visibleIDs);
 
-      getExercises(visibleIDs);
+   //   getExercises(visibleIDs);
     }
   }
 
@@ -927,11 +926,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
               }
               setPageSizeInitialSelection(pagesize);
             } else {
-
               logger.info("\n\n ignoring req " + reqID + " vs current " + freqid);
             }
-
-
           }
         });
   }
@@ -942,13 +938,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-
+            getExercises(visibleIDs);
           }
 
           @Override
           public void onSuccess(Void result) {
             long now = System.currentTimeMillis();
-            logger.info("OK, ensured audio... in " + (now - then) + " millis");
+            getExercises(visibleIDs);
+
+            //logger.info("OK, ensured audio... in " + (now - then) + " millis");
           }
         });
   }
@@ -980,8 +978,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @param wrapper
    */
   private void showExercises(Collection<CommonExercise> result, ExerciseListWrapper<CommonExercise> wrapper) {
-    clearExerciseContainer();
-
+//    clearExerciseContainer();
     int id = result.isEmpty() ? -1 : result.iterator().next().getID();
     int size = result.size();
 

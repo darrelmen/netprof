@@ -1,9 +1,7 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
@@ -16,8 +14,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.services.ListService;
-import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.*;
@@ -33,27 +29,29 @@ import java.util.logging.Logger;
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
-  private static final int CONTEXT_PADDING = 10;
+  public static final int CONTEXT_INDENT = 40;
+
+  //  private static final int CONTEXT_PADDING = 10;
   private final List<CorrectAndScore> correctAndScores;
 
-  public static final String CONTEXT = "Context";
+//  public static final String CONTEXT = "Context";
 
-  public static final String DEFAULT_SPEAKER = "Default Speaker";
+//  public static final String DEFAULT_SPEAKER = "Default Speaker";
 
   /**
-   * TODO make better relationship with ASRRecordAudioPanel
+   * TODOx make better relationship with ASRRecordAudioPanel
    */
-  Image recordImage1;
-  Image recordImage2;
+  // Image recordImage1;
+  //Image recordImage2;
 
   private final T exercise;
   private final ExerciseController controller;
 
-  protected final ListServiceAsync listService = GWT.create(ListService.class);
+  //protected final ListServiceAsync listService = GWT.create(ListService.class);
   private final AnnotationHelper annotationHelper;
   private final ClickableWords<T> clickableWords;
   private final boolean showInitially = false;
-  private UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
+  private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -67,7 +65,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @paramx allowRecording
    * @paramx includeListButtons
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
-   * @see mitll.langtest.client.custom.Navigation#getLearnHelper(ExerciseController)
+   * @see mitll.langtest.client.custom.Navigation#getLearnHelper
    */
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
@@ -85,9 +83,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     setWidth("100%");
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
-
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), controller.getExerciseService());
-
     this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
@@ -117,7 +113,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     rowWidget.getElement().setId("firstRow");
 
     SimpleRecordAudioPanel<T> recordPanel = makeFirstRow(e, rowWidget);
-
     card.add(rowWidget);
 
     if (isValid(english)) {
@@ -168,7 +163,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     flContainer.add(recordButtonContainer);
 
     if (hasAudio(e)) {
-      flContainer.add(getPlayAudioPanel(e));
+      flContainer.add(getPlayAudioPanel());
     }
 
     Widget flEntry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
@@ -210,8 +205,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //logger.info("Add context " + contextEx.getID());
       Panel context = getContext(contextEx, foreignLanguage);
       if (context != null) {
-        context.getElement().getStyle().setPadding(CONTEXT_PADDING, Style.Unit.PX);
+        //context.getElement().getStyle().setPadding(CONTEXT_PADDING, Style.Unit.PX);
+        Style style = context.getElement().getStyle();
+        style.setFontWeight(Style.FontWeight.LIGHTER);
         rowWidget.add(context);
+        // context.addStyleName("bentonRegular");
         context.setWidth("100%");
       }
 
@@ -228,8 +226,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         if (contextTransWidget != null) {
           contextTransWidget.addStyleName("rightsidecolor");
           contextTransWidget.setWidth("50%");
+          contextTransWidget.getElement().getStyle().setFontWeight(Style.FontWeight.LIGHTER);
 
-          contextTransWidget.getElement().getStyle().setPadding(CONTEXT_PADDING, Style.Unit.PX);
+          //  contextTransWidget.getElement().getStyle().setPadding(CONTEXT_PADDING, Style.Unit.PX);
           rowWidget.add(contextTransWidget);
         }
       }
@@ -245,8 +244,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   @NotNull
-  private DivWidget getPlayAudioPanel(T e) {
-    PlayAudioPanel w = new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller);
+  private DivWidget getPlayAudioPanel() {
+    PlayAudioPanel w = new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller, false);
     return w;
   }
 
@@ -367,12 +366,20 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (!context.isEmpty()) {
       Panel hp = new DivWidget();
       hp.addStyleName("inlineFlex");
+      hp.getElement().setId("contentContainer");
+      DivWidget spacer = new DivWidget();
+
+      spacer.getElement().getStyle().setProperty("minWidth",CONTEXT_INDENT+ "px");
+      hp.add(spacer);
+
       AudioAttribute audioAttrPrefGender = exercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
 
-      if (audioAttrPrefGender != null) {
-        //logger.info("context audio " + audioAttrPrefGender.getExid() + " "+ audioAttrPrefGender.getAudioRef() + " "+audioAttrPrefGender.getTranscript());
-        hp.add(new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller));
-      }
+      //if (audioAttrPrefGender != null) {
+      //logger.info("context audio " + audioAttrPrefGender.getExid() + " "+ audioAttrPrefGender.getAudioRef() + " "+audioAttrPrefGender.getTranscript());
+      ChoicePlayAudioPanel child = new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller, true);
+      child.setEnabled(audioAttrPrefGender != null);
+      hp.add(child);
+      // }
 
       Panel contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
           true, false, false);

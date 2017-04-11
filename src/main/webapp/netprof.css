@@ -1486,6 +1486,12 @@ document sections.*/
     padding: 2px 2px;
 }
 
+.bentonRegular {
+    font-family: BentonRegular;
+    font-size: 14px;
+    font-weight: 400;
+}
+
 .sidebar .dimension.refined > .menuItem > a::after {
     color: #303239;
     content: "view all";
@@ -1546,7 +1552,7 @@ document sections.*/
 .sidebar .dimension > .header {
     color: #292b2d;
     display: block;
-    font-family: BentonMedium;
+    font-family: BentonRegular;
     font-size: 14px;
     font-weight: 400;
     left: 0;
@@ -1714,7 +1720,7 @@ h1, h2, h3, h4, h5, h6 {
     font-family: BentonRegular;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.5;
     vertical-align: baseline;
     padding: 2px;

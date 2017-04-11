@@ -135,7 +135,7 @@ public class ListManager implements RequiresResize {
    * @see Navigation#getNavigation
    */
   public ListManager(final ExerciseController controller,
-                     TabPanel tabPanel,
+                     HasWidgets tabPanel,
                      ReloadableContainer exerciseList) {
     if (exerciseList == null) logger.warning("huh? exerciselist is null?\n\n\n");
     this.userManager = controller.getUserManager();
@@ -143,15 +143,17 @@ public class ListManager implements RequiresResize {
     storage = new KeyStorage(controller);
 
     // browse tab
-    browse = new TabAndContent(tabPanel, IconType.TH_LIST, BROWSE);
-    browse.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(BROWSE);
-        logEvent(browse, BROWSE);
-        viewBrowse();
-      }
-    });
+    if (tabPanel != null) {
+      browse = new TabAndContent(tabPanel, IconType.TH_LIST, BROWSE);
+      browse.getTab().addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          checkAndMaybeClearTab(BROWSE);
+          logEvent(browse, BROWSE);
+          viewBrowse();
+        }
+      });
+    }
 
     npfHelper = new NPFHelper(controller, false, false);
     reviewItem = new ReviewItemHelper(controller, exerciseList);
@@ -178,6 +180,14 @@ public class ListManager implements RequiresResize {
         logEvent(studyLists, STUDY_LISTS);
       }
     });
+  }
+
+  public TabPanel showLists() {
+    logger.info("showLists ");
+    subListTabPanel = new TabPanel();
+    addListTabs(subListTabPanel);
+    showFirstUserListTab(subListTabPanel, 0);
+    return subListTabPanel;
   }
 
   /**

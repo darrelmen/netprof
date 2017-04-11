@@ -49,6 +49,7 @@ import mitll.langtest.shared.analysis.UserInfo;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -57,6 +58,8 @@ import java.util.List;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
+  private final Logger logger = Logger.getLogger("UserContainer");
+
   private static final String CURRENT = "Avg";//"Curr.";
   private static final int CURRENT_WIDTH = 60;
   private static final int DIFF_WIDTH = 55;
@@ -68,14 +71,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private final ShowTab learnTab;
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
-  private final ExerciseServiceAsync exerciseServiceAsync;
+ // private final ExerciseServiceAsync exerciseServiceAsync;
 
   /**
    * @param controller
    * @param rightSide
    * @see StudentAnalysis#StudentAnalysis
    */
-  UserContainer(ExerciseServiceAsync service,
+  UserContainer(
                 ExerciseController controller,
                 DivWidget rightSide,
                 DivWidget overallBottom,
@@ -85,7 +88,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     super(controller, selectedUserKey, STUDENT);
     this.rightSide = rightSide;
     this.learnTab = learnTab;
-    this.exerciseServiceAsync = service;
+    logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
+   // this.exerciseServiceAsync = controller.getExerciseService();
     this.overallBottom = overallBottom;
   }
 
@@ -364,9 +368,17 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   public void gotClickOnItem(final UserInfo user) {
     super.gotClickOnItem(user);
     //MiniUser user1 = user.getUser();
-    int id = user.getID();
-    overallBottom.clear();
-    AnalysisTab widgets = new AnalysisTab(exerciseServiceAsync, controller, id, learnTab, user.getUserID(), MIN_RECORDINGS, overallBottom);
+   // int id = user.getID();
+    logger.warning("gotClickOnItem " +overallBottom.getElement().getId());
+
+/*    if (overallBottom != null) {
+      overallBottom.clear();
+    }
+    else {
+      logger.warning("\n\n\n no bottom div for " );
+    }*/
+
+    AnalysisTab widgets = new AnalysisTab(controller, learnTab, MIN_RECORDINGS, overallBottom);
     rightSide.clear();
     rightSide.add(widgets);
   }

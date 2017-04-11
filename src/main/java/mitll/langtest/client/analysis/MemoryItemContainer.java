@@ -67,6 +67,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagingContainer<T> {
+  private final Logger logger = Logger.getLogger("MemoryItemContainer");
+
   static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
   private static final int PAGE_SIZE = 11;
@@ -74,7 +76,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final String selectedUserKey;
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final Date now = new Date();
-  private final Logger logger = Logger.getLogger("UserContainer");
   private final String header;
 
   static final int ID_WIDTH = 130;
@@ -188,7 +189,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<T> users) {
+    logger.info("getTableWithPager" +users.size());
+
     Panel tableWithPager = getTableWithPager(new ListOptions());
+
+    logger.info("getTableWithPager tableWithPager ");
+
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
 
@@ -226,7 +232,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     }
     final T finalUser = userToSelect;
 
-  //  logger.info("makeInitialSelection make initial selection from " + users.size() + " to select " + userToSelect);
+    logger.info("makeInitialSelection make initial selection from " + users.size() + " to select " + userToSelect);
 
     Scheduler.get().scheduleDeferred(() -> {
           if (selectedUser == null || finalUser == null) {

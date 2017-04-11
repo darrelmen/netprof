@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 
@@ -57,7 +58,7 @@ public class TabAndContent implements RequiresResize {
   private final String label;
   private RequiresResize resizeable = null;
 
-  public TabAndContent(TabPanel tabPanel, IconType iconType, String label) {
+  public TabAndContent(HasWidgets tabPanel, IconType iconType, String label) {
     this(iconType,label);
     tabPanel.add(getTab().asTabLink());
   }

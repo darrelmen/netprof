@@ -270,7 +270,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see #afterReadingExercises
    */
   private void populateIdToExercise() {
-    logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
+   // logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
     for (CommonExercise e : exercises) {
       idToExercise.put(e.getID(), e);
       idToExercise.put(e.getDominoID(), e);

@@ -28,21 +28,27 @@ public class WaitCursorHelper {
   }
 
   public void showFinished() {
-    if (waitTimer != null) {
-      waitTimer.cancel();
-    }
+    cancelTimer();
     hideWaitCursor();
   }
 
-  private void hideWaitCursor() {
-    waitCursor.setUrl(white);
-    hide();
-  }
-
-  public void scheduleWaitTimer() {
+  public void cancelTimer() {
     if (waitTimer != null) {
       waitTimer.cancel();
     }
+  }
+
+  private void hideWaitCursor() {
+    setWhite();
+    hide();
+  }
+
+  public void setWhite() {
+    waitCursor.setUrl(white);
+  }
+
+  public void scheduleWaitTimer() {
+    cancelTimer();
     waitTimer = new Timer() {
       @Override
       public void run() {

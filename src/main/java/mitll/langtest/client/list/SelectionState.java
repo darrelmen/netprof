@@ -70,7 +70,7 @@ public class SelectionState {
    * @see HistoryExerciseList#getIDFromToken
    * @see HistoryExerciseList#getSelectionState(String)
    */
-  SelectionState(String token, boolean removePlus) {
+  public SelectionState(String token, boolean removePlus) {
     parseToken(removePlus ? unencodeToken(token) : unencodeToken2(token));
   }
 

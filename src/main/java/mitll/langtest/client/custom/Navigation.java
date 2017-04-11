@@ -184,7 +184,7 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
                     LifecycleSupport lifecycleSupport) {
     this.userManager = userManager;
     this.controller = controller;
-  //  this.feedback = feedback;
+    //  this.feedback = feedback;
     this.lifecycleSupport = lifecycleSupport;
     storage = new KeyStorage(controller);
 
@@ -195,7 +195,7 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
 
     markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
     practiceHelper = new PracticeHelper(controller);
-    recorderHelper      = new RecorderNPFHelper(controller, true,  learnHelper);
+    recorderHelper = new RecorderNPFHelper(controller, true, learnHelper);
     recordExampleHelper = new RecorderNPFHelper(controller, false, learnHelper);
   }
 
@@ -219,6 +219,16 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
 
   @Override
   public void showDrill() {
+
+  }
+
+  @Override
+  public void showProgress() {
+
+  }
+
+  @Override
+  public void showLists() {
 
   }
 
@@ -442,7 +452,7 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
 
     analysis.getContent().clear();
     ShowTab showTab = this;
-    AnalysisTab w = new AnalysisTab(exerciseServiceAsync, controller, getUser(), showTab, userManager.getUserID(), 1, null);
+    AnalysisTab w = new AnalysisTab(controller, showTab, 1, null);
     analysis.getContent().add(w);
   }
 
@@ -453,7 +463,7 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
     //  logger.info("show student analysis");
     learnHelper.showNPF(chapters.getContent(), LEARN);
     studentAnalysis.getContent().clear();
-    studentAnalysis.getContent().add(new StudentAnalysis(exerciseServiceAsync, controller, this));
+    studentAnalysis.getContent().add(new StudentAnalysis(controller, this));
   }
 
   /**
@@ -579,9 +589,11 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
     return tabAndContent;
   }
 
+/*
   private int getUser() {
     return userManager.getUser();
   }
+*/
 
   /**
    *
@@ -654,7 +666,7 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
 
         logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
 
-     //   listManager.showFirstUserListTab((TabPanel) widget, tab);
+        //   listManager.showFirstUserListTab((TabPanel) widget, tab);
 
         listManager.selectTab((TabPanel) widget, tab);
         if (tab == 0) {

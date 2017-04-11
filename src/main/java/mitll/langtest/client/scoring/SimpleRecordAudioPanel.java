@@ -15,6 +15,7 @@ import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.list.WaitCursorHelper;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -25,20 +26,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
+
 /**
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
-  public static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
   private Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+  private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
 
   private static final int PROGRESS_BAR_WIDTH = 260;
-  private static final String DOWNLOAD_AUDIO = "downloadAudio";
-
-  // private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
-//  private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
-//  private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
-
   private static final int FIRST_STEP = 35;
   private static final int SECOND_STEP = 75;
 
@@ -49,21 +46,17 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   private PostAudioRecordButton postAudioRecordButton;
   private RecorderPlayAudioPanel playAudioPanel;
-  // private IconAnchor download;
-  // private Panel downloadContainer;
   private MiniScoreListener miniScoreListener;
 
-  /**
-   * TODO make better relationship with ASRRecordAudioPanel
-   */
-  // private Image recordImage1;
-  // private Image recordImage2;
   private WaitCursorHelper waitCursorHelper;
 
   protected String audioPath;
 
   ExerciseController controller;
   T exercise;
+  /**
+   *
+   */
   private DivWidget scoreFeedback;
   private ProgressBar progressBar;
   private boolean hasScoreHistory = false;
@@ -82,25 +75,41 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     this.goodwaveExercisePanel = goodwaveExercisePanel;
     this.exercise = exercise;
 
+    getElement().setId("SimpleRecordAudioPanel");
+ //   addStyleName("inlineFlex");
+    setWidth("100%");
     addWidgets();
     showRecordingHistory(history);
     hasScoreHistory = history != null && !history.isEmpty();
     setVisible(hasScoreHistory);
   }
 
+  DivWidget recordFeedback;
+
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
    * @return
    * @seex #AudioPanel
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
+   * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel(BusyPanel, ExerciseController, CommonExercise, List)
    */
   protected void addWidgets() {
-    add(makePlayAudioPanel());
+    RecorderPlayAudioPanel playAudioPanel = makePlayAudioPanel();
+   // playAudioPanel.setWidth("50%");
+   // add(playAudioPanel);
+
     add(scoreFeedback = new DivWidget());
+
+    add(getScoreHistory());
+
+    recordFeedback = playAudioPanel.getRecordFeedback(getWaitCursor());
+    recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
+    scoreFeedback.add(recordFeedback);
+    // scoreFeedback.setWidth("50%");
     progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
     getProgressBarContainer(progressBar);
-    scoreFeedback.add(progressBar);
+
+    // scoreFeedback.add(progressBar);
     addTooltip(progressBar, "Overall Score");
     scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
@@ -126,7 +135,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     //    afterPlayWidget.add(label);
     // afterPlayWidget.add(progressBar);
 
-    progressBar.setWidth(PROGRESS_BAR_WIDTH + "px");
+  //  progressBar.setWidth(PROGRESS_BAR_WIDTH + "px");
     // progressBar.addStyleName("floatLeft");
     progressBar.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
 
@@ -142,10 +151,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     return progressBar;
   }
 
-//  private void addToScoreFeedbackRow(Widget widget) {
-//    scoreFeedback.add(widget);
-//  }
-
   private void addMiniScoreListener(MiniScoreListener l) {
     this.miniScoreListener = l;
   }
@@ -159,7 +164,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see AudioPanel#getPlayButtons
    * @see #addWidgets
    */
-  private PlayAudioPanel makePlayAudioPanel() {
+  private RecorderPlayAudioPanel makePlayAudioPanel() {
     waitCursorHelper = new WaitCursorHelper();
     waitCursorHelper.hide();
 
@@ -167,13 +172,12 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     postAudioRecordButton.addStyleName("leftFiveMargin");
     postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
 
-    playAudioPanel = new RecorderPlayAudioPanel(this,
+    playAudioPanel = new RecorderPlayAudioPanel(//this,
         controller.getSoundManager(),
         postAudioRecordButton,
         exercise,
         controller,
         false);
-    //  playAudioPanel.setVisible(false);
     playAudioPanel.hidePlayButton();
 
     return playAudioPanel;
@@ -185,7 +189,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   /**
    * @return
-   * @see ChoicePlayAudioPanel#addButtons(Widget)
+   * @see RecorderPlayAudioPanel#RecorderPlayAudioPanel
    */
   @NotNull
   public ASRHistoryPanel getScoreHistory() {
@@ -193,6 +197,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     addMiniScoreListener(historyPanel);
     historyPanel.addStyleName("floatRight");
     historyPanel.showChart();
+    historyPanel.setWidth("50%");
     return historyPanel;
   }
 
@@ -224,7 +229,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see mitll.langtest.server.DownloadServlet#returnAudioFile
    */
   private void setDownloadHref() {
-
     String audioPathToUse = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg", ".mp3") : audioPath;
 
     int id = exercise.getID();
@@ -249,41 +253,52 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private int getUser() {
     return controller.getUserState().getUser();
   }
-  //private int reqid = 0;
 
   /**
    * @param result
    * @see #useResult(PretestScore, boolean, String)
    */
   private void scoreAudio(AudioAnswer result) {
-//    logger.info("use " + result);
-    clearScoreFeedback();
-    scoreFeedback.add(progressBar);
+     clearScoreFeedback();
+  //  scoreFeedback.add(progressBar);
     PretestScore pretestScore = result.getPretestScore();
 
     if (pretestScore.getHydecScore() > 0) {
-      Widget styledWordTable = new WordScoresTable().getStyledWordTable(pretestScore);
-      DivWidget wordTableContainer = new DivWidget();
-      wordTableContainer.getElement().setId("wordTableContainer");
-      wordTableContainer.addStyleName("inlineFlex");
-      wordTableContainer.addStyleName("floatLeft");
-
-      wordTableContainer.add(getPlayButtonDiv());
-
-      wordTableContainer.add(styledWordTable);
-
-      Panel downloadContainer = playAudioPanel.getDownloadContainer();
-      downloadContainer.addStyleName("topFiveMargin");
-      wordTableContainer.add(downloadContainer);
-
-      scoreFeedback.add(wordTableContainer);
+      scoreFeedback.add(getWordTableContainer(pretestScore));
     } else {
       Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
       w.addStyleName("floatLeft");
-
       scoreFeedback.add(w);
     }
     useResult(pretestScore, false, result.getPath());
+  }
+
+  //DivWidget spacer;
+
+  @NotNull
+  private DivWidget getWordTableContainer(PretestScore pretestScore) {
+    DivWidget wordTableContainer = new DivWidget();
+    wordTableContainer.getElement().setId("wordTableContainer");
+    wordTableContainer.addStyleName("inlineFlex");
+    wordTableContainer.addStyleName("floatLeft");
+
+//    spacer = new DivWidget();
+//    spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
+//    wordTableContainer.add(spacer);
+
+    wordTableContainer.add(getPlayButtonDiv());
+    DivWidget scoreFeedbackDiv = new DivWidget();
+    scoreFeedbackDiv.add(progressBar);
+    Widget styledWordTable = new WordScoresTable().getStyledWordTable(pretestScore);
+    scoreFeedbackDiv.add(styledWordTable);
+
+    wordTableContainer.add(scoreFeedbackDiv);
+
+    Panel downloadContainer = playAudioPanel.getDownloadContainer();
+    downloadContainer.addStyleName("topFiveMargin");
+    wordTableContainer.add(downloadContainer);
+
+    return wordTableContainer;
   }
 
   @NotNull
@@ -297,11 +312,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     return divForPlay;
   }
 
-  private void clearScoreFeedback() {
-    scoreFeedback.clear();
-  }
-
-
   @Override
   public void startRecording() {
     setVisible(true);
@@ -310,14 +320,16 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     hideScore();
 
     goodwaveExercisePanel.setBusy(true);
-
-    //recordImage1.setVisible(true);
     playAudioPanel.showFirstRecord();
-    //downloadContainer.setVisible(false);
 
     waitCursorHelper.hide();
 
     clearScoreFeedback();
+  }
+
+  private void clearScoreFeedback() {
+    scoreFeedback.clear();
+    scoreFeedback.add(recordFeedback);
   }
 
   @Override
@@ -325,9 +337,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     playAudioPanel.setEnabled(true);
 
     goodwaveExercisePanel.setBusy(false);
-
-    // recordImage1.setVisible(false);
-    // recordImage2.setVisible(false);
     playAudioPanel.hideRecord();
 
     waitCursorHelper.show();
@@ -343,13 +352,15 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     setVisible(true);
     hasScoreHistory = true;
 
-//    playAudioPanel.setVisible(true);
     playAudioPanel.showPlayButton();
 
     audioPath = result.getPath();
     setDownloadHref();
     scoreAudio(result);
-    waitCursorHelper.showFinished();
+   // waitCursorHelper.showFinished();
+    waitCursorHelper.cancelTimer();
+    waitCursorHelper.setWhite();
+    waitCursorHelper.show();
   }
 
   @Override
@@ -364,11 +375,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   }
 
   @Override
-  public void flip(boolean first) {
-    playAudioPanel.flip(first);
-//    recordImage1.setVisible(first);
-//    recordImage2.setVisible(!first);
-  }
+  public void flip(boolean first) {   playAudioPanel.flip(first);  }
 
   /**
    * @param result
@@ -389,7 +396,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  void showScore(double score) {
+  private void showScore(double score) {
     double percent = score / 100d;
     progressBar.setPercent(100 * percent);
     progressBar.setText("" + Math.round(score));//(score));
@@ -400,18 +407,10 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
                 ProgressBarBase.Color.WARNING :
                 ProgressBarBase.Color.DANGER);
 
-    //scoreBar.setVisible(true);
     progressBar.setVisible(true);
-    //scores.setVisible(true);
   }
 
-  void hideScore() {
-    //scoreBar.setVisible(false);
-    progressBar.setVisible(false);
-
-    //scores.setVisible(false);
-  }
-
+  private  void hideScore() {  progressBar.setVisible(false);  }
 
   @Nullable
   private String getReadyToPlayAudio(String path) {
