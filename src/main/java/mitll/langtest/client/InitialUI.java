@@ -110,7 +110,7 @@ public class InitialUI implements UILifecycle {
 
   private final IBanner banner;
 
-  protected Panel headerRow;
+  protected Widget headerRow;
 
   /**
    * TODO : move breadcrumbs up into banner
@@ -134,12 +134,11 @@ public class InitialUI implements UILifecycle {
     this.userManager = userManager;
     this.controller = langTest;
     userFeedback = langTest;
-  //  UserMenu userMenu = new UserMenu(langTest, userManager, this);
     this.choices = new ProjectChoices(langTest, this);
     //banner = new Banner(props, this, langTest, userMenu, langTest);
     UserMenu userMenu = new UserMenu(langTest, userManager, this);
-    logger.info("made user menu"+ userMenu);
-    banner = new NewBanner(userManager, this, userMenu);
+//    logger.info("made user menu"+ userMenu);
+    banner = new NewBanner(userManager, this, userMenu, breadcrumbs = getBreadcrumbs());
   }
 
   /**
@@ -168,7 +167,8 @@ public class InitialUI implements UILifecycle {
    */
   protected Panel makeFirstTwoRows(Container verticalContainer) {
     // add header row
-    verticalContainer.add(headerRow = makeHeaderRow());
+    //verticalContainer.add(headerRow = makeHeaderRow());
+    RootPanel.get().add(headerRow = makeHeaderRow());
     headerRow.getElement().setId("headerRow");
 
     Panel contentRow = new DivWidget();
@@ -194,8 +194,8 @@ public class InitialUI implements UILifecycle {
    * @return
    * @see #populateRootPanel()
    */
-  private Panel makeHeaderRow() {
-    ClickHandler reload = new ClickHandler() {
+  private Widget makeHeaderRow() {
+/*    ClickHandler reload = new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         service.reloadExercises(new AsyncCallback<Void>() {
@@ -209,15 +209,14 @@ public class InitialUI implements UILifecycle {
           }
         });
       }
-    };
+    };*/
     // logger.info("talks to domino " + props.talksToDomino());
-    reload = (props.talksToDomino()) ? reload : null;
-
+    //reload = (props.talksToDomino()) ? reload : null;
     Widget bannerRow = banner.getBanner();
-
-    headerRow = new FluidRow();
-    headerRow.add(new Column(12, bannerRow));
-    return headerRow;
+return bannerRow;
+//    headerRow = new FluidRow();
+//    headerRow.add(new Column(12, bannerRow));
+    //return headerRow;
   }
 
   /**
@@ -255,7 +254,9 @@ public class InitialUI implements UILifecycle {
 
   public void logout() {
     lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
-    verticalContainer.remove(breadcrumbs);
+
+    //verticalContainer.remove(breadcrumbs);
+    breadcrumbs.clear();
 
     userService.logout(userManager.getUserID(), new AsyncCallback<Void>() {
       @Override
@@ -300,6 +301,7 @@ public class InitialUI implements UILifecycle {
     RootPanel.get().clear();   // necessary?
     Container verticalContainer = new FluidContainer();
     verticalContainer.getElement().setId(ROOT_VERTICAL_CONTAINER);
+    verticalContainer.getElement().getStyle().setMarginTop(49, Style.Unit.PX);
     return verticalContainer;
   }
 
@@ -383,7 +385,7 @@ public class InitialUI implements UILifecycle {
    * @see #getBreadcrumbs()
    */
   private void addCrumbs(Breadcrumbs crumbs) {
-    NavLink home = new NavLink("Home");
+  /*  NavLink home = new NavLink("Home");
 
     home.addClickHandler(new ClickHandler() {
       @Override
@@ -391,48 +393,47 @@ public class InitialUI implements UILifecycle {
         chooseProjectAgain();
       }
     });
-    crumbs.add(home);
+    crumbs.add(home);*/
 
     User current = userManager.getCurrent();
     if (current != null) {
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
-        int currentProject = startupInfo.getProjectid();
-        for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
-          if (project.hasChildren() && project.hasChild(currentProject)) {
-            String crumbName = project.getLanguage();
-            NavLink lang = new NavLink(crumbName);
-
-            crumbs.add(lang);
-            //   logger.info("getBreadcrumbs adding step for " + lang);
-
-            SlimProject child = project.getChild(currentProject);
-            /*final NavLink projectCrumb =*/
-            addProjectCrumb(crumbs, child);
-
-            lang.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent clickEvent) {
-                clearStartupInfo();
-                clearContent();
-//                boolean remove = crumbs.remove(projectCrumb);
-                removeUntilCrumb(2);
-                // if (!remove) {
-                //   logger.warning("didn't remove " + projectCrumb);
-                // }
-                choices.showProject(project);
-              }
-            });
-          } else if (project.getProjectid() == currentProject) {
-            addProjectCrumb(crumbs, project);
-            break;
-          } else {
-            //logger.fine("getBreadcrumbs skipping project " + project);
-          }
-        }
+        addBreadcrumbLevels(crumbs, startupInfo);
+      }
+      else {
+        logger.info("no project startup info...");
       }
     } else {
       logger.info("getBreadcrumbs no current user --- ????");
+    }
+  }
+
+  private void addBreadcrumbLevels(Breadcrumbs crumbs, ProjectStartupInfo startupInfo) {
+    int currentProject = startupInfo.getProjectid();
+    crumbs.clear();
+    for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
+      if (project.hasChildren() && project.hasChild(currentProject)) {
+        NavLink lang = new NavLink(project.getLanguage());
+        crumbs.add(lang);
+        logger.info("getBreadcrumbs adding step for " + lang);
+        addProjectCrumb(crumbs, project.getChild(currentProject));
+
+        lang.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent clickEvent) {
+            clearStartupInfo();
+            clearContent();
+            removeUntilCrumb(2);
+            choices.showProject(project);
+          }
+        });
+      } else if (project.getProjectid() == currentProject) {
+        addProjectCrumb(crumbs, project);
+        break;
+      } else {
+        logger.fine("getBreadcrumbs skipping project " + project);
+      }
     }
   }
 
@@ -677,7 +678,7 @@ public class InitialUI implements UILifecycle {
     if (lifecycleSupport.getProjectStartupInfo() == null) {
       addProjectChoices(0, null);
     } else {
-      //logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+      logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     }
@@ -707,7 +708,7 @@ public class InitialUI implements UILifecycle {
    * @see #addProjectChoices
    */
   private void addBreadcrumbs() {
-    int childCount = verticalContainer.getElement().getChildCount();
+/*    int childCount = verticalContainer.getElement().getChildCount();
     boolean found = false;
 
     // logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
@@ -727,8 +728,12 @@ public class InitialUI implements UILifecycle {
       logger.info("addBreadcrumbs - no breadcrumbs...");
     }
     if (!found) {
-      verticalContainer.insert(breadcrumbs = getBreadcrumbs(), 1);
-    }
+      //verticalContainer.insert(breadcrumbs = getBreadcrumbs(), 1);
+    //  banner.setBreadcrumbs(breadcrumbs = getBreadcrumbs());
+      addCrumbs(breadcrumbs);
+    }*/
+    addCrumbs(breadcrumbs);
+
   }
 
   @Override
@@ -798,6 +803,7 @@ public class InitialUI implements UILifecycle {
     lastUser = userID;
     banner.setBrowserInfo(lifecycleSupport.getInfoLine());
     banner.reflectPermissions(lifecycleSupport.getPermissions());
+
   }
 
   /**

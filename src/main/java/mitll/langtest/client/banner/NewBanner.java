@@ -3,6 +3,7 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.Alignment;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -51,7 +52,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
    * @param lifecycle
    * @see InitialUI#InitialUI(LangTest, UserManager)
    */
-  public NewBanner(UserManager userManager, UILifecycle lifecycle, UserMenu userMenu) {
+  public NewBanner(UserManager userManager, UILifecycle lifecycle, UserMenu userMenu, Breadcrumbs breadcrumbs) {
+    setPosition(NavbarPosition.TOP);
     Brand netprof = new Brand("netprof");
     addHomeClick(netprof);
     netprof.addStyleName("handCursor");
@@ -59,10 +61,17 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     add(getImage());
     add(netprof);
     NavCollapse navCollapse = new NavCollapse();
+    navCollapse.addStyleName("topFiveMargin");
+
+    //add(breadcrumbs);
     add(navCollapse);
 
     Nav lnav = new Nav();
+    lnav.getElement().setId("lnav");
+    lnav.addStyleName("inlineFlex");
     navCollapse.add(lnav);
+    lnav.add(breadcrumbs);
+    breadcrumbs.addStyleName("rightTwentyMargin");
     addChoicesForUser(lnav);
 
     Nav rnav = getRightSideChoices(userManager, userMenu);
@@ -106,7 +115,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     SelectionState selectionState = new SelectionState(token, false);
     String instance1 = selectionState.getInstance();
 
-    logger.info("got " + token + " instance " + instance1);
+//    logger.info("got " + token + " instance " + instance1);
 
     switch (instance1) {
       case LEARN:
@@ -137,21 +146,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private void addChoicesForUser(Nav nav) {
-    for (String choice : Arrays.asList("Learn", "Drill", "Progress", "List")) {
-      choices.add(getChoice(nav, choice));
-    }
-//    choices.add(getChoice(nav, "Drill"));
-//    choices.add(getChoice(nav, "Progress", event -> navigation.showProgress()));
-//    choices.add(getChoice(nav, "Lists", event -> navigation.showLists()));
+    for (String choice : Arrays.asList("Learn", "Drill", "Progress", "List"))  choices.add(getChoice(nav, choice));
   }
 
   private Dropdown userDrop;
 
   private List<Widget> choices = new ArrayList();
-
-//  private NavLink addLearn(Nav nav) {
-//    return getChoice(nav, "Learn");
-//  }
 
   NavLink currentActive = null;
 
@@ -270,6 +270,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   public void onResize() {
 
   }
+//
+//  @Override
+//  public void setBreadcrumbs(Breadcrumbs widgets) {
+//
+//  }
 
   private NavLink getContactUs() {
     return getAnchor(NEED_HELP_QUESTIONS_CONTACT_US, getMailTo());

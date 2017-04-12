@@ -1396,7 +1396,7 @@ document sections.*/
     font-family: BentonRegular, Arial, sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
-    font-size: 12px;
+    font-size: 14px;
     width: 204px;
     margin-top: 2px;
 }
@@ -1496,7 +1496,7 @@ document sections.*/
     color: #303239;
     content: "view all";
     font-family: BentonRegular;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     text-transform: none;
     float: right;
@@ -1506,7 +1506,7 @@ document sections.*/
     color: #303239;
     content: "view all";
     font-family: BentonRegular;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     text-transform: none;
     float: right;
@@ -1537,7 +1537,7 @@ document sections.*/
     color: #292b2d;
     display: block;
     font-family: BentonMedium;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     left: 0;
     /*
@@ -1553,7 +1553,7 @@ document sections.*/
     color: #292b2d;
     display: block;
     font-family: BentonRegular;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     left: 0;
     /*
@@ -1566,20 +1566,6 @@ document sections.*/
     cursor: pointer;
     */
 }
-
-/*.sidebar .menuItem a {
-    display: block;
-    color: #292b2d;
-    text-transform: uppercase;
-    font-size: 14px;
-    font-family: BentonMedium;
-    font-weight: 400;
-    -webkit-font-smoothing: antialiased;
-    position: relative;
-    right: 0;
-    left: 0;
-    padding: 0 10px;
-}*/
 
 .sidebar .refinements > ul > li {
     padding: 4px 0;
@@ -1720,7 +1706,7 @@ h1, h2, h3, h4, h5, h6 {
     font-family: BentonRegular;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.5;
     vertical-align: baseline;
     padding: 2px;
@@ -1755,4 +1741,8 @@ h1, h2, h3, h4, h5, h6 {
 
 #headerRow > .span12 > .navbar {
     margin-bottom: 0px;
+}
+
+#lnav {
+    display: inline-flex;
  }

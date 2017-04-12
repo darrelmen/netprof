@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
+import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -84,6 +85,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     }
   }
 
+  SplitDropdownButton splitDropdownButton;
 
   /**
    * @param toAddTo
@@ -92,6 +94,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
    */
   protected IconAnchor makePlayButton(DivWidget toAddTo) {
     SplitDropdownButton playButton = new SplitDropdownButton(playLabel);
+    splitDropdownButton = playButton;
     playButton.getElement().setId("splitPlayAudio");
     toAddTo.add(playButton);
     configureButton2(playButton);
@@ -109,12 +112,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void configureButton2(SplitDropdownButton playButton) {
-    playButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-//        logger.info("configureButton2 got click on play " + this);
-        playAudio();
-      }
-    });
+    playButton.addClickHandler(event -> { playAudio(); });
 
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
@@ -181,8 +179,11 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     }
 
     if (toUse == null) toUse = fallback;
-    setEnabled(toUse != null);
-    if (toUse != null) {
+    boolean val = toUse != null;
+
+    setEnabled(val);
+    splitDropdownButton.getTriggerWidget().setEnabled(val);
+    if (val) {
       rememberAudio(toUse.getAudioRef());
     }
   }

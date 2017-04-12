@@ -114,21 +114,10 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     return foreignLanguage;
   }
 
-  /**
-   * TODO: don't put this here
-   *
-   * @return
-   */
-/*  public String getAltFL() {
-    return "";
-  }*/
   @Override
   public boolean equals(Object other) {
-    //boolean checkOld = !getOldID().isEmpty();
     return other instanceof ExerciseShell &&
-        //  (checkOld && getOldID().equals(((ExerciseShell) other).getOldID()) ||
-        (getID() == ((ExerciseShell) other).getID()//)
-        );
+        (getID() == ((ExerciseShell) other).getID());
   }
 
 

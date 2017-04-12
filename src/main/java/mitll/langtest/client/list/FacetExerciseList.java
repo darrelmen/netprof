@@ -232,7 +232,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     int pageSize = getPageIndex();
     if (pageSize != -1) {
       pagesize.setItemSelected(pageSize, true);
-      logger.info("page size now at " + pageSize);
+    //  logger.info("page size now at " + pageSize);
     }
 
     pagesize.addChangeHandler(event -> onPageSizeChange(pagesize));
@@ -290,6 +290,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     DivWidget w = new DivWidget();
     w.addStyleName("floatRight");
     HTML w1 = new HTML("Sort by");
+    w1.addStyleName("topFiveMargin");
     w1.addStyleName("rightFiveMargin");
     w1.addStyleName("floatLeft");
     w.add(w1);
@@ -517,7 +518,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                                  Set<MatchInfo> keys) {
     int j = 0;
     int toShow = TOTAL / typeToValues.keySet().size();
-    boolean hasMore = keys.size() > toShow;
+    int diff = keys.size() - toShow;
+    boolean hasMore = keys.size() > toShow && diff>3;
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
     for (MatchInfo key : keys) {
       addLIChoice(choices, getAnchor(type, key));
@@ -546,6 +548,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return anchor;
   }
 
+  /**
+   *
+   * @param typeToValues
+   * @param type
+   * @return
+   */
   @NotNull
   private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type) {
     Anchor anchor = new Anchor();
@@ -561,6 +569,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return anchor;
   }
 
+  /**
+   * @see #addChoices(Map, String)
+   * @param type
+   * @param selectionForType
+   * @return
+   */
   @NotNull
   private Widget getSelectedAnchor(String type, String selectionForType) {
     Panel anchor = getSpan();
@@ -755,23 +769,17 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     boolean removed = false;
 
     Collection<String> typesWithSelections = new ArrayList<String>(typeToSelection.keySet());
-    //logger.info(" - found " + typesWithSelections + " selected rootNodesInOrder vs " + typesToInclude);
 
     for (String selectedType : typesWithSelections) {
       boolean clearSelection = !typesToInclude.contains(selectedType);
       if (clearSelection) {
         if (removeSelection(selectedType, typeToSelection)) {
-          //    logger.info("removed selection " + selectedType);
           removed = true;
         } else {
-          //  logger.info("no selection " + selectedType);
         }
       } else {
-//        logger.info(" - found " + selectedType + " selected type in " + typesToInclude);
       }
     }
-
-    //  logger.info("changeSelection removed --- " + removed);
 
     return removed;
   }
@@ -779,10 +787,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   /**
    * @seex ButtonBarSectionWidget#getChoice(ButtonGroup, String)
    */
-  private void gotSelection() {
-    //logger.info("gotSelection --- ");
-    pushNewSectionHistoryToken();
-  }
+  private void gotSelection() {  pushNewSectionHistoryToken();  }
 
   /**
    * @param selectionState
@@ -942,7 +947,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                 if (numToShow == 1) { // hack for avp
                   hidePrevNextWidgets();
 
-                  if (getCurrentExerciseID() == result.getExercises().iterator().next().getID()) {
+                  int widgetCount = innerContainer.getWidgetCount();
+
+                  if (getCurrentExerciseID() == result.getExercises().iterator().next().getID() && widgetCount == 1) {
                     logger.info("skip current " + getCurrentExerciseID());
                   } else {
                     showExercises(result.getExercises(), result);

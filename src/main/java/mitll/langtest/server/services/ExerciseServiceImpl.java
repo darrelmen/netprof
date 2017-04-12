@@ -405,7 +405,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     List<T> exerciseShells1 = (List<T>) exerciseShells;
     if (exerciseShells1.isEmpty() && firstExercise != null) {
-      logger.error("huh? no exercises");
+      logger.error("makeExerciseListWrapper huh? no exercises");
     }
     ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);
 
@@ -627,12 +627,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       int exid = getExid(prefix);
 
       if (exid > 0) {
+        logger.info("return exid " + exid);
         T exercise = getExercise(exid, false);
         if (exercise != null) {
           exercises1 = Collections.singletonList(exercise);
         }
       }
     }
+    logger.info("prefix " + prefix + " matches " +exercises1.size());
     return exercises1;
   }
 
@@ -1068,10 +1070,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     int exid1 = -1;
     try {
       exid1 = Integer.parseInt(exid);
+      return getExercise(exid1, isFlashcardReq);
     } catch (NumberFormatException e) {
-      logger.warn("can't parse '" + exid + "'");
+      logger.warn("getExercise can't parse '" + exid + "'");
+      return null;
     }
-    return getExercise(exid1, isFlashcardReq);
   }
 
   /**

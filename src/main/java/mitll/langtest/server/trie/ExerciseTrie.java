@@ -190,13 +190,10 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
-//  private Collection<String> getTokensAllLanguages(boolean isMandarin, String fl) {
-//    return isMandarin ? smallVocabDecoder.getMandarinTokens(fl) : smallVocabDecoder.getTokens(fl);
-//  }
-
   private void addEnglish(T exercise) {
     String english = exercise.getEnglish();
     addEnglish(exercise, english);
+    addSubstrings(exercise, english);
   }
 
   private void addEnglish(T exercise, String english) {
@@ -247,10 +244,6 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     addEntryToTrie(new ExerciseWrapper<>(token.toLowerCase(), exercise));
   }
 
-/*  private Collection<String> getMandarinTokens(String foreignLanguage) {
-    return smallVocabDecoder.getMandarinTokens(foreignLanguage);
-  }*/
-
   /**
    * @param prefix
    * @return
@@ -259,8 +252,9 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    */
   public List<T> getExercises(String prefix) {
     String trimmed = getTrimmed(prefix);
-    //  logger.info("trim '" + prefix.toLowerCase() + "' = '" + trimmed + "'");
-    return getMatches(trimmed);
+    List<T> matches = getMatches(trimmed);
+  //   logger.info("getExercises trim '" + prefix.toLowerCase() + "' = '" + trimmed + "' => " +matches.size());
+    return matches;
   }
 
   private static class ExerciseWrapper<T extends CommonShell> implements TextEntityValue<T> {

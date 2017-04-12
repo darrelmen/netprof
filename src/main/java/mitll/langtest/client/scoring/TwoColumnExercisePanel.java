@@ -31,27 +31,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   public static final int CONTEXT_INDENT = 40;
 
-  //  private static final int CONTEXT_PADDING = 10;
   private final List<CorrectAndScore> correctAndScores;
-
-//  public static final String CONTEXT = "Context";
-
-//  public static final String DEFAULT_SPEAKER = "Default Speaker";
-
-  /**
-   * TODOx make better relationship with ASRRecordAudioPanel
-   */
-  // Image recordImage1;
-  //Image recordImage2;
-
   private final T exercise;
   private final ExerciseController controller;
 
-  //protected final ListServiceAsync listService = GWT.create(ListService.class);
   private final AnnotationHelper annotationHelper;
   private final ClickableWords<T> clickableWords;
   private final boolean showInitially = false;
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
+  ListInterface<CommonShell> listContainer;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -70,11 +58,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
                                 final ListInterface<CommonShell> listContainer,
-                                List<CorrectAndScore> correctAndScores,
-                                ExerciseOptions options
+                                List<CorrectAndScore> correctAndScores
   ) {
     this.exercise = commonExercise;
     this.controller = controller;
+    this.listContainer = listContainer;
 
     getElement().setId("TwoColumnExercisePanel");
     addStyleName("cardBorderShadow");
@@ -125,16 +113,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       rowWidget.add(lr);
     }
-
-/*    addField(card, addAltFL(e), "altflrow");
-    addField(card, addTransliteration(e), "transliterationrow");
-
-    if (!useMeaningInsteadOfEnglish && meaningValid) {
-      Widget meaningWidget = getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially);
-      addField(card, meaningWidget, "meaningRow");
-    }*/
-
-    //  logger.info("for " + e.getID() + " found " + e.getDirectlyRelated().size() + " context sentence ");
 
     rowWidget = getRowWidget();
     card.add(rowWidget);
@@ -312,7 +290,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       @Override
       public void setBusy(boolean v) {
       }
-    }, controller, e, correctAndScores);
+    }, controller, e, correctAndScores, listContainer);
   }
 
   @NotNull

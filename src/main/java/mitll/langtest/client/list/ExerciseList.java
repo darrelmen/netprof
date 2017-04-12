@@ -94,7 +94,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private boolean pendingReq = false;
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private UserState userState;
   ListOptions listOptions;
 
@@ -959,4 +959,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   protected abstract List<T> getInOrder();
+
+  @Override
+  public void setScore(int id, float hydecScore) {
+    byID(id).getMutableShell().setScore(hydecScore);
+  }
 }

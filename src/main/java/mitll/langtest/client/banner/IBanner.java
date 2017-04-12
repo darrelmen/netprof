@@ -1,5 +1,6 @@
 package mitll.langtest.client.banner;
 
+import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.shared.user.User;
@@ -27,4 +28,6 @@ public interface IBanner {
   void setUserName(String name);
 
   void onResize();
+
+//  void setBreadcrumbs(Breadcrumbs widgets);
 }

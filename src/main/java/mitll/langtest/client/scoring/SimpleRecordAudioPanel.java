@@ -12,12 +12,12 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.WaitCursorHelper;
 import mitll.langtest.client.sound.CompressedAudio;
-import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +32,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
+  public static final String OGG = ".ogg";
   private Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
 
@@ -60,23 +61,26 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private DivWidget scoreFeedback;
   private ProgressBar progressBar;
   private boolean hasScoreHistory = false;
+  ListInterface<CommonShell> listContainer;
 
   /**
    * @param controller
    * @param exercise
    * @param history
+   * @param listContainer
    * @see TwoColumnExercisePanel#getRecordPanel
    */
   SimpleRecordAudioPanel(BusyPanel goodwaveExercisePanel,
                          ExerciseController controller,
                          T exercise,
-                         List<CorrectAndScore> history) {
+                         List<CorrectAndScore> history, ListInterface<CommonShell> listContainer) {
     this.controller = controller;
     this.goodwaveExercisePanel = goodwaveExercisePanel;
     this.exercise = exercise;
+    this.listContainer = listContainer;
 
     getElement().setId("SimpleRecordAudioPanel");
- //   addStyleName("inlineFlex");
+    //   addStyleName("inlineFlex");
     setWidth("100%");
     addWidgets();
     showRecordingHistory(history);
@@ -84,19 +88,19 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     setVisible(hasScoreHistory);
   }
 
-  DivWidget recordFeedback;
+  private DivWidget recordFeedback;
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
    * @return
    * @seex #AudioPanel
-   * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel(BusyPanel, ExerciseController, CommonExercise, List)
+   * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel(BusyPanel, ExerciseController, CommonExercise, List, ListInterface)
    */
   protected void addWidgets() {
     RecorderPlayAudioPanel playAudioPanel = makePlayAudioPanel();
-   // playAudioPanel.setWidth("50%");
-   // add(playAudioPanel);
+    // playAudioPanel.setWidth("50%");
+    // add(playAudioPanel);
 
     add(scoreFeedback = new DivWidget());
 
@@ -135,7 +139,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     //    afterPlayWidget.add(label);
     // afterPlayWidget.add(progressBar);
 
-  //  progressBar.setWidth(PROGRESS_BAR_WIDTH + "px");
+    //  progressBar.setWidth(PROGRESS_BAR_WIDTH + "px");
     // progressBar.addStyleName("floatLeft");
     progressBar.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
 
@@ -229,25 +233,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see mitll.langtest.server.DownloadServlet#returnAudioFile
    */
   private void setDownloadHref() {
-    String audioPathToUse = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg", ".mp3") : audioPath;
-
-    int id = exercise.getID();
-    int user = getUser();
-
-    playAudioPanel.setDownloadHref(audioPathToUse, id, user);
-
- /*   downloadContainer.setVisible(true);
-    String href = DOWNLOAD_AUDIO +
-        "?file=" +
-        audioPathToUse +
-        "&" +
-        "exerciseID=" +
-        id +
-        "&" +
-        "userID=" +
-        user;
-    download.setHref(href);*/
-    //downloadAnchor.setHref(href);
+    String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, ".mp3") : audioPath;
+    playAudioPanel.setDownloadHref(audioPathToUse, exercise.getID(), getUser());
   }
 
   private int getUser() {
@@ -259,8 +246,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see #useResult(PretestScore, boolean, String)
    */
   private void scoreAudio(AudioAnswer result) {
-     clearScoreFeedback();
-  //  scoreFeedback.add(progressBar);
+    clearScoreFeedback();
     PretestScore pretestScore = result.getPretestScore();
 
     if (pretestScore.getHydecScore() > 0) {
@@ -357,7 +343,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     audioPath = result.getPath();
     setDownloadHref();
     scoreAudio(result);
-   // waitCursorHelper.showFinished();
+    // waitCursorHelper.showFinished();
     waitCursorHelper.cancelTimer();
     waitCursorHelper.setWhite();
     waitCursorHelper.show();
@@ -375,7 +361,9 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   }
 
   @Override
-  public void flip(boolean first) {   playAudioPanel.flip(first);  }
+  public void flip(boolean first) {
+    playAudioPanel.flip(first);
+  }
 
   /**
    * @param result
@@ -383,14 +371,16 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @param path
    */
   private void useResult(PretestScore result, boolean scoredBefore, String path) {
-    boolean isValid = result.getHydecScore() > 0;
+    float hydecScore = result.getHydecScore();
+    boolean isValid = hydecScore > 0;
     if (!scoredBefore && miniScoreListener != null && isValid) {
       miniScoreListener.gotScore(result, path);
     }
     getReadyToPlayAudio(path);
     if (isValid) {
-      float zeroToHundred = result.getHydecScore() * 100f;
+      float zeroToHundred = hydecScore * 100f;
       showScore(Math.min(100.0f, zeroToHundred));
+      listContainer.setScore(exercise.getID(), hydecScore);
     } else {
       hideScore();
     }
@@ -410,7 +400,9 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     progressBar.setVisible(true);
   }
 
-  private  void hideScore() {  progressBar.setVisible(false);  }
+  private void hideScore() {
+    progressBar.setVisible(false);
+  }
 
   @Nullable
   private String getReadyToPlayAudio(String path) {

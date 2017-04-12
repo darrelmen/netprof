@@ -189,4 +189,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
 //  void report();
 
   void gotClickOnItem(T newExercise);
+
+  void setScore(int id, float hydecScore);
 }

@@ -2,7 +2,6 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
@@ -11,7 +10,6 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.scoring.ExerciseOptions;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -59,9 +57,8 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
       public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
         List<CorrectAndScore> correctAndScores = wrapper.getHistories().get(e.getID());
         return new TwoColumnExercisePanel<>(e, controller, exerciseList,
-            correctAndScores,
-            new ExerciseOptions()
-                .setInstance(Navigation.CLASSROOM));
+            correctAndScores
+        );
 
       }
     };
