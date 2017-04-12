@@ -40,6 +40,9 @@ import java.text.CharacterIterator;
 import java.text.Normalizer;
 import java.text.StringCharacterIterator;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -58,6 +61,7 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
   private static final String ENGLISH = "English";
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
+  SmallVocabDecoder smallVocabDecoder;
 
   /**
    * Tokens are normalized to lower case.
@@ -75,6 +79,7 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
                       SmallVocabDecoder smallVocabDecoder) {
     boolean includeForeign = !language.equals(ENGLISH);
     startMakingNodes();
+    this.smallVocabDecoder = smallVocabDecoder;
 
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
@@ -117,7 +122,7 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
       ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(exercise, false);
       addEntryToTrie(textEntityDescription);
 
-      addSubstrings(exercise,fl);
+      addSubstrings(exercise, fl);
 
       Collection<String> tokens = isMandarin ?
           getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(fl);
@@ -149,6 +154,8 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
     if (english != null && !english.isEmpty()) {
       ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(exercise, true);
 
+      addSubstrings(exercise, english);
+
       //if (textEntityDescription.isEmpty()) logger.error("huh? for " +exercise.getID() + " entry is empty?");
       addEntryToTrie(textEntityDescription);
       Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
@@ -172,20 +179,22 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
   }
 
   private void addSubstrings(T exercise, String fl) {
+    List<String> tokens = smallVocabDecoder.getTokens(fl);
 
-    for (int i = 0; i< fl.length(); i++) {
-      String substring = fl.substring(i);
-      char c = substring.charAt(0);
-  //    Character character = c;
-      if (!Character.isSpaceChar(c)) {
+    List<String> collect = tokens.stream().map(String::toLowerCase).collect(Collectors.toList());
+    for (String token : new HashSet<>(collect)) {
+      for (int i = 0; i < token.length(); i++) {
+        String substring = token.substring(i);
+        //char c = substring.charAt(0);
         addEntry(exercise, substring);
 //        logger.info("adding " + substring);
+
       }
     }
   }
 
   private boolean addEntry(T exercise, String token) {
-     ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(token.toLowerCase(), exercise);
+    ExerciseWrapper<T> textEntityDescription = new ExerciseWrapper<>(token.toLowerCase(), exercise);
     //if (textEntityDescription.isEmpty()) logger.error("addEntry - huh? "+textEntityDescription.getNormalizedValue() + " is empty " + exercise.getID());
     return addEntryToTrie(textEntityDescription);
   }
@@ -233,7 +242,9 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
       return value;
     }
 
-    public boolean isEmpty() { return value.isEmpty(); }
+    public boolean isEmpty() {
+      return value.isEmpty();
+    }
 
     public String toString() {
       return "e " + e.getID() + " : " + value;

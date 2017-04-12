@@ -33,6 +33,7 @@
 package mitll.langtest.client.bootstrap;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -44,6 +45,10 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ItemSorter {
+  private final Logger logger = Logger.getLogger("ItemSorter");
+
+  public static final String REGEX = "[-:]";
+
   /**
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList
    * @param sections
@@ -83,18 +88,18 @@ public class ItemSorter {
     Collections.sort(items, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
-        boolean firstHasSep = o1.contains("-");
-        boolean secondHasSep = o2.contains("-");
+        boolean firstHasSep  = o1.contains("-") || o1.contains(":");
+        boolean secondHasSep = o2.contains("-") || o2.contains(":");
         String left1 = o1;
         String left2 = o2;
         String right1 = "";
         String right2 = "";
 
         if (firstHasSep) {
-          String[] first = o1.split("-");
+          String[] first = o1.split(REGEX);
           left1 = first[0];
           if (first.length == 1) {
-            System.err.println("huh? couldn't split " + o1);
+            logger.warning("huh? couldn't split " + o1);
             right1 = "";
           }
           else {
@@ -108,7 +113,7 @@ public class ItemSorter {
         }
 
         if (secondHasSep) {
-          String[] second = o2.split("-");
+          String[] second = o2.split(REGEX);
           left2 = second[0];
           right2 = second[1];
         } else if (o2.contains(" ")) {

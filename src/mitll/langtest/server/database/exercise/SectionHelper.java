@@ -144,6 +144,8 @@ public class SectionHelper<T extends Shell> {
       }
     }
 
+    //logger.info("first set " + firstSet);
+
     return firstSet;
   }
 
@@ -158,10 +160,17 @@ public class SectionHelper<T extends Shell> {
     String nextType = typeOrder.iterator().next();
 
     Collection<String> children = typeToSections.get(nextType);
+
+    //logger.info("children of " + nextType);
+    //for (String child : children) logger.info(child);
     if (children == null) {
       logger.error("huh? can't find " + nextType + " in " + typeToSections);
     } else {
-      for (String childSection : children) {
+      List<String> sorted = getSortedChildren(children);
+
+     // for (String child : sorted) logger.info("Sort " +child);
+
+      for (String childSection : sorted) {
         SectionNode child = new SectionNode(nextType, childSection);
         parent.addChild(child);
 
@@ -173,6 +182,46 @@ public class SectionHelper<T extends Shell> {
         }
       }
     }
+  }
+
+  private List<String> getSortedChildren(Collection<String> children) {
+    List<String> sorted = new ArrayList<>(children);
+    Collections.sort(sorted, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        String[] s1 = o1.split(":");
+        boolean firstHasInt = false;
+        int firstIndex = 0;
+        if (s1.length == 2) {
+          try {
+            firstIndex = Integer.parseInt(s1[0]);
+            firstHasInt = true;
+          } catch (NumberFormatException e) {
+            //e.printStackTrace();
+          }
+        }
+        String[] s2 = o2.split(":");
+        boolean secondHasInt = false;
+        int secondIndex = 0;
+        if (s2.length == 2) {
+          try {
+            secondIndex = Integer.parseInt(s2[0]);
+            secondHasInt = true;
+          } catch (NumberFormatException e) {
+            //e.printStackTrace();
+          }
+        }
+
+        if (firstHasInt) {
+          if (secondHasInt) {
+            return Integer.valueOf(firstIndex).compareTo(secondIndex);
+          } else return -1;
+        } else if (secondHasInt) {
+          return -1;
+        } else return o1.compareTo(o2);
+      }
+    });
+    return sorted;
   }
 
 /*
@@ -204,7 +253,7 @@ public class SectionHelper<T extends Shell> {
       String type = pair.getKey();
       if (isKnownType(type)) {
         Collection<String> value = pair.getValue();
-  //      logger.info("looking for exercises under '" +value +"' (" +value.size()+ ")");
+        //      logger.info("looking for exercises under '" +value +"' (" +value.size()+ ")");
         Collection<T> exercisesForSection = new HashSet<T>(getExercisesForSection(type, value));
 
         if (currentList == null) {
@@ -244,7 +293,7 @@ public class SectionHelper<T extends Shell> {
       for (String section : sections) {
         Lesson<T> lesson = sectionToLesson.get(section);
         if (lesson == null) {
-          logger.error("getExercisesForSection : Couldn't find section '" + section +"'");
+          logger.error("getExercisesForSection : Couldn't find section '" + section + "'");
           return Collections.emptyList();
         } else {
           Collection<T> exercises1 = lesson.getExercises();

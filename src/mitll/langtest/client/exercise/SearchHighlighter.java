@@ -154,7 +154,9 @@ public class SearchHighlighter {
   private WordBounds findNextWord(String candidate, String[] searchWords, int indexToStartAt) {
     WordBounds firstWord = null;
     for (String word : searchWords) {
-      if (word.isEmpty()) logger.warning("got empty search term");
+      if (word.isEmpty()){
+        //logger.warning("got empty search term");
+      }
       else {
         int index = candidate.indexOf(word, indexToStartAt);
         if (index != -1) {

@@ -796,11 +796,15 @@ public class AudioDAO extends DAO {
 
     Set<String> notreg = new HashSet<>(uniqueIDs);
     notreg.removeAll(origMaleReg);
-    logger.info("unrecorded male Reg      (" + notreg.size() + ")" + new TreeSet<>(notreg) + " from " + uniqueIDs.size());
+    logger.info("unrecorded male Reg      (" + notreg.size() + ")" +
+        //new TreeSet<>(notreg) +
+        " from " + uniqueIDs.size());
 
     Set<String> notslow = new HashSet<>(uniqueIDs);
     notslow.removeAll(maleSlowSpeed);
-    logger.info("unrecorded male slow     (" + notslow.size() + ")" + new TreeSet<>(notslow) + " from " + uniqueIDs.size());
+    logger.info("unrecorded male slow     (" + notslow.size() + ")" +
+        //new TreeSet<>(notslow) +
+        " from " + uniqueIDs.size());
 
     femaleIDs = new HashSet<>(femaleIDs);
     femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);

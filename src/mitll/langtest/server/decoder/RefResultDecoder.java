@@ -131,7 +131,9 @@ public class RefResultDecoder {
         }
         if (serverProps.shouldDoDecode()) {
           sleep(5000);
-          if (!serverProps.isNoModel()) writeRefDecode(exercises, relativeConfigDir);
+          if (serverProps.hasModel()) {
+            writeRefDecode(exercises, relativeConfigDir);
+          }
         } else {
           logger.debug(getLanguage() + " not doing decode ref decode");
         }

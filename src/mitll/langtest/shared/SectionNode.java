@@ -51,7 +51,7 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
   private String type;
   private String name;
 
-  private List<SectionNode> children = new ArrayList<SectionNode>();
+  private List<SectionNode> children = new ArrayList<>();
 
   public SectionNode() {
   }   // required for serialization

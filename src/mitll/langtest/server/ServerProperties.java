@@ -292,7 +292,7 @@ public class ServerProperties {
   }
 
   public boolean isNoModel() {
-    return getDefaultFalse(NO_MODEL);
+    return getDefaultFalse(NO_MODEL) && getModelsDir() != null;
   }
 
   boolean removeExercisesWithMissingAudio() {
@@ -312,8 +312,8 @@ public class ServerProperties {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO
    * @return
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO
    */
   public boolean shouldCheckAudioTranscript() {
     return getDefaultTrue(CHECK_AUDIO_TRANSCRIPT);
@@ -664,8 +664,16 @@ public class ServerProperties {
   }
 
   public String getCurrentModel() {
-    String models_dir = getProperty("MODELS_DIR");
+    String models_dir = getModelsDir();
     return hasModel() && models_dir != null ? models_dir.replaceAll("models.", "") : "";
+  }
+
+  private boolean hasModels() {
+    return getProperty("MODELS_DIR") != null;
+  }
+
+  private String getModelsDir() {
+    return getProperty("MODELS_DIR");
   }
 
   public boolean shouldRecalcDNR() {

@@ -179,11 +179,11 @@ class CheckLTS {
             if (htkEntry
                 ) {
               if (process != null) {
-                logger.info("2 checkLTS in dict for " + process.length);
+//                logger.info("2 checkLTS in dict for " + process.length);
                 if (process.length > 0) {
-                  logger.info("2 in dict for " + process[0].length);
+  //                logger.info("2 in dict for " + process[0].length);
                   if (process[0].length > 0) {
-                    logger.info("2 in dict for " + process[0][0].length());
+    //                logger.info("2 in dict for " + process[0][0].length());
                   }
                 }
               }
