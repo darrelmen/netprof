@@ -219,7 +219,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     w.addStyleName("floatLeft");
     w.addStyleName("topFiveMargin");
     w.addStyleName("rightFiveMargin");
-    // footer.add(w);
+
     pageSizeContainer = new DivWidget();
     footer.add(pageSizeContainer);
     pageSizeContainer.add(w);
@@ -229,23 +229,32 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     for (Integer num : PAGE_SIZE_CHOICES) {
       pagesize.addItem(num + ITEMS_PAGE, "" + num);
     }
-//    pagesize.addFocusHandler(new FocusHandler() {
-//      @Override
-//      public void onFocus(FocusEvent event) {
-//        pagesize.setFocus(false);
-//      }
-//    });
+    int pageSize = getPageIndex();
+    if (pageSize != -1) {
+      pagesize.setItemSelected(pageSize, true);
+      logger.info("page size now at " + pageSize);
+    }
 
     pagesize.addChangeHandler(event -> onPageSizeChange(pagesize));
     return pagesize;
   }
 
-  private void setPageSizeInitialSelection(ListBox pagesize) {
+  private int getPageIndex() {
+    return controller.getStorage().getInt("pageSizeSelected");
+  }
+
+  /**
+   * @param pagesize
+   * @see #getExercises
+   */
+/*  private void setPageSizeInitialSelection(ListBox pagesize) {
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         int i = 0;
+        Integer realPageSize = pagingContainer.getRealPageSize();
+
         for (Integer num : PAGE_SIZE_CHOICES) {
-          if (pagingContainer.getRealPageSize().equals(num)) {
+          if (realPageSize.equals(num)) {
             //     logger.info("initial selection: size is " + num);
             pagesize.setItemSelected(i, true);
           }
@@ -254,13 +263,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       }
     });
-  }
+  }*/
 
   private void onPageSizeChange(ListBox pagesize) {
     pagesize.setFocus(false);
     String value = pagesize.getValue();
     int i = Integer.parseInt(value);
     pagingContainer.setPageSize(i);
+    controller.getStorage().setInt("pageSizeSelected", pagesize.getSelectedIndex());
     scrollToTop();
   }
 
@@ -315,13 +325,23 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           protected void gotRangeChanged(Range newRange) {
-            // logger.info("gotRangeChanged for " + newRange);
+          //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
             askServerForExercises(-1, getIdsForRange(newRange));
           }
 
           @Override
           protected int getNumTableRowsGivenScreenHeight() {
-            return numToShow;
+            int pageSize = getPageIndex();
+            if (pageSize != -1) {
+              try {
+                return PAGE_SIZE_CHOICES.get(pageSize);
+              } catch (Exception e) {
+                return numToShow;
+              }
+            } else {
+
+              return numToShow;
+            }
           }
         };
     return pagingContainer;
@@ -888,10 +908,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       ensureAudio(visibleIDs);
 
-   //   getExercises(visibleIDs);
+      //   getExercises(visibleIDs);
     }
   }
 
+  /**
+   * @see #ensureAudio(Collection)
+   * @param visibleIDs
+   */
   private void getExercises(Collection<Integer> visibleIDs) {
     long then = System.currentTimeMillis();
     hidePrevNext();
@@ -928,7 +952,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                   //showPrevNext();
                 }
               }
-              setPageSizeInitialSelection(pagesize);
+              //setPageSizeInitialSelection(pagesize);
             } else {
               logger.info("\n\n ignoring req " + reqID + " vs current " + freqid);
             }
@@ -949,7 +973,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           public void onSuccess(Void result) {
             long now = System.currentTimeMillis();
             getExercises(visibleIDs);
-
             //logger.info("OK, ensured audio... in " + (now - then) + " millis");
           }
         });
@@ -977,9 +1000,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   * @see
    * @param result
    * @param wrapper
+   * @see
    */
   private void showExercises(Collection<CommonExercise> result, ExerciseListWrapper<CommonExercise> wrapper) {
 //    clearExerciseContainer();
@@ -991,7 +1014,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       //   logger.info("ex " + exercise.getID() + " " + exercise.getUnitToValue());
       Scheduler.get().scheduleDeferred(new Command() {
         public void execute() {
-      //    logger.info("showExercises ex " + exercise.getID() + " " + exercise.getUnitToValue());
+          //    logger.info("showExercises ex " + exercise.getID() + " " + exercise.getUnitToValue());
           addExerciseWidget(exercise, wrapper);
           //logger.info("ex " + exercise.getID() + " now " +innerContainer.getElement().getChildCount());
           if (numToShow != 1) {

@@ -6,19 +6,17 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.InlineHTML;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.dialog.WordBounds;
+import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -40,9 +38,8 @@ public class ClickableWords<T extends CommonExercise> {
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
-  //private static final String MEANING = "Meaning";
   private final ListInterface listContainer;
-  ExerciseServiceAsync exerciseServiceAsync;
+//  private ExerciseServiceAsync exerciseServiceAsync;
 
   /**
    * @param listContainer
@@ -55,7 +52,7 @@ public class ClickableWords<T extends CommonExercise> {
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
-    this.exerciseServiceAsync = exerciseServiceAsync;
+    //  this.exerciseServiceAsync = exerciseServiceAsync;
   }
 
   /**
@@ -77,7 +74,7 @@ public class ClickableWords<T extends CommonExercise> {
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
     for (String token : tokens) {
-      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, false, isFL));
+      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, false));
     }
 
     horizontal.addStyleName("leftFiveMargin");
@@ -138,7 +135,7 @@ public class ClickableWords<T extends CommonExercise> {
         // logger.fine("-  no highlight '" + toFind + "' vs '" +token+ "'");
       }
 
-      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch, isFL));
+      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch));
     }
 
     horizontal.addStyleName("leftFiveMargin");
@@ -188,20 +185,52 @@ public class ClickableWords<T extends CommonExercise> {
     return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
   }
 
+  private WordBoundsFactory factory = new WordBoundsFactory();
+  private static final String STRONG = "strong";
+
+  /**
+   * @param isMeaning
+   * @param dir
+   * @param html
+   * @param chineseCharacter
+   * @param addStyle
+   * @return
+   */
   private InlineHTML makeClickableText(boolean isMeaning,
                                        HasDirection.Direction dir,
                                        final String html,
                                        boolean chineseCharacter,
-                                       boolean addStyle,
-                                       boolean isFL) {
+                                       boolean addStyle) {
     final InlineHTML w = new InlineHTML(html, dir);
     //final MyClickable w = new MyClickable(toShow, dir);
 
     if (addStyle) w.addStyleName("contextmatch");
 
     //String typeAheadText = listContainer.getTypeAheadText().toLowerCase();
-    if (isMatch(html, listContainer.getTypeAheadText().toLowerCase())) {//html.toLowerCase().contains(typeAheadText) && ((float)typeAheadText.length()/(float)html.length()) > THRESHOLD) {
-      w.addStyleName("searchmatch");
+    String typeAheadText = listContainer.getTypeAheadText();
+    String searchToken = typeAheadText.toLowerCase();
+    if (isMatch(html, searchToken)) {//html.toLowerCase().contains(typeAheadText) && ((float)typeAheadText.length()/(float)html.length()) > THRESHOLD) {
+      String[] toFind = new String[0];
+      toFind[0] = searchToken;
+
+      WordBounds wordBounds = factory.findNextWord(html.toLowerCase(), toFind, 0);
+
+      if (wordBounds == null) {
+        logger.info("can't find  '" + searchToken + "' in '" + html+"'");
+        w.addStyleName("searchmatch");
+      } else {
+     //   logger.info("word bounds " + wordBounds + " for '" + searchToken + "' in '" + html+"'");
+        List<String> parts = wordBounds.getTriple(html);
+        SafeHtmlBuilder accum = new SafeHtmlBuilder();
+
+        accum.appendEscaped(parts.get(0));
+        accum.appendHtmlConstant("<" + STRONG + ">");
+        accum.appendEscaped(parts.get(1));
+        accum.appendHtmlConstant("</" + STRONG + ">");
+        accum.appendEscaped(parts.get(2));
+
+        w.setHTML(accum.toSafeHtml(), dir);
+      }
     }
 
     String noPunct = removePunct(html);
@@ -221,7 +250,7 @@ public class ClickableWords<T extends CommonExercise> {
         }
       });
       w.addMouseOverHandler(mouseOverEvent -> w.addStyleName("underline"));
-      w.addMouseOutHandler (mouseOutEvent  -> w.removeStyleName("underline"));
+      w.addMouseOutHandler(mouseOutEvent -> w.removeStyleName("underline"));
     }
 
     w.addStyleName("Instruction-data-with-wrap-keep-word");

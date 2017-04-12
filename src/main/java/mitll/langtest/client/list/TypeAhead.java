@@ -47,6 +47,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 
+import java.util.logging.Logger;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -54,7 +56,9 @@ import mitll.langtest.client.LangTest;
  * @since 9/25/14.
  */
 public abstract class TypeAhead implements ITypeAhead {
-  //private Logger logger = Logger.getLogger("TypeAhead");
+  private Logger logger = Logger.getLogger("TypeAhead");
+
+
   private static final int WIDTH = 180 - 32;
   private static final int RIGHT_MARIGN_FOR_SEARCH = 10;
   private final TextBox typeAhead = new TextBox();
@@ -119,7 +123,7 @@ public abstract class TypeAhead implements ITypeAhead {
         String current = getTypeAhead().getText();
 
         if (previous.equals(current)) {
-
+          logger.info("prev = current " + previous);
         } else {
           gotTypeAheadEntry(current);
           previous = current;

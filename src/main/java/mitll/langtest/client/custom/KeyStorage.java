@@ -82,9 +82,23 @@ public class KeyStorage {
   public void setBoolean(String name, boolean val) {
     storeValue(name, "" + val);
   }
+  public void setInt(String name, int val) {
+    storeValue(name, "" + val);
+  }
 
   public boolean isTrue(String name) {
     return getValue(name).equals("true");
+  }
+  public int getInt(String name) {
+    String value = getValue(name);
+    if (value == null) return -1;
+    else {
+      try {
+        return Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+        return -1;
+      }
+    }
   }
 
   public void storeValue(String name, String toStore) {

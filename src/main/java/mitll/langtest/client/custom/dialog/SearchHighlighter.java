@@ -96,13 +96,13 @@ public class SearchHighlighter {
       //String part1 = suggestion.substring(cursor, wordBounds.startIndex);
      // String part2 = suggestion.substring(wordBounds.startIndex, wordBounds.endIndex);
       String[] parts = wordBounds.getParts(suggestion, cursor);
-      cursor = wordBounds.endIndex;
+      cursor = wordBounds.getEndIndex();
       accum.appendEscaped(parts[0]);
       accum.appendHtmlConstant("<" + STRONG + ">");
       accum.appendEscaped(parts[1]);
       accum.appendHtmlConstant("</" + STRONG + ">");
 //      }
-      index = wordBounds.endIndex;
+      index = wordBounds.getEndIndex();
     }
 
 //    // Check to make sure the search was found in the string.

@@ -221,8 +221,9 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
     doPause();
     playAudio(audioRef);
-    controller.getStorage().setBoolean(IS_MALE, isMale);
-    controller.getStorage().setBoolean(IS_REG, isReg);
+    KeyStorage storage = controller.getStorage();
+    storage.setBoolean(IS_MALE, isMale);
+    storage.setBoolean(IS_REG, isReg);
 
     LangTest.EVENT_BUS.fireEvent(new AudioSelectedEvent(exercise == null ? -1 : exercise.getID()));
   }
