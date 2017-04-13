@@ -46,6 +46,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import scala.Int;
 
 import java.io.File;
 import java.io.IOException;
@@ -671,7 +672,7 @@ public class RefResultDecoder {
 
     db.getRefResultDAO().deleteForProject(projid);
 
-    Set<String> decodedFiles = getDecodedFiles(projid);
+    Set<Integer> decodedFiles = getDecodedFiles(projid);
     logger.debug("writeRefDecode for project " + projid +
         " found " + decodedFiles.size() + " previous ref results, checking " +
         exercises.size() + " exercises ");
@@ -763,7 +764,7 @@ public class RefResultDecoder {
    * @see #writeRefDecode(String, Collection, int)
    */
   @NotNull
-  private void queueDecodeExercise(String language, Set<String> decodedFiles, CommonExercise exercise) {
+  private void queueDecodeExercise(String language, Set<Integer> decodedFiles, CommonExercise exercise) {
     //   Stats stats = new Stats();
     /*   if (audioAttributes != null) {
       db.getAudioDAO().attachAudio(exercise, audioAttributes, language);
@@ -801,7 +802,7 @@ public class RefResultDecoder {
     // return stats;
   }
 
-  private int queueDecode(String language, Set<String> decodedFiles, CommonExercise exercise, int added,
+  private int queueDecode(String language, Set<Integer> decodedFiles, CommonExercise exercise, int added,
                           Collection<AudioAttribute> audioAttributes1) {
     if (!audioAttributes1.isEmpty()) {
       //   stats.maleAudio += audioAttributes1.size();
@@ -858,15 +859,16 @@ public class RefResultDecoder {
    * @return
    * @see #writeRefDecode
    */
-  private Set<String> getDecodedFiles(int projid) {
+  private Set<Integer> getDecodedFiles(int projid) {
     //logger.info("getDecodedFiles ----");
     //List<Result> results = db.getRefResultDAO().getResults();
 
-    List<String> files = db.getRefResultDAO().getAllFilesForProject(projid);
+    //List<String> files = db.getRefResultDAO().getAllFilesForProject(projid);
+    List<Integer> files = db.getRefResultDAO().getAllAudioIDsForProject(projid);
 
-    Set<String> decodedFiles = new HashSet<>();
+ /*   Set<String> decodedFiles = new HashSet<>();
     //   for (Result res : results) {
-    for (String res : files) {
+    for (Integer res : files) {
       // String[] bestAudios = res.getAnswer().split(File.separator);
       String[] bestAudios = res.split(File.separator);
       if (bestAudios.length > 1) {
@@ -874,8 +876,9 @@ public class RefResultDecoder {
         decodedFiles.add(bestAudio);
         if (stopDecode) break;
       }
-    }
-    return decodedFiles;
+    }*/
+
+    return new HashSet<>(files);
   }
 
   /**
@@ -886,11 +889,11 @@ public class RefResultDecoder {
    * @see #queueDecodeExercise
    */
   private DecodeTask doDecode(String language,
-                              Set<String> decodedFiles,
+                              Set<Integer> decodedFiles,
                               CommonExercise exercise,
                               Collection<AudioAttribute> audioAttributes) {
-    List<AudioAttribute> toDecode = getNotYetDecoded(decodedFiles, audioAttributes);
-    return new DecodeTask(language, exercise, toDecode);
+  //  List<AudioAttribute> toDecode = ;
+    return new DecodeTask(language, exercise, getNotYetDecoded(decodedFiles, audioAttributes));
   }
 
   private static class DecodeTask {
@@ -958,12 +961,12 @@ public class RefResultDecoder {
   }
 
   @NotNull
-  private List<AudioAttribute> getNotYetDecoded(Set<String> decodedFiles, Collection<AudioAttribute> audioAttributes) {
+  private List<AudioAttribute> getNotYetDecoded(Set<Integer> decodedFiles, Collection<AudioAttribute> audioAttributes) {
     List<AudioAttribute> toDecode = new ArrayList<>();
     for (AudioAttribute attribute : audioAttributes) {
       if (!attribute.isContextAudio()) {
-        String bestAudio = getFile(attribute);
-        if (!decodedFiles.contains(bestAudio)) {
+        //String bestAudio = getFile(attribute);
+        if (!decodedFiles.contains(attribute.getUniqueID())) {
           toDecode.add(attribute);
         }
       }
@@ -1008,29 +1011,27 @@ public class RefResultDecoder {
           try {
             FileUtils.copyFile(absoluteFile, replacement);
           } catch (IOException e) {
-            logger.error("got " + e, e);
+            logger.error("doTrim got " + e, e);
           }
           TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile);
           if (trimInfo.didTrim()) {
             // drop ref result info
-            logger.debug("trimmed " + exid + " " + attribute + " audio " + bestAudio);
+            logger.debug("doTrim trimmed " + exid + " " + attribute + " audio " + bestAudio);
             if (hasModel) {
-              boolean b = db.getRefResultDAO().removeForAudioFile(absoluteFile.getAbsolutePath());
+            //  boolean b = db.getRefResultDAO().removeForAudioFile(absoluteFile.getAbsolutePath());
+              boolean b = db.getRefResultDAO().removeByAudioID(attribute.getUniqueID());
               if (!b) {
-                logger.warn("for " + exid + " couldn't remove " + absoluteFile.getAbsolutePath() + " for " + attribute);
+                logger.warn("doTrim for " + exid + " couldn't remove " + absoluteFile.getAbsolutePath() + " for " + attribute);
               } else {
                 changed++;
               }
             }
-
             trimmed++;
           }
-
           count++;
 
-          String author = attribute.getUser().getUserID();
           audioConversion.ensureWriteMP3(pathHelper.getInstallPath(), audioRef, trimInfo.didTrim(),
-              new TrackInfo(title, author, comment, language));
+              new TrackInfo(title, attribute.getUser().getUserID(), comment, language));
         }
       } else {
 //        logger.warn("no file for " + exid + " " + attribute + " at audio file " + bestAudio);

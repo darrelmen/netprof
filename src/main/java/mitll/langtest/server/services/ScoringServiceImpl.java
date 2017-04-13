@@ -32,6 +32,9 @@
 
 package mitll.langtest.server.services;
 
+import audio.image.ImageType;
+import audio.image.TranscriptEvent;
+import com.google.gson.JsonObject;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
@@ -39,18 +42,26 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.result.ISlimResult;
+import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.npdata.dao.SlickAudio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import scala.Int;
 
 import java.io.File;
-import java.util.Collection;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class ScoringServiceImpl extends MyRemoteServiceServlet implements ScoringService {
@@ -74,7 +85,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       int exerciseID = result.getExerciseID();
 
       boolean isAMAS = serverProps.isAMAS();
-      CommonShell exercise;
+      CommonShell exercise = null;
       String sentence = "";
       String transliteration = "";
       if (isAMAS) {
@@ -82,10 +93,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         sentence = exercise.getForeignLanguage();
       } else {
         CommonExercise exercise1 = db.getExercise(getProjectID(), exerciseID);
-        transliteration = exercise1.getTransliteration();
-        exercise = exercise1;
 
         if (exercise1 != null) {
+          transliteration = exercise1.getTransliteration();
+          exercise = exercise1;
           Collection<CommonExercise> directlyRelated = exercise1.getDirectlyRelated();
           sentence =
               result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
@@ -130,6 +141,61 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return asrScoreForAudio;
   }
 
+  @Override
+  public Map<Integer, AlignmentOutput> getAlignments(int projid, List<Integer> audioIDs) {
+    Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
+    for (Integer audioID : audioIDs) {
+      ISlimResult cachedResult = db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
+      if (cachedResult == null || !cachedResult.isValid()) {
+
+        if (cachedResult != null && !cachedResult.isValid()) {
+          boolean b = db.getRefResultDAO().removeByAudioID(audioID);
+        }
+
+        AudioAttribute byID = db.getAudioDAO().getByID(audioID);
+        if (byID != null) {
+          CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
+          PretestScore pretestScore = getAudioFileHelper().decodeAndRemember(customOrPredefExercise, byID, false);
+          idToAlignment.put(audioID, pretestScore);
+        } else {
+          logger.error("can't find audio id " + audioID);
+        }
+      } else {
+        PrecalcScores precalcScores = getPrecalcScores(false, cachedResult);
+        Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
+            getTypeToTranscriptEvents(precalcScores.getJsonObject(), false);
+        Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents);
+        idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
+      }
+    }
+    return idToAlignment;
+  }
+
+  public Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
+    return
+        new ParseResultJson(db.getServerProps())
+            .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
+  }
+
+  @NotNull
+  public Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
+
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) {
+        typeToEndTimes.put(key, endTimes = new ArrayList<>());
+      }
+      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        TranscriptEvent value = event.getValue();
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
+      }
+    }
+
+    return typeToEndTimes;
+  }
+
   /**
    * And check if there is no hydra dcodr available locally, and if so, try to use one on dev.
    * <p>
@@ -160,7 +226,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     PrecalcScores precalcScores =
         getAudioFileHelper().checkForWebservice(exerciseID, sentence, getProjectID(), userIDFromSession, absoluteAudioFile);
 
-    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, transliteration, imageOptions,
+    return getPretestScore(reqid,
+        (int) resultID,
+        testAudioFile,
+        sentence, transliteration, imageOptions,
         exerciseID, usePhonemeMap, precalcScores);
   }
 
@@ -175,10 +244,15 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param usePhoneToDisplay
    * @param precalcScores
    * @return
+   * @paramx audioID
    */
-  private PretestScore getPretestScore(int reqid, int resultID, String testAudioFile, String sentence,
+  private PretestScore getPretestScore(int reqid,
+                                       int resultID,
+                                       String testAudioFile,
+                                       String sentence,
                                        String transliteration,
-                                       ImageOptions imageOptions, int exerciseID,
+                                       ImageOptions imageOptions,
+                                       int exerciseID,
                                        boolean usePhoneToDisplay,
                                        PrecalcScores precalcScores) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
@@ -186,19 +260,19 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     String[] split = testAudioFile.split(File.separator);
     String answer = split[split.length - 1];
-    String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
-    Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
+//    String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
+    ISlimResult cachedResult = null;//db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
     if (cachedResult != null && precalcScores == null) {
       precalcScores = getPrecalcScores(usePhoneToDisplay, cachedResult);
       if (DEBUG)
-        logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer +
-            " found previous " + cachedResult.getUniqueID());
+        logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer);
+      //  +
+      //  " found previous " + cachedResult.getUniqueID());
     } else {
       logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
-
 
     PretestScore asrScoreForAudio =
         getAudioFileHelper().getASRScoreForAudio(
@@ -232,7 +306,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   @NotNull
-  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, Result cachedResult) {
+  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult) {
     return new PrecalcScores(serverProps, cachedResult, usePhoneToDisplay || serverProps.usePhoneToDisplay());
   }
 
@@ -272,9 +346,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   /**
-   * @see mitll.langtest.client.project.ProjectEditForm#getUserForm
    * @param projid
    * @return
+   * @see mitll.langtest.client.project.ProjectEditForm#getUserForm
    */
   @Override
   public boolean isHydraRunning(int projid) {
@@ -284,13 +358,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       return false;
     } else {
       try {
-      //  logger.debug("isHydraRunning  project with id " + projid);
+        //  logger.debug("isHydraRunning  project with id " + projid);
         AudioFileHelper audioFileHelper = project.getAudioFileHelper();
         //logger.debug("isHydraRunning  audioFileHelper " + audioFileHelper);
         boolean hydraAvailable = audioFileHelper.isHydraAvailable();
-       // logger.debug("isHydraRunning  hydraAvailable " + hydraAvailable);
+        // logger.debug("isHydraRunning  hydraAvailable " + hydraAvailable);
         boolean hydraAvailableCheckNow = audioFileHelper.isHydraAvailableCheckNow();
-       // logger.debug("isHydraRunning  isHydraAvailableCheckNow " + hydraAvailableCheckNow);
+        // logger.debug("isHydraRunning  isHydraAvailableCheckNow " + hydraAvailableCheckNow);
 
         if (!hydraAvailable && hydraAvailableCheckNow) audioFileHelper.setAvailable();
         return hydraAvailableCheckNow;

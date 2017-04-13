@@ -18,19 +18,19 @@ import java.util.List;
  * Created by go22670 on 2/24/17.
  */
 public class ClickableTranscript {
-  AudioPanel.ImageAndCheck words;
-  AudioPanel.ImageAndCheck phones;
+  private final AudioPanel.ImageAndCheck words;
+  private final AudioPanel.ImageAndCheck phones;
   private PretestScore result;
-  EventLogger eventLogger;
-  int exerciseID;
-  AudioControl audioControl;
+  private final EventLogger eventLogger;
+  private final int exerciseID;
+  private final AudioControl audioControl;
 
   public ClickableTranscript(AudioPanel.ImageAndCheck words,
                              AudioPanel.ImageAndCheck phones,
                              EventLogger eventLogger,
                              int exerciseID,
                              AudioControl audioControl
-                             ) {
+  ) {
     this.words = words;
     this.phones = phones;
     this.eventLogger = eventLogger;
@@ -39,7 +39,9 @@ public class ClickableTranscript {
     addClickHandlers();
   }
 
-  void setScore(PretestScore result) { this.result =result;}
+  void setScore(PretestScore result) {
+    this.result = result;
+  }
 
   private void addClickHandlers() {
     this.phones.getImage().getElement().getStyle().setCursor(Style.Cursor.POINTER);
@@ -79,6 +81,7 @@ public class ClickableTranscript {
       }
     });*/
   }
+
   private abstract class MyClickHandler implements ClickHandler, EventSegment {
     final NetPronImageType type;
 
@@ -109,7 +112,7 @@ public class ClickableTranscript {
 
 /*    protected void getClickedOnSegment(MouseEvent<ClickHandler> event) {
       int index = 0;
-      List<Float> endTimes = result.getsTypeToEndTimes().get(type);
+      List<Float> endTimes = result.getTypeToSegments().get(type);
       float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//endTimes.get(endTimes.size() - 1);
       float horizOffset = (float) event.getX() / (float) phones.image.getWidth();
       float mouseClickTime = wavFileLengthInSeconds * horizOffset;
@@ -163,7 +166,7 @@ public class ClickableTranscript {
 
   private void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
     //int index = 0;
-    List<TranscriptSegment> transcriptSegments = result.getsTypeToEndTimes().get(type);
+    List<TranscriptSegment> transcriptSegments = result.getTypeToSegments().get(type);
     float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//transcriptSegments.get(transcriptSegments.size() - 1);
     float horizOffset = (float) eventXPos / (float) phones.getImage().getWidth();
     float mouseClickTime = wavFileLengthInSeconds * horizOffset;
@@ -174,7 +177,7 @@ public class ClickableTranscript {
       // TranscriptSegment next = transcriptSegments.get(Math.min(transcriptSegments.size() - 1, index + 1));
       if (mouseClickTime > segment.getStart() && mouseClickTime <= segment.getEnd()) {
 //        if (debug) System.out.println("\t playing " + segment);
-        //   result.getsTypeToEndTimes();
+        //   result.getTypeToSegments();
         onClick.onSegmentClick(segment);
         break;
       }

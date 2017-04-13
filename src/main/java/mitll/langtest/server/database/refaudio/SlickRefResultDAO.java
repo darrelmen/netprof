@@ -34,8 +34,11 @@ package mitll.langtest.server.database.refaudio;
 
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
+import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.result.SlimResult;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.decoder.RefResultDecoder;
@@ -92,7 +95,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    * @param userID
    * @param projid
    * @param exid
-   * @param audioFile
    * @param durationInMillis
    * @param correct
    * @param alignOutput
@@ -101,27 +103,42 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    * @param decodeOutputOld
    * @param isMale
    * @param speed
-   * @param model            @return
-   * @see mitll.langtest.server.database.DatabaseImpl#addRefAnswer
+   * @param model
+   * @return
+   * @paramz audioFile
+   * @see DatabaseServices#addRefAnswer
    */
   @Override
-  public long addAnswer(int userID, int projid, int exid,
-                        String audioFile, long durationInMillis, boolean correct,
+  public long addAnswer(int userID, int projid, int exid, int audioid,
+
+                        //String audioFile,
+                        long durationInMillis, boolean correct,
                         DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput,
                         DecodeAlignOutput alignOutputOld, DecodeAlignOutput decodeOutputOld,
                         boolean isMale, String speed, String model) {
-    SlickRefResult insert = dao.insert(toSlick(userID, projid, exid, audioFile, durationInMillis, correct,
+    SlickRefResult insert = dao.insert(toSlick(userID, projid, exid,
+        audioid,
+        //audioFile,
+        durationInMillis, correct,
         alignOutput, decodeOutput, isMale, speed, model));
     return insert.id();
   }
 
-  private SlickRefResult toSlick(int userID, int projid, int exid, String audioFile, long durationInMillis, boolean correct,
-                         DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput, boolean isMale,
-                         String speed, String model) {
+  private SlickRefResult toSlick(int userID, int projid, int exid,
+                                 int audioid,
+                                 //  String audioFile,
+                                 long durationInMillis, boolean correct,
+                                 DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput, boolean isMale,
+                                 String speed, String model) {
     if (model == null) model = "";
     return new SlickRefResult(-1,
-        userID, projid,
-        exid, new Timestamp(System.currentTimeMillis()), audioFile, durationInMillis,
+        userID,
+        projid,
+        exid,
+        audioid,
+        new Timestamp(System.currentTimeMillis()),
+        //audioFile,
+        durationInMillis,
         correct,
         decodeOutput.getScore(), decodeOutput.getJson(), decodeOutput.getNumPhones(), decodeOutput.getProcessDurInMillis(),
         alignOutput.getScore(), alignOutput.getJson(), alignOutput.getNumPhones(), alignOutput.getProcessDurInMillis(),
@@ -130,7 +147,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     );
   }
 
-  public SlickRefResult toSlick(int projid, Result result) {
+  public SlickRefResult toSlick(int projid, Result result, int audioID) {
     DecodeAlignOutput alignOutput = result.getAlignOutput();
     DecodeAlignOutput decodeOutput = result.getDecodeOutput();
     String model = result.getModel();
@@ -139,8 +156,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
         result.getUserid(),
         projid,
         result.getExerciseID(),
+        audioID,
         new Timestamp(result.getTimestamp()),
-        result.getAnswer(), result.getDurationInMillis(),
+        //  result.getAnswer(),
+        result.getDurationInMillis(),
         result.isCorrect(),
         decodeOutput.getScore(), decodeOutput.getJson(), decodeOutput.getNumPhones(), decodeOutput.getProcessDurInMillis(),
         alignOutput.getScore(), alignOutput.getJson(), alignOutput.getNumPhones(), alignOutput.getProcessDurInMillis(),
@@ -150,10 +169,15 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     );
   }
 
-
+/*
   @Override
   public boolean removeForAudioFile(String audioFile) {
     return dao.deleteByAudioFile(audioFile) > 0;
+  }*/
+
+  @Override
+  public boolean removeByAudioID(int audioID) {
+    return dao.deleteByAudioID(audioID) > 0;
   }
 
   /**
@@ -167,12 +191,20 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return results;
   }
 
-  public List<String> getAllFilesForProject(int projid) {
+/*  public List<String> getAllFilesForProject(int projid) {
     return dao.getAllFiles(projid);
+  }*/
+
+  public List<Integer> getAllAudioIDsForProject(int projid) {
+    return dao.getAllAudioID(projid);
   }
 
   private List<SlickRefResultJson> getJsonResultsForProject(int projid) {
     return dao.getAllSlimForProject(projid);
+  }
+
+  private List<SlickRefResultJson> getSlimForAudioID(int audioid) {
+    return dao.getAllSlimForProject(audioid);
   }
 
   /**
@@ -185,25 +217,44 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return new ExerciseToPhone().getExerciseToPhoneForProject(jsonResults);
   }
 
+/*
   @Override
-  public Result getResult(int exid, String answer) {
+  public ISlimResult getResult(int exid, String answer) {
     long then = System.currentTimeMillis();
     Collection<SlickRefResult> slickRefResults = dao.byExAndAnswer(exid, answer);
     long now = System.currentTimeMillis();
     if (now - then > 20) logger.info("took " + (now - then) + " to lookup " + exid);
+
     if (slickRefResults.isEmpty()) {
       logger.info("no results for " + exid + " and " + answer);
       return null;
+    } else {
+      return fromSlick(slickRefResults.iterator().next());
     }
-    else return fromSlick(slickRefResults.iterator().next());
+  }
+*/
+
+  @Override
+  public ISlimResult getResult(int audioid) {
+    long then = System.currentTimeMillis();
+    Collection<SlickRefResultJson> slickRefResults = dao.getAllSlimByAudioID(audioid);
+    long now = System.currentTimeMillis();
+    //  if (now - then > 20) logger.info("took " + (now - then) + " to lookup " + exid);
+
+    if (slickRefResults.isEmpty()) {
+      logger.info("no results for " + audioid);
+      return null;
+    } else {
+      return fromSlickToSlim(slickRefResults.iterator().next());
+    }
   }
 
   /**
    * @param ids
    * @return
-   * @see mitll.langtest.server.database.JsonSupport#getJsonRefResults(Map)
+   * @seex mitll.langtest.server.database.JsonSupport#getJsonRefResults(Map)
    */
-  @Override
+/*  @Override
   public JSONObject getJSONScores(Collection<Integer> ids) {
     Collection<Tuple3<Integer, String, String>> tuple3s = dao.jsonByExIDs(ids);
     Map<Integer, List<String>> idToAnswers = new HashMap<>();
@@ -217,7 +268,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
       addToJSONs(idToJSONs, exid, json);
     }
     return getJsonObject(idToAnswers, idToJSONs);
-  }
+  }*/
 
   private static final String WORDS = "{\"words\":[]}";
 
@@ -240,7 +291,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
           // "", // plan
           slickRef.exid(), // id
           0, // qid
-          trimPathForWebPage2(slickRef.answer()), // answer
+          "",//trimPathForWebPage2(slickRef.answer()), // answer
           true, // valid
           slickRef.modified().getTime(),
           AudioType.UNSET,
@@ -252,6 +303,15 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
       result.setJsonScore(scoreJson1);
       return result;
     } else return null;
+  }
+
+  private SlimResult fromSlickToSlim(SlickRefResultJson slickRef) {
+    String scoreJson = slickRef.scorejson();
+    float alignScore = slickRef.alignscore();
+
+    boolean validAlignJSON = alignScore > 0 && !scoreJson.contains(WORDS);
+
+    return new SlimResult(validAlignJSON, scoreJson, alignScore);
   }
 
   @Override

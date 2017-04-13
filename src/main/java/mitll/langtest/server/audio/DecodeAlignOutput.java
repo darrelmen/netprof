@@ -105,7 +105,7 @@ public class DecodeAlignOutput {
   private int numPhones(PretestScore pretestScore) {
     int c = 0;
     if (pretestScore != null) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getTypeToSegments();
       List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
 
       if (phones != null) {

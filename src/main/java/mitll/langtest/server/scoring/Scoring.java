@@ -360,8 +360,7 @@ public abstract class Scoring {
         return getEventInfo(typeToFile, useWebservice, usePhoneToDisplay); // if align, don't use webservice regardless
       }
     } else {
-      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
-          getTypeToTranscriptEvents(object, usePhoneToDisplay);
+      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =getTypeToTranscriptEvents(object, usePhoneToDisplay);
 
      // logger.info("imageTypeMapMap " + imageTypeMapMap);
       String pathname = audioFileNoSuffix + ".wav";
@@ -380,7 +379,7 @@ public abstract class Scoring {
     }
   }
 
-  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
+  public Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
     return
         new ParseResultJson(props)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);

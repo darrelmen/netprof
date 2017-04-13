@@ -815,8 +815,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #scoreRepeatExercise
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = eventAndFileInfo.typeToEvent;
+    return getTypeToSegments(typeToEvent);
+  }
+
+  @NotNull
+  public Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
       if (endTimes == null) {

@@ -39,6 +39,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
@@ -186,7 +187,13 @@ public class ListManager implements RequiresResize {
     logger.info("showLists ");
     subListTabPanel = new TabPanel();
     addListTabs(subListTabPanel);
-    showFirstUserListTab(subListTabPanel, 0);
+
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        showFirstUserListTab(subListTabPanel, 0);
+      }
+    });
     return subListTabPanel;
   }
 

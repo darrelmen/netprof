@@ -42,26 +42,22 @@ import java.util.Date;
 /**
  * Only server side.
  */
-public class Result implements UserAndTime {
-  private int uniqueID;
+public class Result extends SlimResult implements UserAndTime {
+  protected int uniqueID;
   private int userid;
 
   private int exid;
   @Deprecated  private String oldExID;
   private int qid;
   private String answer;
-  private boolean valid;
   private long timestamp;
 
   private AudioType audioType = AudioType.UNSET;
   private long durationInMillis;
   private boolean correct;
-  private float pronScore;
 
   private String deviceType;
   private String device;
-
-  private transient String jsonScore;
 
   private long processDur;
   private long roundTrip;
@@ -74,9 +70,6 @@ public class Result implements UserAndTime {
 
   private DecodeAlignOutput alignOutput;
   private DecodeAlignOutput decodeOutput;
-
-//  public Result() {
-//  }
 
   /**
    * @param userid
@@ -111,17 +104,16 @@ public class Result implements UserAndTime {
                 String deviceType,
                 long processDur, long roundTripDur, boolean withFlash, float dynamicRange,
                 String validity, String model) {
+    super(valid, "", pronScore);
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
     this.qid = qid;
     this.answer = answer;
-    this.valid = valid;
     this.timestamp = timestamp;
     this.audioType = audioType;
     this.durationInMillis = durationInMillis;
     this.correct = correct;
-    this.pronScore = pronScore;
     this.device = device;
     this.deviceType = deviceType;
     this.processDur = processDur;
@@ -159,16 +151,12 @@ public class Result implements UserAndTime {
     return correct;
   }
 
-  public float getPronScore() {
-    return pronScore;
+  public int getUserid() {
+    return userid;
   }
 
   public int getUniqueID() {
     return uniqueID;
-  }
-
-  public int getUserid() {
-    return userid;
   }
 
   /**
@@ -182,10 +170,6 @@ public class Result implements UserAndTime {
 
   public String getAnswer() {
     return answer;
-  }
-
-  public boolean isValid() {
-    return valid;
   }
 
   public long getTimestamp() {
@@ -212,14 +196,6 @@ public class Result implements UserAndTime {
         "  ans " + getAnswer() +
         " audioType : " + getAudioType() + " device " + device +
         " valid " + isValid() + " " + (isCorrect() ? "correct" : "incorrect") + " score " + getPronScore();
-  }
-
-  public String getJsonScore() {
-    return jsonScore;
-  }
-
-  public void setJsonScore(String jsonScore) {
-    this.jsonScore = jsonScore;
   }
 
   public void setUserID(Integer userID) {

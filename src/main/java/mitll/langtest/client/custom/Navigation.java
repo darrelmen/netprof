@@ -589,12 +589,6 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
     return tabAndContent;
   }
 
-/*
-  private int getUser() {
-    return userManager.getUser();
-  }
-*/
-
   /**
    *
    */
@@ -604,6 +598,11 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
     } else {
       selectPreviousTab();
     }
+  }
+
+  @Override
+  public void clearCurrent() {
+
   }
 
   private void checkAndMaybeClearTab(String value) {

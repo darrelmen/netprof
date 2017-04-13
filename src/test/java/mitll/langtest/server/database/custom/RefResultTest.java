@@ -47,9 +47,9 @@ public class RefResultTest {
     typeToSection.put("Unit", Collections.singleton("1"));
     typeToSection.put("Chapter", Collections.singleton("1"));
 
-    JSONObject jsonRefResult = war.getJsonRefResult(typeToSection, 1);
+  //  JSONObject jsonRefResult = war.getJsonRefResult(typeToSection, 1);
 
-    System.out.println(jsonRefResult);
+   // System.out.println(jsonRefResult);
 
 
     Map<Integer, Map<String, Result>> userToResults = null;//((ResultDAO)war.getResultDAO()).getUserToResults(true, war.getUserDAO());

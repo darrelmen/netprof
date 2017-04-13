@@ -49,13 +49,12 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
  */
-public class PretestScore implements IsSerializable {
+public class PretestScore extends AlignmentOutput implements IsSerializable {
   private int reqid = 0;
   private float hydecScore = -1f;
   private Map<String, Float> phoneScores;
   private Map<String, Float> wordScores;
   private Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
-  private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
   private String recoSentence;
   private float wavFileLengthSeconds;
   private int processDur = 0;
@@ -67,7 +66,7 @@ public class PretestScore implements IsSerializable {
 
   /**
    * @param score
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
+   * @seex mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
    */
   public PretestScore(float score) {
     this.hydecScore = score;
@@ -82,7 +81,7 @@ public class PretestScore implements IsSerializable {
    * @param sTypeToEndTimes
    * @param recoSentence
    * @param processDur
-   * @see mitll.langtest.server.scoring.ASRScoring#getPretestScore
+   * @seex mitll.langtest.server.scoring.ASRScoring#getPretestScore
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
    */
   public PretestScore(float hydecScore,
@@ -92,11 +91,12 @@ public class PretestScore implements IsSerializable {
                       String recoSentence,
                       float wavFileLengthSeconds,
                       int processDur) {
+    super(sTypeToEndTimes);
     this.sTypeToImage = sTypeToImage;
     this.hydecScore = hydecScore;
     this.phoneScores = phoneScores;
     this.wordScores = wordScores;
-    this.sTypeToEndTimes = sTypeToEndTimes;
+  //  this.sTypeToEndTimes = sTypeToEndTimes;
     this.recoSentence = recoSentence;
     this.wavFileLengthSeconds = wavFileLengthSeconds;
     this.processDur = processDur;
@@ -117,10 +117,6 @@ public class PretestScore implements IsSerializable {
 
   public Map<NetPronImageType, String> getsTypeToImage() {
     return sTypeToImage;
-  }
-
-  public Map<NetPronImageType, List<TranscriptSegment>> getsTypeToEndTimes() {
-    return sTypeToEndTimes;
   }
 
   public String getRecoSentence() {
@@ -147,7 +143,7 @@ public class PretestScore implements IsSerializable {
     return "hydec score " + hydecScore +
         " phones " + getPhoneScores() +
         " type->image " + getsTypeToImage() +
-        " type->endtimes " + getsTypeToEndTimes() + " took " + processDur + " millis"
+        " type->endtimes " + getTypeToSegments() + " took " + processDur + " millis"
         ;
   }
 

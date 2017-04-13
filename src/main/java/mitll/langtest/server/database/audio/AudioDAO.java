@@ -875,6 +875,16 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return null;
   }
 
+  @Override
+  public Map<String, Integer> getPairs(int projid) {
+    return null;
+  }
+
+  @Override
+  public AudioAttribute getByID(int audioID) {
+    return null;
+  }
+
   /**
    * An audio cut is uniquely identified by by exercise id, speed (reg/slow), and who recorded it.
    *
@@ -883,7 +893,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param audioType  at this speed
    * @return > 0 if audio was marked defective
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
+   * @seex mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   protected int markDefect(int userid, int exerciseID, AudioType audioType) {
     try {

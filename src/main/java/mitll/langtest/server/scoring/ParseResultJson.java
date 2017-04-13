@@ -183,7 +183,7 @@ public class ParseResultJson {
    * @see PrecalcScores#getCachedScores
    * @see Scoring#getTypeToTranscriptEvents
    */
-  Map<ImageType, Map<Float, TranscriptEvent>> readFromJSON(JsonObject jsonObject,
+  public Map<ImageType, Map<Float, TranscriptEvent>> readFromJSON(JsonObject jsonObject,
                                                            String words1,
                                                            String w1,
                                                            boolean usePhones,

@@ -38,6 +38,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.npdata.dao.SlickAudio;
 
 import java.util.Collection;
 import java.util.List;
@@ -126,4 +127,7 @@ public interface IAudioDAO extends IDAO {
 
   String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise);
 
+  Map<String,Integer> getPairs(int projid);
+
+  AudioAttribute getByID(int audioID);
 }

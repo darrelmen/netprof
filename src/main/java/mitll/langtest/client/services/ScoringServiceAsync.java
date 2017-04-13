@@ -34,8 +34,12 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+
+import java.util.List;
+import java.util.Map;
 
 public interface ScoringServiceAsync {
   void getASRScoreForAudio(int reqid,
@@ -74,4 +78,5 @@ public interface ScoringServiceAsync {
 
   void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Boolean> async);
 
+  void getAlignments(int projid, List<Integer> audioIDs, AsyncCallback<Map<Integer, AlignmentOutput>> async);
 }

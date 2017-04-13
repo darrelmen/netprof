@@ -36,7 +36,9 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.JsonSupport;
+import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
@@ -117,17 +119,19 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @param userID
    * @param projid
    *@param exid
-   * @param audioFile
+   * @paramx audioFile
    * @param correct
    * @param isMale
    * @param speed
    * @param model       @return id of new row in result table
-   * @see DatabaseImpl#addRefAnswer
+   * @see DatabaseServices#addRefAnswer
    */
   @Override
   public long addAnswer(int userID,
-                        int projid, int exid,
-                        String audioFile,
+                        int projid,
+                        int exid,
+                        int audioID,
+                        //String audioFile,
                         long durationInMillis,
                         boolean correct,
 
@@ -141,7 +145,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, ""+ exid, audioFile, durationInMillis, correct,
+      long newid = addAnswerToTable(connection, userID, ""+ exid, "", durationInMillis, correct,
           alignOutput,
           decodeOutput,
 
@@ -159,6 +163,11 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
       database.closeConnection(connection);
     }
     return -1;
+  }
+
+  @Override
+  public boolean removeByAudioID(int audioID) {
+    return false;
   }
 
   /**
@@ -279,11 +288,13 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
     return newID;
   }
+/*
 
   @Override
   public boolean removeForAudioFile(String audioFile) {
     return remove(REFRESULT, ANSWER, audioFile, false);
   }
+*/
 
   private String copyStringChar(String plan) {
     return new String(plan.toCharArray());
@@ -293,7 +304,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see RefResultDecoder#getDecodedFiles()
+   * @see RefResultDecoder#getDecodedFiles
    */
   @Override
   public List<Result> getResults() {
@@ -330,6 +341,11 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     return null;
   }
 
+  @Override
+  public ISlimResult getResult(int audioid) {
+    return null;
+  }
+
   public Result getRefForExAndAudio(String exid, String answer) {
     Result latestResult = null;
 
@@ -359,10 +375,10 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @param exid
    * @param answer
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getPretestScore
    */
-  @Override
-  public Result getResult(int exid, String answer) {
+/*  @Override
+  public ISlimResult getResult(int exid, String answer) {
     String sql = SELECT_ALL +
         " WHERE " + EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
     try {
@@ -375,14 +391,14 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
       logger.error("Got " + e, e);
     }
     return null;
-  }
+  }*/
 
   /**
    * @param ids
    * @return
-   * @see JsonSupport#getJsonRefResults(Map)
+   * @seex JsonSupport#getJsonRefResults(Map)
    */
-  @Override
+/*  @Override
   public JSONObject getJSONScores(Collection<Integer> ids) {
     try {
       String list = getInList(ids);
@@ -418,7 +434,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
       logException(ee);
     }
     return new JSONObject();
-  }
+  }*/
 
   /**
    * @param sql
@@ -457,9 +473,14 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   }
 
   @Override
-  public List<String> getAllFilesForProject(int projid) {
+  public List<Integer> getAllAudioIDsForProject(int projid) {
     return null;
   }
+/*
+  @Override
+  public List<String> getAllFilesForProject(int projid) {
+    return null;
+  }*/
 
   @Override
   public void deleteForProject(int projid) {

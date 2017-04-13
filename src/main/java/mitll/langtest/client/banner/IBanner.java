@@ -29,5 +29,6 @@ public interface IBanner {
 
   void onResize();
 
+
 //  void setBreadcrumbs(Breadcrumbs widgets);
 }

@@ -463,24 +463,27 @@ return bannerRow;
    * @see #addCrumbs(Breadcrumbs)
    */
   public void chooseProjectAgain() {
-    userService.forgetProject(new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-      }
+    if (userManager.hasUser()) {
+      userService.forgetProject(new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable throwable) {
+        }
 
-      @Override
-      public void onSuccess(Void aVoid) {
-      }
-    });
+        @Override
+        public void onSuccess(Void aVoid) {
+          navigation.clearCurrent();
+        }
+      });
 
-    History.newItem("");
-    clearStartupInfo();
+      History.newItem("");
+      clearStartupInfo();
 
-    breadcrumbs.clear();
-    addCrumbs(breadcrumbs);
+      breadcrumbs.clear();
+      addCrumbs(breadcrumbs);
 
-    clearContent();
-    addProjectChoices(0, null);
+      clearContent();
+      addProjectChoices(0, null);
+    }
   }
 
   private void makeNavigation() {

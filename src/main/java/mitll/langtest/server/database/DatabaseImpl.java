@@ -919,11 +919,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param typeToSection
    * @param projectid
    * @return
-   * @see ScoreServlet#getRefInfo(String, JSONObject)
+   * @seex ScoreServlet#getRefInfo
    */
-  public JSONObject getJsonRefResult(Map<String, Collection<String>> typeToSection, int projectid) {
+/*  public JSONObject getJsonRefResult(Map<String, Collection<String>> typeToSection, int projectid) {
     return getJsonSupportForProject(projectid).getJsonRefResults(typeToSection);
-  }
+  }*/
 
   /**
    * TODO : make sure that iOS app has same idea of current project as does website
@@ -1270,21 +1270,19 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param userID
    * @param projid
    * @param exerciseID
-   * @param audioFile
-   * @param durationInMillis
+   * @param audioid
+   *@param durationInMillis
    * @param correct
    * @param isMale
    * @param speed
-   * @param model
-   * @return
+   * @param model      @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    */
   @Override
   public long addRefAnswer(int userID,
                            int projid,
                            int exerciseID,
-                           String audioFile,
-                           long durationInMillis,
+                           int audioid, long durationInMillis,
                            boolean correct,
                            DecodeAlignOutput alignOutput,
                            DecodeAlignOutput decodeOutput,
@@ -1295,7 +1293,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
                            boolean isMale,
                            String speed,
                            String model) {
-    return refresultDAO.addAnswer(userID, projid, exerciseID, audioFile, durationInMillis, correct,
+    return refresultDAO.addAnswer(userID, projid, exerciseID, audioid, durationInMillis, correct,
         alignOutput, decodeOutput,
         alignOutputOld, decodeOutputOld,
         isMale, speed, model);

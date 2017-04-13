@@ -47,7 +47,6 @@ import mitll.langtest.server.database.userlist.UserListServices;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -116,8 +115,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   long addRefAnswer(int userID,
                     int projid,
                     int exerciseID,
-                    String audioFile,
-                    long durationInMillis,
+                    int audioid, long durationInMillis,
                     boolean correct,
                     DecodeAlignOutput alignOutput,
                     DecodeAlignOutput decodeOutput,

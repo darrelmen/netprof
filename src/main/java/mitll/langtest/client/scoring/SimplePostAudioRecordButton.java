@@ -242,7 +242,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
       colorfulSent.add(bad);
       return colorfulSent;
     }
-    List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> ts = lastResult.getPretestScore().getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
     String[] words = sentToColor.replaceAll("-", " ").split("\\s+");
     int wordIndex = 0;
     for (TranscriptSegment wordInfo : ts) {

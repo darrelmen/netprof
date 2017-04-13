@@ -44,7 +44,6 @@ import java.util.Map;
 
 class BaseRefResultDAO extends DAO {
   private static final String SCORE_JSON = "scoreJSON";
-//  private final boolean dropTable;
 
   BaseRefResultDAO(Database database) {
     super(database);

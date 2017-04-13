@@ -48,6 +48,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import scala.Tuple2;
+import scala.collection.Seq;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -70,6 +71,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     doCheckOnStartup = serverProps.doAudioCheckOnStartup();
   }
 
+  public Map<String,Integer> getPairs(int projid) {
+    return dao.getPairs(projid);
+  }
   public void createTable() {
     dao.createTable();
   }
@@ -533,7 +537,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @paramx idToMini
    * @see #getAudioAttributesByProject(int)
    */
-  private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all) {
+  private List<AudioAttribute> toAudioAttribute(Collection<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
     if (all.isEmpty()) {
       logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows but no audio?");
@@ -551,14 +555,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return toAudioAttribute(s, miniUser);
   }
 
-  public void addBulk(List<SlickAudio> bulk) {
-    dao.addBulk(bulk);
-  }
-
+  public void addBulk(List<SlickAudio> bulk)  { dao.addBulk(bulk);  }
   public void addBulk2(List<SlickAudio> bulk) {
     dao.addBulk2(bulk);
   }
-
   public int getNumRows() {
     return dao.getNumRows();
   }
@@ -711,5 +711,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
     }
     return orDefault;
+  }
+
+  public AudioAttribute getByID(int audioID) {
+    Collection<SlickAudio> byID = dao.getByID(audioID);
+    return byID.isEmpty()?null:toAudioAttribute(byID).iterator().next();
   }
 }

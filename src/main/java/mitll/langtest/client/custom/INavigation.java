@@ -18,4 +18,6 @@ public interface INavigation {
   void onResize();
 
   void showPreviousState();
+
+  void clearCurrent();
 }

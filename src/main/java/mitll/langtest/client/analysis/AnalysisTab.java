@@ -273,22 +273,38 @@ public class AnalysisTab extends DivWidget {
       public void onSuccess(List<WordScore> wordScores) {
         logger.info("getWordScores : got " + wordScores.size() + " for user #" + userid);
 
-        Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
-        final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle);
-        Panel tableWithPager = wordContainer.getTableWithPager(wordScores);
-
-        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle);
-        wordsContainer.addStyleName("cardBorderShadow");
-        wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
-
-        lowerHalf.add(wordsContainer);
-
-        DivWidget soundsDiv = getSoundsDiv();
-
-        lowerHalf.add(soundsDiv);
-        getPhoneReport(service, controller, userid, soundsDiv, analysisPlot, showTab, minRecordings);
+        showWordScores(wordScores, controller, analysisPlot, showTab, lowerHalf, /*service,*/ userid, minRecordings);
       }
     });
+  }
+
+  private void showWordScores(List<WordScore> wordScores, ExerciseController controller, AnalysisPlot analysisPlot,
+                              ShowTab showTab, Panel lowerHalf,
+                              //AnalysisServiceAsync service,
+                              int userid, int minRecordings) {
+   // Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
+    Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab, new Heading(3, WORDS, SUBTITLE));
+
+    DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", new Heading(3, WORDS, SUBTITLE));
+    wordsContainer.addStyleName("cardBorderShadow");
+    wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
+
+    lowerHalf.add(wordsContainer);
+
+    DivWidget soundsDiv = getSoundsDiv();
+
+    lowerHalf.add(soundsDiv);
+    getPhoneReport(analysisServiceAsync, controller, userid, soundsDiv, analysisPlot, showTab, minRecordings);
+  }
+
+  private Panel getWordContainer(List<WordScore> wordScores,
+                                 ExerciseController controller,
+                                 AnalysisPlot analysisPlot,
+                                 ShowTab showTab,
+                                 Heading wordsTitle) {
+    final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle);
+
+    return wordContainer.getTableWithPager(wordScores);
   }
 
   private DivWidget getSoundsDiv() {

@@ -39,6 +39,7 @@ import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.result.ISlimResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +52,7 @@ import java.util.Map;
  */
 public class PrecalcScores {
   //  private static final Logger logger = LogManager.getLogger(PrecalcScores.class);
-  private Result precalcResult;
+  private ISlimResult precalcResult;
   private Scores scores;
   private JsonObject jsonObject;
   private boolean isValid;
@@ -63,17 +64,16 @@ public class PrecalcScores {
    * @param serverProperties
    * @param precalcResult
    * @param usePhoneToDisplay
-   * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getPrecalcScores
    */
-  public PrecalcScores(ServerProperties serverProperties, Result precalcResult, boolean usePhoneToDisplay) {
+  public PrecalcScores(ServerProperties serverProperties, ISlimResult precalcResult, boolean usePhoneToDisplay) {
     this.parseResultJson = new ParseResultJson(serverProperties);
     this.precalcResult = precalcResult;
 
     boolean valid = isValidPrecalc();
 
     if (valid) {
-      float pronScore = precalcResult.getPronScore();
-      parseJSON(precalcResult, usePhoneToDisplay, pronScore);
+      parseJSON(precalcResult, usePhoneToDisplay, precalcResult.getPronScore());
 //      logger.debug("for cached result " + precalcResult + " is valid " + isValid + " : " + precalcResult.getJsonScore());
     } else {
       isValid = false;
@@ -85,9 +85,8 @@ public class PrecalcScores {
     parseJSON(false, -100, json);
   }
 
-  private void parseJSON(Result precalcResult, boolean usePhoneToDisplay, float pronScore) {
-    String jsonScore = precalcResult.getJsonScore();
-    parseJSON(usePhoneToDisplay, pronScore, jsonScore);
+  private void parseJSON(ISlimResult precalcResult, boolean usePhoneToDisplay, float pronScore) {
+    parseJSON(usePhoneToDisplay, pronScore, precalcResult.getJsonScore());
   }
 
   private void parseJSON(boolean usePhoneToDisplay, float pronScore, String jsonScore) {

@@ -89,18 +89,17 @@ public class ProjectChoices {
    */
   public void showProjectChoices(int level, SlimProject parent) {
     if (parent != null) {
-      showProjectChoices(getVisibleProjects(parent.getChildren()), level);
+      contentRow.add(showProjectChoices(getVisibleProjects(parent.getChildren()), level));
     } else {
       long then = System.currentTimeMillis();
-
       service.getStartupInfo(new AsyncCallback<StartupInfo>() {
         public void onFailure(Throwable caught) {
           lifecycleSupport.onFailure(caught, then);
         }
 
         public void onSuccess(StartupInfo startupInfo) {
-          logger.info("got " +startupInfo);
-          showProjectChoices(getVisibleProjects(startupInfo.getProjects()), level);
+//          logger.info("got " +startupInfo);
+          contentRow.add(showProjectChoices(getVisibleProjects(startupInfo.getProjects()), level));
         }
       });
     }
@@ -136,7 +135,7 @@ public class ProjectChoices {
   }
 
   public void showProject(SlimProject project) {
-    showProjectChoices(project.getChildren(), 1);
+    contentRow.add(showProjectChoices(project.getChildren(), 1));
   }
 
   /**
@@ -144,19 +143,15 @@ public class ProjectChoices {
    * @param nest
    * @see InitialUI#addProjectChoices
    */
-  public void showProjectChoices(List<SlimProject> result, int nest) {
+  private Section showProjectChoices(List<SlimProject> result, int nest) {
 //    logger.info("showProjectChoices " + result.size() + " : " + nest);
     final Section section = new Section("section");
-    contentRow.add(section);
-
     section.add(getHeader(result, nest));
 
     final Container flags = new Container();
-    // removeWidth(flags);
-
     section.add(flags);
-
     addFlags(result, nest, flags);
+    return section;
   }
 
   private void addFlags(List<SlimProject> result, int nest, Container flags) {
@@ -164,7 +159,6 @@ public class ProjectChoices {
     flags.add(current);
 
     List<SlimProject> languages = new ArrayList<>(result);
-
 //    logger.info("addProjectChoices " + languages.size() + " languages");
 
     sortLanguages(nest, languages);
@@ -177,8 +171,7 @@ public class ProjectChoices {
       if (max > size) max = size;
       for (int j = i; j < max; j++) {
         SlimProject project = languages.get(j);
-        Panel langIcon = getLangIcon(project.getLanguage(), project, nest);
-        current.add(langIcon);
+        current.add(getLangIcon(project.getLanguage(), project, nest));
         total++;
       }
 
@@ -190,16 +183,12 @@ public class ProjectChoices {
   }
 
   private void sortLanguages(final int nest, List<SlimProject> languages) {
-    Collections.sort(languages, new Comparator<SlimProject>() {
-      @Override
-      public int compare(SlimProject o1, SlimProject o2) {
-        if (nest == 0) {
-
-          return o1.getLanguage().toLowerCase().compareTo(o2.getLanguage().toLowerCase());
-        } else {
-          int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
-          return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
-        }
+    Collections.sort(languages, (o1, o2) -> {
+      if (nest == 0) {
+        return o1.getLanguage().toLowerCase().compareTo(o2.getLanguage().toLowerCase());
+      } else {
+        int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
+        return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
       }
     });
   }
@@ -216,26 +205,26 @@ public class ProjectChoices {
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
-    // removeWidth(header);
     String text = PLEASE_SELECT_A_LANGUAGE;
     if (nest == 1) {
       text = PLEASE_SELECT_A_COURSE;
     }
-
     if (result.isEmpty()) {
       text = NO_LANGUAGES_LOADED_YET;
     }
 
     Heading child = new Heading(3, text);
     child.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
-
     header.add(child);
+
     return header;
   }
 
+/*
   private void removeWidth(Widget header) {
     header.getElement().removeAttribute("width");
   }
+*/
 
   /**
    * @param lang

@@ -2,7 +2,6 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
@@ -20,33 +19,20 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/10/17.
  */
 public class NewContentChooser implements INavigation {
+  private final Logger logger = Logger.getLogger("NewContentChooser");
+
   public static final String LISTS = "Lists";
   public static final String PROGRESS = "Progress";
-  private Logger logger = Logger.getLogger("NewContentChooser");
-
   public static final String LEARN = "Learn";
-
-  //public static final String STUDENT_ANALYSIS = "Student Analysis";
-  public static final String CLASSROOM = "classroom";
-
-  //public static final String CHAPTERS = "Learn Pronunciation";
-
-  //private static final String CLASSES = "Classes";
-  public static final String PROJECTS = "Projects";
-
-  public static final String YOUR_LISTS = "Study Your Lists";
-  private static final String STUDY_LISTS = "Study Lists";
-  private static final String OTHERS_LISTS = "Study Visited Lists";
   public static final String DRILL = "Drill";//Audio Vocabulary Practice";
 
-  private DivWidget divWidget = new DivWidget();
-  private ExerciseListContent learnHelper;
-  private ExerciseListContent practiceHelper;
-  private ExerciseController controller;
-  ListManager listManager;
-  TabPanel tabPanel = new TabPanel();
+  private final DivWidget divWidget = new DivWidget();
+  private final ExerciseListContent learnHelper;
+  private final ExerciseListContent practiceHelper;
+  private final ExerciseController controller;
+  private final ListManager listManager;
 
-  String currentSection = "";
+  private String currentSection = "";
 
   public NewContentChooser(ExerciseController controller) {
     NewLearnHelper newLearnHelper = new NewLearnHelper(controller);
@@ -58,6 +44,7 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showInitialState() {
+    clearCurrent();
     History.fireCurrentHistoryState();
   }
 
@@ -129,5 +116,10 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showPreviousState() {
+  }
+
+  @Override
+  public void clearCurrent() {
+    currentSection = "";
   }
 }

@@ -506,51 +506,56 @@ public class AudioFileHelper implements AlignDecode {
     if (isInDictOrLTS(exercise)) {
       String audioRef = attribute.getAudioRef();
       if (!audioRef.contains("context=")) {
-        //logger.debug("doing alignment -- ");
-        // Do alignment...
-        File absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
-        String absolutePath = absoluteFile.getAbsolutePath();
-
-        DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoFlashcard(false);
-
-        PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath,
-            //serverProps.usePhoneToDisplay(), false,
-            options);
-        DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
-
-        // Do decoding, and record alignment info we just got in the database ...
-        long durationInMillis = attribute.getDurationInMillis();
-        AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
-        DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
-
-        options.setUseOldSchool(doHydec);
-        PretestScore alignmentScoreOld = doHydec ? getAlignmentScore(exercise, absolutePath,
-            options) : new PretestScore();
-        DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
-
-        // Do decoding, and record alignment info we just got in the database ...
-        AudioAnswer decodeAnswerOld = doHydec ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, true) : new AudioAnswer();
-        DecodeAlignOutput decodeOutputOld = new DecodeAlignOutput(decodeAnswerOld, true);
-
-        //logger.debug("attr dur " + attribute.getDurationInMillis());
-
-        getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(),
-            absoluteFile,
-            durationInMillis,
-
-            alignOutput,
-            decodeOutput,
-
-            alignOutputOld,
-            decodeOutputOld,
-
-            attribute.isMale(),
-            attribute.isRegularSpeed() ? REG : SLOW,
-            getModelsDir());
+        decodeAndRemember(exercise, attribute,true);
       }
     } else {
       logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
+  }
+
+  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode) {
+    String audioRef = attribute.getAudioRef();
+    //logger.debug("doing alignment -- ");
+    boolean doHydec =false;
+    // Do alignment...
+    File absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
+    String absolutePath = absoluteFile.getAbsolutePath();
+
+    DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoFlashcard(false);
+
+    PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, options);
+    DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
+
+    // Do decoding, and record alignment info we just got in the database ...
+    long durationInMillis = attribute.getDurationInMillis();
+    AudioAnswer decodeAnswer = doDecode?getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false): new AudioAnswer();
+
+    DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
+    options.setUseOldSchool(doHydec);
+    PretestScore alignmentScoreOld = /*doHydec ? getAlignmentScore(exercise, absolutePath, options) :*/ new PretestScore();
+    DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
+
+    // Do decoding, and record alignment info we just got in the database ...
+    //AudioAnswer decodeAnswerOld = doHydec ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, true) : new AudioAnswer();
+    DecodeAlignOutput decodeOutputOld = new DecodeAlignOutput(new AudioAnswer(), true);
+
+    //logger.debug("attr dur " + attribute.getDurationInMillis());
+
+    getRefAudioAnswerDecoding(exercise,
+        attribute.getUserid(),
+        attribute.getUniqueID(),
+        durationInMillis,
+
+        alignOutput,
+        decodeOutput,
+
+        alignOutputOld,
+        decodeOutputOld,
+
+        attribute.isMale(),
+        attribute.isRegularSpeed() ? REG : SLOW,
+        getModelsDir());
+    return alignmentScore;
   }
 
   /**
@@ -622,7 +627,7 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param exercise1
    * @param user
-   * @param file
+   * @param audioid
    * @param duration
    * @param isMale
    * @param speed
@@ -634,8 +639,9 @@ public class AudioFileHelper implements AlignDecode {
    */
   private void getRefAudioAnswerDecoding(CommonExercise exercise1,
                                          int user,
-
-                                         File file, long duration,
+                                          int audioid,
+                                        // File file,
+                                         long duration,
                                          DecodeAlignOutput alignOutput,
                                          DecodeAlignOutput decodeOutput,
 
@@ -647,7 +653,8 @@ public class AudioFileHelper implements AlignDecode {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(duration);
     // logger.debug("validity dur " + validity.durationInMillis);
 
-    db.addRefAnswer(user, exercise1.getProjectID(), exercise1.getID(), file.getPath(),
+    db.addRefAnswer(user, exercise1.getProjectID(), exercise1.getID(),
+        audioid,
         validity.durationInMillis,
 
         decodeOutput.isCorrect(),
@@ -981,10 +988,10 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
-  private String getEasyScores(String language, String foreignLanguage, File theFile) {
+/*  private String getEasyScores(String language, String foreignLanguage, File theFile) {
     PrecalcScores easyScores = getPrecalcScores(-1, language, foreignLanguage, 1, theFile, "https://netprof1-dev.llan.ll.mit.edu/netprof/");
     return easyScores.getJsonObject().toString();
-  }
+  }*/
 
   @Nullable
   private PrecalcScores getPrecalcScores(int exid, String language, String foreignLanguage, int userid, File theFile, String hydraHost) {

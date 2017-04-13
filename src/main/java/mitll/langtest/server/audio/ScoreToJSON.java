@@ -91,7 +91,7 @@ public class ScoreToJSON {
   public JSONObject getJsonObject(PretestScore pretestScore) {
     JSONObject jsonObject = new JSONObject();
     if (pretestScore != null) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getTypeToSegments();
 
       if (netPronImageTypeListMap.isEmpty()) {
         JSONObject jsonObject1 = JSONObject.fromObject(pretestScore.getJson());
@@ -186,7 +186,7 @@ public class ScoreToJSON {
 
     jsonObject.put(SCORE, score.getHydecScore());
 
-    for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getsTypeToEndTimes().entrySet()) {
+    for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getTypeToSegments().entrySet()) {
       List<TranscriptSegment> value = pair.getValue();
       JSONArray value1 = new JSONArray();
       NetPronImageType imageType = pair.getKey();

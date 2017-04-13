@@ -1,11 +1,8 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -41,7 +38,7 @@ public class WordScoresTable {
    * @see #scoreAudio
    */
   private Widget getWordTable(PretestScore score) {
-    return new WordTable().getWordTable(score.getsTypeToEndTimes(), false);
+    return new WordTable().getWordTable(score.getTypeToSegments(), false);
   }
 
   /**

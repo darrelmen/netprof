@@ -34,6 +34,7 @@ package mitll.langtest.server.database.refaudio;
 
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
@@ -47,8 +48,9 @@ public interface IRefResultDAO extends IDAO {
   boolean removeForExercise(int exid);
 
   long addAnswer(int userID,
-                 int projid, int exid,
-                 String audioFile,
+                 int projid,
+                 int exid,
+                 int audioID,
                  long durationInMillis,
                  boolean correct,
 
@@ -60,7 +62,8 @@ public interface IRefResultDAO extends IDAO {
 
                  boolean isMale, String speed, String model);
 
-  boolean removeForAudioFile(String audioFile);
+  //boolean removeForAudioFile(String audioFile);
+  boolean removeByAudioID(int audioID);
 
   // TODO : add  a simple ex, json pair here
   // get it, parse it, make reverse map of phone->ex
@@ -78,15 +81,17 @@ public interface IRefResultDAO extends IDAO {
   List<Result> getResults();
 
   Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
+
   /**
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
-   * @param exid
-   * @param answer
+   * @paramx exid
+   * @paramx answer
    * @return
    */
-  Result getResult(int exid, String answer);
+ // ISlimResult getResult(int exid, String answer);
+  ISlimResult getResult(int audioid);
 
-  JSONObject getJSONScores(Collection<Integer> ids);
+  //JSONObject getJSONScores(Collection<Integer> ids);
 
   /**
    * @see mitll.langtest.server.decoder.RefResultDecoder#trimRef
@@ -94,7 +99,8 @@ public interface IRefResultDAO extends IDAO {
    */
   int getNumResults();
 
-  List<String> getAllFilesForProject(int projid);
+ // List<String> getAllFilesForProject(int projid);
+  List<Integer> getAllAudioIDsForProject(int projid);
 
   void deleteForProject(int projid);
 }

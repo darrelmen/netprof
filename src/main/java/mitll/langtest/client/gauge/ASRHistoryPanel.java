@@ -102,7 +102,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     addPlayer();
 
     CorrectAndScore hydecScore = new CorrectAndScore(score.getHydecScore(), path);
-    hydecScore.setScores(score.getsTypeToEndTimes());
+    hydecScore.setScores(score.getTypeToSegments());
     hydecScore.setJson(score.getJson());
     addScore(hydecScore);
   }

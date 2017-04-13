@@ -309,7 +309,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param optName null OK
    * @param isDev
    * @see #copyOneConfigCommand
-   * @see PostgresTest#testCopy
+   * @seex PostgresTest#testCopy
    */
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev);  // TODO : course?
@@ -335,7 +335,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.info("oldToNewUser " + oldToNewUser.size() + " exToID " + exToID.size());
 
       // add the audio table
-      copyAudio(db, oldToNewUser, exToID, projectID);
+      Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, projectID);
 
       // add event table
       copyEvents(db, projectID, oldToNewUser, exToID);
@@ -358,7 +358,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
       copyReviewed(db, oldToNewUser, exToID, true);
       copyReviewed(db, oldToNewUser, exToID, false);
-      copyRefResult(db, oldToNewUser, exToID, projectID);
+      copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
     } else {
       logger.info("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
     }
@@ -425,22 +425,24 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param projid
    * @see #copyOneConfig
    */
-  private void copyAudio(DatabaseImpl db,
-                         Map<Integer, Integer> oldToNewUser,
-                         Map<String, Integer> exToID,
-                         int projid) {
+  private Map<String, Integer> copyAudio(DatabaseImpl db,
+                                         Map<Integer, Integer> oldToNewUser,
+                                         Map<String, Integer> exToID,
+                                         int projid) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
     Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO().getAudioAttributesByProject(projid);
-    logger.info("h2 audio  " + audioAttributes.size());
+    logger.info("copyAudio h2 audio  " + audioAttributes.size());
     int missing = 0;
     int skippedMissingUser = 0;
     Set<String> missingExIDs = new TreeSet<>();
+    Map<String, Integer> fileToID = new HashMap<>();
     for (AudioAttribute att : audioAttributes) {
       String oldexid = att.getOldexid();
       Integer id = exToID.get(oldexid);
       if (id != null) {
+        // fileToID.put(att.getAudioRef(),att.getExid());
         att.setExid(id);
         SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser, projid);
         if (slickAudio != null) {
@@ -454,9 +456,9 @@ public class CopyToPostgres<T extends CommonShell> {
       }
     }
     long then = System.currentTimeMillis();
-    logger.debug("add bulk : " + bulk.size() + " audio... " + skippedMissingUser + " were skipped due to missing user");
+    logger.debug("copyAudio add bulk : " + bulk.size() + " audio... " + skippedMissingUser + " were skipped due to missing user");
     slickAudioDAO.addBulk(bulk);
-    logger.debug("finished adding bulk : " + bulk.size() + " audio...");
+    logger.debug("copyAudio finished adding bulk : " + bulk.size() + " audio...");
 
     long now = System.currentTimeMillis();
 
@@ -466,8 +468,9 @@ public class CopyToPostgres<T extends CommonShell> {
           "" + missingExIDs);
     }
 
-    logger.info("took " + (now - then) +
+    logger.info("copyAudio took " + (now - then) +
         " , postgres audio " + slickAudioDAO.getAudioAttributesByProject(projid).size());
+    return slickAudioDAO.getPairs(projid);
   }
 
   /**
@@ -817,12 +820,16 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param projid
    * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
    */
-  private void copyRefResult(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID, int projid) {
+  private void copyRefResult(DatabaseImpl db,
+                             Map<Integer, Integer> oldToNewUser,
+                             Map<String, Integer> exToID,
+                             Map<String, Integer> pathToAudioID,
+                             int projid) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
     RefResultDAO originalDAO = new RefResultDAO(db, false);
     List<SlickRefResult> bulk = new ArrayList<>();
     Collection<Result> all = originalDAO.getResults();
-    logger.info("copyRefResult found " + all.size());
+    logger.info("copyRefResult found " + all.size() + " original ref results.");
     int missing = 0;
     Set<Integer> missingUsers = new HashSet<>();
     for (Result result : all) {
@@ -836,7 +843,20 @@ public class CopyToPostgres<T extends CommonShell> {
         Integer exid = exToID.get(result.getOldExID());
         if (exid != null) {
           result.setExid(exid);
-          bulk.add(dao.toSlick(projid, result));
+          String answer = result.getAnswer();
+          String[] bestAudios = answer.split("bestAudio");
+
+          int audioID = -1;
+
+          if (bestAudios.length == 2) {
+            String bestAudio = bestAudios[1];
+            bestAudio += "bestAudio";
+            audioID = pathToAudioID.get(bestAudio);
+          }
+
+          if (audioID != -1) {
+            bulk.add(dao.toSlick(projid, result, audioID));
+          }
         } else missing++;
       }
     }

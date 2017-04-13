@@ -39,8 +39,12 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+
+import java.util.List;
+import java.util.Map;
 
 @RemoteServiceRelativePath("scoring-manager")
 public interface ScoringService extends RemoteService {
@@ -50,6 +54,8 @@ public interface ScoringService extends RemoteService {
    * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio
    */
   PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions);
+
+  Map<Integer,AlignmentOutput> getAlignments(int projid,List<Integer> audioIDs);
 
   /**
    * @param reqid
@@ -91,7 +97,6 @@ public interface ScoringService extends RemoteService {
                            String device);
 
   boolean isHydraRunning(int projid);
-
 
   /**
    * @param foreign

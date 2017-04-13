@@ -257,9 +257,10 @@ public class ScoreServlet extends DatabaseServlet {
       } else if (matchesRequest(queryString, PROJECTS)) {
         queryString = removePrefix(queryString, PROJECTS);
         jsonString = getProjects(queryString);
-      } else if (matchesRequest(queryString, REF_INFO)) {
-        queryString = removePrefix(queryString, REF_INFO);
-        toReturn = getRefInfo(queryString, toReturn);
+//      } else if (matchesRequest(queryString, REF_INFO)) {
+//        logger.warn("\n\n\n someone made this request " + REF_INFO);
+//        queryString = removePrefix(queryString, REF_INFO);
+//        toReturn = getRefInfo(queryString, toReturn);
       } else if (matchesRequest(queryString, JSON_REPORT)) {
         queryString = removePrefix(queryString, JSON_REPORT);
         int year = getYear(queryString);
@@ -494,7 +495,14 @@ public class ScoreServlet extends DatabaseServlet {
     return toReturn;
   }
 
-  private JSONObject getRefInfo(String queryString, JSONObject toReturn) {
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @param queryString
+   * @param toReturn
+   * @return
+   * @deprecated not clear who calls this!
+   */
+/*  private JSONObject getRefInfo(String queryString, JSONObject toReturn) {
     String[] split1 = queryString.split("&");
     if (split1.length < 2) {
       toReturn.put(ERROR, "expecting at least two query parameters");
@@ -513,7 +521,7 @@ public class ScoreServlet extends DatabaseServlet {
       toReturn = db.getJsonRefResult(selection, 1);
     }
     return toReturn;
-  }
+  }*/
 
   /**
    * Don't die if audio file helper is not available.

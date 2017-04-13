@@ -25,9 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.banner.NewContentChooser.DRILL;
-import static mitll.langtest.client.banner.NewContentChooser.LEARN;
-import static mitll.langtest.client.banner.NewContentChooser.PROGRESS;
+import static mitll.langtest.client.banner.NewContentChooser.*;
 
 /**
  * Created by go22670 on 4/10/17.
@@ -46,6 +44,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private INavigation navigation;
   private HandlerRegistration handlerRegistration;
   private Map<String,NavLink> nameToLink = new HashMap<>();
+  private Dropdown userDrop;
+
+  private List<Widget> choices = new ArrayList();
+
+  NavLink currentActive = null;
 
   /**
    * @param userManager
@@ -74,8 +77,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     breadcrumbs.addStyleName("rightTwentyMargin");
     addChoicesForUser(lnav);
 
-    Nav rnav = getRightSideChoices(userManager, userMenu);
-    navCollapse.add(rnav);
+    navCollapse.add(getRightSideChoices(userManager, userMenu));
 
     setCogVisible(userManager.hasUser());
     this.userManager = userManager;
@@ -130,6 +132,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
         navigation.showProgress();
         showActive(nameToLink.get(PROGRESS));
         break;
+      case LISTS:
+        navigation.showLists();
+        showActive(nameToLink.get(LISTS));
+        break;
       default:
         navigation.showLearn();
         break;
@@ -149,11 +155,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     for (String choice : Arrays.asList("Learn", "Drill", "Progress", "List"))  choices.add(getChoice(nav, choice));
   }
 
-  private Dropdown userDrop;
 
-  private List<Widget> choices = new ArrayList();
-
-  NavLink currentActive = null;
 
   @NotNull
   private NavLink getChoice(Nav nav, String learn1) {
@@ -198,10 +200,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   }
 
-//  private Widget addDrill(Nav nav) {
-//    return getChoice(nav, "Drill", event -> navigation.showDrill());
-//  }
-
   private Image getImage() {
     Image flashcardImage = new Image(LangTest.LANGTEST_IMAGES + NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeftAndClear");
@@ -220,9 +218,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
    * @seez #gotUser
    * @seez #makeHeaderRow()
    */
+/*
   private String getGreeting() {
     return userManager.getUserID() == null ? "" : ("" + userManager.getUserID());
   }
+*/
 
   @Override
   public Panel getBanner() {
@@ -270,6 +270,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   public void onResize() {
 
   }
+
+//  @Override
+//  public void clearCurrent() {
+//    currentActive
+//  }
 //
 //  @Override
 //  public void setBreadcrumbs(Breadcrumbs widgets) {

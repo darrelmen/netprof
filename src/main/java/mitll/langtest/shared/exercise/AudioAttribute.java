@@ -65,7 +65,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final String SPEED = "speed";
-  public static final String SLOW = AudioType.SLOW.toString();
+  public static final String SLOW    = AudioType.SLOW.toString();
   public static final String REGULAR = AudioType.REGULAR.toString();
 
   /**

@@ -132,8 +132,9 @@ public class JsonSupport {
   /**
    * @param typeToSection
    * @return
-   * @see DatabaseImpl#getJsonRefResult(Map, int)
+   * @seex DatabaseImpl#getJsonRefResult(Map, int)
    */
+/*
   JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     List<Integer> allIDs = new ArrayList<>();
@@ -145,6 +146,7 @@ public class JsonSupport {
     }
     return refResultDAO.getJSONScores(allIDs);
   }
+*/
 
   /**
    * scoreJson has the complete scoring json for the last item only.

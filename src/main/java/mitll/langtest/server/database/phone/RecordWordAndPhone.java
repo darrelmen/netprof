@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.phone;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.AnswerInfo;
@@ -96,7 +95,7 @@ public class RecordWordAndPhone {
    */
   public void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
-      recordWordAndPhoneInfo(answerID, pretestScore.getsTypeToEndTimes());
+      recordWordAndPhoneInfo(answerID, pretestScore.getTypeToSegments());
     }
   }
 
