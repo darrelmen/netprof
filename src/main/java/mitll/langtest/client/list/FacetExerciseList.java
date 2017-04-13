@@ -45,6 +45,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -85,7 +86,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, /*5,*/ 10, 25, 50);
   private static final String ITEMS_PAGE = " items/page";
 
-  private static final int TOTAL = 32;
+  private static final int TOTAL = 28;//32;
+  public static final int CLOSE_TO_END = 2;
   private static final String SHOW_LESS = "<i>View fewer</i>";
   private static final String SHOW_MORE = "<i>View all</i>";
   private static final String ANY = "Any";
@@ -519,7 +521,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     int j = 0;
     int toShow = TOTAL / typeToValues.keySet().size();
     int diff = keys.size() - toShow;
-    boolean hasMore = keys.size() > toShow && diff>3;
+    boolean hasMore = keys.size() > toShow && diff> CLOSE_TO_END;
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
     for (MatchInfo key : keys) {
       addLIChoice(choices, getAnchor(type, key));
@@ -842,6 +844,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected FacetContainer getSectionWidgetContainer() {
     return new FacetContainer() {
 
+      int id;
       /**
        * @see HistoryExerciseList#restoreListBoxState
        * @param selectionState
@@ -850,7 +853,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
         // logger.info("restoreListBoxState t->sel " + selectionState);
-
+        this.id = selectionState.getItem();
         Map<String, String> newTypeToSelection = new HashMap<>();
         for (String type : typeOrder) {
           Collection<String> selections = selectionState.getTypeToSection().get(type);
@@ -870,8 +873,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
         }
 
+        if (id != -1) builder.append(SECTION_SEPARATOR).append("item=").append(id);
         String s = builder.toString();
-        //logger.info("getHistoryToken token " + s);
+        logger.info("getHistoryToken token " + s);
 
         return s;
       }
@@ -1016,6 +1020,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     int id = result.isEmpty() ? -1 : result.iterator().next().getID();
     int size = result.size();
 
+    String token = History.getToken();
+    SelectionState selectionState = getSelectionState(token);
+    logger.info("token " +token);
+    logger.info("selectionState " +selectionState);
+    int item = selectionState.getItem();
+    if (item != -1) {
+      id = item;
+    }
+
 //    logger.info("showExercises onSuccess adding " + result.size());
     for (CommonExercise exercise : result) {
       //   logger.info("ex " + exercise.getID() + " " + exercise.getUnitToValue());
@@ -1033,6 +1046,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         }
       });
       if (exercise.getID() == id) {
+        logger.info("marking " + id);
         markCurrentExercise(id);
       }
     }

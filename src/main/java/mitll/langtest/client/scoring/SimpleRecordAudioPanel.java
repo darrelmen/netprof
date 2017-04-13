@@ -187,6 +187,10 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     return playAudioPanel;
   }
 
+  /**
+   * @see TwoColumnExercisePanel#makeFirstRow
+   * @return
+   */
   public PostAudioRecordButton getPostAudioRecordButton() {
     return postAudioRecordButton;
   }

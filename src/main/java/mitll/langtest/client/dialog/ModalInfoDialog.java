@@ -78,7 +78,8 @@ public class ModalInfoDialog {
   }
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
-    this(title, Collections.singleton(message), Collections.emptyList(), null, handler, false, true, 600, 400);
+    this(title, Collections.singleton(message), Collections.emptyList(),
+        null, handler, false, true, 600, 150);
   }
 
   public ModalInfoDialog(String title, Collection<String> messages, Collection<String> values, Widget widget,

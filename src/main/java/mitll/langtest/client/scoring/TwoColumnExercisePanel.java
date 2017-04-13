@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -18,6 +19,7 @@ import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.BasicDialog;
@@ -137,14 +139,54 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return card;
   }
 
+  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
+
+  @NotNull
+  private String getMailTo() {
+    return "mailto:"  +
+        //NETPROF_HELP_LL_MIT_EDU +
+        "?" +
+        //   "cc=" + LTEA_DLIFLC_EDU + "&" +
+        "Subject=Share netprof item " + exercise.getEnglish() +
+        "&body=Link to " + exercise.getEnglish() + "/" + exercise.getForeignLanguage()+" : "+
+         trimURL(Window.Location.getHref()) +
+        SelectionState.SECTION_SEPARATOR+"item="+exercise.getID();
+  }
+
+  String trimURL(String url) {
+    if (url.contains("127.0.0.1")) {
+      return url.split("\\?")[0].split("#")[0];
+    }
+    else {
+      return url.split("\\?")[0].split("#")[0];
+    }
+  }
+
+
   boolean showingComments = false;
   @NotNull
   private Dropdown getDropdown() {
     Dropdown w = new Dropdown("");
+    w.setRightDropdown(true);
     w.setIcon(IconType.REORDER);
     w.add(new NavLink("Add to List"));
     w.add(new NavLink("New List"));
-    w.add(new NavLink("Share"));
+    NavLink share = new NavLink("Share");
+    w.add(share);
+    share.setHref(getMailTo());
+
+
+    NavLink widget = getShowComments();
+
+    w.add(widget);
+    w.addStyleName("leftTwentyMargin");
+    w.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
+    w.getTriggerWidget().setCaret(false);
+    return w;
+  }
+
+  @NotNull
+  private NavLink getShowComments() {
     NavLink widget = new NavLink("Show Comments");
     widget.addClickHandler(new ClickHandler() {
       @Override
@@ -166,12 +208,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         }
       }
     });
-
-    w.add(widget);
-    w.addStyleName("leftTwentyMargin");
-    w.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
-    w.getTriggerWidget().setCaret(false);
-    return w;
+    return widget;
   }
 
   @NotNull
@@ -182,7 +219,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     flContainer.getElement().setId("flWidget");
 
     DivWidget recordButtonContainer = new DivWidget();
-    recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
+    PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
+    recordButtonContainer.add(postAudioRecordButton);
+    //postAudioRecordButton.setVisible(controller.isRecordingEnabled());
     flContainer.add(recordButtonContainer);
 
     if (hasAudio(e)) {
