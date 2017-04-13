@@ -246,6 +246,7 @@ public class LangTest implements
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
   private final ScoringServiceAsync scoringServiceAsync = GWT.create(ScoringService.class);
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+  private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
 
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
@@ -934,6 +935,10 @@ public class LangTest implements
 
   public ExerciseServiceAsync getExerciseService() {
     return exerciseServiceAsync;
+  }
+
+  public ListServiceAsync getListService() {
+    return listServiceAsync;
   }
 
   public UserFeedback getFeedback() {

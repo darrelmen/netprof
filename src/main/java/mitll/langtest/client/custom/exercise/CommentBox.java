@@ -66,8 +66,9 @@ import java.util.logging.Logger;
  * @since 9/8/14.
  */
 public class CommentBox extends PopupContainerFactory {
-  public static final int ENTRY_VISIBLE_LENGTH = 70;
   private final Logger logger = Logger.getLogger("CommentBox");
+
+  public static final int ENTRY_VISIBLE_LENGTH = 70;
 
   private static final int MAX_LENGTH = 500;
 
@@ -196,10 +197,24 @@ public class CommentBox extends PopupContainerFactory {
 
   }
 
+  Button commentButton, clearButton;
+
+  public void showButtons() {
+    commentButton.setVisible(true);
+    clearButton.setVisible(hasComment);
+  }
+
+  public void hideButtons() {
+    commentButton.setVisible(false);
+    clearButton.setVisible(false);
+  }
+
+  boolean hasComment = false;
+
   /**
-   * @param field      of the exerciseID to comment on
-   * @param content    to wrap
-   * @param annotation to get current comment from
+   * @param field         of the exerciseID to comment on
+   * @param content       to wrap
+   * @param annotation    to get current comment from
    * @param showInitially
    * @return three part widget -- content, comment button, and clear button
    * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getEntry
@@ -217,12 +232,16 @@ public class CommentBox extends PopupContainerFactory {
       clearButton.setVisible(false);
     }
 
+    this.commentButton = commentButton;
+    this.clearButton = clearButton;
+
     commentPopup = makeCommentPopup(field, commentButton, commentEntryText, clearButton);
     commentPopup.addAutoHidePartner(commentButton.getElement()); // fix for bug Wade found where click didn't toggle comment
     configureTextBox(annotation != null ? annotation.getComment() : null, commentEntryText, commentPopup);
 
     boolean isCorrect = annotation == null || annotation.getStatus() == null || annotation.isCorrect();
     String comment = !isCorrect ? annotation.getComment() : "";
+    hasComment = !isCorrect;
 /*    System.out.println("getEntry : field " + field + " annotation " + annotation +
       " correct " + isCorrect + " comment '" + comment+
       "', fields " + exerciseID.getFields());*/
@@ -382,6 +401,7 @@ public class CommentBox extends PopupContainerFactory {
       showQCHasComment(commentButton);
     }
     clearButton.setVisible(!isCorrect);
+    hasComment = !isCorrect;
   }
 
   /**

@@ -80,6 +80,7 @@ public interface ExerciseController extends EventRegistration {
   ScoringServiceAsync getScoringService();
 
   ExerciseServiceAsync getExerciseService();
+  ListServiceAsync getListService();
 
 
   UserManager getUserManager();

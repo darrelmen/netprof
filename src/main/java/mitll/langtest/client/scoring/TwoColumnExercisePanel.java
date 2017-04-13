@@ -1,8 +1,13 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Dropdown;
+import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -20,6 +25,7 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -110,6 +116,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       lr.add(getEnglishWidget(e, english));
       lr.add(getItemWidget(e));
+      Dropdown w = getDropdown();
+      lr.add(w);
 
       rowWidget.add(lr);
     }
@@ -129,6 +137,43 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return card;
   }
 
+  boolean showingComments = false;
+  @NotNull
+  private Dropdown getDropdown() {
+    Dropdown w = new Dropdown("");
+    w.setIcon(IconType.REORDER);
+    w.add(new NavLink("Add to List"));
+    w.add(new NavLink("New List"));
+    w.add(new NavLink("Share"));
+    NavLink widget = new NavLink("Show Comments");
+    widget.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        for (CommentBox box : comments) {
+          if (showingComments) {
+            box.hideButtons();
+          }
+          else {
+            box.showButtons();
+          }
+        }
+        showingComments = !showingComments;
+        if (showingComments) {
+          widget.setText("Hide Comments");
+        }
+        else {
+          widget.setText("Show Comments");
+        }
+      }
+    });
+
+    w.add(widget);
+    w.addStyleName("leftTwentyMargin");
+    w.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
+    w.getTriggerWidget().setCaret(false);
+    return w;
+  }
+
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget) {
     SimpleRecordAudioPanel<T> recordPanel = getRecordPanel(e);
@@ -144,7 +189,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       flContainer.add(getPlayAudioPanel());
     }
 
-    Widget flEntry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
+    Widget flEntry =
+        getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
     flEntry.addStyleName("floatLeft");
 
     DivWidget fieldContainer = new DivWidget();
@@ -183,11 +229,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //logger.info("Add context " + contextEx.getID());
       Panel context = getContext(contextEx, foreignLanguage);
       if (context != null) {
-        //context.getElement().getStyle().setPadding(CONTEXT_PADDING, Style.Unit.PX);
         Style style = context.getElement().getStyle();
         style.setFontWeight(Style.FontWeight.LIGHTER);
         rowWidget.add(context);
-        // context.addStyleName("bentonRegular");
         context.setWidth("100%");
       }
 
@@ -205,8 +249,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           contextTransWidget.addStyleName("rightsidecolor");
           contextTransWidget.setWidth("50%");
           contextTransWidget.getElement().getStyle().setFontWeight(Style.FontWeight.LIGHTER);
-
-          //  contextTransWidget.getElement().getStyle().setPadding(CONTEXT_PADDING, Style.Unit.PX);
           rowWidget.add(contextTransWidget);
         }
       }
@@ -227,6 +269,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return w;
   }
 
+  /**
+   * @param e
+   * @return
+   */
   @NotNull
   private DivWidget getItemWidget(T e) {
     InlineLabel itemHeader = commonExerciseUnitChapterItemHelper.getLabel(e);
@@ -333,6 +379,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return meaning != null && !meaning.trim().isEmpty() && !meaning.equals("N/A");
   }
 
+  List<CommentBox> comments = new ArrayList<>();
+
   /**
    * @param exercise
    * @return
@@ -347,23 +395,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.getElement().setId("contentContainer");
       DivWidget spacer = new DivWidget();
 
-      spacer.getElement().getStyle().setProperty("minWidth",CONTEXT_INDENT+ "px");
+      spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
       hp.add(spacer);
 
       AudioAttribute audioAttrPrefGender = exercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
 
-      //if (audioAttrPrefGender != null) {
-      //logger.info("context audio " + audioAttrPrefGender.getExid() + " "+ audioAttrPrefGender.getAudioRef() + " "+audioAttrPrefGender.getTranscript());
       ChoicePlayAudioPanel child = new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller, true);
       child.setEnabled(audioAttrPrefGender != null);
       hp.add(child);
-      // }
 
       Panel contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
           true, false, false);
 
+      CommentBox commentBox = getCommentBox(true);
       Widget commentRow =
-          getCommentBox(true)
+          commentBox
               .getEntry(QCNPFExercise.CONTEXT, contentWidget,
                   exercise.getAnnotation(QCNPFExercise.CONTEXT), showInitially);
 
@@ -378,19 +424,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (!contextTranslation.isEmpty()) {
       return getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, contextTranslation, false, false, false, showInitially);
     } else return null;
-  }
-
-  /**
-   * @return
-   * @seex x#getEntry(String, String, String, ExerciseAnnotation)
-   * @seex #makeFastAndSlowAudio(String)
-   */
-  private CommentBox getCommentBox(boolean tooltipOnRight) {
-    if (logger == null) {
-      logger = Logger.getLogger("CommentNPFExercise");
-    }
-    T exercise = this.exercise;
-    return new CommentBox(this.exercise.getID(), controller, annotationHelper, exercise.getMutableAnnotation(), tooltipOnRight);
   }
 
   /**
@@ -423,5 +456,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     Panel contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning);
     if (!isFL) contentWidget.addStyleName("topFiveMargin");
     return getCommentBox(true).getEntry(field, contentWidget, annotation, showInitially);
+  }
+
+  /**
+   * @return
+   * @seex x#getEntry(String, String, String, ExerciseAnnotation)
+   * @seex #makeFastAndSlowAudio(String)
+   */
+  private CommentBox getCommentBox(boolean tooltipOnRight) {
+    if (logger == null) {
+      logger = Logger.getLogger("CommentNPFExercise");
+    }
+    T exercise = this.exercise;
+    CommentBox commentBox =
+        new CommentBox(this.exercise.getID(), controller, annotationHelper, exercise.getMutableAnnotation(), tooltipOnRight);
+    comments.add(commentBox);
+    return commentBox;
   }
 }

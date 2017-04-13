@@ -76,7 +76,7 @@ abstract class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
   private static final String ADD_TO_LIST = "Add to List";
   /**
-   * @see #getNextListButton
+   * @see #getNewListButton
    */
   private static final String NEW_LIST = "New List";
   private static final String ITEM_ADDED = "Item Added!";
@@ -121,7 +121,7 @@ abstract class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     if (includeListButtons) {
       addToList = new DropdownButton(ADD_TO_LIST);
       navigationHelper.add(makeAddToList(getLocalExercise().getID(), controller, addToList));
-      navigationHelper.add(getNextListButton());
+      navigationHelper.add(getNewListButton());
     }
     return navigationHelper;
   }
@@ -147,7 +147,7 @@ abstract class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    * @return
    * @see #getNavigationHelper
    */
-  private Widget getNextListButton() {
+  private Widget getNewListButton() {
     String buttonTitle = NEW_LIST;
 
     final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList();
