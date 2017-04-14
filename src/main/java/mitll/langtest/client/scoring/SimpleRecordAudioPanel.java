@@ -62,7 +62,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private DivWidget scoreFeedback;
   private ProgressBar progressBar;
   private boolean hasScoreHistory = false;
-  ListInterface<CommonShell> listContainer;
+  private  ListInterface<CommonShell> listContainer;
 
   /**
    * @param controller

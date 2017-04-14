@@ -32,13 +32,11 @@
 
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.incubator.Table;
 import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.gauge.SimpleColumnChart;
@@ -66,10 +64,10 @@ public class WordTable {
   private static final String TD = "td";
 
   /**
-   * @see PhoneExampleContainer#getItemColumn
    * @param netPronImageTypeToEndTime
    * @param filter
    * @return
+   * @see PhoneExampleContainer#getItemColumn
    */
   public String toHTML(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, String filter) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
@@ -92,7 +90,6 @@ public class WordTable {
     }
 
     builder.append("</thead>");
-
     builder.append("<tr>");
 
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
@@ -106,9 +103,7 @@ public class WordTable {
           String color = " background-color:" + SimpleColumnChart.getColor(phone.getScore());
           boolean match = event.equals(filter);
           if (!match) color = "";
-          builder.append("<th style='text-align:center;" +
-              color +
-              "'>");
+          builder.append("<th style='text-align:center;" + color + "'>");
           builder.append(event);
           builder.append("</th>");
         }
@@ -127,9 +122,9 @@ public class WordTable {
   }
 
   /**
-   * @see mitll.langtest.client.gauge.ASRHistoryPanel#makeColoredTable
    * @param netPronImageTypeToEndTime
    * @return
+   * @see mitll.langtest.client.gauge.ASRHistoryPanel#makeColoredTable
    */
   public String makeColoredTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
@@ -154,6 +149,43 @@ public class WordTable {
     builder.append(event);
     builder.append("</span>");
     return builder.toString();
+  }
+
+  Widget getDivWord(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+    DivWidget table = new DivWidget();
+    table.addStyleName("topFiveMargin");
+    table.addStyleName("leftFiveMargin");
+ //   table.addStyleName("inlineFlex");
+    Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
+    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
+      TranscriptSegment word = pair.getKey();
+
+      String wordLabel = word.getEvent();
+      if (!wordLabel.equals("SIL")) {
+        DivWidget col = new DivWidget();
+        col.addStyleName("floatLeft");
+        table.add(col);
+
+        InlineHTML header = new InlineHTML(wordLabel);
+        alignCenter(header);
+        header.addStyleName("floatLeft");
+        header.setWidth("100%");
+        setColor(word, header);
+        DivWidget hdiv = new DivWidget();
+        setColor(word, hdiv);
+
+        hdiv.setWidth("100%");
+        hdiv.add(header);
+        col.add(hdiv);
+
+        DivWidget phones = new DivWidget();
+        phones.addStyleName("inlineFlex");
+        addPhonesBelowWord2(pair.getValue(), phones);
+        col.add(phones);
+      }
+    }
+
+    return table;
   }
 
   Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, boolean showScore) {
@@ -244,12 +276,27 @@ public class WordTable {
     }
   }
 
+  private void addPhonesBelowWord2(List<TranscriptSegment> value, DivWidget scoreRow) {
+    for (TranscriptSegment phone : value) {
+      String phoneLabel = phone.getEvent();
+      if (!phoneLabel.equals("sil")) {
+//        TableHeader h = new TableHeader(phoneLabel);
+        InlineHTML h = new InlineHTML(phoneLabel);
+        alignCenter(h);
+        // pTable.add(h);
+        setColor(phone, h);
+        h.getElement().getStyle().setWidth(25, Style.Unit.PX);
+        scoreRow.add(h);
+      }
+    }
+  }
+
   @NotNull
   private HTML getScore(TranscriptSegment word) {
     return new HTML("" + getPercent(word.getScore()));
   }
 
-  private void setColor(TranscriptSegment phone, TableHeader h) {
+  private void setColor(TranscriptSegment phone, UIObject h) {
     h.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(phone.getScore()));
   }
 
@@ -267,7 +314,7 @@ public class WordTable {
 
   private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
-    List<TranscriptSegment> words  = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeToEndTime.get(NetPronImageType.PHONE_TRANSCRIPT);
 
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();

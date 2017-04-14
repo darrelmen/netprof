@@ -804,7 +804,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     imported.setForeignLanguage(foreignLanguagePhrase);
     imported.setAltFL(altfl);
 
-    if (DEBUG_DETAIL) logger.info("got " + imported);
+    if (DEBUG_DETAIL) logger.info("getExercise got " + imported);
     return imported;
   }
 

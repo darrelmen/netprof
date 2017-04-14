@@ -172,7 +172,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     w.setRightDropdown(true);
     w.setIcon(IconType.REORDER);
     w.add(new NavLink("Add to List"));
-    w.add(new NavLink("New List"));
+    NavLink widget = new NavLink("New List");
+    w.add(widget);
+//    widget.addClickHandler()
     NavLink share = new NavLink(EMAIL);
     w.add(share);
     share.setHref(getMailTo());

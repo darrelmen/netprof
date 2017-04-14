@@ -30,7 +30,6 @@ public class WordScoresTable {
     return table2;
   }
 
-
   /**
    * @see ScoringAudioPanel#scoreAudio
    * @param score
@@ -38,7 +37,8 @@ public class WordScoresTable {
    * @see #scoreAudio
    */
   private Widget getWordTable(PretestScore score) {
-    return new WordTable().getWordTable(score.getTypeToSegments(), false);
+   // return new WordTable().getWordTable(score.getTypeToSegments(), false);
+    return new WordTable().getDivWord(score.getTypeToSegments());
   }
 
   /**
