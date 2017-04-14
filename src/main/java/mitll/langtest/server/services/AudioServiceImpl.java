@@ -53,7 +53,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -267,7 +269,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //            logger.info("checkAudio e.g. ensure audio for " + audioAttribute + " on " + e);
           }
           try {
-            boolean didit = ensureCompressedAudio(audioAttribute.getUserid(), e, audioAttribute.getAudioRef(), audioAttribute.getAudioType(), language);
+            boolean didit = ensureCompressedAudio(
+                audioAttribute.getUserid(),
+                e,
+                audioAttribute.getAudioRef(),
+                audioAttribute.getAudioType(),
+                language);
             if (didit) success++;
             if (c % 1000 == 0) logger.debug("checkAudio checked " + c + ", success = " + success);
           } catch (Exception e1) {
@@ -278,7 +285,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
     now = System.currentTimeMillis();
     if (now - then > WARN_THRESH) {
-      logger.info("4 checkAudio - took " + (now - then) + " millis to ensure ogg and mp3 for " + c + " attributes, " + success + " files successful");
+      logger.info("4 checkAudio - took " + (now - then) + " millis to ensure ogg and mp3 for " + c + " attributes for " +
+          exercises.size() + " exercises, " +
+          success + " files successful");
     }
   }
 
@@ -296,13 +305,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                         String path,
                                         AudioType audioType,
                                         String language) {
+    if (checkedExists.contains(path)) return true;
+
     String userID = getUserID(user);
     if (userID == null) {
       logger.warn("ensureCompressedEquivalent huh? no user for " + user);
     }
 
     boolean noExerciseYet = commonShell == null;
-    String title = noExerciseYet ? "unknown" : commonShell.getForeignLanguage();
+    String title   = noExerciseYet ? "unknown" : commonShell.getForeignLanguage();
     String comment = noExerciseYet ? "unknown" : commonShell.getEnglish();
     if (audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) && !noExerciseYet) {
       if (commonShell.hasContext()) {
@@ -312,8 +323,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       }
     }
 
-    return ensureMP3(path, new TrackInfo(title, userID, comment, language));
+    boolean b = ensureMP3(path, new TrackInfo(title, userID, comment, language));
+    if (b) checkedExists.add(path);
+    return b;
   }
+
+  private Set<String> checkedExists = new HashSet<>();
 
   /**
    * for both audio in answers and best audio -- could be more efficient...
@@ -325,7 +340,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see #writeAudioFile
    */
   private boolean ensureMP3(String wavFile, TrackInfo trackInfo) {
-    // if (!wavFile.startsWith(serverProps.getAudioBaseDir()))
+
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
       if (DEBUG) logger.debug("ensureMP3 : trying " + wavFile);

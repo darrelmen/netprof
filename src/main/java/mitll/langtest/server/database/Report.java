@@ -368,7 +368,7 @@ public class Report {
     List<SlickSlimEvent> allSlim = eventDAO.getAllSlim(projid);
     List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim(projid);
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projid);
-    Collection<AudioAttribute> audioAttributes   = audioDAO.getAudioAttributesByProject(projid);
+    Collection<AudioAttribute> audioAttributes   = audioDAO.getAudioAttributesByProjectThatHaveBeenChecked(projid);
     List<Result> results = resultDAO.getResults();
     Collection<Result> resultsDevices = resultDAO.getResultsDevices();
 

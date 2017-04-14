@@ -55,7 +55,7 @@ import java.util.logging.Logger;
 public abstract class ClickablePagingContainer<T extends HasID> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("ClickablePagingContainer");
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private final Map<Integer, T> idToExercise = new HashMap<>();
 
   public ClickablePagingContainer(ExerciseController controller) {
@@ -262,7 +262,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   private void markCurrent(int i, T itemToSelect) {
-    if (DEBUG) logger.info(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
+//    if (DEBUG) logger.info(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID() + " at " +i);
     getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
       int pageEnd = table.getPageStart() + table.getPageSize();

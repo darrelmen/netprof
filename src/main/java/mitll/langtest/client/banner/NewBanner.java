@@ -34,6 +34,10 @@ import static mitll.langtest.client.banner.NewContentChooser.*;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeHandler<String> {
+  public static final String LEARN = "Learn";
+  public static final String DRILL = "Drill";
+  public static final String PROGRESS = "Progress";
+  public static final String LISTS = "Lists";
   private final Logger logger = Logger.getLogger("NewBanner");
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
@@ -142,24 +146,24 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     SelectionState selectionState = new SelectionState(token, false);
     String instance1 = selectionState.getInstance();
 
-//    logger.info("got " + token + " instance " + instance1);
+    logger.info("onValueChange got " + token + " instance " + instance1);
 
     switch (instance1) {
-      case LEARN:
+      case NewContentChooser.LEARN:
         navigation.showLearn();
-        showActive(nameToLink.get(LEARN));
+        showActive(nameToLink.get(NewContentChooser.LEARN));
         break;
-      case DRILL:
+      case NewContentChooser.DRILL:
         navigation.showDrill();
-        showActive(nameToLink.get(DRILL));
+        showActive(nameToLink.get(NewContentChooser.DRILL));
         break;
-      case PROGRESS:
+      case NewContentChooser.PROGRESS:
         navigation.showProgress();
-        showActive(nameToLink.get(PROGRESS));
+        showActive(nameToLink.get(NewContentChooser.PROGRESS));
         break;
-      case LISTS:
+      case NewContentChooser.LISTS:
         navigation.showLists();
-        showActive(nameToLink.get(LISTS));
+        showActive(nameToLink.get(NewContentChooser.LISTS));
         break;
       default:
         navigation.showLearn();
@@ -178,7 +182,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   private void addChoicesForUser(Nav nav) {
     boolean first =true;
-    for (String choice : Arrays.asList("Learn", "Drill", "Progress", "List")) {
+    for (String choice : Arrays.asList(LEARN, DRILL, PROGRESS,LISTS)) {
       NavLink choice1 = getChoice(nav, choice);
       if (first) choice1.addStyleName("leftTenMargin");
       first =false;
@@ -192,16 +196,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     NavLink learn = getLink(nav, learn1);
     ClickHandler clickHandler = event -> {
       switch (learn1) {
-        case "Learn":
+        case LEARN:
           navigation.showLearn();
           break;
-        case "Drill":
+        case DRILL:
           navigation.showDrill();
           break;
-        case "Progress":
+        case PROGRESS:
           navigation.showProgress();
           break;
-        case "Lists":
+        case LISTS:
           navigation.showLists();
           break;
       }

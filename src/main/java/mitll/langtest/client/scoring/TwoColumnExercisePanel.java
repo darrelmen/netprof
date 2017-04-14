@@ -147,7 +147,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    // logger.info("base is "+s1);
     String s = s1 +
         "#"+
-        SelectionState.SECTION_SEPARATOR + "item=" + exercise.getID();
+        SelectionState.SECTION_SEPARATOR + "item=" + exercise.getID() +
+        SelectionState.SECTION_SEPARATOR + "project=" +controller.getProjectStartupInfo().getProjectid();
+
     String encode = URL.encode(s);
     return "mailto:" +
         //NETPROF_HELP_LL_MIT_EDU +

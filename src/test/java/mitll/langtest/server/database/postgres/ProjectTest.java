@@ -284,6 +284,10 @@ public class ProjectTest extends BaseTest {
   public void testDropPashto() {
     doDrop("pashto");
   }
+  @Test
+  public void testDropPashto1() {
+    doDrop("Pashto Elementary");
+  }
 
   private void doDropRef(String croatian) {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("war", "");

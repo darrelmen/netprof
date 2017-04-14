@@ -45,6 +45,8 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class SelectionState {
+  public static final String ITEM = "item";
+  public static final String SEARCH = "search";
   private final Logger logger = Logger.getLogger("SelectionState");
 
   public static final String SECTION_SEPARATOR = "###";
@@ -63,6 +65,7 @@ public class SelectionState {
   private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault, onlyUninspected;
 
   private static final boolean DEBUG = false;
+  private int project;
 
   /**
    * @param token
@@ -119,14 +122,20 @@ public class SelectionState {
           String type = segments[0].trim();
           String section = segments[1];
 
-          if (isMatch(type, "item")) {
+          if (isMatch(type, ITEM)) {
             try {
               setItem(Integer.parseInt(section));
             } catch (NumberFormatException e) {
               e.printStackTrace();
             }
-          } else if (isMatch(type, "search")) {
+          } else if (isMatch(type, SEARCH)) {
             search = section;
+          } else if (isMatch(type, "project")) {
+            try {
+              setProject(Integer.parseInt(section));
+            } catch (NumberFormatException e) {
+              e.printStackTrace();
+            }
           } else if (isMatch(type, ONLY_WITH_AUDIO_DEFECTS)) {
             onlyWithAudioDefects = section.equals("true");
           } else if (isMatch(type, ONLY_UNRECORDED)) {
@@ -152,14 +161,6 @@ public class SelectionState {
         logger.warning("parseToken skipping part '" + part + "'");
       }
     }
-
-  /*  if (token.contains("item")) {
-      int item1 = token.indexOf("item=");
-      String itemValue = token.substring(item1+"item=".length());
-      itemValue = itemValue.split(SEPARATOR)[0];
-      if (debug) logger.info("parseToken : got item = '" + itemValue +"'");
-      setItem(itemValue);
-    }*/
 
     if (DEBUG) logger.info("parseToken : got " + this + " from token '" + token + "'");
     //  logger.info(getInfo());
@@ -252,6 +253,14 @@ public class SelectionState {
     }
     String s = builder.toString();
     return s.substring(0, Math.max(0, s.length() - 2));
+  }
+
+  public void setProject(int project) {
+    this.project = project;
+  }
+
+  public int getProject() {
+    return project;
   }
 
 /*  public String getInfo() {

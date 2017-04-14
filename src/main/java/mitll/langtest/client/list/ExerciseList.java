@@ -668,7 +668,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   public int getCurrentExerciseID() {
-    return getCurrentExercise() != null ? getCurrentExercise().getID() : -1;//"Unknown";
+    T currentExercise = getCurrentExercise();
+ //   logger.info("Current exercise is " + currentExercise);
+    return currentExercise != null ? currentExercise.getID() : -1;//"Unknown";
   }
 
   protected abstract T getCurrentExercise();
@@ -678,15 +680,20 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ListInterface#loadNextExercise
    */
   private void getNextExercise(HasID current) {
-    if (DEBUG) logger.info("ExerciseList.getNextExercise current " + current);
     int i = getIndex(current.getID());
+    if (DEBUG) logger.info("ExerciseList.getNextExercise current " + current + " at index " + i);
     if (i == -1) {
       logger.warning("ExerciseList.getNextExercise : huh? couldn't find " + current +
           " in " + getSize() //+ " exercises : " + getKeys()
       );
     } else {
-      Shell next = getAt(i + 1);
-      if (DEBUG) logger.info("ExerciseList.getNextExercise " + next);
+      int i1 = i + 1;
+      Shell next = getAt(i1);
+  /*    for (int j = i; j<i+5;j++) {
+        int id = getAt(j).getID();
+        logger.info("\tat " + j +" = "+ id);
+      }*/
+      if (DEBUG) logger.info("ExerciseList.getNextExercise " + next.getID() + " at next index " + i1);
       loadExercise(next.getID());
     }
   }
@@ -776,7 +783,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   public boolean loadNextExercise(int id) {
-    if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + getInstance());
+    if (DEBUG || true) logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + getInstance());
     T exerciseByID = byID(id);
     if (exerciseByID == null) logger.warning("huh? couldn't find exercise with id " + id);
     return exerciseByID != null && loadNextExercise(exerciseByID);

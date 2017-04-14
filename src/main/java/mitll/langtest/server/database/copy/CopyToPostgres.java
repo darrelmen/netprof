@@ -332,10 +332,14 @@ public class CopyToPostgres<T extends CommonShell> {
       SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
       copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL);
 
-      logger.info("oldToNewUser " + oldToNewUser.size() + " exToID " + exToID.size());
+      logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
       // add the audio table
       Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, projectID);
+      logger.info("pathToAudioID num = " + pathToAudioID.size());
+
+      // copy ref results
+      copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
 
       // add event table
       copyEvents(db, projectID, oldToNewUser, exToID);
@@ -358,7 +362,6 @@ public class CopyToPostgres<T extends CommonShell> {
 
       copyReviewed(db, oldToNewUser, exToID, true);
       copyReviewed(db, oldToNewUser, exToID, false);
-      copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
     } else {
       logger.info("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
     }
@@ -432,7 +435,7 @@ public class CopyToPostgres<T extends CommonShell> {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
-    Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO().getAudioAttributesByProject(projid);
+    Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO().getAudioAttributesByProjectThatHaveBeenChecked(projid);
     logger.info("copyAudio h2 audio  " + audioAttributes.size());
     int missing = 0;
     int skippedMissingUser = 0;
@@ -468,9 +471,14 @@ public class CopyToPostgres<T extends CommonShell> {
           "" + missingExIDs);
     }
 
-    logger.info("copyAudio took " + (now - then) +
-        " , postgres audio " + slickAudioDAO.getAudioAttributesByProject(projid).size());
-    return slickAudioDAO.getPairs(projid);
+    Map<String, Integer> pairs = slickAudioDAO.getPairs(projid);
+
+//    Collection<AudioAttribute> audioAttributesByProject = slickAudioDAO.getAudioAttributesByProjectThatHaveBeenChecked(projid);
+    logger.info("copyAudio took " + (now - then) + " for project " + projid+
+        " , postgres audio count = " + pairs.size());
+
+
+    return pairs;
   }
 
   /**
@@ -829,7 +837,10 @@ public class CopyToPostgres<T extends CommonShell> {
     RefResultDAO originalDAO = new RefResultDAO(db, false);
     List<SlickRefResult> bulk = new ArrayList<>();
     Collection<Result> all = originalDAO.getResults();
-    logger.info("copyRefResult found " + all.size() + " original ref results.");
+    logger.info("copyRefResult for project " + projid + " found " + all.size() + " original ref results.");
+    logger.info("copyRefResult found " + oldToNewUser.size() + " oldToNewUser entries.");
+    logger.info("copyRefResult found " + exToID.size() + " ex to id entries.");
+    logger.info("copyRefResult found " + pathToAudioID.size() + " path to audio id entries.");
     int missing = 0;
     Set<Integer> missingUsers = new HashSet<>();
     for (Result result : all) {
@@ -844,19 +855,22 @@ public class CopyToPostgres<T extends CommonShell> {
         if (exid != null) {
           result.setExid(exid);
           String answer = result.getAnswer();
+          logger.info("for " + exid+ " result id " +result.getID() +" got " + answer);
           String[] bestAudios = answer.split("bestAudio");
 
-          int audioID = -1;
+          Integer audioID = null;
 
           if (bestAudios.length == 2) {
             String bestAudio = bestAudios[1];
-            bestAudio += "bestAudio";
+            bestAudio = "bestAudio"+bestAudio;
             audioID = pathToAudioID.get(bestAudio);
+            if (audioID == null) logger.warn("can't find '" + bestAudio + "'");
           }
 
-          if (audioID != -1) {
+          if (audioID != null) {
             bulk.add(dao.toSlick(projid, result, audioID));
           }
+
         } else missing++;
       }
     }

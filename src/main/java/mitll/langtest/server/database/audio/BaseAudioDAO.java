@@ -43,7 +43,6 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
-import net.liftweb.util.AU;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,7 +51,6 @@ import java.io.File;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class BaseAudioDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseAudioDAO.class);
@@ -100,7 +98,7 @@ public abstract class BaseAudioDAO extends DAO {
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
 
     logger.info("getExToAudio - for project #" + projid);
-    Collection<AudioAttribute> attributesByProject = getAudioAttributesByProject(projid);
+    Collection<AudioAttribute> attributesByProject = getAudioAttributesByProjectThatHaveBeenChecked(projid);
     //  logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
 
     for (AudioAttribute audio : attributesByProject) {
@@ -130,7 +128,7 @@ public abstract class BaseAudioDAO extends DAO {
     return exToAudio;
   }
 
-  abstract Collection<AudioAttribute> getAudioAttributesByProject(int projid);
+  abstract Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid);
 
   public void attachAudioToExercises(Collection<CommonExercise> exercises, String language) {
     Set<Integer> collect = exercises.stream().map(HasID::getID).collect(Collectors.toSet());

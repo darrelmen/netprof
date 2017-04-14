@@ -231,7 +231,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see Report#getReport
    */
   @Override
-  public Collection<AudioAttribute> getAudioAttributesByProject(int projid) {
+  public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid) {
     try {
       String sql = SELECT_ALL + " WHERE " + DEFECT + "=false";
       return getResultsSQL(sql);
@@ -523,7 +523,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param sql
    * @return
    * @throws SQLException
-   * @see #getAudioAttributesByProject
+   * @see #getAudioAttributesByProjectThatHaveBeenChecked
    * @see BaseAudioDAO#getAudioAttributesForExercise(int)
    */
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {

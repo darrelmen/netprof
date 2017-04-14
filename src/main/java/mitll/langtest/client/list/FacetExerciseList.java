@@ -837,7 +837,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected FacetContainer getSectionWidgetContainer() {
     return new FacetContainer() {
 
-      private int id;
+     // private int id;
 
       /**
        * @see HistoryExerciseList#restoreListBoxState
@@ -847,7 +847,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
         logger.info("restoreListBoxState t->sel " + selectionState);
-        this.id = selectionState.getItem();
+
+       // this.id = selectionState.getItem();
+
         Map<String, String> newTypeToSelection = new HashMap<>();
         for (String type : typeOrder) {
           Collection<String> selections = selectionState.getTypeToSection().get(type);
@@ -858,6 +860,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         getTypeToValue(newTypeToSelection);
       }
 
+      /**
+       * @see HistoryExerciseList#getHistoryTokenFromUIState
+       * @return
+       */
       @Override
       public String getHistoryToken() {
         StringBuilder builder = new StringBuilder();
@@ -867,7 +873,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
         }
 
+  /*
         if (id != -1) builder.append(SECTION_SEPARATOR).append("item=").append(id);
+        */
+
         String s = builder.toString();
         logger.info("getHistoryToken token '" + s +"'");
 
@@ -1009,11 +1018,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         hidePrevNextWidgets();
         // int widgetCount = innerContainer.getWidgetCount();
 
-        if (getCurrentExerciseID() == result.getExercises().iterator().next().getID()) {// && widgetCount == 1) {
-          logger.info("skip current " + getCurrentExerciseID());
-        } else {
+//        if (getCurrentExerciseID() == result.getExercises().iterator().next().getID()) {// && widgetCount == 1) {
+//          logger.info("skip current " + getCurrentExerciseID());
+//        } else {
           showExercises(result.getExercises(), result);
-        }
+    //    }
       } else {
         showExercises(result.getExercises(), result);
         //showPrevNext();
@@ -1041,8 +1050,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       id = item;
     }
 
-    if (numToShow == 1 && result.size() == 1) {
-      addExerciseWidget(result.iterator().next(), wrapper);
+    if (numToShow == 1 /*&& result.size() == 1*/) {
+      CommonExercise next = result.iterator().next();
+      addExerciseWidget(next, wrapper);
+      markCurrentExercise(next.getID());
     } else {
       DivWidget exerciseContainer = new DivWidget();
 

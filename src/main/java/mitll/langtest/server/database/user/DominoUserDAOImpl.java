@@ -570,7 +570,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 //      logger.warn("getUserIfMatchPass : took " + diff + " to check for password match.");
 //    }
     if (dominoPassword != null && (match || dominoPassword.equals(encodedPassword))) {//dominoPassword.equals(encodedPassword)) {//netProfDelegate.isPasswordMatch(user.getID(), encodedPassword) || magicMatch) {
-      logger.warn("getUserIfMatch match in of " + dominoPassword + " vs encoded " + encodedPassword.length() + " match " + match + " took " + diff + " millis");
+
+      if (diff > 100) {
+        logger.warn("getUserIfMatch match in of " + dominoPassword + " vs encoded " + encodedPassword.length() +
+            " match " + match + " took " + diff + " millis");
+      }
+
       boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
       user.setAdmin(isadmin);
       return user;
@@ -898,7 +903,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    *
    * @return
    * @see Analysis#getUserInfos
-   * @see mitll.langtest.server.database.audio.SlickAudioDAO#getAudioAttributesByProject(int)
+   * @see mitll.langtest.server.database.audio.SlickAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked(int)
    */
   @Override
   public synchronized Map<Integer, MiniUser> getMiniUsers() {

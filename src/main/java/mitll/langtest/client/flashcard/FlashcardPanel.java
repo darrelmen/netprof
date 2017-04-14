@@ -118,7 +118,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   final String instance;
   final ListInterface exerciseList;
   private final DivWidget prevNextRow;
-  //final LangTestDatabaseAsync service;
   boolean showOnlyEnglish = false;
   private Button autoPlay;
 
@@ -378,7 +377,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    */
   private Panel getThreePartContent(ControlState controlState,
                                     Panel contentMiddle,
-                                    DivWidget belowDiv, DivWidget lowestRow) {
+                                    DivWidget belowDiv,
+                                    DivWidget lowestRow) {
     Panel horiz = new HorizontalPanel();
     horiz.getElement().setId("left-content-right_container");
 

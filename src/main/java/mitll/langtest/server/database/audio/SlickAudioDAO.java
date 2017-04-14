@@ -48,7 +48,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import scala.Tuple2;
-import scala.collection.Seq;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -89,9 +88,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see BaseAudioDAO#getExToAudio
    */
   @Override
-  public Collection<AudioAttribute> getAudioAttributesByProject(int projid) {
+  public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid) {
     List<SlickAudio> all = dao.getAll(projid);
-    logger.info("getAudioAttributesByProject " + projid + " found " + all.size() + " that has been checked to exist.");
+    logger.info("getAudioAttributesByProjectThatHaveBeenChecked " + projid + " found " + all.size() + " that has been checked to exist.");
     return toAudioAttribute(all);
   }
 
@@ -535,7 +534,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param all
    * @return
    * @paramx idToMini
-   * @see #getAudioAttributesByProject(int)
+   * @see #getAudioAttributesByProjectThatHaveBeenChecked(int)
    */
   private List<AudioAttribute> toAudioAttribute(Collection<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
@@ -574,10 +573,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
+   * TODO : also check that the compressed versions are there too!
    * @param projectID
    * @param language
    * @param validateAll
-   * @see
+   * @see mitll.langtest.server.services.AudioServiceImpl#checkAudio
    */
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
     boolean foundFiles = didFindAnyAudioFiles(projectID);
