@@ -177,7 +177,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     w.add(share);
     share.setHref(getMailTo());
     w.add(getShowComments());
-    w.addStyleName("leftTwentyMargin");
+    w.addStyleName("leftThirtyMargin");
     w.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
     w.getTriggerWidget().setCaret(false);
     return w;

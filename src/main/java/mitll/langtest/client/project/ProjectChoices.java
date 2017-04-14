@@ -144,7 +144,7 @@ public class ProjectChoices {
    * @see InitialUI#addProjectChoices
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-//    logger.info("showProjectChoices " + result.size() + " : " + nest);
+   logger.info("showProjectChoices " + result.size() + " : " + nest);
     final Section section = new Section("section");
     section.add(getHeader(result, nest));
 
@@ -160,7 +160,6 @@ public class ProjectChoices {
 
     List<SlimProject> languages = new ArrayList<>(result);
 //    logger.info("addProjectChoices " + languages.size() + " languages");
-
     sortLanguages(nest, languages);
 
     int size = languages.size();
@@ -169,6 +168,7 @@ public class ProjectChoices {
     for (int i = 0; i < size; i += ITEMS_IN_ROW) {
       int max = i + ITEMS_IN_ROW;
       if (max > size) max = size;
+
       for (int j = i; j < max; j++) {
         SlimProject project = languages.get(j);
         current.add(getLangIcon(project.getLanguage(), project, nest));
@@ -176,8 +176,7 @@ public class ProjectChoices {
       }
 
       if (total < size) {
-        current = new Thumbnails();
-        flags.add(current);
+        flags.add(current = new Thumbnails());
       }
     }
   }
@@ -257,23 +256,7 @@ public class ProjectChoices {
     button.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
-        NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
-        List<SlimProject> children = projectForLang.getChildren();
-        // logger.info("project " + projid + " has " + children);
-        if (children.size() < 2) {
-          //logger.info("onClick select leaf project " + projid + " current user " + userManager.getUser() + " : " + userManager.getUserID());
-          setProjectForUser(projid);
-        } else {
-          logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");
-          projectCrumb.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-              uiLifecycle.clickOnParentCrumb(projectForLang);
-            }
-          });
-          uiLifecycle.clearContent();
-          showProjectChoices(children, nest);
-        }
+        gotClickOnFlag(name, projectForLang, projid, nest);
       }
     });
     widgets.add(button);
@@ -285,6 +268,35 @@ public class ProjectChoices {
     widgets.add(label);
 
     return widgets;
+  }
+
+  private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
+    NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
+    List<SlimProject> children = projectForLang.getChildren();
+
+    logger.info("gotClickOnFlag project " + projid + " has " + children);
+
+     if (children.size() < 2) {
+
+      logger.info("onClick select leaf project " + projid +
+          " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
+
+      setProjectForUser(projid);
+    } else {
+
+      logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");
+
+      projectCrumb.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent clickEvent) {
+          uiLifecycle.clickOnParentCrumb(projectForLang);
+        }
+      });
+
+      uiLifecycle.clearContent();
+
+      contentRow.add(showProjectChoices(children, nest));
+    }
   }
 
   @NotNull

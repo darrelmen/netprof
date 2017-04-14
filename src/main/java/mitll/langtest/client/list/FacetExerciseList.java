@@ -975,16 +975,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     next.setEnabled(pagingContainer.hasNextPage());
   }
 
-
   /**
    * @param visibleIDs
    * @see #ensureAudio
    */
   private void getExercises(Collection<Integer> visibleIDs) {
     long then = System.currentTimeMillis();
-    // hidePrevNext();
 
-    logger.info("getExercises asking for " + visibleIDs.size());
+  //  logger.info("getExercises asking for " + visibleIDs.size());
     service.getFullExercises(freqid++, visibleIDs, false,
         new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
           @Override
@@ -997,8 +995,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           public void onSuccess(ExerciseListWrapper<CommonExercise> result) {
             long now = System.currentTimeMillis();
             logger.info("getExercises took " + (now - then) + " to get " + result.getExercises().size() + " exercises");
-            //int reqID = result.getReqID();
-
             if (isCurrentReq(result)) {
               gotFullExercises(result);
               //setPageSizeInitialSelection(pagesize);
