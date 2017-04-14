@@ -72,7 +72,7 @@ public abstract class BaseAudioDAO extends DAO {
   protected final IUserDAO userDAO;
   private final int netProfDurLength;
 
-  private static final boolean DEBUG_ATTACH = false;
+  private static final boolean DEBUG_ATTACH = true;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
 
@@ -131,29 +131,31 @@ public abstract class BaseAudioDAO extends DAO {
   abstract Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid);
 
   public void attachAudioToExercises(Collection<CommonExercise> exercises, String language) {
+    logger.info("attachAudioToExercises to " + exercises.size() + " exercises for " + language);
+
     Set<Integer> collect = exercises.stream().map(HasID::getID).collect(Collectors.toSet());
 
     for (CommonExercise exercise : exercises) {
       for (CommonExercise de : exercise.getDirectlyRelated()) {
         collect.add(de.getID());
-        if (DEBUG_ATTACH) logger.info("For " + exercise.getID() + " adding " + de.getID());
+        if (DEBUG_ATTACH) logger.info("attachAudioToExercises For " + exercise.getID() + " adding " + de.getID());
       }
     }
 
-    if (DEBUG_ATTACH) logger.info("getting audio for " + new TreeSet<>(collect));
+    if (DEBUG_ATTACH) logger.info("attachAudioToExercises getting audio for " + new TreeSet<>(collect));
 
     Map<Integer, List<AudioAttribute>> audioAttributesForExercises = getAudioAttributesForExercises(collect);
     for (CommonExercise exercise : exercises) {
       int id = exercise.getID();
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(id);
 
-
       if (audioAttributes != null) {
         boolean attachedAll = attachAudio(exercise, audioAttributes, language);
         if (DEBUG_ATTACH)
-          logger.info("For " + exercise.getID() + " attachedAll " + attachedAll + " " + audioAttributes.size());
-      } else if (DEBUG_ATTACH) logger.info("no audio for " + id);
-
+          logger.info("attachAudioToExercises For " + exercise.getID() + " attachedAll " + attachedAll + " " + audioAttributes.size());
+      } else {
+        if (DEBUG_ATTACH) logger.info("attachAudioToExercises no audio for " + id);
+      }
 
       for (CommonExercise de : exercise.getDirectlyRelated()) {
         int contextID = de.getID();
@@ -178,7 +180,6 @@ public abstract class BaseAudioDAO extends DAO {
           if (DEBUG_ATTACH)
             logger.info("no audio found for context parent exercise " + id + " and context " + contextID);
         }
-
       }
     }
   }
@@ -218,7 +219,7 @@ public abstract class BaseAudioDAO extends DAO {
       logger.warn("attachAudioToExercise took " + (now - then) + " to attach audio to " + id);
 
     if (!attachedAll)
-      logger.info("didn't attach all audio to " + id + " " + firstExercise.getForeignLanguage());
+      logger.info("attachAudioToExercise didn't attach all audio to " + id + " " + firstExercise.getForeignLanguage());
 /*    if (DEBUG) {
       for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
         logger.debug("\t\tafter attachAudio : after on ex exid " + firstExercise.getOldID() + " audio " + attribute);
@@ -275,10 +276,10 @@ public abstract class BaseAudioDAO extends DAO {
         } else {
 //          logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getOldID());
           if (DEBUG_ATTACH)
-            logger.info("attachAudio attaching audio \t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
-                "\t : transcript  '" +
-                attr.getTranscript() +
-                "'");
+            logger.info("attachAudio attach audio " + attr.getUniqueID() + " " + (attr.isMale() ? "male" : "female") + " userid " + attr.getUser().getUserID()+
+                " type " + attr.getAudioType()+
+                " to exercise " + firstExercise.getID() +
+                " transcript  '" + attr.getTranscript() + "'");
         }
       }
       //}

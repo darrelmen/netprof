@@ -55,7 +55,7 @@ import java.util.logging.Logger;
 public abstract class ClickablePagingContainer<T extends HasID> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("ClickablePagingContainer");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private final Map<Integer, T> idToExercise = new HashMap<>();
 
   public ClickablePagingContainer(ExerciseController controller) {

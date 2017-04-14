@@ -114,7 +114,9 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void pause(Sound sound) {
-    SoundManager.pause(sound);
+    if (sound != null) {
+      SoundManager.pause(sound);
+    }
   }
 
   public void play(Sound sound) {

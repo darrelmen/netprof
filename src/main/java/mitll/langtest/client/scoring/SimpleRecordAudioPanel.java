@@ -32,13 +32,14 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
-  public static final String OGG = ".ogg";
   private Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+
+  public static final String OGG = ".ogg";
   private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
 
-  private static final int PROGRESS_BAR_WIDTH = 260;
-  private static final int FIRST_STEP = 35;
-  private static final int SECOND_STEP = 75;
+  //private static final int PROGRESS_BAR_WIDTH = 260;
+  public static final int FIRST_STEP = 35;
+  public static final int SECOND_STEP = 75;
 
   /**
    * TODO : limit connection here...
@@ -141,7 +142,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     //  progressBar.setWidth(PROGRESS_BAR_WIDTH + "px");
     // progressBar.addStyleName("floatLeft");
-    progressBar.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
+    //progressBar.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
 
     Style style = progressBar.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
@@ -233,7 +234,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   * @seex #useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
    * @see mitll.langtest.server.DownloadServlet#returnAudioFile
    */
   private void setDownloadHref() {
@@ -263,18 +263,12 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     useResult(pretestScore, false, result.getPath());
   }
 
-  //DivWidget spacer;
-
   @NotNull
   private DivWidget getWordTableContainer(PretestScore pretestScore) {
     DivWidget wordTableContainer = new DivWidget();
     wordTableContainer.getElement().setId("wordTableContainer");
     wordTableContainer.addStyleName("inlineFlex");
     wordTableContainer.addStyleName("floatLeft");
-
-//    spacer = new DivWidget();
-//    spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
-//    wordTableContainer.add(spacer);
 
     wordTableContainer.add(getPlayButtonDiv());
     DivWidget scoreFeedbackDiv = new DivWidget();

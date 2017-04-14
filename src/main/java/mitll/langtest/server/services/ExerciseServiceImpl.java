@@ -167,16 +167,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         if (request.isNoFilter()) {
           synchronized (projidToWrapper) {
             projidToWrapper.put(projectID, exerciseListWrapper);
-
-            logger.info("projidToWrapper now " + projidToWrapper.size());
+//            logger.info("projidToWrapper now " + projidToWrapper.size());
           }
-        } else {
+        }
+//        else {
 //          logger.debug("REq " + request.isNoFilter());
 //          logger.debug("REq " + request.toString());
 //          logger.debug("REq " + request.getPrefix());
 //          logger.debug("REq " + request.getActivityType());
 //          logger.debug("REq " + request.getUserListID());
-        }
+  //      }
         return exerciseListWrapper;
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
@@ -1033,6 +1033,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return (T) byID;
   }
 
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#getExercises(Collection)
+   * @param reqid
+   * @param ids
+   * @param isFlashcardReq
+   * @return
+   */
   @Override
   public ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids, boolean isFlashcardReq) {
     List<CommonExercise> exercises = new ArrayList<>();
@@ -1040,30 +1047,43 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     int projectID = getProjectID();
     int userID = getUserIDFromSession();
 
+    Set<CommonExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
+
+    if (ids.size() > toAddAudioTo.size()) {
+      logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
+    } else {
+      logger.info("getFullExercises getting " + ids.size() + " exercises");
+    }
+
+    if (!toAddAudioTo.isEmpty()) {
+      db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
+    }
+    else {
+      logger.info("getFullExercises all " + ids.size() + " exercises have audio");
+    }
+
+    addScores(userID, exercises);
+
+    return new ExerciseListWrapper<>(reqid, exercises, null, getScoreHistories(ids, exercises, userID));
+  }
+
+  @NotNull
+  private Set<CommonExercise> getCommonExercisesWithoutAudio(Collection<Integer> ids, List<CommonExercise> exercises, int projectID) {
     Set<CommonExercise> toAddAudioTo = new HashSet<>();
 
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
       if (byID.getAudioAttributes().isEmpty()) {
         toAddAudioTo.add(byID);
+        logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
       }
       exercises.add(byID);
     }
+    return toAddAudioTo;
+  }
 
-    if (ids.size() > toAddAudioTo.size()) {
-//      logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
-    } else
-//      logger.info("getting " + ids.size() + " exercises");
-
-    if (!toAddAudioTo.isEmpty()) {
-      db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
-    }
-
-    Map<Integer, List<CorrectAndScore>> scoreHistories = (exercises.isEmpty()) ? Collections.emptyMap() : db.getResultDAO().getScoreHistories(userID, ids, getLanguage(exercises.get(0)));
-
-    addScores(userID, exercises);
-
-    return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistories);
+  private Map<Integer, List<CorrectAndScore>> getScoreHistories(Collection<Integer> ids, List<CommonExercise> exercises, int userID) {
+    return (exercises.isEmpty()) ? Collections.emptyMap() : db.getResultDAO().getScoreHistories(userID, ids, getLanguage(exercises.get(0)));
   }
 
   private <T extends Shell> T getExercise(String exid, boolean isFlashcardReq) {

@@ -178,7 +178,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return toAudioAttributes(byExerciseID);
   }
 
-  //  @Override
+  /**
+   * @see BaseAudioDAO#attachAudioToExercises(Collection, String)
+   * @param exids
+   * @return
+   */
   Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids) {
     long then = System.currentTimeMillis();
     Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDs(exids);
@@ -191,6 +195,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
     for (Map.Entry<Integer, List<SlickAudio>> pair : byExerciseID.entrySet()) {
       copy.put(pair.getKey(), toAudioAttributes(pair.getValue()));
+    }
+    if (copy.size() != exids.size()) {
+      logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " + copy.size());
     }
     return copy;
   }

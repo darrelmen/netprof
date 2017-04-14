@@ -122,8 +122,8 @@ public abstract class TypeAhead implements ITypeAhead {
         //  logger.info("got key up " + event);
         String current = getTypeAhead().getText();
 
-        if (previous.equals(current)) {
-          logger.info("prev = current " + previous);
+        if (previous.equals(current) && !previous.isEmpty()) {
+          logger.info("prev = current '" + previous + "'");
         } else {
           gotTypeAheadEntry(current);
           previous = current;

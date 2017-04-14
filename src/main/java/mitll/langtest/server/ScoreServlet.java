@@ -71,7 +71,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String REQUEST = "request";
   private static final String NESTED_CHAPTERS = "nestedChapters";
   private static final String CHAPTER_HISTORY = "chapterHistory";
-  private static final String REF_INFO = "refInfo";
+ // private static final String REF_INFO = "refInfo";
   private static final String ROUND_TRIP1 = "roundTrip";
   private static final String PHONE_REPORT = "phoneReport";
   /**

@@ -72,7 +72,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private static final boolean DEBUG = false;
   private static final boolean WARN_MISSING_FILE = false;
-  public static final int WARN_THRESH = 100;
+  private static final int WARN_THRESH = 10;
+
+  private static final int CHECKED_INTERVAL = 1;
 
   private AudioConversion audioConversion;
   private PathWriter pathWriter;
@@ -240,13 +242,18 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     then = now;
     List<CommonExercise> exercises = db.getExercises(projectid);
     now = System.currentTimeMillis();
-    if (now - then > WARN_THRESH) logger.info("2 checkAudio - took " + (now - then) + " millis to get exercises");
+    if (now - then > WARN_THRESH) logger.info("ensureAudio for " + projectid+ " - took " + (now - then) + " millis to get exercises");
 
     ensureAudioForExercises( exercises);
   }
 
   public void ensureAudioForIDs(int projid, Collection<Integer> ids) {
-    ensureAudioForExercises(ids.stream().map(id -> db.getCustomOrPredefExercise(projid,id)).collect(Collectors.toList()));
+    logger.info("ensureAudioForIDs for "+ ids.size());
+    List<CommonExercise> collect = ids.stream().map(id -> db.getCustomOrPredefExercise(projid, id)).collect(Collectors.toList());
+    if (collect.size() != ids.size()) {
+      logger.warn("only found " +collect.size() + " exercises???");
+    }
+    ensureAudioForExercises(collect);
   }
 
   private void ensureAudioForExercises(  List<CommonExercise> exercises) {
@@ -256,9 +263,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     then = now;
     db.getAudioDAO().attachAudioToExercises(exercises, language);
     now = System.currentTimeMillis();
-    if (now - then > WARN_THRESH) logger.info("3  checkAudio - took " + (now - then) + " millis to attach audio");
+    if (now - then > WARN_THRESH) logger.info("ensureAudioForExercises checkAudio - took " + (now - then) + " millis to attach audio");
 
-    then = now;
+    ensureCompressedAudio(exercises,  language);
+  }
+
+  private void ensureCompressedAudio(List<CommonExercise> exercises,   String language) {
+    long then = System.currentTimeMillis();
+
     int c = 0;
     int success = 0;
     for (CommonExercise e : exercises) {
@@ -283,9 +295,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         }
       }
     }
-    now = System.currentTimeMillis();
+    long now = System.currentTimeMillis();
     if (now - then > WARN_THRESH) {
-      logger.info("4 checkAudio - took " + (now - then) + " millis to ensure ogg and mp3 for " + c + " attributes for " +
+      logger.info("ensureCompressedAudio - took " + (now - then) + " millis to ensure ogg and mp3 for " + c + " attributes for " +
           exercises.size() + " exercises, " +
           success + " files successful");
     }
@@ -293,6 +305,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
 
   /**
+   * Tries to remember if we've checked a file before...
    * @param user
    * @param commonShell
    * @param path
@@ -324,7 +337,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     boolean b = ensureMP3(path, new TrackInfo(title, userID, comment, language));
-    if (b) checkedExists.add(path);
+    if (b) {
+      checkedExists.add(path);
+      if (checkedExists.size() % CHECKED_INTERVAL == 0) logger.debug("checked " + checkedExists.size() + " files...");
+    }
     return b;
   }
 
@@ -640,7 +656,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return audioFile;
     }
   }
-
 
   public void recalcRefAudio(int projid) {
     Project project = db.getProject(projid);
