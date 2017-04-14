@@ -41,6 +41,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 
+import java.util.logging.Logger;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -48,6 +50,7 @@ import mitll.langtest.client.list.ListOptions;
  * @since 1/26/16.
  */
 public class NPFlexSectionExerciseList extends FacetExerciseList {
+  private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList");
   private static final String COMPLETE = "Complete";
   private static final String LIST_COMPLETE = "List complete!";
 
@@ -83,6 +86,9 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
 
   @Override
   protected void noSectionsGetExercises(long userID) {
-    simpleLoadExercises(getInitialHistoryToken(), getPrefix());
+ //   simpleLoadExercises(getInitialHistoryToken(), getPrefix());
+    String historyToken = getHistoryToken();
+    logger.info("noSections " + userID + " " + historyToken);
+    simpleLoadExercises(historyToken, getPrefix());
   }
 }

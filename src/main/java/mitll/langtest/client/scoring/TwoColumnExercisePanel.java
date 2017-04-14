@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
@@ -37,6 +38,7 @@ import java.util.logging.Logger;
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
+  private static final String EMAIL = "Email Item";
   public static final int CONTEXT_INDENT = 40;
 
   private final List<CorrectAndScore> correctAndScores;
@@ -47,7 +49,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final ClickableWords<T> clickableWords;
   private final boolean showInitially = false;
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
-  ListInterface<CommonShell> listContainer;
+  private final ListInterface<CommonShell> listContainer;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -139,31 +141,29 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return card;
   }
 
-  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
-
   @NotNull
   private String getMailTo() {
-    return "mailto:"  +
+    String s1 = trimURL(Window.Location.getHref());
+   // logger.info("base is "+s1);
+    String s = s1 +
+        "#"+
+        SelectionState.SECTION_SEPARATOR + "item=" + exercise.getID();
+    String encode = URL.encode(s);
+    return "mailto:" +
         //NETPROF_HELP_LL_MIT_EDU +
         "?" +
         //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Share netprof item " + exercise.getEnglish() +
-        "&body=Link to " + exercise.getEnglish() + "/" + exercise.getForeignLanguage()+" : "+
-         trimURL(Window.Location.getHref()) +
-        SelectionState.SECTION_SEPARATOR+"item="+exercise.getID();
+        "&body=Link to " + exercise.getEnglish() + "/" + exercise.getForeignLanguage() + " : " +
+        encode;
   }
 
-  String trimURL(String url) {
-    if (url.contains("127.0.0.1")) {
-      return url.split("\\?")[0].split("#")[0];
-    }
-    else {
-      return url.split("\\?")[0].split("#")[0];
-    }
+  private String trimURL(String url) {
+    return url.split("\\?")[0].split("#")[0];
   }
 
+  private boolean showingComments = false;
 
-  boolean showingComments = false;
   @NotNull
   private Dropdown getDropdown() {
     Dropdown w = new Dropdown("");
@@ -171,14 +171,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     w.setIcon(IconType.REORDER);
     w.add(new NavLink("Add to List"));
     w.add(new NavLink("New List"));
-    NavLink share = new NavLink("Share");
+    NavLink share = new NavLink(EMAIL);
     w.add(share);
     share.setHref(getMailTo());
-
-
-    NavLink widget = getShowComments();
-
-    w.add(widget);
+    w.add(getShowComments());
     w.addStyleName("leftTwentyMargin");
     w.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
     w.getTriggerWidget().setCaret(false);
@@ -335,11 +331,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private void addField(Panel grid, Widget widget, String altflrow) {
     if (widget != null) {
-//      DivWidget rowWidget = getRowWidget();
-//      rowWidget.getElement().setId(altflrow);
-//     // rowWidget.addStyleName("leftMarginForFields");
-//      // rowWidget.addStyleName("floatLeft");
-//      rowWidget.add(widget);
       widget.addStyleName("topFiveMargin");
       grid.add(widget);
     }
@@ -354,7 +345,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             null,
             toShow,
             Placement.LEFT);
-        // widgets.setHideDelay(2000);
       }
     });
   }
@@ -418,7 +408,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return meaning != null && !meaning.trim().isEmpty() && !meaning.equals("N/A");
   }
 
-  List<CommentBox> comments = new ArrayList<>();
+  private final List<CommentBox> comments = new ArrayList<>();
 
   /**
    * @param exercise

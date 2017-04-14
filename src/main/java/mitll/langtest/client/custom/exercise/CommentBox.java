@@ -227,11 +227,6 @@ public class CommentBox extends PopupContainerFactory {
     final Button commentButton = new Button();
     Button clearButton = getClearButton(commentEntryText, commentButton, field);
 
-    if (!showInitially) {
-      commentButton.setVisible(false);
-      clearButton.setVisible(false);
-    }
-
     this.commentButton = commentButton;
     this.clearButton = clearButton;
 
@@ -256,6 +251,12 @@ public class CommentBox extends PopupContainerFactory {
 
     Panel row = getCommentAndButtonsRow(field, content, commentButton, clearButton);
     showOrHideCommentButton(commentButton, clearButton, isCorrect);
+
+    if (!showInitially) {
+      commentButton.setVisible(false);
+      clearButton.setVisible(false);
+    }
+
     return row;
   }
 

@@ -92,7 +92,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     this.waitCursorHelper = new WaitCursorHelper();
     addComponents();
     if (!listOptions.isShowPager()) {
-        //pagingContainer.
+      //pagingContainer.
     }
     getElement().setId("PagingExerciseList_" + getInstance());
   }
@@ -100,7 +100,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   void sortBy(Comparator<T> comp) {
     pagingContainer.sortBy(comp);
     loadFirst();
+    //markCurrentExercise(getFirstID());
   }
+
+  public void loadFirst() {  pushFirstSelection(getFirstID(), getTypeAheadText());  }
 
   @Override
   public void setState(int id, STATE state) {
@@ -296,7 +299,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
 
-
   private Stack<Long> pendingRequests = new Stack<>();
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
@@ -307,8 +309,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     loadExercises(getHistoryTokenFromUIState(text, -1), text, false, false, false, false);
   }
 
-
   public String getTypeAheadText() {
+    if (typeAhead == null) logger.warning("type ahead is null?");
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
@@ -319,7 +321,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   void setTypeAheadText(String t) {
     if (pendingRequests.isEmpty()) {
       if (typeAhead != null) {
-        //   logger.info("Set type ahead to '" + t + "'");
+        logger.info("setTypeAheadText Set type ahead to '" + t + "'");
         typeAhead.setText(t);
       }
     } else {
@@ -343,7 +345,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  protected void showFinishedGettingExercises() { waitCursorHelper.showFinished(); }
+  protected void showFinishedGettingExercises() {
+    waitCursorHelper.showFinished();
+  }
 
   /**
    * @see SimpleSelectExerciseList#gotEmptyExerciseList
@@ -491,12 +495,13 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void onResize() {
-   // super.onResize();
+    // super.onResize();
     pagingContainer.onResize(getCurrentExercise());
   }
 
   /**
    * Scrolls container to visible range, if needed.
+   *
    * @param itemID
    * @see #showExercise
    */

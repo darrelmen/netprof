@@ -71,7 +71,9 @@ public class SelectionState {
    * @see HistoryExerciseList#getSelectionState(String)
    */
   public SelectionState(String token, boolean removePlus) {
-    parseToken(removePlus ? unencodeToken(token) : unencodeToken2(token));
+    String token1 = removePlus ? unencodeToken(token) : unencodeToken2(token);
+    //logger.info("From '" + token + "' to '" + token1 +   "'");
+    parseToken(token1);
   }
 
   private String unencodeToken(String token) {
@@ -79,7 +81,11 @@ public class SelectionState {
   }
 
   private String unencodeToken2(String token) {
-    return token.replaceAll("%3D", "=").replaceAll("%3B", SECTION_SEPARATOR).replaceAll("%2", " ");
+    return token
+        .replaceAll("%3D", "=")
+        .replaceAll("%3B", SECTION_SEPARATOR)
+        .replaceAll("%23", "#")
+        ;
   }
 
   /**
@@ -110,7 +116,7 @@ public class SelectionState {
         String[] segments = part.split("=");
         if (DEBUG) logger.info("\tpart " + part + " : " + Arrays.asList(segments));
         if (segments.length > 1) {
-          String type    = segments[0].trim();
+          String type = segments[0].trim();
           String section = segments[1];
 
           if (isMatch(type, "item")) {
@@ -178,6 +184,7 @@ public class SelectionState {
   }
 
   private void setItem(int item) {
+    if (DEBUG) logger.info("item = " + item);
     this.item = item;
   }
 
@@ -213,39 +220,6 @@ public class SelectionState {
       return text;
     }
   }
-
-  //public static final String SHOWING_ALL_ENTRIES = "Showing all entries";
-
-/*  public String getDescription(Collection<String> typeOrder) {
-    if (typeToSection.isEmpty()) {
-      return SHOWING_ALL_ENTRIES;
-    } else {
-      StringBuilder status = new StringBuilder();
-      //System.out.println("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
-      for (String type : typeOrder) {
-        Collection<String> selectedItems = typeToSection.get(type);
-        if (selectedItems != null) {
-          List<String> sorted = new ArrayList<String>();
-          for (String selectedItem : selectedItems) {
-            sorted.add(selectedItem);
-          }
-          Collections.sort(sorted);
-          StringBuilder status2 = new StringBuilder();
-          String sep = sorted.size() == 2 ? " and " : ", ";
-          for (String item : sorted) {
-            status2.append(item).append(sep);
-          }
-          String s = status2.toString();
-          if (!s.isEmpty()) s = s.substring(0, s.length() - sep.length());
-          String statusForType = type + " " + s;
-          status.append(statusForType).append(" and ");
-        }
-      }
-      String text = status.toString();
-      if (text.length() > 0) text = text.substring(0, text.length() - " and ".length());
-      return text;
-    }
-  }*/
 
   public String getInstance() {
     return instance;

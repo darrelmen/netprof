@@ -89,7 +89,7 @@ public class InitialUI implements UILifecycle {
   private static final int NO_USER_INITIAL = -2;
 
   private final UserManager userManager;
- // private final UserMenu userMenu;
+  // private final UserMenu userMenu;
 
   /**
    * @see #configureUIGivenUser
@@ -106,7 +106,7 @@ public class InitialUI implements UILifecycle {
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private final UserServiceAsync userService    = GWT.create(UserService.class);
+  private final UserServiceAsync userService = GWT.create(UserService.class);
 
   private final IBanner banner;
 
@@ -118,7 +118,7 @@ public class InitialUI implements UILifecycle {
   private Breadcrumbs breadcrumbs;
   protected Panel contentRow;
   private INavigation navigation;
- // private final BrowserCheck browserCheck = new BrowserCheck();
+  // private final BrowserCheck browserCheck = new BrowserCheck();
   private Container verticalContainer;
   private static final boolean DEBUG = false;
   private final ProjectChoices choices;
@@ -138,7 +138,7 @@ public class InitialUI implements UILifecycle {
     //banner = new Banner(props, this, langTest, userMenu, langTest);
     UserMenu userMenu = new UserMenu(langTest, userManager, this);
 //    logger.info("made user menu"+ userMenu);
-    banner = new NewBanner(userManager, this, userMenu, breadcrumbs = getBreadcrumbs(),controller);
+    banner = new NewBanner(userManager, this, userMenu, breadcrumbs = getBreadcrumbs(), controller);
   }
 
   /**
@@ -213,7 +213,7 @@ public class InitialUI implements UILifecycle {
     // logger.info("talks to domino " + props.talksToDomino());
     //reload = (props.talksToDomino()) ? reload : null;
     Widget bannerRow = banner.getBanner();
-return bannerRow;
+    return bannerRow;
 //    headerRow = new FluidRow();
 //    headerRow.add(new Column(12, bannerRow));
     //return headerRow;
@@ -257,6 +257,7 @@ return bannerRow;
 
     //verticalContainer.remove(breadcrumbs);
     breadcrumbs.clear();
+    breadcrumbs.setVisible(false);
 
     userService.logout(userManager.getUserID(), new AsyncCallback<Void>() {
       @Override
@@ -373,6 +374,7 @@ return bannerRow;
     Breadcrumbs crumbs = new Breadcrumbs(">");
     crumbs.getElement().setId("breadcrumb");
     crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    crumbs.setVisible(false);
     addCrumbs(crumbs);
     // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
 
@@ -385,33 +387,23 @@ return bannerRow;
    * @see #getBreadcrumbs()
    */
   private void addCrumbs(Breadcrumbs crumbs) {
-  /*  NavLink home = new NavLink("Home");
-
-    home.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        chooseProjectAgain();
-      }
-    });
-    crumbs.add(home);*/
-
     User current = userManager.getCurrent();
     if (current != null) {
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
         addBreadcrumbLevels(crumbs, startupInfo);
-      }
-      else {
+      } else {
         logger.info("no project startup info...");
       }
     } else {
-      logger.info("getBreadcrumbs no current user --- ????");
+      //logger.info("getBreadcrumbs no current user --- ????");
     }
   }
 
   private void addBreadcrumbLevels(Breadcrumbs crumbs, ProjectStartupInfo startupInfo) {
     int currentProject = startupInfo.getProjectid();
     crumbs.clear();
+    breadcrumbs.setVisible(true);
     for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
       if (project.hasChildren() && project.hasChild(currentProject)) {
         NavLink lang = new NavLink(project.getLanguage());
@@ -487,7 +479,7 @@ return bannerRow;
   }
 
   private void makeNavigation() {
-   // navigation = new Navigation(service, userManager, controller, userFeedback, lifecycleSupport);
+    // navigation = new Navigation(service, userManager, controller, userFeedback, lifecycleSupport);
     navigation = new NewContentChooser(controller);
     banner.setNavigation(navigation);
   }
@@ -744,15 +736,9 @@ return bannerRow;
   public NavLink makeBreadcrumb(String name) {
     NavLink projectCrumb = new NavLink(name);
     breadcrumbs.add(projectCrumb);
+    breadcrumbs.setVisible(true);
     return projectCrumb;
   }
-
-/*
-  @NotNull
-  private Image getFlag(String cc) {
-    return new Image("langtest/cc/" + cc + ".png");
-  }
-*/
 
   @Override
   public void clickOnParentCrumb(SlimProject parent) {

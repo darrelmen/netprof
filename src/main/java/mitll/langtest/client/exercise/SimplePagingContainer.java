@@ -345,12 +345,18 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   private Comparator<T> comp;
 
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#sortBy(Comparator)
+   * @param comp
+   */
   @Override
   public void sortBy(Comparator<T> comp) {
     this.comp = comp;
+    long then = System.currentTimeMillis();
     logger.info("about to sort ");
     Collections.sort(getList(), comp);
-    logger.info("finished sort ");
+    long now = System.currentTimeMillis();
+    logger.info("finished sort in " + (now-then));
   }
 
   public void hide() {

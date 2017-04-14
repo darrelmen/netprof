@@ -43,6 +43,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 4/27/16.
+ * @deprecated
  */
 public class SectionWidgetContainer<T extends SectionWidget> implements FacetContainer {
   private final Logger logger = Logger.getLogger("SectionWidgetContainer");

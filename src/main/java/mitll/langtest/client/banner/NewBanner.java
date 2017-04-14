@@ -177,7 +177,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private void addChoicesForUser(Nav nav) {
-    for (String choice : Arrays.asList("Learn", "Drill", "Progress", "List")) choices.add(getChoice(nav, choice));
+    boolean first =true;
+    for (String choice : Arrays.asList("Learn", "Drill", "Progress", "List")) {
+      NavLink choice1 = getChoice(nav, choice);
+      if (first) choice1.addStyleName("leftTenMargin");
+      first =false;
+      choices.add(choice1);
+    }
   }
 
 

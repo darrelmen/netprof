@@ -70,6 +70,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private static final boolean DEBUG = false;
   private static final boolean WARN_MISSING_FILE = false;
+  public static final int WARN_THRESH = 100;
 
   private AudioConversion audioConversion;
   private PathWriter pathWriter;
@@ -222,7 +223,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long then = System.currentTimeMillis();
     db.getAudioDAO().makeSureAudioIsThere(projectid, project.getLanguage(), true);
     long now = System.currentTimeMillis();
-    if (now - then > 100) logger.info("1 checkAudio - took " + (now - then) + " millis to check audio");
+    if (now - then > WARN_THRESH) logger.info("1 checkAudio - took " + (now - then) + " millis to check audio");
 
     ensureAudio(projectid);
   }
@@ -237,7 +238,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     then = now;
     List<CommonExercise> exercises = db.getExercises(projectid);
     now = System.currentTimeMillis();
-    if (now - then > 100) logger.info("2 checkAudio - took " + (now - then) + " millis to get exercises");
+    if (now - then > WARN_THRESH) logger.info("2 checkAudio - took " + (now - then) + " millis to get exercises");
 
     ensureAudioForExercises( exercises);
   }
@@ -253,7 +254,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     then = now;
     db.getAudioDAO().attachAudioToExercises(exercises, language);
     now = System.currentTimeMillis();
-    if (now - then > 100) logger.info("3  checkAudio - took " + (now - then) + " millis to attach audio");
+    if (now - then > WARN_THRESH) logger.info("3  checkAudio - took " + (now - then) + " millis to attach audio");
 
     then = now;
     int c = 0;
@@ -276,7 +277,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       }
     }
     now = System.currentTimeMillis();
-    if (now - then > 100) {
+    if (now - then > WARN_THRESH) {
       logger.info("4 checkAudio - took " + (now - then) + " millis to ensure ogg and mp3 for " + c + " attributes, " + success + " files successful");
     }
   }
@@ -552,7 +553,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         imageOptions.getWidth(), imageOptions.getHeight(), imageType1, exerciseID);
     long now = System.currentTimeMillis();
     long diff = now - then;
-    if (diff > 100) {
+    if (diff > WARN_THRESH) {
       logger.debug("getImageForAudioFile : got images " +
           // "(" + width + " x " + height + ")" +
           " (" + reqid + ") type " + imageType +
