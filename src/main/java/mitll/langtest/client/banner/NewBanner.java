@@ -166,7 +166,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
         showActive(nameToLink.get(NewContentChooser.LISTS));
         break;
       default:
-        navigation.showLearn();
+    //    navigation.showLearn();
         break;
     }
   }

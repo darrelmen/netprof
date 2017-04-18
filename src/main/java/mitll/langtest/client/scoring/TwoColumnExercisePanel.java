@@ -1,21 +1,23 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Dropdown;
+import com.github.gwtbootstrap.client.ui.DropdownContainer;
+import com.github.gwtbootstrap.client.ui.DropdownSubmenu;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.exercise.CommentBox;
+import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
@@ -23,13 +25,16 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -51,6 +56,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final boolean showInitially = false;
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<CommonShell> listContainer;
+
+  public static final String MAKE_A_NEW_LIST = "Make a new list";
+
+  private static final String ADD_ITEM = "Add Item to List";
+  private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
+  private static final String ADD_TO_LIST = "Add to List";
+  /**
+   * @see #getNewListButton
+   */
+  private static final String NEW_LIST = "New List";
+  private static final String ITEM_ADDED = "Item Added!";
+  private static final String ADDING_TO_LIST = "Adding to list ";
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -169,21 +186,103 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private Dropdown getDropdown() {
-    Dropdown w = new Dropdown("");
-    w.setRightDropdown(true);
-    w.setIcon(IconType.REORDER);
-    w.add(new NavLink("Add to List"));
+  //  Dropdown dropdownContainer = new Dropdown("");
+    DropdownContainer dropdownContainer = new DropdownContainer("");
+    dropdownContainer.setRightDropdown(true);
+    dropdownContainer.setIcon(IconType.REORDER);
+    //  NavLink widget1 = new NavLink("Add to List");
+    DropdownSubmenu widget1 = new DropdownSubmenu("Add to List");
+    widget1.setRightDropdown(false);
+    dropdownContainer.add(widget1);
+
+    widget1.getTriggerWidget().addMouseDownHandler(new MouseDownHandler() {
+      @Override
+      public void onMouseDown(MouseDownEvent event) {
+        logger.info("got mouse down");
+      }
+    });
+
+    populateListChoices(exercise.getID(),controller,widget1);
+ //   widget1.add(new Dropdown(""))
+//    widget1.add(new NavLink("first"));
+ //   widget1.add(new NavLink("second"));
+
     NavLink widget = new NavLink("New List");
-    w.add(widget);
+    dropdownContainer.add(widget);
 //    widget.addClickHandler()
     NavLink share = new NavLink(EMAIL);
-    w.add(share);
+    dropdownContainer.add(share);
     share.setHref(getMailTo());
-    w.add(getShowComments());
-    w.addStyleName("leftThirtyMargin");
-    w.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
-    w.getTriggerWidget().setCaret(false);
-    return w;
+    dropdownContainer.add(getShowComments());
+    dropdownContainer.addStyleName("leftThirtyMargin");
+    dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
+    dropdownContainer.getTriggerWidget().setCaret(false);
+    return dropdownContainer;
+  }
+
+  private final PopupContainerFactory popupContainer = new PopupContainerFactory();
+
+  /**
+   * Ask server for the set of current lists for this user.
+   * <p>
+   * TODO : do this better -- tell server to return lists that don't have exercise in them.
+   *
+   * @param id
+   * @param controller
+   * @param w1
+   * @seex #makeAddToList
+   * @seex #wasRevealed()
+   */
+  private void populateListChoices(final int id, final ExerciseController controller, final DropdownBase w1) {
+    ListServiceAsync listService = controller.getListService();
+    listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Collection<UserList<CommonShell>> result) {
+        w1.clear();
+      //  activeCount = 0;
+        boolean anyAdded = false;
+        //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
+        for (final UserList ul : result) {
+          if (!ul.containsByID(id)) {
+        //    activeCount++;
+            anyAdded = true;
+            final NavLink widget = new NavLink(ul.getName());
+            w1.add(widget);
+            widget.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                controller.logEvent(w1, "DropUp", id, "adding_" + ul.getID() + "/" + ul.getName());
+
+                listService.addItemToUserList(ul.getID(), id, new AsyncCallback<Void>() {
+                  @Override
+                  public void onFailure(Throwable caught) {
+                  }
+
+                  @Override
+                  public void onSuccess(Void result) {
+                    popupContainer.showPopup(ITEM_ADDED, w1);
+                    widget.setVisible(false);
+          //          activeCount--;
+            //        if (activeCount == 0) {
+              //        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
+                //      w1.add(widget);
+                  //  }
+                  }
+                });
+              }
+            });
+          }
+        }
+        if (!anyAdded) {
+        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
+          w1.add(widget);
+        }
+      }
+    });
   }
 
   @NotNull

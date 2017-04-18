@@ -49,7 +49,7 @@ public class NewListButton {
    * @return
    * @see #getNavigationHelper
    */
-  private Widget getNextListButton() {
+  private Widget getNewListButton() {
     String buttonTitle = NEW_LIST;
 
     final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList();

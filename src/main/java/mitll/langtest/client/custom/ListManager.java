@@ -499,6 +499,8 @@ public class ListManager implements RequiresResize {
    * @see #showList
    */
   private Panel makeTabContent(UserList ul, String instanceName, HasID toSelect) {
+    logger.info("makeTabContent " +ul+ " instance " + instanceName + " to select " + toSelect);
+
     FluidContainer listOperationsContainer = new FluidContainer();
     listOperationsContainer.getElement().setId("showListContainer");
 
