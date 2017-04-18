@@ -136,7 +136,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param onlyDefaultUser
    * @param onlyUninspected
    * @paramx setTypeAheadText
-   * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
+   * @see #gotTypeAheadEvent
+   * @see HistoryExerciseList#simpleLoadExercises
    */
   void loadExercises(String selectionState,
                      String prefix,
@@ -302,11 +303,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private Stack<Long> pendingRequests = new Stack<>();
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
-    logger.info("gotTypeAheadEvent got type ahead '" + text + " set text " + setTypeAheadText);// + "' at " + new Date(keypressTimestamp));
+    logger.info("gotTypeAheadEvent got type ahead '" + text + "' set text '" + setTypeAheadText +"'");// + "' at " + new Date(keypressTimestamp));
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
-    loadExercises(getHistoryTokenFromUIState(text, -1), text, false, false, false, false);
+    pushNewItem(text,-1);
+    //loadExercises(getHistoryTokenFromUIState(text, -1), text, false, false, false, false);
   }
 
   public String getTypeAheadText() {

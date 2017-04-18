@@ -89,7 +89,9 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
         return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel,
-            new ListOptions(instanceName).setShowPager(false), listHeader, footer, 1) {
+            new ListOptions(instanceName)
+                .setShowPager(false).
+                setShowTypeAhead(false), listHeader, footer, 1) {
           @Override
           protected CommonShell findFirstExercise() {
             int currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
@@ -115,15 +117,25 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
             statsFlashcardFactory.resetStorage();
           }
 
+          /**
+           * The issue is there should only be only keyboard focus - either the space bar and prev/next or
+           * the search box. - so we should hide the search box.
+           *
+           * @param typeToSection
+           * @param prefix
+           * @param exerciseID
+           * @param onlyWithAudioAnno
+           * @param onlyUnrecorded
+           * @param onlyDefaultUser
+           * @param onlyUninspected
+           */
           @Override
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                                   String prefix,
                                                   int exerciseID, boolean onlyWithAudioAnno,
                                                   boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
-//            logger.info("got loadExercisesUsingPrefix " +prefix);
-            //  controller.logException(new Exception("where did this come from?"));
-            //prefix = ""; // practice helper doesn't use a search box
-            super.loadExercisesUsingPrefix(typeToSection, "", exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
+            logger.info("getMyListLayout : got loadExercisesUsingPrefix " +prefix);
+            super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             statsFlashcardFactory.setSelection(typeToSection);
           }
         };

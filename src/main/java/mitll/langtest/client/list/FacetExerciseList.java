@@ -105,7 +105,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                            DivWidget listHeader,
                            DivWidget footer,
                            int numToShow) {
-    super(currentExerciseVPanel, controller, listOptions.setShowTypeAhead(true));
+    super(currentExerciseVPanel, controller, listOptions);
 
     this.numToShow = numToShow;
     sectionPanel = new DivWidget();
@@ -718,16 +718,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getSectionWidgetContainer()
    */
   private void getTypeToValue(Map<String, String> typeToSelection) {
-    List<Pair> pairs = new ArrayList<>();
-
-    for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
-      String s = typeToSelection.get(type);
-      if (s == null) {
-        pairs.add(new Pair(type, ANY));
-      } else {
-        pairs.add(new Pair(type, s));
-      }
-    }
+    List<Pair> pairs = getPairs(typeToSelection);
 
     controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs),
         new AsyncCallback<FilterResponse>() {
@@ -742,15 +733,29 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           public void onSuccess(FilterResponse response) {
             Map<String, Set<MatchInfo>> result = response.getTypeToValues();
-            //  logger.info("getTypeToValues for " + pairs + " got " + result);
+            logger.info("getTypeToValues for " + pairs + " got " + result.size());
             boolean b = changeSelection(response.getTypesToInclude(), typeToSelection);
 
             setTypeToSelection(typeToSelection);
-
             addFacetsForReal(result, typeOrderContainer);
             gotSelection();
           }
         });
+  }
+
+  @NotNull
+  private List<Pair> getPairs(Map<String, String> typeToSelection) {
+    List<Pair> pairs = new ArrayList<>();
+
+    for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
+      String s = typeToSelection.get(type);
+      if (s == null) {
+        pairs.add(new Pair(type, ANY));
+      } else {
+        pairs.add(new Pair(type, s));
+      }
+    }
+    return pairs;
   }
 
   private boolean changeSelection(Set<String> typesToInclude, Map<String, String> typeToSelection) {
@@ -831,7 +836,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   protected FacetContainer getSectionWidgetContainer() {
     return new FacetContainer() {
-
       // private int id;
 
       /**
@@ -841,8 +845,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
        */
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
-        logger.info("restoreListBoxState t->sel " + selectionState);
-
+        //logger.info("restoreListBoxState t->sel " + selectionState);
         // this.id = selectionState.getItem();
 
         Map<String, String> newTypeToSelection = new HashMap<>();
@@ -873,7 +876,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         */
 
         String s = builder.toString();
-        logger.info("getHistoryToken token '" + s + "'");
+       // logger.info("getHistoryToken token '" + s + "'");
 
         return s;
       }

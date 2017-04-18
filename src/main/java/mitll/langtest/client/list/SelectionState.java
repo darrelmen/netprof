@@ -57,7 +57,7 @@ public class SelectionState {
   public static final String ONLY_UNINSPECTED = "onlyUninspected";
   private static final String ITEM_SEPARATOR = "&#44";
 
-  static final String INSTANCE = "instance";
+  public static final String INSTANCE = "instance";
   private int item = -1;
   private final Map<String, Collection<String>> typeToSection = new HashMap<>();
   private String instance = "";
@@ -263,11 +263,11 @@ public class SelectionState {
     return project;
   }
 
-/*  public String getInfo() {
+  public String getInfo() {
     return "parseToken : instance " + instance + " : " +
         "search " + search + ", " +
         "item " + item + ", " +
         "unit->chapter " + getTypeToSection() +
         " onlyWithAudioDefects="+isOnlyWithAudioDefects();
-  }*/
+  }
 }

@@ -19,14 +19,14 @@ public class SearchHighlighter {
    */
   private static final String NORMALIZE_TO_SINGLE_WHITE_SPACE = "\\s+";
 
-  String getQueryHighlightString(String formattedSuggestion, String query) {
+/*  String getQueryHighlightString(String formattedSuggestion, String query) {
     String lowerCaseSuggestion = normalizeSuggestion(formattedSuggestion);
     String[] searchWords = normalizeSearch(query).split(WHITESPACE_STRING);
 
 //    logger.info("lower " + lowerCaseSuggestion);
 //    for (String w : searchWords) logger.info("\ts '" + w + "'");
     return getHighlightedString(searchWords, formattedSuggestion, lowerCaseSuggestion);
-  }
+  }*/
 
   /**
    * Normalize the search key by making it lower case, removing multiple spaces,
@@ -73,9 +73,9 @@ public class SearchHighlighter {
    * @param suggestion
    * @param lowerCaseSuggestion
    * @return
-   * @see SearchTypeahead#getSuggestion(String[], CommonShell)
+   * @see SearchTypeahead#getSuggestion
    */
-  public String getHighlightedString(String[] searchWords, String suggestion, String lowerCaseSuggestion) {
+  String getHighlightedString(String[] searchWords, String suggestion, String lowerCaseSuggestion) {
     // Create strong search string.
     SafeHtmlBuilder accum = new SafeHtmlBuilder();
 

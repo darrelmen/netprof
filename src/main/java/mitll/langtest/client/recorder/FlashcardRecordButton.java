@@ -66,6 +66,7 @@ public class FlashcardRecordButton extends RecordButton {
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
   private static final String PROMPT = "Click and hold to record";
   private static final int WIDTH_FOR_BUTTON = 360;
+  private static final boolean WARN_NOT_A_SPACE = false;
 
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
@@ -164,7 +165,9 @@ public class FlashcardRecordButton extends RecordButton {
             gotDownArrow();
             event.stopPropagation();
           } else {
-            warnNotASpace();
+            if (WARN_NOT_A_SPACE) {
+              warnNotASpace();
+            }
           }
         }
       }

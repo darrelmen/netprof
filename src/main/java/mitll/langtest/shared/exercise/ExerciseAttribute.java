@@ -46,21 +46,12 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseAttribute extends Pair {
-/*
-  private int id;
-*/
-
   public ExerciseAttribute() {
   }
 
   public ExerciseAttribute(String status, String value) {
     super(status, value);
   }
-
-/*  private ExerciseAttribute(int id, String status, String value) {
-    super(status,value);
-    this.id = id;
-  }*/
 
   public void setValue(String value) {
     this.value = value;
@@ -82,10 +73,4 @@ public class ExerciseAttribute extends Pair {
       return property.equals(ea.property) && value.equals(ea.property);
     }
   }
-
-/*
-  public int getId() {
-    return id;
-  }
-*/
 }

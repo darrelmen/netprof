@@ -194,25 +194,35 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   @NotNull
   private NavLink getChoice(Nav nav, String learn1) {
     NavLink learn = getLink(nav, learn1);
+    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + learn1;
+
     ClickHandler clickHandler = event -> {
-      switch (learn1) {
-        case LEARN:
-          navigation.showLearn();
-          break;
-        case DRILL:
-          navigation.showDrill();
-          break;
-        case PROGRESS:
-          navigation.showProgress();
-          break;
-        case LISTS:
-          navigation.showLists();
-          break;
-      }
-      showActive(learn);
+      setHistoryItem(historyToken);
+   //   showActive(learn);
     };
+//      switch (learn1) {
+//        case LEARN:
+//         // navigation.showLearn();
+//          setHistoryItem(SelectionState.SECTION_SEPARATOR+SelectionState.INSTANCE +"="+learn1);
+//          break;
+//        case DRILL:
+//         // navigation.showDrill();
+//          break;
+//        case PROGRESS:
+//         // navigation.showProgress();
+//          break;
+//        case LISTS:
+//         // navigation.showLists();
+//          break;
+//      }
+//    };
     learn.addClickHandler(clickHandler);
     return learn;
+  }
+
+  protected void setHistoryItem(String historyToken) {
+    if (true) logger.info("NewBanner.setHistoryItem '" + historyToken + "' -------------- ");
+    History.newItem(historyToken);
   }
 
   @NotNull
@@ -225,13 +235,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   private void showActive(NavLink learn) {
     for (NavLink link : nameToLink.values()) link.setActive(false);
-
     learn.setActive(true);
-//    if (currentActive != null) {
-//      currentActive.setActive(false);
-    //  }
-    //currentActive = learn;
-
   }
 
   private Image getImage() {

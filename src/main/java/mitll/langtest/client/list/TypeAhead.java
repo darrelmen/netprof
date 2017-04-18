@@ -114,7 +114,7 @@ public abstract class TypeAhead implements ITypeAhead {
   private void makeTypeAhead() {
     typeAhead.setWidth(WIDTH + "px");
     typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT);
-    getTypeAhead().getElement().setId("ExerciseList_TypeAhead");
+    getTypeAhead().getElement().setId("TypeAhead");
 
     getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
@@ -123,7 +123,7 @@ public abstract class TypeAhead implements ITypeAhead {
         String current = getTypeAhead().getText();
 
         if (previous.equals(current) && !previous.isEmpty()) {
-          logger.info("prev = current '" + previous + "'");
+          logger.info("makeTypeAhead prev = current '" + previous + "'");
         } else {
           gotTypeAheadEntry(current);
           previous = current;

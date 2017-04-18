@@ -73,11 +73,9 @@ public class ListOptions {
     return instance;
   }
 
-
   boolean isIncorrectFirst() {
     return incorrectFirst;
   }
-
 
   boolean isShowFirstNotCompleted() {
     return showFirstNotCompleted;

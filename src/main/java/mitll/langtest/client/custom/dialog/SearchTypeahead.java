@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 public class SearchTypeahead {
   private final Logger logger = Logger.getLogger("SearchTypeahead");
 
-
   /**
    * Regular expression used to collapse all whitespace in a query string.
    */
@@ -36,7 +35,7 @@ public class SearchTypeahead {
   private CommonShell currentExercise = null;
   private final SearchHighlighter highlighter = new SearchHighlighter();
 
-  public SearchTypeahead(ExerciseController controller, FeedbackExerciseList feedbackExerciseList) {
+  SearchTypeahead(ExerciseController controller, FeedbackExerciseList feedbackExerciseList) {
     this.controller = controller;
     this.feedbackExerciseList = feedbackExerciseList;
   }
@@ -48,7 +47,7 @@ public class SearchTypeahead {
    * @return
    * @see EditableExerciseList#getTypeahead
    */
-  public <T extends CommonShell> Typeahead getTypeaheadUsing(final String whichField, TextBox w) {
+   <T extends CommonShell> Typeahead getTypeaheadUsing(final String whichField, TextBox w) {
     SuggestOracle oracle = new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
@@ -135,7 +134,7 @@ public class SearchTypeahead {
     }
   }
 
-  public void clearCurrentExercise() {
+   void clearCurrentExercise() {
     currentExercise = null;
   }
 
@@ -211,7 +210,11 @@ public class SearchTypeahead {
     return formattedSuggestion;
   }
 
-  public CommonShell getCurrentExercise() {
+  /**
+   * @see EditableExerciseList#isOnList
+   * @return
+   */
+  CommonShell getCurrentExercise() {
     return currentExercise;
   }
 

@@ -88,7 +88,7 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
   protected void noSectionsGetExercises(long userID) {
  //   simpleLoadExercises(getInitialHistoryToken(), getPrefix());
     String historyToken = getHistoryToken();
-    logger.info("noSections " + userID + " " + historyToken);
+   // logger.info("noSections " + userID + " " + historyToken);
     simpleLoadExercises(historyToken, getPrefix());
   }
 }

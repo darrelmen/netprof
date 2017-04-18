@@ -20,6 +20,7 @@ import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.sound.PlayAudioPanel;
@@ -63,7 +64,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @paramx allowRecording
    * @paramx includeListButtons
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
-   * @see mitll.langtest.client.custom.Navigation#getLearnHelper
+   * @see mitll.langtest.client.banner.NewLearnHelper#getFactory
    */
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
@@ -144,11 +145,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private String getMailTo() {
     String s1 = trimURL(Window.Location.getHref());
-   // logger.info("base is "+s1);
+    // logger.info("base is "+s1);
     String s = s1 +
-        "#"+
+        "#" +
         SelectionState.SECTION_SEPARATOR + "item=" + exercise.getID() +
-        SelectionState.SECTION_SEPARATOR + "project=" +controller.getProjectStartupInfo().getProjectid();
+        SelectionState.SECTION_SEPARATOR + "project=" + controller.getProjectStartupInfo().getProjectid();
 
     String encode = URL.encode(s);
     return "mailto:" +
@@ -194,16 +195,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         for (CommentBox box : comments) {
           if (showingComments) {
             box.hideButtons();
-          }
-          else {
+          } else {
             box.showButtons();
           }
         }
         showingComments = !showingComments;
         if (showingComments) {
           widget.setText("Hide Comments");
-        }
-        else {
+        } else {
           widget.setText("Show Comments");
         }
       }
@@ -264,33 +263,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void addContext(T e, Panel card, DivWidget rowWidget) {
     int c = 0;
     String foreignLanguage = e.getForeignLanguage();
+    String altFL = e.getAltFL();
     for (CommonExercise contextEx : e.getDirectlyRelated()) {
       //logger.info("Add context " + contextEx.getID());
-      Panel context = getContext(contextEx, foreignLanguage);
-      if (context != null) {
-        Style style = context.getElement().getStyle();
-        style.setFontWeight(Style.FontWeight.LIGHTER);
-        rowWidget.add(context);
-        context.setWidth("100%");
-      }
-
-      String contextTranslation = contextEx.getEnglish();
-
-      boolean same = contextEx.getForeignLanguage().equals(contextTranslation);
-      if (!same) {
-        if (context != null) {
-          context.setWidth("50%");
-        }
-
-        Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation);
-
-        if (contextTransWidget != null) {
-          contextTransWidget.addStyleName("rightsidecolor");
-          contextTransWidget.setWidth("50%");
-          contextTransWidget.getElement().getStyle().setFontWeight(Style.FontWeight.LIGHTER);
-          rowWidget.add(contextTransWidget);
-        }
-      }
+      addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
 
       c++;
 
@@ -302,10 +278,56 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
+  private void addContextFields(DivWidget rowWidget, String foreignLanguage,
+                                String altFL, CommonExercise contextEx) {
+    // DivWidget col = new DivWidget();
+    // col.setWidth("100%");
+    Panel context = getContext(contextEx, foreignLanguage, altFL);
+    if (context != null) {
+      //Style style = context.getElement().getStyle();
+      //style.setFontWeight(Style.FontWeight.LIGHTER);
+      rowWidget.add(context);
+      //  col.add(context);
+      context.setWidth("100%");
+    }
+
+
+    String contextTranslation = contextEx.getEnglish();
+
+    boolean same = contextEx.getForeignLanguage().equals(contextTranslation);
+    if (!same) {
+      if (context != null) {
+        context.setWidth("50%");
+      }
+
+      Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation);
+
+      if (contextTransWidget != null) {
+        contextTransWidget.addStyleName("rightsidecolor");
+        contextTransWidget.setWidth("50%");
+        // contextTransWidget.getElement().getStyle().setFontWeight(Style.FontWeight.LIGHTER);
+        rowWidget.add(contextTransWidget);
+      }
+    }
+  }
+
+  private Widget getAltContext(String flToHighlight, String altFL) {
+    Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
+        true, false, false);
+
+    CommentBox commentBox = getCommentBox(true);
+    return commentBox
+        .getEntry(QCNPFExercise.ALTCONTEXT, contentWidget,
+            exercise.getAnnotation(QCNPFExercise.ALTCONTEXT), showInitially);
+  }
+
+  /**
+   * @return
+   * @see #makeFirstRow
+   */
   @NotNull
   private DivWidget getPlayAudioPanel() {
-    PlayAudioPanel w = new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller, false);
-    return w;
+    return new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller, false);
   }
 
   /**
@@ -390,8 +412,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private Widget addAltFL(T e) {
     String translitSentence = e.getAltFL().trim();
-    if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
-      return getEntry(e, QCNPFExercise.ALTFL, translitSentence, true, true, false, showInitially);
+    if (!translitSentence.isEmpty() && !translitSentence.equals("N/A") && !e.getForeignLanguage().trim().equals(translitSentence)) {
+      Widget entry = getEntry(e, QCNPFExercise.ALTFL, translitSentence, true, true, false, showInitially);
+      entry.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+      return entry;
     } else return null;
   }
 
@@ -415,12 +439,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final List<CommentBox> comments = new ArrayList<>();
 
   /**
-   * @param exercise
+   * @param contextExercise
    * @return
    * @seex #addContextButton
    */
-  private Panel getContext(CommonExercise exercise, String itemText) {
-    String context = exercise.getForeignLanguage();
+  private Panel getContext(CommonExercise contextExercise, String itemText, String altFL) {
+    String context = contextExercise.getForeignLanguage();
 
     if (!context.isEmpty()) {
       Panel hp = new DivWidget();
@@ -431,9 +455,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
       hp.add(spacer);
 
-      AudioAttribute audioAttrPrefGender = exercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
+      AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
 
-      ChoicePlayAudioPanel child = new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller, true);
+      ChoicePlayAudioPanel child
+          = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true);
       child.setEnabled(audioAttrPrefGender != null);
       hp.add(child);
 
@@ -444,9 +469,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       Widget commentRow =
           commentBox
               .getEntry(QCNPFExercise.CONTEXT, contentWidget,
-                  exercise.getAnnotation(QCNPFExercise.CONTEXT), showInitially);
+                  contextExercise.getAnnotation(QCNPFExercise.CONTEXT), showInitially);
 
-      hp.add(commentRow);
+      DivWidget col = new DivWidget();
+      col.setWidth("100%");
+      hp.add(col);
+
+      col.add(commentRow);
+
+      if (!context.equals(contextExercise.getAltFL())) {
+        col.add(getAltContext(altFL, contextExercise.getAltFL()));
+      }
+
       return hp;
     } else {
       return null;

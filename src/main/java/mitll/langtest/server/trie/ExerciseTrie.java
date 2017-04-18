@@ -109,6 +109,13 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
+  /**
+   *
+   * @param includeForeign = not english
+   * @param isMandarin
+   * @param hasClickableCharacters = mandarin, korean, japanese
+   * @param exercise
+   */
   private void addEntryForExercise(
       boolean includeForeign,
       boolean isMandarin,
@@ -129,8 +136,15 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     for (CommonExercise ex : exercise.getDirectlyRelated()) {
       addEnglish(exercise, ex.getEnglish());
       if (includeForeign) {
-        addForeign(isMandarin, hasClickableCharacters, exercise, ex.getForeignLanguage(), ex.getTransliteration());
+        includeForeign(isMandarin, hasClickableCharacters, exercise, ex);
       }
+    }
+  }
+
+  private void includeForeign(boolean isMandarin, boolean hasClickableCharacters, T exercise, CommonExercise ex) {
+    addForeign(isMandarin, hasClickableCharacters, exercise, ex.getForeignLanguage(), ex.getTransliteration());
+    if (!exercise.getAltFL().isEmpty()) {
+      addForeign(isMandarin, hasClickableCharacters, exercise, ex.getAltFL(), ex.getTransliteration());
     }
   }
 
@@ -140,7 +154,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    * @param isMandarin
    * @param hasClickableCharacters
    * @param exercise
-   * @paramz smallVocabDecoder
+   * @see #addEntryForExercise(boolean, boolean, boolean, CommonExercise)
    */
   private void addForeign(boolean isMandarin, boolean hasClickableCharacters,
                           T exercise) {
@@ -148,9 +162,13 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     String transliteration = exercise.getTransliteration();
 
     addForeign(isMandarin, hasClickableCharacters, exercise, fl, transliteration);
+    if (!exercise.getAltFL().isEmpty()) {
+      addForeign(isMandarin, hasClickableCharacters, exercise, exercise.getAltFL(), transliteration);
+    }
   }
 
-  private void addForeign(boolean isMandarin, boolean hasClickableCharacters, T exercise, String fl, String transliteration) {
+  private void addForeign(boolean isMandarin,
+                          boolean hasClickableCharacters, T exercise, String fl, String transliteration) {
     if (fl != null && !fl.isEmpty()) {
       addFL(isMandarin, hasClickableCharacters, exercise, fl);
       addTransliteration(transliteration, exercise);
@@ -169,24 +187,24 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
-  private void addFL(boolean isMandarin, boolean hasClickableCharacters, T exercise, String fl) {
+  private void addFL(boolean isMandarin, boolean hasClickableCharacters, T exToReturnOnMatch, String fl) {
     fl = getTrimmed(fl);
-    addEntryToTrie(new ExerciseWrapper<>(fl, exercise));
-    addSubstrings(exercise, fl);
+    addEntryToTrie(new ExerciseWrapper<>(fl, exToReturnOnMatch));
+    addSubstrings(exToReturnOnMatch, fl);
 
     Collection<String> tokens = smallVocabDecoder.getTokensAllLanguages(isMandarin, fl);
     for (String token : tokens) {
-      addEntry(exercise, token);
+      addEntry(exToReturnOnMatch, token);
       // String noAccents = removeDiacritics(token);
       String noAccents = StringUtils.stripAccents(token);
 
       if (!token.equals(noAccents) && !noAccents.isEmpty()) {
-        addEntry(exercise, noAccents);
+        addEntry(exToReturnOnMatch, noAccents);
       }
     }
 
     if (hasClickableCharacters) {
-      addClickableCharacters(exercise, fl);
+      addClickableCharacters(exToReturnOnMatch, fl);
     }
   }
 

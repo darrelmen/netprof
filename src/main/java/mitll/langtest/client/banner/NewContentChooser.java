@@ -59,6 +59,8 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showDrill() {
     if (currentSection.equals(DRILL)) return;
+
+    logger.info("showDrill ------ ");
     clear();
     practiceHelper.showContent(divWidget, DRILL);
     practiceHelper.hideList();

@@ -17,6 +17,7 @@ import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -26,6 +27,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 3/23/17.
  */
 public class ClickableWords<T extends CommonExercise> {
+  public static final String CONTEXTMATCH = "contextmatch";
   private final Logger logger = Logger.getLogger("ClickableWords");
 
   public static final double THRESHOLD = 0.3;
@@ -39,7 +41,6 @@ public class ClickableWords<T extends CommonExercise> {
   private static final String JAPANESE = "Japanese";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private final ListInterface listContainer;
-//  private ExerciseServiceAsync exerciseServiceAsync;
 
   /**
    * @param listContainer
@@ -52,14 +53,13 @@ public class ClickableWords<T extends CommonExercise> {
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
-    //  this.exerciseServiceAsync = exerciseServiceAsync;
   }
 
   /**
    * @paramx label
    * @paramx value
    * @paramx nameValueRow
-   * @seex #getContentWidget(String, String, boolean)
+   * @see TwoColumnExercisePanel#getEntry(String, String, ExerciseAnnotation, boolean, boolean, boolean, boolean)
    */
   DivWidget getClickableWords(String value,
                               boolean isFL,
@@ -95,9 +95,37 @@ public class ClickableWords<T extends CommonExercise> {
 
     List<String> tokens = getTokens(value, flLine, isChineseCharacter);
 
-    List<String> highlightTokens = getTokens(highlight, flLine, isChineseCharacter);
-
     // if the highlight token is not in the display, skip over it -
+    List<String> realHighlight = getMatchingHighlight(tokens,
+        getTokens(highlight, flLine, isChineseCharacter));
+
+//    logger.info("getClickableWordsHighlight real " + realHighlight);
+
+    Iterator<String> iterator = realHighlight.iterator();
+    String toFind = iterator.hasNext() ? iterator.next() : null;
+
+    HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
+    int match = 0;
+    for (String token : tokens) {
+      boolean isMatch = toFind != null && isMatch(token, toFind);
+      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch));
+      match++;
+
+      if (isMatch) {
+      //  logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "' at " + match);
+        toFind = iterator.hasNext() ? iterator.next() : null;
+      }
+//      else if (isMatch) {
+//        logger.fine("getClickableWordsHighlight no highlight '" + toFind + "' vs '" + token + "' match at " + match);
+//      }
+    }
+
+    horizontal.addStyleName("leftFiveMargin");
+    return horizontal;
+  }
+
+  @NotNull
+  private List<String> getMatchingHighlight(List<String> tokens, List<String> highlightTokens) {
     List<String> realHighlight = new ArrayList<>();
 
     Iterator<String> hIter = highlightTokens.iterator();
@@ -118,29 +146,7 @@ public class ClickableWords<T extends CommonExercise> {
         }
       }
     }
-
-//    logger.info("real " + realHighlight);
-
-    Iterator<String> iterator = realHighlight.iterator();
-    String toFind = iterator.hasNext() ? iterator.next() : null;
-
-    HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
-    for (String token : tokens) {
-      boolean isMatch = toFind != null && isMatch(token, toFind);
-
-      if (isMatch && iterator.hasNext()) {
-        toFind = iterator.next();
-        // logger.info("- highlight '" + toFind + "' = '" +token+ "'");
-      } else {
-        // logger.fine("-  no highlight '" + toFind + "' vs '" +token+ "'");
-      }
-
-      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch));
-    }
-
-    horizontal.addStyleName("leftFiveMargin");
-
-    return horizontal;
+    return realHighlight;
   }
 
   private boolean isMatch(String token, String next) {
@@ -204,7 +210,7 @@ public class ClickableWords<T extends CommonExercise> {
     final InlineHTML w = new InlineHTML(html, dir);
     //final MyClickable w = new MyClickable(toShow, dir);
 
-    if (addStyle) w.addStyleName("contextmatch");
+    if (addStyle) w.addStyleName(CONTEXTMATCH);
 
     //String typeAheadText = listContainer.getTypeAheadText().toLowerCase();
     String typeAheadText = listContainer.getTypeAheadText();
@@ -216,10 +222,10 @@ public class ClickableWords<T extends CommonExercise> {
       WordBounds wordBounds = factory.findNextWord(html.toLowerCase(), toFind, 0);
 
       if (wordBounds == null) {
-        logger.info("can't find  '" + searchToken + "' in '" + html+"'");
+        logger.info("can't find  '" + searchToken + "' in '" + html + "'");
         w.addStyleName("searchmatch");
       } else {
-     //   logger.info("word bounds " + wordBounds + " for '" + searchToken + "' in '" + html+"'");
+        //   logger.info("word bounds " + wordBounds + " for '" + searchToken + "' in '" + html+"'");
         List<String> parts = wordBounds.getTriple(html);
         SafeHtmlBuilder accum = new SafeHtmlBuilder();
 
