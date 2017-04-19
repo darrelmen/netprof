@@ -107,6 +107,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     new TooltipHelper().addTooltip(subtitle,"Is your microphone active?");
     rnav.setAlignment(Alignment.RIGHT);
 
+    addUserMenu(userManager, userMenu, rnav);
+
+    subtitle.setVisible(!controller.isRecordingEnabled());
+
+    getInfoMenu(userMenu, rnav);
+    return rnav;
+  }
+
+  private void addUserMenu(UserManager userManager, UserMenu userMenu, Nav rnav) {
     userDrop = new Dropdown(userManager.getUserID());
     userDrop.setIcon(IconType.USER);
     rnav.add(userDrop);
@@ -117,13 +126,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     for (LinkAndTitle linkAndTitle : userMenuChoices) {
       userDrop.add(linkAndTitle.getLink());
     }
-
-
-
-    subtitle.setVisible(!controller.isRecordingEnabled());
-
-    getInfoMenu(userMenu, rnav);
-    return rnav;
   }
 
   Label subtitle;
@@ -146,7 +148,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     SelectionState selectionState = new SelectionState(token, false);
     String instance1 = selectionState.getInstance();
 
-    logger.info("onValueChange got " + token + " instance " + instance1);
+    logger.info("onValueChange got '" + token + "' instance '" + instance1+"'");
 
     switch (instance1) {
       case NewContentChooser.LEARN:
@@ -166,6 +168,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
         showActive(nameToLink.get(NewContentChooser.LISTS));
         break;
       default:
+        if(instance1.isEmpty()) {
+          navigation.showLearn();
+        }
     //    navigation.showLearn();
         break;
     }

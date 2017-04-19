@@ -10,9 +10,13 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.custom.UserList;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,31 +29,25 @@ public class NewListButton {
 
   private final Logger logger = Logger.getLogger("NewListButton");
 
-  public static final String MAKE_A_NEW_LIST = "Make a new list";
+  private final UserListSupport userListSupport;
 
-  private static final String ADD_ITEM = "Add Item to List";
-  private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
-  private static final String ADD_TO_LIST = "Add to List";
-  /**
-   * @see #getNextListButton
-   */
-  private static final String NEW_LIST = "New List";
-  private static final String ITEM_ADDED = "Item Added!";
-  private static final String ADDING_TO_LIST = "Adding to list ";
+  private final int exid;
+  private final ExerciseController controller;
+  private final Widget dropdown;
 
-  int exid;
-  ExerciseController controller;
-
-  public NewListButton(int exid, ExerciseController controller) {
+  public NewListButton(int exid, ExerciseController controller, UserListSupport userListSupport,
+                       Widget dropdown) {
     this.exid = exid;
     this.controller = controller;
+    this.userListSupport = userListSupport;
+    this.dropdown =dropdown;
   }
 
   /**
    * @return
-   * @see #getNavigationHelper
+   * @seex #getNavigationHelper
    */
-  private Widget getNewListButton() {
+/*  private Widget getNewListButton() {
     String buttonTitle = NEW_LIST;
 
     final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList();
@@ -67,6 +65,26 @@ public class NewListButton {
     });
 
     return newListButton;
+  }*/
+
+  private final PopupContainerFactory popupContainerFactory = new PopupContainerFactory();
+  private PopupContainerFactory.HidePopupTextBox textBox;
+
+  public DecoratedPopupPanel getNewListButton2() {
+    final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList();
+    this.textBox = textBox;
+    final DecoratedPopupPanel thePopup = popupContainerFactory.getPopup(textBox, new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        makeANewList(textBox);
+      }
+    });
+
+    return thePopup;
+  }
+
+  public void showOrHide(PopupPanel popupPanel, UIObject popupButton) {
+    popupContainerFactory.showOrHideRelative(popupPanel, popupButton, textBox, null);
   }
 
   @NotNull
@@ -80,7 +98,7 @@ public class NewListButton {
     textBox.addKeyUpHandler(new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-        boolean duplicateName = false;//isDuplicateName(textBox.getText());
+        boolean duplicateName = isDuplicateName(textBox.getText());
         if (duplicateName) {
           textBox.getElement().getStyle().setColor("red");
         } else {
@@ -93,28 +111,16 @@ public class NewListButton {
     return textBox;
   }
 
-  /**
-   * @param popupButton
-   * @return
-   */
-  private void configureNewListButton(final Button popupButton) {
-    popupButton.setIcon(IconType.LIST_UL);
-    popupButton.setType(ButtonType.PRIMARY);
-    popupButton.addStyleName("leftFiveMargin");
-    popupButton.getElement().setId("NPFExercise_popup");
-    controller.register(popupButton, exid, "show new list");
-  }
-
   private void makeANewList(TextBox textEntry) {
     String newListName = textEntry.getValue();
     if (!newListName.isEmpty()) {
       controller.logEvent(textEntry, "NewList_TextBox", exid, "make new list called '" + newListName + "'");
-//      boolean duplicateName = isDuplicateName(newListName);
-//      if (duplicateName) {
-//        logger.info("---> not adding duplicate list " + newListName);
-//      } else {
-      addUserList(newListName, textEntry);
-      //}
+      boolean duplicateName = isDuplicateName(newListName);
+      if (duplicateName) {
+        logger.info("---> not adding duplicate list " + newListName);
+      } else {
+        addUserList(newListName, textEntry);
+      }
     }
   }
 
@@ -141,26 +147,15 @@ public class NewListButton {
               logger.warning("should never happen!");
             } else {
               textBox.setText("");
-              //wasRevealed();
+              popupContainerFactory.showPopup("List " + title + " added!", dropdown);
+
             }
           }
         }
     );
   }
 
-/*  private boolean isDuplicateName(String newListName) {
-    boolean addIt = false;
-    for (UserList ul : listsForUser) {
-      if (ul.getName().equals(newListName)) {
-        addIt = true;
-        break;
-      }
-    }
-    return addIt;
-  }*/
-
-
-  protected Tooltip addTooltip(Widget w, String tip) {
-    return new TooltipHelper().addTooltip(w, tip);
+  private boolean isDuplicateName(String newListName) {
+    return userListSupport.getKnownNames().contains(newListName);
   }
 }

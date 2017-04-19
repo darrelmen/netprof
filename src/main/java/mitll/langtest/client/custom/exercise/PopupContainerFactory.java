@@ -41,6 +41,7 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -63,6 +64,17 @@ public class PopupContainerFactory {
                                                 Button triggerButton,
                                                 Tooltip triggerButtonTooltip,
                                                 ClickHandler clickHandler) {
+    final DecoratedPopupPanel thePopup = getPopup(commentEntryText, clickHandler);
+
+    thePopup.addAutoHidePartner(triggerButton.getElement()); // fix for bug Wade found where click didn't toggle comment
+
+    configurePopupButton(triggerButton, thePopup, commentEntryText, triggerButtonTooltip);
+
+    return thePopup;
+  }
+
+  @NotNull
+  public DecoratedPopupPanel getPopup(HidePopupTextBox commentEntryText, ClickHandler clickHandler) {
     final DecoratedPopupPanel thePopup = new DecoratedPopupPanel();
     thePopup.setAutoHideEnabled(true);
 
@@ -73,11 +85,6 @@ public class PopupContainerFactory {
     thePopup.add(hp);
 
     configureTextBox("", commentEntryText, thePopup);
-
-    thePopup.addAutoHidePartner(triggerButton.getElement()); // fix for bug Wade found where click didn't toggle comment
-
-    configurePopupButton(triggerButton, thePopup, commentEntryText, triggerButtonTooltip);
-
     return thePopup;
   }
 
@@ -121,27 +128,31 @@ public class PopupContainerFactory {
     popupButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        boolean visible = popup.isShowing();
-
-        if (visible) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
-          // but if that click is on the button, it would immediately shows it again
-          //System.out.println("popup visible " + visible);
-          popup.hide();
-        } else {
-          popup.getElement().getStyle().setZIndex(1100);
-          popup.showRelativeTo(popupButton);
-//          textEntry.setFocus(true);
-
-          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            public void execute() {
-              textEntry.setFocus(true);
-            }
-          });
-
-          tooltip.hide();
-        }
+        showOrHideRelative(popup, popupButton, textEntry, tooltip);
       }
     });
+  }
+
+  public void showOrHideRelative(PopupPanel popup, UIObject popupButton, TextBox textEntry, Tooltip tooltip) {
+    boolean visible = popup.isShowing();
+
+    if (visible) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
+      // but if that click is on the button, it would immediately shows it again
+      //System.out.println("popup visible " + visible);
+      popup.hide();
+    } else {
+      popup.getElement().getStyle().setZIndex(1100);
+      popup.showRelativeTo(popupButton);
+//          textEntry.setFocus(true);
+
+      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+        public void execute() {
+          textEntry.setFocus(true);
+        }
+      });
+
+     if (tooltip != null) tooltip.hide();
+    }
   }
 
   public void showPopup(String html, Widget target) {

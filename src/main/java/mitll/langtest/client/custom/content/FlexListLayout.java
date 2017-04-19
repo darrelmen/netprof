@@ -51,6 +51,7 @@ import java.util.logging.Logger;
  * @since 3/28/2014.
  */
 public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize {
+  public static final int RIGHT_SIDE_DIV_WIDTH = 70;
   private final Logger logger = Logger.getLogger("FlexListLayout");
 
   public PagingExerciseList<T, U> npfExerciseList;
@@ -88,7 +89,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
       topRow.addStyleName("floatLeft");
       topRow.addStyleName("leftBlock");
       topRow.addStyleName("rightFiveMargin");
-twoRows.addStyleName("inlineFlex");
+      twoRows.addStyleName("inlineFlex");
       FlowPanel section = new FlowPanel("section");
       section.addStyleName("sidebar");
 
@@ -104,7 +105,8 @@ twoRows.addStyleName("inlineFlex");
       bottomRowDiv.addStyleName("floatLeft");
       bottomRowDiv.addStyleName("mainBlock");
       bottomRowDiv.getElement().setId("rightSideDiv");
-      bottomRowDiv.setWidth("75%");
+      bottomRowDiv.setWidth(RIGHT_SIDE_DIV_WIDTH +
+          "%");
       // listHeader.addStyleName("listHeader");
       bottomRowDiv.add(listHeader);
     }
@@ -114,7 +116,7 @@ twoRows.addStyleName("inlineFlex");
     bottomRow.add(exerciseListContainer);
     bottomRow.getElement().setId("NPFHelper_bottomRow");
     styleBottomRow(bottomRow);
-    if (!hasTopRow)bottomRow.setWidth("100%");
+    if (!hasTopRow) bottomRow.setWidth("100%");
 
     bottomRowDiv.add(bottomRow);
     twoRows.add(bottomRowDiv);

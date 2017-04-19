@@ -59,18 +59,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final boolean showInitially = false;
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<CommonShell> listContainer;
-
+/*
   public static final String MAKE_A_NEW_LIST = "Make a new list";
 
   private static final String ADD_ITEM = "Add Item to List";
   private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
   private static final String ADD_TO_LIST = "Add to List";
-  /**
+  *//**
    * @seex #getNewListButton
-   */
+   *//*
   private static final String NEW_LIST = "New List";
   private static final String ITEM_ADDED = "Item Added!";
-  private static final String ADDING_TO_LIST = "Adding to list ";
+  private static final String ADDING_TO_LIST = "Adding to list ";*/
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -189,12 +189,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private Dropdown getDropdown() {
-    //  Dropdown dropdownContainer = new Dropdown("");
-    DropdownContainer dropdownContainer = new DropdownContainer("");
+      Dropdown dropdownContainer = new Dropdown("");
+    //DropdownContainer dropdownContainer = new DropdownContainer("");
     dropdownContainer.setIcon(IconType.REORDER);
     dropdownContainer.setRightDropdown(true);
+    dropdownContainer.getMenuWiget().getElement().getStyle().setTop(10, Style.Unit.PCT);
 
-    DropdownSubmenu addToList = new DropdownSubmenu("Add to List");
+    new UserListSupport(controller).addListOptions(dropdownContainer,exercise.getID());
+
+/*    DropdownSubmenu addToList = new DropdownSubmenu("Add to List");
     addToList.setRightDropdown(true);
   //  addToList.setStyleDependentName("pull-left", true);
     DropdownSubmenu removeFromList = new DropdownSubmenu("Remove from List");
@@ -211,7 +214,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
 
     NavLink widget = new NavLink("New List");
-    dropdownContainer.add(widget);
+    dropdownContainer.add(widget);*/
 //    widget.addClickHandler()
     NavLink share = new NavLink(EMAIL);
     dropdownContainer.add(share);
@@ -223,118 +226,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return dropdownContainer;
   }
 
-  private final PopupContainerFactory popupContainer = new PopupContainerFactory();
 
-  /**
-   * Ask server for the set of current lists for this user.
-   * <p>
-   * TODO : do this better -- tell server to return lists that don't have exercise in them.
-   *
-   * @param id
-   * @param addToList
-   * @seex #makeAddToList
-   * @seex #wasRevealed()
-   */
-  private void populateListChoices(final int id, final DropdownBase addToList, final DropdownBase removeFromList,
-                                   DropdownContainer container) {
-    ListServiceAsync listService = controller.getListService();
-    listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
 
-      @Override
-      public void onSuccess(Collection<UserList<CommonShell>> result) {
-        addToList.clear();
-        removeFromList.clear();
-
-        //  activeCount = 0;
-        boolean anyAdded = false;
-        boolean anyToRemove = false;
-        //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
-        for (final UserList ul : result) {
-          if (!ul.containsByID(id)) {
-            //    activeCount++;
-            anyAdded = true;
-            getAddListLink(ul, addToList, id, container);
-          } else {
-            anyToRemove = true;
-            getRemoveListLink(ul, removeFromList, id, container);
-          }
-        }
-        if (!anyAdded) {
-          addToList.add(new NavLink(ITEM_ALREADY_ADDED));
-        }
-        if (!anyToRemove) {
-          removeFromList.add(new NavLink("Not on any lists."));
-        }
-      }
-    });
-  }
-
-  private void getAddListLink(UserList ul, DropdownBase addToList,
-                              int exid,
-                              DropdownContainer container) {
-    final NavLink widget = new NavLink(ul.getName());
-    addToList.add(widget);
-    widget.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(addToList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
-
-        controller.getListService().addItemToUserList(ul.getID(), exid, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
-
-          @Override
-          public void onSuccess(Void result) {
-            container.hideContainer();
-            popupContainer.showPopup(ITEM_ADDED, container);
-            //widget.setVisible(false);
-//            populateListChoices(exid, addToList, removeFromList, container);
-            //          activeCount--;
-            //        if (activeCount == 0) {
-            //        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
-            //      addToList.add(widget);
-            //  }
-          }
-        });
-      }
-    });
-  }
-
-  private void getRemoveListLink(UserList ul, DropdownBase removeFromList, int exid,
-                                 DropdownContainer container) {
-    final NavLink widget = new NavLink(ul.getName());
-    removeFromList.add(widget);
-    widget.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(removeFromList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
-
-        controller.getListService().deleteItemFromList(ul.getID(), exid, new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
-
-          @Override
-          public void onSuccess(Boolean result) {
-            container.hideContainer();
-            popupContainer.showPopup(result ? "Item removed." : "Item *not* removed.", container);
-            //widget.setVisible(false);
-
-            //   widget.setVisible(false);
-            //          activeCount--;
-            //        if (activeCount == 0) {
-            //        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
-            //      addToList.add(widget);
-            //  }
-          }
-        });
-      }
-    });
-  }
 
   @NotNull
   private NavLink getShowComments() {
