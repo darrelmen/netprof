@@ -8,6 +8,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.github.gwtbootstrap.client.ui.event.ShowEvent;
+import com.github.gwtbootstrap.client.ui.event.ShowHandler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.http.client.URL;
@@ -32,6 +34,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
+import slick.ast.Drop;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,7 +66,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
   private static final String ADD_TO_LIST = "Add to List";
   /**
-   * @see #getNewListButton
+   * @seex #getNewListButton
    */
   private static final String NEW_LIST = "New List";
   private static final String ITEM_ADDED = "Item Added!";
@@ -186,26 +189,26 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private Dropdown getDropdown() {
-  //  Dropdown dropdownContainer = new Dropdown("");
+    //  Dropdown dropdownContainer = new Dropdown("");
     DropdownContainer dropdownContainer = new DropdownContainer("");
-    dropdownContainer.setRightDropdown(true);
     dropdownContainer.setIcon(IconType.REORDER);
-    //  NavLink widget1 = new NavLink("Add to List");
-    DropdownSubmenu widget1 = new DropdownSubmenu("Add to List");
-    widget1.setRightDropdown(false);
-    dropdownContainer.add(widget1);
+    dropdownContainer.setRightDropdown(true);
 
-    widget1.getTriggerWidget().addMouseDownHandler(new MouseDownHandler() {
+    DropdownSubmenu addToList = new DropdownSubmenu("Add to List");
+    addToList.setRightDropdown(true);
+  //  addToList.setStyleDependentName("pull-left", true);
+    DropdownSubmenu removeFromList = new DropdownSubmenu("Remove from List");
+    removeFromList.setRightDropdown(true);
+    dropdownContainer.addShowHandler(new ShowHandler() {
       @Override
-      public void onMouseDown(MouseDownEvent event) {
-        logger.info("got mouse down");
+      public void onShow(ShowEvent showEvent) {
+        populateListChoices(exercise.getID(), addToList, removeFromList, dropdownContainer);
       }
     });
+    //  NavLink addToList = new NavLink("Add to List");
+    dropdownContainer.add(addToList);
+    dropdownContainer.add(removeFromList);
 
-    populateListChoices(exercise.getID(),controller,widget1);
- //   widget1.add(new Dropdown(""))
-//    widget1.add(new NavLink("first"));
- //   widget1.add(new NavLink("second"));
 
     NavLink widget = new NavLink("New List");
     dropdownContainer.add(widget);
@@ -228,12 +231,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * TODO : do this better -- tell server to return lists that don't have exercise in them.
    *
    * @param id
-   * @param controller
-   * @param w1
+   * @param addToList
    * @seex #makeAddToList
    * @seex #wasRevealed()
    */
-  private void populateListChoices(final int id, final ExerciseController controller, final DropdownBase w1) {
+  private void populateListChoices(final int id, final DropdownBase addToList, final DropdownBase removeFromList,
+                                   DropdownContainer container) {
     ListServiceAsync listService = controller.getListService();
     listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
@@ -242,45 +245,93 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        w1.clear();
-      //  activeCount = 0;
+        addToList.clear();
+        removeFromList.clear();
+
+        //  activeCount = 0;
         boolean anyAdded = false;
+        boolean anyToRemove = false;
         //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         for (final UserList ul : result) {
           if (!ul.containsByID(id)) {
-        //    activeCount++;
+            //    activeCount++;
             anyAdded = true;
-            final NavLink widget = new NavLink(ul.getName());
-            w1.add(widget);
-            widget.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                controller.logEvent(w1, "DropUp", id, "adding_" + ul.getID() + "/" + ul.getName());
-
-                listService.addItemToUserList(ul.getID(), id, new AsyncCallback<Void>() {
-                  @Override
-                  public void onFailure(Throwable caught) {
-                  }
-
-                  @Override
-                  public void onSuccess(Void result) {
-                    popupContainer.showPopup(ITEM_ADDED, w1);
-                    widget.setVisible(false);
-          //          activeCount--;
-            //        if (activeCount == 0) {
-              //        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
-                //      w1.add(widget);
-                  //  }
-                  }
-                });
-              }
-            });
+            getAddListLink(ul, addToList, id, container);
+          } else {
+            anyToRemove = true;
+            getRemoveListLink(ul, removeFromList, id, container);
           }
         }
         if (!anyAdded) {
-        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
-          w1.add(widget);
+          addToList.add(new NavLink(ITEM_ALREADY_ADDED));
         }
+        if (!anyToRemove) {
+          removeFromList.add(new NavLink("Not on any lists."));
+        }
+      }
+    });
+  }
+
+  private void getAddListLink(UserList ul, DropdownBase addToList,
+                              int exid,
+                              DropdownContainer container) {
+    final NavLink widget = new NavLink(ul.getName());
+    addToList.add(widget);
+    widget.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.logEvent(addToList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
+
+        controller.getListService().addItemToUserList(ul.getID(), exid, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            container.hideContainer();
+            popupContainer.showPopup(ITEM_ADDED, container);
+            //widget.setVisible(false);
+//            populateListChoices(exid, addToList, removeFromList, container);
+            //          activeCount--;
+            //        if (activeCount == 0) {
+            //        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
+            //      addToList.add(widget);
+            //  }
+          }
+        });
+      }
+    });
+  }
+
+  private void getRemoveListLink(UserList ul, DropdownBase removeFromList, int exid,
+                                 DropdownContainer container) {
+    final NavLink widget = new NavLink(ul.getName());
+    removeFromList.add(widget);
+    widget.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.logEvent(removeFromList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
+
+        controller.getListService().deleteItemFromList(ul.getID(), exid, new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(Boolean result) {
+            container.hideContainer();
+            popupContainer.showPopup(result ? "Item removed." : "Item *not* removed.", container);
+            //widget.setVisible(false);
+
+            //   widget.setVisible(false);
+            //          activeCount--;
+            //        if (activeCount == 0) {
+            //        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
+            //      addToList.add(widget);
+            //  }
+          }
+        });
       }
     });
   }

@@ -855,7 +855,7 @@ public class CopyToPostgres<T extends CommonShell> {
         if (exid != null) {
           result.setExid(exid);
           String answer = result.getAnswer();
-          logger.info("for " + exid+ " result id " +result.getID() +" got " + answer);
+//          logger.info("for " + exid+ " result id " +result.getID() +" got " + answer);
           String[] bestAudios = answer.split("bestAudio");
 
           Integer audioID = null;
