@@ -112,7 +112,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       synchronized (projidToWrapper) {
         ExerciseListWrapper<T> exerciseListWrapper = projidToWrapper.get(projectID);
         if (exerciseListWrapper != null) {
-          logger.info("Returning cached exercises " + exerciseListWrapper);
+          logger.info("getExerciseIds Returning cached exercises " + exerciseListWrapper);
 
           ExerciseListWrapper<T> tExerciseListWrapper = new ExerciseListWrapper<>(request.getReqID(),
               exerciseListWrapper.getExercises(),

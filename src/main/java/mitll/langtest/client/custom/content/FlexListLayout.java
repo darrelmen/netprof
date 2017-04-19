@@ -41,6 +41,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
@@ -86,15 +87,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     Panel topRow = hasTopRow ? new FluidRow() : new FlowPanel("nav");
     topRow.getElement().setId("NPFHelper_" + (hasTopRow ? "topRow" : "leftSide"));
     if (!hasTopRow) {
-      topRow.addStyleName("floatLeft");
-      topRow.addStyleName("leftBlock");
-      topRow.addStyleName("rightFiveMargin");
-      twoRows.addStyleName("inlineFlex");
-      FlowPanel section = new FlowPanel("section");
-      section.addStyleName("sidebar");
-
-      twoRows.add(section);
-      section.add(topRow);
+      styleTopRow(twoRows, topRow);
     } else {
       twoRows.add(topRow);
     }
@@ -102,19 +95,15 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     DivWidget bottomRowDiv = new DivWidget();
     DivWidget listHeader = new DivWidget();
     if (!hasTopRow) {
-      bottomRowDiv.addStyleName("floatLeft");
-      bottomRowDiv.addStyleName("mainBlock");
-      bottomRowDiv.getElement().setId("rightSideDiv");
-      bottomRowDiv.setWidth(RIGHT_SIDE_DIV_WIDTH +
-          "%");
-      // listHeader.addStyleName("listHeader");
-      bottomRowDiv.add(listHeader);
+      styleBottomRowDiv(bottomRowDiv, listHeader);
     }
 
     //  Panel bottomRow = new HorizontalPanel();
     Panel bottomRow = new DivWidget();
     bottomRow.add(exerciseListContainer);
     bottomRow.getElement().setId("NPFHelper_bottomRow");
+
+  //  bottomRow.addStyleName("inlineFlex");
     styleBottomRow(bottomRow);
     if (!hasTopRow) bottomRow.setWidth("100%");
 
@@ -123,11 +112,9 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
     Panel currentExerciseVPanel = getCurrentExercisePanel();
     bottomRow.add(currentExerciseVPanel);
-    DivWidget footer = new DivWidget();
-    footer.getElement().setId("footer");
-    bottomRow.add(footer);
-    footer.setWidth("100%");
-    footer.addStyleName("floatLeft");
+
+    DivWidget footer = getFooter(bottomRow);
+
     // TODO : only has to be paging b/c it needs to setUserListID
     PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID,
         listHeader, footer);
@@ -143,6 +130,40 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
     widgets.addWidgets();
     return twoRows;
+  }
+
+  protected void styleTopRow(Panel twoRows, Panel topRow) {
+    topRow.addStyleName("floatLeft");
+    topRow.addStyleName("leftBlock");
+    topRow.addStyleName("rightFiveMargin");
+
+    twoRows.addStyleName("inlineFlex");
+
+    FlowPanel section = new FlowPanel("section");
+    section.addStyleName("sidebar");
+
+    twoRows.add(section);
+    section.add(topRow);
+  }
+
+  private void styleBottomRowDiv(DivWidget bottomRowDiv, DivWidget listHeader) {
+    bottomRowDiv.addStyleName("floatLeft");
+    bottomRowDiv.addStyleName("mainBlock");
+    bottomRowDiv.getElement().setId("rightSideDiv");
+    bottomRowDiv.setWidth(RIGHT_SIDE_DIV_WIDTH +
+        "%");
+    // listHeader.addStyleName("listHeader");
+    bottomRowDiv.add(listHeader);
+  }
+
+  @NotNull
+  private DivWidget getFooter(Panel bottomRow) {
+    DivWidget footer = new DivWidget();
+    footer.getElement().setId("footer");
+    bottomRow.add(footer);
+    footer.setWidth("100%");
+    footer.addStyleName("floatLeft");
+    return footer;
   }
 
   protected Panel getCurrentExercisePanel() {

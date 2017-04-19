@@ -339,7 +339,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     boolean b = ensureMP3(path, new TrackInfo(title, userID, comment, language));
     if (b) {
       checkedExists.add(path);
-      if (checkedExists.size() % CHECKED_INTERVAL == 0) logger.debug("checked " + checkedExists.size() + " files...");
+      if (checkedExists.size() % CHECKED_INTERVAL == 10) logger.debug("ensureCompressedAudio checked " + checkedExists.size() + " files...");
     }
     return b;
   }

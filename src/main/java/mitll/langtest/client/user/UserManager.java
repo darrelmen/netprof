@@ -466,7 +466,7 @@ public class UserManager {
   }
 
   public boolean isAdmin() {
-    return current.isAdmin();
+    return current != null && current.isAdmin();
   }
 
   public User getCurrent() {

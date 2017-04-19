@@ -12,6 +12,8 @@ public interface INavigation {
   void showDrill();
   void showProgress();
   void showLists();
+  void showRecord();
+  void showRecordExample();
 
   Widget getNavigation();
 

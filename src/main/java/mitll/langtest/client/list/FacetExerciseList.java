@@ -72,11 +72,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   public static int FIRST_PAGE_SIZE = 5;
-  private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, /*5,*/ 10, 25, 50);
+  private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, /*5,*/ 10, 25/*, 50*/);
   private static final String ITEMS_PAGE = " items/page";
 
   private static final int TOTAL = 28;//32;
-  public static final int CLOSE_TO_END = 2;
+  private static final int CLOSE_TO_END = 2;
   private static final String SHOW_LESS = "<i>View fewer</i>";
   private static final String SHOW_MORE = "<i>View all</i>";
   private static final String ANY = "Any";
@@ -292,10 +292,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected void addMinWidthStyle(Panel leftColumn) {
   }
 
-  private Panel tableWithPager;
+  protected Panel tableWithPager;
 
   protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
     tableWithPager = pagingContainer.getTableWithPager(listOptions);
+ //   return tableWithPager;
   }
 
   /**

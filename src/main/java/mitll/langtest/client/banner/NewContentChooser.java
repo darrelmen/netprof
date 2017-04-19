@@ -9,6 +9,7 @@ import mitll.langtest.client.analysis.StudentAnalysis;
 import mitll.langtest.client.custom.ExerciseListContent;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.ListManager;
+import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,9 @@ public class NewContentChooser implements INavigation {
   public static final String PROGRESS = "Progress";
   public static final String LEARN = "Learn";
   public static final String DRILL = "Drill";//Audio Vocabulary Practice";
+
+  public static final String RECORD_AUDIO = "Items";
+  public static final String RECORD_EXAMPLE = "Context";
 
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
@@ -93,6 +97,30 @@ public class NewContentChooser implements INavigation {
     clear();
     divWidget.add(listManager.showLists());
     currentSection = LISTS;
+  }
+
+  public void showRecord() {
+    if (currentSection.equals(RECORD_AUDIO)) {
+      logger.info("showRecord  - skip current");
+      return;
+    }
+    clear();
+
+
+
+    RecorderNPFHelper recorderNPFHelper = new RecorderNPFHelper(controller, true, null);
+    logger.info("showRecord  - recorderNPFHelper");
+    recorderNPFHelper.showNPF(divWidget, RECORD_AUDIO);
+    currentSection = RECORD_AUDIO;
+  }
+
+  public void showRecordExample() {
+    if (currentSection.equals(RECORD_EXAMPLE)) return;
+    clear();
+
+    RecorderNPFHelper recorderNPFHelper = new RecorderNPFHelper(controller, false, null);
+    recorderNPFHelper.showNPF(divWidget, RECORD_EXAMPLE);
+    currentSection = RECORD_EXAMPLE;
   }
 
   private void clear() {

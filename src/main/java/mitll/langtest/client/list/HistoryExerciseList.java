@@ -69,9 +69,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected long userID;
   private final FacetContainer sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PUSH = true;
+  private static final boolean DEBUG_PUSH = false;
 
   /**
    * @param currentExerciseVPanel

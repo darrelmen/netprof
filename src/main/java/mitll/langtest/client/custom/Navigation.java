@@ -232,6 +232,16 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
 
   }
 
+  @Override
+  public void showRecord() {
+
+  }
+
+  @Override
+  public void showRecordExample() {
+
+  }
+
   /**
    * Defines order of tabs...
    * Show student analysis if the user has teacher permissions

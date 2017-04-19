@@ -228,7 +228,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
           return getColumnToolTip(columnText);
         } else {
           String html = "" + shell.getID();
-          logger.info("got shell " + shell.getID());
+        //  logger.info("got shell " + shell.getID());
           if (columnText != null) {
             columnText = truncate(columnText);
             STATE state = shell.getState();

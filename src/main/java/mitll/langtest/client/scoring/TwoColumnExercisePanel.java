@@ -273,6 +273,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     Widget flEntry =
         getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
     flEntry.addStyleName("floatLeft");
+    logger.info("makeFirstRow Set with on " + flEntry.getElement().getId());
+    flEntry.setWidth("100%");
 
     DivWidget fieldContainer = new DivWidget();
     fieldContainer.getElement().setId("fieldContainer");

@@ -859,7 +859,8 @@ public class LangTest implements
 
   @Override
   public Collection<User.Permission> getPermissions() {
-    return getCurrent().getPermissions();
+    User current = getCurrent();
+    return current != null ? current.getPermissions() : Collections.emptyList();
   }
 
   public boolean hasPermission(User.Permission permission) {

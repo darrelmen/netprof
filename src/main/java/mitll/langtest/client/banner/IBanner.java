@@ -25,10 +25,13 @@ public interface IBanner {
 
   void setVisibleAdmin(boolean visibleAdmin);
 
+  /**
+   * @see mitll.langtest.client.InitialUI#gotUser
+   * @param name
+   */
   void setUserName(String name);
 
   void onResize();
 
-
-//  void setBreadcrumbs(Breadcrumbs widgets);
+  void checkProjectSelected();
 }

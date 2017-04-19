@@ -49,10 +49,7 @@ import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.*;
-import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.list.*;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -110,14 +107,61 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
       final FlexListLayout outerLayout = this;
 
+      protected void styleTopRow(Panel twoRows, Panel topRow) {
+        twoRows.add(topRow);
+      }
+
+      protected void styleBottomRow(Panel bottomRow) {
+        bottomRow.setWidth("100%");
+        bottomRow.addStyleName("inlineFlex");
+      }
+
       @Override
-      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
-                                                                                 String instanceName, DivWidget listHeader, DivWidget footer) {
-        return new NPFlexSectionExerciseList(outerLayout.getController(), topRow, currentExercisePanel,
-            new ListOptions().setInstance(instanceName).setShowFirstNotCompleted(true), listHeader, footer, 1) {
-          private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
+      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
+                                                                                 Panel currentExercisePanel,
+                                                                                 String instanceName,
+                                                                                 DivWidget listHeader,
+                                                                                 DivWidget footer) {
+  /*      return new HistoryExerciseList(outerLayout.getController(),
+            topRow,
+            currentExercisePanel,
+            new ListOptions()
+                .setInstance(instanceName)
+                .setShowFirstNotCompleted(true),
+            listHeader,
+            footer,
+            1
+        ) */
+
+        return new NPExerciseList<ListSectionWidget>(currentExercisePanel,
+            outerLayout.getController(),
+            new ListOptions()
+                .setInstance(instanceName)
+                .setShowFirstNotCompleted(true)
+        )
+        {
+        //  private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
           private CheckBox filterOnly;
 
+          @Override
+          protected FacetContainer getSectionWidgetContainer() {
+            return new FacetContainer() {
+              @Override
+              public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
+
+              }
+
+              @Override
+              public String getHistoryToken() {
+                return null;
+              }
+
+              @Override
+              public int getNumSelections() {
+                return 0;
+              }
+            };
+          }
 
           @Override
           protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
@@ -139,10 +183,11 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             add(filterOnly);
 
             // row 3
-            add(pagingContainer.getTableWithPager(new ListOptions()));
+            add( pagingContainer.getTableWithPager(new ListOptions()));
             setOnlyExamples(!doNormalRecording);
 
             addEventHandler(instanceName);
+          //  return tableWithPager;
           }
 
           @Override

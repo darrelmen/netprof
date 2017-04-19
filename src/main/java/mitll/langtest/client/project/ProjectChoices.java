@@ -32,6 +32,8 @@ import java.util.logging.Logger;
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
+  public static final int LANGUAGE_SIZE = 3;
+
   /**
    * @see #showProjectChoices(List, int)
    */
@@ -144,7 +146,7 @@ public class ProjectChoices {
    * @see InitialUI#addProjectChoices
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-   logger.info("showProjectChoices " + result.size() + " : " + nest);
+   logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
     final Section section = new Section("section");
     section.add(getHeader(result, nest));
 
@@ -260,7 +262,7 @@ public class ProjectChoices {
       }
     });
     widgets.add(button);
-    Heading label = new Heading(5, name);
+    Heading label = new Heading(LANGUAGE_SIZE, name);
 
     if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
       label.setSubtext(projectForLang.getStatus().name());
@@ -277,28 +279,24 @@ public class ProjectChoices {
     logger.info("gotClickOnFlag project " + projid + " has " + children);
 
      if (children.size() < 2) {
-
       logger.info("onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
 
       setProjectForUser(projid);
     } else {
-
       logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");
 
-      projectCrumb.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent clickEvent) {
-          uiLifecycle.clickOnParentCrumb(projectForLang);
-        }
-      });
-
+      projectCrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
       uiLifecycle.clearContent();
-
       contentRow.add(showProjectChoices(children, nest));
     }
   }
 
+  /**
+   * @see #getImageAnchor
+   * @param cc
+   * @return
+   */
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {
     return new com.google.gwt.user.client.ui.Image("langtest/cc/" + cc + ".png");
