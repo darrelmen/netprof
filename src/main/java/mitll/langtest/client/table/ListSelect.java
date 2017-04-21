@@ -44,6 +44,7 @@ import java.util.List;
 
 /**
  * @see MenuSectionWidget#addChoices(List, String)
+ * @Deprecated
  */
 public class ListSelect {
   //  private final Logger logger = Logger.getLogger("TableSelect");

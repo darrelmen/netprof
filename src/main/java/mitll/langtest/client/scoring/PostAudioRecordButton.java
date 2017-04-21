@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
@@ -107,9 +108,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     controller.register(this, exerciseID);
     Style style = getElement().getStyle();
     style.setMarginBottom(1, Style.Unit.PX);
+
     if (buttonWidth > 0) {
       setWidth(buttonWidth + "px");
     }
+    setType(ButtonType.SUCCESS);
   }
 
   public void setExerciseID(int exercise) {

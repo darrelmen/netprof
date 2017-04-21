@@ -38,7 +38,7 @@ package mitll.langtest.client.sound;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 8/1/14.
  */
-public interface SimpleAudioListener {
+public interface SimpleAudioListener extends PositionAudioListener {
   void songLoaded(double duration);
   void songFinished();
 }

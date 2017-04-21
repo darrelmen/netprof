@@ -1,9 +1,9 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -22,8 +22,8 @@ public class WordScoresTable {
     return child;
   }*/
 
-  public Widget getStyledWordTable(PretestScore result) {
-    Widget table2 = getWordTable(result);
+  public Widget getStyledWordTable(PretestScore result, AudioControl audioControl) {
+    Widget table2 = new WordTable().getDivWord(result.getTypeToSegments(),audioControl);
     table2.addStyleName("topFiveMargin");
     table2.addStyleName("leftFiveMargin");
     table2.addStyleName("floatLeftAndClear");
@@ -36,10 +36,10 @@ public class WordScoresTable {
    * @return
    * @see #scoreAudio
    */
-  private Widget getWordTable(PretestScore score) {
-   // return new WordTable().getWordTable(score.getTypeToSegments(), false);
-    return new WordTable().getDivWord(score.getTypeToSegments());
-  }
+//  private Widget getWordTable(PretestScore score) {
+//   // return new WordTable().getWordTable(score.getTypeToSegments(), false);
+//    return new WordTable().getDivWord(score.getTypeToSegments());
+//  }
 
   /**
    * TODO : don't sort!
@@ -85,15 +85,21 @@ public class WordScoresTable {
     return table;
   }*/
 
+/*
   private int getScore(Map<String, Float> scores, String key) {
     return getPercent(scores.get(key));
   }
+*/
 
+/*
   private int getPercent(Float aFloat) {
     return getScore(aFloat * 100);
   }
+*/
 
+/*
   private int getScore(float a) {
     return Math.round(a);
   }
+*/
 }

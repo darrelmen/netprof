@@ -45,6 +45,7 @@ import mitll.langtest.client.list.SimpleSelectExerciseList;
 
 import java.util.List;
 
+@Deprecated
 public class TableSelect {
 //  private final Logger logger = Logger.getLogger("TableSelect");
   public static final String ALL = "All";

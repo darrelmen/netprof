@@ -1754,10 +1754,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .wordTableWord {
-    margin-right: 2px;
+    margin-right: 1px;
     font-weight: bold;
+    /*
     padding: 3px;
+    */
     float: left;
+}
+
+.playButton {
+}
+
+.playButton > .btn-group > .btn-large + .dropdown-toggle {
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 /*

@@ -109,6 +109,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   public PlayAudioPanel(SoundManagerAPI soundManager, String buttonTitle, Widget optionalToTheRight, boolean doSlow) {
     this.soundManager = soundManager;
+    addStyleName("playButton");
     playLabel = buttonTitle;
     if (buttonTitle.isEmpty()) {
       minWidth = BUTTON_WIDTH;
@@ -200,40 +201,39 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   /**
+   * @param toAddTo
    * @return
    * @see PlayAudioPanel#addButtons
-   * @param toAddTo
    */
   protected IconAnchor makePlayButton(DivWidget toAddTo) {
     Button playButton = new Button(playLabel);
 
-    playButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        doClick();
-      }
-    });
+    playButton.setSize(ButtonSize.LARGE);
+
+    playButton.addClickHandler(event -> doClick());
 
     showPlayIcon(playButton);
     stylePlayButton(playButton);
+
     toAddTo.add(playButton);
     return playButton;
   }
 
-  protected void stylePlayButton(Button playButton) {
-    playButton.setType(ButtonType.INFO);
-    playButton.getElement().setId("PlayAudioPanel_playButton");
-    playButton.addStyleName("leftFiveMargin");
-    playButton.addStyleName("floatLeft");
-    playButton.setEnabled(false);
-  }
-
-  protected void showPlayIcon(IconAnchor playButton) {
+  private void showPlayIcon(IconAnchor playButton) {
     if (isSlow) {
       playButton.setBaseIcon(MyCustomIconType.turtle);
       styleSlowIcon(playButton);
     } else {
       playButton.setIcon(PLAY);
     }
+  }
+
+  private void stylePlayButton(Button playButton) {
+    playButton.setType(ButtonType.INFO);
+    playButton.getElement().setId("PlayAudioPanel_playButton");
+    playButton.addStyleName("leftFiveMargin");
+    playButton.addStyleName("floatLeft");
+    playButton.setEnabled(false);
   }
 
   private void styleSlowIcon(Widget playButton) {
@@ -270,10 +270,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
     if (playButton.isVisible() && isEnabled()) {
       if (isPlaying()) {
-        if (DEBUG) logger.info("PlayAudioPanel doClick pause " + playing + " " +currentPath);
+        if (DEBUG) logger.info("PlayAudioPanel doClick pause " + playing + " " + currentPath);
         pause();  // somehow get exception here?
       } else {
-        if (DEBUG) logger.info("PlayAudioPanel doClick start " + playing + " " +currentPath);
+        if (DEBUG) logger.info("PlayAudioPanel doClick start " + playing + " " + currentPath);
 
         startPlaying();
       }
@@ -309,7 +309,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   private void play() {
     if (DEBUG) {
-      logger.info("PlayAudioPanel play " + playing + " " +currentPath);
+      logger.info("PlayAudioPanel play " + playing + " " + currentPath);
     }
     playing = true;
     setPlayButtonText();
@@ -409,7 +409,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   public void playAudio() {
-    logger.info("playAudio " +currentPath);
+    logger.info("playAudio " + currentPath);
     playAudio(currentPath);
   }
 
@@ -428,10 +428,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       addSimpleListener(new SimpleAudioListener() {
         @Override
         public void songLoaded(double duration) {
-          if (DEBUG)  logger.info("playAudio - songLoaded " + path + " this " + this);
+          if (DEBUG) logger.info("playAudio - songLoaded " + path + " this " + this);
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
-              if (DEBUG)   logger.info("playAudio - songLoaded calling doClick  " + path);
+              if (DEBUG) logger.info("playAudio - songLoaded calling doClick  " + path);
               doClick();
             }
           });
@@ -453,7 +453,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   public String rememberAudio(String path) {
-    if (DEBUG)  logger.info("rememberAudio - path " + path);
+    if (DEBUG) logger.info("rememberAudio - path " + path);
     destroySound();
 
     this.currentPath = CompressedAudio.getPath(path);
@@ -462,7 +462,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   /**
    * destroy any other current sound first...
-   *
+   * <p>
    * Check if soundmanager loaded properly, warn if it didn't.
    *
    * @param path to audio file on server
@@ -477,8 +477,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       if (soundManager.isReady()) {
         //if (DEBUG) logger.info(new Date() + " Sound manager is ready.");
         if (soundManager.isOK()) {
-        //  if (DEBUG)
-            logger.info("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
+          //  if (DEBUG)
+          logger.info("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
 
           destroySound();
           createSound(path);
@@ -511,7 +511,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   private void destroySound() {
     if (currentSound != null) {
       //if (DEBUG)
-   //  logger.info("PlayAudioPanel.destroySound : (" + getElement().getId() + ") destroy sound " + currentSound);
+      //  logger.info("PlayAudioPanel.destroySound : (" + getElement().getId() + ") destroy sound " + currentSound);
 
       this.soundManager.destroySound(currentSound);
       currentSound = null;
@@ -563,7 +563,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see SoundManager#songLoaded(Sound, double)
    */
   public void songLoaded(double duration) {
-   // if (DEBUG) logger.info("PlayAudioPanel.songLoaded : " + this);
+    // if (DEBUG) logger.info("PlayAudioPanel.songLoaded : " + this);
 
     if (listener != null) {
       listener.songLoaded(duration);

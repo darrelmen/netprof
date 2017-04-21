@@ -93,8 +93,8 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   /**
    * Add npf widget to content of a tab - here marked tabAndContent
    *
+   * @param instanceName flex, review, etc.
    * @paramx tabAndContent in this tab
-   * @param instanceName  flex, review, etc.
    * @paramx activityType
    * @see Navigation#addPracticeTab()
    * @see Navigation#addTabs
@@ -102,14 +102,13 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   public void showNPF(DivWidget content, String instanceName) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
-   // DivWidget content = tabAndContent.getContent();
+    // DivWidget content = tabAndContent.getContent();
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
-         logger.info("\t: adding npf content instanceName = " + instanceName);
+      logger.info("\t: adding npf content instanceName = " + instanceName);
       showContent(content, instanceName);
       npfExerciseList.reloadWithCurrent();
-    }
-    else {
+    } else {
       logger.warning("showNPF not doing anything for " + instanceName);
     }
   }

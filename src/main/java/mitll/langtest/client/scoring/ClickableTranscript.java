@@ -5,9 +5,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.UIObject;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.sound.AudioControl;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -25,6 +27,14 @@ public class ClickableTranscript {
   private final int exerciseID;
   private final AudioControl audioControl;
 
+  /**
+   * @see ScoringAudioPanel#ScoringAudioPanel
+   * @param words
+   * @param phones
+   * @param eventLogger
+   * @param exerciseID
+   * @param audioControl
+   */
   public ClickableTranscript(AudioPanel.ImageAndCheck words,
                              AudioPanel.ImageAndCheck phones,
                              EventLogger eventLogger,
@@ -102,9 +112,7 @@ public class ClickableTranscript {
      */
     public void onClick(ClickEvent event) {
       if (result != null) {
-        int eventXPos = event.getX();
-
-        getClickedOnSegment(eventXPos, type, this);
+        getClickedOnSegment(event.getX(), type, this);
       } else {
 //        System.err.println("no result for to click against?");
       }

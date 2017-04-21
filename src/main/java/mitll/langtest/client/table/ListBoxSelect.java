@@ -41,12 +41,13 @@ import mitll.langtest.client.list.SimpleSelectExerciseList;
 import java.util.List;
 
 /**
+ * @Deprecated
  * @see ListSectionWidget#addChoices
  */
 public class ListBoxSelect {
   //  private final Logger logger = Logger.getLogger("TableSelect");
   public static final String ALL = "All";
-//  public static final String FONT_TO_USE = "bold 24px Arial";
+  //  public static final String FONT_TO_USE = "bold 24px Arial";
   private SimpleSelectExerciseList singleSelectExerciseList;
   private ListSectionWidget menuSectionWidget;
 

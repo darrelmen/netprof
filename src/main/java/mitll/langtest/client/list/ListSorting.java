@@ -55,9 +55,9 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
 
     w1.addItem(ENGLISH_ASC);
     w1.addItem(ENGLISH_DSC);
-    String langASC = language + " ascending";
+    String langASC = language + " : ascending";
     w1.addItem(langASC);
-    String langDSC = language + " descending";
+    String langDSC = language + " : descending";
     w1.addItem(langDSC);
     w1.addItem(LENGTH_SHORT_TO_LONG);
     w1.addItem(LENGTH_LONG_TO_SHORT);

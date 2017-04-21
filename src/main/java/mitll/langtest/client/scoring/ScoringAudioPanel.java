@@ -32,22 +32,14 @@
 
 package mitll.langtest.client.scoring;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -70,7 +62,6 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private int resultID = -1;
   private final String transliteration;
   private MiniScoreListener miniScoreListener;
-//  private PretestScore result;
 //  private static final boolean debug = false;
 
   /**
@@ -199,13 +190,9 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     } else {
       phoneTranscript.getImage().setUrl(IMAGES_REDX_PNG);
     }
-//    if (!scoredBefore && scoreListener != null) {
-//      scoreListener.gotScore(result, path);
-//    }
     if (!scoredBefore && miniScoreListener != null) {
       miniScoreListener.gotScore(result, path);
     }
-  //  this.result = result;
     clickableTranscript.setScore(result);
   }
 

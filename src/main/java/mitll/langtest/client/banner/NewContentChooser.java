@@ -106,8 +106,6 @@ public class NewContentChooser implements INavigation {
     }
     clear();
 
-
-
     RecorderNPFHelper recorderNPFHelper = new RecorderNPFHelper(controller, true, null);
     logger.info("showRecord  - recorderNPFHelper");
     recorderNPFHelper.showNPF(divWidget, RECORD_AUDIO);

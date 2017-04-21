@@ -99,7 +99,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     //markCurrentExercise(getFirstID());
   }
 
-  public void loadFirst() {  pushFirstSelection(getFirstID(), getTypeAheadText());  }
+  public void loadFirst() {
+    pushFirstSelection(getFirstID(), getTypeAheadText());
+  }
 
   @Override
   public void setState(int id, STATE state) {
@@ -169,7 +171,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see PagingExerciseList#loadExercises
    */
   protected String getPrefix() {
-    return typeAhead.getText();
+    return typeAhead != null ? typeAhead.getText() : "";
   }
 
   /**
@@ -299,11 +301,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private Stack<Long> pendingRequests = new Stack<>();
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
-    logger.info("gotTypeAheadEvent got type ahead '" + text + "' set text '" + setTypeAheadText +"'");// + "' at " + new Date(keypressTimestamp));
+    logger.info("gotTypeAheadEvent got type ahead '" + text + "' set text '" + setTypeAheadText + "'");// + "' at " + new Date(keypressTimestamp));
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
-    pushNewItem(text,-1);
+    pushNewItem(text, -1);
     //loadExercises(getHistoryTokenFromUIState(text, -1), text, false, false, false, false);
   }
 

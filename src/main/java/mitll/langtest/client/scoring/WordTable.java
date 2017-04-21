@@ -36,10 +36,13 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.incubator.Table;
 import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.gauge.SimpleColumnChart;
+import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -151,11 +154,12 @@ public class WordTable {
     return builder.toString();
   }
 
-  Widget getDivWord(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+  Widget getDivWord(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime,
+                    AudioControl audioControl) {
     DivWidget table = new DivWidget();
     table.addStyleName("topFiveMargin");
     table.addStyleName("leftFiveMargin");
- //   table.addStyleName("inlineFlex");
+    //   table.addStyleName("inlineFlex");
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
       TranscriptSegment word = pair.getKey();
@@ -166,11 +170,12 @@ public class WordTable {
         col.addStyleName("wordTableWord");
         table.add(col);
 
-
         InlineHTML header = new InlineHTML(wordLabel);
         alignCenter(header);
         header.addStyleName("floatLeft");
         header.setWidth("100%");
+
+        addClickHandler(audioControl, word, header);
 //        header.addStyleName("bold");
 
         setColor(word, header);
@@ -183,12 +188,24 @@ public class WordTable {
 
         DivWidget phones = new DivWidget();
         phones.addStyleName("inlineFlex");
-        addPhonesBelowWord2(pair.getValue(), phones);
+        addPhonesBelowWord2(pair.getValue(), phones, audioControl);
         col.add(phones);
       }
     }
 
     return table;
+  }
+
+  private void addClickHandler(AudioControl audioControl, TranscriptSegment word, InlineHTML header) {
+    if (audioControl != null) header.addStyleName("handCursor");
+    header.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        if (audioControl != null) {
+          audioControl.repeatSegment(word.getStart(), word.getEnd());
+        }
+      }
+    });
   }
 
   Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, boolean showScore) {
@@ -279,13 +296,18 @@ public class WordTable {
     }
   }
 
-  private void addPhonesBelowWord2(List<TranscriptSegment> value, DivWidget scoreRow) {
+  private void addPhonesBelowWord2(List<TranscriptSegment> value,
+                                   DivWidget scoreRow,
+                                   AudioControl audioControl) {
     for (TranscriptSegment phone : value) {
       String phoneLabel = phone.getEvent();
       if (!phoneLabel.equals("sil")) {
 //        TableHeader h = new TableHeader(phoneLabel);
         InlineHTML h = new InlineHTML(phoneLabel);
         alignCenter(h);
+
+        addClickHandler(audioControl, phone, h);
+
         // pTable.add(h);
         setColor(phone, h);
         h.getElement().getStyle().setWidth(25, Style.Unit.PX);

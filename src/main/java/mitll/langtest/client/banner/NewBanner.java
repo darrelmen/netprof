@@ -279,7 +279,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     NavLink learn = getLink(nav, learn1);
     learn.addClickHandler(event -> {
-      logger.info("got click on " + learn1 + " = " + historyToken);
+      logger.info("getChoice got click on " + learn1 + " = " + historyToken);
       setHistoryItem(historyToken);
     });
     return learn;

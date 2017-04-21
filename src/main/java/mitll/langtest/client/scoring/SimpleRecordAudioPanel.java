@@ -77,7 +77,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   SimpleRecordAudioPanel(BusyPanel goodwaveExercisePanel,
                          ExerciseController controller,
                          T exercise,
-                         List<CorrectAndScore> history, ListInterface<CommonShell> listContainer) {
+                         List<CorrectAndScore> history,
+                         ListInterface<CommonShell> listContainer) {
     this.controller = controller;
     this.goodwaveExercisePanel = goodwaveExercisePanel;
     this.exercise = exercise;
@@ -102,20 +103,34 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel(BusyPanel, ExerciseController, CommonExercise, List, ListInterface)
    */
   protected void addWidgets() {
-    RecorderPlayAudioPanel playAudioPanel = makePlayAudioPanel();
-    add(scoreFeedback = new DivWidget());
-    add(getScoreHistory());
+    DivWidget col = new DivWidget();
+    col.add(scoreFeedback = new DivWidget());
+    {
+      DivWidget historyHoriz = new DivWidget();
+      historyHoriz.addStyleName("inlineFlex");
+      DivWidget spacer = new DivWidget();
+      spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
-    recordFeedback = playAudioPanel.getRecordFeedback(getWaitCursor());
+      historyHoriz.add(spacer);
+      historyHoriz.add(getScoreHistory());
+      col.add(historyHoriz);
+    }
+
+    add(col);//scoreFeedback = new DivWidget());
+
+    recordFeedback = makePlayAudioPanel().getRecordFeedback(getWaitCursor());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
+
     scoreFeedback.add(recordFeedback);
+
     progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
     styleTheProgressBar(progressBar);
     addTooltip(progressBar, "Overall Score");
+
     scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
 
-  public Widget getWaitCursor() {
+  private Widget getWaitCursor() {
     return waitCursorHelper.getWaitCursor();
   }
 
@@ -177,12 +192,15 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   /**
    * @return
    * @see RecorderPlayAudioPanel#RecorderPlayAudioPanel
+   * @see #addWidgets
    */
   @NotNull
   public ASRHistoryPanel getScoreHistory() {
     ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID());
     addMiniScoreListener(historyPanel);
-    historyPanel.addStyleName("floatRight");
+
+
+   // historyPanel.addStyleName("floatRight");
     historyPanel.showChart();
     historyPanel.setWidth("50%");
     return historyPanel;
@@ -231,13 +249,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     clearScoreFeedback();
     PretestScore pretestScore = result.getPretestScore();
 
-   // if (pretestScore.getHydecScore() > 0) {
-      scoreFeedback.add(getWordTableContainer(pretestScore));
-/*    } else {
-      Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
-      w.addStyleName("floatLeft");
-      scoreFeedback.add(w);
-    }*/
+    scoreFeedback.add(getWordTableContainer(pretestScore));
     useResult(pretestScore, false, result.getPath());
   }
 
@@ -251,11 +263,9 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     wordTableContainer.add(getPlayButtonDiv());
 
     if (pretestScore.getHydecScore() > 0) {
-
       DivWidget scoreFeedbackDiv = new DivWidget();
       scoreFeedbackDiv.add(progressBar);
-      scoreFeedbackDiv.add(new WordScoresTable().getStyledWordTable(pretestScore));
-
+      scoreFeedbackDiv.add(new WordScoresTable().getStyledWordTable(pretestScore, playAudioPanel));
       wordTableContainer.add(scoreFeedbackDiv);
       logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
     }

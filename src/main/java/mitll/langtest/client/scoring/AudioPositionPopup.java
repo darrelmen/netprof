@@ -169,7 +169,5 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
   }
 */
 
-  public String toString() {
-    Widget parent = imageContainer;//getParent();
-    return "popup #" +id + " inside " + parent.getElement().getId(); }
+  public String toString() { return "popup #" +id + " inside " + imageContainer.getElement().getId(); }
 }

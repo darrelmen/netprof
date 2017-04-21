@@ -500,7 +500,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     //}
 
     recoOutput.clear();
-    recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore));
+    recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null));
   }
 
   /**
