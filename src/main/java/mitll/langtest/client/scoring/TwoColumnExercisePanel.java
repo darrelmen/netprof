@@ -1,43 +1,33 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Dropdown;
-import com.github.gwtbootstrap.client.ui.DropdownContainer;
-import com.github.gwtbootstrap.client.ui.DropdownSubmenu;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.github.gwtbootstrap.client.ui.event.ShowEvent;
-import com.github.gwtbootstrap.client.ui.event.ShowHandler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.exercise.CommentBox;
-import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.services.ListServiceAsync;
-import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
-import slick.ast.Drop;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -59,18 +49,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final boolean showInitially = false;
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<CommonShell> listContainer;
-/*
-  public static final String MAKE_A_NEW_LIST = "Make a new list";
-
-  private static final String ADD_ITEM = "Add Item to List";
-  private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
-  private static final String ADD_TO_LIST = "Add to List";
-  *//**
-   * @seex #getNewListButton
-   *//*
-  private static final String NEW_LIST = "New List";
-  private static final String ITEM_ADDED = "Item Added!";
-  private static final String ADDING_TO_LIST = "Adding to list ";*/
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -165,17 +143,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private String getMailTo() {
     String s1 = trimURL(Window.Location.getHref());
-    // logger.info("base is "+s1);
+
     String s = s1 +
         "#" +
-        SelectionState.SECTION_SEPARATOR + "item=" + exercise.getID() +
+        SelectionState.SECTION_SEPARATOR + "search=" + exercise.getID() +
         SelectionState.SECTION_SEPARATOR + "project=" + controller.getProjectStartupInfo().getProjectid();
 
     String encode = URL.encode(s);
     return "mailto:" +
-        //NETPROF_HELP_LL_MIT_EDU +
         "?" +
-        //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Share netprof item " + exercise.getEnglish() +
         "&body=Link to " + exercise.getEnglish() + "/" + exercise.getForeignLanguage() + " : " +
         encode;
@@ -189,33 +165,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private Dropdown getDropdown() {
-      Dropdown dropdownContainer = new Dropdown("");
+    Dropdown dropdownContainer = new Dropdown("");
     //DropdownContainer dropdownContainer = new DropdownContainer("");
     dropdownContainer.setIcon(IconType.REORDER);
     dropdownContainer.setRightDropdown(true);
     dropdownContainer.getMenuWiget().getElement().getStyle().setTop(10, Style.Unit.PCT);
 
-    new UserListSupport(controller).addListOptions(dropdownContainer,exercise.getID());
+    new UserListSupport(controller).addListOptions(dropdownContainer, exercise.getID());
 
-/*    DropdownSubmenu addToList = new DropdownSubmenu("Add to List");
-    addToList.setRightDropdown(true);
-  //  addToList.setStyleDependentName("pull-left", true);
-    DropdownSubmenu removeFromList = new DropdownSubmenu("Remove from List");
-    removeFromList.setRightDropdown(true);
-    dropdownContainer.addShowHandler(new ShowHandler() {
-      @Override
-      public void onShow(ShowEvent showEvent) {
-        populateListChoices(exercise.getID(), addToList, removeFromList, dropdownContainer);
-      }
-    });
-    //  NavLink addToList = new NavLink("Add to List");
-    dropdownContainer.add(addToList);
-    dropdownContainer.add(removeFromList);
-
-
-    NavLink widget = new NavLink("New List");
-    dropdownContainer.add(widget);*/
-//    widget.addClickHandler()
     NavLink share = new NavLink(EMAIL);
     dropdownContainer.add(share);
     share.setHref(getMailTo());
@@ -225,9 +182,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     dropdownContainer.getTriggerWidget().setCaret(false);
     return dropdownContainer;
   }
-
-
-
 
   @NotNull
   private NavLink getShowComments() {
@@ -261,8 +215,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     flContainer.getElement().setId("flWidget");
 
     DivWidget recordButtonContainer = new DivWidget();
-    PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
-    recordButtonContainer.add(postAudioRecordButton);
+    recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
     //postAudioRecordButton.setVisible(controller.isRecordingEnabled());
     flContainer.add(recordButtonContainer);
 

@@ -186,7 +186,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   int getIndex(int currentID);
 
   void markCurrentExercise(int id);
-//  void report();
 
   void gotClickOnItem(T newExercise);
 

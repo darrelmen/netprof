@@ -702,7 +702,7 @@ fieldset > legend {
 }
 
 .minWidth {
-    min-width: 190px;
+    min-width: 300px;
 }
 
 .scrollBackground {
@@ -1407,7 +1407,9 @@ document sections.*/
 .mainBlock {
     vertical-align: top;
     display: inline-block;
+    /*
     width: 750px;
+    */
     zoom: 1;
 }
 

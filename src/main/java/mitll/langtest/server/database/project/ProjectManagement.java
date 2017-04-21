@@ -367,7 +367,6 @@ public class ProjectManagement implements IProjectManagement {
         projid);
   }
 
-
   /**
    * TODO : add mechanism to trigger reload of exercises for a NetProf project from a domino project
    */
@@ -451,11 +450,11 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public CommonExercise getExercise(int projectid, int id) {
-    return getProjectOrFirst(projectid).getExercise(id);
+    return getProjectOrFirst(projectid).getExerciseByID(id);
   }
 
   public CommonExercise getExerciseByID(int id) {
-    return getFirstProject().getExercise(id);
+    return getFirstProject().getExerciseByID(id);
   }
 
   /**

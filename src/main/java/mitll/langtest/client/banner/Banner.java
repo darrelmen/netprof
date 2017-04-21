@@ -435,6 +435,11 @@ public class Banner implements RequiresResize, IBanner {
     }
   }
 
+  @Override
+  public void checkProjectSelected() {
+
+  }
+
   private void setFontWidth() {
     int clientWidth = Window.getClientWidth();
 

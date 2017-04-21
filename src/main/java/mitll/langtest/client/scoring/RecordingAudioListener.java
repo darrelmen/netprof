@@ -12,7 +12,7 @@ public interface RecordingAudioListener {
   void postAudioFile();
 
   void useResult(AudioAnswer result);
-  void useInvalidResult();
+  void useInvalidResult(boolean isValid);
 
   void flip(boolean first);
 }

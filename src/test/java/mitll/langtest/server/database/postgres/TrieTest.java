@@ -32,28 +32,11 @@
 
 package mitll.langtest.server.database.postgres;
 
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.BaseTest;
-import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.analysis.IAnalysis;
-import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.database.project.ProjectType;
-import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
-import mitll.langtest.server.database.userexercise.ExerciseToPhone;
-import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -71,7 +54,7 @@ public class TrieTest extends BaseTest {
     e.setForeignLanguage("soemthing korean");
     exercises.add(e);
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
-    ExerciseTrie<CommonExercise> korean = new ExerciseTrie<>(exercises, "korean", smallVocabDecoder);
+    ExerciseTrie<CommonExercise> korean = new ExerciseTrie<>(exercises, "korean", smallVocabDecoder, true);
 
     testAll(test,korean);
     testAll("habit custom", korean);

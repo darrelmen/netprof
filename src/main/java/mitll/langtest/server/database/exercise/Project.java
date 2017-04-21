@@ -51,6 +51,7 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -69,6 +70,7 @@ public class Project implements PronunciationLookup {
   private SlickAnalysis analysis;
   private AudioFileHelper audioFileHelper;
   private ExerciseTrie<CommonExercise> fullTrie = null;
+  private ExerciseTrie<CommonExercise> fullContextTrie = null;
   private RefResultDecoder refResultDecoder;
   private PathHelper pathHelper;
   private DatabaseImpl db;
@@ -117,14 +119,6 @@ public class Project implements PronunciationLookup {
     return getLanguage().equalsIgnoreCase("english");
   }
 
-  /**
-   * Only public to support deletes...
-   *
-   * @see mitll.langtest.server.services.QCServiceImpl#deleteItem
-   */
-  public <T extends CommonShell> void buildExerciseTrie() {
-    fullTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder());
-  }
 
   private SmallVocabDecoder getSmallVocabDecoder() {
     return getAudioFileHelper() == null ? null : getAudioFileHelper().getSmallVocabDecoder();
@@ -201,10 +195,19 @@ public class Project implements PronunciationLookup {
    */
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
-    String language = project == null ? "unk" : project.language();
-    fullTrie = new ExerciseTrie<>(getRawExercises(), language, getSmallVocabDecoder());
+    buildExerciseTrie();
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper(), hasModel());
 //    refResultDecoder.doRefDecode(getExercisesForUser());
+  }
+
+  /**
+   * Only public to support deletes...
+   *
+   * @see mitll.langtest.server.services.QCServiceImpl#deleteItem
+   */
+  public <T extends CommonShell> void buildExerciseTrie() {
+    fullTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder(), true);
+    fullContextTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder(), false);
   }
 
   /**
@@ -226,6 +229,9 @@ public class Project implements PronunciationLookup {
 
   public ExerciseTrie<CommonExercise> getFullTrie() {
     return fullTrie;
+  }
+  public ExerciseTrie<CommonExercise> getFullContextTrie() {
+    return fullContextTrie;
   }
 
   public void stopDecode() {
@@ -255,7 +261,7 @@ public class Project implements PronunciationLookup {
     return getProject().getProp(webserviceHostIp1);
   }
 
-  public CommonExercise getExercise(int id) {
+  public CommonExercise getExerciseByID(int id) {
     return exerciseDAO.getExercise(id);
   }
 
@@ -264,12 +270,18 @@ public class Project implements PronunciationLookup {
    *
    * @param prefix
    * @return
+   * @see mitll.langtest.server.ScoreServlet#getExerciseIDFromText
+   * @see mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
    */
-  public CommonExercise getExercise(String prefix) {
+  public CommonExercise getExerciseBySearch(String prefix) {
     List<CommonExercise> exercises1 = fullTrie.getExercises(prefix);
-    Optional<CommonExercise> first = exercises1.stream().filter(p -> p.getForeignLanguage().equalsIgnoreCase(prefix) ||
-        p.getEnglish().equalsIgnoreCase(prefix)).findFirst();
-    return (first.isPresent()) ? first.get() : null;
+    Optional<CommonExercise> first = exercises1
+        .stream()
+        .filter(p ->
+            p.getForeignLanguage().equalsIgnoreCase(prefix) ||
+                p.getEnglish().equalsIgnoreCase(prefix))
+        .findFirst();
+    return first.orElse(null);
   }
 
 /*  public void setPhoneTrie(ExerciseTrie<CommonExercise> phoneTrie) {
@@ -293,7 +305,7 @@ public class Project implements PronunciationLookup {
 
   @Override
   public int getNumPhones(String transcript, String transliteration) {
-    return  hasModel() ? audioFileHelper.getNumPhones(transcript, transliteration):0;
+    return hasModel() ? audioFileHelper.getNumPhones(transcript, transliteration) : 0;
   }
 
   /*
@@ -344,6 +356,6 @@ public class Project implements PronunciationLookup {
   }
 
   public void ensureAudio(Set<CommonExercise> toAddAudioTo) {
-    refResultDecoder.ensure(getLanguage(),toAddAudioTo);
+    refResultDecoder.ensure(getLanguage(), toAddAudioTo);
   }
 }

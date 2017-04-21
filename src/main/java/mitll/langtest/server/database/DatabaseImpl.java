@@ -1430,7 +1430,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Nullable
   public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project) {
-    CommonExercise exercise = project.getExercise(exid);
+    CommonExercise exercise = project.getExerciseByID(exid);
 
     if (exercise == null) {
       if (warns++ < 50) {

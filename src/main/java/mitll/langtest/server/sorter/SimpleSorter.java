@@ -53,8 +53,8 @@ import java.util.List;
  */
 public class SimpleSorter extends ExerciseComparator {
   protected final Collection<String> typeOrder;
+
   SimpleSorter(Collection<String> typeOrder) {
-    super(typeOrder);
     this.typeOrder = typeOrder;
   }
 
@@ -66,18 +66,13 @@ public class SimpleSorter extends ExerciseComparator {
    * @param recordedLast
    * @param isEnglish
    * @return
-   * @see LangTestDatabaseImpl#sortExercises
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    */
-  public void getSortedByUnitThenAlpha(List<? extends CommonShell> toSort, final boolean recordedLast, boolean isEnglish) {
+  public void getSorted(List<? extends CommonShell> toSort, final boolean recordedLast, boolean isEnglish) {
     if (typeOrder.isEmpty()) {
-      sortByTooltip(toSort);
+      sortByEnglish(toSort);
     } else {
-      Collections.sort(toSort, new Comparator<CommonShell>() {
-        @Override
-        public int compare(CommonShell o1, CommonShell o2) {
-          return SimpleSorter.this.simpleCompare(o1, o2, recordedLast,isEnglish);
-        }
-      });
+      Collections.sort(toSort, (Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, isEnglish));
     }
   }
 
@@ -88,12 +83,7 @@ public class SimpleSorter extends ExerciseComparator {
    * @param exerciseShells
    * @see AudioExport#writeZipJustOneAudio(OutputStream, SectionHelper, Collection, String, String)
    */
-  public <T extends CommonShell> void sortByTooltip(List<T> exerciseShells) {
-    Collections.sort(exerciseShells, new Comparator<T>() {
-      @Override
-      public int compare(T o1, T o2) {
-        return tooltipComp(o1, o2);
-      }
-    });
+  public <T extends CommonShell> void sortByEnglish(List<T> exerciseShells) {
+    Collections.sort(exerciseShells, (o1, o2) -> compareByEnglish(o1, o2));
   }
 }

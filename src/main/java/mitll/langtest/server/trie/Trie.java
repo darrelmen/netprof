@@ -92,7 +92,7 @@ public class Trie<T> {
 
   /**
    * Start building
-   * @see ExerciseTrie#ExerciseTrie(Collection, String, SmallVocabDecoder)
+   * @see ExerciseTrie#ExerciseTrie(Collection, String, SmallVocabDecoder, boolean)
    */
   public void startMakingNodes() {
     this.tempCache = new HashMap<>();

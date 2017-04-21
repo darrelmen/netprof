@@ -43,7 +43,6 @@ import org.apache.logging.log4j.Logger;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,13 +78,15 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    *
    * @param exercisesForState
    * @param language
+   * @param doExercise
    * @see Project#buildExerciseTrie
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseListWrapperForPrefix
    */
   public ExerciseTrie(Collection<T> exercisesForState,
                       String language,
-                      SmallVocabDecoder smallVocabDecoder) {
+                      SmallVocabDecoder smallVocabDecoder,
+                      boolean doExercise) {
     boolean includeForeign = !language.equals(ENGLISH);
     this.smallVocabDecoder = smallVocabDecoder;
     startMakingNodes();
@@ -98,7 +99,13 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
     //logger.debug("lang " + language + " looking at " + exercisesForState.size());
     for (T exercise : exercisesForState) {
-      addEntryForExercise(includeForeign, isMandarin, hasClickableCharacters, exercise);
+      if (doExercise) {
+        addEntriesForExercise(includeForeign, isMandarin, hasClickableCharacters, exercise);
+      }
+      else {
+        addContextSentences  (includeForeign, isMandarin, hasClickableCharacters, exercise);
+      }
+//      addEntryForExercise(includeForeign, isMandarin, hasClickableCharacters, exercise);
     }
     endMakingNodes();
     long now = System.currentTimeMillis();
@@ -116,11 +123,18 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    * @param hasClickableCharacters = mandarin, korean, japanese
    * @param exercise
    */
+/*
   private void addEntryForExercise(
       boolean includeForeign,
       boolean isMandarin,
       boolean hasClickableCharacters,
       T exercise) {
+    addEntriesForExercise(includeForeign, isMandarin, hasClickableCharacters, exercise);
+    addContextSentences  (includeForeign, isMandarin, hasClickableCharacters, exercise);
+  }
+  */
+
+  private void addEntriesForExercise(boolean includeForeign, boolean isMandarin, boolean hasClickableCharacters, T exercise) {
     addEnglish(exercise);
     if (includeForeign) {
       addForeign(isMandarin, hasClickableCharacters, exercise);
@@ -132,7 +146,9 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
         addEntry(exercise, t);
       }
     }
+  }
 
+  private void addContextSentences(boolean includeForeign, boolean isMandarin, boolean hasClickableCharacters, T exercise) {
     for (CommonExercise ex : exercise.getDirectlyRelated()) {
       addEnglish(exercise, ex.getEnglish());
       if (includeForeign) {
@@ -269,8 +285,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseListWrapperForPrefix
    */
   public List<T> getExercises(String prefix) {
-    String trimmed = getTrimmed(prefix);
-    List<T> matches = getMatches(trimmed);
+    List<T> matches = getMatches(getTrimmed(prefix));
   //   logger.info("getExercises trim '" + prefix.toLowerCase() + "' = '" + trimmed + "' => " +matches.size());
     return matches;
   }

@@ -68,6 +68,6 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   @Override
   protected void useInvalidResult(AudioAnswer result) {
     super.useInvalidResult(result);
-    simpleRecordAudioPanel.useInvalidResult();
+    simpleRecordAudioPanel.useInvalidResult(result.isValid());
   }
 }

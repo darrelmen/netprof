@@ -59,13 +59,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
   public static final String TOPIC = "Topic";
   public static final String SUB_TOPIC = "Sub-topic";
-  public static final String GRAMMAR = "Grammar";
-  public static final String ANY = "any";
-  public static final String ALL = "all";
+  private static final String GRAMMAR = "Grammar";
+  private static final String ANY = "any";
+  private static final String ALL = "all";
   //  private static final String SOUND = "Sound";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
-  private boolean DEBUG = false;
+  private final boolean DEBUG = false;
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
 /*  private final Map<String,
@@ -138,7 +138,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     }
   }
 
-  private ItemSorter itemSorter = new ItemSorter();
+  private final ItemSorter itemSorter = new ItemSorter();
 
   private void recurseAndCount(SectionNode node, Map<String, Set<String>> typeToCount) {
     String childType = node.getChildType();
@@ -533,12 +533,12 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
     }
   }
-
+/*
   private Map<String, MatchInfo> getNameToInfo(Set<MatchInfo> currentMatches) {
     Map<String, MatchInfo> nameToInfo = new HashMap<>();
     for (MatchInfo info : currentMatches) nameToInfo.put(info.getValue(), info);
     return nameToInfo;
-  }
+  }*/
 
   @NotNull
   private Map<String, Set<String>> getTypeToMatch(String type, String value, SectionNode root) {
@@ -877,9 +877,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     seen = null;
   }
 
-  Map<String, Set<String>> typeToCount = new HashMap<>();
-  Map<String, Map<String, MatchInfo>> typeToMatchInfo = new HashMap<>();
-  Map<String, Set<MatchInfo>> typeToDistinct = new HashMap();
+  private Map<String, Set<String>> typeToCount = new HashMap<>();
+  private Map<String, Map<String, MatchInfo>> typeToMatchInfo = new HashMap<>();
+  private Map<String, Set<MatchInfo>> typeToDistinct = new HashMap();
 
   /**
    * @param predefinedTypeOrder

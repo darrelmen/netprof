@@ -909,7 +909,7 @@ public class ScoreServlet extends DatabaseServlet {
     String exerciseText = request.getHeader(EXERCISE_TEXT);
     if (exerciseText != null && projid > 0) {
       Project project1 = db.getProject(projid);
-      CommonExercise exercise = project1.getExercise(exerciseText);
+      CommonExercise exercise = project1.getExerciseBySearch(exerciseText);
       if (exercise != null) {
         logger.info("getExerciseIDFromText for '" + exerciseText + "' found exercise id " + exercise.getID());
         realExID = exercise.getID();

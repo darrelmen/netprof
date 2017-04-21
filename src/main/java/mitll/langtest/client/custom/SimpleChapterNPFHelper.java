@@ -33,6 +33,7 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.custom.content.FlexListLayout;
@@ -121,6 +122,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   public void showContent(Panel listContent, String instanceName) {
     listContent.add(doNPF(instanceName));
     listContent.addStyleName("userListBackground");
+    listContent.getElement().getStyle().setMarginRight(120, Style.Unit.PX);
   }
 
   private final FlexListLayout<T, U> flexListLayout;

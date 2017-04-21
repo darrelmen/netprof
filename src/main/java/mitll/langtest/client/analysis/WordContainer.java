@@ -86,6 +86,9 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   private final ExerciseComparator sorter;
   private final ShowTab learnTab;
   private final Heading heading;
+  /**
+   * Hack for spanish to make it upper case. Why?
+   */
   private final boolean spanish;
   private List<WordScore> sortedHistory;
   private SortedSet<WordScore> byTime;
@@ -99,7 +102,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
     super(controller, plot);
     spanish = controller.getLanguage().equalsIgnoreCase("Spanish");
-    sorter = new ExerciseComparator(controller.getProjectStartupInfo().getTypeOrder());
+    sorter = new ExerciseComparator();
     plot.addListener(this);
     this.learnTab = learnTab;
     this.heading = w;

@@ -35,6 +35,9 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   public static final String OGG = ".ogg";
+  /**
+   * @see #scoreAudio
+   */
   private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
 
   //private static final int PROGRESS_BAR_WIDTH = 260;
@@ -62,7 +65,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private DivWidget scoreFeedback;
   private ProgressBar progressBar;
   private boolean hasScoreHistory = false;
-  private  ListInterface<CommonShell> listContainer;
+  private ListInterface<CommonShell> listContainer;
 
   /**
    * @param controller
@@ -100,30 +103,21 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   protected void addWidgets() {
     RecorderPlayAudioPanel playAudioPanel = makePlayAudioPanel();
-    // playAudioPanel.setWidth("50%");
-    // add(playAudioPanel);
-
     add(scoreFeedback = new DivWidget());
-
     add(getScoreHistory());
 
     recordFeedback = playAudioPanel.getRecordFeedback(getWaitCursor());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
     scoreFeedback.add(recordFeedback);
-    // scoreFeedback.setWidth("50%");
     progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
-    getProgressBarContainer(progressBar);
-
-    // scoreFeedback.add(progressBar);
+    styleTheProgressBar(progressBar);
     addTooltip(progressBar, "Overall Score");
     scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
 
-
   public Widget getWaitCursor() {
     return waitCursorHelper.getWaitCursor();
   }
-
 
   /**
    * Add score feedback to the right of the play button.
@@ -131,28 +125,12 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @return
    * @seex mitll.langtest.client.scoring.AudioPanel#addWidgets
    */
-  private Widget getProgressBarContainer(ProgressBar progressBar) {
-/*      HTML label = new HTML("Score");
-      label.addStyleName("topFiveMargin");
-      label.addStyleName("leftTenMargin");
-      label.addStyleName("floatLeft");*/
-    //   Panel afterPlayWidget = new DivWidget();
-    //    afterPlayWidget.add(label);
-    // afterPlayWidget.add(progressBar);
-
-    //  progressBar.setWidth(PROGRESS_BAR_WIDTH + "px");
-    // progressBar.addStyleName("floatLeft");
-    //progressBar.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
-
+  private Widget styleTheProgressBar(ProgressBar progressBar) {
     Style style = progressBar.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
     style.setMarginLeft(5, Style.Unit.PX);
     style.setMarginBottom(0, Style.Unit.PX);
-
-    //afterPlayWidget.addStyleName("floatLeft");
-    //afterPlayWidget.setVisible(false);
     progressBar.setVisible(false);
-
     return progressBar;
   }
 
@@ -189,10 +167,10 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   * @see TwoColumnExercisePanel#makeFirstRow
    * @return
+   * @see TwoColumnExercisePanel#makeFirstRow
    */
-  public PostAudioRecordButton getPostAudioRecordButton() {
+  PostAudioRecordButton getPostAudioRecordButton() {
     return postAudioRecordButton;
   }
 
@@ -273,8 +251,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     wordTableContainer.add(getPlayButtonDiv());
     DivWidget scoreFeedbackDiv = new DivWidget();
     scoreFeedbackDiv.add(progressBar);
-    Widget styledWordTable = new WordScoresTable().getStyledWordTable(pretestScore);
-    scoreFeedbackDiv.add(styledWordTable);
+    scoreFeedbackDiv.add(new WordScoresTable().getStyledWordTable(pretestScore));
 
     wordTableContainer.add(scoreFeedbackDiv);
 
@@ -348,11 +325,14 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   }
 
   @Override
-  public void useInvalidResult() {
+  public void useInvalidResult(boolean isValid) {
     setVisible(hasScoreHistory);
-    playAudioPanel.hidePlayButton();
 
-    playAudioPanel.setEnabled(false);
+    logger.info("useInvalidResult " + isValid);
+    
+    if (!isValid) playAudioPanel.hidePlayButton();
+    else playAudioPanel.showPlayButton();
+    playAudioPanel.setEnabled(isValid);
 
     waitCursorHelper.showFinished();
     waitCursorHelper.hide();
@@ -376,8 +356,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     }
     getReadyToPlayAudio(path);
     if (isValid) {
-      float zeroToHundred = hydecScore * 100f;
-      showScore(Math.min(100.0f, zeroToHundred));
+      showScore(Math.min(100.0f, hydecScore * 100f));
       listContainer.setScore(exercise.getID(), hydecScore);
     } else {
       hideScore();
@@ -387,7 +366,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private void showScore(double score) {
     double percent = score / 100d;
     progressBar.setPercent(100 * percent);
-    progressBar.setText("" + Math.round(score));//(score));
+    progressBar.setText("" + Math.round(score));
     progressBar.setColor(
         score > SECOND_STEP ?
             ProgressBarBase.Color.SUCCESS :

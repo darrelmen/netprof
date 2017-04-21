@@ -47,15 +47,7 @@ import java.util.Collection;
  * @since 10/9/15.
  */
 public class ExerciseComparator {
-  protected final Collection<String> typeOrder;
-
-  public ExerciseComparator(Collection<String> typeOrder) {
-    this.typeOrder = typeOrder;
-  }
-
-  protected String removePunct(String t) {
-    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
-  }
+  private static final String A_SPACE = "a ";
 
   public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean isEnglish) {
     if (recordedLast) {
@@ -64,7 +56,7 @@ public class ExerciseComparator {
     }
 
     // items in same chapter alphabetical by tooltip
-    return isEnglish ? flCompare(o1, o2) : tooltipComp(o1, o2);
+    return isEnglish ? compareByFL(o1, o2) : compareByEnglish(o1, o2);
   }
 
   private Integer getRecordedOrder(CommonShell o1, CommonShell o2) {
@@ -76,7 +68,7 @@ public class ExerciseComparator {
     return null;
   }
 
-  public int compare(CommonExercise o1, CommonExercise o2, boolean recordedLast) {
+/*  public int compare(CommonExercise o1, CommonExercise o2, boolean recordedLast) {
     if (recordedLast) {
       Integer x = getRecordedOrder(o1, o2);
       if (x != null) return x;
@@ -86,10 +78,10 @@ public class ExerciseComparator {
     int i = getTypeOrder(o1, o2);
 
     // items in same chapter alphabetical by tooltip
-    return (i == 0) ? tooltipComp(o1, o2) : i;
-  }
+    return (i == 0) ? compareByEnglish(o1, o2) : i;
+  }*/
 
-  private int getTypeOrder(CommonExercise o1, CommonExercise o2) {
+/*  private int getTypeOrder(CommonExercise o1, CommonExercise o2) {
     int i = 0;
     for (String type : typeOrder) {
       String type1 = o1.getUnitToValue().get(type);
@@ -109,30 +101,36 @@ public class ExerciseComparator {
       }
     }
     return i;
+  }*/
+
+  protected <T extends CommonShell> int compareByEnglish(T o1, T o2) {
+    return compareStrings(o1.getEnglish(), o2.getEnglish());
   }
 
-  protected <T extends CommonShell> int tooltipComp(T o1, T o2) {
-    String id1 = o1.getEnglish();
-    String id2 = o2.getEnglish();
-    return compareStrings(id1, id2);
-  }
-
-  private <T extends CommonShell> int flCompare(T o1, T o2) {
-    String id1 = o1.getForeignLanguage();
-    String id2 = o2.getForeignLanguage();
-    return id1.compareTo(id2);
-  }
-
+  /**
+   * Skip prefix of "a ".
+   * @param id1
+   * @param id2
+   * @return
+   */
   public int compareStrings(String id1, String id2) {
     String t = id1.toLowerCase();
-    if (t.startsWith("a ")) t = t.substring(2);
+    if (t.startsWith(A_SPACE)) t = t.substring(2);
 
     t = dropPunct(t);
     String t1 = id2.toLowerCase();
-    if (t1.startsWith("a ")) t1 = t1.substring(2);
+    if (t1.startsWith(A_SPACE)) t1 = t1.substring(2);
     t1 = dropPunct(t1);
 
     return removePunct(t).compareTo(removePunct(t1));
+  }
+
+  protected String removePunct(String t) {
+    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
+  }
+
+  private <T extends CommonShell> int compareByFL(T o1, T o2) {
+    return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
   }
 
   @NotNull

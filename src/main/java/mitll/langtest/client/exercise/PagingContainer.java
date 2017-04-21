@@ -94,7 +94,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     if (startupInfo == null) {
       logger.warning("PagingContainer huh? no startup info?");
     }
-    sorter = new ExerciseComparator(controller.getTypeOrder());
+    sorter = new ExerciseComparator();
 
     boolean japanese = controller.getLanguage().equalsIgnoreCase("Japanese");
     if (japanese) FLLength = JAPANESE_LENGTH;

@@ -209,7 +209,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {
-    return db.getProject(projectID).getExercise(foreignLanguage.trim());
+    return db.getProject(projectID).getExerciseBySearch(foreignLanguage.trim());
   }
 
   /**
@@ -368,7 +368,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * @param id
    * @param context
-   * @see mitll.langtest.client.custom.ListManager#attachMedia
+   * @see mitll.langtest.client.custom.userlist.ListOperations#attachMedia
    */
   public void updateContext(long id, String context) {
     getUserListDAO().updateContext(id, context);

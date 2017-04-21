@@ -86,7 +86,6 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     this.exerciseID = exerciseID;
     getElement().setId("ASRHistoryPanel");
     addStyleName("inlineFlex");
-   // setWidth("100%");
   }
 
   /**
@@ -160,8 +159,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     TooltipHelper tooltipHelper = new TooltipHelper();
     int j = 0;
     for (CorrectAndScore scoreAndPath : scoreAndPaths) {
-      //int i = scores2.indexOf(scoreAndPath);
-      int i = scoreAndPaths.size() - (j++);//scores2.indexOf(scoreAndPath);
+      int i = scoreAndPaths.size() - (j++);
       Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + i, i);
       hp.addStyleName("floatLeft");
       hp.addStyleName("rightTenMargin");

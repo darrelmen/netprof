@@ -46,15 +46,14 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   private Panel downloadContainer;
   private int exid;
   private ExerciseController controller;
-  boolean showChoices;
+  //private boolean showChoices;
 
   /**
    * @param soundManager
    * @param postAudioRecordButton1
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  public RecorderPlayAudioPanel(//SimpleRecordAudioPanel simpleRecordAudioPanel,
-                                SoundManagerAPI soundManager,
+  public RecorderPlayAudioPanel(SoundManagerAPI soundManager,
                                 final PostAudioRecordButton postAudioRecordButton1,
                                 CommonExercise exercise,
                                 ExerciseController exerciseController,
@@ -75,7 +74,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
         null);
     this.exid = exercise.getID();
     this.controller = exerciseController;
-    this.showChoices = showChoices;
+    //this.showChoices = showChoices;
     // DivWidget recordFeedback = getRecordFeedback(simpleRecordAudioPanel.getWaitCursor());
     // firstRow.add(recordFeedback);
     downloadContainer = addDownloadAudioWidget();

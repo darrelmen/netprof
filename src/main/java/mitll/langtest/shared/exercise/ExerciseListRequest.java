@@ -32,6 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -39,6 +40,7 @@ import mitll.langtest.shared.answer.ActivityType;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -260,10 +262,19 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getLimitedMatches(ExerciseListRequest, List)
+   * @return
+   */
   public int getLimit() {
     return limit;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.SearchTypeahead#getTypeaheadUsing
+   * @param limit
+   * @return
+   */
   public ExerciseListRequest setLimit(int limit) {
     this.limit = limit;
     return this;

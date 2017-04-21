@@ -35,6 +35,7 @@ package mitll.langtest.client.custom.content;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -52,8 +53,9 @@ import java.util.logging.Logger;
  * @since 3/28/2014.
  */
 public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize {
-  public static final int RIGHT_SIDE_DIV_WIDTH = 70;
   private final Logger logger = Logger.getLogger("FlexListLayout");
+
+//  private static final int RIGHT_SIDE_DIV_WIDTH = 70;
 
   public PagingExerciseList<T, U> npfExerciseList;
   private final ExerciseController controller;
@@ -77,11 +79,11 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    */
   public Panel doInternalLayout(long uniqueID, String instanceName, boolean hasTopRow) {
     Panel twoRows = hasTopRow ? new FlowPanel() : new DivWidget();
-    twoRows.getElement().setId("NPFHelper_twoRows");
+    twoRows.getElement().setId("FlexListLayout_twoRows");
 
     Panel exerciseListContainer = new SimplePanel();
     exerciseListContainer.addStyleName("floatLeftAndClear");
-    exerciseListContainer.getElement().setId("NPFHelper_exerciseListContainer");
+    exerciseListContainer.getElement().setId("FlexListLayout_exerciseListContainer");
 
     // second row ---------------
     Panel topRow = hasTopRow ? new FluidRow() : new FlowPanel("nav");
@@ -138,6 +140,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     topRow.addStyleName("rightFiveMargin");
 
     twoRows.addStyleName("inlineFlex");
+  //  twoRows.getElement().getStyle().setMarginRight(100, Style.Unit.PX);
 
     FlowPanel section = new FlowPanel("section");
     section.addStyleName("sidebar");
@@ -150,8 +153,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     bottomRowDiv.addStyleName("floatLeft");
     bottomRowDiv.addStyleName("mainBlock");
     bottomRowDiv.getElement().setId("rightSideDiv");
-    bottomRowDiv.setWidth(RIGHT_SIDE_DIV_WIDTH +
-        "%");
+    //bottomRowDiv.setWidth(RIGHT_SIDE_DIV_WIDTH +    "%");
     // listHeader.addStyleName("listHeader");
     bottomRowDiv.add(listHeader);
   }

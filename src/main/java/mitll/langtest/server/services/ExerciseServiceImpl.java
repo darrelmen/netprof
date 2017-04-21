@@ -98,30 +98,21 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   @Override
   public ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
     int projectID = getProjectID();
+
     if (projectID == -1) {
       logger.warn("getExerciseIds project id is -1?  It should probably have a real value.");
       List<T> ts = new ArrayList<T>();
       return new ExerciseListWrapper<T>(request.getReqID(), ts, null);
     }
+
     if (serverProps.isAMAS()) {
       ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
       return (ExerciseListWrapper<T>) amasExerciseIds; // TODO : how to do this without forcing it.
     }
 
     if (request.isNoFilter()) {
-      synchronized (projidToWrapper) {
-        ExerciseListWrapper<T> exerciseListWrapper = projidToWrapper.get(projectID);
-        if (exerciseListWrapper != null) {
-          logger.info("getExerciseIds Returning cached exercises " + exerciseListWrapper);
-
-          ExerciseListWrapper<T> tExerciseListWrapper = new ExerciseListWrapper<>(request.getReqID(),
-              exerciseListWrapper.getExercises(),
-              exerciseListWrapper.getFirstExercise());
-
-          addScoresForAll(request.getUserID(), exerciseListWrapper.getExercises());
-          return tExerciseListWrapper;
-        }
-      }
+      ExerciseListWrapper<T> tExerciseListWrapper = getCachedExerciseWrapper(request, projectID);
+      if (tExerciseListWrapper != null) return tExerciseListWrapper;
     }
 
     List<CommonExercise> exercises;
@@ -134,50 +125,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
-        boolean predefExercises = userListByID == null;
-        exercises = predefExercises ? getExercises() : getCommonExercises(userListByID);
-
-        // now if there's a prefix, filter by prefix match
-        int userID = request.getUserID();
-        if (!request.getPrefix().isEmpty()) {
-          // now do a trie over matches
-          exercises = getExercisesForSearch(request.getPrefix(), exercises, predefExercises);
-          exercises = getLimitedMatches(request, exercises);
-        }
-        exercises = filterExercises(request, exercises, projectID);
-
-        // TODO : I don't think we need this?
-/*        if (!isUserListReq) {
-          markRecordedState(userID, request.getActivityType(), exercises, request.isOnlyExamples());
-        }*/
-
-        // now sort : everything gets sorted the same way
-        List<CommonExercise> commonExercises;
-        if (request.isIncorrectFirstOrder()) {
-          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, getCollator(), getLanguage());
-        } else {
-          commonExercises = new ArrayList<>(exercises);
-          if (predefExercises) {
-            sortExercises(request.getActivityType(), commonExercises);
-          }
-        }
-
-        ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises);
-
-        if (request.isNoFilter()) {
-          synchronized (projidToWrapper) {
-            projidToWrapper.put(projectID, exerciseListWrapper);
-//            logger.info("projidToWrapper now " + projidToWrapper.size());
-          }
-        }
-//        else {
-//          logger.debug("REq " + request.isNoFilter());
-//          logger.debug("REq " + request.toString());
-//          logger.debug("REq " + request.getPrefix());
-//          logger.debug("REq " + request.getActivityType());
-//          logger.debug("REq " + request.getUserListID());
-  //      }
-        return exerciseListWrapper;
+        return getExerciseWhenNoUnitChapter(request, projectID, userListByID);
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         if (userListByID != null) {
@@ -193,6 +141,91 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logAndNotifyServerException(e);
       return new ExerciseListWrapper<T>();
     }
+  }
+
+  private ExerciseListWrapper<T> getExerciseWhenNoUnitChapter(ExerciseListRequest request,
+                                                              int projectID,
+                                                              UserList<CommonExercise> userListByID) {
+    List<CommonExercise> exercises;
+    boolean predefExercises = userListByID == null;
+    exercises = predefExercises ? getExercises() : getCommonExercises(userListByID);
+
+    // now if there's a prefix, filter by prefix match
+    int userID = request.getUserID();
+    TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<CommonExercise>().setByExercise(exercises);
+    if (!request.getPrefix().isEmpty()) {
+      // now do a trie over matches
+      exercisesForSearch = getExercisesForSearch(request.getPrefix(), exercises, predefExercises);
+      //exercises = exercisesForSearch;
+
+      if (request.getLimit() > 0) {
+        exercisesForSearch.setByExercise(getFirstFew(request, exercisesForSearch.getByExercise()));
+      }
+//      exercises = getLimitedMatches(request, exercisesForSearch.getByExercise());
+    }
+    exercisesForSearch.setByExercise(filterExercises(request, exercisesForSearch.getByExercise(), projectID));
+
+    // TODO : I don't think we need this?
+/*        if (!isUserListReq) {
+          markRecordedState(userID, request.getActivityType(), exercises, request.isOnlyExamples());
+        }*/
+
+    // now sort : everything gets sorted the same way
+    List<CommonExercise> commonExercises = getSortedExercises(request, exercisesForSearch, predefExercises, userID);
+    ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises);
+
+    if (request.isNoFilter()) {
+      rememberCachedWrapper(projectID, exerciseListWrapper);
+    }
+    return exerciseListWrapper;
+  }
+
+  private void rememberCachedWrapper(int projectID, ExerciseListWrapper<T> exerciseListWrapper) {
+    synchronized (projidToWrapper) {
+      projidToWrapper.put(projectID, exerciseListWrapper);
+    }
+  }
+
+  private List<CommonExercise> getSortedExercises(ExerciseListRequest request,
+                                                  TripleExercises<CommonExercise> exercises,
+                                                  boolean predefExercises, int userID) {
+    List<CommonExercise> commonExercises;
+    if (request.isIncorrectFirstOrder()) {
+      commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getCollator(), getLanguage());
+    } else {
+      commonExercises = new ArrayList<>();
+      if (predefExercises) {
+        List<CommonExercise> basicExercises = new ArrayList<CommonExercise>(exercises.getByExercise());
+        sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises);
+        commonExercises.addAll(exercises.getByID());
+        commonExercises.addAll(basicExercises);
+
+        List<CommonExercise> contextExercises = new ArrayList<CommonExercise>(exercises.getByContext());
+
+        sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises);
+
+        commonExercises.addAll(contextExercises);
+      }
+    }
+    return commonExercises;
+  }
+
+  @Nullable
+  private ExerciseListWrapper<T> getCachedExerciseWrapper(ExerciseListRequest request, int projectID) {
+    synchronized (projidToWrapper) {
+      ExerciseListWrapper<T> exerciseListWrapper = projidToWrapper.get(projectID);
+      if (exerciseListWrapper != null) {
+        logger.info("getExerciseIds Returning cached exercises " + exerciseListWrapper);
+
+        ExerciseListWrapper<T> tExerciseListWrapper = new ExerciseListWrapper<>(request.getReqID(),
+            exerciseListWrapper.getExercises(),
+            exerciseListWrapper.getFirstExercise());
+
+        addScoresForAll(request.getUserID(), exerciseListWrapper.getExercises());
+        return tExerciseListWrapper;
+      }
+    }
+    return null;
   }
 
   private void addScoresForAll(int userid, List<T> exercises) {
@@ -215,7 +248,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   /**
-   * Return shortest matches first.
+   * Return shortest matches first (on fl term).
    *
    * @param request
    * @param exercises
@@ -223,17 +256,20 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private List<CommonExercise> getLimitedMatches(ExerciseListRequest request, List<CommonExercise> exercises) {
     if (request.getLimit() > 0) {
-      Collections.sort(exercises, (o1, o2) -> {
-        String foreignLanguage = o1.getForeignLanguage();
-        String foreignLanguage1 = o2.getForeignLanguage();
-        int length = foreignLanguage.length();
-        int length1 = foreignLanguage1.length();
-        int i = Integer.valueOf(length).compareTo(length1);
-
-        return i == 0 ? foreignLanguage.compareTo(foreignLanguage1) : i;
-      });
-      exercises = exercises.subList(0, Math.min(exercises.size(), request.getLimit()));
+      exercises = getFirstFew(request, exercises);
     }
+    return exercises;
+  }
+
+  @NotNull
+  private List<CommonExercise> getFirstFew(ExerciseListRequest request, List<CommonExercise> exercises) {
+    Collections.sort(exercises, (o1, o2) -> {
+      String foreignLanguage = o1.getForeignLanguage();
+      String foreignLanguage1 = o2.getForeignLanguage();
+      int i = Integer.valueOf(foreignLanguage.length()).compareTo(foreignLanguage1.length());
+      return i == 0 ? foreignLanguage.compareTo(foreignLanguage1) : i;
+    });
+    exercises = exercises.subList(0, Math.min(exercises.size(), request.getLimit()));
     return exercises;
   }
 
@@ -351,7 +387,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     //logger.debug("marked " +i + " as recorded role " +role);
 
     if (hasPrefix) {
-      ExerciseTrie<CommonExercise> trie = new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder());
+      ExerciseTrie<CommonExercise> trie = new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder(), true);
       exercisesForState = trie.getExercises(prefix);
     }
 
@@ -366,7 +402,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getCollator(), getLanguage());
     } else {
       copy = new ArrayList<>(exercisesForState);
-      sortExercises(request.getActivityType(), copy);
+      sortExercises(request.getActivityType() == ActivityType.RECORDER, copy);
     }
 
     return makeExerciseListWrapper(request, copy);
@@ -578,15 +614,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   /**
    * TODO : slow?
    *
-   * @param role
    * @param commonExercises
    * @param <T>
+   * @paramx role
    * @see #getExerciseIds(ExerciseListRequest)
    */
-  private <T extends CommonShell> void sortExercises(ActivityType role, List<T> commonExercises) {
-    int projectID = getProjectID();
-    new ExerciseSorter(db.getTypeOrder(projectID))
-        .getSortedByUnitThenAlpha(commonExercises, role == ActivityType.RECORDER, getProject().isEnglish());
+  private <T extends CommonShell> void sortExercises(boolean isRecorder, List<T> commonExercises) {
+    new ExerciseSorter(db.getTypeOrder(getProjectID()))
+        .getSorted(commonExercises, isRecorder, getProject().isEnglish());
   }
 
   /**
@@ -599,9 +634,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #getExerciseIds
    */
-  private <T extends CommonExercise> List<T> getExercisesForSearch(String prefix,
-                                                                   Collection<T> exercises,
-                                                                   boolean predefExercises) {
+  private <T extends CommonExercise> TripleExercises<T> getExercisesForSearch(String prefix,
+                                                                              Collection<T> exercises,
+                                                                              boolean predefExercises) {
     ExerciseTrie<T> fullTrie = (ExerciseTrie<T>) getProject().getFullTrie();
     return getExercisesForSearchWithTrie(prefix, exercises, predefExercises, fullTrie);
   }
@@ -616,26 +651,68 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param <T>
    * @return
    */
-  private <T extends CommonExercise> List<T> getExercisesForSearchWithTrie(String prefix,
-                                                                           Collection<T> exercises,
-                                                                           boolean predefExercises,
-                                                                           ExerciseTrie<T> fullTrie) {
-    ExerciseTrie<T> trie = predefExercises ? fullTrie : new ExerciseTrie<T>(exercises, getLanguage(), getSmallVocabDecoder());
-    List<T> exercises1 = trie.getExercises(prefix);
+  private <T extends CommonExercise> TripleExercises<T> getExercisesForSearchWithTrie(String prefix,
+                                                                                      Collection<T> exercises,
+                                                                                      boolean predefExercises,
+                                                                                      ExerciseTrie<T> fullTrie) {
+    ExerciseTrie<T> trie = predefExercises ? fullTrie : new ExerciseTrie<T>(exercises, getLanguage(), getSmallVocabDecoder(), true);
+    List<T> basicExercises = trie.getExercises(prefix);
+    logger.info("getExercisesForSearchWithTrie : prefix " + prefix + " matches " + basicExercises.size());
+    ExerciseTrie<T> fullContextTrie = (ExerciseTrie<T>) getProject().getFullContextTrie();
+    return new TripleExercises<T>(getExercieByExid(prefix), basicExercises, predefExercises ? fullContextTrie.getExercises(prefix) : Collections.emptyList());
+  }
 
-    if (exercises1.isEmpty()) { // allow lookup by id
-      int exid = getExid(prefix);
+  private static class TripleExercises<T extends CommonExercise> {
+    private List<T> byID = Collections.emptyList();
+    private List<T> byExercise = Collections.emptyList();
+    private List<T> byContext = Collections.emptyList();
 
-      if (exid > 0) {
-        logger.info("return exid " + exid);
-        T exercise = getExercise(exid, false);
-        if (exercise != null) {
-          exercises1 = Collections.singletonList(exercise);
-        }
+    public TripleExercises() {
+    }
+
+    public TripleExercises(List<T> byID, List<T> byExercise, List<T> byContext) {
+      this.byID = byID;
+      this.byExercise = byExercise;
+      this.byContext = byContext;
+    }
+
+    public List<T> getByID() {
+      return byID;
+    }
+
+    public void setByID(List<T> byID) {
+      this.byID = byID;
+    }
+
+    public List<T> getByExercise() {
+      return byExercise;
+    }
+
+    public TripleExercises setByExercise(List<T> byExercise) {
+      this.byExercise = byExercise;
+      return this;
+    }
+
+    public List<T> getByContext() {
+      return byContext;
+    }
+
+    public void setByContext(List<T> byContext) {
+      this.byContext = byContext;
+    }
+  }
+
+  private <T extends CommonExercise> List<T> getExercieByExid(String prefix) {
+    int exid = getExid(prefix);
+
+    if (exid > 0) {
+      logger.info("return exid " + exid);
+      T exercise = getExercise(exid, false);
+      if (exercise != null) {
+        return Collections.singletonList(exercise);
       }
     }
-    logger.info("prefix " + prefix + " matches " +exercises1.size());
-    return exercises1;
+    return Collections.emptyList();
   }
 
   private int getExid(String prefix) {
@@ -1034,11 +1111,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#getExercises(Collection)
    * @param reqid
    * @param ids
    * @param isFlashcardReq
    * @return
+   * @see mitll.langtest.client.list.FacetExerciseList#getExercises(Collection)
    */
   @Override
   public ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids, boolean isFlashcardReq) {
@@ -1057,8 +1134,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     if (!toAddAudioTo.isEmpty()) {
       db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
-    }
-    else {
+    } else {
       logger.info("getFullExercises all " + ids.size() + " exercises have audio");
     }
 
