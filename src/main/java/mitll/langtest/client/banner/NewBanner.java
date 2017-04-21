@@ -379,8 +379,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
     Collection<NavLink> values = nameToLink.values();
-    logger.info("project info " + projectStartupInfo);
-    logger.info("setting " + values.size() + " links");
+//    logger.info("project info " + projectStartupInfo);
+//    logger.info("setting " + values.size() + " links");
 
     boolean show = projectStartupInfo != null;
 //    for (NavLink link : values) {

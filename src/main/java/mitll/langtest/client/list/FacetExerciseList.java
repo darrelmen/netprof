@@ -424,11 +424,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getTypeToValue
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
+/*
     logger.info("addFacetsForReal" +//\n\tfor " +
         //" nodes" +
         "\n\t# root nodes = " + rootNodesInOrder.size() +
         " type->distinct " + typeToValues.keySet() +
         "\n\ttype->sel " + typeToSelection);
+        */
     // nav -
     //   ul
     UnorderedList allTypesContainer = new UnorderedList(); //ul
@@ -929,7 +931,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void ensureAudio(Collection<Integer> visibleIDs) {
-    //   long then = System.currentTimeMillis();
+    long then = System.currentTimeMillis();
     controller.getAudioService().ensureAudioForIDs(controller.getProjectStartupInfo().getProjectid(), visibleIDs,
         new AsyncCallback<Void>() {
           @Override
@@ -939,9 +941,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           public void onSuccess(Void result) {
-            //  long now = System.currentTimeMillis();
+              long now = System.currentTimeMillis();
             getExercises(visibleIDs);
-            //logger.info("OK, ensured audio... in " + (now - then) + " millis");
+            logger.info("ensureAudio OK, ensured audio... in " + (now - then) + " millis");
           }
         });
   }

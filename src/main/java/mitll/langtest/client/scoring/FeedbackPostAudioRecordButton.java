@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -9,8 +10,16 @@ import mitll.langtest.shared.answer.AudioType;
  * @see AudioPanel#makePlayAudioPanel(Widget, String, String)
  */
 class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
+  private static final String STOP = "Stop";
+
   private RecordingAudioListener simpleRecordAudioPanel;
 
+  /**
+   * @see SimpleRecordAudioPanel#makePlayAudioPanel
+   * @param exid
+   * @param simpleRecordAudioPanel
+   * @param controller
+   */
   FeedbackPostAudioRecordButton(int exid,
                                 RecordingAudioListener simpleRecordAudioPanel, ExerciseController controller) {
     super(
@@ -19,10 +28,11 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
         1,
         true,
         "",
-        controller.getProps().doClickAndHold() ? "" : "Stop",
+        controller.getProps().doClickAndHold() ? "" : STOP,
         -1,
         true);
     this.simpleRecordAudioPanel = simpleRecordAudioPanel;
+    setSize(ButtonSize.LARGE);
   }
 
 
@@ -57,9 +67,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   @Override
-  public void useResult(AudioAnswer result) {
-    simpleRecordAudioPanel.useResult(result);
-  }
+  public void useResult(AudioAnswer result) {  simpleRecordAudioPanel.useResult(result);  }
 
   /**
    * @param result

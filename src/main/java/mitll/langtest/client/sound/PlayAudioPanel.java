@@ -37,13 +37,13 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.flashcard.MyCustomIconType;
 
 import java.util.ArrayList;
@@ -68,6 +68,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends DivWidget implements AudioControl {
+  private static final int BUTTON_WIDTH = 10;
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
   private static final boolean DEBUG = false;
 
@@ -110,7 +111,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     this.soundManager = soundManager;
     playLabel = buttonTitle;
     if (buttonTitle.isEmpty()) {
-      minWidth = 12;
+      minWidth = BUTTON_WIDTH;
       pauseLabel = "";
     }
     id = counter++;
@@ -256,7 +257,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
     if (minWidth > 0) {
 //      logger.info("setting min width " + minWidth + " on " + playButton.getElement().getExID());
-      if (minWidth == 12) offsetWidth = 12;
+      if (minWidth == BUTTON_WIDTH) offsetWidth = BUTTON_WIDTH;
       playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
     }
   }
@@ -324,8 +325,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       playButton.setIcon(IconType.PAUSE);
 
       playButton.getElement().getStyle().setPaddingBottom(4, Style.Unit.PX);
-      playButton.getElement().getStyle().setPaddingLeft(12, Style.Unit.PX);
-      playButton.getElement().getStyle().setPaddingRight(12, Style.Unit.PX);
+      playButton.getElement().getStyle().setPaddingLeft(BUTTON_WIDTH, Style.Unit.PX);
+      playButton.getElement().getStyle().setPaddingRight(BUTTON_WIDTH, Style.Unit.PX);
     } else {
       showPlayIcon(playButton);
     }

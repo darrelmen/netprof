@@ -335,7 +335,9 @@ public class InitialUI implements UILifecycle {
   private Breadcrumbs getBreadcrumbs() {
     Breadcrumbs crumbs = new Breadcrumbs(">");
     crumbs.getElement().setId("breadcrumb");
-    crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    Style style = crumbs.getElement().getStyle();
+    style.setMarginBottom(0, Style.Unit.PX);
+    style.clearProperty("backgroundColor");
     crumbs.setVisible(false);
     addCrumbs(crumbs);
     // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");

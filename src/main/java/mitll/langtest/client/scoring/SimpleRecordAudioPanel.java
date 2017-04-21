@@ -231,13 +231,13 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     clearScoreFeedback();
     PretestScore pretestScore = result.getPretestScore();
 
-    if (pretestScore.getHydecScore() > 0) {
+   // if (pretestScore.getHydecScore() > 0) {
       scoreFeedback.add(getWordTableContainer(pretestScore));
-    } else {
+/*    } else {
       Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
       w.addStyleName("floatLeft");
       scoreFeedback.add(w);
-    }
+    }*/
     useResult(pretestScore, false, result.getPath());
   }
 
@@ -249,11 +249,21 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     wordTableContainer.addStyleName("floatLeft");
 
     wordTableContainer.add(getPlayButtonDiv());
-    DivWidget scoreFeedbackDiv = new DivWidget();
-    scoreFeedbackDiv.add(progressBar);
-    scoreFeedbackDiv.add(new WordScoresTable().getStyledWordTable(pretestScore));
 
-    wordTableContainer.add(scoreFeedbackDiv);
+    if (pretestScore.getHydecScore() > 0) {
+
+      DivWidget scoreFeedbackDiv = new DivWidget();
+      scoreFeedbackDiv.add(progressBar);
+      scoreFeedbackDiv.add(new WordScoresTable().getStyledWordTable(pretestScore));
+
+      wordTableContainer.add(scoreFeedbackDiv);
+      logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
+    }
+    else {
+      Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
+      w.addStyleName("leftFiveMargin");
+      wordTableContainer.add(w);
+    }
 
     Panel downloadContainer = playAudioPanel.getDownloadContainer();
     downloadContainer.addStyleName("topFiveMargin");
@@ -329,7 +339,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     setVisible(hasScoreHistory);
 
     logger.info("useInvalidResult " + isValid);
-    
+
     if (!isValid) playAudioPanel.hidePlayButton();
     else playAudioPanel.showPlayButton();
     playAudioPanel.setEnabled(isValid);
@@ -377,9 +387,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     progressBar.setVisible(true);
   }
 
-  private void hideScore() {
-    progressBar.setVisible(false);
-  }
+  private void hideScore() { progressBar.setVisible(false);  }
 
   @Nullable
   private String getReadyToPlayAudio(String path) {

@@ -87,7 +87,7 @@ public class RecordButton extends Button {
   private RecordingListener recordingListener;
   private final PropertyHandler propertyHandler;
   private Timer afterStopTimer = null;
-  private int afterStopDelayMillis;// = 50;
+  //private int afterStopDelayMillis;// = 50;
 
   public interface RecordingListener {
     void startRecording();
@@ -103,8 +103,8 @@ public class RecordButton extends Button {
    * @param buttonText
    * @param stopButtonText
    * @param propertyHandler
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton
    * @seex mitll.langtest.client.scoring.SimplePostAudioRecordButton#SimplePostAudioRecordButton(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, String, String, String, String)
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton
    */
   protected RecordButton(int delay, boolean doClickAndHold, String buttonText, String stopButtonText, PropertyHandler propertyHandler) {
     super(buttonText);
@@ -115,7 +115,7 @@ public class RecordButton extends Button {
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
     setIcon(IconType.MICROPHONE);
-    this.afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
+    //   this.afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
 
     setupRecordButton();
     getElement().setId("record_button");
@@ -164,39 +164,27 @@ public class RecordButton extends Button {
 
   private void setupRecordButton() {
     if (doClickAndHold) {
-      addMouseDownHandler(new MouseDownHandler() {
-        @Override
-        public void onMouseDown(MouseDownEvent event) {
-          if (!mouseDown) {
-            mouseDown = true;
-            doClick();
-          } else {
-            logger.info("ignoring mouse down since mouse already down ");
-          }
+      addMouseDownHandler(event -> {
+        if (!mouseDown) {
+          mouseDown = true;
+          doClick();
+        } else {
+          logger.info("setupRecordButton ignoring mouse down since mouse already down ");
         }
       });
 
-      addMouseUpHandler(new MouseUpHandler() {
-        @Override
-        public void onMouseUp(MouseUpEvent event) {
+      addMouseUpHandler(event -> {
+        if (mouseDown) {
           mouseDown = false;
           doClick();
+        } else {
+          logger.info("setupRecordButton ignoring mouse up since mouse already up");
         }
       });
 
-      addMouseOutHandler(new MouseOutHandler() {
-        @Override
-        public void onMouseOut(MouseOutEvent event) {
-          gotMouseOut();
-        }
-      });
+      addMouseOutHandler(event -> gotMouseOut());
     } else {
-      addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          doClick();
-        }
-      });
+      addClickHandler(event -> doClick());
     }
   }
 
@@ -217,7 +205,7 @@ public class RecordButton extends Button {
     }
   }
 
- // private long last = 0;
+  // private long last = 0;
   private long started = 0;
   //private long last = 0;
 
@@ -228,7 +216,7 @@ public class RecordButton extends Button {
    * @see #doClick
    */
   private void startOrStopRecording() {
-    long enter = System.currentTimeMillis();
+    //long enter = System.currentTimeMillis();
 //    if (last  > 0) {
 //      logger.info("startOrStopRecording at " + enter + " millis after dur " +  (enter-last));
 //    }
@@ -238,32 +226,40 @@ public class RecordButton extends Button {
     //   last = enter;
 
     if (isRecording()) {
-      recording = false;
-      long now = System.currentTimeMillis();
-
-      cancelAfterStopTimer();
-      cancelTimer();
-      long duration = now - started;
-
-      //logger.info("startOrStopRecording ui time between button clicks = " + duration + " millis, ");
-
-      int afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
-      afterStopTimer = new Timer() {
-        @Override
-        public void run() {
-          stop(duration);
-        }
-      };
-      afterStopTimer.schedule(afterStopDelayMillis);
+      stopRecording();
     } else {
-      recording = true;
-      started = System.currentTimeMillis();
-
-      cancelAfterStopTimer();
-//      logger.info("startOrStopRecording started = " + started);
-      start();
-      addRecordingMaxLengthTimeout();
+      startRecordingWithTimer();
     }
+  }
+
+  private void startRecordingWithTimer() {
+    recording = true;
+    started = System.currentTimeMillis();
+
+    cancelAfterStopTimer();
+//      logger.info("startOrStopRecording started = " + started);
+    start();
+    addRecordingMaxLengthTimeout();
+  }
+
+  private void stopRecording() {
+    recording = false;
+    long now = System.currentTimeMillis();
+
+    cancelAfterStopTimer();
+    cancelTimer();
+    long duration = now - started;
+
+    //logger.info("startOrStopRecording ui time between button clicks = " + duration + " millis, ");
+
+    int afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
+    afterStopTimer = new Timer() {
+      @Override
+      public void run() {
+        stop(duration);
+      }
+    };
+    afterStopTimer.schedule(afterStopDelayMillis);
   }
 
   private void cancelAfterStopTimer() {
@@ -286,8 +282,8 @@ public class RecordButton extends Button {
    */
   protected void stop(long duration) {
 //    long now = System.currentTimeMillis();
-   // long duration2 = now - started;
-   // logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+    // long duration2 = now - started;
+    // logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
     showStopped();
     recordingListener.stopRecording(duration);
   }

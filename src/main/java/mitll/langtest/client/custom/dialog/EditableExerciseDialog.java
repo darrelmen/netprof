@@ -305,7 +305,7 @@ class EditableExerciseDialog extends NewUserExercise {
     if (rap != null) {
       // regular speed audio
       int id = newUserExercise.getID();
-      rap.getPostAudioButton().setExercise(id);
+      rap.getPostAudioButton().setExerciseID(id);
       String refAudio = newUserExercise.getRefAudio();
 
       if (refAudio != null) {
@@ -320,7 +320,7 @@ class EditableExerciseDialog extends NewUserExercise {
       }
 
       // slow speed audio
-      rapSlow.getPostAudioButton().setExercise(id);
+      rapSlow.getPostAudioButton().setExerciseID(id);
       String slowAudioRef = newUserExercise.getSlowAudioRef();
 
       if (slowAudioRef != null) {

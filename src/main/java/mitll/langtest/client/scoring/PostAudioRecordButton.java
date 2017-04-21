@@ -69,7 +69,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private int exerciseID;
   protected final ExerciseController controller;
   private final boolean recordInResults;
-  //private final int buttonWidth;
   private final boolean scoreAudioNow;
 
   /**
@@ -107,21 +106,15 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     getElement().setId("PostAudioRecordButton");
     controller.register(this, exerciseID);
     Style style = getElement().getStyle();
-    //style.setMarginTop(1, Style.Unit.PX);
     style.setMarginBottom(1, Style.Unit.PX);
     if (buttonWidth > 0) {
       setWidth(buttonWidth + "px");
     }
-//    else {
-//      setWidth(32 + "px");
-//
-//    }
   }
 
-  public void setExercise(int exercise) {
+  public void setExerciseID(int exercise) {
     this.exerciseID = exercise;
   }
-
   protected int getExerciseID() {
     return exerciseID;
   }
@@ -132,12 +125,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   public void stopRecording(long duration) {
     if (duration > MIN_DURATION) {
-      controller.stopRecording(new WavCallback() {
-        @Override
-        public void getBase64EncodedWavFile(String bytes) {
-          postAudioFile(bytes);
-        }
-      });
+      controller.stopRecording(this::postAudioFile);
     }
     else {
       showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt());
@@ -191,29 +179,33 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           }
 
           public void onSuccess(AudioAnswer result) {
-            long now = System.currentTimeMillis();
-            long roundtrip = now - then;
-
-            logger.info("PostAudioRecordButton : Got audio answer " + result);// + " platform is " + getPlatform());
-
-            if (result.getReqid() != reqid) {
-              logger.info("ignoring old response " + result);
-              return;
-            }
-            if (result.getValidity() == AudioAnswer.Validity.OK ||
-                (controller.getProps().isQuietAudioOK() && result.getValidity() == AudioAnswer.Validity.TOO_QUIET)) {
-              validAudio = true;
-              useResult(result);
-              addRT(result, (int) roundtrip);
-            } else {
-              validAudio = false;
-              useInvalidResult(result);
-            }
-            if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
-              logRoundtripTime(result, roundtrip);
-            }
+            onPostSuccess(result, then);
           }
         });
+  }
+
+  private void onPostSuccess(AudioAnswer result, long then) {
+    long now = System.currentTimeMillis();
+    long roundtrip = now - then;
+
+    logger.info("PostAudioRecordButton : onPostSuccess Got audio answer " + result);// + " platform is " + getPlatform());
+
+    if (result.getReqid() != reqid) {
+      logger.info("onPostSuccess ignoring old response " + result);
+      return;
+    }
+    if (result.getValidity() == AudioAnswer.Validity.OK ||
+        (controller.getProps().isQuietAudioOK() && result.getValidity() == AudioAnswer.Validity.TOO_QUIET)) {
+      validAudio = true;
+      useResult(result);
+      addRT(result, (int) roundtrip);
+    } else {
+      validAudio = false;
+      useInvalidResult(result);
+    }
+    if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
+      logRoundtripTime(result, roundtrip);
+    }
   }
 
   private int getUser() {

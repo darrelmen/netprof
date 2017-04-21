@@ -63,6 +63,7 @@ import java.util.logging.Logger;
  */
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonExercise>
     implements ReloadableContainer, RequiresResize, ExerciseListContent {
+  public static final int RIGHT_SIDE_MARGIN = 155;//120;
   private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
   private boolean madeNPFContent = false;
 
@@ -122,7 +123,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   public void showContent(Panel listContent, String instanceName) {
     listContent.add(doNPF(instanceName));
     listContent.addStyleName("userListBackground");
-    listContent.getElement().getStyle().setMarginRight(120, Style.Unit.PX);
+    listContent.getElement().getStyle().setMarginRight(RIGHT_SIDE_MARGIN, Style.Unit.PX);
   }
 
   private final FlexListLayout<T, U> flexListLayout;

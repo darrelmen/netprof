@@ -38,7 +38,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   private static final String EMAIL = "Email Item";
-  public static final int CONTEXT_INDENT = 40;
+  public static final int CONTEXT_INDENT = 56;//40;
 
   private final List<CorrectAndScore> correctAndScores;
   private final T exercise;
@@ -226,7 +226,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     Widget flEntry =
         getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
     flEntry.addStyleName("floatLeft");
-    logger.info("makeFirstRow Set with on " + flEntry.getElement().getId());
+
+    //logger.info("makeFirstRow Set with on " + flEntry.getElement().getId());
+
     flEntry.setWidth("100%");
 
     DivWidget fieldContainer = new DivWidget();
@@ -278,17 +280,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private void addContextFields(DivWidget rowWidget, String foreignLanguage,
                                 String altFL, CommonExercise contextEx) {
-    // DivWidget col = new DivWidget();
-    // col.setWidth("100%");
     Panel context = getContext(contextEx, foreignLanguage, altFL);
     if (context != null) {
-      //Style style = context.getElement().getStyle();
-      //style.setFontWeight(Style.FontWeight.LIGHTER);
       rowWidget.add(context);
-      //  col.add(context);
       context.setWidth("100%");
     }
-
 
     String contextTranslation = contextEx.getEnglish();
 
@@ -449,7 +445,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.addStyleName("inlineFlex");
       hp.getElement().setId("contentContainer");
       DivWidget spacer = new DivWidget();
-
+      spacer.getElement().setId("spacer");
       spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
       hp.add(spacer);
 

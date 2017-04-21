@@ -598,7 +598,7 @@ abstract class NewUserExercise extends BasicDialog {
     translit.box.setText(newUserExercise.getTransliteration());
 
     // regular speed audio
-    rap.getPostAudioButton().setExercise(newUserExercise.getID());
+    rap.getPostAudioButton().setExerciseID(newUserExercise.getID());
     String refAudio = newUserExercise.getRefAudio();
 
     if (refAudio != null) {
@@ -606,7 +606,7 @@ abstract class NewUserExercise extends BasicDialog {
     }
 
     // slow speed audio
-    rapSlow.getPostAudioButton().setExercise(newUserExercise.getID());
+    rapSlow.getPostAudioButton().setExerciseID(newUserExercise.getID());
     String slowAudioRef = newUserExercise.getSlowAudioRef();
 
     if (slowAudioRef != null) {

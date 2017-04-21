@@ -366,6 +366,7 @@ fieldset {
 .leftTenMargin {
     margin-left: 10px;
 }
+
 .leftTwentyMargin {
     margin-left: 20px;
 }
@@ -1750,15 +1751,22 @@ h1, h2, h3, h4, h5, h6 {
 
 #lnav {
     display: inline-flex;
- }
+}
+
+.wordTableWord {
+    margin-right: 2px;
+    font-weight: bold;
+    padding: 3px;
+    float: left;
+}
 
 /*
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus, .dropdown-submenu:hover > a, .dropdown-submenu:focus > a {
 */
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus, .dropdown-submenu:hover > a, .dropdown-submenu:focus > a {
-/*    background-color: #0081c2;
-    background-image: linear-gradient(to bottom, #08c, #0077b3);
-    background-repeat: repeat-x;*/
+    /*    background-color: #0081c2;
+        background-image: linear-gradient(to bottom, #08c, #0077b3);
+        background-repeat: repeat-x;*/
     color: #fff;
     text-decoration: none;
 }

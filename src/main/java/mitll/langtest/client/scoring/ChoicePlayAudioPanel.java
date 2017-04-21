@@ -9,6 +9,7 @@ import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -94,6 +95,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
    */
   protected IconAnchor makePlayButton(DivWidget toAddTo) {
     SplitDropdownButton playButton = new SplitDropdownButton(playLabel);
+    playButton.setSize(ButtonSize.LARGE);
+
     splitDropdownButton = playButton;
     playButton.getElement().setId("splitPlayAudio");
     toAddTo.add(playButton);

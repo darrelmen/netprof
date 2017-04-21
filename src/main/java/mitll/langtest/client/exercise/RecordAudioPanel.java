@@ -260,7 +260,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
   public void setExercise(T exercise) {
     this.exercise = exercise;
-    postAudioRecordButton.setExercise(exercise.getID());
+    postAudioRecordButton.setExerciseID(exercise.getID());
   }
 
   /**

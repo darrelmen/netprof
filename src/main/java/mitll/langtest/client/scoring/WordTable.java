@@ -163,13 +163,16 @@ public class WordTable {
       String wordLabel = word.getEvent();
       if (!wordLabel.equals("SIL")) {
         DivWidget col = new DivWidget();
-        col.addStyleName("floatLeft");
+        col.addStyleName("wordTableWord");
         table.add(col);
+
 
         InlineHTML header = new InlineHTML(wordLabel);
         alignCenter(header);
         header.addStyleName("floatLeft");
         header.setWidth("100%");
+//        header.addStyleName("bold");
+
         setColor(word, header);
         DivWidget hdiv = new DivWidget();
         setColor(word, hdiv);
