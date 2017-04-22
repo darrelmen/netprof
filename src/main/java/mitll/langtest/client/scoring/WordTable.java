@@ -40,18 +40,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.AudioControl;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -62,6 +57,7 @@ import java.util.logging.Logger;
  */
 public class WordTable {
   private final Logger logger = Logger.getLogger("WordTable");
+  public static final int PHONE_WIDTH = 25;
 
   private static final String TR = "tr";
   private static final String TD = "td";
@@ -116,7 +112,6 @@ public class WordTable {
       builder.append("</table>");
       builder.append("</td>");
       //    builder.append("<td>&nbsp;</td>");
-
     }
 
     builder.append("</tr>");
@@ -147,20 +142,37 @@ public class WordTable {
 
   public String getColoredSpan(String event, float score) {
     StringBuilder builder = new StringBuilder();
-    builder.append("<span style='padding:3px; margin-left:3px; text-align:center; background-color:" + SimpleColumnChart.getColor(score) +
+    builder.append("<span style='" +
+        "padding:3px; " +
+        "margin-left:3px; " +
+        "text-align:center; " +
+        "white-space:nowrap; " +
+        "background-color:" + SimpleColumnChart.getColor(score) +
         "'>");
     builder.append(event);
     builder.append("</span>");
     return builder.toString();
   }
 
+  /**
+   * @param netPronImageTypeToEndTime
+   * @param audioControl
+   * @return
+   * @see WordScoresTable#getStyledWordTable
+   */
   Widget getDivWord(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime,
-                    AudioControl audioControl) {
+                    AudioControl audioControl,
+                    Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget) {
     DivWidget table = new DivWidget();
     table.addStyleName("topFiveMargin");
     table.addStyleName("leftFiveMargin");
-    //   table.addStyleName("inlineFlex");
+
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
+
+    TreeMap<TranscriptSegment, Widget> words = new TreeMap<>();
+    typeToSegmentToWidget.put(NetPronImageType.WORD_TRANSCRIPT, words);
+    TreeMap<TranscriptSegment, Widget> phoneMap = new TreeMap<>();
+    typeToSegmentToWidget.put(NetPronImageType.PHONE_TRANSCRIPT, phoneMap);
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
       TranscriptSegment word = pair.getKey();
 
@@ -175,8 +187,8 @@ public class WordTable {
         header.addStyleName("floatLeft");
         header.setWidth("100%");
 
+        words.put(word, header);
         addClickHandler(audioControl, word, header);
-//        header.addStyleName("bold");
 
         setColor(word, header);
         DivWidget hdiv = new DivWidget();
@@ -188,7 +200,7 @@ public class WordTable {
 
         DivWidget phones = new DivWidget();
         phones.addStyleName("inlineFlex");
-        addPhonesBelowWord2(pair.getValue(), phones, audioControl);
+        addPhonesBelowWord2(pair.getValue(), phones, audioControl, phoneMap);
         col.add(phones);
       }
     }
@@ -208,6 +220,12 @@ public class WordTable {
     });
   }
 
+  /**
+   * @param netPronImageTypeToEndTime
+   * @param showScore
+   * @return
+   * @see ReviewScoringPanel#getWordTable
+   */
   Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, boolean showScore) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
 
@@ -282,7 +300,7 @@ public class WordTable {
         //  HTML score = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
         HTML score = showScore ? getScore(phone) : new HTML();
         alignCenter(score);
-        score.getElement().getStyle().setWidth(25, Style.Unit.PX);
+        score.getElement().getStyle().setWidth(PHONE_WIDTH, Style.Unit.PX);
 
         col = new HTMLPanel(TD, "");
 
@@ -298,19 +316,17 @@ public class WordTable {
 
   private void addPhonesBelowWord2(List<TranscriptSegment> value,
                                    DivWidget scoreRow,
-                                   AudioControl audioControl) {
+                                   AudioControl audioControl,
+                                   TreeMap<TranscriptSegment, Widget> phoneMap) {
     for (TranscriptSegment phone : value) {
       String phoneLabel = phone.getEvent();
       if (!phoneLabel.equals("sil")) {
-//        TableHeader h = new TableHeader(phoneLabel);
         InlineHTML h = new InlineHTML(phoneLabel);
         alignCenter(h);
-
         addClickHandler(audioControl, phone, h);
-
-        // pTable.add(h);
+        phoneMap.put(phone, h);
         setColor(phone, h);
-        h.getElement().getStyle().setWidth(25, Style.Unit.PX);
+        h.getElement().getStyle().setWidth(PHONE_WIDTH, Style.Unit.PX);
         scoreRow.add(h);
       }
     }
@@ -347,12 +363,11 @@ public class WordTable {
       for (TranscriptSegment word : words) {
         String event = word.getEvent();
         if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
-
         } else {
           for (TranscriptSegment phone : phones) {
             if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
               List<TranscriptSegment> orDefault = wordToPhones.get(word);
-              if (orDefault == null) wordToPhones.put(word, orDefault = new ArrayList<TranscriptSegment>());
+              if (orDefault == null) wordToPhones.put(word, orDefault = new ArrayList<>());
               orDefault.add(phone);
             }
           }

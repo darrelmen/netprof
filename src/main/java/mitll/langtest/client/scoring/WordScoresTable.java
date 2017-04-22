@@ -2,8 +2,12 @@ package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.sound.AudioControl;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -22,8 +26,16 @@ public class WordScoresTable {
     return child;
   }*/
 
-  public Widget getStyledWordTable(PretestScore result, AudioControl audioControl) {
-    Widget table2 = new WordTable().getDivWord(result.getTypeToSegments(),audioControl);
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showCorrectFeedback(double, String, PretestScore)
+   * @param result
+   * @param audioControl
+   * @param typeToSegmentToWidget
+   * @return
+   */
+  public Widget getStyledWordTable(PretestScore result, AudioControl audioControl,
+                                   Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget) {
+    Widget table2 = new WordTable().getDivWord(result.getTypeToSegments(), audioControl, typeToSegmentToWidget);
     table2.addStyleName("topFiveMargin");
     table2.addStyleName("leftFiveMargin");
     table2.addStyleName("floatLeftAndClear");

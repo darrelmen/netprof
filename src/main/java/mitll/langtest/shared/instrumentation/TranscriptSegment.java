@@ -33,6 +33,7 @@
 package mitll.langtest.shared.instrumentation;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -40,7 +41,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/25/2014.
  */
-public class TranscriptSegment implements IsSerializable {
+public class TranscriptSegment implements IsSerializable, Comparable<TranscriptSegment> {
   private float start;                  /// Start time in seconds
   private float end;                    /// End time in seconds
   private String event;                 /// Text to be displayed per event
@@ -73,6 +74,14 @@ public class TranscriptSegment implements IsSerializable {
     return end;
   }
 
+  public boolean contains(float pos) {
+    return pos >= start && pos < end;
+  }
+
+  public boolean contains(double pos) {
+    return pos >= start && pos < end;
+  }
+
   public int getDuration() {
     return Math.round(end * 1000 - start * 1000);
   }
@@ -94,11 +103,16 @@ public class TranscriptSegment implements IsSerializable {
     return ((float) ((Math.round(totalHours * 100d)))) / 100f;
   }
 
-  public String toString() {
-    return "[" + roundToHundredth(start) + "-" + roundToHundredth(end) + "] " + event + " (" + roundToHundredth(score) + ")";
+  public float getFloatDuration() {
+    return getEnd() - getStart();
   }
 
-  public float getFloatDuration() {
-    return getEnd()-getStart();
+  @Override
+  public int compareTo(@NotNull TranscriptSegment o) {
+    return Float.valueOf(getStart()).compareTo(o.getStart());
+  }
+
+  public String toString() {
+    return "[" + roundToHundredth(start) + "-" + roundToHundredth(end) + "] " + event + " (" + roundToHundredth(score) + ")";
   }
 }

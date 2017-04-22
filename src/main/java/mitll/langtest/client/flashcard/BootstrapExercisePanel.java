@@ -60,6 +60,7 @@ import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -500,7 +501,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     //}
 
     recoOutput.clear();
-    recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null));
+    recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null, new HashMap<>()));
   }
 
   /**

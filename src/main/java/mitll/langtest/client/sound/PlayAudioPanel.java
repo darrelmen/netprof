@@ -152,7 +152,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String, com.google.gwt.user.client.ui.Widget)
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String buttonTitle, Widget optionalToTheRight) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String buttonTitle,
+                        Widget optionalToTheRight) {
     this(soundManager, buttonTitle, optionalToTheRight, false);
     addPlayListener(playListener);
   }
@@ -281,6 +282,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   private void startPlaying() {
+
+    startSong(currentPath);
     for (PlayListener playListener : playListeners) playListener.playStarted();
     play();
   }
@@ -298,6 +301,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   public void addListener(AudioControl listener) {
     this.listener = listener;
+    logger.info("addListener now has listener " +listener);
   }
 
   private void addSimpleListener(SimpleAudioListener listener) {
@@ -406,6 +410,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     if (listener != null) {
       listener.update(position);
     }
+    else {
+      logger.info("no listener...");
+    }
   }
 
   public void playAudio() {
@@ -452,7 +459,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     if (DEBUG) logger.info("playAudio - loadAudio finished " + fixedPath);
   }
 
-  public String rememberAudio(String path) {
+  protected String rememberAudio(String path) {
     if (DEBUG) logger.info("rememberAudio - path " + path);
     destroySound();
 
@@ -473,7 +480,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   public void startSong(String path) {
     if (!path.equals(FILE_MISSING)) {
       //logger.info("PlayAudioPanel.loadAudio - skipping " + path);
-      if (DEBUG) logger.info("PlayAudioPanel : start song : " + path);
+      if (DEBUG) logger.info("PlayAudioPanel : startSong : " + path);
       if (soundManager.isReady()) {
         //if (DEBUG) logger.info(new Date() + " Sound manager is ready.");
         if (soundManager.isOK()) {
@@ -495,6 +502,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #startSong(String)
    */
   private void createSound(String song) {
+    if (DEBUG) {
+      currentPath = song;
+    }
+
     currentSound = new Sound(this);
     if (DEBUG) {
       logger.info("PlayAudioPanel.createSound  : (" + getElement().getId() + ") for " + song + " : " + this + " created sound " + currentSound);
