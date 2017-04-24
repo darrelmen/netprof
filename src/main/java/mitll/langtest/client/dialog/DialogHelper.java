@@ -53,7 +53,6 @@ public class DialogHelper {
 
   public interface CloseListener {
     void gotYes();
-
     void gotNo();
   }
 
@@ -93,8 +92,13 @@ public class DialogHelper {
    * @param maxHeight
    * @see DownloadHelper#showDialog
    */
-  public Button show(String title, Collection<String> msgs, Widget other, String buttonName, String cancelButtonName,
-                     final CloseListener listener, int maxHeight) {
+  public Button show(String title,
+                     Collection<String> msgs,
+                     Widget other,
+                     String buttonName,
+                     String cancelButtonName,
+                     final CloseListener listener,
+                     int maxHeight) {
     final Modal dialogBox = new Modal();
     dialogBox.setTitle("<b>" + title + "</b>");
     if (maxHeight > 0) dialogBox.setMaxHeigth(maxHeight + "px");

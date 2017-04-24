@@ -374,7 +374,7 @@ public class InitialUI implements UILifecycle {
       if (project.hasChildren() && project.hasChild(currentProject)) {
         crumbs.add(getLangBreadcrumb(project));
         addProjectCrumb(crumbs, project.getChild(currentProject));
-      } else if (project.getProjectid() == currentProject) {
+      } else if (project.getID() == currentProject) {
         addProjectCrumb(crumbs, project);
         break;
       } else {

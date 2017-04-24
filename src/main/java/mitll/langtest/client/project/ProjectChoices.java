@@ -2,15 +2,18 @@ package mitll.langtest.client.project;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
 import mitll.langtest.client.*;
+import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
@@ -156,10 +159,10 @@ public class ProjectChoices {
   }
 
   /**
-   * @see #showProjectChoices(List, int)
    * @param result
    * @param nest
    * @param flags
+   * @see #showProjectChoices(List, int)
    */
   private void addFlags(List<SlimProject> result, int nest, Container flags) {
     Panel current = new Thumbnails();
@@ -239,6 +242,7 @@ public class ProjectChoices {
   }
 
   /**
+   * Has three parts - flag, label, and optional edit icon.
    * TODO : Consider arbitrarily deep nesting...
    *
    * @param name
@@ -249,9 +253,11 @@ public class ProjectChoices {
   private Panel getImageAnchor(String name, SlimProject projectForLang) {
     int nest = 1;
 
-    Thumbnail widgets = new Thumbnail();
-    widgets.setSize(2);
-    final int projid = projectForLang.getProjectid();
+    Thumbnail thumbnail = new Thumbnail();
+   // widgets.setWidth("100%");
+    thumbnail.setWidth("195px");
+    thumbnail.setSize(2);
+    final int projid = projectForLang.getID();
 
     {
       PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
@@ -261,19 +267,85 @@ public class ProjectChoices {
           gotClickOnFlag(name, projectForLang, projid, nest);
         }
       });
-      widgets.add(button);
+      thumbnail.add(button);
     }
 
+    DivWidget horiz = new DivWidget();
+    horiz.addStyleName("inlineFlex");
+    horiz.setWidth("100%");
+    thumbnail.add(horiz);
     {
       Heading label = new Heading(LANGUAGE_SIZE, name);
 
       if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
         label.setSubtext(projectForLang.getStatus().name());
       }
-      widgets.add(label);
+      label.addStyleName("floatLeft");
+
+      DivWidget container = new DivWidget();
+      container.add(label);
+      container.setWidth("100%");
+      container.addStyleName("floatLeft");
+
+      horiz.add(container);
     }
 
-    return widgets;
+    if (isQC() && !projectForLang.hasChildren()) {
+      com.github.gwtbootstrap.client.ui.Button editButton = getEditButton(projectForLang);
+      DivWidget buttonContainer = new DivWidget();
+      buttonContainer.addStyleName("floatRight");
+      editButton.addStyleName("floatRight");
+      buttonContainer.setWidth("100%");
+      buttonContainer.addStyleName("topTwentyMargin");
+      buttonContainer.add(editButton);
+      horiz.add(buttonContainer);
+    }
+
+    return thumbnail;
+  }
+
+  @NotNull
+  private com.github.gwtbootstrap.client.ui.Button getEditButton(SlimProject projectForLang) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
+    w.setIcon(IconType.PENCIL);
+    w.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        logger.info("projectForLang " + projectForLang);
+        String name = projectForLang.getName();
+
+        logger.info("Edit " + name);
+
+        ProjectEditForm projectEditForm = new ProjectEditForm(null, controller);
+        Widget form = projectEditForm.getForm(projectForLang);
+        logger.info("form " + form);
+
+        new DialogHelper(true).show(
+            "Edit " + name,
+            Collections.emptyList(),
+            form,
+            "OK",
+            "Cancel",
+            new DialogHelper.CloseListener() {
+              @Override
+              public void gotYes() {
+                //
+              //  logger.info("consider updating name of project");
+                projectEditForm.updateProject();
+              }
+
+              @Override
+              public void gotNo() {
+
+              }
+            }, 550);
+      }
+    });
+    return w;
+  }
+
+  private boolean isQC() {
+    return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || controller.getUserState().isAdmin();
   }
 
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {

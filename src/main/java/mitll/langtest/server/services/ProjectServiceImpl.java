@@ -38,31 +38,47 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
-  private static final org.apache.logging.log4j.Logger log = LogManager.getLogger(ProjectServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
+
+  //private static final org.apache.logging.log4j.Logger log = LogManager.getLogger(ProjectServiceImpl.class);
 
   @Override
   public List<ProjectInfo> getAll() {
     return getProjectDAO().getAll()
         .stream()
         .map(project -> new ProjectInfo(project.id(),
-            project.language(),
             project.name(),
+            project.language(),
             project.course(),
-            project.modified().getTime(),
+            project.countrycode(),
             ProjectStatus.valueOf(project.status()),
             project.displayorder(),
-            project.countrycode(),
-            project.getProp(ServerProperties.WEBSERVICE_HOST_PORT),
+
+            project.modified().getTime(),
+
+            getPort(project),
+
             project.getProp(ServerProperties.MODELS_DIR))
         )
         .collect(Collectors.toList());
+  }
+
+  private int getPort(SlickProject project) {
+    try {
+      return Integer.parseInt(project.getProp(ServerProperties.WEBSERVICE_HOST_PORT));
+    } catch (NumberFormatException e) {
+      logger.error("got " + e,e);
+      return -1;
+    }
   }
 
   private IProjectDAO getProjectDAO() {

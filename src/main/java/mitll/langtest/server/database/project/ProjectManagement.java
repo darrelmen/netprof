@@ -700,18 +700,30 @@ public class ProjectManagement implements IProjectManagement {
 
     boolean isRTL = false;
     if (status != ProjectStatus.RETIRED) {
-      Collection<CommonExercise> exercises = db.getExercises(project.id());
-      isRTL = isRTL(exercises);
+      isRTL = isRTL(db.getExercises(project.id()));
     }
 
-    return new SlimProject(project.id(),
+    return new SlimProject(
+        project.id(),
         project.name(),
         project.language(),
-        project.countrycode(),
-        project.course(),
+        project.course(), project.countrycode(),
         ProjectStatus.valueOf(project.status()),
         project.displayorder(),
+
         hasModel,
-        isRTL);
+        isRTL,
+        project.created().getTime(),
+        getPort(project),
+        project.getProp(ServerProperties.MODELS_DIR));
+  }
+
+  private int getPort(SlickProject project) {
+    try {
+      return Integer.parseInt(project.getProp(ServerProperties.WEBSERVICE_HOST_PORT));
+    } catch (NumberFormatException e) {
+      logger.error("got " + e, e);
+      return -1;
+    }
   }
 }

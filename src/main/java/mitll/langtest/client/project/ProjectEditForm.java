@@ -6,9 +6,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ProjectService;
@@ -28,12 +27,10 @@ import java.util.logging.Logger;
 class ProjectEditForm extends UserDialog {
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
-
   private static final int MIN_LENGTH_USER_ID = 4;
   static final int USER_ID_MAX_LENGTH = 5;
 
-
-  private final EventRegistration eventRegistration;
+ // private final EventRegistration eventRegistration;
   private final ProjectOps projectOps;
   private ListBox statusBox;
   private ProjectInfo info;
@@ -47,19 +44,22 @@ class ProjectEditForm extends UserDialog {
 
   /**
    * @param projectOps
-   * @param props
+   * @paramx props
    * @see ProjectContainer#gotClickOnItem
    */
   ProjectEditForm(ProjectOps projectOps,
-                  PropertyHandler props,
-                  EventRegistration eventRegistration,
-                  AudioServiceAsync audioServiceAsync,
-                  ScoringServiceAsync scoringServiceAsync) {
-    super(props);
+                  ExerciseController controller
+//      ,
+//                  PropertyHandler props,
+//                  EventRegistration eventRegistration,
+//                  AudioServiceAsync audioServiceAsync,
+//                  ScoringServiceAsync scoringServiceAsync
+  ) {
+    super(controller.getProps());
     this.projectOps = projectOps;
-    this.eventRegistration = eventRegistration;
-    this.audioServiceAsync = audioServiceAsync;
-    this.scoringServiceAsync = scoringServiceAsync;
+  //  this.eventRegistration = controller;
+    this.audioServiceAsync = controller.getAudioService();
+    this.scoringServiceAsync = controller.getScoringService();
   }
 
   /**
@@ -68,18 +68,19 @@ class ProjectEditForm extends UserDialog {
    * @see ProjectContainer#gotClickOnItem
    */
   Widget getForm(ProjectInfo info) {
+    logger.info("getForm " +info);
+
     this.info = info;
     String name = info.getName();
     Heading heading = new Heading(3, name);
     heading.addStyleName("signUp");
 
-    Button editProject = getEditButton();
+    //Button editProject = getEditButton();
 
-    Fieldset fields = getFields(info, editProject);
-    fields.add(editProject);
+    Fieldset fields = getFields(info/*, editProject*/);
+    //fields.add(editProject);
 
-    Panel twoPartForm = getTwoPartForm(heading, fields);
-    return twoPartForm;
+    return getTwoPartForm(heading, fields);
   }
 
   @Override
@@ -90,7 +91,7 @@ class ProjectEditForm extends UserDialog {
       }
     };
     signInForm.addStyleName("topMargin");
-    signInForm.addStyleName("formRounded");
+  //  signInForm.addStyleName("formRounded");
     signInForm.getElement().getStyle().setBackgroundColor("white");
     return signInForm;
   }
@@ -116,30 +117,28 @@ class ProjectEditForm extends UserDialog {
     });
   }
 
-  @NotNull
+ /* @NotNull
   private Button getEditButton() {
     Button editProject = getFormButton("editProject", "Edit", eventRegistration);
     editProject.setEnabled(false);
     editProject.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        gotClick();
+        updateProject();
       }
     });
     return editProject;
-  }
+  }*/
 
-  private void gotClick() {
+  public void updateProject() {
     ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
 
     if (status == ProjectStatus.EVALUATION || status == ProjectStatus.PRODUCTION) {
       try {
-        int i = Integer.parseInt(hydraPort.getSafeText());
-        info.setPort(i);
+        info.setPort(Integer.parseInt(hydraPort.getSafeText()));
 
         if (model.isEmpty()) {
           markError(model, "Please enter a language model directory.");
-//          return;
         }
 
       } catch (NumberFormatException e) {
@@ -148,15 +147,12 @@ class ProjectEditForm extends UserDialog {
       }
     }
 
-
     info.setStatus(status);
-
     info.setModelsDir(model.getSafeText());
 
     projectServiceAsync.update(info, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-
       }
 
       @Override
@@ -167,8 +163,7 @@ class ProjectEditForm extends UserDialog {
     });
   }
 
-
-  private Fieldset getFields(ProjectInfo info, Button editButton) {
+  private Fieldset getFields(ProjectInfo info/*, Button editButton*/) {
     Fieldset fieldset = new Fieldset();
     Heading id = new Heading(4, "ID", "" + info.getID());
     fieldset.add(id);
@@ -176,7 +171,7 @@ class ProjectEditForm extends UserDialog {
     addControlGroupEntrySimple(
         fieldset,
         "",
-        statusBox = getBox(editButton))
+        statusBox = getBox(/*editButton*/))
         .setWidth("366px");
 
     setBox(info.getStatus());
@@ -297,7 +292,7 @@ class ProjectEditForm extends UserDialog {
     return w;
   }
 
-  private ListBox getBox(final Button editButton) {
+  private ListBox getBox(/*final Button editButton*/) {
     ListBox affBox = new ListBox();
     affBox.getElement().setId("Status_Box");
     //  affBox.setWidth(SIGN_UP_WIDTH );
@@ -306,6 +301,9 @@ class ProjectEditForm extends UserDialog {
     for (ProjectStatus status : ProjectStatus.values()) {
       affBox.addItem(status.name());
     }
+
+/*
+
     affBox.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
@@ -318,6 +316,7 @@ class ProjectEditForm extends UserDialog {
         editButton.setEnabled(changed());
       }
     });
+*/
 
     return affBox;
   }

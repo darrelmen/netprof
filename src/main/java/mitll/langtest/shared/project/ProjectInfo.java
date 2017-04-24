@@ -37,13 +37,14 @@ import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.HasID;
 
 public class ProjectInfo implements HasID, IsSerializable, MutableProject {
+  private int id;
   private String name;
   private String language;
   private String course;
   private String countryCode;
   private ProjectStatus status;
   private int displayOrder;
-  private int id;
+
   private long created;
 
   private int port = -1;
@@ -56,14 +57,16 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
    * @see ProjectServiceImpl#getAll
    */
   public ProjectInfo(int projectid,
-                     String language,
                      String name,
+                     String language,
                      String course,
-                     long created,
+                     String countryCode,
                      ProjectStatus status,
                      int displayOrder,
-                     String countryCode,
-                     String port, String modelsDir) {
+
+                     long created,
+                     int port,
+                     String modelsDir) {
     this.language = language;
     this.id = projectid;
     this.name = name;
@@ -72,11 +75,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.status = status;
     this.displayOrder = displayOrder;
     this.countryCode = countryCode;
-    try {
-      this.port = port == null ? -1 : Integer.parseInt(port);
-    } catch (NumberFormatException e) {
-      // bad port
-    }
+    this.port = port;
     this.modelsDir = modelsDir;
   }
 
@@ -87,14 +86,6 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   public int getID() {
     return id;
   }
-
-/*  public void addChild(ProjectInfo projectInfo) {
-    children.add(projectInfo);
-  }
-
-  public List<ProjectInfo> getChildren() {
-    return children;
-  }*/
 
   @Override
   public int compareTo(HasID o) {

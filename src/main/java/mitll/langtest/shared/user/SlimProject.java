@@ -32,29 +32,27 @@
 
 package mitll.langtest.shared.user;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
-import mitll.npdata.dao.SlickProject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class SlimProject implements IsSerializable {
-  private int projectid;
-  private String name;
-  private String language;
-  private String course;
-  private String countryCode;
-  private ProjectStatus status;
-  private int displayOrder;
+public class SlimProject extends ProjectInfo {
+//  private int projectid;
+//  private String name;
+//  private String language;
+//  private String course;
+//  private String countryCode;
+//  private ProjectStatus status;
+//  private int displayOrder;
+
   private boolean hasModel;
   private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
 
-  //  List<>
   public SlimProject() {
   }
 
@@ -66,46 +64,31 @@ public class SlimProject implements IsSerializable {
    * @param displayOrder
    * @param hasModel
    * @param isRTL
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getProjectInfo(SlickProject)
+   * @param created
+   *@param port
+   * @param modelsDir @see mitll.langtest.server.database.project.ProjectManagement#getProjectInfo
    */
   public SlimProject(int projectid,
                      String name,
                      String language,
-                     String countryCode,
                      String course,
+                     String countryCode,
                      ProjectStatus status,
                      int displayOrder,
+
                      boolean hasModel,
-                     boolean isRTL) {
-    this.name = name;
-    this.language = language;
-    this.projectid = projectid;
-    this.countryCode = countryCode;
-    this.course = course;
-    this.status = status;
-    this.displayOrder = displayOrder;
+                     boolean isRTL, long created, int port,
+                     String modelsDir) {
+    super(projectid,name,language,course,countryCode,status,displayOrder,created,port,modelsDir);
+//    this.name = name;
+//    this.language = language;
+//    this.projectid = projectid;
+//    this.countryCode = countryCode;
+//    this.course = course;
+//    this.status = status;
+//    this.displayOrder = displayOrder;
     this.hasModel = hasModel;
     this.isRTL = isRTL;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getLanguage() {
-    return language;
-  }
-
-  public String getCourse() {
-    return course;
-  }
-
-  public int getProjectid() {
-    return projectid;
-  }
-
-  public String getCountryCode() {
-    return countryCode;
   }
 
   public void addChild(SlimProject projectInfo) {
@@ -118,14 +101,14 @@ public class SlimProject implements IsSerializable {
 
   public boolean hasChild(int projectid) {
     for (SlimProject child : children) {
-      if (child.getProjectid() == projectid) return true;
+      if (child.getID() == projectid) return true;
     }
     return false;
   }
 
   public SlimProject getChild(int projectid) {
     for (SlimProject child : children) {
-      if (child.getProjectid() == projectid) return child;
+      if (child.getID() == projectid) return child;
     }
     return null;
   }
@@ -134,15 +117,11 @@ public class SlimProject implements IsSerializable {
     Collections.sort(children, new Comparator<SlimProject>() {
       @Override
       public int compare(SlimProject o1, SlimProject o2) {
-        int i = Integer.valueOf(o1.displayOrder).compareTo(o2.displayOrder);
+        int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
         return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
       }
     });
     return children;
-  }
-
-  public int getDisplayOrder() {
-    return displayOrder;
   }
 
   public boolean isHasModel() {
@@ -153,12 +132,8 @@ public class SlimProject implements IsSerializable {
     return isRTL;
   }
 
-  public ProjectStatus getStatus() {
-    return status;
-  }
-
   public String toString() {
-    return "Project #" + projectid + " " + name + " " + language + " " + status +
+    return "Project #" + getID() + " " + getName() + " " + getLanguage() + " " + getStatus() +
         " num children " + children.size();
   }
 }

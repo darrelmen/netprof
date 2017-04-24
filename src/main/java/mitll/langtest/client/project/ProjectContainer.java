@@ -42,6 +42,10 @@ import mitll.langtest.shared.project.ProjectInfo;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+/**
+ * @deprecated  - we have editing
+ * @param <T>
+ */
 public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer<T> implements RequiresResize {
   private final Logger logger = Logger.getLogger("ProjectContainer");
 
@@ -215,9 +219,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
     ProjectEditForm projectEditForm =
         new ProjectEditForm(
             projectOps,
-            controller.getProps(),
-            controller,
-        controller.getAudioService(), controller.getScoringService());
+            controller );
     rightSide.add(projectEditForm.getForm(project));
 
     projectOps.clearOthers(this);
