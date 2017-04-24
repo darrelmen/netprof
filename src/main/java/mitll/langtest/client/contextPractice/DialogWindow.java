@@ -624,7 +624,7 @@ public class DialogWindow implements  DialogViewer {
       });
     } else {
       ((PlayAudioPanel) sentPanel.getWidget(currIndex, 1)).playCurrent();
-      ((PlayAudioPanel) sentPanel.getWidget(currIndex, 1)).addListener(new AudioControl() {
+      ((PlayAudioPanel) sentPanel.getWidget(currIndex, 1)).setListener(new AudioControl() {
 
         @Override
         public void reinitialize() {

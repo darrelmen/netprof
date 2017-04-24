@@ -271,8 +271,9 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       DivWidget scoreFeedbackDiv = new DivWidget();
       scoreFeedbackDiv.add(progressBar);
       Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget = new HashMap<>();
-      scoreFeedbackDiv.add(new WordScoresTable().getStyledWordTable(pretestScore, playAudioPanel, typeToSegmentToWidget));
-      playAudioPanel.addListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
+      scoreFeedbackDiv.add(new WordScoresTable()
+          .getStyledWordTable(pretestScore, playAudioPanel, typeToSegmentToWidget));
+      playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
       wordTableContainer.add(scoreFeedbackDiv);
       logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
     } else {

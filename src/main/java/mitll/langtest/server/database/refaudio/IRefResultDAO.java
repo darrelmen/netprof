@@ -90,7 +90,6 @@ public interface IRefResultDAO extends IDAO {
    */
  // ISlimResult getResult(int exid, String answer);
   ISlimResult getResult(int audioid);
-
   //JSONObject getJSONScores(Collection<Integer> ids);
 
   /**

@@ -143,7 +143,7 @@ public class DecodeTest extends BaseTest {
     CommonExercise exercise = russian.getExercise(1,8);
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes)
-      audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false);
+      audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false, -1);
   }
 
   AudioFileHelper getAudioFileHelper(DatabaseImpl russian) {
@@ -160,7 +160,7 @@ public class DecodeTest extends BaseTest {
 
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes)
-      audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false);
+      audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false, -1);
   }
 
   @Test

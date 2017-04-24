@@ -54,11 +54,9 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import mitll.npdata.dao.SlickAudio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.Int;
 
 import java.io.File;
 import java.util.*;
@@ -144,34 +142,48 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @Override
   public Map<Integer, AlignmentOutput> getAlignments(int projid, List<Integer> audioIDs) {
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
+    logger.info("getAlignments asking for " + audioIDs);
     for (Integer audioID : audioIDs) {
       ISlimResult cachedResult = db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
       if (cachedResult == null || !cachedResult.isValid()) {
-
         if (cachedResult != null && !cachedResult.isValid()) {
           boolean b = db.getRefResultDAO().removeByAudioID(audioID);
+          logger.error("getAlignments remove invalid ref result for audio id " + audioID + " = " + b);
         }
-
-        AudioAttribute byID = db.getAudioDAO().getByID(audioID);
-        if (byID != null) {
-          CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
-          PretestScore pretestScore = getAudioFileHelper().decodeAndRemember(customOrPredefExercise, byID, false);
-          idToAlignment.put(audioID, pretestScore);
-        } else {
-          logger.error("can't find audio id " + audioID);
-        }
+        recalcAudioRef(projid, idToAlignment, audioID);
       } else {
-        PrecalcScores precalcScores = getPrecalcScores(false, cachedResult);
-        Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
-            getTypeToTranscriptEvents(precalcScores.getJsonObject(), false);
-        Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents);
-        idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
+        getCachedAudioRef(idToAlignment, audioID, cachedResult);
       }
     }
     return idToAlignment;
   }
 
-  public Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
+  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult) {
+    PrecalcScores precalcScores = getPrecalcScores(false, cachedResult);
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
+        getTypeToTranscriptEvents(precalcScores.getJsonObject(), false);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents);
+    logger.info("cache HIT for " + audioID + " returning " + typeToSegments);
+    idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
+  }
+
+  private void recalcAudioRef(int projid, Map<Integer, AlignmentOutput> idToAlignment, Integer audioID) {
+    AudioAttribute byID = db.getAudioDAO().getByID(audioID);
+    if (byID != null) {
+      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
+      logger.error("getAlignments decoding " + audioID + " for " + byID.getExid());
+
+      PretestScore pretestScore =
+          getAudioFileHelper().decodeAndRemember(customOrPredefExercise, byID, false, getUserIDFromSession());
+      logger.error("getAlignments decoding " + audioID + " for " + byID.getExid() + " got " + pretestScore);
+      idToAlignment.put(audioID, pretestScore);
+    } else {
+      logger.error("getAlignments can't find audio id " + audioID);
+    }
+  }
+
+  public Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
+                                                                               boolean usePhoneToDisplay) {
     return
         new ParseResultJson(db.getServerProps())
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
@@ -221,10 +233,12 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                           int exerciseID,
                                           boolean usePhonemeMap) {
     File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg", ".wav"));
-    int userIDFromSession = getUserIDFromSession();
 
+    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(getProjectID(), exerciseID);
+
+    String english = customOrPredefExercise == null ? "" : customOrPredefExercise.getEnglish();
     PrecalcScores precalcScores =
-        getAudioFileHelper().checkForWebservice(exerciseID, sentence, getProjectID(), userIDFromSession, absoluteAudioFile);
+        getAudioFileHelper().checkForWebservice(exerciseID, english, sentence, getProjectID(), getUserIDFromSession(), absoluteAudioFile);
 
     return getPretestScore(reqid,
         (int) resultID,
@@ -232,6 +246,16 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         sentence, transliteration, imageOptions,
         exerciseID, usePhonemeMap, precalcScores);
   }
+/*
+  public AlignmentOutput getAlignment(int audioID) {
+    ISlimResult cachedResult =  db.getRefResultDAO().getResult(audioID);
+    if (cachedResult == null) {
+
+    }
+    else {
+      return cachedResult;
+    }
+  }*/
 
   /**
    * Be careful - we lookup audio file by .wav extension
@@ -274,20 +298,14 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
-    PretestScore asrScoreForAudio =
-        getAudioFileHelper().getASRScoreForAudio(
-            reqid,
-            testAudioFile,
-            sentence,
-            transliteration,
-            imageOptions,
-            "" + exerciseID,
-            precalcScores,
-            new DecoderOptions()
-                .setDoFlashcard(false)
-                .setCanUseCache(serverProps.useScoreCache())
-                .setUsePhoneToDisplay(usePhoneToDisplay1)
-        );
+    PretestScore asrScoreForAudio = getPretestScoreMaybeUseCache(reqid,
+        testAudioFile,
+        sentence,
+        transliteration,
+        imageOptions,
+        exerciseID,
+        precalcScores,
+        usePhoneToDisplay1);
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
@@ -303,6 +321,22 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       db.rememberScore(resultID, asrScoreForAudio, true);
     }
     return asrScoreForAudio;
+  }
+
+  private PretestScore getPretestScoreMaybeUseCache(int reqid, String testAudioFile, String sentence, String transliteration, ImageOptions imageOptions, int exerciseID, PrecalcScores precalcScores, boolean usePhoneToDisplay1) {
+    return getAudioFileHelper().getASRScoreForAudio(
+        reqid,
+        testAudioFile,
+        sentence,
+        transliteration,
+        imageOptions,
+        "" + exerciseID,
+        precalcScores,
+        new DecoderOptions()
+            .setDoFlashcard(false)
+            .setCanUseCache(serverProps.useScoreCache())
+            .setUsePhoneToDisplay(usePhoneToDisplay1)
+    );
   }
 
   @NotNull

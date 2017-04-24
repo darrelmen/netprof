@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
-  public static final int LANGUAGE_SIZE = 3;
+  private static final int LANGUAGE_SIZE = 3;
 
   /**
    * @see #showProjectChoices(List, int)
@@ -77,7 +77,6 @@ public class ProjectChoices {
     this.lifecycleSupport = langTest;
     this.props = langTest.getProps();
     this.controller = langTest;
-    //userFeedback = langTest;
     this.userNotification = langTest;
     this.uiLifecycle = uiLifecycle;
   }
@@ -146,7 +145,7 @@ public class ProjectChoices {
    * @see InitialUI#addProjectChoices
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-   logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+    logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
     final Section section = new Section("section");
     section.add(getHeader(result, nest));
 
@@ -156,6 +155,12 @@ public class ProjectChoices {
     return section;
   }
 
+  /**
+   * @see #showProjectChoices(List, int)
+   * @param result
+   * @param nest
+   * @param flags
+   */
   private void addFlags(List<SlimProject> result, int nest, Container flags) {
     Panel current = new Thumbnails();
     flags.add(current);
@@ -221,12 +226,6 @@ public class ProjectChoices {
     return header;
   }
 
-/*
-  private void removeWidth(Widget header) {
-    header.getElement().removeAttribute("width");
-  }
-*/
-
   /**
    * @param lang
    * @param projectForLang
@@ -254,20 +253,25 @@ public class ProjectChoices {
     widgets.setSize(2);
     final int projid = projectForLang.getProjectid();
 
-    PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
-    button.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        gotClickOnFlag(name, projectForLang, projid, nest);
-      }
-    });
-    widgets.add(button);
-    Heading label = new Heading(LANGUAGE_SIZE, name);
-
-    if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
-      label.setSubtext(projectForLang.getStatus().name());
+    {
+      PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
+      button.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent clickEvent) {
+          gotClickOnFlag(name, projectForLang, projid, nest);
+        }
+      });
+      widgets.add(button);
     }
-    widgets.add(label);
+
+    {
+      Heading label = new Heading(LANGUAGE_SIZE, name);
+
+      if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
+        label.setSubtext(projectForLang.getStatus().name());
+      }
+      widgets.add(label);
+    }
 
     return widgets;
   }
@@ -278,7 +282,7 @@ public class ProjectChoices {
 
     logger.info("gotClickOnFlag project " + projid + " has " + children);
 
-     if (children.size() < 2) {
+    if (children.size() < 2) {
       logger.info("onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
 
@@ -293,9 +297,9 @@ public class ProjectChoices {
   }
 
   /**
-   * @see #getImageAnchor
    * @param cc
    * @return
+   * @see #getImageAnchor
    */
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {

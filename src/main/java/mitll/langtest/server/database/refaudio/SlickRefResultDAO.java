@@ -239,10 +239,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     long then = System.currentTimeMillis();
     Collection<SlickRefResultJson> slickRefResults = dao.getAllSlimByAudioID(audioid);
     long now = System.currentTimeMillis();
-    //  if (now - then > 20) logger.info("took " + (now - then) + " to lookup " + exid);
+      if (now - then > 20) logger.info("getResult took " + (now - then) + " to lookup " + audioid);
 
     if (slickRefResults.isEmpty()) {
-      logger.info("no results for " + audioid);
+      logger.info("getResult : no results for " + audioid);
       return null;
     } else {
       return fromSlickToSlim(slickRefResults.iterator().next());
@@ -310,6 +310,9 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     float alignScore = slickRef.alignscore();
 
     boolean validAlignJSON = alignScore > 0 && !scoreJson.contains(WORDS);
+    if (!validAlignJSON) {
+      logger.info("slickRef " +slickRef +         " not valid " + alignScore + " score " +scoreJson);
+    }
 
     return new SlimResult(validAlignJSON, scoreJson, alignScore);
   }

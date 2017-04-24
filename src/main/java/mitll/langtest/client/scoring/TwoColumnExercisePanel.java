@@ -10,8 +10,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,13 +24,16 @@ import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.AlignmentOutput;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -49,6 +54,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final boolean showInitially = false;
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<CommonShell> listContainer;
+  private ChoicePlayAudioPanel playAudio;
+  Map<Integer, AlignmentOutput> aligments = new HashMap<>();
+  private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>>> idToTypeToSegmentToWidget = new HashMap<>();
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -84,6 +92,101 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
+    addMouseOverHandler(new MouseOverHandler() {
+      @Override
+      public void onMouseOver(MouseOverEvent event) {
+        logger.info("got mouse over " + exercise.getID());
+        getRefAudio(controller);
+      }
+    });
+  }
+
+
+  private void getRefAudio(ExerciseController controller) {
+    int refID = playAudio.getCurrentAudioID();
+    int contextRefID = -1; //contextPlay.getCurrentAudioID();
+
+    logger.info("asking for " + refID);
+    logger.info("asking for " + contextRefID);
+
+    List<Integer> req = new ArrayList<>();
+    if (refID != -1) {
+      if (!aligments.containsKey(refID))
+        req.add(refID);
+    }
+    if (contextRefID != -1) {
+      if (!aligments.containsKey(contextRefID))
+        req.add(contextRefID);
+    }
+
+    if (req.isEmpty()) {
+      registerSegmentHighlight(refID, contextRefID);
+    } else {
+      controller.getScoringService().getAlignments(controller.getProjectStartupInfo().getProjectid(),
+          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(Map<Integer, AlignmentOutput> result) {
+              aligments.putAll(result);
+              //      idToTypeToSegmentToWidget = new HashMap<>();
+//              matchSegmentToWidget(result);
+
+              registerSegmentHighlight(refID, contextRefID);
+              // AlignmentOutput alignmentOutput = aligments.get(NetPronImageType.WORD_TRANSCRIPT);
+            }
+          });
+    }
+  }
+
+  private void registerSegmentHighlight(int refID, int contextRefID) {
+    if (refID != -1) {
+      AlignmentOutput value2 = aligments.get(refID);
+      matchSegmentToWidgetForAudio(refID, value2);
+      playAudio.setListener(new SegmentHighlightAudioControl(idToTypeToSegmentToWidget.get(refID)));
+    }
+    if (contextRefID != -1) {
+      matchSegmentToWidgetForAudio(contextRefID, aligments.get(contextRefID));
+    }
+  }
+
+  private void matchSegmentToWidget(Map<Integer, AlignmentOutput> result) {
+    for (Map.Entry<Integer, AlignmentOutput> pair : result.entrySet()) {
+      Integer audioID = pair.getKey();
+
+      matchSegmentToWidgetForAudio(audioID, pair.getValue());
+    }
+  }
+
+  private void matchSegmentToWidgetForAudio(Integer audioID, AlignmentOutput value2) {
+    if (value2 == null) {
+      logger.warning("no alignment for " + audioID);
+    } else {
+      Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> value = new HashMap<>();
+      idToTypeToSegmentToWidget.put(audioID, value);
+
+      List<TranscriptSegment> transcriptSegments =
+          value2.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+      TreeMap<TranscriptSegment, Widget> value1 = new TreeMap<>();
+      value.put(NetPronImageType.WORD_TRANSCRIPT, value1);
+
+      Iterator<Widget> iterator = flclickables.iterator();
+      if (transcriptSegments != null) {
+      for (TranscriptSegment seg : transcriptSegments) {
+        if (iterator.hasNext()) {
+          value1.put(seg, iterator.next());
+        } else {
+          logger.warning("no match for " + seg);
+        }
+      }}
+    }
+  }
+
+  private HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+    return addDomHandler(handler, MouseOverEvent.getType());
   }
 
   /**
@@ -207,6 +310,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return widget;
   }
 
+  List<Widget> flclickables;
+
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget) {
     SimpleRecordAudioPanel<T> recordPanel = getRecordPanel(e);
@@ -216,17 +321,17 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     DivWidget recordButtonContainer = new DivWidget();
     recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
-    //postAudioRecordButton.setVisible(controller.isRecordingEnabled());
     flContainer.add(recordButtonContainer);
 
     if (hasAudio(e)) {
-      flContainer.add(getPlayAudioPanel());
+      flContainer.add(playAudio = getPlayAudioPanel());
+      //playAudio.setListener(new SegmentHighlightAudioControl(idToTypeToSegmentToWidget.get()));
     }
 
+    flclickables = new ArrayList<>();
     Widget flEntry =
-        getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially);
+        getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially, flclickables);
     flEntry.addStyleName("floatLeft");
-
     //logger.info("makeFirstRow Set with on " + flEntry.getElement().getId());
 
     flEntry.setWidth("100%");
@@ -243,7 +348,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     boolean useMeaningInsteadOfEnglish = isEnglish && meaningValid;
 
     if (!useMeaningInsteadOfEnglish && meaningValid) {
-      Widget meaningWidget = getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially);
+      Widget meaningWidget = getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially, new ArrayList<>());
       addField(fieldContainer, meaningWidget, "meaningRow");
     }
 
@@ -320,7 +425,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @see #makeFirstRow
    */
   @NotNull
-  private DivWidget getPlayAudioPanel() {
+  private ChoicePlayAudioPanel getPlayAudioPanel() {
     return new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller, false);
   }
 
@@ -341,7 +446,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private Widget getEnglishWidget(T e, String english) {
-    Widget englishWidget = getEntry(e, QCNPFExercise.ENGLISH, english, false, false, false, showInitially);
+    Widget englishWidget = getEntry(e, QCNPFExercise.ENGLISH, english, false, false, false, showInitially, new ArrayList<>());
     englishWidget.addStyleName("rightsidecolor");
     englishWidget.getElement().setId("englishWidget");
     englishWidget.addStyleName("floatLeft");
@@ -404,10 +509,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return rowWidget;
   }
 
+  List<Widget> altflClickables;
+
   private Widget addAltFL(T e) {
     String translitSentence = e.getAltFL().trim();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A") && !e.getForeignLanguage().trim().equals(translitSentence)) {
-      Widget entry = getEntry(e, QCNPFExercise.ALTFL, translitSentence, true, true, false, showInitially);
+      altflClickables = new ArrayList<>();
+      Widget entry = getEntry(e, QCNPFExercise.ALTFL, translitSentence, true, true, false, showInitially, altflClickables);
       entry.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
       return entry;
     } else return null;
@@ -416,7 +524,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Widget addTransliteration(T e) {
     String translitSentence = e.getTransliteration();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
-      return getEntry(e, QCNPFExercise.TRANSLITERATION, translitSentence, false, true, false, showInitially);
+      return getEntry(e, QCNPFExercise.TRANSLITERATION, translitSentence, false, true, false, showInitially, new ArrayList<>());
     }
     return null;
   }
@@ -431,6 +539,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private final List<CommentBox> comments = new ArrayList<>();
+  ChoicePlayAudioPanel contextPlay;
 
   /**
    * @param contextExercise
@@ -451,10 +560,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
 
-      ChoicePlayAudioPanel child
+      contextPlay
           = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true);
-      child.setEnabled(audioAttrPrefGender != null);
-      hp.add(child);
+      contextPlay.setEnabled(audioAttrPrefGender != null);
+      hp.add(contextPlay);
 
       Panel contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
           true, false, false);
@@ -483,7 +592,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private Widget addContextTranslation(AnnotationExercise e, String contextTranslation) {
     if (!contextTranslation.isEmpty()) {
-      return getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, contextTranslation, false, false, false, showInitially);
+      return getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, contextTranslation,
+          false, false, false, showInitially, new ArrayList<>());
     } else return null;
   }
 
@@ -492,13 +602,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param field
    * @param value
    * @param showInitially
+   * @param clickables
    * @return
    * @paramx label
    * @see #getItemContent
    */
   private Widget getEntry(AnnotationExercise e, final String field, String value, boolean isFL, boolean isTranslit,
-                          boolean isMeaning, boolean showInitially) {
-    return getEntry(field, value, e.getAnnotation(field), isFL, isTranslit, isMeaning, showInitially);
+                          boolean isMeaning, boolean showInitially, List<Widget> clickables) {
+    return getEntry(field, value, e.getAnnotation(field), isFL, isTranslit, isMeaning, showInitially, clickables);
   }
 
   /**
@@ -506,6 +617,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param value
    * @param annotation
    * @param showInitially
+   * @param clickables
    * @return
    * @paramx label
    * @seex #makeFastAndSlowAudio(String)
@@ -513,8 +625,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private Widget getEntry(final String field,
                           String value, ExerciseAnnotation annotation, boolean isFL, boolean isTranslit,
-                          boolean isMeaning, boolean showInitially) {
-    Panel contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning);
+                          boolean isMeaning, boolean showInitially, List<Widget> clickables) {
+    Panel contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning, clickables);
     if (!isFL) contentWidget.addStyleName("topFiveMargin");
     return getCommentBox(true).getEntry(field, contentWidget, annotation, showInitially);
   }

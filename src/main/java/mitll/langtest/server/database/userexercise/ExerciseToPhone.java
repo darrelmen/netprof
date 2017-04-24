@@ -94,8 +94,13 @@ public class ExerciseToPhone {
 
       int exid = exjson.exid();
       ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
-      if (phonesForEx == null) exToPhones.put(exid, phonesForEx = new ExercisePhoneInfo());
-      addPhones(phonesForEx, netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT));
+      if (phonesForEx == null) {
+        exToPhones.put(exid, phonesForEx = new ExercisePhoneInfo());
+      }
+      List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+      if (transcriptSegments != null) {
+        addPhones(phonesForEx, transcriptSegments);
+      }
       phonesForEx.setNumPhones(exjson.numalignphones());
     }
     logger.info("getExerciseToPhone took " + (System.currentTimeMillis() - then) +
@@ -361,9 +366,18 @@ public class ExerciseToPhone {
     }
   }
 
+  /**
+   * @see #getExToPhonePerProject
+   * @param phonesForEx
+   * @param transcriptSegments
+   */
   private void addPhones(ExercisePhoneInfo phonesForEx, List<TranscriptSegment> transcriptSegments) {
     Set<String> phones = new HashSet<>();
-    for (TranscriptSegment segment : transcriptSegments) phones.add(segment.getEvent());
+    for (TranscriptSegment segment : transcriptSegments) {
+      if (segment != null) {
+        phones.add(segment.getEvent());
+      }
+    }
     phonesForEx.addPhones(phones);
   }
 }

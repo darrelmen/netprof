@@ -6,8 +6,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Created by go22670 on 11/16/16.
  */
 public class ImageOptions implements IsSerializable {
-  private int width;
-  private int height;
+  private int width =120;
+  private int height=120;
   private boolean useScoreToColorBkg;
 
   public ImageOptions() {

@@ -305,9 +305,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @param listener
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    */
-  public void addListener(AudioControl listener) {
+  public void setListener(AudioControl listener) {
     this.listener = listener;
-    //logger.info("addListener now has listener " + listener);
+    //logger.info("setListener now has listener " + listener);
   }
 
   private void addSimpleListener(SimpleAudioListener listener) {

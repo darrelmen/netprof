@@ -230,6 +230,7 @@ public class Project implements PronunciationLookup {
   public ExerciseTrie<CommonExercise> getFullTrie() {
     return fullTrie;
   }
+
   public ExerciseTrie<CommonExercise> getFullContextTrie() {
     return fullContextTrie;
   }
@@ -282,6 +283,26 @@ public class Project implements PronunciationLookup {
                 p.getEnglish().equalsIgnoreCase(prefix))
         .findFirst();
     return first.orElse(null);
+  }
+
+  public CommonExercise getExerciseBySearchBoth(String english, String fl) {
+//    logger.info("getExerciseBySearchBoth looking for '" + english +
+//        "' and '" + fl +
+//        "' found ");
+    List<CommonExercise> exercises1 = fullTrie.getExercises(english);
+    Optional<CommonExercise> first = exercises1
+        .stream()
+        .filter(p ->
+            p.getForeignLanguage().length() == fl.length() &&
+                p.getEnglish().equalsIgnoreCase(english))
+        .findFirst();
+    CommonExercise exercise = first.orElse(null);
+
+    logger.info("getExerciseBySearchBoth looking for '" + english +
+        "' and '" + fl +
+        "' found " + exercise);
+
+    return exercise;
   }
 
 /*  public void setPhoneTrie(ExerciseTrie<CommonExercise> phoneTrie) {

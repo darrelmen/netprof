@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -452,7 +451,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    */
   private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String recordButtonTitle) {
     PlayAudioPanel playAudio = makePlayAudioPanel(toTheRightWidget, playButtonSuffix, recordButtonTitle);
-    playAudio.addListener(audioPositionPopup);
+    playAudio.setListener(audioPositionPopup);
     return playAudio;
   }
 

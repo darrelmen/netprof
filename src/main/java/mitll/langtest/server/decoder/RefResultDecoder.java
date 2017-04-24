@@ -46,7 +46,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.Int;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +68,7 @@ public class RefResultDecoder {
   private static final boolean DO_TRIM = false;
   // private static final int SLEEP_BETWEEN_DECODES = 2000;
   private static final boolean DO_CALC_DNR = true;
-  private static final boolean ENSURE_OGG = false;
+  //private static final boolean ENSURE_OGG = false;
   public static final int MAX_SPEW = 50;
   //private static final int SLEEP_BETWEEN_DECODES = 2000;
 
@@ -85,6 +84,7 @@ public class RefResultDecoder {
 
   private final BlockingQueue<DecodeTask> queue = new LinkedBlockingQueue<>();
   private Thread consumer = null;
+  int defaultUser;
 
   /**
    * @param db
@@ -105,7 +105,7 @@ public class RefResultDecoder {
     this.audioConversion = new AudioConversion(serverProperties);
     this.hasModel = hasModel;
     audioCheck = new AudioCheck(serverProperties);
-
+    defaultUser = db.getUserDAO().getDefaultUser();
 
   }
 
@@ -429,7 +429,7 @@ public class RefResultDecoder {
   }
 
   public void ensure(String language,
-                      Collection<CommonExercise> exercises) {
+                     Collection<CommonExercise> exercises) {
 //      String installPath = pathHelper.getInstallPath();
     int numResults = db.getRefResultDAO().getNumResults();
     logger.debug(language + " writeRefDecode : found " +
@@ -723,7 +723,7 @@ public class RefResultDecoder {
         int c = 0;
         while (!stopDecode) {
           DecodeTask remove = queue.take();
-          decodeOneExercise(remove.language, remove.exercise, remove.toDecode);
+          decodeOneExercise(remove.language, remove.exercise, remove.toDecode, defaultUser);
           if (++c % 100 == 0) logger.debug("decode did " + c);
 
           if (stopDecode) {
@@ -892,7 +892,6 @@ public class RefResultDecoder {
                               Set<Integer> decodedFiles,
                               CommonExercise exercise,
                               Collection<AudioAttribute> audioAttributes) {
-  //  List<AudioAttribute> toDecode = ;
     return new DecodeTask(language, exercise, getNotYetDecoded(decodedFiles, audioAttributes));
   }
 
@@ -908,7 +907,7 @@ public class RefResultDecoder {
     }
   }
 
-  private int decodeOneExercise(String language, CommonExercise exercise, List<AudioAttribute> toDecode) {
+  private int decodeOneExercise(String language, CommonExercise exercise, List<AudioAttribute> toDecode, int defaultUser) {
     int count = 0;
     boolean doHydec = serverProps.shouldDoDecodeWithHydec();
     for (AudioAttribute attribute : toDecode) {
@@ -937,7 +936,7 @@ public class RefResultDecoder {
             float dnr = attribute.getDnr();
             if (dnr < 0) dnr = audioCheck.getDNR(absoluteFile);
             if (dnr > audioCheck.getMinDNR()) {
-              audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
+              audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec, defaultUser);
               sleep(serverProps.getSleepBetweenDecodes());
               count++;
             } else {
@@ -1018,7 +1017,7 @@ public class RefResultDecoder {
             // drop ref result info
             logger.debug("doTrim trimmed " + exid + " " + attribute + " audio " + bestAudio);
             if (hasModel) {
-            //  boolean b = db.getRefResultDAO().removeForAudioFile(absoluteFile.getAbsolutePath());
+              //  boolean b = db.getRefResultDAO().removeForAudioFile(absoluteFile.getAbsolutePath());
               boolean b = db.getRefResultDAO().removeByAudioID(attribute.getUniqueID());
               if (!b) {
                 logger.warn("doTrim for " + exid + " couldn't remove " + absoluteFile.getAbsolutePath() + " for " + attribute);

@@ -216,11 +216,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   int getBeforeLoginUser();
 
-  /**
-   * @return
-   * @see UserServiceImpl#getCounts()
-   */
- // Map<User.Kind, Integer> getCounts();
+  int getDefaultUser();
 
   /**
    * @param toUpdate

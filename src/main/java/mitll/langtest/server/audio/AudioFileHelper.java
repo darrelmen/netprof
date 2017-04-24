@@ -500,35 +500,48 @@ public class AudioFileHelper implements AlignDecode {
    * @param exercise
    * @param attribute
    * @param doHydec
+   * @param userID
    * @see mitll.langtest.server.decoder.RefResultDecoder#doDecode
    */
-  public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, boolean doHydec) {
+  public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, boolean doHydec, int userID) {
     if (isInDictOrLTS(exercise)) {
       String audioRef = attribute.getAudioRef();
       if (!audioRef.contains("context=")) {
-        decodeAndRemember(exercise, attribute,true);
+        decodeAndRemember(exercise, attribute, true, userID);
       }
     } else {
       logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
   }
 
-  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode) {
+  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode, int userID) {
     String audioRef = attribute.getAudioRef();
     //logger.debug("doing alignment -- ");
-    boolean doHydec =false;
+    boolean doHydec = false;
     // Do alignment...
     File absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
     String absolutePath = absoluteFile.getAbsolutePath();
 
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoFlashcard(false);
 
-    PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, options);
+    PrecalcScores precalcScores =
+        checkForWebservice(exercise.getID(), exercise.getEnglish(),
+            attribute.getTranscript(), exercise.getProjectID(), userID, absoluteFile);
+
+    PretestScore alignmentScore = precalcScores == null ? getAlignmentScore(exercise, absolutePath, options) :
+        getPretestScoreMaybeUseCache(-1,
+            absolutePath,
+            attribute.getTranscript(),
+            exercise.getTransliteration(),
+            ImageOptions.getDefault(),
+            exercise.getID(),
+            precalcScores,
+            false);
     DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
 
     // Do decoding, and record alignment info we just got in the database ...
     long durationInMillis = attribute.getDurationInMillis();
-    AudioAnswer decodeAnswer = doDecode?getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false): new AudioAnswer();
+    AudioAnswer decodeAnswer = doDecode ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false) : new AudioAnswer();
 
     DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
     options.setUseOldSchool(doHydec);
@@ -556,6 +569,23 @@ public class AudioFileHelper implements AlignDecode {
         attribute.isRegularSpeed() ? REG : SLOW,
         getModelsDir());
     return alignmentScore;
+  }
+
+  private PretestScore getPretestScoreMaybeUseCache(int reqid, String testAudioFile, String sentence,
+                                                    String transliteration, ImageOptions imageOptions, int exerciseID, PrecalcScores precalcScores, boolean usePhoneToDisplay1) {
+    return getASRScoreForAudio(
+        reqid,
+        testAudioFile,
+        sentence,
+        transliteration,
+        imageOptions,
+        "" + exerciseID,
+        precalcScores,
+        new DecoderOptions()
+            .setDoFlashcard(false)
+            .setCanUseCache(serverProps.useScoreCache())
+            .setUsePhoneToDisplay(usePhoneToDisplay1)
+    );
   }
 
   /**
@@ -635,12 +665,12 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @paramx wavPath
    * @paramx numAlignPhones
-   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean)
+   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean, int)
    */
   private void getRefAudioAnswerDecoding(CommonExercise exercise1,
                                          int user,
-                                          int audioid,
-                                        // File file,
+                                         int audioid,
+                                         // File file,
                                          long duration,
                                          DecodeAlignOutput alignOutput,
                                          DecodeAlignOutput decodeOutput,
@@ -900,7 +930,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean)
+   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean, int)
    */
 
   private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, DecoderOptions options) {
@@ -950,21 +980,23 @@ public class AudioFileHelper implements AlignDecode {
    * GOOD for local testing!
    *
    * @param exid
-   * @param foreignLanguage
+   * @param english
+   *@param foreignLanguage
    * @param projid
    * @param userid
-   * @param theFile         @return
+   * @param theFile     @return scores for the file
    * @see mitll.langtest.server.services.ScoringServiceImpl#getASRScoreForAudio
    */
-  public PrecalcScores checkForWebservice(int exid, String foreignLanguage, int projid, int userid, File theFile) {
+  public PrecalcScores checkForWebservice(int exid, String english, String foreignLanguage, int projid, int userid,
+                                          File theFile) {
     boolean available = isHydraAvailable();
     if (!available) {
       logger.debug("checkForWebservice local webservice not available" +
-          "\n\tfor " + theFile.getName() +
+          "\n\tfor     " + theFile.getName() +
           "\n\tproject " + projid +
-          "\n\texid " + exid +
-          "\n\titem " + foreignLanguage +
-          "\n\tuser " + userid);
+          "\n\texid    " + exid +
+          "\n\titem    " + foreignLanguage +
+          "\n\tuser    " + userid);
     }
     if (!available && !theFile.getName().endsWith("ogg") && serverProps.isLaptop()) {
  /*
@@ -974,10 +1006,9 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("checkForWebservice theFile " + theFile.getAbsolutePath());
       logger.info("checkForWebservice exists  " + theFile.exists());
       */
-
       if (theFile.exists()) {
         String hydraHost = serverProps.getHydraHost();//"https://netprof1-dev.llan.ll.mit.edu/netprof/";
-        PrecalcScores precalcScores = getPrecalcScores(exid, getLanguage(), foreignLanguage, userid, theFile, hydraHost);
+        PrecalcScores precalcScores = getPrecalcScores(exid, english, foreignLanguage, userid, theFile, hydraHost);
         if (precalcScores != null) return precalcScores;
         return null;
       } else {
@@ -994,13 +1025,15 @@ public class AudioFileHelper implements AlignDecode {
   }*/
 
   @Nullable
-  private PrecalcScores getPrecalcScores(int exid, String language, String foreignLanguage, int userid, File theFile, String hydraHost) {
+  private PrecalcScores getPrecalcScores(int exid, String english, String foreignLanguage, int userid, File theFile,
+                                         String hydraHost) {
     HTTPClient httpClient = new HTTPClient(hydraHost + "scoreServlet");
     httpClient.addRequestProperty("request", "align");
-    httpClient.addRequestProperty("exercise", "" + exid);
+//    httpClient.addRequestProperty("exercise", "" + exid);
+    httpClient.addRequestProperty("english", english);
     httpClient.addRequestProperty(EXERCISE_TEXT, StringUtils.stripAccents(foreignLanguage));
     // USE THE LANGUAGE INSTEAD
-    httpClient.addRequestProperty("projid", "-1");//  + projid);
+  //  httpClient.addRequestProperty("projid", "-1");//  + projid);
     httpClient.addRequestProperty("language", getLanguage());
     httpClient.addRequestProperty("user", "" + userid);
     httpClient.addRequestProperty("full", "full");  // full json returned
@@ -1229,6 +1262,7 @@ public class AudioFileHelper implements AlignDecode {
       PrecalcScores precalcScores =
           checkForWebservice(
               exercise.getID(),
+              exercise.getEnglish(),
               exercise.getForeignLanguage(),
               project.getID(),
               userID,

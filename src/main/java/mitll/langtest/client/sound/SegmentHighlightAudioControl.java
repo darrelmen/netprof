@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -15,22 +16,18 @@ import java.util.logging.Logger;
 public class SegmentHighlightAudioControl implements AudioControl {
   private final Logger logger = Logger.getLogger("SegmentHighlightAudioControl");
 
-  //  private final Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget;
-//  private TranscriptSegment currentWord;
-//  private TranscriptSegment currentPhone;
-//
-//  private boolean isWordHighlighted = false;
-//  boolean isPhoneHighlighted = false;
- // private final TreeMap<TranscriptSegment, Widget> words;
- // TreeMap<TranscriptSegment, Widget> phones;
-  SegmentAudioControl wordSegments, phoneSegments;
+  private SegmentAudioControl wordSegments, phoneSegments = null;
 
+  /**
+   * @param typeToSegmentToWidget
+   * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#getWordTableContainer
+   */
   public SegmentHighlightAudioControl(Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget) {
-    //   this.typeToSegmentToWidget = typeToSegmentToWidget;
-//    words = ;
-//    phones = typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
     wordSegments = new SegmentAudioControl(typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT));
-    phoneSegments = new SegmentAudioControl(typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT));
+    TreeMap<TranscriptSegment, Widget> words = typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
+    if (words != null) {
+      phoneSegments = new SegmentAudioControl(words);
+    }
   }
 
   public String toString() {
@@ -52,22 +49,21 @@ public class SegmentHighlightAudioControl implements AudioControl {
   }
 
   @Override
-  public void update(double position) {
-    wordSegments.update(position);
-    phoneSegments.update(position);
-  }
-
-
-  @Override
   public void songLoaded(double duration) {
     wordSegments.songLoaded(duration);
-    phoneSegments.songLoaded(duration);
+    if (phoneSegments != null) phoneSegments.songLoaded(duration);
+  }
+
+  @Override
+  public void update(double position) {
+    wordSegments.update(position);
+    if (phoneSegments != null) phoneSegments.update(position);
   }
 
   @Override
   public void songFinished() {
     wordSegments.songFinished();
-    phoneSegments.songFinished();
+    if (phoneSegments != null) phoneSegments.songFinished();
   }
 
   public static class SegmentAudioControl implements AudioControl {
@@ -102,6 +98,11 @@ public class SegmentHighlightAudioControl implements AudioControl {
     }
 
     @Override
+    public void songLoaded(double duration) {
+      if (isWordHighlighted) removeHighlight();
+    }
+
+    @Override
     public void update(double position) {
       position /= 1000;
       //   logger.info("update " +position);
@@ -127,12 +128,6 @@ public class SegmentHighlightAudioControl implements AudioControl {
           }
         }
       }
-    }
-
-
-    @Override
-    public void songLoaded(double duration) {
-      if (isWordHighlighted) removeHighlight();
     }
 
     @Override

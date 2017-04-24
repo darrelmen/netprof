@@ -71,7 +71,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String REQUEST = "request";
   private static final String NESTED_CHAPTERS = "nestedChapters";
   private static final String CHAPTER_HISTORY = "chapterHistory";
- // private static final String REF_INFO = "refInfo";
+  // private static final String REF_INFO = "refInfo";
   private static final String ROUND_TRIP1 = "roundTrip";
   private static final String PHONE_REPORT = "phoneReport";
   /**
@@ -500,7 +500,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param queryString
    * @param toReturn
    * @return
-   * @deprecated not clear who calls this!
+   * @deprecatedx not clear who calls this!
    */
 /*  private JSONObject getRefInfo(String queryString, JSONObject toReturn) {
     String[] split1 = queryString.split("&");
@@ -899,17 +899,20 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #getJsonForAudio
    * @param request
    * @param realExID
    * @param projid
    * @return
+   * @see #getJsonForAudio
    */
   private int getExerciseIDFromText(HttpServletRequest request, int realExID, int projid) {
-    String exerciseText = request.getHeader(EXERCISE_TEXT);
+    String exerciseText = request.getHeader("english");
     if (exerciseText != null && projid > 0) {
       Project project1 = db.getProject(projid);
-      CommonExercise exercise = project1.getExerciseBySearch(exerciseText);
+      String flText = request.getHeader(EXERCISE_TEXT);
+
+      CommonExercise exercise = project1.getExerciseBySearchBoth(exerciseText, flText);
+
       if (exercise != null) {
         logger.info("getExerciseIDFromText for '" + exerciseText + "' found exercise id " + exercise.getID());
         realExID = exercise.getID();

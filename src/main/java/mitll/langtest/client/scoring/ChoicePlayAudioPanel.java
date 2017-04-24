@@ -42,11 +42,12 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
   private ExerciseController controller;
   private CommonExercise exercise;
-  boolean includeContext = false;
+  private boolean includeContext = false;
+  private int currentAudioID = -1;
 
   /**
    * @see TwoColumnExercisePanel#getPlayAudioPanel
-   * @see TwoColumnExercisePanel#getContext(CommonExercise, String)
+   * @see TwoColumnExercisePanel#getContext
    */
   public ChoicePlayAudioPanel(
       SoundManagerAPI soundManager,
@@ -84,7 +85,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     }
   }
 
-  SplitDropdownButton splitDropdownButton;
+  private SplitDropdownButton splitDropdownButton;
 
   /**
    * @param toAddTo
@@ -185,6 +186,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     setEnabled(val);
     splitDropdownButton.getTriggerWidget().setEnabled(val);
     if (val) {
+      currentAudioID = toUse.getUniqueID();
       rememberAudio(toUse.getAudioRef());
     }
   }
@@ -259,5 +261,9 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   @Override
   protected void addButtons(Widget optionalToTheRight) {
     playButton = makePlayButton(this);
+  }
+
+  public int getCurrentAudioID() {
+    return currentAudioID;
   }
 }

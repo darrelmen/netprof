@@ -16,6 +16,10 @@ public class AlignmentOutput implements IsSerializable {
   public AlignmentOutput() {
   }
 
+  /**
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getAlignments
+   * @param sTypeToEndTimes
+   */
   public AlignmentOutput(Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes) {
     this.sTypeToEndTimes = sTypeToEndTimes;
   }
