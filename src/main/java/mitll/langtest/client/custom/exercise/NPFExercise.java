@@ -66,6 +66,7 @@ import java.util.logging.Logger;
  * @since 12/12/13
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
 abstract class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
   private final Logger logger = Logger.getLogger("NPFExercise");

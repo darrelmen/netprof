@@ -74,6 +74,7 @@ import java.util.logging.Logger;
  * @since 12/12/13
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated got to get rid of this
  */
 public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
   private Logger logger = Logger.getLogger("CommentNPFExercise");

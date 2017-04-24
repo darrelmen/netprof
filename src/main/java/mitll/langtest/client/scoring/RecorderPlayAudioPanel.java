@@ -6,7 +6,7 @@ import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.core.client.Scheduler;
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
@@ -18,15 +18,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.user.MiniUser;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by go22670 on 4/5/17.
@@ -46,18 +38,16 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   private Panel downloadContainer;
   private int exid;
   private ExerciseController controller;
-  //private boolean showChoices;
 
   /**
    * @param soundManager
    * @param postAudioRecordButton1
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  public RecorderPlayAudioPanel(SoundManagerAPI soundManager,
+  RecorderPlayAudioPanel(SoundManagerAPI soundManager,
                                 final PostAudioRecordButton postAudioRecordButton1,
                                 CommonExercise exercise,
-                                ExerciseController exerciseController,
-                                boolean showChoices) {
+                                ExerciseController exerciseController) {
     super(soundManager, new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -74,12 +64,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
         null);
     this.exid = exercise.getID();
     this.controller = exerciseController;
-    //this.showChoices = showChoices;
-    // DivWidget recordFeedback = getRecordFeedback(simpleRecordAudioPanel.getWaitCursor());
-    // firstRow.add(recordFeedback);
     downloadContainer = addDownloadAudioWidget();
-  //  firstRow.add(simpleRecordAudioPanel.getScoreHistory());
-
     getElement().setId("RecorderPlayAudioPanel");
   }
 
@@ -90,17 +75,21 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
       }
     });
 
+    logger.info("configureButton " + playButton.getElement().getId());
+
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
-    playButton.getElement().setId("PlayAudioPanel_playButton");
+    playButton.setSize(ButtonSize.LARGE);
+    playButton.getElement().setId("PlayAudioPanel_playButton_recorder");
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
   }
 
-  public void hidePlayButton() {
+  void hidePlayButton() {
     playButton.setVisible(false);
   }
-  public void showPlayButton() {
+
+  void showPlayButton() {
     playButton.setVisible(true);
   }
 
@@ -109,12 +98,12 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordImage2.setVisible(!first);
   }
 
-  public void showFirstRecord() {
+  void showFirstRecord() {
     recordImage1.setVisible(true);
     downloadContainer.setVisible(false);
   }
 
-  public void hideRecord() {
+  void hideRecord() {
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
   }
@@ -126,18 +115,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   @Override
   protected void addButtons(Widget optionalToTheRight) {
     playButton = makePlayButton(this);
-    // firstRow.add(playButton = makePlayButton());
-  /*  DivWidget firstRow = new DivWidget();
-    firstRow.addStyleName("inlineFlex");
-    firstRow.getElement().setId("recordingContainer");
-    firstRow.setWidth("100%");
-    add(firstRow);
-
-    this.firstRow = firstRow;*/
-    //   firstRow.add(getRecordFeedback());
-    // firstRow.add(downloadContainer = addDownloadAudioWidget());
-    // downloadContainer = addDownloadAudioWidget();
-    //f//irstRow.add(simpleRecordAudioPanel.getScoreHistory());
   }
 
   /**
@@ -148,16 +125,14 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   protected IconAnchor makePlayButton(DivWidget toAddTo) {
     Button playButton = new Button(playLabel);
     configureButton(playButton);
-   // toAddTo.add(playButton);
     return playButton;
   }
-//  private DivWidget firstRow;
 
   /**
    * @return
    * @see SimpleRecordAudioPanel#scoreAudio
    */
-  public Panel getDownloadContainer() {
+  Panel getDownloadContainer() {
     return downloadContainer;
   }
 
@@ -227,8 +202,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void setDownloadHref(String audioPathToUse,
                        int id,
                        int user) {
-
-
     downloadContainer.setVisible(true);
     String href = DOWNLOAD_AUDIO +
         "?file=" +
@@ -240,6 +213,5 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
         "userID=" +
         user;
     download.setHref(href);
-    //downloadAnchor.setHref(href);
   }
 }

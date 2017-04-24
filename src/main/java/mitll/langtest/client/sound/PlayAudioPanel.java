@@ -68,9 +68,10 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends DivWidget implements AudioControl {
-  private static final int BUTTON_WIDTH = 10;
+//  private static final int BUTTON_WIDTH = 10;
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
   private static final boolean DEBUG = false;
+  private static final boolean LOCAL_TESTING = false;
 
   protected static final IconType PLAY = IconType.PLAY;
 
@@ -78,7 +79,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #setPlayButtonText
    */
   private static final String PAUSE_LABEL = "pause";
-  private static final int MIN_WIDTH = 40;
+//  private static final int MIN_WIDTH = 40;
   private static final String FILE_MISSING = "FILE_MISSING";
   private String currentPath = null;
 
@@ -87,7 +88,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   protected String playLabel;
   private String pauseLabel = PAUSE_LABEL;
-  private int minWidth = MIN_WIDTH;
+ // private int minWidth = MIN_WIDTH;
   protected IconAnchor playButton;
   private boolean isSlow;
 
@@ -112,7 +113,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     addStyleName("playButton");
     playLabel = buttonTitle;
     if (buttonTitle.isEmpty()) {
-      minWidth = BUTTON_WIDTH;
+    //  minWidth = BUTTON_WIDTH;
       pauseLabel = "";
     }
     id = counter++;
@@ -225,6 +226,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       playButton.setBaseIcon(MyCustomIconType.turtle);
       styleSlowIcon(playButton);
     } else {
+      //logger.info("showPlayIcon ");
       playButton.setIcon(PLAY);
     }
   }
@@ -247,6 +249,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   /**
    * Make sure play button doesn't squish down when it says "pause"
    */
+/*
   @Override
   protected void onLoad() {
     super.onLoad();
@@ -262,6 +265,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
     }
   }
+  */
 
   /**
    * @see #addButtons(Widget)
@@ -282,8 +286,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   private void startPlaying() {
-
-    startSong(currentPath);
+    if (LOCAL_TESTING) {
+      logger.info("startPlaying " + currentPath);
+      startSong(currentPath);
+    }
     for (PlayListener playListener : playListeners) playListener.playStarted();
     play();
   }
@@ -301,7 +307,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   public void addListener(AudioControl listener) {
     this.listener = listener;
-    logger.info("addListener now has listener " +listener);
+    //logger.info("addListener now has listener " + listener);
   }
 
   private void addSimpleListener(SimpleAudioListener listener) {
@@ -312,7 +318,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #doClick()
    */
   private void play() {
-    if (DEBUG) {
+    if (DEBUG || LOCAL_TESTING) {
       logger.info("PlayAudioPanel play " + playing + " " + currentPath);
     }
     playing = true;
@@ -322,16 +328,19 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   private void setPlayButtonText() {
     boolean playing1 = isPlaying();
-    String html = playing1 ? pauseLabel : playLabel;
-    // logger.info("setPlayButtonText now playing = " + isPlaying());
-    playButton.setText(html);
+    //logger.info("setPlayButtonText now playing = " + isPlaying());
+    playButton.setText(playing1 ? pauseLabel : playLabel);
     if (playing1) {
-      playButton.setIcon(IconType.PAUSE);
+      logger.info("setPlayButtonText set cursor to pause ");
 
+      playButton.setIcon(IconType.PAUSE);
+/*
       playButton.getElement().getStyle().setPaddingBottom(4, Style.Unit.PX);
       playButton.getElement().getStyle().setPaddingLeft(BUTTON_WIDTH, Style.Unit.PX);
       playButton.getElement().getStyle().setPaddingRight(BUTTON_WIDTH, Style.Unit.PX);
+      */
     } else {
+      logger.info("setPlayButtonText set cursor to play ");
       showPlayIcon(playButton);
     }
     //  playButton.setIcon(playing1 ? IconType.PAUSE : PLAY);
@@ -409,8 +418,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   public void update(double position) {
     if (listener != null) {
       listener.update(position);
-    }
-    else {
+    } else {
       logger.info("no listener...");
     }
   }
@@ -478,14 +486,15 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #loadAudio
    */
   public void startSong(String path) {
-    if (!path.equals(FILE_MISSING)) {
+    if (path == null) logger.warning("no path given???");
+    else if (!path.equals(FILE_MISSING)) {
       //logger.info("PlayAudioPanel.loadAudio - skipping " + path);
       if (DEBUG) logger.info("PlayAudioPanel : startSong : " + path);
       if (soundManager.isReady()) {
         //if (DEBUG) logger.info(new Date() + " Sound manager is ready.");
         if (soundManager.isOK()) {
           //  if (DEBUG)
-          logger.info("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
+          if (DEBUG) logger.info("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
 
           destroySound();
           createSound(path);
@@ -502,7 +511,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #startSong(String)
    */
   private void createSound(String song) {
-    if (DEBUG) {
+    if (LOCAL_TESTING) {
       currentPath = song;
     }
 
@@ -523,7 +532,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     if (currentSound != null) {
       //if (DEBUG)
       //  logger.info("PlayAudioPanel.destroySound : (" + getElement().getId() + ") destroy sound " + currentSound);
-
       this.soundManager.destroySound(currentSound);
       currentSound = null;
     }
@@ -533,7 +541,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * Does repeat audio if childCount > 0
    */
   public void reinitialize() {
-    if (DEBUG) {
+    if (DEBUG || LOCAL_TESTING) {
       logger.info("PlayAudioPanel :reinitialize " + getElement().getId());
     }
 
@@ -542,8 +550,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     soundManager.setPosition(currentSound, 0);
 
     if (listener != null) {
-      if (DEBUG) logger.info("PlayAudioPanel :reinitialize - telling listener to reinitialize ");
-
+      if (DEBUG || LOCAL_TESTING) logger.info("PlayAudioPanel :reinitialize - telling listener to reinitialize " + listener);
       listener.reinitialize();
     }
 //    else {
@@ -627,7 +634,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   public PlayAudioPanel setMinWidth(int minWidth) {
-    this.minWidth = minWidth;
+   // this.minWidth = minWidth;
     return this;
   }
 

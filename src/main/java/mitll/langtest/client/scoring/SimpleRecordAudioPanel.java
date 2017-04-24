@@ -14,8 +14,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.WaitCursorHelper;
-import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.CompressedAudio;
+import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -46,7 +46,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
 
-  //private static final int PROGRESS_BAR_WIDTH = 260;
   public static final int FIRST_STEP = 35;
   public static final int SECOND_STEP = 75;
 
@@ -180,8 +179,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
         controller.getSoundManager(),
         postAudioRecordButton,
         exercise,
-        controller,
-        false);
+        controller
+    );
     playAudioPanel.hidePlayButton();
 
     return playAudioPanel;
@@ -273,7 +272,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       scoreFeedbackDiv.add(progressBar);
       Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget = new HashMap<>();
       scoreFeedbackDiv.add(new WordScoresTable().getStyledWordTable(pretestScore, playAudioPanel, typeToSegmentToWidget));
-      playAudioPanel.addListener(new MyAudioControl(typeToSegmentToWidget));
+      playAudioPanel.addListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
       wordTableContainer.add(scoreFeedbackDiv);
       logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
     } else {
@@ -376,6 +375,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @param path
    */
   private void useResult(PretestScore result, boolean scoredBefore, String path) {
+  //  logger.info("useResult path " +path);
     float hydecScore = result.getHydecScore();
     boolean isValid = hydecScore > 0;
     if (!scoredBefore && miniScoreListener != null && isValid) {
@@ -410,13 +410,13 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   @Nullable
   private String getReadyToPlayAudio(String path) {
-    // logger.info("get ready to play " +path);
+    //logger.info("getReadyToPlayAudio : get ready to play " +path);
     path = CompressedAudio.getPath(path);
     if (path != null) {
       this.audioPath = path;
     }
     if (playAudioPanel != null) {
-      // logger.info("startSong ready to play " +path);
+      //logger.info("getReadyToPlayAudio startSong ready to play " +path);
       playAudioPanel.startSong(path);
     }
     return path;
@@ -436,121 +436,4 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     miniScoreListener.showChart();
   }
 
-  private static class MyAudioControl implements AudioControl {
-    private Logger logger = Logger.getLogger("MyAudioControl");
-
-    private final Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget;
-    TranscriptSegment currentWord;
-    TranscriptSegment currentPhone;
-
-    boolean isWordHighlighted = false;
-    boolean isPhoneHighlighted = false;
-    TreeMap<TranscriptSegment, Widget> words;
-    TreeMap<TranscriptSegment, Widget> phones;
-
-
-    public MyAudioControl(Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget) {
-      this.typeToSegmentToWidget = typeToSegmentToWidget;
-      words = typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
-      initialize();
-    }
-
-    public String toString() {
-      return "MyAudioControl";
-    }
-
-    @Override
-    public void reinitialize() {
-   //   logger.info("reinitialize ");
-  //    initialize();
-    }
-
-    private void initialize() {
-      if (words != null && !words.isEmpty()) {
-        currentWord = words.keySet().iterator().next();
-      //  logger.info("current word  now " + currentWord);
-        currentPhone = null;
-      }
-    }
-
-    @Override
-    public void songFirstLoaded(double durationEstimate) {
-
-    }
-
-    @Override
-    public void repeatSegment(float startInSeconds, float endInSeconds) {
-    }
-
-    @Override
-    public void update(double position) {
-      position /= 1000;
-      //   logger.info("update " +position);
-      if (currentWord == null) {
-    //    logger.info("no current word - update ignore : " +position);
-//        currentWord = findContains(position, words);
-      } else {
-        if (position < currentWord.getStart()) { // before
-      //    logger.info("before current word - update ignore : " +position);
-        }
-        else if (position >= currentWord.getEnd()) { // after
-          removeHighlight();
-          currentWord = words.higherKey(currentWord);  // next word
-
-          if (currentWord != null) {
-            if (isWordHighlighted = currentWord.contains(position)) {
-              showHighlight();
-            }
-          }
-          else isWordHighlighted = false;
-        } else { // contains
-          if (!isWordHighlighted) {
-            if (isWordHighlighted = currentWord.contains(position)) {
-              showHighlight();
-            }
-          }
-        }
-      }
-    }
-
-    private void removeHighlight() {
-      if (currentWord != null) {
-        Widget widget = words.get(currentWord);
-        widget.getElement().getStyle().setBackgroundColor(backgroundColor);
-      }
-    }
-
-    String backgroundColor;
-
-    private void showHighlight() {
-      Widget nwidget = words.get(currentWord);
-      backgroundColor = nwidget.getElement().getStyle().getBackgroundColor();
-      nwidget.getElement().getStyle().setBackgroundColor("#2196F3");
-     // nwidget.getElement().getStyle().clearProperty("backgroundColor");
-     // nwidget.addStyleName("border-blue");
-    }
-/*
-    private TranscriptSegment findContains(double position, Map<TranscriptSegment, Widget> words) {
-      TranscriptSegment ret = null;
-      for (Map.Entry<TranscriptSegment, Widget> pair : words.entrySet()) {
-        if (pair.getKey().contains(position)) {
-          ret = pair.getKey();
-       //   pair.getValue().addStyleName("border-blue");
-          break;
-        }
-      }
-      return ret;
-    }*/
-
-    @Override
-    public void songLoaded(double duration) {
-      if (isWordHighlighted) removeHighlight();
-    }
-
-    @Override
-    public void songFinished() {
-      if (isWordHighlighted) removeHighlight();
-      initialize();
-    }
-  }
 }
