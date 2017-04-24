@@ -8,7 +8,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
@@ -17,7 +16,6 @@ import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
@@ -30,7 +28,7 @@ class ProjectEditForm extends UserDialog {
   private static final int MIN_LENGTH_USER_ID = 4;
   static final int USER_ID_MAX_LENGTH = 5;
 
- // private final EventRegistration eventRegistration;
+  // private final EventRegistration eventRegistration;
   private final ProjectOps projectOps;
   private ListBox statusBox;
   private ProjectInfo info;
@@ -39,7 +37,7 @@ class ProjectEditForm extends UserDialog {
   private ScoringServiceAsync scoringServiceAsync;
 
   private HTML feedback;
-  private FormField hydraPort;
+  private FormField hydraPort, nameField, language;
   private FormField model;
 
   /**
@@ -49,15 +47,9 @@ class ProjectEditForm extends UserDialog {
    */
   ProjectEditForm(ProjectOps projectOps,
                   ExerciseController controller
-//      ,
-//                  PropertyHandler props,
-//                  EventRegistration eventRegistration,
-//                  AudioServiceAsync audioServiceAsync,
-//                  ScoringServiceAsync scoringServiceAsync
   ) {
     super(controller.getProps());
     this.projectOps = projectOps;
-  //  this.eventRegistration = controller;
     this.audioServiceAsync = controller.getAudioService();
     this.scoringServiceAsync = controller.getScoringService();
   }
@@ -66,21 +58,22 @@ class ProjectEditForm extends UserDialog {
    * @param info
    * @return
    * @see ProjectContainer#gotClickOnItem
+   * @see ProjectChoices#getEditButton
    */
   Widget getForm(ProjectInfo info) {
-    logger.info("getForm " +info);
+//    logger.info("getForm " + info);
 
     this.info = info;
-    String name = info.getName();
+
+    boolean isNew = info.getName().isEmpty();
+    String name = isNew ? "New Project" : info.getName();
+
     Heading heading = new Heading(3, name);
     heading.addStyleName("signUp");
 
-    //Button editProject = getEditButton();
+    Fieldset fields = getFields(info);
 
-    Fieldset fields = getFields(info/*, editProject*/);
-    //fields.add(editProject);
-
-    return getTwoPartForm(heading, fields);
+    return isNew ? fields : getTwoPartForm(heading, fields);
   }
 
   @Override
@@ -91,16 +84,17 @@ class ProjectEditForm extends UserDialog {
       }
     };
     signInForm.addStyleName("topMargin");
-  //  signInForm.addStyleName("formRounded");
+    //  signInForm.addStyleName("formRounded");
     signInForm.getElement().getStyle().setBackgroundColor("white");
     return signInForm;
   }
 
   private void checkIsHydraRunning() {
-    scoringServiceAsync.isHydraRunning(info.getID(), new AsyncCallback<Boolean>() {
+
+    int id = info.getID();
+    scoringServiceAsync.isHydraRunning(id, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-
       }
 
       @Override
@@ -115,22 +109,11 @@ class ProjectEditForm extends UserDialog {
         }
       }
     });
+
   }
 
- /* @NotNull
-  private Button getEditButton() {
-    Button editProject = getFormButton("editProject", "Edit", eventRegistration);
-    editProject.setEnabled(false);
-    editProject.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        updateProject();
-      }
-    });
-    return editProject;
-  }*/
 
-  public void updateProject() {
+  void updateProject() {
     ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
 
     if (status == ProjectStatus.EVALUATION || status == ProjectStatus.PRODUCTION) {
@@ -163,14 +146,53 @@ class ProjectEditForm extends UserDialog {
     });
   }
 
+  void newProject() {
+    ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
+
+    if (status == ProjectStatus.EVALUATION || status == ProjectStatus.PRODUCTION) {
+      try {
+        info.setPort(Integer.parseInt(hydraPort.getSafeText()));
+
+        if (model.isEmpty()) {
+          markError(model, "Please enter a language model directory.");
+        }
+
+      } catch (NumberFormatException e) {
+        markError(hydraPort, "Please enter a port number for the service.");
+        return;
+      }
+    }
+
+    info.setStatus(status);
+    info.setModelsDir(model.getSafeText());
+
+    /*projectServiceAsync.update(info, new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        projectOps.refreshStartupInfo();
+        projectOps.reload();
+      }
+    });*/
+  }
+
   private Fieldset getFields(ProjectInfo info/*, Button editButton*/) {
     Fieldset fieldset = new Fieldset();
-    Heading id = new Heading(4, "ID", "" + info.getID());
-    fieldset.add(id);
+    if (info.getID() > 0) {
+      Heading id = new Heading(4, "ID", "" + info.getID());
+      fieldset.add(id);
+    }
 
+    fieldset.add(new Heading(5, "Name"));
+    nameField = getName(fieldset, info.getName(), "Project Name");
+    fieldset.add(new Heading(5, "Language"));
+    language = getName(fieldset, info.getLanguage(), "Language");
     addControlGroupEntrySimple(
         fieldset,
-        "",
+        "Lifecycle",
         statusBox = getBox(/*editButton*/))
         .setWidth("366px");
 
@@ -192,6 +214,19 @@ class ProjectEditForm extends UserDialog {
 
     return fieldset;
   }
+
+  private FormField getName(Fieldset fieldset, String currentName, String hint) {
+    FormField userField =
+        addControlFormFieldWithPlaceholder(fieldset, false, 3, 50, hint);
+    userField.box.addStyleName("topMargin");
+    userField.box.addStyleName("rightFiveMargin");
+    userField.box.getElement().setId("name");
+    userField.box.setWidth("200px");
+    if (currentName != null && !currentName.isEmpty())
+      userField.box.setText(currentName);
+    return userField;
+  }
+
 
   private FormField getHydraPort(Fieldset fieldset, int currentPort) {
     FormField userField =
@@ -321,9 +356,11 @@ class ProjectEditForm extends UserDialog {
     return affBox;
   }
 
+/*
   private boolean changed() {
     return (info.getStatus() != ProjectStatus.valueOf(statusBox.getValue()));
   }
+*/
 
   private void setBox(ProjectStatus statusValue) {
     int i = 0;

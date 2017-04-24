@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import corpus.EmptyLTS;
 import corpus.LTS;
 import corpus.ModernStandardArabicLTS;
@@ -62,7 +63,7 @@ public class LTSFactory {
    * TODO : are we limited to these?
    */
   // known languages
-  public enum Language {
+  public enum Language implements IsSerializable {
     ARABIC,
     CROATIAN,
     DARI,

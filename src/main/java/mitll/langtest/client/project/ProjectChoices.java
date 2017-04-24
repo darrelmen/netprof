@@ -2,7 +2,9 @@ package mitll.langtest.client.project;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -21,6 +23,7 @@ import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
@@ -33,6 +36,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
+  public static final String NEW_PROJECT = "New Project";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
   private static final int LANGUAGE_SIZE = 3;
@@ -214,6 +218,7 @@ public class ProjectChoices {
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
+//    header.addStyleName("inlineFlex");
     String text = PLEASE_SELECT_A_LANGUAGE;
     if (nest == 1) {
       text = PLEASE_SELECT_A_COURSE;
@@ -224,9 +229,62 @@ public class ProjectChoices {
 
     Heading child = new Heading(3, text);
     child.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
-    header.add(child);
+    //header.add(child);
+
+    DivWidget left = new DivWidget();
+    left.addStyleName("floatLeftAndClear");
+    left.add(child);
+    //left.addStyleName("clear");
+    header.add(left);
+
+    if (isQC()) {
+      getCreateNewButton(header);
+    }
 
     return header;
+  }
+
+  private void getCreateNewButton(DivWidget header) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(NEW_PROJECT);
+
+    DivWidget right = new DivWidget();
+    right.addStyleName("floatRight");
+    right.add(w);
+
+    w.addStyleName("floatLeft");
+    header.add(right);
+
+    w.setIcon(IconType.PLUS);
+    w.setSize(ButtonSize.LARGE);
+    w.setType(ButtonType.WARNING);
+    w.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        ProjectEditForm projectEditForm = new ProjectEditForm(null, controller);
+        Widget form = projectEditForm.getForm(new ProjectInfo());
+        logger.info("form " + form);
+
+        DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+          @Override
+          public void gotYes() {
+            projectEditForm.newProject();
+          }
+
+          @Override
+          public void gotNo() {
+
+          }
+        };
+        new DialogHelper(true).show(
+            "Create New Project",
+            Collections.emptyList(),
+            form,
+            "OK",
+            "Cancel",
+            listener,
+            550);
+      }
+    });
   }
 
   /**
@@ -320,25 +378,24 @@ public class ProjectChoices {
         Widget form = projectEditForm.getForm(projectForLang);
         logger.info("form " + form);
 
+        DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+          @Override
+          public void gotYes() {
+            projectEditForm.updateProject();
+          }
+
+          @Override
+          public void gotNo() {
+
+          }
+        };
         new DialogHelper(true).show(
             "Edit " + name,
             Collections.emptyList(),
             form,
             "OK",
             "Cancel",
-            new DialogHelper.CloseListener() {
-              @Override
-              public void gotYes() {
-                //
-              //  logger.info("consider updating name of project");
-                projectEditForm.updateProject();
-              }
-
-              @Override
-              public void gotNo() {
-
-              }
-            }, 550);
+            listener, 550);
       }
     });
     return w;

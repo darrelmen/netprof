@@ -37,18 +37,18 @@ import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.HasID;
 
 public class ProjectInfo implements HasID, IsSerializable, MutableProject {
-  private int id;
-  private String name;
-  private String language;
-  private String course;
-  private String countryCode;
-  private ProjectStatus status;
-  private int displayOrder;
+  private int id = -1;
+  private String name = "";
+  private String language = "";
+  private String course = "";
+  private String countryCode = "";
+  private ProjectStatus status = ProjectStatus.DEVELOPMENT;
+  private int displayOrder = 0;
 
-  private long created;
+  private long created = 0;
 
   private int port = -1;
-  private String modelsDir;
+  private String modelsDir = "";
 
   public ProjectInfo() {
   } // for serialization
