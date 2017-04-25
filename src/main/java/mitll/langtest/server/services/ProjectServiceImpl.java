@@ -34,11 +34,9 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
@@ -116,11 +114,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
   @Override
   public boolean create(ProjectInfo newProject) {
-    DAOContainer container = db;
-    ProjectServices projectServices = db;
-    return new CreateProject().createProject(container,
-        projectServices,
-        newProject);
+    return new CreateProject().createProject(db, db, newProject);
   }
 
   private boolean getWasRetired(Project currentProject) {

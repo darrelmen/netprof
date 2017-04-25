@@ -35,6 +35,7 @@ package mitll.langtest.server.database.postgres;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.copy.CopyToPostgres;
+import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
@@ -278,7 +279,7 @@ public class PostgresTest extends BaseTest {
     return new Info("english");
   }
 
-  private boolean justReport = false;
+  private static final boolean justReport = false;
 
   private void testCopy(Info info) {
     testCopy(Collections.singletonList(info));
@@ -288,7 +289,7 @@ public class PostgresTest extends BaseTest {
     CopyToPostgres cp = new CopyToPostgres();
     try {
       for (Info config : infos) {
-        String cc = cp.getCC(config.language);
+        String cc = new CreateProject().getCC(config.language);
         long then = System.currentTimeMillis();
         logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 

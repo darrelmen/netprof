@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget {
+public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   private static final String EMAIL = "Email Item";
@@ -56,7 +56,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<CommonShell> listContainer;
   private ChoicePlayAudioPanel playAudio;
-  Map<Integer, AlignmentOutput> aligments = new HashMap<>();
+  Map<Integer, AlignmentOutput> alignments = new HashMap<>();
   private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>>> idToTypeToSegmentToWidget = new HashMap<>();
 
   /**
@@ -93,30 +93,25 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
-    addMouseOverHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        logger.info("got mouse over " + exercise.getID());
-        getRefAudio(controller);
-      }
-    });
-  }
 
+    addMouseOverHandler(event -> getRefAudio(controller));
+  }
 
   private void getRefAudio(ExerciseController controller) {
     int refID = playAudio.getCurrentAudioID();
     int contextRefID = -1; //contextPlay.getCurrentAudioID();
 
-    logger.info("asking for " + refID);
-    logger.info("asking for " + contextRefID);
+    logger.info("getRefAudio asking for " + refID);
+//    logger.info("asking for " + contextRefID);
 
     List<Integer> req = new ArrayList<>();
     if (refID != -1) {
-      if (!aligments.containsKey(refID))
+      if (!alignments.containsKey(refID))
         req.add(refID);
     }
+
     if (contextRefID != -1) {
-      if (!aligments.containsKey(contextRefID))
+      if (!alignments.containsKey(contextRefID))
         req.add(contextRefID);
     }
 
@@ -132,25 +127,61 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
             @Override
             public void onSuccess(Map<Integer, AlignmentOutput> result) {
-              aligments.putAll(result);
-              //      idToTypeToSegmentToWidget = new HashMap<>();
-//              matchSegmentToWidget(result);
-
+              alignments.putAll(result);
               registerSegmentHighlight(refID, contextRefID);
-              // AlignmentOutput alignmentOutput = aligments.get(NetPronImageType.WORD_TRANSCRIPT);
+              cacheOthers();
             }
           });
     }
   }
 
+  private void cacheOthers() {
+    Set<Integer> req = new HashSet<>(playAudio.getAllAudioIDs());
+
+    req.removeAll(alignments.keySet());
+
+    if (!req.isEmpty()) {
+      logger.info("Asking for audio alignments for " + req);
+
+      controller.getScoringService().getAlignments(controller.getProjectStartupInfo().getProjectid(),
+          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(Map<Integer, AlignmentOutput> result) {
+              alignments.putAll(result);
+              //registerSegmentHighlight(refID, contextRefID);
+            }
+          });
+    }
+  }
+
+
   private void registerSegmentHighlight(int refID, int contextRefID) {
     if (refID != -1) {
-      matchSegmentToWidgetForAudio(refID, aligments.get(refID));
-      playAudio.setListener(new SegmentHighlightAudioControl(idToTypeToSegmentToWidget.get(refID)));
+      audioChanged(refID);
+//      matchSegmentToWidgetForAudio(refID, alignments.get(refID));
+//      Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(refID);
+//
+//      logger.info("registerSegment for " + refID + " : " + typeToSegmentToWidget);
+//
+//      playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
     }
+
     if (contextRefID != -1) {
-      matchSegmentToWidgetForAudio(contextRefID, aligments.get(contextRefID));
+      matchSegmentToWidgetForAudio(contextRefID, alignments.get(contextRefID));
     }
+  }
+
+  @Override
+  public void audioChanged(int id) {
+    matchSegmentToWidgetForAudio(id, alignments.get(id));
+    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(id);
+    logger.info("audioChanged for " + id + " : " + typeToSegmentToWidget);
+    playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
   }
 
 /*
@@ -169,8 +200,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> value = new HashMap<>();
       idToTypeToSegmentToWidget.put(audioID, value);
 
-      List<TranscriptSegment> transcriptSegments =
-          value2.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+      List<TranscriptSegment> transcriptSegments = value2.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
       TreeMap<TranscriptSegment, IHighlightSegment> value1 = new TreeMap<>();
       value.put(NetPronImageType.WORD_TRANSCRIPT, value1);
 
@@ -430,7 +460,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private ChoicePlayAudioPanel getPlayAudioPanel() {
-    return new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller, false);
+    return new ChoicePlayAudioPanel(controller.getSoundManager(), exercise, controller, false, this);
   }
 
   /**
@@ -565,7 +595,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
 
       contextPlay
-          = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true);
+          = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true, this);
       contextPlay.setEnabled(audioAttrPrefGender != null);
       hp.add(contextPlay);
 
@@ -651,4 +681,5 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     comments.add(commentBox);
     return commentBox;
   }
+
 }

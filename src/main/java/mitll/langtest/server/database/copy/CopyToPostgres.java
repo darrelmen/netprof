@@ -101,7 +101,7 @@ public class CopyToPostgres<T extends CommonShell> {
       boolean hasModel = databaseLight.getServerProps().hasModel();
       logger.info("loading " + language + " " + hasModel);
       String nameToUse = optionalName.isEmpty() ? language : optionalName;
-      new CopyToPostgres().copyOneConfig(databaseLight, getCC(language), nameToUse, displayOrder, !hasModel);
+      new CopyToPostgres().copyOneConfig(databaseLight, new CreateProject().getCC(language), nameToUse, displayOrder, !hasModel);
     } catch (Exception e) {
       logger.error("got " + e, e);
     } finally {
@@ -134,66 +134,11 @@ public class CopyToPostgres<T extends CommonShell> {
     database.close();
   }
 
-  /**
-   * Add brazilian, serbo croatian, french, etc.
-   * <p>
-   * TODO : make t
-   *
-   * @param language
-   * @return
-   */
-  public String getCC(String language) {
-    List<Pair> languages = Arrays.asList(
-        new Pair("croatian", "hr"),
-        new Pair("dari", "af"),
-        new Pair("egyptian", "eg"),
-        new Pair("english", "us"),
-        new Pair("farsi", "ir"),
-        new Pair("french", "fr"),
-        new Pair("german", "de"),
-        new Pair("hindi", "in"),
-        new Pair("korean", "kr"),
-        new Pair("iraqi", "iq"),
-        new Pair("japanese", "jp"),
-        new Pair("levantine", "sy"),
-        new Pair("mandarin", "cn"),
-        new Pair("msa", "al"),
-        new Pair("pashto", "af"),
-        new Pair("portuguese", "pt"),
-        new Pair("russian", "ru"),
-        new Pair("serbian", "rs"),
-        new Pair("sorani", "ku"),
-        new Pair("spanish", "es"),
-        new Pair("sudanese", "ss"),
-        new Pair("tagalog", "ph"),
-        new Pair("turkish", "tr"),
-        new Pair("urdu", "pk"));
-
-
-    Map<String, String> langToCode = new HashMap<>();
-    for (Pair pair : languages) langToCode.put(pair.language, pair.cc);
-
-    String cc = langToCode.get(language.toLowerCase());
-    if (cc == null) {
-      logger.error("\n\n\n\ncan't find a flag for " + language);
-      cc = "us";
-    }
-    return cc;
-  }
-
-  private static class Pair {
-    String language;
-    String cc;
-
-    public Pair(String language, String cc) {
-      this.language = language;
-      this.cc = cc;
-    }
-  }
-
+/*
   private DatabaseImpl getAndPopulate() {
     return getDatabase().setInstallPath("war", "").populateProjects();
   }
+*/
 
   private static DatabaseImpl getDatabase() {
     File file = new File(NETPROF_PROPERTIES_FULL);
@@ -388,9 +333,14 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
-  private int createProjectIfNotExists(DatabaseImpl db, String cc, String optName, int displayOrder,
+  private int createProjectIfNotExists(DatabaseImpl db,
+                                       String cc,
+                                       String optName,
+                                       int displayOrder,
                                        boolean isDev) {
-    return new CreateProject().createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev);
+    CreateProject createProject = new CreateProject();
+    //String cc = createProject.getCC(optName);
+    return createProject.createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev);
   }
 
   /**

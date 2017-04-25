@@ -400,6 +400,4 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     @Source({CellTable.Style.DEFAULT_CSS, "RTLScoresCellTableStyleSheet.css"})
     PagingContainer.TableResources.TableStyle cellTableStyle();
   }
-
-
 }

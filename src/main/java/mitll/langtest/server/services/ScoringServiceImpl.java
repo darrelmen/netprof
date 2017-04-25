@@ -140,7 +140,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   @Override
-  public Map<Integer, AlignmentOutput> getAlignments(int projid, List<Integer> audioIDs) {
+  public Map<Integer, AlignmentOutput> getAlignments(int projid, Collection<Integer> audioIDs) {
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
     logger.info("getAlignments asking for " + audioIDs);
     for (Integer audioID : audioIDs) {
@@ -155,6 +155,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         getCachedAudioRef(idToAlignment, audioID, cachedResult);
       }
     }
+    logger.info("getAligments for "+ projid + " and " +audioIDs + " found " +idToAlignment.size());
     return idToAlignment;
   }
 
@@ -171,14 +172,17 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     AudioAttribute byID = db.getAudioDAO().getByID(audioID);
     if (byID != null) {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
-      logger.error("getAlignments decoding " + audioID + " for " + byID.getExid());
+
+      if (customOrPredefExercise != null) {
+        logger.info("getAlignments decoding " + audioID + " for " + byID.getExid() + " : " + customOrPredefExercise.getEnglish() + " " + customOrPredefExercise.getForeignLanguage());
+      }
 
       PretestScore pretestScore =
           getAudioFileHelper().decodeAndRemember(customOrPredefExercise, byID, false, getUserIDFromSession());
-      logger.error("getAlignments decoding " + audioID + " for " + byID.getExid() + " got " + pretestScore);
+      logger.info("getAlignments decoding " + audioID + " for " + byID.getExid() + " got " + pretestScore);
       idToAlignment.put(audioID, pretestScore);
     } else {
-      logger.error("getAlignments can't find audio id " + audioID);
+      logger.info("getAlignments can't find audio id " + audioID);
     }
   }
 

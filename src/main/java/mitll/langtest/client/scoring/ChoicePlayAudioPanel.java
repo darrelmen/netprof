@@ -24,10 +24,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -44,6 +41,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   private CommonExercise exercise;
   private boolean includeContext = false;
   private int currentAudioID = -1;
+  AudioChangeListener listener;
+  private Set<Integer> allIDs = new HashSet<>();
 
   /**
    * @see TwoColumnExercisePanel#getPlayAudioPanel
@@ -53,7 +52,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       SoundManagerAPI soundManager,
       CommonExercise exercise,
       ExerciseController exerciseController,
-      boolean includeContext) {
+      boolean includeContext, AudioChangeListener listener) {
     super(soundManager, new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -68,9 +67,11 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         },
         "",
         null);
-  this.includeContext = includeContext;
+    this.includeContext = includeContext;
     this.exercise = exercise;
     this.controller = exerciseController;
+    this.listener = listener;
+
     getElement().setId("ChoicePlayAudioPanel");
 
     LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> {
@@ -80,7 +81,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
-     // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
+      // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
       addChoices(null, includeContext);
     }
   }
@@ -114,7 +115,9 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void configureButton2(SplitDropdownButton playButton) {
-    playButton.addClickHandler(event -> { playAudio(); });
+    playButton.addClickHandler(event -> {
+      playAudio();
+    });
 
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
@@ -124,6 +127,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     playButton.addStyleName("choiceplay");
   }
 
+
   private void addChoices(SplitDropdownButton playButton, boolean includeContext) {
     Collection<Long> preferredVoices = Collections.emptyList();
     boolean isMale = isMale();
@@ -131,7 +135,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     boolean isReg = controller.getStorage().isTrue(IS_REG);
     boolean isSlow = !isReg;
 
-    Map<MiniUser, List<AudioAttribute>> malesMap   =
+    Map<MiniUser, List<AudioAttribute>> malesMap =
         exercise.getMostRecentAudio(true, preferredVoices, includeContext);
     Map<MiniUser, List<AudioAttribute>> femalesMap =
         exercise.getMostRecentAudio(false, preferredVoices, includeContext);
@@ -149,6 +153,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     {
       AudioAttribute mr = getAtSpeed(malesMap, true);
       if (mr != null) {
+        allIDs.add(mr.getUniqueID());
         if (playButton != null) addAudioChoice(playButton, true, true, mr);
         if (isMale && isReg) toUse = mr;
         else fallback = mr;
@@ -157,6 +162,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     {
       AudioAttribute ms = getAtSpeed(malesMap, false);
       if (ms != null) {
+        allIDs.add(ms.getUniqueID());
         if (playButton != null) addAudioChoice(playButton, true, false, ms);
         if (isMale && isSlow) toUse = ms;
         if (fallback == null) fallback = ms;
@@ -165,6 +171,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     {
       AudioAttribute fr = getAtSpeed(femalesMap, true);
       if (fr != null) {
+        allIDs.add(fr.getUniqueID());
         if (playButton != null) addAudioChoice(playButton, false, true, fr);
         if (isFemale && isReg) toUse = fr;
         if (fallback == null) fallback = fr;
@@ -174,6 +181,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     {
       AudioAttribute fs = getAtSpeed(femalesMap, false);
       if (fs != null) {
+        allIDs.add(fs.getUniqueID());
+
         if (playButton != null) addAudioChoice(playButton, false, false, fs);
         if (isFemale && isSlow) toUse = fs;
         if (fallback == null) fallback = fs;
@@ -187,6 +196,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     splitDropdownButton.getTriggerWidget().setEnabled(val);
     if (val) {
       currentAudioID = toUse.getUniqueID();
+      listener.audioChanged(currentAudioID);
+      logger.info("addChoices For exercise " + exercise.getID() + " current audio is " + currentAudioID);
       rememberAudio(toUse.getAudioRef());
     }
   }
@@ -221,7 +232,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void playAndRemember(String audioRef, boolean isMale, boolean isReg) {
-    logger.info("playAndRemember " +audioRef);
+    logger.info("playAndRemember " + audioRef);
 
     doPause();
     playAudio(audioRef);
@@ -263,7 +274,15 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     playButton = makePlayButton(this);
   }
 
+  /**
+   * @return
+   * @see TwoColumnExercisePanel#getRefAudio
+   */
   public int getCurrentAudioID() {
     return currentAudioID;
+  }
+
+  public Set<Integer> getAllAudioIDs() {
+    return allIDs;
   }
 }

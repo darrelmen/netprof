@@ -9,9 +9,7 @@ import mitll.langtest.shared.project.ProjectInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by go22670 on 10/26/16.
@@ -110,6 +108,7 @@ public class CreateProject {
    * @param projectServices
    * @param info
    * @return false if name already exists
+   * @see mitll.langtest.server.services.ProjectServiceImpl#create(ProjectInfo)
    */
   public boolean createProject(DAOContainer daoContainer,
                                ProjectServices projectServices,
@@ -117,12 +116,15 @@ public class CreateProject {
     IProjectDAO projectDAO = daoContainer.getProjectDAO();
     int byName = projectDAO.getByName(info.getName());
 
+    logger.info("Create new " +info);
+
     if (byName == -1) {
       int projectID = addProject(projectDAO,
-          daoContainer.getUserDAO().getBeforeLoginUser(), info.getName(),
+          daoContainer.getUserDAO().getBeforeLoginUser(),
+          info.getName(),
           info.getLanguage(),
           info.getCourse(),
-          info.getCountryCode(),
+          info.getCountryCode().isEmpty() ? getCC(info.getLanguage()) : info.getCountryCode(),
           true,
           info.getDisplayOrder(),
           info.getFirstType(),
@@ -168,4 +170,60 @@ public class CreateProject {
     return db.getLanguage();
   }
 
+  /**
+   * Add brazilian, serbo croatian, french, etc.
+   * <p>
+   * TODO : make t
+   *
+   * @param language
+   * @return
+   */
+  public String getCC(String language) {
+    List<Pair> languages = Arrays.asList(
+        new Pair("croatian", "hr"),
+        new Pair("dari", "af"),
+        new Pair("egyptian", "eg"),
+        new Pair("english", "us"),
+        new Pair("farsi", "ir"),
+        new Pair("french", "fr"),
+        new Pair("german", "de"),
+        new Pair("hindi", "in"),
+        new Pair("korean", "kr"),
+        new Pair("iraqi", "iq"),
+        new Pair("japanese", "jp"),
+        new Pair("levantine", "sy"),
+        new Pair("mandarin", "cn"),
+        new Pair("msa", "al"),
+        new Pair("pashto", "af"),
+        new Pair("portuguese", "pt"),
+        new Pair("russian", "ru"),
+        new Pair("serbian", "rs"),
+        new Pair("sorani", "ku"),
+        new Pair("spanish", "es"),
+        new Pair("sudanese", "ss"),
+        new Pair("tagalog", "ph"),
+        new Pair("turkish", "tr"),
+        new Pair("urdu", "pk"));
+
+
+    Map<String, String> langToCode = new HashMap<>();
+    for (Pair pair : languages) langToCode.put(pair.language, pair.cc);
+
+    String cc = langToCode.get(language.toLowerCase());
+    if (cc == null) {
+      logger.error("\n\n\n\ncan't find a flag for " + language);
+      cc = "us";
+    }
+    return cc;
+  }
+
+  private static class Pair {
+    String language;
+    String cc;
+
+    public Pair(String language, String cc) {
+      this.language = language;
+      this.cc = cc;
+    }
+  }
 }

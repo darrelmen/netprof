@@ -831,7 +831,12 @@ public class ScoreServlet extends DatabaseServlet {
                                      Request requestType,
                                      String deviceType,
                                      String device) throws IOException {
-    int realExID = Integer.parseInt(request.getHeader(EXERCISE));
+    int realExID = 0;
+    try {
+      realExID = Integer.parseInt(request.getHeader(EXERCISE));
+    } catch (NumberFormatException e) {
+      logger.info("couldn't parse "+ request.getHeader(EXERCISE));
+    }
     int reqid = getReqID(request);
     int projid = getProject(request);
 

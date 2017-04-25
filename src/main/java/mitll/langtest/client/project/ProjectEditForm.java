@@ -65,21 +65,8 @@ class ProjectEditForm extends UserDialog {
    * @see ProjectChoices#getEditButton
    */
   Widget getForm(ProjectInfo info) {
-//    logger.info("getForm " + info);
     this.info = info;
-
-    boolean isNew = info.getName().isEmpty();
-
-    // if (isNew) {
-    //    String name = isNew ? "New Project" : info.getName();
-    //  Heading heading = new Heading(3, name);
-    // heading.addStyleName("signUp");
-    // }
-
-    //  Fieldset fields = getFields(info);
     return getFields(info);
-
-//    return !isNew ? fields : getTwoPartForm(heading, fields);
   }
 
   @Override
@@ -198,25 +185,8 @@ class ProjectEditForm extends UserDialog {
     nameField = getName(fieldset, info.getName(), "Project Name");
     checkNameOnBlur(nameField);
 
-    fieldset.add(new Heading(5, "Language"));
-    // language = getName(fieldset, info.getLanguage(), "Language");
-    language = new ListBox();
-    fieldset.add(language);
-    int i = 0;
-    for (Language value : Language.values()) {
-      language.addItem(value.toDisplay());
-      if (info.getLanguage().equalsIgnoreCase(value.toString())) language.setItemSelected(i, true);
-      i++;
-    }
-    language.addStyleName("leftFiveMargin");
-
-    addControlGroupEntrySimple(
-        fieldset,
-        "Lifecycle",
-        statusBox = getBox())
-        .setWidth("366px");
-
-    setBox(info.getStatus());
+    addLanguage(info, fieldset);
+    addLifecycle(info, fieldset);
 
     fieldset.add(new Heading(5, "Hydra Port"));
     hydraPort = getHydraPort(fieldset, info.getPort());
@@ -234,6 +204,30 @@ class ProjectEditForm extends UserDialog {
 
 
     return fieldset;
+  }
+
+  private void addLifecycle(ProjectInfo info, Fieldset fieldset) {
+    addControlGroupEntrySimple(
+        fieldset,
+        "Lifecycle",
+        statusBox = getBox())
+        .setWidth("366px");
+
+    setBox(info.getStatus());
+  }
+
+  private void addLanguage(ProjectInfo info, Fieldset fieldset) {
+    fieldset.add(new Heading(5, "Language"));
+    // language = getName(fieldset, info.getLanguage(), "Language");
+    language = new ListBox();
+    fieldset.add(language);
+    int i = 0;
+    for (Language value : Language.values()) {
+      language.addItem(value.toDisplay());
+      if (info.getLanguage().equalsIgnoreCase(value.toString())) language.setItemSelected(i, true);
+      i++;
+    }
+    language.addStyleName("leftFiveMargin");
   }
 
   private FormField getName(Fieldset fieldset, String currentName, String hint) {
