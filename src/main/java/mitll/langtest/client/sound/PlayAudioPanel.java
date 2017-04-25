@@ -331,8 +331,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     //logger.info("setPlayButtonText now playing = " + isPlaying());
     playButton.setText(playing1 ? pauseLabel : playLabel);
     if (playing1) {
-      logger.info("setPlayButtonText set cursor to pause ");
-
+    //  logger.info("setPlayButtonText set cursor to pause ");
       playButton.setIcon(IconType.PAUSE);
 /*
       playButton.getElement().getStyle().setPaddingBottom(4, Style.Unit.PX);
@@ -419,7 +418,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     if (listener != null) {
       listener.update(position);
     } else {
-      logger.info("no listener...");
+ //     logger.info("update : no listener...");
     }
   }
 

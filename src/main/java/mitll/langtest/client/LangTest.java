@@ -289,7 +289,7 @@ public class LangTest implements
       public void onSuccess(StartupInfo startupInfo) {
         long now = System.currentTimeMillis();
         if (startupInfo == null) logger.warning("startup info is null??");
-        rememberStartup(startupInfo);
+        rememberStartup(startupInfo, false);
         onModuleLoad2();
 
         if (isLogClientMessages() && (now - then > 500)) {
@@ -328,26 +328,29 @@ public class LangTest implements
    * after we change state
    *
    * @see ProjectOps#refreshStartupInfo
+   * @param reloadWindow
    */
-  public void refreshStartupInfo() {
+  public void refreshStartupInfo(boolean reloadWindow) {
     service.getStartupInfo(new AsyncCallback<StartupInfo>() {
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
 
       public void onSuccess(StartupInfo startupInfo) {
-        rememberStartup(startupInfo);
+        rememberStartup(startupInfo, reloadWindow);
       }
     });
   }
 
   /**
    * @param startupInfo
+   * @param reloadWindow
    * @see #askForStartupInfo
    */
-  private void rememberStartup(StartupInfo startupInfo) {
+  private void rememberStartup(StartupInfo startupInfo, boolean reloadWindow) {
     this.startupInfo = startupInfo;
     props = new PropertyHandler(startupInfo.getProperties());
+    if (reloadWindow) initialUI.chooseProjectAgain();
   }
 
   /**

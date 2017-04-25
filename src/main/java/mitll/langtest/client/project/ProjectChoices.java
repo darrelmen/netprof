@@ -257,33 +257,30 @@ public class ProjectChoices {
     w.setIcon(IconType.PLUS);
     w.setSize(ButtonSize.LARGE);
     w.setType(ButtonType.WARNING);
-    w.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        ProjectEditForm projectEditForm = new ProjectEditForm(null, controller);
-        Widget form = projectEditForm.getForm(new ProjectInfo());
-        logger.info("form " + form);
+    w.addClickHandler(event -> {
+      ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
+      Widget form = projectEditForm.getForm(new ProjectInfo());
+      //logger.info("form " + form);
 
-        DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
-          @Override
-          public void gotYes() {
-            projectEditForm.newProject();
-          }
+      DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+        @Override
+        public void gotYes() {
+          projectEditForm.newProject();
+        }
 
-          @Override
-          public void gotNo() {
+        @Override
+        public void gotNo() {
 
-          }
-        };
-        new DialogHelper(true).show(
-            "Create New Project",
-            Collections.emptyList(),
-            form,
-            "OK",
-            "Cancel",
-            listener,
-            550);
-      }
+        }
+      };
+      new DialogHelper(true).show(
+          "Create New Project",
+          Collections.emptyList(),
+          form,
+          "OK",
+          "Cancel",
+          listener,
+          550);
     });
   }
 
@@ -295,7 +292,13 @@ public class ProjectChoices {
    * @see #showProjectChoices
    */
   private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
-    String lang1 = nest == 0 ? lang : projectForLang.getName();
+//    logger.info("project " + projectForLang);
+//    logger.info("lang " + lang);
+//    logger.info("nest " + nest);
+    String lang1 =
+        nest == 0 &&
+         //   lang.equalsIgnoreCase(projectForLang.getName()) &&
+            projectForLang.hasChildren() ? lang : projectForLang.getName();
     return getImageAnchor(lang1, projectForLang);
   }
 
@@ -310,9 +313,8 @@ public class ProjectChoices {
    */
   private Panel getImageAnchor(String name, SlimProject projectForLang) {
     int nest = 1;
-
     Thumbnail thumbnail = new Thumbnail();
-   // widgets.setWidth("100%");
+    // widgets.setWidth("100%");
     thumbnail.setWidth("195px");
     thumbnail.setSize(2);
     final int projid = projectForLang.getID();
@@ -349,17 +351,23 @@ public class ProjectChoices {
     }
 
     if (isQC() && !projectForLang.hasChildren()) {
-      com.github.gwtbootstrap.client.ui.Button editButton = getEditButton(projectForLang);
-      DivWidget buttonContainer = new DivWidget();
-      buttonContainer.addStyleName("floatRight");
-      editButton.addStyleName("floatRight");
-      buttonContainer.setWidth("100%");
-      buttonContainer.addStyleName("topTwentyMargin");
-      buttonContainer.add(editButton);
-      horiz.add(buttonContainer);
+      horiz.add(getEditButtonContainer(projectForLang));
     }
 
     return thumbnail;
+  }
+
+  @NotNull
+  private DivWidget getEditButtonContainer(SlimProject projectForLang) {
+    com.github.gwtbootstrap.client.ui.Button editButton = getEditButton(projectForLang);
+    DivWidget buttonContainer = new DivWidget();
+    buttonContainer.addStyleName("floatLeft");
+    editButton.addStyleName("floatRight");
+    buttonContainer.setWidth("100%");
+    buttonContainer.addStyleName("topFiveMargin");
+//    buttonContainer.addStyleName("topTwentyMargin");
+    buttonContainer.add(editButton);
+    return buttonContainer;
   }
 
   @NotNull
@@ -374,7 +382,7 @@ public class ProjectChoices {
 
         logger.info("Edit " + name);
 
-        ProjectEditForm projectEditForm = new ProjectEditForm(null, controller);
+        ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
         Widget form = projectEditForm.getForm(projectForLang);
         logger.info("form " + form);
 
@@ -414,7 +422,6 @@ public class ProjectChoices {
     if (children.size() < 2) {
       logger.info("onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
-
       setProjectForUser(projid);
     } else {
       logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");

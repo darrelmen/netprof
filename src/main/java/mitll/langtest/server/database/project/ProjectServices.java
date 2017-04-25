@@ -22,6 +22,5 @@ public interface ProjectServices {
 
   void configureProject(Project project);
 
-
   String getLanguage(int projectid);
 }

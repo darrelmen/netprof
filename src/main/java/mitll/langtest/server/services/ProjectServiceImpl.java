@@ -34,8 +34,11 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.DAOContainer;
+import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
+import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
@@ -48,8 +51,6 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
-
-  //private static final org.apache.logging.log4j.Logger log = LogManager.getLogger(ProjectServiceImpl.class);
 
   @Override
   public List<ProjectInfo> getAll() {
@@ -64,10 +65,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
             project.displayorder(),
 
             project.modified().getTime(),
-
             getPort(project),
-
-            project.getProp(ServerProperties.MODELS_DIR))
+            project.getProp(ServerProperties.MODELS_DIR), project.first(), project.second())
         )
         .collect(Collectors.toList());
   }
@@ -85,13 +84,21 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     return db.getProjectDAO();
   }
 
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
+   * @param projectid
+   * @return
+   */
   @Override
   public boolean exists(int projectid) {
     return getProjectDAO().exists(projectid);
   }
 
+  @Override
+  public boolean existsByName(String name) { return getProjectDAO().getByName(name) != -1;  }
+
   /**
-   * @see mitll.langtest.client.project.ProjectEditForm#gotClick
+   * @see ProjectEditForm#updateProject
    * @param info
    * @return
    */
@@ -105,6 +112,15 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
     db.getProjectManagement().refreshProjects();
     return update;
+  }
+
+  @Override
+  public boolean create(ProjectInfo newProject) {
+    DAOContainer container = db;
+    ProjectServices projectServices = db;
+    return new CreateProject().createProject(container,
+        projectServices,
+        newProject);
   }
 
   private boolean getWasRetired(Project currentProject) {

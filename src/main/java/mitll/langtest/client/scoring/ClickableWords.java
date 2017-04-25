@@ -14,6 +14,8 @@ import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ExerciseServiceAsync;
+import mitll.langtest.client.sound.HighlightSegment;
+import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.jetbrains.annotations.NotNull;
@@ -58,13 +60,13 @@ public class ClickableWords<T extends CommonExercise> {
   /**
    * @param value
    * @param clickables
-   * @see TwoColumnExercisePanel#getEntry(String, String, ExerciseAnnotation, boolean, boolean, boolean, boolean)
+   * @see TwoColumnExercisePanel#getEntry
    */
   DivWidget getClickableWords(String value,
                               boolean isFL,
                               boolean isTranslit,
                               boolean isMeaning,
-                              List<Widget> clickables) {
+                              List<IHighlightSegment> clickables) {
     DivWidget horizontal = new DivWidget();
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
@@ -74,7 +76,7 @@ public class ClickableWords<T extends CommonExercise> {
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
     for (String token : tokens) {
-      InlineHTML w = makeClickableText(isMeaning, dir, token, isChineseCharacter, false);
+      HighlightSegment w = makeClickableText(isMeaning, dir, token, isChineseCharacter, false);
       clickables.add(w);
       horizontal.add(w);
     }
@@ -209,12 +211,12 @@ public class ClickableWords<T extends CommonExercise> {
    * @return
    * @see #getClickableWordsHighlight
    */
-  private InlineHTML makeClickableText(boolean isMeaning,
+  private HighlightSegment makeClickableText(boolean isMeaning,
                                        HasDirection.Direction dir,
                                        final String html,
                                        boolean chineseCharacter,
                                        boolean isContextMatch) {
-    final InlineHTML w = new InlineHTML(html, dir);
+    final HighlightSegment w = new HighlightSegment(html, dir);
 
     if (isContextMatch) w.addStyleName(CONTEXTMATCH);
 

@@ -30,5 +30,9 @@ public enum Language implements IsSerializable {
   SUDANESE,
   TAGALOG,
   TURKISH,
-  URDU
+  URDU;
+
+  public String toDisplay() {
+    return name().substring(0,1)+name().substring(1).toLowerCase();
+  }
 }

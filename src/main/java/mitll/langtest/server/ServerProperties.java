@@ -199,8 +199,8 @@ public class ServerProperties {
    */
   public static List<String> CORE_PROPERTIES = Arrays.asList(
       ServerProperties.MODELS_DIR,
-      "N_OUTPUT",
-      "N_HIDDEN",
+    //  "N_OUTPUT",
+   //   "N_HIDDEN",
       WEBSERVICE_HOST_PORT
   );
   private String configFileFullPath;

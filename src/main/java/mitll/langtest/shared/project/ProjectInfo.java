@@ -36,6 +36,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.HasID;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   private int id = -1;
   private String name = "";
@@ -49,6 +52,10 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
 
   private int port = -1;
   private String modelsDir = "";
+  private String firstType = "";
+  private String secondType = "";
+
+  private Map<String, String> propertyValue = new HashMap<>();
 
   public ProjectInfo() {
   } // for serialization
@@ -66,7 +73,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
 
                      long created,
                      int port,
-                     String modelsDir) {
+                     String modelsDir, String first, String secondType) {
     this.language = language;
     this.id = projectid;
     this.name = name;
@@ -77,6 +84,8 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.countryCode = countryCode;
     this.port = port;
     this.modelsDir = modelsDir;
+    this.firstType = first;
+    this.secondType =secondType;
   }
 
   public String getLanguage() {
@@ -143,7 +152,51 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.modelsDir = modelsDir;
   }
 
+  public Map<String, String> getPropertyValue() {
+    return propertyValue;
+  }
+
+  public void addProp(String key, String value) {
+    propertyValue.put(key, value);
+  }
+
+  public String getProp(String key) {
+    return propertyValue.get(key);
+  }
+
+  public String removeProp(String key) {
+    return propertyValue.remove(key);
+  }
+
   public String toString() {
     return getName() + " " + getStatus() + " lang " + language;
+  }
+
+  public String getFirstType() {
+    return firstType;
+  }
+
+  public String getSecondType() {
+    return secondType;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setCourse(String course) {
+    this.course = course;
+  }
+
+  public void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
+  }
+
+  public void setDisplayOrder(int displayOrder) {
+    this.displayOrder = displayOrder;
+  }
+
+  public void setLanguage(String language) {
+    this.language = language;
   }
 }

@@ -1,10 +1,7 @@
 package mitll.langtest.client.sound;
 
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -15,16 +12,17 @@ import java.util.logging.Logger;
  */
 public class SegmentHighlightAudioControl implements AudioControl {
   private final Logger logger = Logger.getLogger("SegmentHighlightAudioControl");
-
   private SegmentAudioControl wordSegments, phoneSegments = null;
 
   /**
    * @param typeToSegmentToWidget
    * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#getWordTableContainer
    */
-  public SegmentHighlightAudioControl(Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget) {
+  public SegmentHighlightAudioControl(Map<NetPronImageType,
+      TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
     wordSegments = new SegmentAudioControl(typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT));
-    TreeMap<TranscriptSegment, Widget> words = typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
+    TreeMap<TranscriptSegment, IHighlightSegment> words =
+        typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (words != null) {
       phoneSegments = new SegmentAudioControl(words);
     }
@@ -41,12 +39,10 @@ public class SegmentHighlightAudioControl implements AudioControl {
   }
 
   @Override
-  public void songFirstLoaded(double durationEstimate) {
-  }
+  public void songFirstLoaded(double durationEstimate) {}
 
   @Override
-  public void repeatSegment(float startInSeconds, float endInSeconds) {
-  }
+  public void repeatSegment(float startInSeconds, float endInSeconds) {}
 
   @Override
   public void songLoaded(double duration) {
@@ -68,10 +64,14 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
   public static class SegmentAudioControl implements AudioControl {
     private TranscriptSegment currentWord;
-    private final TreeMap<TranscriptSegment, Widget> words;
+    private final TreeMap<TranscriptSegment, IHighlightSegment> words;
     private boolean isWordHighlighted = false;
 
-    public SegmentAudioControl(TreeMap<TranscriptSegment, Widget> words) {
+    /**
+     * @see SegmentHighlightAudioControl#SegmentHighlightAudioControl
+     * @param words
+     */
+    SegmentAudioControl(TreeMap<TranscriptSegment, IHighlightSegment> words) {
       this.words = words;
       if (words != null && !words.isEmpty()) {
         currentWord = words.keySet().iterator().next();
@@ -86,7 +86,6 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
     @Override
     public void reinitialize() {
-
     }
 
     @Override
@@ -138,17 +137,20 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
     private void removeHighlight() {
       if (currentWord != null) {
-        Widget widget = words.get(currentWord);
-        widget.getElement().getStyle().setBackgroundColor(backgroundColor);
+        IHighlightSegment widget = words.get(currentWord);
+        widget.clearBlue();
+
+//        widget.getElement().getStyle().setBackgroundColor(backgroundColor);
       }
     }
 
-    private String backgroundColor;
+   // private String backgroundColor;
 
     private void showHighlight() {
-      Widget nwidget = words.get(currentWord);
-      backgroundColor = nwidget.getElement().getStyle().getBackgroundColor();
-      nwidget.getElement().getStyle().setBackgroundColor("#2196F3");
+      IHighlightSegment nwidget = words.get(currentWord);
+      nwidget.setBlue();
+     // backgroundColor = nwidget.getElement().getStyle().getBackgroundColor();
+  //    nwidget.getElement().getStyle().setBackgroundColor("#2196F3");
     }
   }
 }

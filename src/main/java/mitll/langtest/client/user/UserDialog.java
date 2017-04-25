@@ -73,13 +73,14 @@ public abstract class UserDialog extends BasicDialog {
   protected final UserServiceAsync service = GWT.create(UserService.class);
 
   /**
-   * @see SignUpForm#SignUpForm
    * @param props
+   * @see SignUpForm#SignUpForm
    */
-  protected UserDialog(PropertyHandler props) { this.props = props;  }
+  protected UserDialog(PropertyHandler props) {
+    this.props = props;
+  }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeEnglishRow
    * @param dialogBox
    * @param label
    * @param isPassword
@@ -87,6 +88,7 @@ public abstract class UserDialog extends BasicDialog {
    * @param maxLength
    * @param hint
    * @return
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeEnglishRow
    */
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
@@ -100,7 +102,11 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   protected void markError(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
+    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, true);
+  }
+
+  protected void markErrorNoGrab(FormField dialectGroup, String message) {
+    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, false);
   }
 
   protected void markErrorBlur(FormField dialectGroup, String message) {
@@ -109,14 +115,14 @@ public abstract class UserDialog extends BasicDialog {
 
   /**
    * When would we want it to be different for testing?
+   *
    * @param url
    * @return
    */
   String trimURL(String url) {
     if (url.contains("127.0.0.1")) {
       return url.split("\\?")[0].split("#")[0];
-    }
-    else {
+    } else {
       return url.split("\\?")[0].split("#")[0];
     }
   }
@@ -133,7 +139,6 @@ public abstract class UserDialog extends BasicDialog {
    * @paramx passwordHash
    * @seex SignInForm#foundExistingUser
    * @see SignUpForm#gotSignUp
-   *
    */
   void storeUser(User result, UserManager userManager) {
     //logger.info("UserPassLogin.storeUser - " + result);
@@ -155,7 +160,7 @@ public abstract class UserDialog extends BasicDialog {
     return signInForm;
   }
 
-   void setFocusOn(final FocusWidget widget) {
+  void setFocusOn(final FocusWidget widget) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         widget.setFocus(true);
@@ -171,7 +176,7 @@ public abstract class UserDialog extends BasicDialog {
    * @see SignInForm#getForgotPassword
    * @see UserPassLogin#getForgotUser
    */
-   void makePopup(Panel commentPopup, Widget commentEntryText, Widget okButton, String prompt) {
+  void makePopup(Panel commentPopup, Widget commentEntryText, Widget okButton, String prompt) {
     Panel vp = new VerticalPanel();
     Panel w = new Heading(6, prompt);
     vp.add(w);

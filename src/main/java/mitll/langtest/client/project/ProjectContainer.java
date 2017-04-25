@@ -213,7 +213,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
 
   @Override
   public void gotClickOnItem(final T project) {
-    super.gotClickOnItem(project);
+  /*  super.gotClickOnItem(project);
     rightSide.clear();
 
     ProjectEditForm projectEditForm =
@@ -222,6 +222,6 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
             controller );
     rightSide.add(projectEditForm.getForm(project));
 
-    projectOps.clearOthers(this);
+    projectOps.clearOthers(this);*/
   }
 }

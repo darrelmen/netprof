@@ -44,4 +44,7 @@ public interface ProjectServiceAsync {
 
   void update(ProjectInfo info, AsyncCallback<Boolean> async);
 
+  void create(ProjectInfo newProject, AsyncCallback<Boolean> async);
+
+  void existsByName(String name, AsyncCallback<Boolean> async);
 }

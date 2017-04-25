@@ -38,6 +38,7 @@ import corpus.LTS;
 import corpus.ModernStandardArabicLTS;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,7 +64,7 @@ public class LTSFactory {
    * TODO : are we limited to these?
    */
   // known languages
-  public enum Language implements IsSerializable {
+  /*public enum Language implements IsSerializable {
     ARABIC,
     CROATIAN,
     DARI,
@@ -89,7 +90,7 @@ public class LTSFactory {
     TAGALOG,
     TURKISH,
     URDU
-  }
+  }*/
 
   private final LTS unknown = new EmptyLTS();
   private LTS ltsForLanguage = unknown; /// attempt to deal with undefined LTS...

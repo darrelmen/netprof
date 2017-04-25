@@ -42,5 +42,7 @@ import java.util.List;
 public interface ProjectService extends RemoteService {
   List<ProjectInfo> getAll();
   boolean exists(int projectid);
+  boolean existsByName(String name);
   boolean update(ProjectInfo info);
+  boolean create(ProjectInfo newProject);
 }

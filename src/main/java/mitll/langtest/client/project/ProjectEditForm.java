@@ -1,12 +1,15 @@
 package mitll.langtest.client.project;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.LifecycleSupport;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ProjectService;
@@ -14,6 +17,7 @@ import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 
@@ -29,7 +33,7 @@ class ProjectEditForm extends UserDialog {
   static final int USER_ID_MAX_LENGTH = 5;
 
   // private final EventRegistration eventRegistration;
-  private final ProjectOps projectOps;
+  private final LifecycleSupport lifecycleSupport;
   private ListBox statusBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
@@ -37,19 +41,19 @@ class ProjectEditForm extends UserDialog {
   private ScoringServiceAsync scoringServiceAsync;
 
   private HTML feedback;
-  private FormField hydraPort, nameField, language;
+  private FormField hydraPort, nameField;
+  ListBox language;
   private FormField model;
 
   /**
-   * @param projectOps
-   * @paramx props
-   * @see ProjectContainer#gotClickOnItem
+   * @param lifecycleSupport
+   * @see ProjectChoices#getCreateNewButton(DivWidget)
    */
-  ProjectEditForm(ProjectOps projectOps,
+  ProjectEditForm(LifecycleSupport lifecycleSupport,
                   ExerciseController controller
   ) {
     super(controller.getProps());
-    this.projectOps = projectOps;
+    this.lifecycleSupport = lifecycleSupport;
     this.audioServiceAsync = controller.getAudioService();
     this.scoringServiceAsync = controller.getScoringService();
   }
@@ -62,18 +66,20 @@ class ProjectEditForm extends UserDialog {
    */
   Widget getForm(ProjectInfo info) {
 //    logger.info("getForm " + info);
-
     this.info = info;
 
     boolean isNew = info.getName().isEmpty();
-    String name = isNew ? "New Project" : info.getName();
 
-    Heading heading = new Heading(3, name);
-    heading.addStyleName("signUp");
+    // if (isNew) {
+    //    String name = isNew ? "New Project" : info.getName();
+    //  Heading heading = new Heading(3, name);
+    // heading.addStyleName("signUp");
+    // }
 
-    Fieldset fields = getFields(info);
+    //  Fieldset fields = getFields(info);
+    return getFields(info);
 
-    return isNew ? fields : getTwoPartForm(heading, fields);
+//    return !isNew ? fields : getTwoPartForm(heading, fields);
   }
 
   @Override
@@ -90,7 +96,6 @@ class ProjectEditForm extends UserDialog {
   }
 
   private void checkIsHydraRunning() {
-
     int id = info.getID();
     scoringServiceAsync.isHydraRunning(id, new AsyncCallback<Boolean>() {
       @Override
@@ -109,10 +114,12 @@ class ProjectEditForm extends UserDialog {
         }
       }
     });
-
   }
 
-
+  /**
+   * So we can change the name, the language?, the model dir,
+   * the port
+   */
   void updateProject() {
     ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
 
@@ -130,6 +137,7 @@ class ProjectEditForm extends UserDialog {
       }
     }
 
+    info.setName(nameField.getSafeText());
     info.setStatus(status);
     info.setModelsDir(model.getSafeText());
 
@@ -140,43 +148,43 @@ class ProjectEditForm extends UserDialog {
 
       @Override
       public void onSuccess(Boolean result) {
-        projectOps.refreshStartupInfo();
-        projectOps.reload();
+        lifecycleSupport.refreshStartupInfo(true);
+        // projectOps.reload();
       }
     });
   }
 
   void newProject() {
-    ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
-
-    if (status == ProjectStatus.EVALUATION || status == ProjectStatus.PRODUCTION) {
+//    ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
+/*    if (status == ProjectStatus.EVALUATION || status == ProjectStatus.PRODUCTION) {
       try {
         info.setPort(Integer.parseInt(hydraPort.getSafeText()));
-
         if (model.isEmpty()) {
           markError(model, "Please enter a language model directory.");
         }
-
       } catch (NumberFormatException e) {
         markError(hydraPort, "Please enter a port number for the service.");
         return;
       }
-    }
+    }*/
 
-    info.setStatus(status);
+    //  info.setStatus(status);
+    info.setName(nameField.getSafeText());
+    info.setLanguage(language.getValue());
     info.setModelsDir(model.getSafeText());
 
-    /*projectServiceAsync.update(info, new AsyncCallback<Boolean>() {
+    projectServiceAsync.create(info, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
       public void onSuccess(Boolean result) {
-        projectOps.refreshStartupInfo();
-        projectOps.reload();
+        lifecycleSupport.refreshStartupInfo(true);
+//        projectOps.refreshStartupInfo();
+        //      projectOps.reload();
       }
-    });*/
+    });
   }
 
   private Fieldset getFields(ProjectInfo info/*, Button editButton*/) {
@@ -188,12 +196,24 @@ class ProjectEditForm extends UserDialog {
 
     fieldset.add(new Heading(5, "Name"));
     nameField = getName(fieldset, info.getName(), "Project Name");
+    checkNameOnBlur(nameField);
+
     fieldset.add(new Heading(5, "Language"));
-    language = getName(fieldset, info.getLanguage(), "Language");
+    // language = getName(fieldset, info.getLanguage(), "Language");
+    language = new ListBox();
+    fieldset.add(language);
+    int i = 0;
+    for (Language value : Language.values()) {
+      language.addItem(value.toDisplay());
+      if (info.getLanguage().equalsIgnoreCase(value.toString())) language.setItemSelected(i, true);
+      i++;
+    }
+    language.addStyleName("leftFiveMargin");
+
     addControlGroupEntrySimple(
         fieldset,
         "Lifecycle",
-        statusBox = getBox(/*editButton*/))
+        statusBox = getBox())
         .setWidth("366px");
 
     setBox(info.getStatus());
@@ -212,6 +232,7 @@ class ProjectEditForm extends UserDialog {
     fieldset.add(getCheckAudio(info));
     fieldset.add(getRecalcRefAudio(info));
 
+
     return fieldset;
   }
 
@@ -224,17 +245,43 @@ class ProjectEditForm extends UserDialog {
     userField.box.setWidth("200px");
     if (currentName != null && !currentName.isEmpty())
       userField.box.setText(currentName);
+
+
     return userField;
   }
 
+  private void checkNameOnBlur(FormField userField) {
+    userField.box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        String safeText = userField.getSafeText();
+        if (!safeText.equalsIgnoreCase(info.getName())) {
+          logger.info("checking name " + safeText);
+          projectServiceAsync.existsByName(safeText, new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+              if (result) {
+                markErrorNoGrab(userField, "Project with this name already exists.");
+              }
+            }
+          });
+        }
+      }
+    });
+  }
 
   private FormField getHydraPort(Fieldset fieldset, int currentPort) {
     FormField userField =
-        addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Hydra Port");
+        addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Hydra Port (optional)");
     userField.box.addStyleName("topMargin");
     userField.box.addStyleName("rightFiveMargin");
     userField.box.getElement().setId("hydraPort");
-    userField.box.setWidth("50px");
+    userField.box.setWidth("150" +
+        "px");
     if (currentPort > 0)
       userField.box.setText("" + currentPort);
     return userField;
@@ -242,11 +289,12 @@ class ProjectEditForm extends UserDialog {
 
   private FormField getModel(Fieldset fieldset, String model) {
     FormField userField =
-        addControlFormFieldWithPlaceholder(fieldset, false, 5, 100, "Language Model");
+        addControlFormFieldWithPlaceholder(fieldset, false, 5, 100, "Language Model (optional)");
     //  userField.box.addStyleName("topMargin");
     userField.box.addStyleName("rightFiveMargin");
     userField.box.getElement().setId("languageModel");
-    userField.box.setWidth("366px");
+    userField.box.setWidth("366" +
+        "px");
     if (model != null)
       userField.box.setText("" + model);
     return userField;
@@ -274,6 +322,7 @@ class ProjectEditForm extends UserDialog {
         }
       });
     });
+    w.addStyleName("bottomFiveMargin");
     return w;
   }
 
@@ -303,27 +352,28 @@ class ProjectEditForm extends UserDialog {
   private Button getRecalcRefAudio(final ProjectInfo info) {
     Button w = new Button("Align ref audio", IconType.STETHOSCOPE);
 
-    w.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        w.setEnabled(false);
-        feedback.setText("Please wait...");
+    w.addClickHandler(event -> {
+      w.setEnabled(false);
+      feedback.setText("Please wait...");
 
-        audioServiceAsync.recalcRefAudio(info.getID(), new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            w.setEnabled(true);
+      audioServiceAsync.recalcRefAudio(info.getID(), new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          w.setEnabled(true);
 
-          }
+        }
 
-          @Override
-          public void onSuccess(Void result) {
-            w.setEnabled(true);
-            feedback.setText("In progress...");
-          }
-        });
-      }
+        @Override
+        public void onSuccess(Void result) {
+          w.setEnabled(true);
+          feedback.setText("In progress...");
+        }
+      });
     });
+
+    w.addStyleName("leftFiveMargin");
+    w.addStyleName("bottomFiveMargin");
+
     return w;
   }
 

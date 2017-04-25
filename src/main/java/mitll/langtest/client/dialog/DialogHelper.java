@@ -124,6 +124,7 @@ public class DialogHelper {
 
     // add buttons
     FluidRow row = new FluidRow();
+    row.addStyleName("topFiveMargin");
     if (doYesAndNo) {
       row.add(new Column(4, closeButton));
       row.add(new Column(4, new Heading(4)));

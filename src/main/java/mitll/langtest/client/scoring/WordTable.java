@@ -42,6 +42,8 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.AudioControl;
+import mitll.langtest.client.sound.HighlightSegment;
+import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
@@ -162,27 +164,27 @@ public class WordTable {
    */
   Widget getDivWord(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime,
                     AudioControl audioControl,
-                    Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget) {
+                    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
     DivWidget table = new DivWidget();
     table.addStyleName("topFiveMargin");
     table.addStyleName("leftFiveMargin");
 
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
 
-    TreeMap<TranscriptSegment, Widget> words = new TreeMap<>();
+    TreeMap<TranscriptSegment, IHighlightSegment> words = new TreeMap<>();
     typeToSegmentToWidget.put(NetPronImageType.WORD_TRANSCRIPT, words);
-    TreeMap<TranscriptSegment, Widget> phoneMap = new TreeMap<>();
+    TreeMap<TranscriptSegment, IHighlightSegment> phoneMap = new TreeMap<>();
     typeToSegmentToWidget.put(NetPronImageType.PHONE_TRANSCRIPT, phoneMap);
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
       TranscriptSegment word = pair.getKey();
 
       String wordLabel = word.getEvent();
-      if (!wordLabel.equals("SIL")) {
+      if (!shouldSkipWord(wordLabel)) {
         DivWidget col = new DivWidget();
         col.addStyleName("wordTableWord");
         table.add(col);
 
-        InlineHTML header = new InlineHTML(wordLabel);
+        HighlightSegment header = new HighlightSegment(wordLabel);
         alignCenter(header);
         header.addStyleName("floatLeft");
         header.setWidth("100%");
@@ -190,9 +192,10 @@ public class WordTable {
         words.put(word, header);
         addClickHandler(audioControl, word, header);
 
-        setColor(word, header);
+        setColorClickable(word, header);
+
         DivWidget hdiv = new DivWidget();
-        setColor(word, hdiv);
+        //setColor(word, hdiv);
 
         hdiv.setWidth("100%");
         hdiv.add(header);
@@ -208,8 +211,11 @@ public class WordTable {
     return table;
   }
 
+
   private void addClickHandler(AudioControl audioControl, TranscriptSegment word, InlineHTML header) {
-    if (audioControl != null) header.addStyleName("handCursor");
+    if (audioControl != null) {
+      header.addStyleName("handCursor");
+    }
     header.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -244,7 +250,7 @@ public class WordTable {
       TranscriptSegment word = pair.getKey();
 
       String wordLabel = word.getEvent();
-      if (!wordLabel.equals("SIL")) {
+      if (!shouldSkipWord(wordLabel)) {
         TableHeader header = new TableHeader(wordLabel);
         alignCenter(header);
         setColor(word, header);
@@ -314,19 +320,27 @@ public class WordTable {
     }
   }
 
+  /**
+   * @see #getDivWord
+   * @param value
+   * @param scoreRow
+   * @param audioControl
+   * @param phoneMap
+   */
   private void addPhonesBelowWord2(List<TranscriptSegment> value,
                                    DivWidget scoreRow,
                                    AudioControl audioControl,
-                                   TreeMap<TranscriptSegment, Widget> phoneMap) {
+                                   TreeMap<TranscriptSegment, IHighlightSegment> phoneMap) {
     for (TranscriptSegment phone : value) {
       String phoneLabel = phone.getEvent();
-      if (!phoneLabel.equals("sil")) {
-        InlineHTML h = new InlineHTML(phoneLabel);
+      if (!shouldSkipPhone(phoneLabel)) {
+        HighlightSegment h = new HighlightSegment(phoneLabel);
         alignCenter(h);
         addClickHandler(audioControl, phone, h);
         phoneMap.put(phone, h);
-        setColor(phone, h);
-        h.getElement().getStyle().setWidth(PHONE_WIDTH, Style.Unit.PX);
+        setColorClickable(phone, h);
+        h.addStyleName("phoneWidth");
+//        h.getElement().getStyle().setWidth(PHONE_WIDTH, Style.Unit.PX);
         scoreRow.add(h);
       }
     }
@@ -338,11 +352,18 @@ public class WordTable {
   }
 
   private void setColor(TranscriptSegment phone, UIObject h) {
-    h.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(phone.getScore()));
+    String color = SimpleColumnChart.getColor(phone.getScore());
+    h.getElement().getStyle().setBackgroundColor(color);
+  }
+
+  private void setColorClickable(TranscriptSegment phone, HighlightSegment h) {
+    String color = SimpleColumnChart.getColor(phone.getScore());
+    h.setBackground(color);
   }
 
   private void alignCenter(UIObject header) {
-    header.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+    header.addStyleName("center");
+//    header.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
   }
 
   private int getPercent(Float aFloat) {
@@ -353,6 +374,11 @@ public class WordTable {
     return Math.round(a);
   }
 
+  /**
+   * @param netPronImageTypeToEndTime
+   * @return
+   * @see #getDivWord
+   */
   private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
@@ -362,8 +388,7 @@ public class WordTable {
     if (words != null) {
       for (TranscriptSegment word : words) {
         String event = word.getEvent();
-        if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
-        } else {
+        if (!shouldSkipPhone(event)) {
           for (TranscriptSegment phone : phones) {
             if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
               List<TranscriptSegment> orDefault = wordToPhones.get(word);
@@ -378,4 +403,13 @@ public class WordTable {
     }
     return wordToPhones;
   }
+
+  private boolean shouldSkipPhone(String event) {
+    return event.equals("sil") || event.equals("<s>") || event.equals("</s>");
+  }
+
+  private boolean shouldSkipWord(String wordLabel) {
+    return wordLabel.equals("SIL");
+  }
+
 }

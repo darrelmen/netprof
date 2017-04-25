@@ -217,7 +217,8 @@ public class BasicDialog {
   protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     if (!label.isEmpty()) {
-      userGroup.add(new ControlLabel(label));
+      ControlLabel widget1 = new ControlLabel(label);
+      userGroup.add(widget1);
     }
     widget.addStyleName("leftFiveMargin");
     userGroup.add(widget);
@@ -352,10 +353,10 @@ public class BasicDialog {
     setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement);
   }
 
-  void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
+  void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement, boolean grabFocus) {
     // if (DEBUG) logger.info("markError on '" + dialect.getElement().getExID() + "' with " + header + "/" + message);
     dialectGroup.setType(ControlGroupType.ERROR);
-    dialect.setFocus(true);
+    dialect.setFocus(grabFocus);
 //    setupPopover(dialect, header, message, placement);
     Widget widget = dialect;
 

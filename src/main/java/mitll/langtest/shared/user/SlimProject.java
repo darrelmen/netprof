@@ -37,18 +37,9 @@ import mitll.langtest.shared.project.ProjectStatus;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class SlimProject extends ProjectInfo {
-//  private int projectid;
-//  private String name;
-//  private String language;
-//  private String course;
-//  private String countryCode;
-//  private ProjectStatus status;
-//  private int displayOrder;
-
   private boolean hasModel;
   private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
@@ -65,8 +56,9 @@ public class SlimProject extends ProjectInfo {
    * @param hasModel
    * @param isRTL
    * @param created
-   *@param port
-   * @param modelsDir @see mitll.langtest.server.database.project.ProjectManagement#getProjectInfo
+   * @param port
+   * @param modelsDir
+   * @see mitll.langtest.server.database.project.ProjectManagement#getProjectInfo
    */
   public SlimProject(int projectid,
                      String name,
@@ -78,15 +70,9 @@ public class SlimProject extends ProjectInfo {
 
                      boolean hasModel,
                      boolean isRTL, long created, int port,
-                     String modelsDir) {
-    super(projectid,name,language,course,countryCode,status,displayOrder,created,port,modelsDir);
-//    this.name = name;
-//    this.language = language;
-//    this.projectid = projectid;
-//    this.countryCode = countryCode;
-//    this.course = course;
-//    this.status = status;
-//    this.displayOrder = displayOrder;
+                     String modelsDir,
+                     String firstType, String secondType) {
+    super(projectid, name, language, course, countryCode, status, displayOrder, created, port, modelsDir, firstType, secondType);
     this.hasModel = hasModel;
     this.isRTL = isRTL;
   }
@@ -114,12 +100,9 @@ public class SlimProject extends ProjectInfo {
   }
 
   public List<SlimProject> getChildren() {
-    Collections.sort(children, new Comparator<SlimProject>() {
-      @Override
-      public int compare(SlimProject o1, SlimProject o2) {
-        int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
-        return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
-      }
+    Collections.sort(children, (o1, o2) -> {
+      int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
+      return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
     });
     return children;
   }

@@ -715,7 +715,8 @@ public class ProjectManagement implements IProjectManagement {
         isRTL,
         project.created().getTime(),
         getPort(project),
-        project.getProp(ServerProperties.MODELS_DIR));
+        project.getProp(ServerProperties.MODELS_DIR),
+        project.first(), project.second());
   }
 
   private int getPort(SlickProject project) {

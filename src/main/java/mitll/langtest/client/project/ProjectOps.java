@@ -79,7 +79,7 @@ public class ProjectOps implements RequiresResize {
   }
 
   public void refreshStartupInfo() {
-    lifecycleSupport.refreshStartupInfo();
+    lifecycleSupport.refreshStartupInfo(false);
   }
 
   /**
@@ -219,9 +219,7 @@ public class ProjectOps implements RequiresResize {
    * @paramx kind
    * @see #showInitialState
    */
-  private void showProjects(
-                            final DivWidget content, DivWidget userForm) {
-
+  private void showProjects(final DivWidget content, DivWidget userForm) {
     projectServiceAsync.getAll(new AsyncCallback<List<ProjectInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {

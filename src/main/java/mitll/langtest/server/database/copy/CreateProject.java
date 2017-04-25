@@ -1,13 +1,16 @@
 package mitll.langtest.server.database.copy;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.database.user.DominoUserDAOImpl;
+import mitll.langtest.server.database.project.ProjectServices;
+import mitll.langtest.shared.project.ProjectInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -25,14 +28,17 @@ public class CreateProject {
    * @return
    * @see CopyToPostgres#copyOneConfig
    */
-  int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName, String course,
-                               int displayOrder,
-                               boolean isDev) {
-    IProjectDAO projectDAO = db.getProjectDAO();
+  public int createProjectIfNotExists(DatabaseImpl db,
+                                      String countryCode,
+                                      String optName,
+                                      String course,
+                                      int displayOrder,
+                                      boolean isDev) {
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
 
-   // logger.info("createProjectIfNotExists create project " + name);
+    // logger.info("createProjectIfNotExists create project " + name);
+    IProjectDAO projectDAO = db.getProjectDAO();
     int byName = projectDAO.getByName(name);
 
     if (byName == -1) {
@@ -71,29 +77,91 @@ public class CreateProject {
     String secondType = iterator.hasNext() ? iterator.next() : "";
     String language = getOldLanguage(db);
 
-    DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
-
     if (language.equals("msa")) language = "MSA";
     if (language.equals("levantine")) language = "Levantine";
 
-    int byName = projectDAO.add(
-        dominoUserDAO.getBeforeLoginUser(),
-        name,
-        language,
-        course,
-        firstType, secondType,
-        countryCode, displayOrder, isDev);
+    int beforeLoginUser = db.getUserDAO().getBeforeLoginUser();
+    int projectID =
+        addProject(projectDAO,
+            beforeLoginUser,
+            name,
+            language,
+            course,
+            countryCode,
+            isDev,
+            displayOrder,
+            firstType,
+            secondType);
 
     Properties props = db.getServerProps().getProps();
     for (String prop : ServerProperties.CORE_PROPERTIES) {
       String property = props.getProperty(prop);
       if (property != null) {
-        projectDAO.addProperty(byName, prop, property, MODEL_PROPERTY_TYPE, "");
+        projectDAO.addProperty(projectID, prop, property, MODEL_PROPERTY_TYPE, "");
       }
     }
 
-    logger.info("createProject : created project " + byName);
-    return byName;
+    logger.info("createProject : created project " + projectID);
+    return projectID;
+  }
+
+  /**
+   * @param daoContainer
+   * @param projectServices
+   * @param info
+   * @return false if name already exists
+   */
+  public boolean createProject(DAOContainer daoContainer,
+                               ProjectServices projectServices,
+                               ProjectInfo info) {
+    IProjectDAO projectDAO = daoContainer.getProjectDAO();
+    int byName = projectDAO.getByName(info.getName());
+
+    if (byName == -1) {
+      int projectID = addProject(projectDAO,
+          daoContainer.getUserDAO().getBeforeLoginUser(), info.getName(),
+          info.getLanguage(),
+          info.getCourse(),
+          info.getCountryCode(),
+          true,
+          info.getDisplayOrder(),
+          info.getFirstType(),
+          info.getSecondType()
+      );
+
+      projectDAO.addProperty(projectID, ServerProperties.WEBSERVICE_HOST_PORT,
+          "" + info.getPort(), MODEL_PROPERTY_TYPE, "");
+
+      projectDAO.addProperty(projectID, ServerProperties.MODELS_DIR,
+          "" + info.getModelsDir(), MODEL_PROPERTY_TYPE, "");
+
+      for (Map.Entry<String, String> pair : info.getPropertyValue().entrySet()) {
+        projectDAO.addProperty(projectID, pair.getKey(), pair.getValue(), "property", "");
+      }
+      projectServices.rememberProject(projectID);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private int addProject(IProjectDAO projectDAO,
+                         int beforeLoginUser,
+                         String name,
+                         String language,
+                         String course,
+                         String countryCode,
+                         boolean isDev, int displayOrder, String firstType, String secondType) {
+    return projectDAO.add(
+        beforeLoginUser,
+        name,
+        language,
+        course,
+        firstType,
+        secondType,
+        countryCode,
+        displayOrder,
+        isDev);
   }
 
   private String getOldLanguage(DatabaseImpl db) {

@@ -14,7 +14,9 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.WaitCursorHelper;
+import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.CompressedAudio;
+import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -270,7 +272,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     if (pretestScore.getHydecScore() > 0) {
       DivWidget scoreFeedbackDiv = new DivWidget();
       scoreFeedbackDiv.add(progressBar);
-      Map<NetPronImageType, TreeMap<TranscriptSegment, Widget>> typeToSegmentToWidget = new HashMap<>();
+      Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
       scoreFeedbackDiv.add(new WordScoresTable()
           .getStyledWordTable(pretestScore, playAudioPanel, typeToSegmentToWidget));
       playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
