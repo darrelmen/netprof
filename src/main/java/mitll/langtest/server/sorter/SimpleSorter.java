@@ -64,15 +64,15 @@ public class SimpleSorter extends ExerciseComparator {
    *
    * @param toSort
    * @param recordedLast
-   * @param isEnglish
+   * @param sortByFL
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    */
-  public void getSorted(List<? extends CommonShell> toSort, final boolean recordedLast, boolean isEnglish) {
+  public void getSorted(List<? extends CommonShell> toSort, final boolean recordedLast, boolean sortByFL) {
     if (typeOrder.isEmpty()) {
       sortByEnglish(toSort);
     } else {
-      Collections.sort(toSort, (Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, isEnglish));
+      Collections.sort(toSort, (Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, sortByFL));
     }
   }
 

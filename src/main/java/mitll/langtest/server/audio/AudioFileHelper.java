@@ -683,23 +683,25 @@ public class AudioFileHelper implements AlignDecode {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(duration);
     // logger.debug("validity dur " + validity.durationInMillis);
 
-    db.addRefAnswer(user, exercise1.getProjectID(), exercise1.getID(),
-        audioid,
-        validity.durationInMillis,
+    if (alignOutput.isValid()) {
+      db.addRefAnswer(user, exercise1.getProjectID(), exercise1.getID(),
+          audioid,
+          validity.durationInMillis,
 
-        decodeOutput.isCorrect(),
+          decodeOutput.isCorrect(),
 
-        alignOutput,
-        decodeOutput,
+          alignOutput,
+          decodeOutput,
 
-        alignOutputOld,
-        decodeOutputOld,
+          alignOutputOld,
+          decodeOutputOld,
 
-        isMale, speed,
-        model);
-    // TODO : add word and phone table for refs
-    //	recordWordAndPhoneInfo(decodeAnswer, answerID);
-    //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
+          isMale, speed,
+          model);
+      // TODO : add word and phone table for refs
+      //	recordWordAndPhoneInfo(decodeAnswer, answerID);
+      //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
+    }
   }
 
   private AudioAnswer getDecodeAnswer(CommonExercise exercise1,
@@ -981,10 +983,10 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param exid
    * @param english
-   *@param foreignLanguage
+   * @param foreignLanguage
    * @param projid
    * @param userid
-   * @param theFile     @return scores for the file
+   * @param theFile         @return scores for the file
    * @see mitll.langtest.server.services.ScoringServiceImpl#getASRScoreForAudio
    */
   public PrecalcScores checkForWebservice(int exid, String english, String foreignLanguage, int projid, int userid,
@@ -1033,7 +1035,7 @@ public class AudioFileHelper implements AlignDecode {
     httpClient.addRequestProperty("english", english);
     httpClient.addRequestProperty(EXERCISE_TEXT, StringUtils.stripAccents(foreignLanguage));
     // USE THE LANGUAGE INSTEAD
-  //  httpClient.addRequestProperty("projid", "-1");//  + projid);
+    //  httpClient.addRequestProperty("projid", "-1");//  + projid);
     httpClient.addRequestProperty("language", getLanguage());
     httpClient.addRequestProperty("user", "" + userid);
     httpClient.addRequestProperty("full", "full");  // full json returned

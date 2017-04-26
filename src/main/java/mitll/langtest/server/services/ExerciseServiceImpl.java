@@ -152,7 +152,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     // now if there's a prefix, filter by prefix match
     int userID = request.getUserID();
-    TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<CommonExercise>().setByExercise(exercises);
+    TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
     if (!request.getPrefix().isEmpty()) {
       // now do a trie over matches
       exercisesForSearch = getExercisesForSearch(request.getPrefix(), exercises, predefExercises);
@@ -188,7 +188,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   private List<CommonExercise> getSortedExercises(ExerciseListRequest request,
                                                   TripleExercises<CommonExercise> exercises,
-                                                  boolean predefExercises, int userID) {
+                                                  boolean predefExercises,
+                                                  int userID) {
     List<CommonExercise> commonExercises;
     if (request.isIncorrectFirstOrder()) {
       commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getCollator(), getLanguage());
@@ -196,13 +197,23 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       commonExercises = new ArrayList<>();
       if (predefExercises) {
         List<CommonExercise> basicExercises = new ArrayList<CommonExercise>(exercises.getByExercise());
-        sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises);
+        boolean sortByFL = getProject().isEnglish();
+        String searchTerm = request.getPrefix();
+        boolean hasSearch = !searchTerm.isEmpty();
+        if (!basicExercises.isEmpty() && hasSearch) {
+          // if the search term is in the fl, sort by fl
+          sortByFL = basicExercises.iterator().next().getForeignLanguage().contains(searchTerm);
+        }
+        sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL);
         commonExercises.addAll(exercises.getByID());
         commonExercises.addAll(basicExercises);
 
         List<CommonExercise> contextExercises = new ArrayList<CommonExercise>(exercises.getByContext());
-
-        sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises);
+        if (!contextExercises.isEmpty() && hasSearch) {
+          // if the search term is in the fl, sort by fl
+          sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
+        }
+        sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL);
 
         commonExercises.addAll(contextExercises);
       }
@@ -402,7 +413,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getCollator(), getLanguage());
     } else {
       copy = new ArrayList<>(exercisesForState);
-      sortExercises(request.getActivityType() == ActivityType.RECORDER, copy);
+      sortExercises(request.getActivityType() == ActivityType.RECORDER, copy, false);
     }
 
     return makeExerciseListWrapper(request, copy);
@@ -614,14 +625,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   /**
    * TODO : slow?
    *
-   * @param commonExercises
    * @param <T>
+   * @param commonExercises
+   * @param sortByFL
    * @paramx role
    * @see #getExerciseIds(ExerciseListRequest)
    */
-  private <T extends CommonShell> void sortExercises(boolean isRecorder, List<T> commonExercises) {
+  private <T extends CommonShell> void sortExercises(boolean isRecorder, List<T> commonExercises, boolean sortByFL) {
+
     new ExerciseSorter(db.getTypeOrder(getProjectID()))
-        .getSorted(commonExercises, isRecorder, getProject().isEnglish());
+        .getSorted(commonExercises, isRecorder, sortByFL);
   }
 
   /**
@@ -688,7 +701,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       return byExercise;
     }
 
-    public TripleExercises setByExercise(List<T> byExercise) {
+    public TripleExercises<T> setByExercise(List<T> byExercise) {
       this.byExercise = byExercise;
       return this;
     }

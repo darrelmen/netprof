@@ -141,6 +141,7 @@ public class DecodeAlignOutput {
     return (int) processDurInMillis;
   }
 
+  public boolean isValid() { return json != null; }
   public boolean isCorrect() {
     return isCorrect;
   }

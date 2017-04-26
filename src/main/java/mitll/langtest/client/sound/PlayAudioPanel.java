@@ -33,6 +33,7 @@
 package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -68,7 +69,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends DivWidget implements AudioControl {
-//  private static final int BUTTON_WIDTH = 10;
+  //  private static final int BUTTON_WIDTH = 10;
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
   private static final boolean DEBUG = false;
   private static final boolean LOCAL_TESTING = false;
@@ -79,7 +80,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #setPlayButtonText
    */
   private static final String PAUSE_LABEL = "pause";
-//  private static final int MIN_WIDTH = 40;
+  //  private static final int MIN_WIDTH = 40;
   private static final String FILE_MISSING = "FILE_MISSING";
   private String currentPath = null;
 
@@ -88,7 +89,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   protected String playLabel;
   private String pauseLabel = PAUSE_LABEL;
- // private int minWidth = MIN_WIDTH;
+  // private int minWidth = MIN_WIDTH;
   protected IconAnchor playButton;
   private boolean isSlow;
 
@@ -113,7 +114,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     addStyleName("playButton");
     playLabel = buttonTitle;
     if (buttonTitle.isEmpty()) {
-    //  minWidth = BUTTON_WIDTH;
+      //  minWidth = BUTTON_WIDTH;
       pauseLabel = "";
     }
     id = counter++;
@@ -331,7 +332,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     //logger.info("setPlayButtonText now playing = " + isPlaying());
     playButton.setText(playing1 ? pauseLabel : playLabel);
     if (playing1) {
-    //  logger.info("setPlayButtonText set cursor to pause ");
+      //  logger.info("setPlayButtonText set cursor to pause ");
       playButton.setIcon(IconType.PAUSE);
 /*
       playButton.getElement().getStyle().setPaddingBottom(4, Style.Unit.PX);
@@ -418,13 +419,19 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     if (listener != null) {
       listener.update(position);
     } else {
- //     logger.info("update : no listener...");
+      //     logger.info("update : no listener...");
     }
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#configureButton2
+   */
   public void playAudio() {
-    logger.info("playAudio " + currentPath);
-    playAudio(currentPath);
+    if (currentPath == null) {
+      logger.warning("playAudio " + currentPath);
+    } else {
+      playAudio(currentPath);
+    }
   }
 
   /**
@@ -467,7 +474,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   protected String rememberAudio(String path) {
-    if (DEBUG) logger.info("rememberAudio - path " + path);
+    if (DEBUG || path == null) logger.info("rememberAudio - path " + path);
     destroySound();
 
     this.currentPath = CompressedAudio.getPath(path);
@@ -549,7 +556,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     soundManager.setPosition(currentSound, 0);
 
     if (listener != null) {
-      if (DEBUG || LOCAL_TESTING) logger.info("PlayAudioPanel :reinitialize - telling listener to reinitialize " + listener);
+      if (DEBUG || LOCAL_TESTING)
+        logger.info("PlayAudioPanel :reinitialize - telling listener to reinitialize " + listener);
       listener.reinitialize();
     }
 //    else {
@@ -633,7 +641,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   public PlayAudioPanel setMinWidth(int minWidth) {
-   // this.minWidth = minWidth;
+    // this.minWidth = minWidth;
     return this;
   }
 

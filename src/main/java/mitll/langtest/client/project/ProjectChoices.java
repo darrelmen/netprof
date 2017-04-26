@@ -185,7 +185,9 @@ public class ProjectChoices {
 
       for (int j = i; j < max; j++) {
         SlimProject project = languages.get(j);
-        current.add(getLangIcon(project.getLanguage(), project, nest));
+        String language = project.getLanguage();
+        language = language.substring(0,1).toUpperCase()+language.substring(1);
+        current.add(getLangIcon(language, project, nest));
         total++;
       }
 

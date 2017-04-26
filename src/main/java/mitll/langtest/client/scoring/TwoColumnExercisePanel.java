@@ -24,6 +24,7 @@ import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.client.user.BasicDialog;
@@ -98,10 +99,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void getRefAudio(ExerciseController controller) {
-    int refID = playAudio.getCurrentAudioID();
+    AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
+    int refID =  currentAudioAttr.getUniqueID();
     int contextRefID = -1; //contextPlay.getCurrentAudioID();
 
-    logger.info("getRefAudio asking for " + refID);
+    //  logger.info("getRefAudio asking for " + refID);
 //    logger.info("asking for " + contextRefID);
 
     List<Integer> req = new ArrayList<>();
@@ -116,7 +118,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
 
     if (req.isEmpty()) {
-      registerSegmentHighlight(refID, contextRefID);
+      registerSegmentHighlight(refID, contextRefID, currentAudioAttr.getDurationInMillis());
     } else {
       controller.getScoringService().getAlignments(controller.getProjectStartupInfo().getProjectid(),
           req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
@@ -128,7 +130,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             @Override
             public void onSuccess(Map<Integer, AlignmentOutput> result) {
               alignments.putAll(result);
-              registerSegmentHighlight(refID, contextRefID);
+              registerSegmentHighlight(refID, contextRefID, currentAudioAttr.getDurationInMillis());
               cacheOthers();
             }
           });
@@ -160,28 +162,38 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
 
-  private void registerSegmentHighlight(int refID, int contextRefID) {
+  private void registerSegmentHighlight(int refID, int contextRefID, long durationInMillis) {
     if (refID != -1) {
-      audioChanged(refID);
+      audioChanged(refID, durationInMillis);
 //      matchSegmentToWidgetForAudio(refID, alignments.get(refID));
 //      Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(refID);
-//
 //      logger.info("registerSegment for " + refID + " : " + typeToSegmentToWidget);
-//
 //      playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
     }
 
-    if (contextRefID != -1) {
-      matchSegmentToWidgetForAudio(contextRefID, alignments.get(contextRefID));
-    }
+//    if (contextRefID != -1) {
+//      matchSegmentToWidgetForAudio(contextRefID, alignments.get(contextRefID));
+//    }
   }
 
   @Override
-  public void audioChanged(int id) {
-    matchSegmentToWidgetForAudio(id, alignments.get(id));
-    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(id);
-    logger.info("audioChanged for " + id + " : " + typeToSegmentToWidget);
-    playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
+  public void audioChanged(int id, long duration) {
+    AlignmentOutput value2 = alignments.get(id);
+    if (value2 != null) {
+      logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
+      matchSegmentToWidgetForAudio(id, duration, value2);
+      Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(id);
+      logger.info("audioChanged for ex " + exercise.getID() +
+          " audio id " + id + " : " +
+          (typeToSegmentToWidget == null ? "missing" : typeToSegmentToWidget.size()));
+      if (typeToSegmentToWidget == null) {
+        logger.warning("audioChanged no type to segment for " + id + " and exercise " + exercise.getID());
+      } else {
+        TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
+        logger.info("audioChanged segments now " + transcriptSegmentIHighlightSegmentTreeMap.keySet());
+        playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
+      }
+    }
   }
 
 /*
@@ -193,23 +205,31 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 */
 
-  private void matchSegmentToWidgetForAudio(Integer audioID, AlignmentOutput value2) {
+  /**
+   * TODO : what to do about chinese?
+   *
+   * @param audioID
+   * @param value2
+   * @see #
+   */
+  private void matchSegmentToWidgetForAudio(Integer audioID, long durationInMillis, AlignmentOutput value2) {
+    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> value = new HashMap<>();
+    idToTypeToSegmentToWidget.put(audioID, value);
+    TreeMap<TranscriptSegment, IHighlightSegment> segmentToWidget = new TreeMap<>();
+    value.put(NetPronImageType.WORD_TRANSCRIPT, segmentToWidget);
+
     if (value2 == null) {
-      logger.warning("no alignment for " + audioID);
+      logger.warning("matchSegmentToWidgetForAudio no alignment for " + audioID);
+      segmentToWidget.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0), new AllHighlight(flclickables));
     } else {
-      Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> value = new HashMap<>();
-      idToTypeToSegmentToWidget.put(audioID, value);
+      Iterator<IHighlightSegment> iterator = flclickables.iterator();
 
       List<TranscriptSegment> transcriptSegments = value2.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
-      TreeMap<TranscriptSegment, IHighlightSegment> value1 = new TreeMap<>();
-      value.put(NetPronImageType.WORD_TRANSCRIPT, value1);
-
-      Iterator<IHighlightSegment> iterator = flclickables.iterator();
       if (transcriptSegments != null) {
         for (TranscriptSegment seg : transcriptSegments) {
           if (!seg.getEvent().equalsIgnoreCase("sil")) {
             if (iterator.hasNext()) {
-              value1.put(seg, iterator.next());
+              segmentToWidget.put(seg, iterator.next());
             } else {
               logger.warning("matchSegmentToWidgetForAudio no match for " + seg);
             }

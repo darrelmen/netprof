@@ -49,14 +49,14 @@ import java.util.Collection;
 public class ExerciseComparator {
   private static final String A_SPACE = "a ";
 
-  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean isEnglish) {
+  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean sortByFL) {
     if (recordedLast) {
       Integer x = getRecordedOrder(o1, o2);
       if (x != null) return x;
     }
 
     // items in same chapter alphabetical by tooltip
-    return isEnglish ? compareByFL(o1, o2) : compareByEnglish(o1, o2);
+    return sortByFL ? compareByFL(o1, o2) : compareByEnglish(o1, o2);
   }
 
   private Integer getRecordedOrder(CommonShell o1, CommonShell o2) {

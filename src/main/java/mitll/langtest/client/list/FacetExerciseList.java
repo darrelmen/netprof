@@ -382,7 +382,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     this.rootNodesInOrder = new HashSet<>(projectStartupInfo.getTypeOrder());
     this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
-    // addFacets(container, projectStartupInfo.getRootNodes(), projectStartupInfo.getTypeToDistinct());
   }
 
   /**
@@ -672,7 +671,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       @Override
       public void onClick(ClickEvent event) {
         removeSelection(type);
-//        logger.info("ty->sel remove " + typeToSelection);
         getTypeToValue(typeToSelection);
       }
     });
@@ -736,7 +734,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           public void onSuccess(FilterResponse response) {
             Map<String, Set<MatchInfo>> result = response.getTypeToValues();
-            logger.info("getTypeToValues for " + pairs + " got " + result.size());
+          //  logger.info("getTypeToValues for " + pairs + " got " + result.size());
             boolean b = changeSelection(response.getTypesToInclude(), typeToSelection);
 
             setTypeToSelection(typeToSelection);
@@ -909,7 +907,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
-      logger.info("askServerForExercises show empty -- ");
+     // logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();
     } else {
       if (numToShow == 1 && itemID > 0) {

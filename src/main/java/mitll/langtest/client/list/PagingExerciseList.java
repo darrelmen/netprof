@@ -289,7 +289,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   public void searchBoxEntry(String text) {
     if (listOptions.isShowTypeAhead()) {
-      logger.info("searchBoxEntry type ahead '" + text + "'");
+     // logger.info("searchBoxEntry type ahead '" + text + "'");
 
       // why would this be a bad idea?
       setTypeAheadText(text);
@@ -321,7 +321,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   void setTypeAheadText(String t) {
     if (pendingRequests.isEmpty()) {
       if (typeAhead != null) {
-        logger.info("setTypeAheadText Set type ahead to '" + t + "'");
+       // logger.info("setTypeAheadText Set type ahead to '" + t + "'");
         typeAhead.setText(t);
       }
     } else {
