@@ -498,9 +498,7 @@ public class BasicDialog {
    * @see RecordButton#showTooLoud()
    */
   public void showPopover(Widget w, String heading, String message, Placement placement) {
-    //Popover popover = new Popover();
     showPopover(new Popover(), w, heading, message, placement, true);
-    //return popover;
   }
 
   /**
@@ -571,8 +569,7 @@ public class BasicDialog {
   }
 
    FormField getSimpleFormField(Panel dialogBox, TextBox user, int minLength) {
-    final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
-    return new FormField(user, userGroup, minLength);
+    return new FormField(user, addControlGroupEntryNoLabel(dialogBox, user), minLength);
   }
 
   static class MyPopover extends Popover {

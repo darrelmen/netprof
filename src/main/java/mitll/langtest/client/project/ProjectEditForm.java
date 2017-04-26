@@ -1,14 +1,14 @@
 package mitll.langtest.client.project;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTest;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LifecycleSupport;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AudioServiceAsync;
@@ -41,7 +41,7 @@ class ProjectEditForm extends UserDialog {
   private ScoringServiceAsync scoringServiceAsync;
 
   private HTML feedback;
-  private FormField hydraPort, nameField;
+  private FormField hydraPort, nameField, unit, chapter;
   ListBox language;
   private FormField model;
 
@@ -60,13 +60,14 @@ class ProjectEditForm extends UserDialog {
 
   /**
    * @param info
+   * @param isNew
    * @return
    * @see ProjectContainer#gotClickOnItem
    * @see ProjectChoices#getEditButton
    */
-  Widget getForm(ProjectInfo info) {
+  Widget getForm(ProjectInfo info, boolean isNew) {
     this.info = info;
-    return getFields(info);
+    return getFields(info, isNew);
   }
 
   @Override
@@ -136,26 +137,11 @@ class ProjectEditForm extends UserDialog {
       @Override
       public void onSuccess(Boolean result) {
         lifecycleSupport.refreshStartupInfo(true);
-        // projectOps.reload();
       }
     });
   }
 
   void newProject() {
-//    ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
-/*    if (status == ProjectStatus.EVALUATION || status == ProjectStatus.PRODUCTION) {
-      try {
-        info.setPort(Integer.parseInt(hydraPort.getSafeText()));
-        if (model.isEmpty()) {
-          markError(model, "Please enter a language model directory.");
-        }
-      } catch (NumberFormatException e) {
-        markError(hydraPort, "Please enter a port number for the service.");
-        return;
-      }
-    }*/
-
-    //  info.setStatus(status);
     info.setName(nameField.getSafeText());
     info.setLanguage(language.getValue());
     info.setModelsDir(model.getSafeText());
@@ -166,15 +152,11 @@ class ProjectEditForm extends UserDialog {
       }
 
       @Override
-      public void onSuccess(Boolean result) {
-        lifecycleSupport.refreshStartupInfo(true);
-//        projectOps.refreshStartupInfo();
-        //      projectOps.reload();
-      }
+      public void onSuccess(Boolean result) {     lifecycleSupport.refreshStartupInfo(true);      }
     });
   }
 
-  private Fieldset getFields(ProjectInfo info/*, Button editButton*/) {
+  private Fieldset getFields(ProjectInfo info, boolean isNew) {
     Fieldset fieldset = new Fieldset();
     if (info.getID() > 0) {
       Heading id = new Heading(4, "ID", "" + info.getID());
@@ -185,7 +167,7 @@ class ProjectEditForm extends UserDialog {
     nameField = getName(fieldset, info.getName(), "Project Name");
     checkNameOnBlur(nameField);
 
-    addLanguage(info, fieldset);
+    addLanguage(info, fieldset, isNew);
     addLifecycle(info, fieldset);
 
     fieldset.add(new Heading(5, "Hydra Port"));
@@ -193,15 +175,16 @@ class ProjectEditForm extends UserDialog {
     fieldset.add(new Heading(5, "Language Model"));
     model = getModel(fieldset, info.getModelsDir());
 
+
     feedback = new HTML();
     feedback.addStyleName("topFiveMargin");
     feedback.addStyleName("bottomFiveMargin");
     fieldset.add(feedback);
 
-
-    fieldset.add(getCheckAudio(info));
-    fieldset.add(getRecalcRefAudio(info));
-
+    if (!isNew) {
+      fieldset.add(getCheckAudio(info));
+      fieldset.add(getRecalcRefAudio(info));
+    }
 
     return fieldset;
   }
@@ -216,12 +199,15 @@ class ProjectEditForm extends UserDialog {
     setBox(info.getStatus());
   }
 
-  private void addLanguage(ProjectInfo info, Fieldset fieldset) {
+  private void addLanguage(ProjectInfo info, Fieldset fieldset, boolean isNew) {
     fieldset.add(new Heading(5, "Language"));
     // language = getName(fieldset, info.getLanguage(), "Language");
     language = new ListBox();
     fieldset.add(language);
     int i = 0;
+    if (isNew) {
+      language.addItem("Please select a language.");
+    }
     for (Language value : Language.values()) {
       language.addItem(value.toDisplay());
       if (info.getLanguage().equalsIgnoreCase(value.toString())) language.setItemSelected(i, true);
@@ -240,30 +226,26 @@ class ProjectEditForm extends UserDialog {
     if (currentName != null && !currentName.isEmpty())
       userField.box.setText(currentName);
 
-
     return userField;
   }
 
   private void checkNameOnBlur(FormField userField) {
-    userField.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        String safeText = userField.getSafeText();
-        if (!safeText.equalsIgnoreCase(info.getName())) {
-          logger.info("checking name " + safeText);
-          projectServiceAsync.existsByName(safeText, new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
+    userField.box.addBlurHandler(event -> {
+      String safeText = userField.getSafeText();
+      if (!safeText.equalsIgnoreCase(info.getName())) {
+        logger.info("checking name " + safeText);
+        projectServiceAsync.existsByName(safeText, new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-            @Override
-            public void onSuccess(Boolean result) {
-              if (result) {
-                markErrorNoGrab(userField, "Project with this name already exists.");
-              }
+          @Override
+          public void onSuccess(Boolean result) {
+            if (result) {
+              markErrorNoGrab(userField, "Project with this name already exists.");
             }
-          });
-        }
+          }
+        });
       }
     });
   }
@@ -416,6 +398,8 @@ class ProjectEditForm extends UserDialog {
         break;
       } else i++;
     }
+
+    // first is please select.
     statusBox.setSelectedIndex(found ? i : 0);
   }
 }

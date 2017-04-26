@@ -34,7 +34,6 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.UserProjectDAO;
@@ -220,10 +219,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param id
    * @seex PostgresTest#testDeleteEnglish
    */
-  public void delete(int id) {
+  public boolean delete(int id) {
     logger.info("delete project #" + id);
-
-    dao.delete(id);
+    return dao.delete(id) >0;
   }
 
   /**

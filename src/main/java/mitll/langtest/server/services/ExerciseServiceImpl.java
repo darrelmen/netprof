@@ -200,20 +200,34 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         boolean sortByFL = getProject().isEnglish();
         String searchTerm = request.getPrefix();
         boolean hasSearch = !searchTerm.isEmpty();
-        if (!basicExercises.isEmpty() && hasSearch) {
-          // if the search term is in the fl, sort by fl
-          sortByFL = basicExercises.iterator().next().getForeignLanguage().contains(searchTerm);
+
+        {
+          if (!basicExercises.isEmpty() && hasSearch) {
+            // if the search term is in the fl, sort by fl
+            sortByFL = basicExercises.iterator().next().getForeignLanguage().contains(searchTerm);
+            logger.info("found search term " + searchTerm + " = " + sortByFL);
+          }
+          sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL);
         }
-        sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL);
+
+        logger.info("adding " + exercises.getByID().size() + " by id exercises");
+
         commonExercises.addAll(exercises.getByID());
+
+        logger.info("adding " + basicExercises.size() + " basicExercises");
+
         commonExercises.addAll(basicExercises);
 
         List<CommonExercise> contextExercises = new ArrayList<CommonExercise>(exercises.getByContext());
-        if (!contextExercises.isEmpty() && hasSearch) {
-          // if the search term is in the fl, sort by fl
-          sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
+        {
+          if (!contextExercises.isEmpty() && hasSearch) {
+            // if the search term is in the fl, sort by fl
+            sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
+            logger.info("2 found search term " + searchTerm + " = " + sortByFL);
+          }
+          sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL);
         }
-        sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL);
+        logger.info("adding " + contextExercises.size() + " contextExercises");
 
         commonExercises.addAll(contextExercises);
       }
@@ -265,13 +279,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param exercises
    * @return
    */
-  private List<CommonExercise> getLimitedMatches(ExerciseListRequest request, List<CommonExercise> exercises) {
+/*  private List<CommonExercise> getLimitedMatches(ExerciseListRequest request, List<CommonExercise> exercises) {
     if (request.getLimit() > 0) {
       exercises = getFirstFew(request, exercises);
     }
     return exercises;
-  }
-
+  }*/
   @NotNull
   private List<CommonExercise> getFirstFew(ExerciseListRequest request, List<CommonExercise> exercises) {
     Collections.sort(exercises, (o1, o2) -> {
@@ -959,14 +972,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #makeExerciseListWrapper
    */
-  private <T extends CommonShell> List<CommonShell> getExerciseShells(
-      // Collection<? extends CommonExercise> exercises
-      Collection<T> exercises
-  ) {
-//    logger.info("getExerciseShells for " + exercises.size());
+  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises) {
     List<CommonShell> ids = new ArrayList<>();
     for (T e : exercises) {
-//      logger.info("got " +e.getOldID() + " mean " + e.getMeaning() + " eng " + e.getEnglish() + " fl " + e.getForeignLanguage());
       ids.add(e.getShell());
     }
     return ids;

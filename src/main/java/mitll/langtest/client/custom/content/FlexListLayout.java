@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.custom.content;
 
+import com.github.gwtbootstrap.client.ui.Affix;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
@@ -110,6 +111,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     if (!hasTopRow) bottomRow.setWidth("100%");
 
     bottomRowDiv.add(bottomRow);
+//    ScrollPanel widgets1 = new ScrollPanel(bottomRowDiv);
     twoRows.add(bottomRowDiv);
 
     Panel currentExerciseVPanel = getCurrentExercisePanel();
@@ -140,11 +142,19 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     topRow.addStyleName("rightFiveMargin");
 
     twoRows.addStyleName("inlineFlex");
-  //  twoRows.getElement().getStyle().setMarginRight(100, Style.Unit.PX);
+   // twoRows.getElement().getStyle().setTop(0, Style.Unit.PX  );
+  //  topRow.getElement().getStyle().setTop(0, Style.Unit.PX  );
+
+    //  twoRows.getElement().getStyle().setMarginRight(100, Style.Unit.PX);
 
     FlowPanel section = new FlowPanel("section");
+  //  section.getElement().getStyle().setTop(0, Style.Unit.PX  );
     section.addStyleName("sidebar");
 
+//    Affix affix = new Affix();
+//affix.setOffsetBottom(40);
+//affix.setWidget(section);
+//affix.reconfigure();
     twoRows.add(section);
     section.add(topRow);
   }

@@ -41,6 +41,7 @@ import mitll.langtest.client.download.DownloadHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,6 +54,7 @@ public class DialogHelper {
 
   public interface CloseListener {
     void gotYes();
+
     void gotNo();
   }
 
@@ -82,6 +84,10 @@ public class DialogHelper {
 
   public void show(String title, Collection<String> msgs, final CloseListener listener) {
     show(title, msgs, null, "Yes", "No", listener, -1);
+  }
+
+  public Button show(String title, Widget contents, CloseListener listener, int max) {
+    return show(title, Collections.emptyList(), contents, "OK", "Cancel", listener, max);
   }
 
   /**

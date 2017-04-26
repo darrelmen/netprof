@@ -45,4 +45,5 @@ public interface ProjectService extends RemoteService {
   boolean existsByName(String name);
   boolean update(ProjectInfo info);
   boolean create(ProjectInfo newProject);
+  boolean delete(int id);
 }

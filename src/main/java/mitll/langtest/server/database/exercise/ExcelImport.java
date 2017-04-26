@@ -102,7 +102,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @param addDefects
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
-  public ExcelImport(String file, ServerProperties serverProps,
+  public ExcelImport(String file,
+                     ServerProperties serverProps,
                      IUserListManager userListManager,
                      boolean addDefects) {
     super(serverProps, userListManager, addDefects, serverProps.getLanguage(), -1);
@@ -174,7 +175,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   /**
    * @param file
    * @return
-   * @see #getRawExercises()
+   * @see #readExercises()
    */
   private List<CommonExercise> readExercises(File file) {
     try {
@@ -205,7 +206,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @return
    * @seex mitll.langtest.server.SiteDeployer#readExercises(mitll.langtest.shared.Site, org.apache.commons.fileupload.FileItem)
    */
-  private List<CommonExercise> readExercises(InputStream inp) {
+  public List<CommonExercise> readExercises(InputStream inp) {
     log();
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     String language = serverProps.getLanguage();

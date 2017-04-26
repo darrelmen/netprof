@@ -139,7 +139,6 @@ public class SignInForm extends UserDialog implements SignIn {
 
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("password_login_box");
-    //hp.addStyleName("leftFiveMargin");
 
     password = addPasswordField(fieldset, hp);
 
@@ -148,7 +147,6 @@ public class SignInForm extends UserDialog implements SignIn {
     hp.add(signInButton);
 
     fieldset.add(hp);
-    //fieldset.add(getForgotRow());
     fieldset.add(forgotRow);
     setFocusOnUserID();
 

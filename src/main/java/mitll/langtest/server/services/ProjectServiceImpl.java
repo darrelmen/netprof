@@ -73,7 +73,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     try {
       return Integer.parseInt(project.getProp(ServerProperties.WEBSERVICE_HOST_PORT));
     } catch (NumberFormatException e) {
-      logger.error("got " + e,e);
+      logger.error("got " + e, e);
       return -1;
     }
   }
@@ -83,9 +83,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   /**
-   * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
    * @param projectid
    * @return
+   * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
    */
   @Override
   public boolean exists(int projectid) {
@@ -93,12 +93,14 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   @Override
-  public boolean existsByName(String name) { return getProjectDAO().getByName(name) != -1;  }
+  public boolean existsByName(String name) {
+    return getProjectDAO().getByName(name) != -1;
+  }
 
   /**
-   * @see ProjectEditForm#updateProject
    * @param info
    * @return
+   * @see ProjectEditForm#updateProject
    */
   @Override
   public boolean update(ProjectInfo info) {
@@ -115,6 +117,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public boolean create(ProjectInfo newProject) {
     return new CreateProject().createProject(db, db, newProject);
+  }
+
+  @Override
+  public boolean delete(int id) {
+    return getProjectDAO().delete(id);
   }
 
   private boolean getWasRetired(Project currentProject) {

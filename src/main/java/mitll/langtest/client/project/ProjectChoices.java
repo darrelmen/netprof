@@ -1,21 +1,20 @@
 package mitll.langtest.client.project;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.HeadElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.Button;
 import mitll.langtest.client.*;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.ModalInfoDialog;
-import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
@@ -186,7 +185,7 @@ public class ProjectChoices {
       for (int j = i; j < max; j++) {
         SlimProject project = languages.get(j);
         String language = project.getLanguage();
-        language = language.substring(0,1).toUpperCase()+language.substring(1);
+        language = language.substring(0, 1).toUpperCase() + language.substring(1);
         current.add(getLangIcon(language, project, nest));
         total++;
       }
@@ -260,30 +259,29 @@ public class ProjectChoices {
     w.setSize(ButtonSize.LARGE);
     w.setType(ButtonType.WARNING);
     w.addClickHandler(event -> {
-      ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
-      Widget form = projectEditForm.getForm(new ProjectInfo());
-      //logger.info("form " + form);
-
-      DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
-        @Override
-        public void gotYes() {
-          projectEditForm.newProject();
-        }
-
-        @Override
-        public void gotNo() {
-
-        }
-      };
-      new DialogHelper(true).show(
-          "Create New Project",
-          Collections.emptyList(),
-          form,
-          "OK",
-          "Cancel",
-          listener,
-          550);
+      showNewProjectDialog();
     });
+  }
+
+  private void showNewProjectDialog() {
+    ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
+    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+      @Override
+      public void gotYes() {
+        projectEditForm.newProject();
+      }
+
+      @Override
+      public void gotNo() {
+
+      }
+    };
+
+    new DialogHelper(true).show(
+        "Create New Project",
+        projectEditForm.getForm(new ProjectInfo(), true),
+        listener,
+        550);
   }
 
   /**
@@ -299,7 +297,7 @@ public class ProjectChoices {
 //    logger.info("nest " + nest);
     String lang1 =
         nest == 0 &&
-         //   lang.equalsIgnoreCase(projectForLang.getName()) &&
+            //   lang.equalsIgnoreCase(projectForLang.getName()) &&
             projectForLang.hasChildren() ? lang : projectForLang.getName();
     return getImageAnchor(lang1, projectForLang);
   }
@@ -338,9 +336,12 @@ public class ProjectChoices {
     thumbnail.add(horiz);
     {
       Heading label = new Heading(LANGUAGE_SIZE, name);
-
+      label.setWidth("100%");
+      label.getElement().getStyle().setLineHeight(25, Style.Unit.PX);
       if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
         label.setSubtext(projectForLang.getStatus().name());
+      } else if (projectForLang.hasChildren()) {
+        label.setSubtext(projectForLang.getChildren().size() + " courses");
       }
       label.addStyleName("floatLeft");
 
@@ -349,12 +350,25 @@ public class ProjectChoices {
       container.setWidth("100%");
       container.addStyleName("floatLeft");
 
+
+      if (isQC() && !projectForLang.hasChildren()) {
+        DivWidget horiz2 = new DivWidget();
+        horiz2.addStyleName("inlineFlex");
+        horiz2.add(getEditButtonContainer(projectForLang));
+        DivWidget importButtonContainer = getImportButtonContainer(projectForLang);
+        importButtonContainer.addStyleName("leftFiveMargin");
+        horiz2.add(importButtonContainer);
+        //horiz2.add(getButtonContainer(getDeleteButton(projectForLang)));
+        container.add(horiz2);
+      }
+
       horiz.add(container);
     }
 
-    if (isQC() && !projectForLang.hasChildren()) {
-      horiz.add(getEditButtonContainer(projectForLang));
-    }
+//    if (isQC() && !projectForLang.hasChildren()) {
+//      horiz.add(getEditButtonContainer(projectForLang));
+//      horiz.add(getImportButtonContainer(projectForLang));
+//    }
 
     return thumbnail;
   }
@@ -362,6 +376,17 @@ public class ProjectChoices {
   @NotNull
   private DivWidget getEditButtonContainer(SlimProject projectForLang) {
     com.github.gwtbootstrap.client.ui.Button editButton = getEditButton(projectForLang);
+    return getButtonContainer(editButton);
+  }
+
+  @NotNull
+  private DivWidget getImportButtonContainer(SlimProject projectForLang) {
+    com.github.gwtbootstrap.client.ui.Button editButton = getImportButton(projectForLang);
+    return getButtonContainer(editButton);
+  }
+
+  @NotNull
+  private DivWidget getButtonContainer(Button editButton) {
     DivWidget buttonContainer = new DivWidget();
     buttonContainer.addStyleName("floatLeft");
     editButton.addStyleName("floatRight");
@@ -376,39 +401,98 @@ public class ProjectChoices {
   private com.github.gwtbootstrap.client.ui.Button getEditButton(SlimProject projectForLang) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.PENCIL);
-    w.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        logger.info("projectForLang " + projectForLang);
-        String name = projectForLang.getName();
-
-        logger.info("Edit " + name);
-
-        ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
-        Widget form = projectEditForm.getForm(projectForLang);
-        logger.info("form " + form);
-
-        DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
-          @Override
-          public void gotYes() {
-            projectEditForm.updateProject();
-          }
-
-          @Override
-          public void gotNo() {
-
-          }
-        };
-        new DialogHelper(true).show(
-            "Edit " + name,
-            Collections.emptyList(),
-            form,
-            "OK",
-            "Cancel",
-            listener, 550);
-      }
-    });
+    w.addClickHandler(event -> showEditDialog(projectForLang));
     return w;
+  }
+
+  @NotNull
+  private com.github.gwtbootstrap.client.ui.Button getImportButton(SlimProject projectForLang) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
+    w.setIcon(IconType.UPLOAD);
+    w.addClickHandler(event -> showImportDialog(projectForLang));
+    return w;
+  }
+
+  @NotNull
+  private com.github.gwtbootstrap.client.ui.Button getDeleteButton(SlimProject projectForLang) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
+    w.setIcon(IconType.ERASER);
+    w.addClickHandler(event -> showImportDialog(projectForLang));
+    return w;
+  }
+
+  private void showEditDialog(SlimProject projectForLang) {
+    logger.info("projectForLang " + projectForLang);
+    ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
+
+    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+      @Override
+      public void gotYes() {
+        projectEditForm.updateProject();
+      }
+
+      @Override
+      public void gotNo() {
+      }
+    };
+    new DialogHelper(true).show(
+        "Edit " + projectForLang.getName(),
+        projectEditForm.getForm(projectForLang, false),
+        listener,
+        550);
+  }
+
+  private void showImportDialog(SlimProject projectForLang) {
+    // logger.info("projectForLang " + projectForLang);
+    //new FileUploader().getForm(projectForLang.getID());
+    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+      @Override
+      public void gotYes() {
+        // projectEditForm.updateProject();
+      }
+
+      @Override
+      public void gotNo() {
+      }
+    };
+    new DialogHelper(true).show(
+        "Import data into " + projectForLang.getName(),
+        new FileUploader().getForm(projectForLang.getID()),
+        listener,
+        550);
+  }
+
+  private void showDeleteDialog(SlimProject projectForLang) {
+    // logger.info("projectForLang " + projectForLang);
+    //new FileUploader().getForm(projectForLang.getID());
+    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+      @Override
+      public void gotYes() {
+        logger.info("delete project!");
+        projectServiceAsync.delete(projectForLang.getID(), new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Boolean result) {
+            uiLifecycle.showInitialState();
+          }
+        });
+        // projectEditForm.updateProject();
+      }
+
+      @Override
+      public void gotNo() {
+      }
+    };
+    Heading contents = new Heading(2, "Are you sure?");
+    new DialogHelper(true).show(
+        "Import data into " + projectForLang.getName(),
+        contents,
+        listener,
+        550);
   }
 
   private boolean isQC() {
@@ -419,7 +503,7 @@ public class ProjectChoices {
     NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
     List<SlimProject> children = projectForLang.getChildren();
 
-    logger.info("gotClickOnFlag project " + projid + " has " + children);
+//    logger.info("gotClickOnFlag project " + projid + " has " + children);
 
     if (children.size() < 2) {
       logger.info("onClick select leaf project " + projid +

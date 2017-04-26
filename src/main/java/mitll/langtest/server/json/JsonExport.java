@@ -100,7 +100,7 @@ public class JsonExport {
    * @return
    * @seex JSONExerciseDAO#readExercises
    */
- /* public List<CommonExercise> getExercises(String json) {
+  public List<CommonExercise> getExercises(String json) {
     JSONObject object = JSONObject.fromObject(json);
     Collection<String> types = getTypes(object);
 
@@ -114,14 +114,14 @@ public class JsonExport {
       logger.info("got " + ex);
     }
     return exercises;
-  }*/
+  }
 
-/*  private List<String> getTypes(JSONObject object) {
+  private List<String> getTypes(JSONObject object) {
     List<String> types = new ArrayList<>();
     JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
     for (int i = 0; i < jsonArray.size(); i++) types.add(jsonArray.getString(i));
     return types;
-  }*/
+  }
 
   /**
    * @param jsonObject
@@ -378,7 +378,7 @@ public class JsonExport {
    * @return
    * @seex #getExercises(String)
    */
-/*
+
   private CommonExercise toExercise(JSONObject jsonObject, Collection<String> types) {
     String id = jsonObject.getString(ID);
     CommonExercise exercise = new Exercise(
@@ -404,7 +404,6 @@ public class JsonExport {
     }
     return exercise;
   }
-*/
 
   /**
    * Male/female reg/slow speed

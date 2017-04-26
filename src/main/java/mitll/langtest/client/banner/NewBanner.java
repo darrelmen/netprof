@@ -68,6 +68,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
                    ExerciseController controller) {
     setPosition(NavbarPosition.TOP);
 
+    setInverse(true);
+
     this.controller = controller;
 
     add(getImage());
@@ -83,10 +85,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     navCollapse.add(this.lnav = getLNav());
 
-    //lnav.add(breadcrumbs);
-    //add(breadcrumbs);
-
-    breadcrumbs.addStyleName("rightTwentyMargin");
+   breadcrumbs.addStyleName("rightTwentyMargin");
     addChoicesForUser(lnav);
 
     Nav recnav = new Nav();

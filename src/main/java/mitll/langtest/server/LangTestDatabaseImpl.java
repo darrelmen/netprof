@@ -49,11 +49,17 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.user.SlimProject;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
@@ -82,6 +88,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private String relativeConfigDir;
   private String configDir;
   private String startupMessage = "";
+  FileUploadHelper siteDeployer;
 
   /**
    * Reco test option lets you run through and score all the reference audio -- if you want to see model performance
@@ -116,6 +123,39 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       if (serverProps.isAMAS()) getAudioFileHelper().makeAutoCRT(relativeConfigDir);
     } catch (Exception e) {
       logger.error("Got " + e, e);
+    }
+  }
+
+  /**
+   * This allows us to upload an exercise file.
+   *
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   * @seex mitll.langtest.client.DataCollectAdmin#makeDataCollectNewSiteForm2
+   * @seex SiteDeployer
+   */
+  @Override
+  protected void service(HttpServletRequest request,
+                         HttpServletResponse response) throws ServletException, IOException {
+    ServletRequestContext ctx = new ServletRequestContext(request);
+    boolean isMultipart = ServletFileUpload.isMultipartContent(ctx);
+
+    String contentType = ctx.getContentType();
+    logger.info("service content type " + contentType + " multi " + isMultipart);
+    if (isMultipart) {
+      logger.debug("isMultipart : Request " + request.getQueryString() + " path " + request.getPathInfo());
+      FileUploadHelper.Site site = siteDeployer.gotFile(request);
+      if (site == null) {
+        super.service(request, response);
+        return;
+      }
+
+      siteDeployer.doSiteResponse(response, site);
+    } else {
+      super.service(request, response);
+
     }
   }
 
@@ -305,14 +345,15 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       this.serverProps = serverProps;
 
       db = makeDatabaseImpl(this.serverProps.getH2Database());
+      siteDeployer = new FileUploadHelper(db);
 
 //      logger.info("readProperties made database " + db);
 
       securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
-  //    logger.info("readProperties made securityManager " + securityManager);
+      //    logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
 
-    //  logger.info("readProperties shareDB ");
+      //  logger.info("readProperties shareDB ");
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }

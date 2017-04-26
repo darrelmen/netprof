@@ -46,7 +46,7 @@ public interface IProjectDAO extends IDAO {
   int add(int userid, long modified, String name, String language, String course,
           ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode, int displayOrder);
 
-  void delete(int id);
+  boolean delete(int id);
 
   /**
    * @return

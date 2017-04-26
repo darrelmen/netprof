@@ -164,7 +164,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
     // remove exercises to remove
     // mask over old items that have been overridden
-    addOverlays(removeExercises());
+    if (userExerciseDAO != null) {
+      addOverlays(removeExercises());
+    }
 
     // add new items
     addNewExercises();
