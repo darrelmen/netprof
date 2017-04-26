@@ -78,7 +78,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   /**
    *
-   *
    */
   public static final String DATABASE_REFERENCE = "databaseReference";
 
@@ -88,7 +87,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private String relativeConfigDir;
   private String configDir;
   private String startupMessage = "";
-  FileUploadHelper siteDeployer;
 
   /**
    * Reco test option lets you run through and score all the reference audio -- if you want to see model performance
@@ -109,6 +107,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.error("Got " + e, e);
     }
 
+    // optional (bogus?) initialization...
+    optionalInit();
+  }
+
+  private void optionalInit() {
     try {
       db.preloadContextPractice();
       getUserListManager().setStateOnExercises();
@@ -118,8 +121,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
 
     try {
-//      this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper());
-//      refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
       if (serverProps.isAMAS()) getAudioFileHelper().makeAutoCRT(relativeConfigDir);
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -142,20 +143,18 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     ServletRequestContext ctx = new ServletRequestContext(request);
     boolean isMultipart = ServletFileUpload.isMultipartContent(ctx);
 
-    String contentType = ctx.getContentType();
-    logger.info("service content type " + contentType + " multi " + isMultipart);
+//    String contentType = ctx.getContentType();
+    //logger.info("service content type " + contentType + " multi " + isMultipart);
     if (isMultipart) {
       logger.debug("isMultipart : Request " + request.getQueryString() + " path " + request.getPathInfo());
-      FileUploadHelper.Site site = siteDeployer.gotFile(request);
+      FileUploadHelper.Site site = db.getProjectManagement().getFileUploadHelper().gotFile(request);
       if (site == null) {
         super.service(request, response);
-        return;
+      } else {
+        db.getProjectManagement().getFileUploadHelper().doSiteResponse(response, site);
       }
-
-      siteDeployer.doSiteResponse(response, site);
     } else {
       super.service(request, response);
-
     }
   }
 
@@ -343,16 +342,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     try {
       this.serverProps = serverProps;
-
       db = makeDatabaseImpl(this.serverProps.getH2Database());
-      siteDeployer = new FileUploadHelper(db);
-
 //      logger.info("readProperties made database " + db);
-
       securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
       //    logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
-
       //  logger.info("readProperties shareDB ");
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -361,7 +355,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     shareDB(servletContext);
 //    shareLoadTesting(servletContext);
   }
-
 /*
   private void shareLoadTesting(ServletContext servletContext) {
     Object loadTesting = servletContext.getAttribute(ScoreServlet.LOAD_TESTING);

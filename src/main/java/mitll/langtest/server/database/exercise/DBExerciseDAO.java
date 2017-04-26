@@ -83,9 +83,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   public List<String> getTypeOrder() {
     List<String> typeOrder = getSectionHelper().getTypeOrder();
     if (typeOrder.isEmpty()) {
-      typeOrder = new ArrayList<>();
-      String first = project.first();
+      String first  = project.first();
       String second = project.second();
+      typeOrder = new ArrayList<>();
       if (first != null && !first.isEmpty()) typeOrder.add(first);
       if (second != null && !second.isEmpty()) typeOrder.add(second);
     }
@@ -206,9 +206,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @NotNull
   private List<String> getTypeOrderFromProject() {
     List<String> typeOrder = getBaseTypeOrder();
-
     typeOrder.addAll(getAttributeTypes());
-
     return typeOrder;
   }
 
@@ -219,8 +217,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     if (!project.second().isEmpty()) {
       typeOrder.add(project.second());
     }
-
-
 /*
     typeOrder.add(SOUND);
     if (SlickUserExerciseDAO.ADD_PHONE_LENGTH) {

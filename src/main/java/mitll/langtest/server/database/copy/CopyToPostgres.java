@@ -338,9 +338,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                        String optName,
                                        int displayOrder,
                                        boolean isDev) {
-    CreateProject createProject = new CreateProject();
-    //String cc = createProject.getCC(optName);
-    return createProject.createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev);
+    return new CreateProject().createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev);
   }
 
   /**
@@ -349,6 +347,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param idToFL
    * @return
+   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
    */
   private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db,
                                                                   int projectID,

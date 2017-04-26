@@ -35,20 +35,26 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.copy.CreateProject;
+import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
+import mitll.langtest.server.database.user.DominoUserDAOImpl;
+import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
+
 
   @Override
   public List<ProjectInfo> getAll() {
@@ -64,7 +70,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
             project.modified().getTime(),
             getPort(project),
-            project.getProp(ServerProperties.MODELS_DIR), project.first(), project.second())
+            project.getProp(ServerProperties.MODELS_DIR),
+            project.first(),
+            project.second())
         )
         .collect(Collectors.toList());
   }
@@ -106,6 +114,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public boolean update(ProjectInfo info) {
     Project currentProject = db.getProject(info.getID());
     boolean wasRetired = getWasRetired(currentProject);
+
+    logger.info("update " +info);
     boolean update = getProjectDAO().update(getUserIDFromSession(), info);
     if (update && wasRetired) {
       db.configureProject(db.getProject(info.getID()));
@@ -122,6 +132,46 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public boolean delete(int id) {
     return getProjectDAO().delete(id);
+  }
+
+  @Override
+  public void addPending(int projectid) {
+    Collection<CommonExercise> toImport = db.getProjectManagement().getFileUploadHelper().getExercises(projectid);
+    if (toImport != null) {
+      Map<Integer, CommonExercise> dominoToEx = new HashMap<>();
+      toImport.forEach(ex -> dominoToEx.put(ex.getDominoID(), ex));
+
+      int importUser = ((DominoUserDAOImpl) db.getUserDAO()).getImportUser();
+      SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
+
+      List<CommonExercise> newEx = new ArrayList<>();
+      List<CommonExercise> updateEx = new ArrayList<>();
+
+      Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
+      Set<Integer> current = legacyToEx.keySet();
+
+      for (Map.Entry<Integer, CommonExercise> pair : dominoToEx.entrySet()) {
+        if (current.contains(pair.getKey())) {
+          updateEx.add(pair.getValue());
+        } else {
+          newEx.add(pair.getValue());
+        }
+      }
+
+      logger.info("addPending importing " + newEx.size() + " exercises");
+      logger.info("addPending updating  " + updateEx.size() + " exercises");
+
+      Collection<String> typeOrder = db.getTypeOrder(projectid);
+      Collection<String> typeOrder2 = db.getProject(projectid).getTypeOrder();
+
+      logger.info("typeorder for " +projectid + " is " + typeOrder);
+      logger.info("typeorder for " +projectid + " is " + typeOrder2);
+
+      new ExerciseCopy().addPredefExercises(projectid, slickUEDAO, importUser, newEx,
+          typeOrder2);
+
+      db.configureProject(db.getProject(projectid));
+    }
   }
 
   private boolean getWasRetired(Project currentProject) {

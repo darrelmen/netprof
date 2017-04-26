@@ -49,4 +49,6 @@ public interface ProjectServiceAsync {
   void existsByName(String name, AsyncCallback<Boolean> async);
 
   void delete(int id, AsyncCallback<Boolean> async);
+
+  void addPending(int id, AsyncCallback<Void> async);
 }

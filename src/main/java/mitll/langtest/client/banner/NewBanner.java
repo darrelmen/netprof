@@ -238,7 +238,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
         break;
       default:
         if (instance1.isEmpty()) {
-          navigation.showLearn();
+          if (controller.getProjectStartupInfo() != null) {
+            navigation.showLearn();
+          }
         } else logger.warning("not reacting to " + instance1);
         break;
     }

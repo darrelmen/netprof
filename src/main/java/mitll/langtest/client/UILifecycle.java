@@ -55,6 +55,8 @@ public interface UILifecycle {
    */
   void gotUser(User user);
 
+  void startOver();
+
   void showInitialState();
 
   @NotNull

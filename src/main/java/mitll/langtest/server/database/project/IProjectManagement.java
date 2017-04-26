@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.FileUploadHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
@@ -84,4 +85,6 @@ public interface IProjectManagement {
   void configureProjectByID(int projid);
 
   List<SlimProject> getNestedProjectInfo();
+
+  FileUploadHelper getFileUploadHelper();
 }

@@ -86,8 +86,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private transient List<ExerciseAttribute> attributes;
 
-  private List<String> tokens = new ArrayList<>();
-
+  //private List<String> tokens = new ArrayList<>();
   // for serialization
   public Exercise() {
   }
@@ -109,11 +108,15 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   long updateTime) {
     super(-1, projectid);
     this.oldid = id;
+    try {
+      this.dominoID = Integer.parseInt(id);
+    } catch (NumberFormatException e) {
+      //
+    }
     this.meaning = meaning;
     this.updateTime = updateTime;
     this.isPredef = true;
     addContext(context, altcontext, contextTranslation);
-    //   this.dominoID = dominoID;
   }
 
   /**
@@ -162,7 +165,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param projectid
    * @param candecode
    * @param lastChecked
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#fromSlickToExercise
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#makeExercise
    */
   public Exercise(int exid,
                   String oldid,
@@ -446,7 +449,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.exercise.ContextCommentNPFExercise#getItemContent
+   * @seex mitll.langtest.client.custom.exercise.ContextCommentNPFExercise#getItemContent
    */
   public boolean isSafeToDecode() {
     return safeToDecode;
@@ -519,7 +522,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @param id
-   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean)
+   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean, List)
    */
   @Deprecated
   public void setOldID(String id) {
@@ -576,11 +579,15 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.numPhones = numPhones;
   }
 
-  public List<String> getTokens() {
+/*  public List<String> getTokens() {
     return tokens;
   }
 
   public void setTokens(List<String> tokens) {
     this.tokens = tokens;
+  }*/
+
+  public void setDominoID(int dominoID) {
+    this.dominoID = dominoID;
   }
 }

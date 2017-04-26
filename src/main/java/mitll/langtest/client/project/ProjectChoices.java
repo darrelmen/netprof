@@ -358,7 +358,7 @@ public class ProjectChoices {
         DivWidget importButtonContainer = getImportButtonContainer(projectForLang);
         importButtonContainer.addStyleName("leftFiveMargin");
         horiz2.add(importButtonContainer);
-        //horiz2.add(getButtonContainer(getDeleteButton(projectForLang)));
+        horiz2.add(getButtonContainer(getDeleteButton(projectForLang)));
         container.add(horiz2);
       }
 
@@ -417,7 +417,8 @@ public class ProjectChoices {
   private com.github.gwtbootstrap.client.ui.Button getDeleteButton(SlimProject projectForLang) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.ERASER);
-    w.addClickHandler(event -> showImportDialog(projectForLang));
+    w.setType(ButtonType.DANGER);
+    w.addClickHandler(event -> showDeleteDialog(projectForLang));
     return w;
   }
 
@@ -448,13 +449,22 @@ public class ProjectChoices {
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
-        // projectEditForm.updateProject();
+        projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+          }
+        });
       }
 
       @Override
       public void gotNo() {
       }
     };
+
     new DialogHelper(true).show(
         "Import data into " + projectForLang.getName(),
         new FileUploader().getForm(projectForLang.getID()),
@@ -477,7 +487,7 @@ public class ProjectChoices {
 
           @Override
           public void onSuccess(Boolean result) {
-            uiLifecycle.showInitialState();
+            uiLifecycle.startOver();
           }
         });
         // projectEditForm.updateProject();
@@ -489,7 +499,7 @@ public class ProjectChoices {
     };
     Heading contents = new Heading(2, "Are you sure?");
     new DialogHelper(true).show(
-        "Import data into " + projectForLang.getName(),
+        "Delete " + projectForLang.getName() + " forever?",
         contents,
         listener,
         550);

@@ -54,9 +54,10 @@ public interface IUserExerciseDAO extends IDAO {
    * @param userExercise
    * @param isOverride
    * @param isContext
+   * @param typeOrder
    * @return
    */
-  int add(CommonExercise userExercise, boolean isOverride, boolean isContext);
+  int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder);
   void addContextToExercise(int exid, int contextid, int projid);
 
   List<CommonShell> getOnList(int listID);

@@ -34,10 +34,7 @@ package mitll.langtest.server.database.project;
 
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import mitll.langtest.server.LangTestDatabaseImpl;
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.*;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
@@ -79,6 +76,8 @@ public class ProjectManagement implements IProjectManagement {
 
   private final DatabaseImpl db;
   private final Map<Integer, Project> idToProject = new HashMap<>();
+  private FileUploadHelper fileUploadHelper;
+
 
   /**
    * @param pathHelper
@@ -95,6 +94,7 @@ public class ProjectManagement implements IProjectManagement {
     this.serverProps = properties;
     this.logAndNotify = logAndNotify;
     this.db = db;
+    fileUploadHelper = new FileUploadHelper(db);
     this.projectDAO = db.getProjectDAO();
   }
 
@@ -482,7 +482,8 @@ public class ProjectManagement implements IProjectManagement {
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty() || rawExercises.size() < 100) {
-      logger.warn("getExercises no exercises in " + serverProps.getLessonPlan() + " = " + rawExercises.size());// + " at " + installPath);
+      logger.warn("getExercises for " + projectid +
+          " no exercises in '" + serverProps.getLessonPlan() + "' = " + rawExercises.size());
     }
     return rawExercises;
   }
@@ -727,4 +728,11 @@ public class ProjectManagement implements IProjectManagement {
       return -1;
     }
   }
+
+  @Override
+  public FileUploadHelper getFileUploadHelper() {
+    return fileUploadHelper;
+  }
+
+
 }

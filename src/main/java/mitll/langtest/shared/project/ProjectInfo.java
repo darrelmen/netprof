@@ -85,7 +85,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.port = port;
     this.modelsDir = modelsDir;
     this.firstType = first;
-    this.secondType =secondType;
+    this.secondType = secondType;
   }
 
   public String getLanguage() {
@@ -169,7 +169,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   }
 
   public String toString() {
-    return getName() + " " + getStatus() + " lang " + language;
+    return getName() + " " + getStatus() + " lang " + language + " first " + firstType + " second " + secondType;
   }
 
   public String getFirstType() {
@@ -198,5 +198,13 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
 
   public void setLanguage(String language) {
     this.language = language;
+  }
+
+  public void setFirstType(String firstType) {
+    this.firstType = firstType;
+  }
+
+  public void setSecondType(String secondType) {
+    this.secondType = secondType;
   }
 }

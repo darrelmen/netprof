@@ -750,11 +750,12 @@ public class UserListManager implements IUserListManager {
   }
 
   public void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir) {
-    int newExerciseID = userExerciseDAO.add(userExercise, false, false);
+    int projectID = userExercise.getProjectID();
+    int newExerciseID = userExerciseDAO.add(userExercise, false, false,
+        getTypeOrder(projectID));
     logger.debug("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
     int contextID = 0;
-    int projectID = userExercise.getProjectID();
     try {
       contextID = makeContextExercise(userExercise, newExerciseID, contextID, projectID);
     } catch (Exception e) {
@@ -769,9 +770,13 @@ public class UserListManager implements IUserListManager {
     fixAudioPaths(userExercise, true, mediaDir);
   }
 
+  private Collection<String> getTypeOrder(int projectID) {
+    return userDAO.getDatabase().getTypeOrder(projectID);
+  }
+
   private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int contextID, int projectID) {
     Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
-    contextID = userExerciseDAO.add(userExercise1, false, true);
+    contextID = userExerciseDAO.add(userExercise1, false, true, getTypeOrder(projectID));
     userExerciseDAO.addContextToExercise(newExerciseID, contextID, projectID);
     userExercise.getDirectlyRelated().add(userExercise1);
     return contextID;

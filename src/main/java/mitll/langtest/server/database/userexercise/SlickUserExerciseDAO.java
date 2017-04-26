@@ -118,12 +118,13 @@ public class SlickUserExerciseDAO
   /**
    * @param shared
    * @param projectID
+   * @param typeOrder
    * @return
    * @see mitll.langtest.server.database.copy.ExerciseCopy#addUserExercises
    */
-  public SlickExercise toSlick(Exercise shared, int projectID) {
+  public SlickExercise toSlick(Exercise shared, int projectID, Collection<String> typeOrder) {
     Map<String, String> unitToValue = shared.getUnitToValue();
-    List<String> typeOrder = getTypeOrder();
+    //List<String> typeOrder = getTypeOrder();
     Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
@@ -150,17 +151,20 @@ public class SlickUserExerciseDAO
         shared.getNumPhones());
   }
 
+  @Deprecated
   private List<String> typeOrder = null;
 
   /**
    * @return
+   * @deprecated bad idea -- for which project is this????
    */
   List<String> getTypeOrder() {
     if (typeOrder == null) {
-//    logger.info("getTypeOrder : exercise DAO "+ exerciseDAO);
       typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
+      logger.info("getTypeOrder : exercise DAO " + exerciseDAO + " type order " + typeOrder);
       if (typeOrder.isEmpty()) {
         typeOrder = exerciseDAO.getTypeOrder();
+        logger.info("\tgetTypeOrder : exercise DAO " + exerciseDAO + " type order " + typeOrder);
       }
     }
     return typeOrder;
@@ -172,23 +176,26 @@ public class SlickUserExerciseDAO
    * @param shared
    * @param isOverride
    * @param isContext
+   * @param typeOrder
    * @return
    */
-  private SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride, boolean isContext) {
-    return toSlick(shared, isOverride, BaseUserDAO.DEFAULT_USER_ID, isContext);
-  }
-
-  public SlickExercise toSlick(CommonExercise shared,
-                               @Deprecated boolean isOverride,
-                               int importUser,
-                               boolean isContext) {
-    return toSlick(shared, isOverride, shared.getProjectID(), importUser, isContext);
+  private SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride, boolean isContext,
+                                Collection<String> typeOrder) {
+//    return toSlick(shared, isOverride, BaseUserDAO.DEFAULT_USER_ID, isContext);
+//  }
+//
+//  private SlickExercise toSlick(CommonExercise shared,
+//                               @Deprecated boolean isOverride,
+//                               int importUser,
+//                               boolean isContext) {
+    return toSlick(shared, isOverride, shared.getProjectID(), BaseUserDAO.DEFAULT_USER_ID, isContext, typeOrder);
   }
 
   /**
    * @param shared
    * @param isOverride
    * @param isContext
+   * @param typeOrder
    * @return
    * @paramx isPredef
    * @see #toSlick
@@ -198,14 +205,15 @@ public class SlickUserExerciseDAO
                                @Deprecated boolean isOverride,
                                int projectID,
                                int importUser,
-                               boolean isContext) {
+                               boolean isContext,
+                               Collection<String> typeOrder) {
     Map<String, String> unitToValue = shared.getUnitToValue();
-    if (getTypeOrder().isEmpty()) {
-      logger.error("type order is empty?");
+    if (typeOrder.isEmpty()) {
+      logger.error("toSlick type order is empty?");
       return null;
     }
-    Iterator<String> iterator = getTypeOrder().iterator();
-    String first = iterator.next();
+    Iterator<String> iterator = typeOrder.iterator();//getTypeOrder().iterator();
+    String first = iterator.hasNext() ? iterator.next() : "";
     String second = iterator.hasNext() ? iterator.next() : "";
 
     int creator = shared.getCreator();
@@ -213,6 +221,11 @@ public class SlickUserExerciseDAO
 
     long updateTime = shared.getUpdateTime();
     if (updateTime == 0) updateTime = lastModified;
+
+    String orDefault = unitToValue.getOrDefault(first, "");
+    String orDefault1 = unitToValue.getOrDefault(second, "");
+
+    logger.info("for " + shared.getID() + " : first = '" + orDefault + "' " + second + " = '" + orDefault1 + "'");
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),
@@ -223,18 +236,18 @@ public class SlickUserExerciseDAO
         shared.getAltFL(),
         shared.getTransliteration(),
         isOverride,
-        unitToValue.getOrDefault(first, ""),
-        unitToValue.getOrDefault(second, ""),
+        orDefault,
+        orDefault1,
         projectID,//shared.getProjectID(),  // project id fk
         shared.isPredefined(),
         isContext,
         false,
-        -1,
+        shared.getDominoID(),
         false,
         never, shared.getNumPhones());
   }
 
-  Timestamp never = new Timestamp(0);
+  private Timestamp never = new Timestamp(0);
 
   /**
    * @param slick
@@ -589,7 +602,7 @@ public class SlickUserExerciseDAO
   private List<CommonExercise> getUserExercises(Collection<SlickExercise> all) {
 //    logger.info("getUserExercises for " + all.size()+ " exercises");
     List<CommonExercise> copy = new ArrayList<>();
-    for (SlickExercise userExercise : all)  copy.add(fromSlick(userExercise));
+    for (SlickExercise userExercise : all) copy.add(fromSlick(userExercise));
     //  logger.info("getUserExercises returned " + copy.size()+ " user exercises");
     return copy;
   }
@@ -661,11 +674,12 @@ public class SlickUserExerciseDAO
    * @param userExercise
    * @param isOverride
    * @param isContext
+   * @param typeOrder
    * @see mitll.langtest.server.database.custom.UserListManager#newExercise
    */
   @Override
-  public int add(CommonExercise userExercise, boolean isOverride, boolean isContext) {
-    int insert = insert(toSlick(userExercise, isOverride, isContext));
+  public int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder) {
+    int insert = insert(toSlick(userExercise, isOverride, isContext, typeOrder));
     ((Exercise) userExercise).setID(insert);
     return insert;
   }
@@ -843,7 +857,7 @@ public class SlickUserExerciseDAO
   @Override
   public void update(CommonExercise userExercise, boolean isContext) {
     //logger.info("update : " + userExercise.getID() + " has " + userExercise.getDirectlyRelated().size() + " context");
-    SlickExercise slickUserExercise = toSlick(userExercise, true, isContext);
+    SlickExercise slickUserExercise = toSlick(userExercise, true, isContext, typeOrder);
 
     int rows = dao.update(slickUserExercise);
     String idLabel = userExercise.getID() + "/" + slickUserExercise.id();
@@ -928,8 +942,10 @@ public class SlickUserExerciseDAO
     relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, exid, contextExid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
-  public int addAttribute(int projid, long now,
-                          int userid, ExerciseAttribute attribute) {
+  public int addAttribute(int projid,
+                          long now,
+                          int userid,
+                          ExerciseAttribute attribute) {
     return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue());
   }
 
@@ -1074,5 +1090,9 @@ public class SlickUserExerciseDAO
 
   public void addBulkAttributes(List<SlickExerciseAttributeJoin> joins) {
     attributeJoinDAOWrapper.addBulk(joins);
+  }
+
+  public Map<Integer, SlickExercise> getLegacyToEx(int projectid) {
+    return dao.getLegacyToExercise(projectid);
   }
 }

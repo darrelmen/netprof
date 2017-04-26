@@ -8,6 +8,7 @@ import com.google.gwt.user.client.Command;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Comparator;
 
@@ -30,22 +31,23 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   public static final String MENU_ITEM = "menuItem";
 
   /**
-   * @see FacetExerciseList#addSortBox
    * @param exerciseList
+   * @see FacetExerciseList#addSortBox
    */
   ListSorting(PagingExerciseList<T, U> exerciseList) {
     this.exerciseList = exerciseList;
-    locale = exerciseList.controller.getProjectStartupInfo().getLocale();
+    ProjectStartupInfo projectStartupInfo = exerciseList.controller.getProjectStartupInfo();
+    locale = projectStartupInfo == null ? "" : projectStartupInfo.getLocale();
   }
 
   private void sortBy(Comparator<T> comp) {
 //    Scheduler.get().scheduleDeferred(new Command() {
 //      public void execute() {
-        exerciseList.waitCursorHelper.scheduleWaitTimer();
-        exerciseList.sortBy(comp);
-        exerciseList.waitCursorHelper.showFinished();
+    exerciseList.waitCursorHelper.scheduleWaitTimer();
+    exerciseList.sortBy(comp);
+    exerciseList.waitCursorHelper.showFinished();
 //      }
-  //  });
+    //  });
   }
 
   ListBox getSortBox(ExerciseController controller) {

@@ -120,9 +120,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @seex UserListManager#newExercise
    * @see IUserExerciseDAO#update
    */
-  public int add(CommonExercise userExercise, boolean isOverride, boolean isContext) {
-    List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
-
+  public int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder) {
+   // List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
     try {
       // there are much better ways of doing this...
       logger.debug("UserExerciseDAO.add : userExercise " + userExercise);
@@ -165,7 +164,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       Map<String, String> unitToValue = userExercise.getUnitToValue();
 
       if (typeOrder.size() > 0) {
-        String s = typeOrder.get(0);
+        String s = typeOrder.iterator().next();
         String x = unitToValue.containsKey(s) ? unitToValue.get(s) : "";
         statement.setString(i++, x);
       } else {
@@ -173,7 +172,9 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       }
 
       if (typeOrder.size() > 1) {
-        String s = typeOrder.get(1);
+        Iterator<String> iterator = typeOrder.iterator();
+        iterator.next();
+        String s = iterator.next();
         statement.setString(i++, unitToValue.containsKey(s) ? unitToValue.get(s) : "");
       } else {
         statement.setString(i++, "");

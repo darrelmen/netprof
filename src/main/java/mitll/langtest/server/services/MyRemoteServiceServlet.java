@@ -74,7 +74,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    */
   @Deprecated
   protected AudioFileHelper audioFileHelper;
-  //private Random random = new Random();
 
   @Override
   public void init() {

@@ -260,7 +260,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   /**
    * @param id
-   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean)
+   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean, List)
    */
   @Deprecated
   public void setOldID(String id) {

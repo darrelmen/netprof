@@ -48,7 +48,7 @@ import java.util.Map;
  */
 interface MutableUserExercise {
   /**
-   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean)
+   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean, java.util.List)
    * @see mitll.langtest.server.database.custom.UserListManager#duplicate(CommonExercise)
    * @param id
    */
@@ -63,13 +63,13 @@ interface MutableUserExercise {
   void setCreator(int id);
 
   /**
-   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean)
+   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean, java.util.List)
    * @param uniqueID
    */
   void setID(int uniqueID);
 
 /*  *//**
-   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean)
+   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean, java.util.List)
    * @return
    *//*
   int getRealID();*/

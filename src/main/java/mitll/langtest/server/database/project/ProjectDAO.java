@@ -111,25 +111,27 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     Project currentProject = database.getProject(projid);
 
     SlickProject project = currentProject.getProject();
-    Timestamp now = new Timestamp(System.currentTimeMillis());
     Timestamp created = new Timestamp(projectInfo.getCreated());
+    Timestamp now     = new Timestamp(System.currentTimeMillis());
 
+    //logger.info("update" + projectInfo);
     SlickProject changed = new SlickProject(projid,
         userid,
         created,
         now,
         projectInfo.getName(),
         projectInfo.getLanguage(),
-        project.course(),
+        projectInfo.getCourse(),
         project.kind(),
         projectInfo.getStatus().toString(),
-        project.first(),
-        project.second(),
-        project.countrycode(),
+        projectInfo.getFirstType(),
+        projectInfo.getSecondType(),
+        projectInfo.getCountryCode(),
         project.ltsClass(),
         project.dominoid(),
-        project.displayorder()
+        projectInfo.getDisplayOrder()
     );
+   // logger.info("changed" + changed);
 
     boolean didChange = dao.update(changed) > 0;
 

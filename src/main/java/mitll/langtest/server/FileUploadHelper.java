@@ -5,6 +5,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.ExcelImport;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -17,10 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by go22670 on 4/26/17.
@@ -29,8 +27,8 @@ public class FileUploadHelper {
   private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(FileUploadHelper.class);
   private static final int MAX_FILE_SIZE = 10000000;
   private static final String UPLOAD_FORM_NAME = "upload";
-  DatabaseServices db;
-  Map<Integer,Collection<CommonExercise>> idToExercises = new HashMap<>();
+  private DatabaseServices db;
+  private Map<Integer,Collection<CommonExercise>> idToExercises = new HashMap<>();
 
   public FileUploadHelper(DatabaseServices db) {
     this.db = db;
@@ -139,7 +137,18 @@ public class FileUploadHelper {
 //      exercises = fileImporter.readExercises(inputStream);
 //      importer = fileImporter;
     } else {
-      ExcelImport excelImport = new ExcelImport(fileName, db.getServerProps(), db.getUserListManager(), false);
+      Project project = db.getProject(site.id);
+      List<String> types = new ArrayList<>();
+      String first = project.getProject().first();
+      String second = project.getProject().second();
+      if (!first.isEmpty()) types.add(first);
+      if (!second.isEmpty()) types.add(second);
+      ExcelImport excelImport = new ExcelImport(fileName, db.getServerProps(), db.getUserListManager(), false) {
+        @Override
+        public List<String> getTypeOrder() {
+          return types;
+        }
+      };
       exercises = excelImport.readExercises(inputStream);
      // importer = excelImport;
       String s = "Read " + exercises.size();
@@ -170,4 +179,9 @@ public class FileUploadHelper {
       response.getWriter().write("Read " + site.getNum() + " items.  Press OK to add them to project.");
     }
   }
+
+  public Collection<CommonExercise> getExercises(int projid) {
+    return idToExercises.get(projid);
+  }
+  public void forgetExercises(int projid) { idToExercises.remove(projid); }
 }

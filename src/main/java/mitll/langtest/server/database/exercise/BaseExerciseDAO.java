@@ -64,8 +64,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   private final ISection<CommonExercise> sectionHelper = new SectionHelper<>();
 
-  //private final ISection<CommonExercise> section = new SectionImpl<>();
-
   protected final String language;
   protected final ServerProperties serverProps;
   private final IUserListManager userListManager;

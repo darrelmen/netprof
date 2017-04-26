@@ -134,7 +134,7 @@ public class BasicDialog {
    * @return
    * @see #getSimpleFormField(Panel, TextBox, int)
    */
-  private ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
+  private ControlGroup addControlGroupEntryNoLabel(HasWidgets dialogBox, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
     widget.addStyleName("leftFiveMargin");
@@ -537,7 +537,7 @@ public class BasicDialog {
     }
   }
 
-  protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox,
+  protected FormField addControlFormFieldWithPlaceholder(HasWidgets dialogBox,
                                                          boolean isPassword,
                                                          int minLength,
                                                          int maxLength,
@@ -568,7 +568,7 @@ public class BasicDialog {
     popover.reconfigure();
   }
 
-   FormField getSimpleFormField(Panel dialogBox, TextBox user, int minLength) {
+   FormField getSimpleFormField(HasWidgets dialogBox, TextBox user, int minLength) {
     return new FormField(user, addControlGroupEntryNoLabel(dialogBox, user), minLength);
   }
 

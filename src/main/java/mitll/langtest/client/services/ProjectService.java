@@ -46,4 +46,5 @@ public interface ProjectService extends RemoteService {
   boolean update(ProjectInfo info);
   boolean create(ProjectInfo newProject);
   boolean delete(int id);
+  void addPending(int id);
 }

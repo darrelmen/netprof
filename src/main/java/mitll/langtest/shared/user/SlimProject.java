@@ -71,7 +71,8 @@ public class SlimProject extends ProjectInfo {
                      boolean hasModel,
                      boolean isRTL, long created, int port,
                      String modelsDir,
-                     String firstType, String secondType) {
+                     String firstType,
+                     String secondType) {
     super(projectid, name, language, course, countryCode, status, displayOrder, created, port, modelsDir, firstType, secondType);
     this.hasModel = hasModel;
     this.isRTL = isRTL;
@@ -117,6 +118,6 @@ public class SlimProject extends ProjectInfo {
 
   public String toString() {
     return "Project #" + getID() + " " + getName() + " " + getLanguage() + " " + getStatus() +
-        " num children " + children.size();
+        " num children " + children.size() + " " + getFirstType() + " " + getSecondType();
   }
 }

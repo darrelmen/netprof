@@ -78,6 +78,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private static final String ID = "id";
   private static final String WORD = "word";
   public static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
+  public static final String UNIT = "unit";
+  public static final String BOOK = "book";
+  public static final String CHAPTER = "chapter";
+  public static final String LESSON = "lesson";
 
   private final List<String> errors = new ArrayList<String>();
   private final String file;
@@ -156,12 +160,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
       Date created = ppropsPart.getCreatedProperty().getValue();
       logger.info("creationTime:     " + created);
-
       Date modified = ppropsPart.getModifiedProperty().getValue();
       logger.info("lastModifiedTime: " + modified);
-
       String lastModifiedBy = ppropsPart.getLastModifiedByProperty().getValue();
-
       logger.info("lastModifiedBy:   " + lastModifiedBy);
       logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " + modified);
 
@@ -296,6 +297,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     int englishSkipped = 0;
     int rows = 0;
     String unitName = null, chapterName = null, weekName = null;
+
+    List<String> typeOrder = getTypeOrder();
+    String first = typeOrder.size() > 0 ? typeOrder.get(0) : "";
+    String second = typeOrder.size() > 1 ? typeOrder.get(1) : "";
+
+    logger.info("First " + first + " second '" + second + "'");
     try {
       Iterator<Row> iter = sheet.rowIterator();
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
@@ -319,6 +326,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
             int i = columns.indexOf(col);
+
+            logger.info("col " + i + " '" + colNormalized + "'");
             if (colNormalized.startsWith(WORD)) {
               gotHeader = true;
               colIndexOffset = i;
@@ -340,7 +349,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               audioIndex = i;
               hasAudioIndex = true;
             } else if (gotUCW) {
-              if (DEBUG) logger.debug("using predef unit/chapter/week ");
+              if (DEBUG || true) logger.debug("readFromSheet using predef unit/chapter/week ");
               if (i == unitIndex) {
                 predefinedTypeOrder.add(col);
                 unitName = col;
@@ -353,11 +362,13 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               } else {
                 addColToHeaderForProperty(colToHeader, col, i);
               }
-            } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
+            } else if (isFirstTypeMatch(colNormalized, first) && unitIndex == -1) {
+              logger.info("first type match " + colNormalized + " " + first + " unit " + i);
               unitIndex = i;
               predefinedTypeOrder.add(col);
               unitName = col;
-            } else if (colNormalized.contains("chapter") || colNormalized.contains("lesson")) {
+            } else if (isSecondTypeMatch(colNormalized, second)) {
+              logger.info("second type match " + colNormalized + " " + second + " unit " + i);
               chapterIndex = i;
               predefinedTypeOrder.add(col);
               chapterName = col;
@@ -385,7 +396,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               " altcontext " + altcontextIndex +
               " id " + idIndex +
               " audio " + audioIndex +
-              " other " + colToHeader
+              " other " + colToHeader +
+              " predef " + usePredefinedTypeOrder
           );
         } else {
           int colIndex = colIndexOffset;
@@ -466,7 +478,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                   deleted++;
                 } else {
                   if (logging++ < 3) {
-                    logger.info("skipping exercise " + imported.getOldID() + " : '" + imported.getEnglish() + "' since no audio.");
+                    logger.info("readFromSheet skipping exercise " + imported.getOldID() + " : '" + imported.getEnglish() + "' since no audio.");
                   }
                   skipped++;
                 }
@@ -499,21 +511,21 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exercises;
   }
 
-  Set<String> toSkip = new HashSet<>(Arrays.asList("Translation".toLowerCase(),"Transliteration".toLowerCase()));
+
+  private Set<String> toSkip = new HashSet<>(Arrays.asList("Translation".toLowerCase(), "Transliteration".toLowerCase()));
 
   private void addColToHeaderForProperty(Map<Integer, String> colToHeader, String col, int i) {
     String s = language.toLowerCase();
     String lcCol = col.toLowerCase();
     if (lcCol.contains(s) || toSkip.contains(lcCol)) {
       logger.debug("readFromSheet skipping col " + col);
-    } else if (!col.isEmpty()){
-      logger.debug("readFromSheet adding col '" + col + "' at  " +i + " vs '" +language+ "'");
+    } else if (!col.isEmpty()) {
+      logger.debug("readFromSheet adding col '" + col + "' at  " + i + " vs '" + language + "'");
       colToHeader.put(i, col);
     }
   }
 
   /**
-   *
    * @param colToHeader
    * @param pairToAttr
    * @param attrToItself
@@ -536,10 +548,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         ExerciseAttribute exerciseAttribute1 = pairToAttr.get(propertyValuePair);
         if (exerciseAttribute1 == null) {
           exerciseAttribute1 = new ExerciseAttribute(property, value);
-     //     logger.info("Remember attr " + exerciseAttribute1);
+          //     logger.info("Remember attr " + exerciseAttribute1);
           pairToAttr.put(propertyValuePair, exerciseAttribute1);
           if (pairToAttr.size() > REASONABLE_PROPERTY_SPACE_LIMIT) {
-            logger.warn("getExerciseAttributes more than " +pairToAttr.size() + " distinct values for property " + property);
+            logger.warn("getExerciseAttributes more than " + pairToAttr.size() + " distinct values for property " + property);
           }
         }
         toAdd.add(exerciseAttribute1);
@@ -550,7 +562,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     List<ExerciseAttribute> exerciseAttributes = attrToItself.get(attributeSet);
     if (exerciseAttributes == null) {
       attrToItself.put(attributeSet, exerciseAttributes = toAdd);
-     // logger.info("Remember attr list " + exerciseAttributes);
+      // logger.info("Remember attr list " + exerciseAttributes);
     }
     return exerciseAttributes;
   }
@@ -591,6 +603,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     int deleted = 0;
     int englishSkipped = 0;
     String unitName = null, chapterName = null, weekName = null;
+
+    List<String> typeOrder = getTypeOrder();
+    String firstType = typeOrder.size() > 0 ? typeOrder.get(0) : "";
+    String second = typeOrder.size() > 1 ? typeOrder.get(1) : "";
+
     try {
       Iterator<Row> iter = sheet.rowIterator();
       boolean gotUCW = unitIndex != -1;
@@ -632,10 +649,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               } else if (columns.indexOf(col) == weekIndex) {
                 weekName = col;
               }
-            } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
+            } else if (isFirstTypeMatch(colNormalized, firstType) && unitIndex == -1) {
               unitIndex = columns.indexOf(col);
               unitName = col;
-            } else if (colNormalized.contains("chapter") || colNormalized.contains("lesson")) {
+            } else if (isSecondTypeMatch(colNormalized, second)) {
               chapterIndex = columns.indexOf(col);
               chapterName = col;
             } else if (colNormalized.contains("week")) {
@@ -694,6 +711,20 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
     logStatistics(id, semis, skipped, englishSkipped, deleted);
     return exercises;
+  }
+
+
+  private boolean isFirstTypeMatch(String colNormalized, String typeSpecified) {
+    return colNormalized.equalsIgnoreCase(typeSpecified) ||
+        colNormalized.contains(UNIT) ||
+        colNormalized.contains(BOOK);
+  }
+
+  private boolean isSecondTypeMatch(String colNormalized, String typeSpecified) {
+    return
+        colNormalized.equalsIgnoreCase(typeSpecified) ||
+            colNormalized.contains(CHAPTER) ||
+            colNormalized.contains(LESSON);
   }
 
   private boolean contextColMatch(String colNormalized) {
@@ -836,6 +867,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     if (unit.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
+      logger.info("recordUnitChapterWeek Adding " + unitName + "=" + unit + " to " + imported.getID() + " " + imported.getEnglish());
     } else if (unitName != null) {
       unit = chapter;
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
@@ -845,6 +877,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         chapter = (unitIndex == -1 ? "" : unit + "-") + chapter; // hack for now to get unique chapters...
       }
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
+      logger.info("recordUnitChapterWeek Adding " + chapterName + "=" + chapter + " to " + imported.getID() + " " + imported.getEnglish());
     } else if (chapterName != null) {
       chapter = unit;
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
@@ -853,8 +886,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (week.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, week));
     }
-
-  //  sectionHelper.addAssociations(pairs);
+    logger.info("now  " + imported.getID() + " = " + imported.getUnitToValue());
+    //  sectionHelper.addAssociations(pairs);
   }
 
   private String getCell(Row next, int col) {

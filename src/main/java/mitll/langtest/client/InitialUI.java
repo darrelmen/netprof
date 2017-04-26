@@ -633,6 +633,11 @@ public class InitialUI implements UILifecycle {
     }
   }
 
+  @Override
+  public void startOver() {
+    configureUIGivenUser(userManager.getUser());
+  }
+
   /**
    * So we know who the user is... now decide what to show them next
    *
