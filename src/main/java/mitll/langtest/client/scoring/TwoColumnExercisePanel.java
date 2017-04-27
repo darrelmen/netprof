@@ -100,8 +100,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void getRefAudio(ExerciseController controller) {
-    if (playAudio != null) {
+    if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
       AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
+
       int refID = currentAudioAttr.getUniqueID();
       int contextRefID = -1; //contextPlay.getCurrentAudioID();
 
