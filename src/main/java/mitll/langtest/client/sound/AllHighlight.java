@@ -13,11 +13,16 @@ public class AllHighlight implements IHighlightSegment {
   }
   @Override
   public void setBlue() {
-    set.stream().forEach(IHighlightSegment::setBlue);
+    set.forEach(IHighlightSegment::setBlue);
   }
 
   @Override
   public void clearBlue() {
-    set.stream().forEach(IHighlightSegment::clearBlue);
+    set.forEach(IHighlightSegment::clearBlue);
+  }
+
+  @Override
+  public boolean isHighlighted() {
+    return !set.isEmpty() && set.iterator().next().isHighlighted();
   }
 }

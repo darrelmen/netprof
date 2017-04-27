@@ -92,8 +92,7 @@ public interface IUserListManager {
 
   void addItemToList(long userListID, String exerciseID, int exid);
 
-  void editItem(CommonExercise userExercise,
-                String mediaDir);
+  void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder);
 
   CommonExercise duplicate(CommonExercise userExercise);
 

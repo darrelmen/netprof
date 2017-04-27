@@ -39,10 +39,12 @@ public class SegmentHighlightAudioControl implements AudioControl {
   }
 
   @Override
-  public void songFirstLoaded(double durationEstimate) {}
+  public void songFirstLoaded(double durationEstimate) {
+  }
 
   @Override
-  public void repeatSegment(float startInSeconds, float endInSeconds) {}
+  public void repeatSegment(float startInSeconds, float endInSeconds) {
+  }
 
   @Override
   public void songLoaded(double duration) {
@@ -66,11 +68,12 @@ public class SegmentHighlightAudioControl implements AudioControl {
     private final Logger logger = Logger.getLogger("SegmentAudioControl");
     private TranscriptSegment currentWord;
     private final TreeMap<TranscriptSegment, IHighlightSegment> words;
-    private boolean isWordHighlighted = false;
+    //private boolean isWordHighlighted = false;
+    private static boolean DEBUG = false;
 
     /**
-     * @see SegmentHighlightAudioControl#SegmentHighlightAudioControl
      * @param words
+     * @see SegmentHighlightAudioControl#SegmentHighlightAudioControl
      */
     SegmentAudioControl(TreeMap<TranscriptSegment, IHighlightSegment> words) {
       this.words = words;
@@ -80,7 +83,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
     private void initialize() {
       if (words != null && !words.isEmpty()) {
         currentWord = words.keySet().iterator().next();
-        logger.info("current word " + currentWord);
+        if (DEBUG) logger.info("initialize current word " + currentWord);
       }
     }
 
@@ -98,7 +101,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
     @Override
     public void songLoaded(double duration) {
-      if (isWordHighlighted) removeHighlight();
+      if (isHighlighted()) removeHighlight();
     }
 
     @Override
@@ -106,30 +109,33 @@ public class SegmentHighlightAudioControl implements AudioControl {
       double posInMillis = positionInSec2 / 1000;
       //   logger.info("update " +positionInSec);
       if (currentWord == null) {
-        //    logger.info("no current word - update ignore : " +positionInSec);
+        if (DEBUG) logger.info("no current word - update ignore : " + posInMillis);
       } else {
         if (posInMillis < currentWord.getStart()) { // before
-          //    logger.info("before current word - update ignore : " +positionInSec);
+          if (DEBUG) logger.info("before current word - update ignore : " + posInMillis);
         } else if (posInMillis >= currentWord.getEnd()) { // after
           removeHighlight();
           currentWord = words.higherKey(currentWord);  // next word
 
           if (currentWord != null) {
-            if (isWordHighlighted = currentWord.contains(posInMillis)) {
+            if (currentWord.contains(posInMillis)) {
               showHighlight();
             }
-          } else isWordHighlighted = false;
-        } else { // contains
-          if (!isWordHighlighted) {
-            if (isWordHighlighted = currentWord.contains(posInMillis)) {
-              showHighlight();
-            }
-            else {
-         //     logger.info(currentWord + " doesn't contain " + posInMillis);
-            }
+          } else {
+            if (DEBUG) logger.info("no current word " + posInMillis);
           }
-          else {
-         //   logger.info(currentWord + " is already highlighted.");
+          //else {
+          //  isWordHighlighted = false;
+          // }
+        } else { // contains
+          if (!isHighlighted()) {
+            if (currentWord.contains(posInMillis)) {
+              showHighlight();
+            } else {
+              if (DEBUG) logger.info(currentWord + " doesn't contain " + posInMillis);
+            }
+          } else {
+            if (DEBUG) logger.info(currentWord + " is already highlighted.");
           }
         }
       }
@@ -137,14 +143,32 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
     @Override
     public void songFinished() {
-      if (isWordHighlighted) removeHighlight();
+      if (DEBUG) logger.info("songFinished..." + words.values().size() + " segments...");
+//      if (isHighlighted()) {
+//        removeHighlight();
+//      }
+//      else {
+      for (IHighlightSegment segment : words.values()) {
+        if (segment.isHighlighted()) {
+          logger.info("segment "+ segment + " highlighted");
+          segment.clearBlue();
+        }
+      }
+      // if (DEBUG) logger.info("nothing highlighted...");
+//      }
       initialize();
+    }
+
+    private boolean isHighlighted() {
+      return currentWord != null && words.get(currentWord).isHighlighted();
     }
 
     private void removeHighlight() {
       if (currentWord != null) {
         words.get(currentWord).clearBlue();
 //        widget.getElement().getStyle().setBackgroundColor(backgroundColor);
+      } else {
+        logger.warning("no current word....");
       }
     }
 

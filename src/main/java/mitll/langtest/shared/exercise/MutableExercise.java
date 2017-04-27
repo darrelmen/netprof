@@ -73,6 +73,7 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void setOldID(String id);
 
+  void setID(int id);
   void setCreator(int id);
 
   /**

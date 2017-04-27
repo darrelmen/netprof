@@ -69,6 +69,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
+  /**
+   *
+   * @param request
+   * @return
+   */
   public FilterResponse getTypeToValues(FilterRequest request) {
     return getSectionHelper().getTypeToValues(request);
   }

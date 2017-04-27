@@ -814,9 +814,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
         " mediaDir : " + getServerProps().getMediaDir() +
         " audio " + userExercise.getAudioAttributes());
 
+    if (userExercise.getProjectID() < 0) {
+      logger.warn("huh? no project id on user exer "+ userExercise);
+    }
     getUserListManager().editItem(userExercise,
         // create if doesn't exist
-        getServerProps().getMediaDir());
+        getServerProps().getMediaDir(), getTypeOrder(userExercise.getProjectID()));
 
     Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());

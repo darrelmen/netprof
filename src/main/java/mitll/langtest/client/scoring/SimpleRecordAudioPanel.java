@@ -14,7 +14,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.WaitCursorHelper;
-import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
@@ -101,6 +100,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   }
 
   private DivWidget recordFeedback;
+  private Widget  scoreHistory;
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
@@ -119,7 +119,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
       historyHoriz.add(spacer);
-      historyHoriz.add(getScoreHistory());
+      historyHoriz.add(scoreHistory = getScoreHistory());
       col.add(historyHoriz);
     }
 
@@ -205,9 +205,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   public ASRHistoryPanel getScoreHistory() {
     ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID());
     addMiniScoreListener(historyPanel);
-
-
-    // historyPanel.addStyleName("floatRight");
     historyPanel.showChart();
     historyPanel.setWidth("50%");
     return historyPanel;
@@ -315,6 +312,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     waitCursorHelper.hide();
 
     clearScoreFeedback();
+    scoreHistory.setVisible(false);
   }
 
   private void clearScoreFeedback() {
@@ -330,6 +328,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     playAudioPanel.hideRecord();
 
     waitCursorHelper.show();
+    scoreHistory.setVisible(true);
   }
 
   @Override
@@ -438,5 +437,4 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     }
     miniScoreListener.showChart();
   }
-
 }

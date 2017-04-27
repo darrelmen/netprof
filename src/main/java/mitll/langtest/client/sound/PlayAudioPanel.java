@@ -72,7 +72,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   //  private static final int BUTTON_WIDTH = 10;
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
   private static final boolean DEBUG = false;
-  private static final boolean LOCAL_TESTING = false;
+  private static final boolean LOCAL_TESTING = true;
 
   protected static final IconType PLAY = IconType.PLAY;
 

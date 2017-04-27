@@ -397,12 +397,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       Shuffler.shuffle(ts);
     }
     clear();
-    int c = 0;
+  //  int c = 0;
     for (T es : result) {
       addExercise(es);
-      if (c++ < 10) {
+/*      if (c++ < 10) {
         logger.info("# " + c + " " + es.getID() + " " + es.getEnglish() + " " + es.getForeignLanguage());
-      }
+      }*/
     }
     flush();
     return result;

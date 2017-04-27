@@ -120,6 +120,7 @@ public class AnalysisTab extends DivWidget {
     bottom.addStyleName("floatLeftAndClear");
 
     if (overallBottom != null) { // are we in student or teacher view
+      overallBottom.clear();
       overallBottom.add(bottom); // teacher
       isNarrow = true;
     } else {

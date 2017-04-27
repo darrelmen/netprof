@@ -34,7 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -107,7 +107,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     }
   }
 
-  public SlickExercise getUnknownExercise() {return null;};
+  public SlickExercise getUnknownExercise() {
+    return null;
+  }
+
+  ;
 
 
   /**
@@ -121,7 +125,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @see IUserExerciseDAO#update
    */
   public int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder) {
-   // List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
+    // List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
     try {
       // there are much better ways of doing this...
       logger.debug("UserExerciseDAO.add : userExercise " + userExercise);
@@ -271,6 +275,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   int c = 0;
+
   /**
    * Handles both userexercise items and predefined exercises.
    *
@@ -313,7 +318,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         }
       }*/
 
-      if (c <10 && !userExercises.isEmpty()) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
+      if (c < 10 && !userExercises.isEmpty())
+        logger.warn("huh? can't find " + c + "/" + userExercises.size() + " items???");
 
       boolean isEnglish = database.getLanguage().equalsIgnoreCase("english");
       String join2 = getJoin2(listID);
@@ -450,7 +456,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       while (rs.next()) {
         exercises.add(getUserExercise(rs, typeOrder));
       }
-      finish(connection, statement, rs,"");
+      finish(connection, statement, rs, "");
     } finally {
       database.closeConnection(connection);
     }
@@ -532,7 +538,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         unitToValue,
         date.getTime(),
         -1, false,
-        System.currentTimeMillis(),-1);
+        System.currentTimeMillis(), -1);
   }
 
   //  private Map<String, List<AudioAttribute>> exToAudio;
@@ -579,10 +585,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   /**
    * @param userExercise
    * @param isContext
-   * @see UserListManager#editItem
+   * @param typeOrder
+   * @see IUserListManager#editItem
    */
   @Override
-  public void update(CommonExercise userExercise, boolean isContext) {
+  public boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + USEREXERCISE +
@@ -609,17 +616,20 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       int i = statement.executeUpdate();
 
       if (i == 0) {
-       // if (createIfDoesntExist) {
-       //   add(userExercise, true, false);
+        // if (createIfDoesntExist) {
+        //   add(userExercise, true, false);
         //} else {
-          logger.error("huh? didn't update the userExercise for " + userExercise + "\n\tsql " + sql);
+        logger.error("huh? didn't update the userExercise for " + userExercise + "\n\tsql " + sql);
         //}
       }
 
       finish(connection, statement);
+      return i > 0;
     } catch (Exception e) {
       logException(e);
+      return false;
     }
+
   }
 
   @Override

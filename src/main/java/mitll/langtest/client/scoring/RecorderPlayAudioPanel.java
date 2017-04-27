@@ -101,6 +101,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void showFirstRecord() {
     recordImage1.setVisible(true);
     downloadContainer.setVisible(false);
+
   }
 
   void hideRecord() {

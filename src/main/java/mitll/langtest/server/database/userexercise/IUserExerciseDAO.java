@@ -58,9 +58,11 @@ public interface IUserExerciseDAO extends IDAO {
    * @return
    */
   int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder);
+
   void addContextToExercise(int exid, int contextid, int projid);
 
   List<CommonShell> getOnList(int listID);
+
   List<CommonExercise> getCommonExercises(int listID);
   /**
    * @param exid
@@ -79,7 +81,7 @@ public interface IUserExerciseDAO extends IDAO {
 
   Collection<CommonExercise> getByExID(Collection<Integer> exids);
 
-  void update(CommonExercise userExercise, boolean isContext);
+  boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder);
 
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 
@@ -87,6 +89,5 @@ public interface IUserExerciseDAO extends IDAO {
 
   void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones);
 
-  int addAttribute(int projid, long now,
-                   int userid, ExerciseAttribute attribute);
+  int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute);
 }

@@ -83,7 +83,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   public List<String> getTypeOrder() {
     List<String> typeOrder = getSectionHelper().getTypeOrder();
     if (typeOrder.isEmpty()) {
-      String first  = project.first();
+      String first = project.first();
       String second = project.second();
       typeOrder = new ArrayList<>();
       if (first != null && !first.isEmpty()) typeOrder.add(first);
@@ -140,6 +140,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               getSectionHelper(),
               exerciseToPhoneForProject,
               fullProject,
+
               allByProject,
               exToAttrs
           );
@@ -154,7 +155,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               getSectionHelper(),
               exerciseToPhoneForProject, fullProject, allByProject, exToAttrs
           ));
-      logger.info("project " +project+ " idToContext " + idToContext.size());
+      logger.info("project " + project + " idToContext " + idToContext.size());
 
       attachContextExercises(allNonContextExercises, userExerciseDAO.getAllRelated(projid), idToContext);
 
@@ -166,10 +167,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   /**
-   * @see #readExercises
    * @param allNonContextExercises
    * @param related
    * @param idToContext
+   * @see #readExercises
    */
   private void attachContextExercises(List<CommonExercise> allNonContextExercises,
                                       Collection<SlickRelatedExercise> related,
@@ -185,7 +186,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     logger.info("idToContext    " + idToContext.size());
     logger.info("idToEx         " + idToEx.size());*/
 
-     for (SlickRelatedExercise relatedExercise : related) {
+    for (SlickRelatedExercise relatedExercise : related) {
       CommonExercise root = idToEx.get(relatedExercise.exid());
       if (root != null) {
         CommonExercise context = idToContext.get(relatedExercise.contextexid());
@@ -203,6 +204,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     logger.info(prefix + " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);
   }
 
+  /**
+   * First basic types, then attribute types...
+   * Might want to allow this to be configurable.
+   * @return
+   */
   @NotNull
   private List<String> getTypeOrderFromProject() {
     List<String> typeOrder = getBaseTypeOrder();
@@ -236,9 +242,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     sectionHelper.setRootTypes(rootTypes);
 
-    Map<String,String> parentToChild = new HashMap<>();
+    Map<String, String> parentToChild = new HashMap<>();
     if (project.second() != null && !project.second().isEmpty()) {
-      parentToChild.put(project.first(),project.second());
+      parentToChild.put(project.first(), project.second());
     }
 
     if (rootTypes.contains(SectionHelper.TOPIC)) {
@@ -248,10 +254,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     sectionHelper.setParentToChildTypes(parentToChild);
 
 //    logger.info("roots " + rootTypes);
- //   logger.info("parentToChild " + parentToChild);
+    //   logger.info("parentToChild " + parentToChild);
   }
 
-  private Collection<String> getAttributeTypes() {   return userExerciseDAO.getAttributeTypes(project.id()); }
+  private Collection<String> getAttributeTypes() {
+    return userExerciseDAO.getAttributeTypes(project.id());
+  }
 
   private Map<Integer, CommonExercise> getIDToExercise(Collection<CommonExercise> allExercises) {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
@@ -262,16 +270,18 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    * @param safe
    * @param unsafe
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
     userExerciseDAO.getDao().updateCheckedBulk(safe, true);
     userExerciseDAO.getDao().updateCheckedBulk(unsafe, false);
   }
 
-  public void updatePhones(int id, int count) { userExerciseDAO.getDao().updatePhones(id,count);  }
+  public void updatePhones(int id, int count) {
+    userExerciseDAO.getDao().updatePhones(id, count);
+  }
 
   public String toString() {
     return "DBExerciseDAO for " + project;

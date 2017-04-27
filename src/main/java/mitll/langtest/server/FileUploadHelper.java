@@ -28,7 +28,7 @@ public class FileUploadHelper {
   private static final int MAX_FILE_SIZE = 10000000;
   private static final String UPLOAD_FORM_NAME = "upload";
   private DatabaseServices db;
-  private Map<Integer,Collection<CommonExercise>> idToExercises = new HashMap<>();
+  private Map<Integer, Collection<CommonExercise>> idToExercises = new HashMap<>();
 
   public FileUploadHelper(DatabaseServices db) {
     this.db = db;
@@ -79,7 +79,7 @@ public class FileUploadHelper {
       if (name.toLowerCase().endsWith("projectid")) {
         logger.info("-------------> got siteid <----------------\n\n");
         site.id = Integer.parseInt(item.getString().trim());
-        logger.info("------------->  siteid" +site.id+
+        logger.info("------------->  siteid" + site.id +
             "  <----------------\n\n");
         return true;
         //  logger.info("User " + item.getString());
@@ -131,7 +131,7 @@ public class FileUploadHelper {
 
   private void readExercisesPopulateSite(Site site, String fileName, InputStream inputStream) {
     List<CommonExercise> exercises;
- //   ExerciseDAO importer;
+    //   ExerciseDAO importer;
     if (fileName.endsWith(".json")) {
 //      FileExerciseDAO fileImporter = new FileExerciseDAO("", "", false, "", "");  //TODO fully support this
 //      exercises = fileImporter.readExercises(inputStream);
@@ -150,28 +150,27 @@ public class FileUploadHelper {
         }
       };
       exercises = excelImport.readExercises(inputStream);
-     // importer = excelImport;
+      // importer = excelImport;
       String s = "Read " + exercises.size();
       logger.info("got " + s);
       if (exercises.isEmpty()) {
 
-      }
-      else {
-        idToExercises.put(site.id,exercises);
+      } else {
+        idToExercises.put(site.id, exercises);
         site.setNum(exercises.size());
       }
     }
   }
 
   /**
-   * @paramx db
    * @param response
    * @param site
    * @throws IOException
+   * @paramx db
    * @paramx siteDeployer
    * @see LangTestDatabaseImpl#service
    */
-  public void doSiteResponse( HttpServletResponse response, Site site) throws IOException {
+  public void doSiteResponse(HttpServletResponse response, Site site) throws IOException {
     response.setContentType("text/plain");
     if (!site.isValid()) {
       response.getWriter().write("Name in use or invalid.");
@@ -183,5 +182,8 @@ public class FileUploadHelper {
   public Collection<CommonExercise> getExercises(int projid) {
     return idToExercises.get(projid);
   }
-  public void forgetExercises(int projid) { idToExercises.remove(projid); }
+
+  public void forgetExercises(int projid) {
+    idToExercises.remove(projid);
+  }
 }

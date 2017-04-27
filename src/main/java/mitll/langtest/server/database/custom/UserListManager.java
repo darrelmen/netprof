@@ -809,13 +809,14 @@ public class UserListManager implements IUserListManager {
   /**
    * @param userExercise
    * @param mediaDir
+   * @param typeOrder
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override
-  public void editItem(CommonExercise userExercise, String mediaDir) {
+  public void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder) {
     fixAudioPaths(userExercise, true, mediaDir);
-    userExerciseDAO.update(userExercise, false);
+    userExerciseDAO.update(userExercise, false, typeOrder);
   }
 
   /**
@@ -867,7 +868,7 @@ public class UserListManager implements IUserListManager {
    * @param userExercise
    * @param overwrite
    * @param mediaDir
-   * @see #editItem
+   * @see UserListManager#editItem
    * @see #newExercise
    */
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {

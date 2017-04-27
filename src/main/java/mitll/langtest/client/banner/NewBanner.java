@@ -85,7 +85,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     navCollapse.add(this.lnav = getLNav());
 
-   breadcrumbs.addStyleName("rightTwentyMargin");
+    breadcrumbs.addStyleName("rightTwentyMargin");
     addChoicesForUser(lnav);
 
     Nav recnav = new Nav();
@@ -120,7 +120,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     breadcrumbs.addStyleName("floatLeft");
     Style style = breadcrumbs.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
-    style.clearProperty("backgroundColor");
+    //style.clearProperty("backgroundColor");
+ //   style.setBackgroundColor("black");
+
   }
 
   @NotNull
@@ -211,6 +213,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");
 
+    showSection(instance1);
+  }
+
+  private void showSection(String instance1) {
     switch (instance1) {
       case NewContentChooser.LEARN:
         navigation.showLearn();
@@ -269,19 +275,17 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
       first = false;
       choices.add(choice1);
     }
-
-
   }
 
-
   @NotNull
-  private NavLink getChoice(ComplexWidget nav, String learn1) {
-    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + learn1;
+  private NavLink getChoice(ComplexWidget nav, String instanceName) {
+    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
 
-    NavLink learn = getLink(nav, learn1);
+    NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
-      logger.info("getChoice got click on " + learn1 + " = " + historyToken);
-      setHistoryItem(historyToken);
+      logger.info("getChoice got click on " + instanceName + " = " + historyToken);
+      showSection(instanceName);
+     // setHistoryItem(historyToken);
     });
     return learn;
   }

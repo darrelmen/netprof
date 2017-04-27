@@ -182,21 +182,23 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 //    }
   }
 
+  private static final boolean DEBUG = false;
+
   @Override
   public void audioChanged(int id, long duration) {
     AlignmentOutput value2 = alignments.get(id);
     if (value2 != null) {
-      logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
+      if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
       matchSegmentToWidgetForAudio(id, duration, value2);
       Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(id);
-      logger.info("audioChanged for ex " + exercise.getID() +
+      if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() +
           " audio id " + id + " : " +
           (typeToSegmentToWidget == null ? "missing" : typeToSegmentToWidget.size()));
       if (typeToSegmentToWidget == null) {
         logger.warning("audioChanged no type to segment for " + id + " and exercise " + exercise.getID());
       } else {
         TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
-        logger.info("audioChanged segments now " + transcriptSegmentIHighlightSegmentTreeMap.keySet());
+        if (DEBUG) logger.info("audioChanged segments now " + transcriptSegmentIHighlightSegmentTreeMap.keySet());
         playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
       }
     }

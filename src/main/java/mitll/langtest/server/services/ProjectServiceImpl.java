@@ -41,13 +41,16 @@ import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickExercise;
+import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -115,7 +118,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     Project currentProject = db.getProject(info.getID());
     boolean wasRetired = getWasRetired(currentProject);
 
-    logger.info("update " +info);
+    // logger.info("update " +info);
     boolean update = getProjectDAO().update(getUserIDFromSession(), info);
     if (update && wasRetired) {
       db.configureProject(db.getProject(info.getID()), false);
@@ -137,41 +140,151 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public void addPending(int projectid) {
     Collection<CommonExercise> toImport = db.getProjectManagement().getFileUploadHelper().getExercises(projectid);
+
     if (toImport != null) {
       Map<Integer, CommonExercise> dominoToEx = new HashMap<>();
       toImport.forEach(ex -> dominoToEx.put(ex.getDominoID(), ex));
 
-      int importUser = ((DominoUserDAOImpl) db.getUserDAO()).getImportUser();
+      int importUser = getUserIDFromSession();
+      logger.info("import user = " + importUser);
+      if (importUser == -1) {
+        logger.info("\t import user now = " + importUser);
+        importUser = ((DominoUserDAOImpl) db.getUserDAO()).getImportUser();
+      }
+
       SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
       List<CommonExercise> newEx = new ArrayList<>();
       List<CommonExercise> updateEx = new ArrayList<>();
 
       Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
-      Set<Integer> current = legacyToEx.keySet();
+      {
+        Set<Integer> current = legacyToEx.keySet();
 
-      for (Map.Entry<Integer, CommonExercise> pair : dominoToEx.entrySet()) {
-        if (current.contains(pair.getKey())) {
-          updateEx.add(pair.getValue());
-        } else {
-          newEx.add(pair.getValue());
+        for (Map.Entry<Integer, CommonExercise> pair : dominoToEx.entrySet()) {
+          Integer dominoID = pair.getKey();
+          CommonExercise importEx = pair.getValue();
+
+          if (current.contains(dominoID)) {
+            updateEx.add(importEx);
+            importEx.getMutable().setID(legacyToEx.get(dominoID).id());
+          } else {
+            newEx.add(importEx);
+          }
         }
       }
 
       logger.info("addPending importing " + newEx.size() + " exercises");
       logger.info("addPending updating  " + updateEx.size() + " exercises");
 
-      Collection<String> typeOrder = db.getTypeOrder(projectid);
+      //  Collection<String> typeOrder = db.getTypeOrder(projectid);
       Collection<String> typeOrder2 = db.getProject(projectid).getTypeOrder();
 
-    //  logger.info("typeorder for " +projectid + " is " + typeOrder);
-      logger.info("typeorder for " +projectid + " is " + typeOrder2);
+      //  logger.info("typeorder for " +projectid + " is " + typeOrder);
+      logger.info("typeorder for " + projectid + " is " + typeOrder2);
 
-      new ExerciseCopy().addPredefExercises(projectid, slickUEDAO, importUser, newEx,
-          typeOrder2);
+      new ExerciseCopy().addPredefExercises(projectid, slickUEDAO, importUser, newEx, typeOrder2);
+
+      // now update...
+      // update the exercises...
+      doUpdate(projectid, importUser, slickUEDAO, updateEx, typeOrder2);
 
       db.configureProject(db.getProject(projectid), true);
     }
+  }
+
+  private void doUpdate(int projectid, int importUser, SlickUserExerciseDAO slickUEDAO, List<CommonExercise> updateEx, Collection<String> typeOrder2) {
+    int failed = 0;
+
+    Map<Integer, ExerciseAttribute> allByProject = slickUEDAO.getIDToPair(projectid);
+    Map<ExerciseAttribute, Integer> attrToID = new HashMap<>();
+    for (Map.Entry<Integer, ExerciseAttribute> pair : allByProject.entrySet()) {
+      attrToID.put(pair.getValue(), pair.getKey());
+    }
+
+    Collection<ExerciseAttribute> allKnownAttributes = new HashSet<>(allByProject.values());
+
+    //  logger.info("addExerciseAttributes found " + allByProject.size() + " attributes");
+    Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = slickUEDAO.getAllJoinByProject(projectid);
+
+    long now = System.currentTimeMillis();
+    Timestamp modified = new Timestamp(now);
+
+    List<SlickExerciseAttributeJoin> newJoins = new ArrayList<>();
+    List<SlickExerciseAttributeJoin> removeJoins = new ArrayList<>();
+
+    for (CommonExercise toUpdate : updateEx) {
+      logger.info("update " + toUpdate);
+      if (!slickUEDAO.update(toUpdate, false, typeOrder2)) failed++;
+
+      // compare new attributes on toUpdate to existing attributes...
+      //SlickExercise slickExercise = legacyToEx.get(toUpdate.getDominoID());
+      int updateExerciseID = toUpdate.getID();
+      Collection<SlickExerciseAttributeJoin> currentAttributesOnThisExercise = exToAttrs.get(updateExerciseID);
+
+      List<ExerciseAttribute> newAttributes = new ArrayList<>();
+      // List<ExerciseAttribute> updateAttributes = ;
+//      if (currentAttributes == null) { // they're all new, since
+//        newAttributes.addAll(updateAttributes);
+//      }
+//      else {
+      List<ExerciseAttribute> knownAttributes = new ArrayList<>();
+
+      // import attributes are either known or unknown...
+      List<ExerciseAttribute> updateAttributes = toUpdate.getAttributes();
+      for (ExerciseAttribute updateAttr : updateAttributes) {
+        if (allKnownAttributes.contains(updateAttr)) {
+          knownAttributes.add(updateAttr);
+        } else {
+          newAttributes.add(updateAttr);
+        }
+      }
+      //  }
+
+      // store and remember the new ones
+      for (ExerciseAttribute newAttr : newAttributes) {
+        int i = slickUEDAO.addAttribute(projectid, now, importUser, newAttr);
+        allByProject.put(i, newAttr);
+        allKnownAttributes.add(newAttr);
+        attrToID.put(newAttr, i);
+        logger.info("remember new import attribute " + i + " = " + newAttr);
+      }
+
+      // for join set, some are on there already, some need to be added, some need to be removed
+
+      Set<Integer> dbIDs = updateAttributes.stream().map(attrToID::get).collect(Collectors.toCollection(HashSet::new));
+      if (currentAttributesOnThisExercise == null) { // none on there yet, add all
+        for (Integer dbID : dbIDs) {
+          newJoins.add(new SlickExerciseAttributeJoin(-1, importUser, modified, updateExerciseID, dbID));
+        }
+      } else {
+        Set<Integer> currentSet = currentAttributesOnThisExercise.stream().map(SlickExerciseAttributeJoin::attrid).collect(Collectors.toCollection(HashSet::new));
+
+        Set<Integer> newIDs = new HashSet<>(dbIDs);
+        newIDs.removeAll(currentSet);
+
+        if (!newIDs.isEmpty()) logger.info("Adding new ids " + newIDs + " to " + updateExerciseID);
+
+        for (Integer dbID : newIDs) {
+          newJoins.add(new SlickExerciseAttributeJoin(-1, importUser, modified, updateExerciseID, dbID));
+        }
+        currentSet.removeAll(dbIDs);
+        for (SlickExerciseAttributeJoin current : currentAttributesOnThisExercise) {
+          if (currentSet.contains(current.attrid())) {
+            removeJoins.add(current);
+            logger.info("removing " + current);
+          }
+        }
+      }
+
+      // so now we have known and new attributes.
+      // compare new attributes to known...
+    }
+
+    logger.info("now " + newJoins.size() + " and remove " + removeJoins.size());
+    slickUEDAO.addBulkAttributeJoins(newJoins);
+    slickUEDAO.removeBulkAttributeJoins(removeJoins);
+    if (failed > 0) logger.warn("\n\n\n\nsomehow failed to update " + failed + " out of " + updateEx.size() + " exercises");
   }
 
   private boolean getWasRetired(Project currentProject) {
