@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.Tooltip;
@@ -40,10 +39,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.IconPosition;
-import com.github.gwtbootstrap.client.ui.constants.IconSize;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -70,6 +65,8 @@ import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
+
+  public static final String PAGE_SIZE_HEADER = "View";
 
   public static int FIRST_PAGE_SIZE = 5;
   private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, /*5,*/ 10, 25/*, 50*/);
@@ -127,18 +124,26 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     getProgressBarContainer(progressBar);
     // Todo : add this
     // breadRow.add(new HTML("breadcrumbs go here"));
+    listHeader.getElement().setId("listHeader");
     listHeader.add(breadRow);
 
     DivWidget pagerAndSort = new DivWidget();
     pagerAndSort.getElement().setId("pagerAndSort");
+    pagerAndSort.addStyleName("inlineFlex");
+    pagerAndSort.setWidth("100%");
 
     listHeader.add(pagerAndSort);
+
     pagerAndSort.add(tableWithPager);
     tableWithPager.addStyleName("floatLeft");
+    tableWithPager.setWidth("100%");
     this.sortBox = addSortBox(controller);
+    //pagesize =
+
+    addPageSize(pagerAndSort);
     pagerAndSort.add(sortBox);
 
-    addPrevNextPage(footer);
+    // addPrevNextPage(footer);
     finished = true;
   }
 
@@ -167,24 +172,27 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return progressBar;
   }
 
-  private Button prev, next;
+  // private Button prev, next;
   private final DivWidget sortBox;
 
+/*  @Deprecated
   private void addPrevNextPage(DivWidget footer) {
     DivWidget buttonDiv = new DivWidget();
     buttonDiv.addStyleName("floatRight");
     addPrevPageButton(buttonDiv);
     addNextPageButton(buttonDiv);
 
-    footer.add(buttonDiv);
+
+  //  footer.add(buttonDiv);
+
     buttonDiv.addStyleName("alignCenter");
 
-    pagesize = addPageSize(footer);
+   // pagesize = addPageSize(footer);
 
-    hidePrevNext();
-    enablePrevNext();
-  }
-
+//    hidePrevNext();
+//    enablePrevNext();
+  }*/
+/*
   private void addPrevPageButton(DivWidget buttonDiv) {
     Button prev = new Button("Previous Page");
     prev.getElement().setId("PrevNextList_Previous");
@@ -225,27 +233,34 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     buttonDiv.add(next);
     this.next = next;
     next.addStyleName("leftTenMargin");
-  }
+  }*/
 
-  private ListBox pagesize;
+  //private ListBox pagesize;
   private DivWidget pageSizeContainer;
 
   private ListBox addPageSize(DivWidget footer) {
-    ListBox pagesize = new ListBox();
-    HTML w = new HTML("View:");
-    w.addStyleName("floatLeft");
-    w.addStyleName("topFiveMargin");
-    w.addStyleName("rightFiveMargin");
+    HTML label = new HTML(PAGE_SIZE_HEADER);
+    label.addStyleName("floatLeft");
+    label.addStyleName("topFiveMargin");
+    label.addStyleName("rightFiveMargin");
 
     pageSizeContainer = new DivWidget();
+    pageSizeContainer.addStyleName("floatRight");
+    pageSizeContainer.addStyleName("rightFiveMargin");
+    pageSizeContainer.addStyleName("inlineFlex");
     footer.add(pageSizeContainer);
-    pageSizeContainer.add(w);
+    pageSizeContainer.add(label);
+
+    ListBox pagesize = new ListBox();
+    pagesize.getElement().getStyle().clearWidth();
     pageSizeContainer.add(pagesize);
+
     pagesize.addStyleName("floatLeft");
 
     for (Integer num : PAGE_SIZE_CHOICES) {
       pagesize.addItem(num + ITEMS_PAGE, "" + num);
     }
+
     int pageSize = getPageIndex();
     if (pageSize != -1) {
       pagesize.setItemSelected(pageSize, true);
@@ -253,6 +268,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
 
     pagesize.addChangeHandler(event -> onPageSizeChange(pagesize));
+
     return pagesize;
   }
 
@@ -279,11 +295,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private DivWidget addSortBox(ExerciseController controller) {
     DivWidget w = new DivWidget();
     w.addStyleName("floatRight");
-    HTML w1 = new HTML("Sort by");
+    HTML w1 = new HTML("Sort");
     w1.addStyleName("topFiveMargin");
     w1.addStyleName("rightFiveMargin");
     w1.addStyleName("floatLeft");
+    w.addStyleName("inlineFlex");
+
+
     w.add(w1);
+
     w.add(new ListSorting<>(this).getSortBox(controller));
     return w;
   }
@@ -296,7 +316,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
     tableWithPager = pagingContainer.getTableWithPager(listOptions);
- //   return tableWithPager;
+    //   return tableWithPager;
   }
 
   /**
@@ -719,9 +739,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getSectionWidgetContainer()
    */
   private void getTypeToValue(Map<String, String> typeToSelection) {
-    List<Pair> pairs = getPairs(typeToSelection);
-
-    controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs),
+    controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, getPairs(typeToSelection)),
         new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -734,7 +752,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           public void onSuccess(FilterResponse response) {
             Map<String, Set<MatchInfo>> result = response.getTypeToValues();
-          //  logger.info("getTypeToValues for " + pairs + " got " + result.size());
+            //  logger.info("getTypeToValues for " + pairs + " got " + result.size());
             boolean b = changeSelection(response.getTypesToInclude(), typeToSelection);
 
             setTypeToSelection(typeToSelection);
@@ -829,7 +847,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void gotEmptyExerciseList() {
-    logger.info("got empty exercise list.");
+   // logger.info("got empty exercise list.");
     clearExerciseContainer();
     showEmptySelection();
     hidePrevNext();
@@ -877,7 +895,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         */
 
         String s = builder.toString();
-       // logger.info("getHistoryToken token '" + s + "'");
+        // logger.info("getHistoryToken token '" + s + "'");
 
         return s;
       }
@@ -907,7 +925,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
-     // logger.info("askServerForExercises show empty -- ");
+      // logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();
     } else {
       if (numToShow == 1 && itemID > 0) {
@@ -939,7 +957,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           public void onSuccess(Void result) {
-              long now = System.currentTimeMillis();
+            long now = System.currentTimeMillis();
             getExercises(visibleIDs);
             logger.info("ensureAudio OK, ensured audio... in " + (now - then) + " millis");
           }
@@ -955,8 +973,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void hidePrevNextWidgets() {
 //    logger.info("hidePrevNextWidgets ------- ");
 
-    prev.setVisible(false);
-    next.setVisible(false);
+/*    prev.setVisible(false);
+    next.setVisible(false);*/
     pageSizeContainer.setVisible(false);
     sortBox.setVisible(false);
   }
@@ -964,19 +982,21 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void showPrevNext() {
     //  logger.info("showPrevNext ------- ");
 
-    prev.setVisible(true);
-    next.setVisible(true);
+/*    prev.setVisible(true);
+    next.setVisible(true);*/
     pageSizeContainer.setVisible(true);
     sortBox.setVisible(true);
 
+/*
     enablePrevNext();
+*/
   }
 
-  private void enablePrevNext() {
+/*  private void enablePrevNext() {
     // logger.info("enablePrevNext ------- ");
     prev.setEnabled(pagingContainer.hasPrevPage());
     next.setEnabled(pagingContainer.hasNextPage());
-  }
+  }*/
 
   /**
    * @param visibleIDs
@@ -1027,7 +1047,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
-  Set<Integer> exercisesWithScores = new HashSet<>();
+  private Set<Integer> exercisesWithScores = new HashSet<>();
 
   /**
    * @param result
@@ -1041,6 +1061,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       markCurrentExercise(next.getID());
     } else {
       DivWidget exerciseContainer = new DivWidget();
+//      Panel scrollPanel = new ScrollPanel(exerciseContainer);
+//
+//      DockLayoutPanel layoutPanel = new DockLayoutPanel(Style.Unit.PX);
+//      layoutPanel.add(scrollPanel);
 
       int reqID = wrapper.getReqID();
       for (CommonExercise exercise : result) {
@@ -1058,7 +1082,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
             setProgressBarScore(getInOrder());
           }
         });
+      //  innerContainer.setWidget(layoutPanel);
         innerContainer.setWidget(exerciseContainer);
+//        innerContainer.getElement().getStyle().setPosition(Style.Position.FIXED);
+//        innerContainer.getElement().getStyle().setTop(85, Style.Unit.PX);
+//        innerContainer.getElement().getStyle().setRight(210, Style.Unit.PX);
         showPrevNext();
       }
     }
@@ -1088,7 +1116,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     //  double percent = score / 100d;
     double percent = 100 * score;
 
-   // logger.info("showScore percent is " + percent);
+    // logger.info("showScore percent is " + percent);
     progressBar.setPercent(num == 0 ? 10 : percent);
     boolean allDone = num == denom;
 

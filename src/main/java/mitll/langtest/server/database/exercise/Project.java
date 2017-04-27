@@ -237,7 +237,7 @@ public class Project implements PronunciationLookup {
   }
 
   public void stopDecode() {
-    refResultDecoder.setStopDecode(true);
+    if (refResultDecoder != null) refResultDecoder.setStopDecode(true);
   }
 
   public String getWebserviceIP() {

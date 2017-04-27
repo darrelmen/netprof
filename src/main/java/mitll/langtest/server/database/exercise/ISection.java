@@ -59,8 +59,6 @@ public interface ISection<T> {
 
   void setPredefinedTypeOrder(List<String> predefinedTypeOrder);
 
-  //void addAssociations(Collection<Pair> pairs);
-
   void report();
 
  /**

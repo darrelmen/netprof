@@ -38,10 +38,10 @@ public class HighlightSegment extends InlineHTML implements IHighlightSegment {
   public void clearBlue() {
     highlighted = false;
     if (background == null) {
-      logger.warning("no background color???");
+//      logger.warning("no background color???");
       getElement().getStyle().clearBackgroundColor();
     } else {
-      logger.info("set background " + background);
+  //    logger.info("set background " + background);
       getElement().getStyle().setBackgroundColor(background);
     }
   }

@@ -1178,29 +1178,35 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public boolean forgotPassword(String user, String url) {
     DBUser next = delegate.getDBUser(user);
 
-    if (next.getPrimaryGroup() == null) {
-      next.setPrimaryGroup(getGroup());
+    if (next == null) {
+      logger.warn("forgotPassword - can't find user " + user );
+      return false;
     }
-    ClientUserDetail clientUserDetail = getClientUserDetail(next);
+    else {
+      if (next.getPrimaryGroup() == null) {
+        next.setPrimaryGroup(getGroup());
+      }
+      ClientUserDetail clientUserDetail = getClientUserDetail(next);
 
-    logger.info("forgotPassword users for " + user + " : " + clientUserDetail);
+      logger.info("forgotPassword users for " + user + " : " + clientUserDetail);
 
-    ClientUserDetail clientUserDetail1 = null;
-    try {
-      if (!isValidAsEmail(clientUserDetail.getEmail())) {
-        logger.error("huh? email " + clientUserDetail.getEmail() + " not valid?");
+      ClientUserDetail clientUserDetail1 = null;
+      try {
+        if (!isValidAsEmail(clientUserDetail.getEmail())) {
+          logger.error("huh? email " + clientUserDetail.getEmail() + " not valid?");
+        }
+
+        clientUserDetail1 = delegate.forgotPassword(next,
+            clientUserDetail,
+            url);
+
+        logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
+
+      } catch (Exception e) {
+        logger.error("Got " + e, e);
       }
 
-      clientUserDetail1 = delegate.forgotPassword(next,
-          clientUserDetail,
-          url);
-
-      logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
-
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
+      return clientUserDetail1 != null;
     }
-
-    return clientUserDetail1 != null;
   }
 }

@@ -145,7 +145,6 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
     logger.info("addChoices For " + exercise.getID() + " " + exercise.getEnglish() + " "+
         " male " + isMale + " is reg " + isReg + " male map " + malesMap.size() + " female map " + femalesMap.size());
-
 */
 
     AudioAttribute toUse = null;

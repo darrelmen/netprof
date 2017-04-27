@@ -87,12 +87,24 @@ public class UserMenu {
     String nameForAnswer = props.getNameForAnswer() + "s";
     choices.add(new LinkAndTitle(
         nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), new ResultsClickHandler(), true));
-  //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
+    //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new LinkAndTitle("Events", new EventsClickHandler(), true));
     choices.add(getChangePassword());
     choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
 
     choices.add(getLogOut());
+    return choices;
+  }
+  List<LinkAndTitle> getCogMenuChoices2() {
+    List<LinkAndTitle> choices = new ArrayList<>();
+    choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
+    choices.add(new LinkAndTitle("Manage Users", props.getDominoURL(), true));
+    String nameForAnswer = props.getNameForAnswer() + "s";
+    choices.add(new LinkAndTitle(
+        nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), new ResultsClickHandler(), true));
+    //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
+    choices.add(new LinkAndTitle("Events", new EventsClickHandler(), true));
+    choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
     return choices;
   }
 

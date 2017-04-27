@@ -178,7 +178,6 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   /**
-   *
    * @param fieldset
    * @param hp
    * @return
@@ -409,9 +408,7 @@ public class SignInForm extends UserDialog implements SignIn {
         String safeText = userField.getSafeText();
         if (safeText.isEmpty()) {
           markErrorBlur(userField, ENTER_A_USER_NAME);
-          return;
         } else {
-
           service.getUserByID(safeText, new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {

@@ -27,6 +27,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
+import slick.ast.Drop;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -121,7 +122,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     Style style = breadcrumbs.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
     //style.clearProperty("backgroundColor");
- //   style.setBackgroundColor("black");
+    //   style.setBackgroundColor("black");
 
   }
 
@@ -134,62 +135,43 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private final Nav lnav;
-  // private Dropdown recordMenu;
+  Dropdown cog;
 
   @NotNull
   private Nav getRightSideChoices(UserManager userManager, UserMenu userMenu) {
     Nav rnav = new Nav();
+    rnav.setAlignment(Alignment.RIGHT);
     rnav.add(subtitle = new Label());
+
     subtitle.addStyleName("floatLeft");
     subtitle.setType(LabelType.WARNING);
     subtitle.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     new TooltipHelper().addTooltip(subtitle, "Is your microphone active?");
-    rnav.setAlignment(Alignment.RIGHT);
 
     //recordMenu = getRecordMenu(rnav);
-
     addUserMenu(userManager, userMenu, rnav);
 
     subtitle.setVisible(!controller.isRecordingEnabled());
 
+    cog = new Dropdown("");
+    cog.setIcon(IconType.COG);
+    userMenu.getCogMenuChoices2().forEach(lt -> cog.add(lt.getLink()));
+    rnav.add(cog);
+
     getInfoMenu(userMenu, rnav);
     return rnav;
   }
-
-/*
-  private Dropdown getRecordMenu(Nav rnav) {
-    Dropdown info = new Dropdown("Record");
-    info.setIcon(IconType.MICROPHONE);
-    rnav.add(info);
-
-    getChoice(info, RECORD_AUDIO);
-    getChoice(info, RECORD_EXAMPLE);
-
-    info.setVisible(false);
-    return info;
-  }
-*/
 
   private void addUserMenu(UserManager userManager, UserMenu userMenu, Nav rnav) {
     userDrop = new Dropdown(userManager.getUserID());
     userDrop.setIcon(IconType.USER);
     rnav.add(userDrop);
 
-    List<LinkAndTitle> userMenuChoices = userMenu.getUserMenuChoices();
-    //logger.info("adding " + userMenuChoices.size());
+//    for (LinkAndTitle linkAndTitle : userMenu.getUserMenuChoices()) {  userDrop.add(linkAndTitle.getLink());    }
 
-    for (LinkAndTitle linkAndTitle : userMenuChoices) {
-      userDrop.add(linkAndTitle.getLink());
-    }
+    userMenu.getUserMenuChoices().forEach(lt -> userDrop.add(lt.getLink()));
   }
 
-  private boolean isQC() {
-    return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || controller.getUserState().isAdmin();
-  }
-
-  private boolean isPermittedToRecord() {
-    return controller.getUserState().hasPermission(User.Permission.RECORD_AUDIO) || controller.getUserState().isAdmin();
-  }
 
   private Label subtitle;
 
@@ -285,7 +267,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     learn.addClickHandler(event -> {
       logger.info("getChoice got click on " + instanceName + " = " + historyToken);
       showSection(instanceName);
-     // setHistoryItem(historyToken);
+      // setHistoryItem(historyToken);
     });
     return learn;
   }
@@ -351,6 +333,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   public void setCogVisible(boolean val) {
     userDrop.setVisible(val);
     for (Widget choice : choices) choice.setVisible(val);
+
+    cog.setVisible(isAdmin());
   }
 
   @Override
@@ -375,6 +359,18 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     recnav.setVisible(isPermittedToRecord() && controller.getProjectStartupInfo() != null);
   }
 
+  private boolean isPermittedToRecord() {
+    return controller.getUserState().hasPermission(User.Permission.RECORD_AUDIO) || isAdmin();
+  }
+
+  private boolean isAdmin() {
+    return controller.getUserState().isAdmin();
+  }
+
+  private boolean isQC() {
+    return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || isAdmin();
+  }
+
   @Override
   public void onResize() {
   }
@@ -383,7 +379,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   public void checkProjectSelected() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
-    Collection<NavLink> values = nameToLink.values();
+    // Collection<NavLink> values = nameToLink.values();
 //    logger.info("project info " + projectStartupInfo);
 //    logger.info("setting " + values.size() + " links");
 

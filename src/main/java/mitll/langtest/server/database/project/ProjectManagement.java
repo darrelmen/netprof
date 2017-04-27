@@ -730,7 +730,7 @@ public class ProjectManagement implements IProjectManagement {
     try {
       return Integer.parseInt(project.getProp(ServerProperties.WEBSERVICE_HOST_PORT));
     } catch (NumberFormatException e) {
-      logger.error("got " + e, e);
+      logger.error("for " +project+ " got " + e);
       return -1;
     }
   }

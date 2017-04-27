@@ -38,12 +38,12 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
     return count;
   }
 
-  public String toString() {
-    return value + "=" + count;
-  }
-
   @Override
   public int compareTo(@NotNull MatchInfo o) {
     return itemSorter.compare(value, o.getValue());
+  }
+
+  public String toString() {
+    return value + "=" + count;
   }
 }

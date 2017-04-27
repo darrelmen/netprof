@@ -225,7 +225,7 @@ public class LangTest implements
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
-  public static final String VERSION_INFO = "2.0.6";
+  public static final String VERSION_INFO = "2.0.7";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 

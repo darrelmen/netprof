@@ -142,7 +142,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @Override
   public Map<Integer, AlignmentOutput> getAlignments(int projid, Collection<Integer> audioIDs) {
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
-    logger.info("getAlignments asking for " + audioIDs);
+//    logger.info("getAlignments asking for " + audioIDs);
     for (Integer audioID : audioIDs) {
       ISlimResult cachedResult = db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
       if (cachedResult == null || !cachedResult.isValid()) {
@@ -164,7 +164,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
         getTypeToTranscriptEvents(precalcScores.getJsonObject(), false);
     Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents);
-    logger.info("cache HIT for " + audioID + " returning " + typeToSegments);
+//    logger.info("cache HIT for " + audioID + " returning " + typeToSegments);
     idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
   }
 

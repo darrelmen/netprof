@@ -123,11 +123,17 @@ public class ProjectChoices {
   private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
     List<SlimProject> filtered = new ArrayList<>();
     Collection<User.Permission> permissions = controller.getPermissions();
-    boolean canRecord = permissions.contains(User.Permission.RECORD_AUDIO) ||
-        permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.DEVELOP_CONTENT);
+    boolean canRecord =
+        permissions.contains(User.Permission.RECORD_AUDIO) ||
+            permissions.contains(User.Permission.QUALITY_CONTROL) ||
+            permissions.contains(User.Permission.DEVELOP_CONTENT);
+
+    logger.info("Examining  " + projects.size() + " projects, can record = " + canRecord);
 
     for (SlimProject project : projects) {
-      if (project.getStatus() != ProjectStatus.PRODUCTION) {
+      if (project.getStatus() == ProjectStatus.PRODUCTION) {
+        filtered.add(project);
+      } else {
         if (project.getStatus() == ProjectStatus.RETIRED) {
           boolean admin = controller.getUserManager().isAdmin();
           if (admin) {
@@ -136,7 +142,7 @@ public class ProjectChoices {
         } else if (canRecord) {
           filtered.add(project);
         }
-      } else filtered.add(project);
+      }
     }
     return filtered;
   }
@@ -185,7 +191,7 @@ public class ProjectChoices {
       for (int j = i; j < max; j++) {
         SlimProject project = languages.get(j);
         String language = project.getLanguage();
-        language = language.substring(0, 1).toUpperCase() + language.substring(1);
+        language = capitalize(language);
         current.add(getLangIcon(language, project, nest));
         total++;
       }
@@ -194,6 +200,12 @@ public class ProjectChoices {
         flags.add(current = new Thumbnails());
       }
     }
+  }
+
+  @NotNull
+  private String capitalize(String language) {
+    language = language.substring(0, 1).toUpperCase() + language.substring(1);
+    return language;
   }
 
   private void sortLanguages(final int nest, List<SlimProject> languages) {
@@ -299,7 +311,7 @@ public class ProjectChoices {
         nest == 0 &&
             //   lang.equalsIgnoreCase(projectForLang.getName()) &&
             projectForLang.hasChildren() ? lang : projectForLang.getName();
-    return getImageAnchor(lang1, projectForLang);
+    return getImageAnchor(capitalize(lang1), projectForLang);
   }
 
   /**

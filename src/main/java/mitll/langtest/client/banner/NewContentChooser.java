@@ -49,7 +49,8 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showInitialState() {
     clearCurrent();
-    History.fireCurrentHistoryState();
+    showLearn();
+   // History.fireCurrentHistoryState();
   }
 
   @Override

@@ -364,7 +364,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       return typeToMatch;
     }
 
-
     Iterator<Pair> iterator = pairs.iterator();
     Pair next = iterator.next();
     String type = next.getProperty();
@@ -373,7 +372,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     boolean isAll = toMatch.equalsIgnoreCase(ANY) || toMatch.equalsIgnoreCase(ALL);
 //    logger.info("to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
     if (!node.isLeaf() && node.getChildType().equals(type)) {
-      // Set<MatchInfo> matches = new HashSet<>();
       Map<String, MatchInfo> matches = new HashMap<>();
       typeToMatch.put(type, matches);
 
@@ -1034,14 +1032,14 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       Set<MatchInfo> matches = typeToMatches.get(type);
       if (matches == null || matches.isEmpty()) {
         typesToInclude1.remove(type);
-        logger.info("removing " + type);
+        logger.info("getTypeToValues removing " + type);
         someEmpty = true;
       }
     }
 
     if (someEmpty) {
       List<Pair> typeToSelection2 = new ArrayList<>();
-      logger.info("back off including  " + typesToInclude1);
+      logger.info("getTypeToValues back off including  " + typesToInclude1);
       for (Pair pair : typeToSelection) {
         if (typesToInclude1.contains(pair.getProperty())) {
           typeToSelection2.add(pair);
@@ -1049,7 +1047,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
           typeToSelection2.add(new Pair(pair.getProperty(), "all"));
         }
       }
-      logger.info("try search again with " + typeToSelection2);
+      logger.info("getTypeToValues try search again with " + typeToSelection2);
 
       return new FilterResponse(request.getReqID(), getTypeToMatches(typeToSelection2), typesToInclude1);
     } else {

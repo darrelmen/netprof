@@ -503,7 +503,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (sectionHelper == null) logger.warn("no section helper for " + this);
     List<String> objects = Collections.emptyList();
     Collection<String> strings = (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
-   logger.info("getTypeOrder : " + projectid + " = " + strings);
+//   logger.info("getTypeOrder : " + projectid + " = " + strings);
     return strings;
   }
 

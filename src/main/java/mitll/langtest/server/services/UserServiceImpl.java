@@ -32,11 +32,13 @@
 
 package mitll.langtest.server.services;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.banner.UserTable;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.user.UserManagement;
@@ -245,12 +247,13 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param user
    * @return true if there's a user with this email
    * @see mitll.langtest.client.user.SignInForm#getForgotPassword
+   * @see mitll.langtest.client.user.SendResetPassword#onChangePassword
    */
   public boolean resetPassword(String user) {
-    String baseURL = getBaseURL();
+    //String baseURL = getBaseURL();
     // logger.warn("resetPassword for " + user + " " + baseURL);
     // Use Domino call to do reset password
-    return db.getUserDAO().forgotPassword(user, baseURL);
+    return db.getUserDAO().forgotPassword(user, getBaseURL());
   }
 
   /**

@@ -152,14 +152,14 @@ public class SlickUserExerciseDAO
         shared.getNumPhones());
   }
 
-  @Deprecated
-  private List<String> typeOrder = null;
+//  @Deprecated
+//  private List<String> typeOrder = null;
 
   /**
    * @return
    * @deprecated bad idea -- for which project is this????
    */
-  List<String> getTypeOrder() {
+/*  List<String> getTypeOrder() {
     if (typeOrder == null) {
       typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
       logger.info("getTypeOrder : exercise DAO " + exerciseDAO + " type order " + typeOrder);
@@ -169,7 +169,7 @@ public class SlickUserExerciseDAO
       }
     }
     return typeOrder;
-  }
+  }*/
 
   /**
    * TODO : we won't do override items soon, since they will just be domino edits...?
@@ -277,7 +277,10 @@ public class SlickUserExerciseDAO
   @NotNull
   private Map<String, String> getUnitToValue(SlickExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
-    Iterator<String> iterator = getTypeOrder().iterator();
+    Collection<String> typeOrder = userDAO.getDatabase().getTypeOrder(slick.projid());
+
+    if (typeOrder == null || typeOrder.isEmpty()) logger.warn("no types for " + slick);
+    Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
     unitToValue.put(first, slick.unit());
