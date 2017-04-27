@@ -225,7 +225,7 @@ public class SlickUserExerciseDAO
     String orDefault = unitToValue.getOrDefault(first, "");
     String orDefault1 = unitToValue.getOrDefault(second, "");
 
-    logger.info("for " + shared.getID() + " : first = '" + orDefault + "' " + second + " = '" + orDefault1 + "'");
+   // logger.info("for " + shared.getID() + " : first = '" + orDefault + "' " + second + " = '" + orDefault1 + "'");
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),

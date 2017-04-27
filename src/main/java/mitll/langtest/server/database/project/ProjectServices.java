@@ -20,7 +20,7 @@ public interface ProjectServices {
 
   Collection<Project> getProjects();
 
-  void configureProject(Project project);
+  void configureProject(Project project, boolean forceReload);
 
   String getLanguage(int projectid);
 }

@@ -25,5 +25,7 @@ public class Pair implements IsSerializable {
     return value;
   }
 
-  public String toString() {   return property + "=" + value;  }
+  public String toString() {
+    return property + "=" + value;
+  }
 }

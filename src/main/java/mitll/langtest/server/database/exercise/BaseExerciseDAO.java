@@ -103,7 +103,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     this.language = language;
     this.addDefects = addDefects;
     this.id = id;
-    logger.debug("\n\n\nlanguage is " + language);
+//    logger.debug("\n\n\nlanguage is " + language);
   }
 
   /**

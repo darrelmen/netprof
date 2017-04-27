@@ -31,6 +31,7 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
@@ -99,41 +100,43 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void getRefAudio(ExerciseController controller) {
-    AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
-    int refID =  currentAudioAttr.getUniqueID();
-    int contextRefID = -1; //contextPlay.getCurrentAudioID();
+    if (playAudio != null) {
+      AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
+      int refID = currentAudioAttr.getUniqueID();
+      int contextRefID = -1; //contextPlay.getCurrentAudioID();
 
-    //  logger.info("getRefAudio asking for " + refID);
+      //  logger.info("getRefAudio asking for " + refID);
 //    logger.info("asking for " + contextRefID);
 
-    List<Integer> req = new ArrayList<>();
-    if (refID != -1) {
-      if (!alignments.containsKey(refID))
-        req.add(refID);
-    }
+      List<Integer> req = new ArrayList<>();
+      if (refID != -1) {
+        if (!alignments.containsKey(refID))
+          req.add(refID);
+      }
 
-    if (contextRefID != -1) {
-      if (!alignments.containsKey(contextRefID))
-        req.add(contextRefID);
-    }
+      if (contextRefID != -1) {
+        if (!alignments.containsKey(contextRefID))
+          req.add(contextRefID);
+      }
 
-    if (req.isEmpty()) {
-      registerSegmentHighlight(refID, contextRefID, currentAudioAttr.getDurationInMillis());
-    } else {
-      controller.getScoringService().getAlignments(controller.getProjectStartupInfo().getProjectid(),
-          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
-            @Override
-            public void onFailure(Throwable caught) {
+      if (req.isEmpty()) {
+        registerSegmentHighlight(refID, contextRefID, currentAudioAttr.getDurationInMillis());
+      } else {
+        controller.getScoringService().getAlignments(controller.getProjectStartupInfo().getProjectid(),
+            req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+              @Override
+              public void onFailure(Throwable caught) {
 
-            }
+              }
 
-            @Override
-            public void onSuccess(Map<Integer, AlignmentOutput> result) {
-              alignments.putAll(result);
-              registerSegmentHighlight(refID, contextRefID, currentAudioAttr.getDurationInMillis());
-              cacheOthers();
-            }
-          });
+              @Override
+              public void onSuccess(Map<Integer, AlignmentOutput> result) {
+                alignments.putAll(result);
+                registerSegmentHighlight(refID, contextRefID, currentAudioAttr.getDurationInMillis());
+                cacheOthers();
+              }
+            });
+      }
     }
   }
 
@@ -145,19 +148,22 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (!req.isEmpty()) {
       logger.info("Asking for audio alignments for " + req);
 
-      controller.getScoringService().getAlignments(controller.getProjectStartupInfo().getProjectid(),
-          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
-            @Override
-            public void onFailure(Throwable caught) {
+      ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+      if (projectStartupInfo != null) {
+        controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
+            req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+              @Override
+              public void onFailure(Throwable caught) {
 
-            }
+              }
 
-            @Override
-            public void onSuccess(Map<Integer, AlignmentOutput> result) {
-              alignments.putAll(result);
-              //registerSegmentHighlight(refID, contextRefID);
-            }
-          });
+              @Override
+              public void onSuccess(Map<Integer, AlignmentOutput> result) {
+                alignments.putAll(result);
+                //registerSegmentHighlight(refID, contextRefID);
+              }
+            });
+      }
     }
   }
 

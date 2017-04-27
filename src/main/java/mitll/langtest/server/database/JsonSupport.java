@@ -35,7 +35,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;

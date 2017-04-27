@@ -73,7 +73,7 @@ public interface Database extends AutoCloseable {
 
   Collection<String> getTypeOrder(int projectid);
 
-  void configureProject(Project project);
+  void configureProject(Project project, boolean forceReload);
 
   void setStartupInfo(User userWhere);
 

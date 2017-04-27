@@ -171,12 +171,12 @@ public class ProjectManagement implements IProjectManagement {
     Collection<Project> projects = getProjects();
     logger.info("configureProjects got " + projects.size() + " projects");
     for (Project project : projects) {
-      configureProject(project, false);
+      configureProject(project, false, false);
     }
   }
 
   public void configureProjectByID(int projid) {
-    configureProject(getProject(projid), false);
+    configureProject(getProject(projid), false, false);
   }
 
   /**
@@ -184,18 +184,21 @@ public class ProjectManagement implements IProjectManagement {
    *
    * @param project
    * @param configureEvenRetired
+   * @param forceReload
    * @see #configureProjects
    */
-  public void configureProject(Project project, boolean configureEvenRetired) {
+  public void configureProject(Project project, boolean configureEvenRetired, boolean forceReload) {
     boolean skipRetired = project.isRetired() && !configureEvenRetired;
     boolean isConfigured = project.getExerciseDAO().isConfigured();
-    if (skipRetired || isConfigured) {
-      if (isConfigured) {
-//        logger.debug("configureProject project already configured " + project.getProject().id());
-      } else {
-        logger.info("skipping fully loading project " + project + " since it's retired");
+    if (!forceReload) {
+      if (skipRetired || isConfigured) {
+        if (isConfigured) {
+          logger.debug("configureProject project already configured " + project.getProject().id());
+        } else {
+          logger.info("skipping fully loading project " + project + " since it's retired");
+        }
+        return;
       }
-      return;
     }
 
     logger.info("configureProject " + project);
@@ -221,6 +224,9 @@ public class ProjectManagement implements IProjectManagement {
     int id = slickProject == null ? -1 : slickProject.id();
     setDependencies(project.getExerciseDAO(), id);
 
+    if (forceReload) {
+      project.getExerciseDAO().reload();
+    }
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
       logger.debug("configureProject (" + project.getLanguage() +
@@ -353,7 +359,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #configureProject
    */
   private void setDependencies(ExerciseDAO exerciseDAO, int projid) {
-    logger.info("setDependencies - " + projid);
+    logger.info("setDependencies - project #" + projid);
     IAudioDAO audioDAO = db.getAudioDAO();
 
     if (audioDAO == null) {
@@ -477,7 +483,7 @@ public class ProjectManagement implements IProjectManagement {
 
     if (!project.isConfigured()) {
       logger.info("\tgetExercises configure " + projectid);
-      configureProject(project, false);
+      configureProject(project, false, false);
     }
 
     List<CommonExercise> rawExercises = project.getRawExercises();
@@ -590,7 +596,7 @@ public class ProjectManagement implements IProjectManagement {
       if (project.getStatus() == ProjectStatus.RETIRED && !userWhere.isAdmin()) {
         logger.info("setStartupInfo project is retired - so kicking the user back to project choice screen.");
       } else {
-        configureProject(project, true);
+        configureProject(project, true, false);
 
         SlickProject project1 = project.getProject();
         List<String> typeOrder = getTypeOrder(project);

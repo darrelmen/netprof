@@ -86,7 +86,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   @Override
   public void clear() {
     typeToUnitToLesson.clear();
-    root = null;
+    makeRoot();
   }
 
   /**
@@ -891,10 +891,12 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     if (seen.isEmpty()) logger.error("huh? no types to remember?");
 
-    if (DEBUG) logger.info("rememberTypesInOrder type order " + predefinedTypeOrder +
-        " root " + root.getName() +
-        " children  " + root.getChildren().size() +
-        " num seen " + seen.size());
+    if (DEBUG || true) {
+      logger.info("rememberTypesInOrder type order " + predefinedTypeOrder +
+          " root " + root.getName() +
+          " children  " + root.getChildren().size() +
+          " num seen " + seen.size());
+    }
 
     for (List<Pair> pairs : seen) {
       child = rememberOne(predefinedTypeOrder, child, pairs);
@@ -919,7 +921,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     //  logger.info("NEW ROOT " + root, new Exception());
   }
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
    * @param predefinedTypeOrder
@@ -945,6 +947,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     if (pairs.size() != 3 && spew++ < 100)
       logger.info("after " + pairs);
 */
+
+    if (DEBUG) logger.info("for " + child + " got types " + predefinedTypeOrder + " " + pairs.size());
 
     return rememberOne(child, pairs);
   }
@@ -980,6 +984,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   private SectionNode rememberOne(SectionNode child, List<Pair> pairs) {
     for (Pair pair : pairs) {
       child = child.getChild(pair.getProperty(), pair.getValue());
+
+      if (child == null) {
+        logger.warn("huh? no child of " + child + " for " + pair);
+      }
     }
     child = root;
     return child;

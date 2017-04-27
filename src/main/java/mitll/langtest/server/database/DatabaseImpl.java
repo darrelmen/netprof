@@ -693,11 +693,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * For when a new project is added or changes state.
    *
    * @param project
+   * @param forceReload
    * @see mitll.langtest.server.services.ProjectServiceImpl#update
    */
   @Override
-  public void configureProject(Project project) {
-    projectManagement.configureProject(project, false);
+  public void configureProject(Project project, boolean forceReload) {
+    projectManagement.configureProject(project, false, forceReload);
   }
 
   /**

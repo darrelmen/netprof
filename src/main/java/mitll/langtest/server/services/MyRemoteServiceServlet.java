@@ -137,7 +137,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     int i = db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
     Project project = db.getProject(i);
     if (project != null) {
-      db.configureProject(project); //check if we should configure it - might be a new project
+      db.configureProject(project, false); //check if we should configure it - might be a new project
     }
     return i;
   }

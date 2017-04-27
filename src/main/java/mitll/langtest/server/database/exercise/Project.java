@@ -51,7 +51,6 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -193,7 +192,7 @@ public class Project implements PronunciationLookup {
 
   /**
    * @param analysis
-   * @see ProjectManagement#configureProject
+   * @see IProjectManagement#configureProject
    */
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;

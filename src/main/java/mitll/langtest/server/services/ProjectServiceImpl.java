@@ -118,7 +118,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     logger.info("update " +info);
     boolean update = getProjectDAO().update(getUserIDFromSession(), info);
     if (update && wasRetired) {
-      db.configureProject(db.getProject(info.getID()));
+      db.configureProject(db.getProject(info.getID()), false);
     }
     db.getProjectManagement().refreshProjects();
     return update;
@@ -164,13 +164,13 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       Collection<String> typeOrder = db.getTypeOrder(projectid);
       Collection<String> typeOrder2 = db.getProject(projectid).getTypeOrder();
 
-      logger.info("typeorder for " +projectid + " is " + typeOrder);
+    //  logger.info("typeorder for " +projectid + " is " + typeOrder);
       logger.info("typeorder for " +projectid + " is " + typeOrder2);
 
       new ExerciseCopy().addPredefExercises(projectid, slickUEDAO, importUser, newEx,
           typeOrder2);
 
-      db.configureProject(db.getProject(projectid));
+      db.configureProject(db.getProject(projectid), true);
     }
   }
 

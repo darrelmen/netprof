@@ -35,6 +35,7 @@ package mitll.langtest.server.database.analysis;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
+import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.services.AnalysisServiceImpl;
@@ -63,7 +64,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param database
    * @param phoneDAO
    * @param projid
-   * @see mitll.langtest.server.database.DatabaseImpl#configureProject
+   * @see ProjectServices#configureProject
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
    */
   public SlickAnalysis(Database database,

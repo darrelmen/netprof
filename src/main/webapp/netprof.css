@@ -1775,7 +1775,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar-inner .breadcrumb {
+    /*
     background-color: #fafafa;
+    */
     border-radius: 4px;
     list-style: outside none none;
     margin: 5px 0 0;

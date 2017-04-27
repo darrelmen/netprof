@@ -210,14 +210,21 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL);
         }
 
+        Set<Integer> unique = new HashSet<>();
         logger.info("adding " + exercises.getByID().size() + " by id exercises");
 
         commonExercises.addAll(exercises.getByID());
+        exercises.getByID().forEach(e -> unique.add(e.getID()));
 
         logger.info("adding " + basicExercises.size() + " basicExercises");
 
-        commonExercises.addAll(basicExercises);
+        basicExercises
+            .stream()
+            .filter(e -> !unique.contains(e.getID()))
+            .forEach(commonExercises::add);
+        basicExercises.forEach(e -> unique.add(e.getID()));
 
+        // last come context matches
         List<CommonExercise> contextExercises = new ArrayList<CommonExercise>(exercises.getByContext());
         {
           if (!contextExercises.isEmpty() && hasSearch) {
@@ -229,7 +236,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         }
         logger.info("adding " + contextExercises.size() + " contextExercises");
 
-        commonExercises.addAll(contextExercises);
+        contextExercises
+            .stream()
+            .filter(e -> !unique.contains(e.getID()))
+            .forEach(commonExercises::add);
+//        commonExercises.addAll(contextExercises);
       }
     }
     return commonExercises;
@@ -239,7 +250,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private ExerciseListWrapper<T> getCachedExerciseWrapper(ExerciseListRequest request, int projectID) {
     synchronized (projidToWrapper) {
       ExerciseListWrapper<T> exerciseListWrapper = projidToWrapper.get(projectID);
-      if (exerciseListWrapper != null) {
+      if (exerciseListWrapper != null && false) {
         logger.info("getExerciseIds Returning cached exercises " + exerciseListWrapper);
 
         ExerciseListWrapper<T> tExerciseListWrapper = new ExerciseListWrapper<>(request.getReqID(),

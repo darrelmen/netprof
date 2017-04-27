@@ -147,7 +147,7 @@ public class ExerciseCopy {
                                                        int importUser,
                                                        Collection<CommonExercise> exercises, Collection<String> typeOrder) {
     List<SlickExercise> bulk = new ArrayList<>();
-    logger.info("addPredefExercises copying   " + exercises.size() + " exercises");
+    logger.info("addPredefExercises copying " + exercises.size() + " exercises");
     Set<ExerciseAttribute> known = new HashSet<>();
     long now = System.currentTimeMillis();
 

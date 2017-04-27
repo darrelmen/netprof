@@ -82,6 +82,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   public static final String BOOK = "book";
   public static final String CHAPTER = "chapter";
   public static final String LESSON = "lesson";
+  public static final String OTHER = "Other";
 
   private final List<String> errors = new ArrayList<String>();
   private final String file;
@@ -327,7 +328,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
             String colNormalized = col.toLowerCase();
             int i = columns.indexOf(col);
 
-            logger.info("col " + i + " '" + colNormalized + "'");
+//            logger.info("col " + i + " '" + colNormalized + "'");
             if (colNormalized.startsWith(WORD)) {
               gotHeader = true;
               colIndexOffset = i;
@@ -363,12 +364,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                 addColToHeaderForProperty(colToHeader, col, i);
               }
             } else if (isFirstTypeMatch(colNormalized, first) && unitIndex == -1) {
-              logger.info("first type match " + colNormalized + " " + first + " unit " + i);
+  //            logger.info("first type match " + colNormalized + " " + first + " unit " + i);
               unitIndex = i;
               predefinedTypeOrder.add(col);
               unitName = col;
             } else if (isSecondTypeMatch(colNormalized, second)) {
-              logger.info("second type match " + colNormalized + " " + second + " unit " + i);
+//              logger.info("second type match " + colNormalized + " " + second + " unit " + i);
               chapterIndex = i;
               predefinedTypeOrder.add(col);
               chapterName = col;
@@ -848,8 +849,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String week = getCell(next, weekIndex);
 
     if (unit.isEmpty() && chapter.isEmpty() && week.isEmpty()) {
-      unit = "Other";
-      chapter = "Other";
+      unit   = OTHER;
+      chapter = OTHER;
     }
 
     // hack to trim off leading tics
@@ -867,7 +868,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     if (unit.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
-      logger.info("recordUnitChapterWeek Adding " + unitName + "=" + unit + " to " + imported.getID() + " " + imported.getEnglish());
+//      logger.info("recordUnitChapterWeek Adding " + unitName + "=" + unit + " to " + imported.getID() + " " + imported.getEnglish());
     } else if (unitName != null) {
       unit = chapter;
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
@@ -877,7 +878,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         chapter = (unitIndex == -1 ? "" : unit + "-") + chapter; // hack for now to get unique chapters...
       }
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
-      logger.info("recordUnitChapterWeek Adding " + chapterName + "=" + chapter + " to " + imported.getID() + " " + imported.getEnglish());
+//      logger.info("recordUnitChapterWeek Adding " + chapterName + "=" + chapter + " to " + imported.getID() + " " + imported.getEnglish());
     } else if (chapterName != null) {
       chapter = unit;
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
@@ -886,7 +887,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (week.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, week));
     }
-    logger.info("now  " + imported.getID() + " = " + imported.getUnitToValue());
+//    logger.info("now  " + imported.getID() + " = " + imported.getUnitToValue());
     //  sectionHelper.addAssociations(pairs);
   }
 

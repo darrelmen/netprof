@@ -77,11 +77,12 @@ public interface IProjectManagement {
   void setStartupInfo(User userWhere, int projid);
 
   /**
-   * @see DatabaseImpl#configureProject
+   * @see ProjectServices#configureProject
    * @param project
    * @param configureEvenRetired
+   * @param forceReload
    */
-  void configureProject(Project project, boolean configureEvenRetired);
+  void configureProject(Project project, boolean configureEvenRetired, boolean forceReload);
   void configureProjectByID(int projid);
 
   List<SlimProject> getNestedProjectInfo();
