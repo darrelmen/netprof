@@ -255,8 +255,12 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     for (List<AudioAttribute> attrs : values) {
       for (AudioAttribute audioAttribute : attrs) {
         if (isReg && audioAttribute.isRegularSpeed() || (!isReg && audioAttribute.isSlow())) {
-          return audioAttribute;
-
+          if (audioAttribute.getAudioRef().startsWith("Fast") || audioAttribute.getAudioRef().startsWith("Slow")) {
+            logger.info("Skip " + audioAttribute);
+          }
+          else {
+            return audioAttribute;
+          }
         }
       }
     }

@@ -14,8 +14,10 @@ import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.custom.UserList;
 import org.jetbrains.annotations.NotNull;
@@ -73,14 +75,8 @@ public class NewListButton {
   public DecoratedPopupPanel getNewListButton2() {
     final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList();
     this.textBox = textBox;
-    final DecoratedPopupPanel thePopup = popupContainerFactory.getPopup(textBox, new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        makeANewList(textBox);
-      }
-    });
 
-    return thePopup;
+    return popupContainerFactory.getPopup(textBox, event -> makeANewList(textBox));
   }
 
   public void showOrHide(PopupPanel popupPanel, UIObject popupButton) {
@@ -148,7 +144,7 @@ public class NewListButton {
             } else {
               textBox.setText("");
               popupContainerFactory.showPopup("List " + title + " added!", dropdown);
-
+              LangTest.EVENT_BUS.fireEvent(new ListChangedEvent());
             }
           }
         }

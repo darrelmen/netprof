@@ -332,7 +332,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private Dropdown getDropdown() {
     Dropdown dropdownContainer = new Dropdown("");
-    //DropdownContainer dropdownContainer = new DropdownContainer("");
     dropdownContainer.setIcon(IconType.REORDER);
     dropdownContainer.setRightDropdown(true);
     dropdownContainer.getMenuWiget().getElement().getStyle().setTop(10, Style.Unit.PCT);

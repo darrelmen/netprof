@@ -992,6 +992,10 @@ public class UserListManager implements IUserListManager {
                     userListDAO.getWithExercises(id);
   }
 
+  public List<UserList<CommonShell>> getByName(int userid,String name,int projid) {
+    return userListDAO.getByName(userid,name,projid);
+  }
+
   /**
    * @param id
    * @param projid

@@ -34,7 +34,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
   @Override
   public void reinitialize() {
-    logger.info("reinitialize ");
+   // logger.info("reinitialize ");
     //    initialize();
   }
 

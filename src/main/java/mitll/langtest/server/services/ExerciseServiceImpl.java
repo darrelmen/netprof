@@ -70,12 +70,38 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
   /**
-   *
    * @param request
    * @return
    */
   public FilterResponse getTypeToValues(FilterRequest request) {
-    return getSectionHelper().getTypeToValues(request);
+    List<Pair> typeToSelection = request.getTypeToSelection();
+    List<UserList<CommonShell>> byName = null;
+
+    logger.info("getTypeToValues " + request);
+    logger.info("getTypeToValues " + typeToSelection);
+    for (Pair p : typeToSelection) {
+      if (p.getProperty().equalsIgnoreCase("Lists")) {
+        byName = db.getUserListManager().getByName(getUserIDFromSession(), p.getValue(), getProjectID());
+        logger.info("getTypeToValues byName " + byName);
+        if (byName.isEmpty()) byName = null;
+      }
+    }
+
+    if (byName != null) {
+      Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
+      UserList<CommonShell> next = byName.iterator().next();
+      MatchInfo matchInfo = new MatchInfo(next.getName(), next.getNumItems());
+
+      HashSet<MatchInfo> value = new HashSet<>();
+      value.add(matchInfo);
+      typeToValues.put("Lists", value);
+
+      FilterResponse lists = new FilterResponse(request.getReqID(), typeToValues, new HashSet<>(Arrays.asList("Lists")));
+      logger.info("returning " +lists);
+      return lists;
+    } else {
+      return getSectionHelper().getTypeToValues(request);
+    }
   }
 
   /**
@@ -120,7 +146,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       if (tExerciseListWrapper != null) return tExerciseListWrapper;
     }
 
-    List<CommonExercise> exercises;
+   // List<CommonExercise> exercises;
 
     logger.debug("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
@@ -134,8 +160,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         if (userListByID != null) {
-          Collection<CommonExercise> exercisesForState = getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
-          ArrayList<CommonExercise> commonExercises = new ArrayList<>(exercisesForState);
+          Collection<CommonExercise> exercisesForState =
+              getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
+          List<CommonExercise> commonExercises = new ArrayList<>(exercisesForState);
           return getExerciseListWrapperForPrefix(request, filterExercises(request, commonExercises, projectID));
         } else {
           return getExercisesForSelectionState(request, projectID);
@@ -216,12 +243,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         }
 
         Set<Integer> unique = new HashSet<>();
-        logger.info("adding " + exercises.getByID().size() + " by id exercises");
+    //    logger.info("adding " + exercises.getByID().size() + " by id exercises");
 
         commonExercises.addAll(exercises.getByID());
         exercises.getByID().forEach(e -> unique.add(e.getID()));
 
-        logger.info("adding " + basicExercises.size() + " basicExercises");
+      //  logger.info("adding " + basicExercises.size() + " basicExercises");
 
         basicExercises
             .stream()
@@ -966,6 +993,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                                                   UserList<T> userListByID) {
     SectionHelper<T> helper = new SectionHelper<T>();
     Collection<T> exercises2 = getCommonExercises(userListByID);
+
+    logger.info("getExercisesFromUserListFiltered found " + exercises2.size() + " for list " + userListByID);
     long then = System.currentTimeMillis();
     for (T commonExercise : exercises2) {
       helper.addExercise(commonExercise);
@@ -973,12 +1002,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     long now = System.currentTimeMillis();
 
     if (now - then > 100) {
-      logger.debug("used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
+      logger.debug("getExercisesFromUserListFiltered used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
     }
+    typeToSelection.remove("Lists");
     //helper.report();
     Collection<T> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
-    // logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
-    return exercisesForState;
+     logger.debug("\tgetExercisesFromUserListFiltered after found " + exercisesForState.size() + " matches to " + typeToSelection);
+    return typeToSelection.isEmpty()?exercises2: exercisesForState;
   }
 
   /**

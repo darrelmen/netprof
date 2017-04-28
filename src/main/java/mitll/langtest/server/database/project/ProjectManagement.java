@@ -487,10 +487,10 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     List<CommonExercise> rawExercises = project.getRawExercises();
-    if (rawExercises.isEmpty() || rawExercises.size() < 100) {
+/*    if (rawExercises.isEmpty() || rawExercises.size() < 100) {
       logger.warn("getExercises for " + projectid +
           " no exercises in '" + serverProps.getLessonPlan() + "' = " + rawExercises.size());
-    }
+    }*/
     return rawExercises;
   }
 

@@ -77,6 +77,7 @@ public interface IUserListManager {
   UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids);
   UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder, Set<Integer> ids);
 
+  List<UserList<CommonShell>> getByName(int userid,String name,int projid);
   UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder, Set<Integer> ids);
   UserList<CommonExercise> getUserListByIDExercises(long id, int projid, Collection<String> typeOrder, Set<Integer> ids);
 

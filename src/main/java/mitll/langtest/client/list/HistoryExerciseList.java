@@ -45,10 +45,15 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
+import scala.tools.cmd.gen.AnyVals;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
  * Created with IntelliJ IDEA.
@@ -374,7 +379,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   protected void restoreListBoxState(SelectionState selectionState) {
     if (DEBUG) logger.info("restoreListBoxState restore '" + selectionState + "'");
-    sectionWidgetContainer.restoreListBoxState(selectionState, controller.getProjectStartupInfo().getTypeOrder());
+    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+    List<String> added = new ArrayList<>(typeOrder);
+    added.add(LISTS);
+    sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
   }
 
   /**
@@ -515,7 +523,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     return getSelectionState(getHistoryTokenFromUIState(getTypeAheadText(), -1));
   }
 
-  private ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix,
+  protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix,
                                                      boolean onlyWithAudioAnno, boolean onlyUnrecorded,
                                                      boolean onlyDefaultUser, boolean onlyUninspected) {
     return getRequest(prefix)
@@ -538,7 +546,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                               int exerciseID,
                               ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
-    if (DEBUG) logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID);
+    if (DEBUG) {
+      logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID);
+      logger.info("getExerciseIDs for '" + request);
+    }
     service.getExerciseIds(
         request,
         new SetExercisesCallback(userListID + "_" + typeToSection.toString(), prefix, exerciseID, request));
