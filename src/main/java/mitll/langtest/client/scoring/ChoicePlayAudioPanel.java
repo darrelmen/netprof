@@ -42,7 +42,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   private boolean includeContext = false;
 //  private int currentAudioID = -1;
   private AudioAttribute currentAudioAttr = null;
-  AudioChangeListener listener;
+  private AudioChangeListener listener;
   private Set<Integer> allIDs = new HashSet<>();
 
   /**
@@ -255,8 +255,12 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     for (List<AudioAttribute> attrs : values) {
       for (AudioAttribute audioAttribute : attrs) {
         if (isReg && audioAttribute.isRegularSpeed() || (!isReg && audioAttribute.isSlow())) {
+          if (audioAttribute.getAudioRef().startsWith("Fast") || audioAttribute.getAudioRef().startsWith("Slow")) {
+            logger.info("Skip " + audioAttribute);
+          }
+          else {
           return audioAttribute;
-
+          }
         }
       }
     }
