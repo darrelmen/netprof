@@ -279,7 +279,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
      * @param instance
      * @see RecorderNPFHelper#getFactory
      */
-    MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
+    MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell,CommonExercise> exerciseList1, String instance) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
     }
 

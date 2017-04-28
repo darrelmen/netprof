@@ -56,7 +56,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final ClickableWords<T> clickableWords;
   private final boolean showInitially = false;
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
-  private final ListInterface<CommonShell> listContainer;
+  private final ListInterface<CommonShell,T> listContainer;
   private ChoicePlayAudioPanel playAudio;
   Map<Integer, AlignmentOutput> alignments = new HashMap<>();
   private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>>> idToTypeToSegmentToWidget = new HashMap<>();
@@ -77,7 +77,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
-                                final ListInterface<CommonShell> listContainer,
+                                final ListInterface<CommonShell,T> listContainer,
                                 List<CorrectAndScore> correctAndScores
   ) {
     this.exercise = commonExercise;
@@ -642,8 +642,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       col.add(commentRow);
 
-      if (!context.equals(contextExercise.getAltFL())) {
-        col.add(getAltContext(altFL, contextExercise.getAltFL()));
+      String altFL1 = contextExercise.getAltFL();
+      if (!altFL1.isEmpty() && !context.equals(altFL1)) {
+        col.add(getAltContext(altFL, altFL1));
       }
 
       return hp;

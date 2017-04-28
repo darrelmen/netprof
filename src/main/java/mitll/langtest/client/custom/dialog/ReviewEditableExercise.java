@@ -596,7 +596,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   @Override
   protected Panel getCreateButton(final UserList<CommonShell> ul,
-                                  final ListInterface<CommonShell> pagingContainer,
+                                  final ListInterface<CommonShell,CommonExercise> pagingContainer,
                                   final Panel toAddTo,
                                   final ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
@@ -631,7 +631,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private Button getFixedButton(final UserList<CommonShell> ul,
-                                final ListInterface<CommonShell> pagingContainer,
+                                final ListInterface<CommonShell,CommonExercise> pagingContainer,
                                 final Panel toAddTo,
                                 final ControlGroup normalSpeedRecording) {
     final Button fixed = makeFixedButton();
@@ -652,7 +652,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
    */
   @Override
-  void afterValidForeignPhrase(final ListInterface<CommonShell> exerciseList,
+  void afterValidForeignPhrase(final ListInterface<CommonShell,CommonExercise> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
     super.afterValidForeignPhrase(exerciseList, toAddTo, onClick);
@@ -838,7 +838,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see #postEditItem
    */
   @Override
-  protected void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
+  protected void doAfterEditComplete(ListInterface<CommonShell,CommonExercise> pagingContainer, boolean buttonClicked) {
     //  super.doAfterEditComplete(pagingContainer, buttonClicked);
     changeTooltip(pagingContainer);
     if (buttonClicked) {

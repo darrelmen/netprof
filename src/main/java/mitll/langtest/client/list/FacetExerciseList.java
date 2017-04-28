@@ -307,9 +307,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     w1.addStyleName("floatLeft");
     w.addStyleName("inlineFlex");
 
-
     w.add(w1);
-
     w.add(new ListSorting<>(this).getSortBox(controller));
     return w;
   }
@@ -373,6 +371,36 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return false;
   }
 
+  /**
+   * @see
+   */
+  public void loadFirst() {
+    // pushFirstSelection(getFirstID(), getTypeAheadText());
+    // restoreUIState(getSelectionState(getHistoryToken()));
+    //selectionStateChanged(getHistoryToken());
+
+    goToFirst(getTypeAheadText(), getFirstID());
+
+  }
+
+  protected void goToFirst(String searchIfAny, int exerciseID) {
+    logger.info("goToFirst Go to first " + searchIfAny + " " + exerciseID);
+//    if (exerciseID < 0) {
+//      loadFirstExercise(searchIfAny);
+//    } else {
+    markCurrentExercise(exerciseID);
+    // logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny + "'");
+//      pushFirstSelection(exerciseID, searchIfAny);
+
+    //selectionStateChanged(getHistoryToken());
+
+//    SelectionState selectionState = getSelectionState(getHistoryToken());
+    //   loadFromSelectionState(selectionState, selectionState);
+
+    checkAndAskServer(exerciseID);
+
+    // }
+  }
 
   /**
    * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
@@ -893,9 +921,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
     logger.info("restoreListBoxState " + selectionState);
-//    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-//    List<String> added = new ArrayList<>(typeOrder);
-//    added.add(LISTS);
     super.restoreListBoxState(selectionState);
     showSelectionState(selectionState);
   }
@@ -1011,7 +1036,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
-      // logger.info("askServerForExercises show empty -- ");
+      logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();
     } else {
       if (numToShow == 1 && itemID > 0) {
@@ -1052,6 +1077,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private void hidePrevNext() {
     hidePrevNextWidgets();
+    progressBar.setVisible(false);
     //logger.info("hidePrevNext ------- ");
     //  clearExerciseContainer();
   }
@@ -1072,6 +1098,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     next.setVisible(true);*/
     pageSizeContainer.setVisible(true);
     sortBox.setVisible(true);
+    progressBar.setVisible(true);
 
 /*
     enablePrevNext();
@@ -1115,6 +1142,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void gotFullExercises(ExerciseListWrapper<CommonExercise> result) {
     if (result.getExercises().isEmpty()) {
       //showEmptyExercise();
+
       hidePrevNext();
     } else {
       if (numToShow == 1) { // hack for avp
@@ -1194,12 +1222,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     showScore(exercisesWithScores.size(), pagingContainer.getSize());
   }
 
-  // private Tooltip progressTooltip = null;
-
   private void showScore(int num, int denom) {
     double score = (float) num / (float) denom;
-
-    //  double percent = score / 100d;
     double percent = 100 * score;
 
     // logger.info("showScore percent is " + percent);

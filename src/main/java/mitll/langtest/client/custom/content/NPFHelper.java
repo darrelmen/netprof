@@ -38,7 +38,6 @@ import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -48,7 +47,7 @@ import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.scoring.ExerciseOptions;
+import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -56,6 +55,7 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -296,8 +296,10 @@ public class NPFHelper implements RequiresResize {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {
-          return new CommentNPFExercise<>(e, controller, exerciseList, new ExerciseOptions(instanceName));
-        }
+        //  return new CommentNPFExercise<>(e, controller, exerciseList, new ExerciseOptions(instanceName));
+          return new TwoColumnExercisePanel<CommonExercise>(e,
+              controller,
+              exerciseList, Collections.emptyList()); }
       }
     };
   }

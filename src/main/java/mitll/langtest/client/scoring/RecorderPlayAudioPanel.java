@@ -75,8 +75,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
       }
     });
 
-    logger.info("configureButton " + playButton.getElement().getId());
-
+//    logger.info("configureButton " + playButton.getElement().getId());
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
     playButton.setSize(ButtonSize.LARGE);
@@ -85,12 +84,11 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     playButton.addStyleName("floatLeft");
   }
 
-  void hidePlayButton() {
-    playButton.setVisible(false);
-  }
-
   void showPlayButton() {
     playButton.setVisible(true);
+  }
+  void hidePlayButton() {
+    playButton.setVisible(false);
   }
 
   public void flip(boolean first) {
@@ -101,7 +99,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void showFirstRecord() {
     recordImage1.setVisible(true);
     downloadContainer.setVisible(false);
-
   }
 
   void hideRecord() {

@@ -87,16 +87,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     super(currentExerciseVPanel, factory, controller, listOptions);
     this.waitCursorHelper = new WaitCursorHelper();
     addComponents();
-  //  if (!listOptions.isShowPager()) {
-      //pagingContainer.
-  //  }
     getElement().setId("PagingExerciseList_" + getInstance());
   }
 
   void sortBy(Comparator<T> comp) {
     pagingContainer.sortBy(comp);
     loadFirst();
-    //markCurrentExercise(getFirstID());
   }
 
   public void loadFirst() {

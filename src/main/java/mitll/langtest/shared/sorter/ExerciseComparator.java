@@ -32,13 +32,10 @@
 
 package mitll.langtest.shared.sorter;
 
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -126,7 +123,7 @@ public class ExerciseComparator {
   }
 
   protected String removePunct(String t) {
-    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
+    return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
   }
 
   private <T extends CommonShell> int compareByFL(T o1, T o2) {

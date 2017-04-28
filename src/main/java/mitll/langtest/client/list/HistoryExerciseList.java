@@ -74,7 +74,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected long userID;
   private final FacetContainer sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
   private static final boolean DEBUG = true;
   private static final boolean DEBUG_PUSH = false;
 
@@ -208,7 +208,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see ExerciseList#pushFirstSelection(int, String)
    * @see ExerciseList#pushNewItem(String, int)
    */
-  private void checkAndAskOrFirst(int exerciseID) {
+  protected void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
       //   logger.info("\tcheckAndAskOrFirst "+ exerciseID);
@@ -339,7 +339,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         request);
   }
 
-  private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+  protected void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
     logger.info("loadFromSelectionState old state " + selectionState.getInfo() + " new state " + newState.getInfo());
     loadExercisesUsingPrefix(
         newState.getTypeToSection(),
@@ -396,13 +396,17 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   public void onValueChange(ValueChangeEvent<String> event) {
     // if (DEBUG_ON_VALUE_CHANGE) logger.info("HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
     String value = event.getValue();
+    selectionStateChanged(value);
+  }
+
+  protected void selectionStateChanged(String value) {
     SelectionState selectionState = getSelectionState(value);
-    logger.info("onValueChange got " + event.getValue() + " sel " + selectionState + " " + selectionState.getInfo());
+    logger.info("selectionStateChanged got " + value + " sel " + selectionState + " " + selectionState.getInfo());
     String instance1 = selectionState.getInstance();
 
     if (!instance1.equals(getInstance()) && instance1.length() > 0) {
       if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info("onValueChange : skipping event " + value + " for instance '" + instance1 +
+        logger.info("selectionStateChanged : skipping event " + value + " for instance '" + instance1 +
             "' that is not mine '" + getInstance() + "'");
       }
       if (getCreatedPanel() == null) {
@@ -412,7 +416,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       return;
     }
     if (DEBUG_ON_VALUE_CHANGE) {
-      logger.info("HistoryExerciseList.onValueChange : originalValue '" + value +
+      logger.info("HistoryExerciseList.selectionStateChanged : originalValue '" + value +
           "'" +
           " token is '" + value + "' for " + instance1 + " vs my instance " + getInstance());
     }
@@ -422,7 +426,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     try {
       loadFromSelectionState(selectionState, selectionState);
     } catch (Exception e) {
-      logger.warning("HistoryExerciseList.onValueChange " + value + " badly formed. Got " + e);
+      logger.warning("HistoryExerciseList.selectionStateChanged " + value + " badly formed. Got " + e);
     }
   }
 

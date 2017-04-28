@@ -51,7 +51,7 @@ import mitll.langtest.shared.exercise.Shell;
 public class PrevNextList<T extends Shell> extends HorizontalPanel {
   private final EventRegistration controller;
   private Button prev, next;
-  private final ListInterface<T> container;
+  private final ListInterface<T,?> container;
   private boolean disableNext = true;
 
   /**
@@ -61,7 +61,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
    * @param controller
    * @see EditableExerciseDialog#addFields
    */
-  PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext, EventRegistration controller) {
+  PrevNextList(final T exerciseShell, ListInterface<T,?> listContainer, boolean disableNext, EventRegistration controller) {
     this.container = listContainer;
     this.disableNext = disableNext;
     this.controller = controller;

@@ -141,7 +141,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
   public QCNPFExercise(T e, ExerciseController controller,
-                       ListInterface<CommonShell> listContainer,
+                       ListInterface<CommonShell,T> listContainer,
                        String instance) {
     super(e, controller, listContainer, new ExerciseOptions(instance));
     this.listContainer = listContainer;
@@ -156,9 +156,9 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
   }
 
   private void initAudioWasPlayed() {
-    audioWasPlayed = new HashSet<Widget>();
-    toResize = new ArrayList<RequiresResize>();
-    incorrectFields = new HashSet<String>();
+    audioWasPlayed = new HashSet<>();
+    toResize = new ArrayList<>();
+    incorrectFields = new HashSet<>();
   }
 
   /**
@@ -186,7 +186,7 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                              final ListInterface<CommonShell> listContainer,
+                                                              final ListInterface<CommonShell,T> listContainer,
                                                               boolean addKeyHandler, boolean includeListButtons) {
     NavigationHelper<CommonShell> navHelper = new NavigationHelper<CommonShell>(exercise, controller,
         new PostAnswerProvider() {

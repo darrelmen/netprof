@@ -40,15 +40,7 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
     locale = projectStartupInfo == null ? "" : projectStartupInfo.getLocale();
   }
 
-  private void sortBy(Comparator<T> comp) {
-//    Scheduler.get().scheduleDeferred(new Command() {
-//      public void execute() {
-    exerciseList.waitCursorHelper.scheduleWaitTimer();
-    exerciseList.sortBy(comp);
-    exerciseList.waitCursorHelper.showFinished();
-//      }
-    //  });
-  }
+
 
   ListBox getSortBox(ExerciseController controller) {
     ListBox w1 = new ListBox();
@@ -105,6 +97,16 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
         return compareShells(o1, o2, i);
       });
     }
+  }
+
+  private void sortBy(Comparator<T> comp) {
+//    Scheduler.get().scheduleDeferred(new Command() {
+//      public void execute() {
+    exerciseList.waitCursorHelper.scheduleWaitTimer();
+    exerciseList.sortBy(comp);
+    exerciseList.waitCursorHelper.showFinished();
+//      }
+    //  });
   }
 
   private int compPhones(CommonShell o1, CommonShell o2) {

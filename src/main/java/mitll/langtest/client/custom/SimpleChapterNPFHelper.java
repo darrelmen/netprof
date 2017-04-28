@@ -145,7 +145,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @return
    * @see Navigation#getNavigation()
    */
-  public ListInterface<?> getExerciseList() {
+  public ListInterface<?,?> getExerciseList() {
     return npfExerciseList;
   }
 

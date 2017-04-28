@@ -64,7 +64,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   protected Button next;
   private boolean enableNextOnlyWhenAllCompleted = true;
   private final PostAnswerProvider provider;
-  private final ListInterface<T> listContainer;
+  private final ListInterface<T,?> listContainer;
 
   /**
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
@@ -75,12 +75,12 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @param addKeyHandler
    */
   protected NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface<T> listContainer, boolean addKeyHandler) {
+                          ListInterface<T,?> listContainer, boolean addKeyHandler) {
     this(exercise, controller, provider, listContainer, true, addKeyHandler, false, false);
   }
 
   public NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface<T> listContainer, boolean addButtons, boolean addKeyHandler,
+                          ListInterface<T,?> listContainer, boolean addButtons, boolean addKeyHandler,
                           boolean enableNextOnlyWhenAllCompleted, boolean addPrevButton) {
     this.provider = provider;
     this.listContainer = listContainer;

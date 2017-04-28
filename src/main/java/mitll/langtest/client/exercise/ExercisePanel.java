@@ -69,7 +69,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   protected T exercise = null;
   final ExerciseController controller;
   private final NavigationHelper<L> navigationHelper;
-  final ListInterface<L> exerciseList;
+  final ListInterface<L,T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   final String message;
   protected final String instance;
@@ -85,7 +85,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    */
   ExercisePanel(final T e,
                 final ExerciseController controller,
-                ListInterface<L> exerciseList, String instructionMessage,
+                ListInterface<L,T> exerciseList, String instructionMessage,
                 String instance) {
     this.exercise = e;
     this.controller = controller;

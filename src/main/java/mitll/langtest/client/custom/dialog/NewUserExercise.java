@@ -139,7 +139,7 @@ abstract class NewUserExercise extends BasicDialog {
   /**
    * TODO : What is this for???
    */
-  ListInterface<CommonShell> listInterface;
+  ListInterface<CommonShell, CommonExercise> listInterface;
   private Panel toAddTo;
   private boolean clickedCreate = false;
   final String instance;
@@ -176,7 +176,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @see EditItem#setFactory
    */
   public Panel addFields(
-      final ListInterface<CommonShell> listInterface,
+      final ListInterface<CommonShell, CommonExercise> listInterface,
       final Panel toAddTo) {
     final FluidContainer container = new ResizableFluid();
     DivWidget upper = new DivWidget();
@@ -287,7 +287,7 @@ abstract class NewUserExercise extends BasicDialog {
   abstract void gotBlur(FormField foreignLang,
                         RecordAudioPanel rap,
                         ControlGroup normalSpeedRecording,
-                        ListInterface<CommonShell> pagingContainer,
+                        ListInterface<CommonShell,CommonExercise> pagingContainer,
                         Panel toAddTo);
 
   /**
@@ -418,7 +418,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @param keepAudio
    * @see #reallyChange
    */
-  private void editItem(final ListInterface<CommonShell> pagingContainer, final boolean buttonClicked, boolean keepAudio) {
+  private void editItem(final ListInterface<CommonShell,CommonExercise> pagingContainer, final boolean buttonClicked, boolean keepAudio) {
     listService.editItem(newUserExercise, keepAudio, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -444,7 +444,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @param buttonClicked
    * @see #reallyChange(ListInterface, boolean, boolean)
    */
-  void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
+  void doAfterEditComplete(ListInterface<CommonShell,CommonExercise> pagingContainer, boolean buttonClicked) {
     changeTooltip(pagingContainer);
     if (predefinedContentList != null) {
       if (DEBUG)
@@ -468,7 +468,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @param pagingContainer
    * @see #doAfterEditComplete(ListInterface, boolean)
    */
-  void changeTooltip(ListInterface<CommonShell> pagingContainer) {
+  void changeTooltip(ListInterface<CommonShell,CommonExercise> pagingContainer) {
     CommonShell byID = pagingContainer.byID(newUserExercise.getID());
     if (DEBUG) logger.info("changeTooltip " + byID);
     if (byID == null) {
@@ -490,7 +490,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @param onClick
    * @see #afterValidForeignPhrase
    */
-  void postChangeIfDirty(ListInterface<CommonShell> exerciseList, boolean onClick) {
+  void postChangeIfDirty(ListInterface<CommonShell,CommonExercise> exerciseList, boolean onClick) {
     if (anyFieldsDirty() || onClick) {
       if (DEBUG) {
         logger.info("postChangeIfDirty:  change" +
@@ -569,7 +569,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @see #postChangeIfDirty(ListInterface, boolean)
    * @see #audioPosted
    */
-  void reallyChange(final ListInterface<CommonShell> pagingContainer, final boolean markFixedClicked, boolean keepAudio) {
+  void reallyChange(final ListInterface<CommonShell,CommonExercise> pagingContainer, final boolean markFixedClicked, boolean keepAudio) {
     newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
     grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
     editItem(pagingContainer, markFixedClicked, keepAudio);
@@ -623,7 +623,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @see #addFields
    */
   abstract Panel getCreateButton(UserList<CommonShell> ul,
-                                 ListInterface<CommonShell> pagingContainer,
+                                 ListInterface<CommonShell, CommonExercise> pagingContainer,
                                  Panel toAddTo,
                                  ControlGroup normalSpeedRecording);
 
@@ -635,13 +635,13 @@ abstract class NewUserExercise extends BasicDialog {
    * @param toAddTo
    * @param onClick
    * @param foreignChanged
+   * @seex #makeCreateButton
    * @see #audioPosted()
-   * @see #makeCreateButton
    */
   void validateThenPost(FormField foreignLang,
                         RecordAudioPanel rap,
                         ControlGroup normalSpeedRecording,
-                        ListInterface<CommonShell> pagingContainer,
+                        ListInterface<CommonShell, CommonExercise> pagingContainer,
                         Panel toAddTo,
                         boolean onClick,
                         boolean foreignChanged) {
@@ -675,7 +675,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @param onClick
    * @see #validateThenPost
    */
-  private void isValidForeignPhrase(final ListInterface<CommonShell> pagingContainer,
+  private void isValidForeignPhrase(final ListInterface<CommonShell,CommonExercise> pagingContainer,
                                     final Panel toAddTo,
                                     final boolean onClick) {
     //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getSafeText() + " before adding/changing " + newUserExercise);
@@ -815,7 +815,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @param onClick
    * @see #isValidForeignPhrase
    */
-  abstract void afterValidForeignPhrase(final ListInterface<CommonShell> exerciseList,
+  abstract void afterValidForeignPhrase(final ListInterface<CommonShell,CommonExercise> exerciseList,
                                         final Panel toAddTo,
                                         boolean onClick);
 

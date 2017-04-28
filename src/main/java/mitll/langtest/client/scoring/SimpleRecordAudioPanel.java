@@ -71,7 +71,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private DivWidget scoreFeedback;
   private ProgressBar progressBar;
   private boolean hasScoreHistory = false;
-  private ListInterface<CommonShell> listContainer;
+  private ListInterface<CommonShell,T> listContainer;
 
   /**
    * @param controller
@@ -84,7 +84,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
                          ExerciseController controller,
                          T exercise,
                          List<CorrectAndScore> history,
-                         ListInterface<CommonShell> listContainer) {
+                         ListInterface<CommonShell,T> listContainer) {
     this.controller = controller;
     this.goodwaveExercisePanel = goodwaveExercisePanel;
     this.exercise = exercise;

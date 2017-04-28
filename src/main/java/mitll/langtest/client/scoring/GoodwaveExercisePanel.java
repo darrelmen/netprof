@@ -46,7 +46,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
@@ -56,9 +55,9 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.CompressedAudio;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.ArrayList;
@@ -90,6 +89,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   private static final String JAPANESE = "Japanese";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private static final String MEANING = "Meaning";
+
+  public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
+  public static final String SPACE_REGEX = " ";
 
   private final ListInterface listContainer;
 
@@ -134,7 +136,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    */
   protected GoodwaveExercisePanel(final T commonExercise,
                                   final ExerciseController controller,
-                                  final ListInterface<CommonShell> listContainer,
+                                  final ListInterface<CommonShell,T> listContainer,
                                   ExerciseOptions options
   ) {
     this.options = options;
@@ -185,7 +187,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   }
 
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                              final ListInterface<CommonShell> listContainer,
+                                                              final ListInterface<CommonShell,T> listContainer,
                                                               boolean addKeyHandler, boolean includeListButtons) {
     NavigationHelper<CommonShell> widgets = new NavigationHelper<>(getLocalExercise(), controller, new PostAnswerProvider() {
       @Override
@@ -442,7 +444,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
         tokens.add(html);
       }
     } else {
-      tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
+      tokens = Arrays.asList(value.split(GoodwaveExercisePanel.SPACE_REGEX));
     }
 
     if (isRTL(exercise) && flLine) {
@@ -471,8 +473,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
         public void onClick(ClickEvent clickEvent) {
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
-              String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
-              String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
+              String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
+              String s2 = s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
               listContainer.searchBoxEntry(s2);
             }
           });
@@ -535,7 +537,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   }
 
   protected String removePunct(String t) {
-    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
+    return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
   }
 
   protected T getLocalExercise() {
