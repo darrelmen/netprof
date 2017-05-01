@@ -284,8 +284,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       lr.add(getEnglishWidget(e, english));
       lr.add(getItemWidget(e));
-      Dropdown w = getDropdown();
-      lr.add(w);
+      lr.add(getDropdown());
 
       rowWidget.add(lr);
     }
@@ -335,15 +334,20 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     dropdownContainer.setRightDropdown(true);
     dropdownContainer.getMenuWiget().getElement().getStyle().setTop(10, Style.Unit.PCT);
 
+    dropdownContainer.addStyleName("leftThirtyMargin");
+    dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
+    dropdownContainer.getTriggerWidget().setCaret(false);
+
+
     new UserListSupport(controller).addListOptions(dropdownContainer, exercise.getID());
 
     NavLink share = new NavLink(EMAIL);
     dropdownContainer.add(share);
     share.setHref(getMailTo());
+
     dropdownContainer.add(getShowComments());
-    dropdownContainer.addStyleName("leftThirtyMargin");
-    dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
-    dropdownContainer.getTriggerWidget().setCaret(false);
+
+
     return dropdownContainer;
   }
 

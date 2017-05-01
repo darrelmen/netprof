@@ -22,6 +22,8 @@ import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * Created by go22670 on 4/5/17.
+ * @see SimpleRecordAudioPanel#makePlayAudioPanel
+ *
  */
 class RecorderPlayAudioPanel extends PlayAudioPanel {
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";

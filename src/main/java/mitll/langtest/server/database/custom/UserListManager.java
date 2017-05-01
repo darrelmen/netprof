@@ -742,11 +742,11 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void newExercise(long userListID, CommonExercise userExercise, String mediaDir) {
-    UserList where = getUserList(userListID);
-    newExerciseOnList(where, userExercise, mediaDir);
+    newExerciseOnList(getUserList(userListID), userExercise, mediaDir);
   }
 
   public UserList getUserList(long userListID) {
+    logger.info("getUserList for " +userListID);
     return userListDAO.getWhere(userListID, true);
   }
 
@@ -1027,7 +1027,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void addVisitor(long userListID, long user) {
-    //logger.debug("addVisitor - user " + user + " visits " + userList.getRealID());
+    logger.debug("addVisitor - user " + user + " visits " + userListID);
     UserList where = getUserList(userListID);
     if (where != null) {
       userListDAO.addVisitor(where.getID(), user);

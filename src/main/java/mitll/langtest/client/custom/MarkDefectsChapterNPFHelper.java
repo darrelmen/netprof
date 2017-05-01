@@ -38,19 +38,16 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.content.FlexListLayout;
-import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
-import mitll.langtest.client.exercise.*;
-import mitll.langtest.client.list.HistoryExerciseList;
-import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.exercise.DefectEvent;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.list.*;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
-
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -89,12 +86,12 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
                                                                                  String instanceName,
                                                                                  DivWidget listHeader, DivWidget footer) {
 //        logger.info("instance is " + instanceName);
-        return new NPFlexSectionExerciseList(controller, topRow, currentExercisePanel,
-            new ListOptions().setInstance(instanceName), listHeader, footer, 1) {
+        return new NPExerciseList<ListSectionWidget>(currentExercisePanel, controller,
+            new ListOptions().setInstance(instanceName)) {
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override
-          protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
+          protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
             // row 1
             Panel column = new FlowPanel();
             add(column);

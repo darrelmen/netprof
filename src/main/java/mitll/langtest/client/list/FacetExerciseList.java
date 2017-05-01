@@ -317,7 +317,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   protected Panel tableWithPager;
 
-  protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
+  protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
     tableWithPager = pagingContainer.getTableWithPager(listOptions);
     //   return tableWithPager;
   }

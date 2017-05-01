@@ -165,8 +165,10 @@ public class InitialUI implements UILifecycle {
    */
   protected Panel makeFirstTwoRows(Container verticalContainer) {
     // add header row
-    RootPanel.get().add(headerRow = makeHeaderRow());
-    headerRow.getElement().setId("headerRow");
+    RootPanel rootPanel = RootPanel.get();
+    rootPanel.add(headerRow = makeHeaderRow());
+//    rootPanel.add(makeHeaderRow2());
+//    headerRow.getElement().setId("headerRow");
 
     Panel contentRow = new DivWidget();
     contentRow.getElement().setId("contentRow");
@@ -174,7 +176,7 @@ public class InitialUI implements UILifecycle {
     verticalContainer.add(contentRow);
     this.contentRow = contentRow;
 
-    RootPanel.get().add(getDownloadDiv());
+    rootPanel.add(getDownloadDiv());
 
     return contentRow;
   }
@@ -193,6 +195,9 @@ public class InitialUI implements UILifecycle {
    */
   private Widget makeHeaderRow() {
     return banner.getBanner();
+  }
+  private Widget makeHeaderRow2() {
+    return banner.getBanner2();
   }
 
   /**

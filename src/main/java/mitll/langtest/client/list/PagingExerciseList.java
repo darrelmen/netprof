@@ -198,7 +198,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void goToFirst(String searchIfAny, int exerciseID) {
     if (listOptions.isShowFirstNotCompleted()) {
-      // logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny +"'");
+       logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny +"'");
       loadFirstExercise(searchIfAny);
     } else {
       super.goToFirst(searchIfAny, exerciseID);
@@ -241,7 +241,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param pagingContainer
    * @see #addComponents
    */
-  protected void addTableWithPager(SimplePagingContainer<T> pagingContainer) {
+  protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
     // row 1
     Panel column = new FlowPanel();
     add(column);

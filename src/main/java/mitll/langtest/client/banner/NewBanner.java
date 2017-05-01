@@ -2,6 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Alignment;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
@@ -49,7 +50,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private static final String RECORDING_DISABLED = "RECORDING DISABLED";
 
   private final UILifecycle lifecycle;
-  private final Nav recnav, defectnav;
+  private ComplexWidget recnav, defectnav;
   private INavigation navigation;
   private HandlerRegistration handlerRegistration;
   private final Map<String, NavLink> nameToLink = new HashMap<>();
@@ -80,17 +81,34 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     NavCollapse navCollapse = new NavCollapse();
     navCollapse.addStyleName("topFiveMargin");
+    navCollapse.getElement().setId("navCollapse1");
 
+    //DivWidget upperLower = new DivWidget();
+
+//    upperLower.add(navCollapse);
     add(navCollapse);
+  //  add(upperLower);
+
+//    NavCollapse navCollapse2 = new NavCollapse();
+ //   navCollapse2.addStyleName("topFiveMargin");
+   // navCollapse2.getElement().setId("navCollapse2");
+
+//    add(navCollapse2);
 
     navCollapse.add(this.lnav = getLNav());
-
-    breadcrumbs.addStyleName("rightTwentyMargin");
     addChoicesForUser(lnav);
+/*
+    lnav.add(recnav =new Dropdown("Record"));
+
+
+    */
+
 
     Nav recnav = getRecNav();
     this.recnav = recnav;
     navCollapse.add(recnav);
+//    upperLower.add(navCollapse2);
+
     recordMenuVisible();
 
 
@@ -113,6 +131,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
     recnav.addStyleName("inlineFlex");
+    recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX  );
+    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX  );
 
     getChoice(recnav, VIEWS.ITEMS.toString());
     getChoice(recnav, VIEWS.CONTEXT.toString());
@@ -124,6 +144,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     Nav recnav = new Nav();
     recnav.getElement().setId("defectnav");
     recnav.addStyleName("inlineFlex");
+    recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX  );
+    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX  );
 
     getChoice(recnav, VIEWS.DEFECTS.toString());
     getChoice(recnav, VIEWS.FIX.toString());
@@ -142,6 +164,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     breadcrumbs.addStyleName("floatLeft");
     Style style = breadcrumbs.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
+    breadcrumbs.addStyleName("rightTwentyMargin");
+
     //style.clearProperty("backgroundColor");
     //   style.setBackgroundColor("black");
 
@@ -152,10 +176,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     Nav lnav = new Nav();
     lnav.getElement().setId("lnav");
     lnav.addStyleName("inlineFlex");
+    lnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX  );
+    lnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX  );
+
     return lnav;
   }
 
-  private final Nav lnav;
+  private  Nav lnav;
   private Dropdown cog;
 
   @NotNull
@@ -228,39 +255,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     }
     navigation.showView(choices);
-   /* switch (instance1) {
-      case NewContentChooser.LEARN:
-        navigation.showLearn();
-        showActive(nameToLink.get(NewContentChooser.LEARN));
-        break;
-      case NewContentChooser.DRILL:
-        navigation.showDrill();
-        showActive(nameToLink.get(NewContentChooser.DRILL));
-        break;
-      case NewContentChooser.PROGRESS:
-        navigation.showProgress();
-        showActive(nameToLink.get(NewContentChooser.PROGRESS));
-        break;
-      case NewContentChooser.LISTS:
-        navigation.showLists();
-        showActive(nameToLink.get(NewContentChooser.LISTS));
-        break;
-      case NewContentChooser.RECORD_AUDIO:
-        navigation.showRecord();
-        showActive(nameToLink.get(NewContentChooser.RECORD_AUDIO));
-        break;
-      case NewContentChooser.RECORD_EXAMPLE:
-        navigation.showRecordExample();
-        showActive(nameToLink.get(NewContentChooser.RECORD_EXAMPLE));
-        break;
-      default:
-        if (instance1.isEmpty()) {
-          if (hasProjectChoice()) {
-            navigation.showLearn();
-          }
-        } else logger.warning("not reacting to " + instance1);
-        break;
-    }*/
   }
 
   private void getInfoMenu(UserMenu userMenu, Nav rnav) {
@@ -272,6 +266,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     info.add(getContactUs());
   }
 
+  NavLink firstChoice = null;
   /**
    * @param nav
    */
@@ -282,7 +277,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     logger.info("addChoicesForUser has project " + hasProject);
     for (String choice : Arrays.asList(VIEWS.LEARN.toString(), VIEWS.DRILL.toString(), VIEWS.PROGRESS.toString(), VIEWS.LISTS.toString())) {
       NavLink choice1 = getChoice(nav, choice);
-      if (first) choice1.addStyleName("leftTenMargin");
+      if (first) {
+        choice1.addStyleName("leftTenMargin");
+        firstChoice = choice1;
+      }
       first = false;
       choices.add(choice1);
     }
@@ -296,6 +294,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     learn.addClickHandler(event -> {
       logger.info("getChoice got click on " + instanceName + " = " + historyToken);
       showSection(instanceName);
+      showActive(learn);
       // setHistoryItem(historyToken);
     });
     return learn;
@@ -346,6 +345,29 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   public Panel getBanner() {
     return this;
   }
+  @Override
+  public Panel getBanner2() {
+
+    return null;
+/*    ResponsiveNavbar responsiveNavbar = new ResponsiveNavbar();
+    NavCollapse navCollapse = new NavCollapse();
+    navCollapse.addStyleName("topFiveMargin");
+    navCollapse.getElement().setId("navCollapseBelow");
+    responsiveNavbar.add(navCollapse);
+
+    Nav recnav = getRecNav();
+    this.recnav = recnav;
+    navCollapse.add(recnav);
+
+    recordMenuVisible();
+
+    Nav defectnav = getDefectNav();
+    this.defectnav = defectnav;
+    navCollapse.add(defectnav);
+    defectMenuVisible();
+
+    return responsiveNavbar;*/
+  }
 
   @Override
   public void setNavigation(INavigation navigation) {
@@ -355,7 +377,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   @Override
   public void reflectPermissions(Collection<User.Permission> permissions) {
-
+    recordMenuVisible();
+    defectMenuVisible();
   }
 
   @Override
@@ -385,7 +408,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private void recordMenuVisible() {
-    recnav.setVisible(isPermittedToRecord() && hasProjectChoice());
+    if (recnav != null) {
+      recnav.setVisible(isPermittedToRecord() && hasProjectChoice());
+    }
   }
 
   private boolean hasProjectChoice() {
@@ -405,6 +430,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private boolean isQC() {
+    logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
     return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || isAdmin();
   }
 
@@ -426,6 +452,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 //    }
 
     lnav.setVisible(show);
+
+
+    showActive(firstChoice);
 
     recordMenuVisible();
   }

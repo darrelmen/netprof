@@ -98,7 +98,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private UserState userState;
   ListOptions listOptions;
 
@@ -521,8 +521,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       if (DEBUG) logger.info("loadFirstExercise (" + getInstance() + ") : current exercises is empty?");
       removeCurrentExercise();
     } else {
-      // if (DEBUG) logger.info("loadFirstExercise ex id =" + firstID + " instance " + getInstance());
-      pushFirstSelection(findFirstID(), searchIfAny);
+      int firstID = findFirstID();
+      if (DEBUG) logger.info("loadFirstExercise ex id =" + firstID + " instance " + getInstance());
+      pushFirstSelection(firstID, searchIfAny);
     }
   }
 

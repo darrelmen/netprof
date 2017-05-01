@@ -12,6 +12,7 @@ import java.util.Collection;
  */
 public interface IBanner {
   Panel getBanner();
+  Panel getBanner2();
 
   void setNavigation(INavigation navigation);
 

@@ -106,6 +106,10 @@ public class NPFHelper implements RequiresResize {
    * @see ListManager#selectPreviouslyClickedSubTab(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean)
    */
   public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
+    logger.info(getClass() + " : adding npf content instanceName = " +
+        instanceName + " for list " + ul + " with " +ul.getExercises().size() + " load " + loadExercises);
+
+
     showNPF(ul, tabAndContent, instanceName, loadExercises, null);
   }
 
@@ -124,15 +128,16 @@ public class NPFHelper implements RequiresResize {
                       String instanceName,
                       boolean loadExercises,
                       HasID toSelect) {
-//    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
+    logger.info(getClass() + " : adding npf content instanceName = " +
+        instanceName + " for list " + ul + " with " +ul.getExercises().size());
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+       logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul + " load " + loadExercises);
       addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
-      // logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+       logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
       rememberAndLoadFirstFromUserList(ul, toSelect);
     }
   }
@@ -157,12 +162,13 @@ public class NPFHelper implements RequiresResize {
    * @see #addNPFToContent
    */
   private Panel doNPF(UserList<CommonShell> ul, String instanceName, boolean loadExercises, HasID toSelect) {
-    //logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul + " of size ");
+    logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul + " of size " + loadExercises);
 
     Panel hp = doInternalLayout(ul, instanceName);
     if (loadExercises) {
       rememberAndLoadFirstFromUserList(ul, toSelect);
     }
+    else logger.warning("not loading exercises?");
     return hp;
   }
 
@@ -247,10 +253,10 @@ public class NPFHelper implements RequiresResize {
     npfExerciseList.setUserListID(ul.getID());
 
     List<CommonShell> copy = new ArrayList<>();
-    for (CommonShell ex : ul.getExercises()) {
-      copy.add(ex);
-    }
+    copy.addAll(ul.getExercises());
+
     int id = toSelect == null ? -1 : toSelect.getID();
+    logger.info("rememberAndLoad " +copy.size() + " exercises for "  +id);
     npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");

@@ -169,6 +169,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       boolean isUserListReq = request.getUserListID() != -1;
       UserList<CommonExercise> userListByID = isUserListReq ? db.getUserListByIDExercises(request.getUserListID(), getProjectID()) : null;
 
+      logger.info("found user list " + isUserListReq + " " + userListByID);
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
         return getExerciseWhenNoUnitChapter(request, projectID, userListByID);
@@ -177,7 +178,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         if (userListByID != null) {
           Collection<CommonExercise> exercisesForState =
               getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
-         // List<CommonExercise> commonExercises = new ArrayList<>(exercisesForState);
           return getExerciseListWrapperForPrefix(request, filterExercises(request, new ArrayList<>(exercisesForState), projectID));
         } else {
           return getExercisesForSelectionState(request, projectID);
@@ -201,16 +201,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     int userID = request.getUserID();
     TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
     if (!request.getPrefix().isEmpty()) {
+      logger.info("found prefix for " + userListByID);
       // now do a trie over matches
       exercisesForSearch = getExercisesForSearch(request.getPrefix(), exercises, predefExercises);
-      //exercises = exercisesForSearch;
-
       if (request.getLimit() > 0) {
         exercisesForSearch.setByExercise(getFirstFew(request, exercisesForSearch.getByExercise()));
       }
-//      exercises = getLimitedMatches(request, exercisesForSearch.getByExercise());
     }
+    logger.info("triple resp " + exercisesForSearch);
     exercisesForSearch.setByExercise(filterExercises(request, exercisesForSearch.getByExercise(), projectID));
+    logger.info("after triple resp " + exercisesForSearch);
 
     // TODO : I don't think we need this?
 /*        if (!isUserListReq) {
@@ -237,12 +237,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                   TripleExercises<CommonExercise> exercises,
                                                   boolean predefExercises,
                                                   int userID) {
-    List<CommonExercise> commonExercises;
+    List<CommonExercise> commonExercises = exercises.getByExercise();
     if (request.isIncorrectFirstOrder()) {
+      logger.info("adding isIncorrectFirstOrder " + exercises.getByExercise().size() + " basicExercises");
       commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getCollator(), getLanguage());
     } else {
-      commonExercises = new ArrayList<>();
+
       if (predefExercises) {
+        commonExercises = new ArrayList<>();
         List<CommonExercise> basicExercises = new ArrayList<CommonExercise>(exercises.getByExercise());
         boolean sortByFL = getProject().isEnglish();
         String searchTerm = request.getPrefix();
@@ -258,12 +260,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         }
 
         Set<Integer> unique = new HashSet<>();
-        //    logger.info("adding " + exercises.getByID().size() + " by id exercises");
+        logger.info("adding " + exercises.getByID().size() + " by id exercises");
 
         commonExercises.addAll(exercises.getByID());
         exercises.getByID().forEach(e -> unique.add(e.getID()));
 
-        //  logger.info("adding " + basicExercises.size() + " basicExercises");
+        logger.info("adding " + basicExercises.size() + " basicExercises");
 
         basicExercises
             .stream()
@@ -784,6 +786,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     public void setByContext(List<T> byContext) {
       this.byContext = byContext;
     }
+
+    public String toString() {
+      return "by id " + byID.size() + "  by ex " + byExercise.size() + " by context " + byContext.size();
+    }
   }
 
   private <T extends CommonExercise> List<T> getExercieByExid(String prefix) {
@@ -1006,24 +1012,30 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private <T extends CommonShell & HasUnitChapter> Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
                                                                                                   UserList<T> userListByID) {
-    SectionHelper<T> helper = new SectionHelper<T>();
+
     Collection<T> exercises2 = getCommonExercises(userListByID);
+    if (typeToSelection.isEmpty()) {
+      logger.info("getExercisesFromUserListFiltered returning  " + userListByID.getExercises().size() + " exercises for " + userListByID.getID());
+      return exercises2;
+    } else {
+      SectionHelper<T> helper = new SectionHelper<T>();
 
-    logger.info("getExercisesFromUserListFiltered found " + exercises2.size() + " for list " + userListByID);
-    long then = System.currentTimeMillis();
-    for (T commonExercise : exercises2) {
-      helper.addExercise(commonExercise);
-    }
-    long now = System.currentTimeMillis();
+      logger.info("getExercisesFromUserListFiltered found " + exercises2.size() + " for list " + userListByID);
+      long then = System.currentTimeMillis();
+      for (T commonExercise : exercises2) {
+        helper.addExercise(commonExercise);
+      }
+      long now = System.currentTimeMillis();
 
-    if (now - then > 100) {
-      logger.debug("getExercisesFromUserListFiltered used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
+      if (now - then > 100) {
+        logger.debug("getExercisesFromUserListFiltered used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
+      }
+      typeToSelection.remove("Lists");
+      //helper.report();
+      Collection<T> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
+      logger.debug("\tgetExercisesFromUserListFiltered after found " + exercisesForState.size() + " matches to " + typeToSelection);
+      return /*typeToSelection.isEmpty() ? exercises2 :*/ exercisesForState;
     }
-    typeToSelection.remove("Lists");
-    //helper.report();
-    Collection<T> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
-    logger.debug("\tgetExercisesFromUserListFiltered after found " + exercisesForState.size() + " matches to " + typeToSelection);
-    return typeToSelection.isEmpty() ? exercises2 : exercisesForState;
   }
 
   /**

@@ -266,5 +266,4 @@ public class ListOperations {
     downloadLink.addStyleName("floatLeft");
     return downloadLink;
   }
-
 }

@@ -216,6 +216,11 @@ public class Banner implements RequiresResize, IBanner {
   }
 
   @Override
+  public Panel getBanner2() {
+    return null;
+  }
+
+  @Override
   public void setNavigation(INavigation navigation) {
 
   }
