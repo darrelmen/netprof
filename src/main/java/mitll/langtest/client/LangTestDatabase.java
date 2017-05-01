@@ -36,7 +36,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.ContextPractice;
-import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 

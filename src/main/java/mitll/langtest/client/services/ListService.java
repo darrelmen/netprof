@@ -34,17 +34,12 @@ package mitll.langtest.client.services;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.TextArea;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
-import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -67,7 +62,7 @@ public interface ListService extends RemoteService {
   /**
    * @param userListID
    * @param isPublic
-   * @see mitll.langtest.client.custom.ListManager#setPublic(long, boolean)
+   * @see ListManager#setPublic(long, boolean)
    */
   void setPublicOnList(long userListID, boolean isPublic);
 
@@ -76,7 +71,7 @@ public interface ListService extends RemoteService {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.client.custom.ListManager#deleteList(Button, UserList, boolean)
+   * @see ListManager#deleteList(Button, UserList, boolean)
    */
   boolean deleteList(long id);
 
@@ -97,7 +92,7 @@ public interface ListService extends RemoteService {
   /**
    * @param userListID
    * @param user
-   * @see mitll.langtest.client.custom.ListManager#addVisitor(UserList)
+   * @see ListManager#addVisitor(UserList)
    */
   void addVisitor(long userListID, int user);
 
@@ -105,7 +100,7 @@ public interface ListService extends RemoteService {
    * @param onlyCreated
    * @param visited
    * @return
-   * @see mitll.langtest.client.custom.ListManager#viewLessons
+   * @see ListManager#viewLessons
    */
   Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited);
 
@@ -113,13 +108,13 @@ public interface ListService extends RemoteService {
    * TODO : not filled in yet
    * @param search
    * @return
-   * @see mitll.langtest.client.custom.ListManager#viewLessons
+   * @see ListManager#viewLessons
    */
   Collection<UserList<CommonShell>> getUserListsForText(String search);
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.ListManager#viewReview(Panel)
+   * @see ListManager#viewReview(Panel)
    */
   List<UserList<CommonShell>> getReviewLists();
 
@@ -141,7 +136,7 @@ public interface ListService extends RemoteService {
    * @param userListID
    * @param userExerciseText
    * @return
-   * @see mitll.langtest.client.custom.ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
+   * @see ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
    */
   Collection<CommonExercise> reallyCreateNewItems(long userListID, String userExerciseText);
 

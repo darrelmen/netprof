@@ -50,7 +50,6 @@ import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
-import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
@@ -123,7 +122,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
-   * and a right side -- the charts and gauges {@link ASRScorePanel}
+   * and a right side -- the charts and gauges
    *
    * @param commonExercise for this exercise
    * @param controller
@@ -207,8 +206,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   public void wasRevealed() {
   }
 
-  protected ASRScorePanel makeScorePanel(T e, String instance) {
-    return null;
+  protected void makeScorePanel(T e, String instance) {
+    //return null;
   }
 
   protected void loadNext() {
@@ -316,7 +315,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @return
    * @see #getQuestionContent
    */
-  protected Widget getScoringAudioPanel(final T e) {
+  protected abstract Widget getScoringAudioPanel(final T e);
+/*  {
     String path = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
 
     if (path != null) {
@@ -342,9 +342,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     return audioPanel;
   }
 
-  protected ASRScoringAudioPanel makeFastAndSlowAudio(String path) {
+  private ASRScoringAudioPanel makeFastAndSlowAudio(String path) {
     return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, controller, options.getInstance());
-  }
+  }*/
 
   /**
    * @param commentToPost

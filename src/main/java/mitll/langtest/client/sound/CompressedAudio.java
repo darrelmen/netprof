@@ -42,7 +42,6 @@ import mitll.langtest.client.BrowserCheck;
  */
 public class CompressedAudio {
  // private final Logger logger = Logger.getLogger("CompressedAudio");
-
   private static final String OGG = ".ogg";
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -62,7 +61,6 @@ public class CompressedAudio {
           // not-supported
       }
   }-*/;
-
 
   public static String getPath(String path) {
     return ensureForwardSlashes(getPathNoSlashChange(path));

@@ -60,7 +60,6 @@ import java.util.Map;
 public class UserManagement {
   private static final Logger logger = LogManager.getLogger(UserManagement.class);
   private final IUserDAO userDAO;
-  // private final IUserPermissionDAO permissionDAO;
   private final IResultDAO resultDAO;
 
   /**
@@ -68,44 +67,10 @@ public class UserManagement {
    * @param resultDAO
    * @see DatabaseImpl#makeDAO
    */
-  public UserManagement(IUserDAO userDAO, IResultDAO resultDAO/*, IUserPermissionDAO permissionDAO*/) {
+  public UserManagement(IUserDAO userDAO, IResultDAO resultDAO) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
-    // this.permissionDAO = permissionDAO;
   }
-
-
-/*  private void ifTeacherAddPermissions(User user1) {
-    List<User.Permission> permissions = new ArrayList<>();
-    if (user1.getUserKind().equals(User.Kind.TEACHER)) {
-      logger.debug("Adding pending teacher permission...");
-      permissions.add(User.Permission.TEACHER_PERM);
-    }
-    addPermissions(permissions);
-  }*/
-
-/*  private void addPermissions(List<User.Permission> permissions) {
-    Timestamp now = new Timestamp(System.currentTimeMillis());
-    int beforeLoginUser = userDAO.getBeforeLoginUser();
-
-    for (User.Permission permission : permissions) {
-      SlickUserPermission e = getPendingRequest(now, beforeLoginUser, permission);
-      permissionDAO.insert(e);
-    }
-  }*/
-
-/*
-  private SlickUserPermission getPendingRequest(Timestamp now, int beforeLoginUser, User.Permission permission) {
-    return new SlickUserPermission(-1,
-        beforeLoginUser,
-        beforeLoginUser,
-        permission.toString(),
-        now,
-        User.PermissionStatus.PENDING.toString(),
-        now,
-        beforeLoginUser);
-  }
-*/
 
   /**
    * @param request

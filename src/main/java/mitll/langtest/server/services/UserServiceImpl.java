@@ -32,13 +32,11 @@
 
 package mitll.langtest.server.services;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.InitialUI;
-import mitll.langtest.client.banner.UserTable;
+import mitll.langtest.client.user.UserTable;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
-import mitll.langtest.client.user.FormField;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.user.UserManagement;

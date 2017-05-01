@@ -37,7 +37,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.*;
@@ -46,9 +45,6 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -62,28 +58,18 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
+public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+//  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
 
   private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
   private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
-  //private static final String MARK_DEFECTS1 = "markDefects";
 
   /**
-   * @param service
-   * @param feedback
-   * @param userManager
    * @param controller
    * @param learnHelper
    * @see Navigation#Navigation
    */
-  MarkDefectsChapterNPFHelper(LangTestDatabaseAsync service,
-                              UserFeedback feedback,
-                              UserManager userManager,
-                              ExerciseController controller,
-                              SimpleChapterNPFHelper learnHelper,
-                              ExerciseServiceAsync exerciseServiceAsync
-  ) {
+  public MarkDefectsChapterNPFHelper(ExerciseController controller, SimpleChapterNPFHelper learnHelper) {
     super(controller, learnHelper);
   }
 
@@ -115,7 +101,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             addTypeAhead(column);
 
             // row 2
-            add(filterOnly      = getFilterCheckbox());
+            add(filterOnly = getFilterCheckbox());
             add(uninspectedOnly = getUninspectedCheckbox());
 
             // row 3
@@ -150,7 +136,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
            */
           protected String getHistoryTokenFromUIState(String search, int id) {
             String s = super.getHistoryTokenFromUIState(search, id) + SelectionState.SECTION_SEPARATOR +
-                SelectionState.ONLY_DEFAULT + "=" + filterOnly.getValue() +  SelectionState.SECTION_SEPARATOR +
+                SelectionState.ONLY_DEFAULT + "=" + filterOnly.getValue() + SelectionState.SECTION_SEPARATOR +
                 SelectionState.ONLY_UNINSPECTED + "=" + uninspectedOnly.getValue();
             return s;
           }
@@ -180,7 +166,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
       if (authenticationEvent.getSource().equals(instanceName)) {
         //logger.info("skip self event from " + instanceName);
       } else {
-    //    logger.info("---> got defect event " + instanceName);
+        //    logger.info("---> got defect event " + instanceName);
         container.reloadFromState();
       }
     });

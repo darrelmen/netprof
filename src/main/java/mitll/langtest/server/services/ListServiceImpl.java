@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -67,7 +68,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * @param id
    * @return
-   * @see mitll.langtest.client.custom.ListManager#deleteList(Button, UserList, boolean)
+   * @see ListManager#deleteList(Button, UserList, boolean)
    */
   @Override
   public boolean deleteList(long id) {
@@ -88,7 +89,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * @param userListID
    * @param isPublic
-   * @see mitll.langtest.client.custom.ListManager#setPublic
+   * @see ListManager#setPublic
    */
   @Override
   public void setPublicOnList(long userListID, boolean isPublic) {
@@ -98,7 +99,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * @param userListID
    * @param user
-   * @see mitll.langtest.client.custom.ListManager#addVisitor(mitll.langtest.shared.custom.UserList)
+   * @see ListManager#addVisitor(mitll.langtest.shared.custom.UserList)
    */
   public void addVisitor(long userListID, int user) {
     getUserListManager().addVisitor(userListID, user);
@@ -109,7 +110,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param visited
    * @return
    * @see mitll.langtest.client.custom.Navigation#showInitialState()
-   * @see mitll.langtest.client.custom.ListManager#viewLessons
+   * @see ListManager#viewLessons
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) {
@@ -125,7 +126,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * @param search
    * @return
-   * @see mitll.langtest.client.custom.ListManager#viewLessons
+   * @see ListManager#viewLessons
    */
   @Override
   public Collection<UserList<CommonShell>> getUserListsForText(String search) {
@@ -147,7 +148,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.ListManager#viewReview
+   * @see ListManager#viewReview
    */
   @Override
   public List<UserList<CommonShell>> getReviewLists() {

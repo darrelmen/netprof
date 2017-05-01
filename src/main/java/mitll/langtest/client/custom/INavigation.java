@@ -7,13 +7,20 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public interface INavigation {
   void showInitialState();
-
+/*
   void showLearn();
+
   void showDrill();
+
   void showProgress();
+
   void showLists();
+
   void showRecord();
-  void showRecordExample();
+
+  void showRecordExample();*/
+
+  void showView(VIEWS view);
 
   Widget getNavigation();
 
@@ -22,4 +29,20 @@ public interface INavigation {
   void showPreviousState();
 
   void clearCurrent();
+
+  public enum VIEWS {
+    NONE,
+    LISTS,
+    PROGRESS,
+    LEARN,
+    DRILL,
+    ITEMS,
+    CONTEXT,
+    DEFECTS,
+    FIX;
+
+    public String toString() {
+      return name().substring(0,1) + name().substring(1).toLowerCase();
+    }
+  }
 }

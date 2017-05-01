@@ -7,8 +7,6 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -27,7 +25,6 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
-import slick.ast.Drop;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -38,11 +35,13 @@ import static mitll.langtest.client.banner.NewContentChooser.*;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeHandler<String> {
+  private final Logger logger = Logger.getLogger("NewBanner");
+
+
   private static final String LEARN = "Learn";
   private static final String DRILL = "Drill";
   private static final String PROGRESS = "Progress";
   private static final String LISTS = "Lists";
-  private final Logger logger = Logger.getLogger("NewBanner");
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
@@ -50,7 +49,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private static final String RECORDING_DISABLED = "RECORDING DISABLED";
 
   private final UILifecycle lifecycle;
-  private final Nav recnav;
+  private final Nav recnav, defectnav;
   private INavigation navigation;
   private HandlerRegistration handlerRegistration;
   private final Map<String, NavLink> nameToLink = new HashMap<>();
@@ -89,16 +88,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     breadcrumbs.addStyleName("rightTwentyMargin");
     addChoicesForUser(lnav);
 
-    Nav recnav = new Nav();
-    recnav.getElement().setId("recnav");
-    recnav.addStyleName("inlineFlex");
+    Nav recnav = getRecNav();
     this.recnav = recnav;
-
-    getChoice(recnav, RECORD_AUDIO);
-    getChoice(recnav, RECORD_EXAMPLE);
-
     navCollapse.add(recnav);
     recordMenuVisible();
+
+
+    Nav defectnav = getDefectNav();
+    this.defectnav = defectnav;
+    navCollapse.add(defectnav);
+    defectMenuVisible();
 
     navCollapse.add(getRightSideChoices(userManager, userMenu));
 
@@ -107,6 +106,28 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     this.lifecycle = lifecycle;
 
     addHistoryListener();
+  }
+
+  @NotNull
+  private Nav getRecNav() {
+    Nav recnav = new Nav();
+    recnav.getElement().setId("recnav");
+    recnav.addStyleName("inlineFlex");
+
+    getChoice(recnav, VIEWS.ITEMS.toString());
+    getChoice(recnav, VIEWS.CONTEXT.toString());
+    return recnav;
+  }
+
+  @NotNull
+  private Nav getDefectNav() {
+    Nav recnav = new Nav();
+    recnav.getElement().setId("defectnav");
+    recnav.addStyleName("inlineFlex");
+
+    getChoice(recnav, VIEWS.DEFECTS.toString());
+    getChoice(recnav, VIEWS.FIX.toString());
+    return recnav;
   }
 
   @NotNull
@@ -135,7 +156,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private final Nav lnav;
-  Dropdown cog;
+  private Dropdown cog;
 
   @NotNull
   private Nav getRightSideChoices(UserManager userManager, UserMenu userMenu) {
@@ -199,7 +220,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private void showSection(String instance1) {
-    switch (instance1) {
+    VIEWS choices = VIEWS.NONE;
+    try {
+      choices = VIEWS.valueOf(instance1.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.info("can't parse " + instance1);
+
+    }
+    navigation.showView(choices);
+   /* switch (instance1) {
       case NewContentChooser.LEARN:
         navigation.showLearn();
         showActive(nameToLink.get(NewContentChooser.LEARN));
@@ -226,12 +255,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
         break;
       default:
         if (instance1.isEmpty()) {
-          if (controller.getProjectStartupInfo() != null) {
+          if (hasProjectChoice()) {
             navigation.showLearn();
           }
         } else logger.warning("not reacting to " + instance1);
         break;
-    }
+    }*/
   }
 
   private void getInfoMenu(UserMenu userMenu, Nav rnav) {
@@ -248,10 +277,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
    */
   private void addChoicesForUser(ComplexWidget nav) {
     boolean first = true;
-    boolean hasProject = controller.getProjectStartupInfo() != null;
+    boolean hasProject = hasProjectChoice();
 
     logger.info("addChoicesForUser has project " + hasProject);
-    for (String choice : Arrays.asList(LEARN, DRILL, PROGRESS, LISTS)) {
+    for (String choice : Arrays.asList(VIEWS.LEARN.toString(), VIEWS.DRILL.toString(), VIEWS.PROGRESS.toString(), VIEWS.LISTS.toString())) {
       NavLink choice1 = getChoice(nav, choice);
       if (first) choice1.addStyleName("leftTenMargin");
       first = false;
@@ -272,10 +301,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     return learn;
   }
 
-  private void setHistoryItem(String historyToken) {
+/*  private void setHistoryItem(String historyToken) {
     if (true) logger.info("NewBanner.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
-  }
+  }*/
 
   @NotNull
   private NavLink getLink(ComplexWidget nav, String learn1) {
@@ -356,7 +385,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private void recordMenuVisible() {
-    recnav.setVisible(isPermittedToRecord() && controller.getProjectStartupInfo() != null);
+    recnav.setVisible(isPermittedToRecord() && hasProjectChoice());
+  }
+
+  private boolean hasProjectChoice() {
+    return controller.getProjectStartupInfo() != null;
+  }
+
+  private void defectMenuVisible() {
+    defectnav.setVisible(isQC() && hasProjectChoice());
   }
 
   private boolean isPermittedToRecord() {

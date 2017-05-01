@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.list;
 
-import mitll.langtest.client.amas.SingleSelectExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
 
 import java.util.*;
@@ -235,9 +234,9 @@ public class SectionWidgetContainer<T extends SectionWidget> implements FacetCon
    * Make sure all sections have a selection - quiz, test type, ilr level
    *
    * @return
-   * @see SingleSelectExerciseList#gotEmptyExerciseList()
-   * @see SingleSelectExerciseList#gotSelection()
-   * @see SingleSelectExerciseList#restoreListFromHistory
+   * @seex SingleSelectExerciseList#gotEmptyExerciseList()
+   * @seex SingleSelectExerciseList#gotSelection()
+   * @seex SingleSelectExerciseList#restoreListFromHistory
    */
   @Override
   public int getNumSelections() {

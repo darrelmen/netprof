@@ -42,7 +42,7 @@ public class ImageResponse implements IsSerializable {
   public ImageResponse() {}
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
+   * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile
    * @param req
    * @param imageURL
    * @param durationInSeconds

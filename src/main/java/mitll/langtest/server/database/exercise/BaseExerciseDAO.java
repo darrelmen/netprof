@@ -260,7 +260,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
 //    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
 //    logger.info("setAudioDAO exToAudio " + exToAudio.size());
-    this.attachAudio = new AttachAudio(language, serverProps.shouldCheckAudioTranscript(), serverProps);
+//    this.attachAudio = new AttachAudio(language, serverProps.shouldCheckAudioTranscript(), serverProps);
   }
 
   /**

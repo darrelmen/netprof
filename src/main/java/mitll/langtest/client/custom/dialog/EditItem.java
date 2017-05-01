@@ -35,6 +35,7 @@ package mitll.langtest.client.custom.dialog;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.ReloadableContainer;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -76,7 +77,7 @@ public class EditItem {
 
   /**
    * @param controller
-   * @see mitll.langtest.client.custom.ListManager#ListManager
+   * @see ListManager#ListManager
    */
   public EditItem(ExerciseController controller,
                   ReloadableContainer predefinedContentList) {
@@ -90,7 +91,7 @@ public class EditItem {
    * @return
    * @paramx itemMarker
    * @paramx includeAddItem
-   * @see mitll.langtest.client.custom.ListManager#showEditItem
+   * @see ListManager#showEditItem
    */
   public Panel editItem(UserList<CommonShell> originalList) {
     Panel hp = new HorizontalPanel();

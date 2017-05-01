@@ -39,6 +39,7 @@ import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.tabs.TabAndContent;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -87,7 +88,7 @@ public class NPFHelper implements RequiresResize {
    * @param controller
    * @param showQC
    * @see mitll.langtest.client.custom.Navigation#Navigation
-   * @see mitll.langtest.client.custom.ListManager#ListManager
+   * @see ListManager#ListManager
    */
   public NPFHelper(ExerciseController controller,
                    boolean showQC,
@@ -102,7 +103,7 @@ public class NPFHelper implements RequiresResize {
    * @param tabAndContent
    * @param instanceName
    * @param loadExercises
-   * @see mitll.langtest.client.custom.ListManager#selectPreviouslyClickedSubTab(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean)
+   * @see ListManager#selectPreviouslyClickedSubTab(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean)
    */
   public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     showNPF(ul, tabAndContent, instanceName, loadExercises, null);
@@ -116,7 +117,7 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName  flex, review, etc.
    * @param loadExercises should we load exercises initially
    * @param toSelect
-   * @see mitll.langtest.client.custom.ListManager#getListOperations
+   * @see ListManager#getListOperations
    */
   public void showNPF(UserList<CommonShell> ul,
                       TabAndContent tabAndContent,

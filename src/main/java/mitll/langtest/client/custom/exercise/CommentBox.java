@@ -44,7 +44,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.instrumentation.EventRegistration;

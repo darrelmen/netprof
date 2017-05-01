@@ -33,7 +33,7 @@
 package mitll.langtest.server.audio;
 
 import corpus.HTKDictionary;
-import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;

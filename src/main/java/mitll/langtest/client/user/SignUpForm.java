@@ -46,7 +46,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.*;
 
 import java.util.Collection;

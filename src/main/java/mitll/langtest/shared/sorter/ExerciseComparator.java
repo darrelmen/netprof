@@ -101,11 +101,22 @@ public class ExerciseComparator {
   }*/
 
   protected <T extends CommonShell> int compareByEnglish(T o1, T o2) {
-    return compareStrings(o1.getEnglish(), o2.getEnglish());
+    String english1 = o1.getEnglish();
+    String english2 = o2.getEnglish();
+    if (english1.isEmpty() && !english2.isEmpty()) {
+      return -1;
+    } else if (!english1.isEmpty() && english2.isEmpty()) {
+      return +1;
+    } else if (english1.isEmpty() && english2.isEmpty()) {
+      return compareByFL(o1, o2);
+    } else {
+      return compareStrings(english1, english2);
+    }
   }
 
   /**
    * Skip prefix of "a ".
+   *
    * @param id1
    * @param id2
    * @return
@@ -132,10 +143,13 @@ public class ExerciseComparator {
 
   @NotNull
   private String dropPunct(String t) {
-    String first = t.substring(0,1);
-    if (first.equals("\"") || first.equals("\\'")) {
-      t = t.substring(1);
+    if (t.isEmpty()) return t;
+    else {
+      String first = t.substring(0, 1);
+      if (first.equals("\"") || first.equals("\\'")) {
+        t = t.substring(1);
+      }
+      return t;
     }
-    return t;
   }
 }

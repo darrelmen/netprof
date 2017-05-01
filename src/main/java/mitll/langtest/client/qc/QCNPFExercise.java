@@ -58,7 +58,6 @@ import mitll.langtest.client.exercise.DefectEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
-import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
@@ -68,7 +67,6 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
@@ -85,7 +83,7 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise>
+public class QCNPFExercise<T extends CommonExercise>
     extends GoodwaveExercisePanel<T> {
   public static final String UNINSPECTED_TOOLTIP = "Item has uninspected audio.";
   private Logger logger = Logger.getLogger("QCNPFExercise");
@@ -148,11 +146,11 @@ public class QCNPFExercise<T extends CommonExercise>//<CommonShell & AudioRefExe
   }
 
   @Override
-  protected ASRScorePanel makeScorePanel(T e, String instance) {
+  protected void makeScorePanel(T e, String instance) {
     if (audioWasPlayed == null) {
       initAudioWasPlayed();
     }
-    return null;
+   // return null;
   }
 
   private void initAudioWasPlayed() {

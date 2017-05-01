@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.SimplePagingContainer;
@@ -75,7 +76,7 @@ public class ReviewItemHelper extends NPFHelper {
    * @param controller
    * @param predefinedContent
    * @see mitll.langtest.client.custom.Navigation#Navigation
-   * @see mitll.langtest.client.custom.ListManager#ListManager
+   * @see ListManager#ListManager
    */
   public ReviewItemHelper(final ExerciseController controller, final ReloadableContainer predefinedContent) {
     super(controller, true, false);

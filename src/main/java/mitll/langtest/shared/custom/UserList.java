@@ -34,6 +34,7 @@ package mitll.langtest.shared.custom;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
@@ -229,7 +230,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.ListManager#selectTabGivenHistory
+   * @see ListManager#selectTabGivenHistory
    * @see Navigation#showInitialState()
    * @see mitll.langtest.client.custom.UserListCallback#addUserListsToDisplay(Collection, Panel, Map)
    */

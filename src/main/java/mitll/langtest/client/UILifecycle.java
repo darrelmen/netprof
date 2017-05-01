@@ -33,7 +33,7 @@
 package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.NavLink;
-import mitll.langtest.shared.user.SlimProject;
+import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 

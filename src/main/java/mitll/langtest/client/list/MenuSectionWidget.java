@@ -52,6 +52,9 @@ import mitll.langtest.shared.exercise.SectionNode;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * @deprecated
+ */
 public class MenuSectionWidget implements SectionWidget {
   private final Logger logger = Logger.getLogger("MenuSectionWidget");
 

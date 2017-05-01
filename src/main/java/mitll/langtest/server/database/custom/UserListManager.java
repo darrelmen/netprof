@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.custom;
 
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.PathWriter;
@@ -1200,7 +1201,7 @@ public class UserListManager implements IUserListManager {
    * @param id
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#deleteList
-   * @see mitll.langtest.client.custom.ListManager#deleteList
+   * @see ListManager#deleteList
    */
   @Override
   public boolean deleteList(long id) {

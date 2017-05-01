@@ -8,8 +8,8 @@ import mitll.langtest.shared.exercise.ExerciseAnnotation;
  * Created by go22670 on 3/23/17.
  */
 public class AnnotationHelper implements CommentAnnotator {
-  ExerciseController controller;
-  int exid;
+  private final ExerciseController controller;
+  private final int exid;
 
   AnnotationHelper(ExerciseController controller, int exid) {
     this.controller = controller;

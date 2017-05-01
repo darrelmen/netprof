@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.userlist;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
@@ -42,6 +42,7 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.custom.UserList;
@@ -65,6 +66,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   private static final String NO_LISTS_YET = "No lists created yet that you haven't seen.";
   private static final String DELETE = "Delete";
   private static final String REVIEWERS = "Reviewers";
+  static final String CLICKED_USER_LIST = "clickedUserList";
 
   private final ListManager listManager;
   private final Panel contentPanel;
@@ -175,7 +177,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
    * @see #onSuccess(java.util.Collection)
    */
   private void selectPreviousList(Collection<UserList<CommonShell>> result) {
-    String clickedUserList = listManager.getStorage().getValue(Navigation.CLICKED_USER_LIST);
+    String clickedUserList = listManager.getStorage().getValue(CLICKED_USER_LIST);
     if (clickedUserList != null && !clickedUserList.isEmpty()) {
       logger.info("selectPreviousList show previous list " + clickedUserList);
       showList(result, Long.parseLong(clickedUserList));

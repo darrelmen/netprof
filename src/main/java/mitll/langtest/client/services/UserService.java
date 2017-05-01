@@ -35,7 +35,7 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.InitialUI;
-import mitll.langtest.client.banner.UserTable;
+import mitll.langtest.client.user.UserTable;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;

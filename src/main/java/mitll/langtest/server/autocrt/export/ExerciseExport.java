@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.server.export;
+package mitll.langtest.server.autocrt.export;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
+ * Just for AutoCRT
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>

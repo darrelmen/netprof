@@ -34,7 +34,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.ContextPractice;
-import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 

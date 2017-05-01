@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client.banner;
+package mitll.langtest.client.user;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.Style;
@@ -87,9 +87,9 @@ public class UserTable extends PagerTable {
 
   /**
    * @param props
-   * @see mitll.langtest.client.LangTest.UsersClickHandler#onClick(ClickEvent)
+   * @see mitll.langtest.client.banner.UserMenu.UsersClickHandler#onClick
    */
-  UserTable(PropertyHandler props, boolean isAdmin) {
+  public UserTable(PropertyHandler props, boolean isAdmin) {
     this.props = props;
     this.isAdmin = isAdmin;
   }
@@ -97,7 +97,7 @@ public class UserTable extends PagerTable {
   /**
    * @see UserMenu.UsersClickHandler
    */
-  void showUsers(final UserServiceAsync service) {
+  public void showUsers(final UserServiceAsync service) {
     // Create the resetEmailPopup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText(REGISTERED_USERS);

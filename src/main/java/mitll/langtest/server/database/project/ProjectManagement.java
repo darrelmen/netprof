@@ -50,7 +50,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.user.SlimProject;
+import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
@@ -193,7 +193,7 @@ public class ProjectManagement implements IProjectManagement {
     if (!forceReload) {
       if (skipRetired || isConfigured) {
         if (isConfigured) {
-          logger.debug("configureProject project already configured " + project.getProject().id());
+          //logger.debug("configureProject project already configured " + project.getProject().id());
         } else {
           logger.info("skipping fully loading project " + project + " since it's retired");
         }
@@ -236,7 +236,7 @@ public class ProjectManagement implements IProjectManagement {
       logger.warn("no exercises in project? " + project);
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(),
-        db.getResultDAO(), db.getRefResultDAO(), db.getAudioDAO(),
+        db.getResultDAO(), db.getAudioDAO(),
         db.getPhoneDAO(),
         project));
 

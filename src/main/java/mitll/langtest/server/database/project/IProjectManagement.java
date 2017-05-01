@@ -37,7 +37,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.user.SlimProject;
+import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;

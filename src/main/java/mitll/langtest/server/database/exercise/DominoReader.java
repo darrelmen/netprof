@@ -8,6 +8,7 @@ import java.io.IOException;
 
 /**
  * Created by go22670 on 4/5/16.
+ * @deprecated
  */
 class DominoReader {
   private static final String DOCUMENTS = "documents";

@@ -30,10 +30,7 @@
  *
  */
 
-package mitll.langtest.shared.user;
-
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectStatus;
+package mitll.langtest.shared.project;
 
 import java.util.ArrayList;
 import java.util.Collections;

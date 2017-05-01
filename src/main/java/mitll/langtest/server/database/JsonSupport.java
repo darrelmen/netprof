@@ -37,7 +37,6 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
-import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -63,7 +62,7 @@ public class JsonSupport {
 
   private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
-  private final IRefResultDAO refResultDAO;
+//  private final IRefResultDAO refResultDAO;
   private final IAudioDAO audioDAO;
   private final IPhoneDAO phoneDAO;
 
@@ -73,20 +72,18 @@ public class JsonSupport {
   /**
    * @param sectionHelper
    * @param resultDAO
-   * @param refResultDAO
    * @param audioDAO
    * @param phoneDAO
    * @see IProjectManagement#configureProject
    */
   public JsonSupport(ISection<CommonExercise> sectionHelper,
                      IResultDAO resultDAO,
-                     IRefResultDAO refResultDAO,
                      IAudioDAO audioDAO,
                      IPhoneDAO phoneDAO,
                      Project project) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
-    this.refResultDAO = refResultDAO;
+  //  this.refResultDAO = refResultDAO;
     this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
     this.language = project.getLanguage();

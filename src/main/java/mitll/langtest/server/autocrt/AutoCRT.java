@@ -39,8 +39,8 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.export.Export;
-import mitll.langtest.server.export.ExerciseExport;
-import mitll.langtest.server.export.ResponseAndGrade;
+import mitll.langtest.server.autocrt.export.ExerciseExport;
+import mitll.langtest.server.autocrt.export.ResponseAndGrade;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.InDictFilter;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -790,7 +790,7 @@ public class AutoCRT {
    * @return a mira classifier
    * @see #getExportedAnswers(String, int)
    * @see #getScoreForExercise
-   * @see mitll.langtest.server.export.ExerciseExport
+   * @see mitll.langtest.server.autocrt.export.ExerciseExport
    * @see AutoGradeExperiment
    */
   private Classifier<AutoGradeExperiment.Event> getClassifier() {

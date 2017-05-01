@@ -37,8 +37,8 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.GradeDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.server.export.ExerciseExport;
-import mitll.langtest.server.export.ResponseAndGrade;
+import mitll.langtest.server.autocrt.export.ExerciseExport;
+import mitll.langtest.server.autocrt.export.ResponseAndGrade;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
 import mitll.langtest.shared.grade.Grade;
@@ -63,6 +63,7 @@ import java.util.*;
  * @since 11/29/12
  * Time: 6:04 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
 public class Export {
   private static final Logger logger = LogManager.getLogger(Export.class);

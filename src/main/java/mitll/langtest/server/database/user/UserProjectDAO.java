@@ -80,12 +80,6 @@ public class UserProjectDAO implements IUserProjectDAO {
     dao.forget(userid);
   }
 
-
-//  @Override
-//  public Collection<SlickUserProject> getAll() {
-//    return dao.getAll();
-//  }
-
   /**
    * TODO - we seem to hit this too often
    *

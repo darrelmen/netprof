@@ -62,7 +62,7 @@ import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.user.SlimProject;
+import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 

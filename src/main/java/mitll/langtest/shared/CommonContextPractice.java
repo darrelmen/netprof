@@ -41,7 +41,5 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @since 9/20/15.
  */
 public interface CommonContextPractice extends IsSerializable {
-
     ContextPractice toContextPractice();
-
 }

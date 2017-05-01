@@ -163,8 +163,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       if (tExerciseListWrapper != null) return tExerciseListWrapper;
     }
 
-    // List<CommonExercise> exercises;
-
     logger.debug("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
     try {

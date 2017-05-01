@@ -46,12 +46,14 @@ import mitll.langtest.client.WavCallback;
  */
 class WebAudioRecorder {
 //  private final Logger logger = Logger.getLogger("WebAudioRecorder");
-  private static final int DELAY_MILLIS = 5000;
+  private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
   private static boolean tried = false;
   private static boolean gotResponse = false;
   private Timer theTimer = null;
+
+  int attempts = 10*60/DELAY_MILLIS;
 
   /**
    *
@@ -63,6 +65,7 @@ class WebAudioRecorder {
   boolean tryWebAudio() {
     if (!tried) {
       tried = true;
+      attempts--;
       //logger.info("webAudioMicAvailable -- tryWebAudio!");
       initWebaudio();
 
@@ -151,9 +154,7 @@ class WebAudioRecorder {
 
   public static void webAudioPermissionDenied() {
     gotResponse = true;
-
     console("webAudioPermissionDenied!");
-
     noWebRTC();
   }
 

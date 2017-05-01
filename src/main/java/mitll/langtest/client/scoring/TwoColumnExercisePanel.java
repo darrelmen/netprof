@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -63,7 +62,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
-   * and a right side -- the charts and gauges {@link ASRScorePanel}
+   * and a right side --
    *
    * @param commonExercise for this exercise
    * @param controller

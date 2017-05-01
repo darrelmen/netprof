@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client.custom;
+package mitll.langtest.client.custom.userlist;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
@@ -47,13 +47,15 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.TextArea;
+import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.content.AVPHelper;
 import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.tabs.TabAndContent;
-import mitll.langtest.client.custom.userlist.ListOperations;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ListService;
@@ -166,7 +168,7 @@ public class ListManager implements RequiresResize {
    * @param studyLists
    * @see Navigation#addStudyLists
    */
-  void addStudyLists(final TabAndContent studyLists) {
+  public void addStudyLists(final TabAndContent studyLists) {
     subListTabPanel = new TabPanel();
 
     DivWidget content = studyLists.getContent();
@@ -187,7 +189,6 @@ public class ListManager implements RequiresResize {
     logger.info("showLists ");
     subListTabPanel = new TabPanel();
     addListTabs(subListTabPanel);
-
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
@@ -290,7 +291,7 @@ public class ListManager implements RequiresResize {
    * @param onlyVisited
    * @see Navigation#showInitialState
    */
-  void showMyLists(boolean onlyCreated, boolean onlyVisited) {
+  public void showMyLists(boolean onlyCreated, boolean onlyVisited) {
     TabPanel tabPanel = subListTabPanel;
     String value = storage.getValue(CLICKED_TAB);
 
