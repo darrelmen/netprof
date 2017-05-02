@@ -55,10 +55,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final ClickableWords<T> clickableWords;
   private final boolean showInitially = false;
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
-  private final ListInterface<CommonShell,T> listContainer;
+  private final ListInterface<CommonShell, T> listContainer;
   private ChoicePlayAudioPanel playAudio;
   Map<Integer, AlignmentOutput> alignments = new HashMap<>();
   private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>>> idToTypeToSegmentToWidget = new HashMap<>();
+  private List<IHighlightSegment> altflClickables;
+  private List<IHighlightSegment> flclickables;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -76,7 +78,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
-                                final ListInterface<CommonShell,T> listContainer,
+                                final ListInterface<CommonShell, T> listContainer,
                                 List<CorrectAndScore> correctAndScores
   ) {
     this.exercise = commonExercise;
@@ -375,7 +377,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return widget;
   }
 
-  List<IHighlightSegment> flclickables;
 
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget) {
@@ -574,7 +575,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return rowWidget;
   }
 
-  List<IHighlightSegment> altflClickables;
 
   private Widget addAltFL(T e) {
     String translitSentence = e.getAltFL().trim();

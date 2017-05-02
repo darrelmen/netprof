@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
   protected String value;
   private int count;
+  private int userListID;
 
   private ItemSorter itemSorter = new ItemSorter();
 
@@ -21,9 +22,10 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
     this.count = node.getCount();
   }
 
-  public MatchInfo(String value, int count) {
+  public MatchInfo(String value, int count, int userListID) {
     this.value = value;
     this.count = count;
+    this.userListID = userListID;
   }
 
   public void incr(int c) {
@@ -45,5 +47,9 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
 
   public String toString() {
     return value + "=" + count;
+  }
+
+  public int getUserListID() {
+    return userListID;
   }
 }

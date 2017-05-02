@@ -1016,9 +1016,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
    * @param request
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
    */
   @Override
   public FilterResponse getTypeToValues(FilterRequest request) {
@@ -1032,6 +1032,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     boolean someEmpty = checkIfAnyTypesAreEmpty(typesInOrder, typesToInclude1, typeToMatches);
 
+    int userListID = request.getUserListID();
     if (someEmpty) {
       List<Pair> typeToSelection2 = new ArrayList<>();
       logger.info("getTypeToValues back off including  " + typesToInclude1);
@@ -1044,9 +1045,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
       logger.info("getTypeToValues try search again with " + typeToSelection2);
 
-      return new FilterResponse(request.getReqID(), getTypeToMatches(typeToSelection2), typesToInclude1);
+      return new FilterResponse(request.getReqID(), getTypeToMatches(typeToSelection2), typesToInclude1, userListID);
     } else {
-      return new FilterResponse(request.getReqID(), typeToMatches, typesToInclude1);
+      return new FilterResponse(request.getReqID(), typeToMatches, typesToInclude1, userListID);
     }
   }
 

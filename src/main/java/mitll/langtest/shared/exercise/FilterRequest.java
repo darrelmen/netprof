@@ -54,9 +54,10 @@ public class FilterRequest implements IsSerializable {
   public FilterRequest() {
   }
 
-  public FilterRequest(int reqID, List<Pair> pairs) {
+  public FilterRequest(int reqID, List<Pair> pairs, int userListID) {
     this.reqID = reqID;
     this.typeToSelection = pairs;
+    this.userListID = userListID;
   }
 
   public boolean isNoFilter() {
