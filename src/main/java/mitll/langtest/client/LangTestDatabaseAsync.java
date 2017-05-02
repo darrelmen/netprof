@@ -62,7 +62,7 @@ public interface LangTestDatabaseAsync {
                              Collection<Integer> ids,
                              long latestResultID,
                              Map<String, Collection<String>> typeToSection,
-                             long userListID, AsyncCallback<AVPScoreReport> async);
+                             int userListID, AsyncCallback<AVPScoreReport> async);
 
 
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);

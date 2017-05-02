@@ -99,10 +99,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     addChoicesForUser(lnav);
 /*
     lnav.add(recnav =new Dropdown("Record"));
-
-
     */
-
 
     Nav recnav = getRecNav();
     this.recnav = recnav;
@@ -165,10 +162,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     Style style = breadcrumbs.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
     breadcrumbs.addStyleName("rightTwentyMargin");
-
-    //style.clearProperty("backgroundColor");
-    //   style.setBackgroundColor("black");
-
   }
 
   @NotNull

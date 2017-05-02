@@ -71,7 +71,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see ListManager#deleteList(Button, UserList, boolean)
    */
   @Override
-  public boolean deleteList(long id) {
+  public boolean deleteList(int id) {
     return getUserListManager().deleteList(id);
   }
 
@@ -82,7 +82,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.EditableExerciseList#deleteItem
    */
   @Override
-  public boolean deleteItemFromList(long listid, int exid) {
+  public boolean deleteItemFromList(int listid, int exid) {
     return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder(getProjectID()));
   }
 
@@ -92,7 +92,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see ListManager#setPublic
    */
   @Override
-  public void setPublicOnList(long userListID, boolean isPublic) {
+  public void setPublicOnList(int userListID, boolean isPublic) {
     getUserListManager().setPublicOnList(userListID, isPublic);
   }
 
@@ -101,7 +101,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param user
    * @see ListManager#addVisitor(mitll.langtest.shared.custom.UserList)
    */
-  public void addVisitor(long userListID, int user) {
+  public void addVisitor(int userListID, int user) {
     getUserListManager().addVisitor(userListID, user);
   }
 
@@ -139,9 +139,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param userListID
    * @param exID
    * @return
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
+   * @seex mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public void addItemToUserList(long userListID, int exID) {
+  public void addItemToUserList(int userListID, int exID) {
     CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(getProjectID(), exID);
     getUserListManager().addItemToList(userListID, "" + exID, customOrPredefExercise.getID());
   }
@@ -189,7 +189,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
-  public CommonExercise newExercise(long userListID, CommonExercise userExercise) {
+  public CommonExercise newExercise(int userListID, CommonExercise userExercise) {
     if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
 
     CommonExercise exercise = getExerciseIfKnown(userExercise);
@@ -221,7 +221,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @return
    */
   @Override
-  public Collection<CommonExercise> reallyCreateNewItems(long userListID, String userExerciseText) {
+  public Collection<CommonExercise> reallyCreateNewItems(int userListID, String userExerciseText) {
     String[] lines = userExerciseText.split("\n");
 
     if (DEBUG) logger.info("got " + lines.length + " lines");
@@ -238,7 +238,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return actualItems;
   }
 
-  private List<CommonExercise> addItemsToList(long userListID,
+  private List<CommonExercise> addItemsToList(int userListID,
                                               UserList<CommonShell> userListByID,
                                               Set<CommonExercise> knownAlready,
                                               List<CommonExercise> newItems) {

@@ -60,8 +60,10 @@ import java.util.Map;
 public class UserList<T extends HasID> extends BaseExercise {
   public static final String MY_LIST = "Favorites";
 
-  @Deprecated protected String oldid = "";
+  @Deprecated
+  protected String oldid = "";
 
+  private int projid;
   private int userid;
   private String userChosenID;
 
@@ -77,7 +79,8 @@ public class UserList<T extends HasID> extends BaseExercise {
   private List<T> exercises = new ArrayList<>();
   private String richText;
 
-  public UserList() {}
+  public UserList() {
+  }
 
   /**
    * @param uniqueID
@@ -87,9 +90,10 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @param description
    * @param classMarker
    * @param richText
+   * @param projid
    * @paramx user
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
-   * @see UserListDAO#getWhere(long, boolean)
+   * @see IUserListDAO#getWhere(int, boolean)
    */
   public UserList(int uniqueID,
                   int userid,
@@ -100,9 +104,10 @@ public class UserList<T extends HasID> extends BaseExercise {
                   boolean isPrivate,
                   long modified,
                   String contextURL,
-                  String richText) {
+                  String richText,
+                  int projid) {
     super(uniqueID);
-     this.userid = userid;
+    this.userid = userid;
     this.userChosenID = userChosenID;
     this.name = name;
     this.description = description;
@@ -110,10 +115,13 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.isPrivate = isPrivate;
     this.modified = modified;
     this.contextURL = contextURL;
-    this.richText =richText;
+    this.richText = richText;
+    this.projid = projid;
   }
 
-  public int getUserID() { return userid; }
+  public int getUserID() {
+    return userid;
+  }
 
   /**
    * @paramx ul
@@ -133,7 +141,6 @@ public class UserList<T extends HasID> extends BaseExercise {
     return copy;
   }
 */
-
   public void addExerciseAfter(T after, T toAdd) {
     int index = exercises.indexOf(after);
     if (index == -1) {
@@ -165,14 +172,15 @@ public class UserList<T extends HasID> extends BaseExercise {
   }
 
   /**
-   *
    * @return
    */
   public List<T> getExercises() {
     return exercises;
   }
 
-  public int getNumItems() { return exercises.size(); }
+  public int getNumItems() {
+    return exercises.size();
+  }
 
   public T getLast() {
     return exercises.get(exercises.size() - 1);
@@ -187,7 +195,10 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.exercises = exercises;
   }
 
-  public boolean remove(T newUserExercise) { return exercises.remove(newUserExercise); }
+  public boolean remove(T newUserExercise) {
+    return exercises.remove(newUserExercise);
+  }
+
   public boolean removeAndCheck(int id) {
     return remove(id) != null;
   }
@@ -202,6 +213,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     }
     return toRemove != null && exercises.remove(toRemove) ? toRemove : null;
   }
+
   /**
    * @param uniqueID
    * @see IUserListDAO#add(UserList, int)
@@ -288,6 +300,10 @@ public class UserList<T extends HasID> extends BaseExercise {
   public String toString() {
     return "UserList #" + getID() + " '" + name + "' by " + getUserID() +
         " : " + (isReview ? " REVIEW " : "") +
-        " : with " +  getNumItems()  + " exercises.";
+        " : with " + getNumItems() + " exercises.";
+  }
+
+  public int getProjid() {
+    return projid;
   }
 }

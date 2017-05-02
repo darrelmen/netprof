@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -50,7 +51,7 @@ public interface IUserExerciseDAO extends IDAO {
   SlickExercise getUnknownExercise();
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#newExercise(long, CommonExercise, String)
+   * @see IUserListManager#newExercise(int, CommonExercise, String)
    * @param userExercise
    * @param isOverride
    * @param isContext

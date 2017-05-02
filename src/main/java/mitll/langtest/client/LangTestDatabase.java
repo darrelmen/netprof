@@ -77,7 +77,7 @@ public interface LangTestDatabase extends RemoteService {
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
   AVPScoreReport getUserHistoryForList(int userid, Collection<Integer> ids, long latestResultID,
-                                       Map<String, Collection<String>> typeToSection, long userListID);
+                                       Map<String, Collection<String>> typeToSection, int userListID);
   // Telemetry ---
 
   /**

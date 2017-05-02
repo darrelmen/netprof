@@ -328,7 +328,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     }
 
     if (!ul.isFavorite()) {
-      final long uniqueID = ul.getID();
+      final int uniqueID = ul.getID();
 
       if (showIsPublic) {
         r1.add(getIsPublic(ul, uniqueID));
@@ -354,7 +354,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     }
   }
 
-  private CheckBox getIsPublic(UserList ul, final long uniqueID) {
+  private CheckBox getIsPublic(UserList ul, final int uniqueID) {
     final CheckBox isPublic = new CheckBox("Public");
     isPublic.setValue(!ul.isPrivate());
     isPublic.addStyleName("floatRight");

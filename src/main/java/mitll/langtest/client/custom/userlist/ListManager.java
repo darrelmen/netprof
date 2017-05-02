@@ -874,7 +874,7 @@ public class ListManager implements RequiresResize {
 
   void deleteList(Button delete, final UserList ul, final boolean onlyMyLists) {
     controller.logEvent(delete, "Button", getListID(ul), "Delete");
-    final long uniqueID = ul.getID();
+    final int uniqueID = ul.getID();
 
     listService.deleteList(uniqueID, new AsyncCallback<Boolean>() {
       @Override
@@ -899,7 +899,7 @@ public class ListManager implements RequiresResize {
    * @param isPublic
    * @see UserListCallback#getIsPublic(UserList, long)
    */
-  void setPublic(long uniqueID, boolean isPublic) {
+  void setPublic(int uniqueID, boolean isPublic) {
     listService.setPublicOnList(uniqueID, isPublic, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {

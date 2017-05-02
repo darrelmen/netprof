@@ -254,9 +254,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
                                               Collection<Integer> ids,
                                               long latestResultID,
                                               Map<String, Collection<String>> typeToSection,
-                                              long userListID) {
+                                              int userListID) {
     //logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
-    UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID, getProjectID()) : null;
+    UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
     List<Integer> allIDs = new ArrayList<>();
     Map<Integer, CollationKey> idToKey = new HashMap<>();
 

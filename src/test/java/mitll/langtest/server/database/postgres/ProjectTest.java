@@ -37,6 +37,7 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.exercise.DominoExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectType;
@@ -91,6 +92,21 @@ public class ProjectTest extends BaseTest {
       }
     }
   }
+
+
+//  @Test
+//  public void testReadDominoJSON() {
+//    DatabaseImpl spanish = getDatabase("spanish");
+//
+//    IProjectDAO projectDAO = spanish.getProjectDAO();
+//    Collection<SlickProject> all = projectDAO.getAll();
+//    for (SlickProject project : all) {
+//      logger.info("Got " + project);
+//      for (SlickProjectProperty prop : project.getProps()) {
+//        logger.info("\t prop " + prop);
+//      }
+//    }
+//  }
 
   @Test
   public void testAddProperty() {
@@ -251,6 +267,14 @@ public class ProjectTest extends BaseTest {
     for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
   }
 
+
+  @Test
+  public void testReadDominoJSON() {
+    DatabaseImpl database = getAndPopulate();
+    DominoExerciseDAO dominoExerciseDAO = database.getDominoExerciseDAO();
+    dominoExerciseDAO.readExercises("SAMPLE-NO-EXAM.json", Arrays.asList("Unit", "Chapter"));
+  }
+
   @Test
   public void testPhonesLookup() {
     getAndPopulate();
@@ -284,6 +308,7 @@ public class ProjectTest extends BaseTest {
   public void testDropPashto() {
     doDrop("pashto");
   }
+
   @Test
   public void testDropPashto1() {
     doDrop("Pashto Elementary");

@@ -33,7 +33,6 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -51,20 +50,20 @@ public interface ListServiceAsync {
 
   void getListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
-  void addItemToUserList(long userListID, int exID, AsyncCallback<Void> async);
+  void addItemToUserList(int userListID, int exID, AsyncCallback<Void> async);
 
   void addUserList(String name, String description, String dliClass,
                    boolean isPublic, AsyncCallback<Long> async);
 
-  void addVisitor(long userListID, int user, AsyncCallback<Void> asyncCallback);
+  void addVisitor(int userListID, int user, AsyncCallback<Void> asyncCallback);
 
   void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
 
-  void setPublicOnList(long userListID, boolean isPublic, AsyncCallback<Void> async);
+  void setPublicOnList(int userListID, boolean isPublic, AsyncCallback<Void> async);
 
-  void newExercise(long userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
+  void newExercise(int userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
 
-  void reallyCreateNewItems(long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
+  void reallyCreateNewItems(int userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
 
   /**
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
@@ -74,9 +73,9 @@ public interface ListServiceAsync {
    */
   void editItem(CommonExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 
-  void deleteList(long id, AsyncCallback<Boolean> async);
+  void deleteList(int id, AsyncCallback<Boolean> async);
 
-  void deleteItemFromList(long listid, int exid, AsyncCallback<Boolean> async);
+  void deleteItemFromList(int listid, int exid, AsyncCallback<Boolean> async);
 
   void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
 

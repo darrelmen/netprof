@@ -427,7 +427,7 @@ public class DownloadServlet extends DatabaseServlet {
     }
 
     try {
-      String name = id == null ? "unknown" : db.getUserListName(id, projectid);
+      String name = id == null ? "unknown" : db.getUserListName(id);
       name = name.replaceAll("\\,", "_").replaceAll(" ", "_");
       name += ".zip";
       setHeader(response, name);

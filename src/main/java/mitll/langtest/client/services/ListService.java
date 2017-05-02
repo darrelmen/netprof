@@ -64,7 +64,7 @@ public interface ListService extends RemoteService {
    * @param isPublic
    * @see ListManager#setPublic(long, boolean)
    */
-  void setPublicOnList(long userListID, boolean isPublic);
+  void setPublicOnList(int userListID, boolean isPublic);
 
   // Deleting lists and exercises from lists
 
@@ -73,7 +73,7 @@ public interface ListService extends RemoteService {
    * @return
    * @see ListManager#deleteList(Button, UserList, boolean)
    */
-  boolean deleteList(long id);
+  boolean deleteList(int id);
 
   /**
    * @param listid
@@ -81,7 +81,7 @@ public interface ListService extends RemoteService {
    * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem
    */
-  boolean deleteItemFromList(long listid, int exid);
+  boolean deleteItemFromList(int listid, int exid);
   /**
    * @see ReviewEditableExercise#confirmThenDeleteItem()
    * @param exid
@@ -94,7 +94,7 @@ public interface ListService extends RemoteService {
    * @param user
    * @see ListManager#addVisitor(UserList)
    */
-  void addVisitor(long userListID, int user);
+  void addVisitor(int userListID, int user);
 
   /**
    * @param onlyCreated
@@ -123,7 +123,7 @@ public interface ListService extends RemoteService {
    * @param exID
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  void addItemToUserList(long userListID, int exID);
+  void addItemToUserList(int userListID, int exID);
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
@@ -131,14 +131,14 @@ public interface ListService extends RemoteService {
    * @param userExercise
    * @return
    */
-  CommonExercise newExercise(long userListID, CommonExercise userExercise);
+  CommonExercise newExercise(int userListID, CommonExercise userExercise);
   /**
    * @param userListID
    * @param userExerciseText
    * @return
    * @see ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
    */
-  Collection<CommonExercise> reallyCreateNewItems(long userListID, String userExerciseText);
+  Collection<CommonExercise> reallyCreateNewItems(int userListID, String userExerciseText);
 
   /**
    * @param id

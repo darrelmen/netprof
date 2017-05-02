@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
@@ -677,7 +678,7 @@ public class SlickUserExerciseDAO
    * @param isOverride
    * @param isContext
    * @param typeOrder
-   * @see mitll.langtest.server.database.custom.UserListManager#newExercise
+   * @see IUserListManager#newExercise
    */
   @Override
   public int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder) {

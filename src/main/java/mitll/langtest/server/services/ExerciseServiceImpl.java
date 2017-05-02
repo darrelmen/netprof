@@ -64,8 +64,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int WARN_DUR = 100;
   private static final boolean DEBUG = false;
 
-  public static final int MIN_DEBUG_DURATION = 30;
-  public static final int MIN_WARN_DURATION = 1000;
+  private static final int MIN_DEBUG_DURATION = 30;
+  private static final int MIN_WARN_DURATION = 1000;
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
@@ -76,39 +76,25 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   public FilterResponse getTypeToValues(FilterRequest request) {
     List<Pair> typeToSelection = request.getTypeToSelection();
 
-    logger.info("getTypeToValues " + request);
-    logger.info("getTypeToValues " + typeToSelection);
-    List<UserList<CommonShell>> byName = getUserLists(typeToSelection);
-
-/*    if (byName != null) {
-      Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-      UserList<CommonShell> next = byName.iterator().next();
-      MatchInfo matchInfo = new MatchInfo(next.getName(), next.getNumItems());
-
-      Set<MatchInfo> value = new HashSet<>();
-      value.add(matchInfo);
-      typeToValues.put("Lists", value);
-
-      FilterResponse lists = new FilterResponse(request.getReqID(), typeToValues, new HashSet<>(Arrays.asList("Lists")));
-      logger.info("returning " +lists);
-      return lists;
-    } else {*/
+    logger.info("getTypeToValues " + request + " " + typeToSelection);
     FilterResponse typeToValues = getSectionHelper().getTypeToValues(request);
 
-    if (byName != null) {
-      UserList<CommonShell> next = byName.iterator().next();
+    int userListID = request.getUserListID();
+    UserList<CommonShell> next = db.getUserListManager().getSimpleUserListByID(userListID);
+
+    if (next != null) {
+      logger.info("\tgetTypeToValues " + request + " include list " + next);
 
       typeToValues.getTypesToInclude().add("Lists");
       Set<MatchInfo> value = new HashSet<>();
-      MatchInfo matchInfo = new MatchInfo(next.getName(), next.getNumItems());
+      MatchInfo matchInfo = new MatchInfo(next.getName(), next.getNumItems(), userListID);
       value.add(matchInfo);
       typeToValues.getTypeToValues().put("Lists", value);
     }
     return typeToValues;
-    //  }
   }
 
-  @Nullable
+/*  @Nullable
   private List<UserList<CommonShell>> getUserLists(List<Pair> typeToSelection) {
     List<UserList<CommonShell>> byName = null;
     for (Pair p : typeToSelection) {
@@ -119,7 +105,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
     return byName;
-  }
+  }*/
 
   /**
    * Complicated.

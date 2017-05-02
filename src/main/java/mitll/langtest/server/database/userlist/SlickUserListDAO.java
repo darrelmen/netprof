@@ -126,7 +126,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.classmarker(),
         slick.isprivate(),
         slick.modified().getTime(),
-        slick.contexturl(), slick.richtext());
+        slick.contexturl(),
+        slick.richtext(),
+        slick.projid());
   }
 
   private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
@@ -139,7 +141,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.classmarker(),
         slick.isprivate(),
         slick.modified().getTime(),
-        slick.contexturl(), slick.richtext());
+        slick.contexturl(), slick.richtext(),
+        slick.projid());
   }
 
   public void insert(SlickUserExerciseList UserExercise) {
@@ -272,7 +275,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @throws SQLException
    * @seex #getAllPredef(long)
    * @see IUserListDAO#getAllPublic
-   * @see #getWhere(long, boolean)
+   * @see IUserListDAO#getWhere(int, boolean)
    */
   private void populateLists(Collection<UserList<CommonShell>> lists, long userid) {
     for (UserList<CommonShell> ul : lists) {
@@ -298,7 +301,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public UserList<CommonShell> getWithExercises(long unique) {
+  public UserList<CommonShell> getWithExercises(int unique) {
     UserList<CommonShell> where = getWhere(unique, true);
     if (where != null) populateList(where);
     return where;
@@ -320,8 +323,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public UserList<CommonShell> getWhere(long unique, boolean warnIfMissing) {
-    Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID((int) unique);
+  public UserList<CommonShell> getWhere(int unique, boolean warnIfMissing) {
+    Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID(unique);
     if (slickUserExerciseListOption.isDefined()) {
       return fromSlick(slickUserExerciseListOption.get());
     } else {

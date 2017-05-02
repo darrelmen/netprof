@@ -13,7 +13,7 @@ import java.util.List;
 public interface UserListServices {
   IUserListManager getUserListManager();
 
-  UserList<CommonShell> getUserListByID(long listid, int projectid);
+//  UserList<CommonShell> getUserListByID(long listid, int projectid);
   //List<UserList<CommonShell>> getUserListByName(long listid, int projectid);
 
   UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid);

@@ -428,7 +428,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
 
-
   private void setTypeToSelection(Map<String, String> typeToSelection) {
     this.typeToSelection = typeToSelection;
   }
@@ -505,7 +504,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   *
    * @param typeToSection
    * @param prefix
    * @param onlyWithAudioAnno
@@ -544,7 +542,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return exerciseListRequest;
   }
 
- // private Map<String, Integer> nameToID = new HashMap<>();
+  // private Map<String, Integer> nameToID = new HashMap<>();
 
   private void populateListChoices(ListItem liForDimensionForType) {
     ListServiceAsync listService = controller.getListService();
@@ -560,7 +558,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         typeToValues.put(LISTS, value);
         for (UserList<?> list : result) {
           value.add(new MatchInfo(list.getName(), list.getNumItems(), list.getID()));
-   //       nameToID.put(list.getName(), list.getID());
+          //       nameToID.put(list.getName(), list.getID());
         }
         Widget first = liForDimensionForType.getWidget(0);
 
@@ -764,7 +762,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   @NotNull
   private Anchor getHeaderAnchor(final String type) {
     Anchor typeSection = getAnchor(type); // li
-    addRemoveClickHandler(type, typeSection, userListID);
+    addRemoveClickHandler(type, typeSection);
     return typeSection;
   }
 
@@ -781,11 +779,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   * @see #addChoices
    * @param type
    * @param value
    * @param childType
    * @return
+   * @see #addChoices
    */
   @NotNull
   private Widget getParentAnchor(String type, String value, String childType) {
@@ -802,13 +800,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void addRemoveClickHandler(final String type, Anchor typeSection) {
     typeSection.addClickHandler(event -> {
       removeSelection(type);
-      int selectedUserListID=-1;
+      int selectedUserListID = -1;
       if (type.equals(LISTS)) {
         selectedUserListID = -1;
-      }
-      else if (typeToSelection.containsKey(LISTS))
-      {
-        selectedUserListID = Integer.parseInt(typeToSelection.get(LISTS));
+      } else if (typeToSelection.containsKey(LISTS)) {
+        try {
+          selectedUserListID = Integer.parseInt(typeToSelection.get(LISTS));
+        } catch (NumberFormatException e) {
+          e.printStackTrace();
+        }
       }
 
       getTypeToValues(typeToSelection, selectedUserListID);
@@ -836,6 +836,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * Add this type=value pair to existing selections
+   *
    * @param type
    * @param key
    * @return
@@ -862,7 +863,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    *
    * @param typeToSelection
    * @param userListID
-   * @see #addRemoveClickHandler(String, Anchor, int)
+   * @see #addRemoveClickHandler
    * @see #getChoiceHandler
    * @see #getSectionWidgetContainer()
    */
@@ -881,8 +882,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
            */
           @Override
           public void onSuccess(FilterResponse response) {
-     //       Map<String, Set<MatchInfo>> result = response.getTypeToValues();
-   //         logger.info("getTypeToValues for " + pairs + " got " + result.size());
+            //       Map<String, Set<MatchInfo>> result = response.getTypeToValues();
+            //         logger.info("getTypeToValues for " + pairs + " got " + result.size());
 
             changeSelection(response.getTypesToInclude(), typeToSelection);
 
@@ -1009,11 +1010,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         }
         if (typeToSelection.equals(newTypeToSelection) && typeOrderContainer.iterator().hasNext()) {
           logger.info("restoreListBoxState state already consistent with " + newTypeToSelection);
-        }
-        else {
+        } else {
           int userListID = -1;
           try {
-            userListID = newTypeToSelection.containsKey(LISTS)?Integer.parseInt(newTypeToSelection.get(LISTS  )):-1;
+            userListID = newTypeToSelection.containsKey(LISTS) ? Integer.parseInt(newTypeToSelection.get(LISTS)) : -1;
           } catch (NumberFormatException e) {
 
           }
@@ -1078,7 +1078,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         logger.info("askServerForExercises ask for single -- " + itemID);
       }
 
-     // ensureAudio(visibleIDs);
+      // ensureAudio(visibleIDs);
       getExercises(visibleIDs);
     }
   }
@@ -1086,6 +1086,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private boolean isStaleReq(ExerciseListWrapper<?> req) {
     return !isCurrentReq(req);
   }
+
   private boolean isCurrentReq(ExerciseListWrapper<?> req) {
     return req.getReqID() == freqid - 1;
   }

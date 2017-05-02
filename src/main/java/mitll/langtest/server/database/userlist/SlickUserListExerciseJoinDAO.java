@@ -34,13 +34,13 @@ package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;
 
-public class SlickUserListExerciseJoinDAO
-    extends DAO implements IUserListExerciseJoinDAO {
-//  private static final Logger logger = LogManager.getLogger(SlickUserListExerciseJoinDAO.class);
+public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerciseJoinDAO {
+  //  private static final Logger logger = LogManager.getLogger(SlickUserListExerciseJoinDAO.class);
   private final UserExerciseListJoinDAOWrapper dao;
 
   public SlickUserListExerciseJoinDAO(Database database, DBConnection dbConnection) {
@@ -59,12 +59,14 @@ public class SlickUserListExerciseJoinDAO
 
   /**
    * @param userList
-   * @param uniqueID
+   * @param ignoredUniqueID
    * @param exid
-   * @see mitll.langtest.server.database.custom.UserListManager#addItemToList
+   * @see IUserListManager#addItemToList
    */
   @Override
-  public void add(UserList userList, String uniqueID, int exid) { addPair(userList.getID(),  exid);  }
+  public void add(UserList userList, String ignoredUniqueID, int exid) {
+    addPair(userList.getID(), exid);
+  }
 
   /**
    * Just for copying from h2 initially
@@ -72,10 +74,13 @@ public class SlickUserListExerciseJoinDAO
    * @param userlistid
    * @paramz exerciseID
    */
-  public void addPair(int userlistid, int exid) {  dao.insert(userlistid, exid);  }
+  public void addPair(int userlistid, int exid) {
+    dao.insert(userlistid, exid);
+  }
 
   @Override
-  public void removeListRefs(long listid) {}
+  public void removeListRefs(long listid) {
+  }
 
   @Override
   public boolean remove(long listid, int exid) {

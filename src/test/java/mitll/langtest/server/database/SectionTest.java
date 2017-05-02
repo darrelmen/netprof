@@ -114,7 +114,7 @@ public class SectionTest extends BaseTest {
     toMatch = new ArrayList<>();
     toMatch.add(getUnit2());
     toMatch.add(getChapterA());
-    FilterResponse typeToValues = sectionHelper.getTypeToValues(new FilterRequest(-1, toMatch));
+    FilterResponse typeToValues = sectionHelper.getTypeToValues(new FilterRequest(-1, toMatch,-1));
 
     logger.info("match for " + toMatch + " is " + typeToValues);
   }
