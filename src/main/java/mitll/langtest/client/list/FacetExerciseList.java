@@ -32,9 +32,13 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.ListBox;
-import com.github.gwtbootstrap.client.ui.base.*;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.Tooltip;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.ListItem;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
+import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -167,7 +171,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     style.setMarginTop(5, Style.Unit.PX);
     style.setMarginLeft(5, Style.Unit.PX);
     progressBar.setVisible(false);
-   // return progressBar;
+    // return progressBar;
   }
 
   // private Button prev, next;
@@ -330,7 +334,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           protected void gotRangeChanged(Range newRange) {
-    //        logger.info("makePagingContainer : gotRangeChanged for " + newRange);
+            logger.info("makePagingContainer : gotRangeChanged for " + newRange);
             gotVisibleRangeChanged(getIdsForRange(newRange));
           }
 
@@ -354,6 +358,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * NO-OP on drill view
+   *
    * @param idsForRange
    */
   protected void gotVisibleRangeChanged(Collection<Integer> idsForRange) {
@@ -557,6 +562,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * TODO: reverse this - get the lists first, then build the facets
+   *
    * @param liForDimensionForType
    */
   private void populateListChoices(ListItem liForDimensionForType) {
@@ -630,7 +636,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
-   // logger.info("addChoices " + type + "=" + selectionForType);
+    // logger.info("addChoices " + type + "=" + selectionForType);
     if (selectionForType == null) { // no selection made, show all possible values for type
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
@@ -658,7 +664,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
             String s = idToName.get(i);
             if (s != null) selectionForType = s;
           } catch (NumberFormatException e) {
-            logger.warning("could n't parse "+selectionForType);
+            logger.warning("could n't parse " + selectionForType);
           }
         }
         choices.add(getSelectedAnchor(type, selectionForType));
@@ -921,7 +927,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           public void onSuccess(FilterResponse response) {
             Map<String, Set<MatchInfo>> result = response.getTypeToValues();
-         //   logger.info("getTypeToValues for " + pairs + " got " + result.size());
+            //   logger.info("getTypeToValues for " + pairs + " got " + result.size());
 
             if (response.getUserListID() != -1) {
 
@@ -980,7 +986,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-  //  logger.info("restoreListBoxState " + selectionState);
+    //  logger.info("restoreListBoxState " + selectionState);
     super.restoreListBoxState(selectionState);
     showSelectionState(selectionState);
   }
@@ -1006,7 +1012,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected void loadFirstExercise(String searchIfAny) {
     // logger.info("loadFirstExercise : ---");
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-     // logger.info("loadFirstExercise : current exercises is empty");
+      // logger.info("loadFirstExercise : current exercises is empty");
       //    gotEmptyExerciseList();
     } else {
       super.loadFirstExercise(searchIfAny);
@@ -1033,7 +1039,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
        */
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
-  //      logger.info("restoreListBoxState t->sel    " + selectionState + " typeOrder " + typeOrder);
+        //      logger.info("restoreListBoxState t->sel    " + selectionState + " typeOrder " + typeOrder);
         Map<String, String> newTypeToSelection = getNewTypeToSelection(selectionState, typeOrder);
         if (typeToSelection.equals(newTypeToSelection) && typeOrderContainer.iterator().hasNext()) {
           logger.info("restoreListBoxState state already consistent with " + newTypeToSelection);
@@ -1189,7 +1195,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void getExercises(Collection<Integer> visibleIDs) {
     long then = System.currentTimeMillis();
-      logger.info("getExercises asking for " + visibleIDs.size() + " visible ");
+
+    logger.info("getExercises asking for " + visibleIDs.size() + " visible ");
+
     service.getFullExercises(freqid++, visibleIDs, false,
         new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
           @Override
@@ -1214,21 +1222,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void gotFullExercises(ExerciseListWrapper<CommonExercise> result) {
     if (result.getExercises().isEmpty()) {
       //showEmptyExercise();
-
       hidePrevNext();
     } else {
       if (numToShow == 1) { // hack for avp
         hidePrevNextWidgets();
-        // int widgetCount = innerContainer.getWidgetCount();
-//        if (getCurrentExerciseID() == result.getExercises().iterator().next().getID()) {// && widgetCount == 1) {
-//          logger.info("skip current " + getCurrentExerciseID());
-//        } else {
         showExercises(result.getExercises(), result);
         progressBar.setVisible(false);
-        //    }
       } else {
         showExercises(result.getExercises(), result);
-
       }
     }
   }
@@ -1241,22 +1242,26 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #gotFullExercises
    */
   private void showExercises(Collection<CommonExercise> result, ExerciseListWrapper<CommonExercise> wrapper) {
-    if (numToShow == 1 /*&& result.size() == 1*/) {
+    if (numToShow == 1) { // drill/avp/flashcard
       CommonExercise next = result.iterator().next();
       addExerciseWidget(next, wrapper);
       markCurrentExercise(next.getID());
     } else {
       DivWidget exerciseContainer = new DivWidget();
 //      Panel scrollPanel = new ScrollPanel(exerciseContainer);
-//
 //      DockLayoutPanel layoutPanel = new DockLayoutPanel(Style.Unit.PX);
 //      layoutPanel.add(scrollPanel);
 
       int reqID = wrapper.getReqID();
+      boolean first = true;
       for (CommonExercise exercise : result) {
         if (isStaleReq(wrapper)) {
           logger.info("showExercises stop stale req " + reqID + " vs  current " + (freqid - 1));
           break;
+        }
+        if (first) {
+          markCurrentExercise(exercise.getID());
+          first = false;
         }
         exerciseContainer.add(factory.getExercisePanel(exercise, wrapper));
       }

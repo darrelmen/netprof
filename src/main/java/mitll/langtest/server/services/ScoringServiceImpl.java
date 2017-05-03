@@ -155,7 +155,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         getCachedAudioRef(idToAlignment, audioID, cachedResult);
       }
     }
-    logger.info("getAligments for "+ projid + " and " +audioIDs + " found " +idToAlignment.size());
+    logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
     return idToAlignment;
   }
 
@@ -173,10 +173,21 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     if (byID != null) {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
 
+      boolean contextAudio = byID.isContextAudio();
       if (customOrPredefExercise != null) {
         logger.info("getAlignments decoding " + audioID +
-            (byID.isContextAudio()? " CONTEXT" :"")+
+            (contextAudio ? " CONTEXT" : "") +
             " for exercise " + byID.getExid() + " : '" + customOrPredefExercise.getEnglish() + "' = '" + customOrPredefExercise.getForeignLanguage() + "'");
+      }
+
+      // cover for import bug...
+      if (contextAudio &&
+          customOrPredefExercise != null &&
+          customOrPredefExercise.getDirectlyRelated() != null &&
+          !customOrPredefExercise.getDirectlyRelated().isEmpty()) {
+        customOrPredefExercise = customOrPredefExercise.getDirectlyRelated().iterator().next();
+
+        logger.info("using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
       PretestScore pretestScore =

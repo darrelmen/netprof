@@ -184,8 +184,8 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     Anchor audioWidget = getAudioWidget(scoreAndPath, title);
     DivWidget audioContainer = new DivWidget();
     audioContainer.add(audioWidget);
-    hp.add(audioContainer);
 
+    hp.add(audioContainer);
     hp.add(makeColoredTable(tooltipHelper, scoreAndPath));
 
     IconAnchor download = getDownload(scoreAndPath.getPath(), i, getDateToDisplay(scoreAndPath.getTimestamp()));
@@ -283,7 +283,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
   private Widget makeColoredTable(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
-//    row.addStyleName("inlineFlex");
+    row.addStyleName("inlineFlex");
     row.getElement().setInnerHTML(new WordTable().makeColoredTable(scoreAndPath.getScores()));
     tooltipHelper.createAddTooltip(row, "Score" + (" " + scoreAndPath.getPercentScore() + "%"), Placement.BOTTOM);
     row.addStyleName("leftFiveMargin");

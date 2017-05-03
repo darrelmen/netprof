@@ -17,8 +17,8 @@ public class AlignmentOutput implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getAlignments
    * @param sTypeToEndTimes
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getAlignments
    */
   public AlignmentOutput(Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes) {
     this.sTypeToEndTimes = sTypeToEndTimes;
@@ -26,5 +26,10 @@ public class AlignmentOutput implements IsSerializable {
 
   public Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments() {
     return sTypeToEndTimes;
+  }
+
+  public String toString() {
+    List<TranscriptSegment> transcriptSegments = sTypeToEndTimes.get(NetPronImageType.WORD_TRANSCRIPT);
+    return transcriptSegments.isEmpty() ? " EMPTY " : transcriptSegments.toString();
   }
 }

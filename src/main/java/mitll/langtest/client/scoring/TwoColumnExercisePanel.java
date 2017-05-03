@@ -2,7 +2,6 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -48,7 +47,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final String EMAIL = "Email Item";
   private static final Set<String> toIgnore = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
 
-  public static final int CONTEXT_INDENT = 56;//40;
+  static final int CONTEXT_INDENT = 56;//40;
 
   private final List<CorrectAndScore> correctAndScores;
   private final T exercise;
@@ -64,9 +63,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>>> idToTypeToSegmentToWidget = new HashMap<>();
   private List<IHighlightSegment> altflClickables;
   private List<IHighlightSegment> flclickables;
-  private List<IHighlightSegment> contextClickables;
+  private List<IHighlightSegment> contextClickables, altContextClickables;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -157,7 +156,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  private void registerSegments(int refID, AudioAttribute currentAudioAttr, int contextRefID, AudioAttribute currentAudioAttr1) {
+  private void registerSegments(int refID,
+                                AudioAttribute currentAudioAttr,
+                                int contextRefID,
+                                AudioAttribute currentAudioAttr1) {
     if (refID != -1) {
       audioChanged(refID, currentAudioAttr.getDurationInMillis());
     }
@@ -247,15 +249,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-/*
-  private void matchSegmentToWidget(Map<Integer, AlignmentOutput> result) {
-    for (Map.Entry<Integer, AlignmentOutput> pair : result.entrySet()) {
-      Integer audioID = pair.getKey();
-      matchSegmentToWidgetForAudio(audioID, pair.getValue());
-    }
-  }
-*/
-
   /**
    * TODO : what to do about chinese?
    *
@@ -319,11 +312,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       AllHighlight allHighlight = new AllHighlight(bulk);
       bulk.add(clickable);
       //   segmentToWidget.put(seg, allHighlight);
-      while (allHighlight.getLength()<segmentLength && iterator.hasNext()) {
+      while (allHighlight.getLength() < segmentLength && iterator.hasNext()) {
         clickable = iterator.next();
 
         while (!clickable.isClickable() && iterator.hasNext()) {
-         // logger.info("2 skip " + clickable);
+          // logger.info("2 skip " + clickable);
           clickable = iterator.next();
         }
 
@@ -334,7 +327,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           logger.info("matchSegmentToWidgetForAudio Adding " + clickable + " to " + allHighlight);
         }*/
         bulk.add(clickable);
-        logger.info("matchSegmentToWidgetForAudio compare : segment length " + segmentLength + " vs to highlight length =" + allHighlight.getLength());
+        if (DEBUG)
+          logger.info("matchSegmentToWidgetForAudio compare : segment length " + segmentLength + " vs to highlight length =" + allHighlight.getLength());
       }
       if (DEBUG) {
         logger.info("Finally highlight is " + allHighlight);
@@ -346,7 +340,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       return clickable;
     }
   }
-
 
   private boolean shouldIgnore(TranscriptSegment seg) {
     return toIgnore.contains(seg.getEvent());
@@ -580,7 +573,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private Widget getAltContext(String flToHighlight, String altFL) {
     Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
-        true, false, false);
+        true, false, false, altContextClickables = new ArrayList<>());
 
     CommentBox commentBox = getCommentBox(true);
     return commentBox
@@ -725,7 +718,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.add(getContextPlay(contextExercise));
 
       Panel contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
-          true, false, false);
+          true, false, false, contextClickables = new ArrayList<>());
 
       CommentBox commentBox = getCommentBox(true);
       Widget commentRow =
@@ -770,11 +763,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void contextAudioChanged(int id, long duration) {
     AlignmentOutput alignmentOutput = alignments.get(id);
     if (alignmentOutput != null) {
-      if (DEBUG || true) logger.info("audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id );
+      if (DEBUG || true) {
+        logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
+            " alignment " +alignmentOutput);
+      }
       if (contextClickables == null) {
         logger.warning("huh? context not set for " + id);
-      }
-      else {
+      } else {
         matchSegmentsToClickables(id, duration, alignmentOutput, idToTypeToSegmentToWidget.get(id), contextClickables, contextPlay);
       }
     }
@@ -783,7 +778,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Widget addContextTranslation(AnnotationExercise e, String contextTranslation) {
     if (!contextTranslation.isEmpty()) {
       return getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, contextTranslation,
-          false, false, false, showInitially,   new ArrayList<>());
+          false, false, false, showInitially, new ArrayList<>());
     } else {
       return null;
     }
@@ -822,8 +817,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @see #getEntry
    */
   private Widget getEntry(final String field,
-                          String value, ExerciseAnnotation annotation, boolean isFL, boolean isTranslit,
-                          boolean isMeaning, boolean showInitially, List<IHighlightSegment> clickables) {
+                          String value,
+                          ExerciseAnnotation annotation,
+                          boolean isFL,
+                          boolean isTranslit,
+                          boolean isMeaning,
+                          boolean showInitially,
+                          List<IHighlightSegment> clickables) {
     Panel contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning, clickables);
     if (!isFL) contentWidget.addStyleName("topFiveMargin");
     return getCommentBox(true).getEntry(field, contentWidget, annotation, showInitially);

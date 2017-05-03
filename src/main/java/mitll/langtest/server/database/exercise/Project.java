@@ -277,6 +277,52 @@ public class Project implements PronunciationLookup {
    */
   public CommonExercise getExerciseBySearch(String prefix) {
     List<CommonExercise> exercises1 = fullTrie.getExercises(prefix);
+    return getMatchEither(prefix, exercises1);
+  }
+
+  public CommonExercise getExerciseBySearchBoth(String english, String fl) {
+//    logger.info("getExerciseBySearchBoth looking for '" + english +
+//        "' and '" + fl +
+//        "' found ");
+    List<CommonExercise> exercisesInVocab = fullTrie.getExercises(english);
+    CommonExercise exercise = getFirstMatchingLength(english, fl, exercisesInVocab);
+
+    logger.info("getExerciseBySearchBoth looking for '" + english +
+        "' and '" + fl +
+        "' found " + exercise);
+
+    if (exercise == null) {
+      List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(english);
+      exercise = getFirstMatchingLength(english, fl, fullContextTrieExercises);
+      logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " found " + exercise);
+    }
+
+    if (exercise == null) {
+      exercise = getMatchEither(english, fl, exercisesInVocab);
+      logger.info("\tgetExerciseBySearchBoth looking for '" + english + " found " + exercise);
+    }
+
+    if (exercise == null) {
+      List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(english);
+      exercise = getMatchEither(english, fl, fullContextTrieExercises);
+      logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " or " +fl+
+          "  found " + exercise);
+    }
+
+    return exercise;
+  }
+
+  private CommonExercise getFirstMatchingLength(String english, String fl, List<CommonExercise> exercises1) {
+    Optional<CommonExercise> first = exercises1
+        .stream()
+        .filter(p ->
+            p.getForeignLanguage().length() == fl.length() &&
+                p.getEnglish().equalsIgnoreCase(english))
+        .findFirst();
+    return first.orElse(null);
+  }
+
+  private CommonExercise getMatchEither(String prefix, List<CommonExercise> exercises1) {
     Optional<CommonExercise> first = exercises1
         .stream()
         .filter(p ->
@@ -286,29 +332,14 @@ public class Project implements PronunciationLookup {
     return first.orElse(null);
   }
 
-  public CommonExercise getExerciseBySearchBoth(String english, String fl) {
-//    logger.info("getExerciseBySearchBoth looking for '" + english +
-//        "' and '" + fl +
-//        "' found ");
-    List<CommonExercise> exercises1 = fullTrie.getExercises(english);
+  private CommonExercise getMatchEither(String prefix, String fl, List<CommonExercise> exercises1) {
     Optional<CommonExercise> first = exercises1
         .stream()
         .filter(p ->
-            p.getForeignLanguage().length() == fl.length() &&
-                p.getEnglish().equalsIgnoreCase(english))
+            p.getForeignLanguage().equalsIgnoreCase(fl) ||
+                p.getEnglish().equalsIgnoreCase(prefix))
         .findFirst();
-    CommonExercise exercise = first.orElse(null);
-
-    logger.info("getExerciseBySearchBoth looking for '" + english +
-        "' and '" + fl +
-        "' found " + exercise);
-
-    if (exercise == null) {
-      exercise = getExerciseBySearch(english);
-      logger.info("getExerciseBySearchBoth looking for '" + english + " found " + exercise);
-    }
-
-    return exercise;
+    return first.orElse(null);
   }
 
 /*  public void setPhoneTrie(ExerciseTrie<CommonExercise> phoneTrie) {

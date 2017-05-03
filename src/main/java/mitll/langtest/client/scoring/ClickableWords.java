@@ -93,6 +93,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param isFL
    * @param isTranslit
    * @param isMeaning
+   * @param clickables
    * @return
    * @see TwoColumnExercisePanel#getContext
    */
@@ -100,7 +101,8 @@ public class ClickableWords<T extends CommonExercise> {
                                        String highlight,
                                        boolean isFL,
                                        boolean isTranslit,
-                                       boolean isMeaning) {
+                                       boolean isMeaning,
+                                       List<IHighlightSegment> clickables) {
     DivWidget horizontal = new DivWidget();
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
@@ -120,7 +122,9 @@ public class ClickableWords<T extends CommonExercise> {
     //  int match = 0;
     for (String token : tokens) {
       boolean isMatch = toFind != null && isMatch(token, toFind);
-      horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch));
+      HighlightSegment clickable = makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch);
+      clickables.add(clickable);
+      horizontal.add(clickable);
       //  match++;
       if (isMatch) {
         //  logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "' at " + match);

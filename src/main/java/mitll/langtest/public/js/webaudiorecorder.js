@@ -56,11 +56,11 @@ function startUserMedia(stream) {
 // if the user goes to another tab or changes focus, stop recording.
 function onVisibilityChange() {
     if (document.webkitHidden) {
-      //  __log('webkitHidden');
+        //  __log('webkitHidden');
 
         if (rememberedInput) {
             recorder && recorder.stop();
-    //        __log('Stopped recording.');
+            //        __log('Stopped recording.');
         }
     } else {
 //        __log('webkitRevealed');
@@ -72,7 +72,7 @@ var start = new Date().getTime();
 function startRecording() {
     recorder.clear();
     recorder && recorder.record();
-  //  start = new Date().getTime();
+    //  start = new Date().getTime();
 
     __log('Recording...');
 }
@@ -81,26 +81,26 @@ function startRecording() {
 function stopRecording() {
     recorder && recorder.stop();
     __log('Stopped recording.');
- //   var end = new Date().getTime();
-  //  __log("duration " + (end-start));
+    //   var end = new Date().getTime();
+    //  __log("duration " + (end-start));
     // get WAV from audio data blob
     grabWav();
 }
 
-function uint6ToB64 (nUint6) {
+function uint6ToB64(nUint6) {
 
     return nUint6 < 26 ?
         nUint6 + 65
         : nUint6 < 52 ?
-        nUint6 + 71
-        : nUint6 < 62 ?
-        nUint6 - 4
-        : nUint6 === 62 ?
-        43
-        : nUint6 === 63 ?
-        47
-        :
-        65;
+            nUint6 + 71
+            : nUint6 < 62 ?
+                nUint6 - 4
+                : nUint6 === 62 ?
+                    43
+                    : nUint6 === 63 ?
+                        47
+                        :
+                        65;
 
 }
 
@@ -109,7 +109,9 @@ function bytesToBase64(aBytes) {
 
     for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
         nMod3 = nIdx % 3;
-        if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
+        if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) {
+            sB64Enc += "\r\n";
+        }
         var aByte = aBytes[nIdx];
         nUint24 |= aByte << (16 >>> nMod3 & 24);
         if (nMod3 === 2 || aBytes.length - nIdx === 1) {
@@ -134,7 +136,7 @@ function grabWav() {
     recorder && recorder.exportMonoWAV(function (blob) {
         try {
             var reader = new FileReader();
-      //      __log("grabWav");
+            //      __log("grabWav");
 
             var arrayBuffer;
             reader.onloadend = function () {
@@ -142,7 +144,7 @@ function grabWav() {
 
                 var myArray = new Uint8Array(arrayBuffer);
 
-        //        __log("grabWav onloadend " + myArray.length);
+                //        __log("grabWav onloadend " + myArray.length);
 
                 var bytes = bytesToBase64(myArray);
                 getBase64(bytes);
@@ -153,9 +155,8 @@ function grabWav() {
             __log('Bad call to blob');
 
             var vDebug = "";
-            for (var prop in e)
-            {
-                vDebug += "property: "+ prop+ " value: ["+ e[prop]+ "]\n";
+            for (var prop in e) {
+                vDebug += "property: " + prop + " value: [" + e[prop] + "]\n";
             }
             vDebug += "toString(): " + " value: [" + e.toString() + "]";
             __log(vDebug);
@@ -171,24 +172,25 @@ function initWebAudio() {
         // webkit shim
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         navigator.getMedia = ( navigator.getUserMedia ||
-            navigator.webkitGetUserMedia ||
-            navigator.mozGetUserMedia ||
-            navigator.msGetUserMedia);
-       // window.URL = window.URL || window.webkitURL;
-       // __log('Audio context is something...');
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia);
+        // window.URL = window.URL || window.webkitURL;
+        // __log('Audio context is something...');
         //console.info("getting audio context...");
 
         //  __log('Audio context is '+window.AudioContext);
 
         audio_context = new AudioContext;
         gotAudioContext = true;
-        __log('initWebAudio Audio context set up.');
+        //   __log('initWebAudio Audio context set up.');
 
-        __log('initWebAudio sample rate = ' +audio_context.sampleRate);
+//        __log('initWebAudio sample rate = ' +audio_context.sampleRate);
 
         //console.info('Audio context set up.');
 
-        __log('initWebAudio navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
+        __log('initWebAudio sample rate = ' + audio_context.sampleRate +
+            ' navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
     } catch (e) {
         __log('initWebAudio No web audio support in this browser!');
         //console.error(e);
@@ -198,8 +200,7 @@ function initWebAudio() {
     if (gotAudioContext) {
         try {
             if (navigator.getMedia) {
-                __log('initWebAudio getMedia ...');
-
+                //         __log('initWebAudio getMedia ...');
                 navigator.getMedia({audio: true}, startUserMedia, function (e) {
                     __log('initWebAudio No live audio input: ' + e);
                     if (e.name == "PermissionDeniedError") {
@@ -211,12 +212,11 @@ function initWebAudio() {
             }
             else {
                 __log('initWebAudio getMedia null - no mic.');
-
                 webAudioMicNotAvailable();
             }
         } catch (e) {
             __log('initWebAudio No navigator.getMedia in this browser!');
-           // console.error(e);
+            // console.error(e);
             webAudioMicNotAvailable();
         }
     }
