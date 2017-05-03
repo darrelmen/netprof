@@ -2,6 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
@@ -26,31 +27,26 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 public class NewContentChooser implements INavigation {
   private final Logger logger = Logger.getLogger("NewContentChooser");
 
-//  public static final String LISTS = "Lists";
-//  public static final String PROGRESS = "Progress";
-//  public static final String LEARN = "Learn";
-//  public static final String DRILL = "Drill";//Audio Vocabulary Practice";
-//
-//  public static final String RECORD_AUDIO = "Items";
-//  public static final String RECORD_EXAMPLE = "Context";
-//
-//  public static final String MARK_DEFECTS = "Mark Defects";
-//  public static final String FIX = "Fix";
-
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
   private final ExerciseListContent practiceHelper;
   private final ExerciseController controller;
   private final ListManager listManager;
+  private final IBanner banner;
 
   private VIEWS currentSection = VIEWS.NONE;
 
-  public NewContentChooser(ExerciseController controller) {
+  /**
+   * @see InitialUI#makeNavigation
+   * @param controller
+   */
+  public NewContentChooser(ExerciseController controller, IBanner banner) {
     NewLearnHelper newLearnHelper = new NewLearnHelper(controller);
     learnHelper = newLearnHelper;
     practiceHelper = new PracticeHelper(controller);
     this.controller = controller;
     this.listManager = new ListManager(controller, null, newLearnHelper);
+    this.banner = banner;
   }
 
   @Override
@@ -60,9 +56,11 @@ public class NewContentChooser implements INavigation {
     // History.fireCurrentHistoryState();
   }
 
+/*
   private boolean hasProjectChoice() {
     return controller.getProjectStartupInfo() != null;
   }
+*/
 
   @Override
   public void showView(VIEWS view) {
@@ -123,37 +121,14 @@ public class NewContentChooser implements INavigation {
     }
   }
 
-//  @Override
-//  public void showLearn() {
-//    if (currentSection.equals(LEARN)) return;
-//    clear();
-//    learnHelper.showContent(divWidget, LEARN);
-//    currentSection = LEARN;
-//  }
-/*
-  @Override
-  public void showDrill() {
-    if (currentSection.equals(DRILL)) return;
-
-    logger.info("showDrill ------ ");
-    clear();
-    practiceHelper.showContent(divWidget, DRILL);
-    practiceHelper.hideList();
-    currentSection = DRILL;
-
-  }*/
-
-  //  @Override
   public void showProgress() {
-//    if (currentSection.equals(PROGRESS)) return;
-//    clear();
     boolean hasTeacher = controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM);
 
-    logger.info("has teacher " + hasTeacher);
-    logger.info("controller " + controller);
+//    logger.info("has teacher " + hasTeacher);
+ //   logger.info("controller " + controller);
 
     ShowTab showTab = getShowTab();
-    logger.info("showTab " + showTab);
+ //   logger.info("showTab " + showTab);
 
     DivWidget w = hasTeacher ?
         new StudentAnalysis(controller, showTab) :
@@ -163,46 +138,11 @@ public class NewContentChooser implements INavigation {
     currentSection = PROGRESS;
   }
 
-  public void showLists() {
+/*  public void showLists() {
     if (currentSection.equals(LISTS)) return;
     clear();
     divWidget.add(listManager.showLists());
     currentSection = LISTS;
-  }
-
-/*  public void showRecord() {
-    if (currentSection.equals(RECORD_AUDIO)) {
-      logger.info("showRecord  - skip current");
-      return;
-    }
-    clear();
-
-    RecorderNPFHelper recorderNPFHelper = new RecorderNPFHelper(controller, true, null);
-    logger.info("showRecord  - recorderNPFHelper");
-    recorderNPFHelper.showNPF(divWidget, RECORD_AUDIO);
-    currentSection = RECORD_AUDIO;
-  }*/
-
-//  public void showRecordExample() {
-//    if (currentSection.equals(RECORD_EXAMPLE)) return;
-//    clear();
-//
-//    RecorderNPFHelper recorderNPFHelper = new RecorderNPFHelper(controller, false, null);
-//    recorderNPFHelper.showNPF(divWidget, RECORD_EXAMPLE);
-//    currentSection = RECORD_EXAMPLE;
-//  }
-
-
-/*  public void showMarkDefects() {
-    if (currentSection.equals(MARK_DEFECTS)) return;
-    clear();
-
-    //RecorderNPFHelper recorderNPFHelper = new RecorderNPFHelper(controller, false, null);
-
-    MarkDefectsChapterNPFHelper markDefectsHelper = new MarkDefectsChapterNPFHelper(controller, null);
-    markDefectsHelper.showNPF(divWidget, MARK_DEFECTS);
-
-    currentSection = MARK_DEFECTS;
   }*/
 
   private void clear() {
@@ -212,7 +152,7 @@ public class NewContentChooser implements INavigation {
   @NotNull
   private ShowTab getShowTab() {
     return exid -> {
-      showView(LEARN);
+      banner.showLearn();
       learnHelper.loadExercise(exid);
     };
   }

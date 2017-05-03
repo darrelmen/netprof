@@ -84,7 +84,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   private Panel recoOutput;
 
   static final int CORRECT_DELAY = 600;
-  private static final int DELAY_MILLIS_LONG = 3000;
+  protected static final int DELAY_MILLIS_LONG = 3000;
   // private static final int LONG_DELAY_MILLIS = 3500;
   public static final int HIDE_DELAY = 2500;
   static final int DELAY_MILLIS = 100;

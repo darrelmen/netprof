@@ -36,6 +36,8 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.exercise.Shell;
 
+import java.util.logging.Logger;
+
 /**
  * Remember the state of the flashcards in the localStorage browser cache.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -44,6 +46,8 @@ import mitll.langtest.shared.exercise.Shell;
  * @since 7/8/14.
  */
 class StickyState {
+  private final Logger logger = Logger.getLogger("StickyState");
+
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
 
@@ -52,29 +56,32 @@ class StickyState {
   private final KeyStorage storage;
 
   /**
-   * @see StatsFlashcardFactory
    * @param storage
+   * @see StatsFlashcardFactory
    */
-  StickyState(KeyStorage storage) { this.storage = storage; }
+  StickyState(KeyStorage storage) {
+    this.storage = storage;
+  }
 
   /**
-   *
    * @param e
    * @see ExercisePanelFactory#getExercisePanel(Shell, mitll.langtest.shared.exercise.ExerciseListWrapper)
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   void storeCurrent(Shell e) {
- //   System.out.println("StickyState.storeCurrent store current " + e.getOldID());
-    storage.storeValue(CURRENT_EXERCISE, ""+e.getID());
+    logger.info("StickyState.storeCurrent store current " + e.getID());
+    storage.storeValue(CURRENT_EXERCISE, "" + e.getID());
   }
 
   int getCurrentExerciseID() {
     String value = storage.getValue(CURRENT_EXERCISE);
-  //  System.out.println("StickyState.getCurrentExerciseID '" + value +"'");
-    return Integer.parseInt(value);
+    logger.info("StickyState.getCurrentExerciseID '" + value + "'");
+    return value.isEmpty() ? -1 : Integer.parseInt(value);
   }
 
-  void clearCurrent() { storage.removeValue(CURRENT_EXERCISE); }
+  void clearCurrent() {
+    storage.removeValue(CURRENT_EXERCISE);
+  }
 
   String getIncorrect() {
     return storage.getValue(INCORRECT);

@@ -330,8 +330,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           protected void gotRangeChanged(Range newRange) {
-            //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
-            askServerForExercises(-1, getIdsForRange(newRange));
+    //        logger.info("makePagingContainer : gotRangeChanged for " + newRange);
+            gotVisibleRangeChanged(getIdsForRange(newRange));
           }
 
           @Override
@@ -350,6 +350,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           }
         };
     return pagingContainer;
+  }
+
+  /**
+   * NO-OP on drill view
+   * @param idsForRange
+   */
+  protected void gotVisibleRangeChanged(Collection<Integer> idsForRange) {
+    askServerForExercises(-1, idsForRange);
   }
 
   /**
@@ -622,7 +630,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
-    logger.info("addChoices " + type + "=" + selectionForType);
+   // logger.info("addChoices " + type + "=" + selectionForType);
     if (selectionForType == null) { // no selection made, show all possible values for type
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
@@ -913,7 +921,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           public void onSuccess(FilterResponse response) {
             Map<String, Set<MatchInfo>> result = response.getTypeToValues();
-            logger.info("getTypeToValues for " + pairs + " got " + result.size());
+         //   logger.info("getTypeToValues for " + pairs + " got " + result.size());
 
             if (response.getUserListID() != -1) {
 
@@ -972,7 +980,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-    logger.info("restoreListBoxState " + selectionState);
+  //  logger.info("restoreListBoxState " + selectionState);
     super.restoreListBoxState(selectionState);
     showSelectionState(selectionState);
   }
@@ -1097,6 +1105,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
+    logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
       logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();
@@ -1180,7 +1189,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void getExercises(Collection<Integer> visibleIDs) {
     long then = System.currentTimeMillis();
-    //  logger.info("getExercises asking for " + visibleIDs.size());
+      logger.info("getExercises asking for " + visibleIDs.size() + " visible ");
     service.getFullExercises(freqid++, visibleIDs, false,
         new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
           @Override

@@ -64,7 +64,7 @@ public class StudentAnalysis extends DivWidget {
   public StudentAnalysis(final ExerciseController controller,
                          final ShowTab showTab) {
     String appTitle = controller.getProps().getAppTitle();
-    logger.info("StudentAnalysis got here " + appTitle);
+    //logger.info("StudentAnalysis got here " + appTitle);
 
     getElement().setId("StudentAnalysis");
 

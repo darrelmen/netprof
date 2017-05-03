@@ -165,9 +165,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     currentExercise = e;
     sticky.storeCurrent(e);
     boolean recordingEnabled = controller.isRecordingEnabled();
-    if (!recordingEnabled) {
-      logger.warning("Recording is *not* enabled!");
-    }
+//    if (!recordingEnabled) {
+//      logger.warning("Recording is *not* enabled!");
+//    }
     boolean hasModel = controller.getProjectStartupInfo().isHasModel();
     boolean showRecordingFlashcard = !hasModel || !recordingEnabled;
 

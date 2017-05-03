@@ -67,6 +67,7 @@ import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.flashcard.BootstrapExercisePanel.DELAY_MILLIS_LONG;
 import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
 
 /**
@@ -119,6 +120,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   final ListInterface exerciseList;
   private final DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
+
+  /**
+   * @see #setAutoPlay
+   */
   private Button autoPlay;
 
   /**
@@ -236,6 +241,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   /**
+   * TODO: Needed???
    * @return
    * @see BootstrapExercisePanel#playRefAndGoToNext
    * @see #maybePlayRef
@@ -478,43 +484,45 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
         logger.info("\tplayRefAndGoToNext tab is not visible");
       }
     } else {
-      getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
-        @Override
-        public void songStarted() {
-          //Widget widget = isSiteEnglish() ? english : foreign;
-          isSongPlaying = true;
+      if (controlState.isAudioOn()) {
+        playAudioAndAdvance(path, delayMillis, useCheck);
+      }
+      else {
+        loadNextOnTimer(2000);
+      }
+    }
+  }
 
-          addPlayingHighlight(foreign);//isSiteEnglish() ? english : foreign);
-          if (endListener != null) {
-            // logger.info("tell endlistener song started for " + path);
-            endListener.songStarted();
-          }
+  private void playAudioAndAdvance(String path, int delayMillis, boolean useCheck) {
+    getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
+      @Override
+      public void songStarted() {
+        isSongPlaying = true;
+        addPlayingHighlight(foreign);
+        if (endListener != null) {
+          endListener.songStarted();
         }
+      }
 
-        @Override
-        public void songEnded() {
-          isSongPlaying = false;
+      @Override
+      public void songEnded() {
+        isSongPlaying = false;
 
-          if (endListener != null) endListener.songEnded();
-          cancelTimer();
-          if (isTabVisible()) {
-            //logger.info("songEnded : loadNextOnTimer " + delayMillis + " for " + path);
-            if (delayMillis > 0) {
-              if (useCheck) {
-                checkThenLoadNextOnTimer(delayMillis);
-              } else {
-                loadNextOnTimer(delayMillis);
-              }
+        if (endListener != null) endListener.songEnded();
+        cancelTimer();
+        if (isTabVisible()) {
+          if (delayMillis > 0) {
+            if (useCheck) {
+              checkThenLoadNextOnTimer(delayMillis);
             } else {
-              loadNext();
+              loadNextOnTimer(delayMillis);
             }
           } else {
-            //        logger.info("songEnded : tab not visible! ");
-            //setAutoPlay(false);
+            loadNext();
           }
         }
-      });
-    }
+      }
+    });
   }
 
   private boolean isValid(String path) {
@@ -829,6 +837,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       }
     });
     onButton.setActive(controlState.isAudioOn());
+    logger.info("audio on button " + onButton.isActive());
     return onButton;
   }
 

@@ -112,6 +112,10 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
             }
           }
 
+          protected void gotVisibleRangeChanged(Collection<Integer> idsForRange) {
+           // askServerForExercises(-1, idsForRange);
+          }
+
           @Override
           protected void onLastItem() {
             statsFlashcardFactory.resetStorage();
@@ -134,7 +138,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                                                   String prefix,
                                                   int exerciseID, boolean onlyWithAudioAnno,
                                                   boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
-            logger.info("getMyListLayout : got loadExercisesUsingPrefix " +prefix);
+//            logger.info("getMyListLayout : got loadExercisesUsingPrefix " +prefix);
             super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             statsFlashcardFactory.setSelection(typeToSection);
           }
@@ -143,7 +147,6 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
       @Override
       protected void styleBottomRow(Panel bottomRow) {
-        //    logger.info("-----\n\n Adding style to " + bottomRow.getElement().getExID());
         bottomRow.addStyleName("centerPractice");
         outerBottomRow = bottomRow;
       }

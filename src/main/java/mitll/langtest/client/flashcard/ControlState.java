@@ -160,9 +160,9 @@ public class ControlState {
   }
 
   /**
+   * @return
    * @see BootstrapExercisePanel#checkThenLoadNextOnTimer
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#
-   * @return
    */
   boolean isAutoPlay() {
     return autoPlay;

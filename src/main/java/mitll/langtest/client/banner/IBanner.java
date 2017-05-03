@@ -35,4 +35,6 @@ public interface IBanner {
   void onResize();
 
   void checkProjectSelected();
+
+  void showLearn();
 }

@@ -40,9 +40,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
 
   private static final String LEARN = "Learn";
-  private static final String DRILL = "Drill";
-  private static final String PROGRESS = "Progress";
-  private static final String LISTS = "Lists";
+//  private static final String DRILL = "Drill";
+//  private static final String PROGRESS = "Progress";
+//  private static final String LISTS = "Lists";
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
@@ -152,6 +152,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   @NotNull
   private Brand getBrand() {
     Brand netprof = new Brand("netprof");
+    netprof.addStyleName("topFiveMargin");
     addHomeClick(netprof);
     netprof.addStyleName("handCursor");
     return netprof;
@@ -160,7 +161,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private void styleBreadcrumbs(Breadcrumbs breadcrumbs) {
     breadcrumbs.addStyleName("floatLeft");
     Style style = breadcrumbs.getElement().getStyle();
-    style.setMarginTop(5, Style.Unit.PX);
+    style.setMarginTop(7, Style.Unit.PX);
     breadcrumbs.addStyleName("rightTwentyMargin");
   }
 
@@ -207,12 +208,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     userDrop = new Dropdown(userManager.getUserID());
     userDrop.setIcon(IconType.USER);
     rnav.add(userDrop);
-
-//    for (LinkAndTitle linkAndTitle : userMenu.getUserMenuChoices()) {  userDrop.add(linkAndTitle.getLink());    }
-
     userMenu.getUserMenuChoices().forEach(lt -> userDrop.add(lt.getLink()));
   }
-
 
   private Label subtitle;
 
@@ -286,11 +283,19 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
       logger.info("getChoice got click on " + instanceName + " = " + historyToken);
-      showSection(instanceName);
-      showActive(learn);
+      gotClickOnChoice(instanceName, learn);
       // setHistoryItem(historyToken);
     });
     return learn;
+  }
+
+  private void gotClickOnChoice(String instanceName, NavLink learn) {
+    showSection(instanceName);
+    showActive(learn);
+  }
+
+  public void showLearn() {
+    gotClickOnChoice(LEARN, firstChoice);
   }
 
 /*  private void setHistoryItem(String historyToken) {

@@ -196,9 +196,11 @@ public class InitialUI implements UILifecycle {
   private Widget makeHeaderRow() {
     return banner.getBanner();
   }
+/*
   private Widget makeHeaderRow2() {
     return banner.getBanner2();
   }
+*/
 
   /**
    * @return
@@ -455,8 +457,9 @@ public class InitialUI implements UILifecycle {
 
   private void makeNavigation() {
     // navigation = new Navigation(service, userManager, controller, userFeedback, lifecycleSupport);
-    navigation = new NewContentChooser(controller);
+    navigation = new NewContentChooser(controller,banner);
     banner.setNavigation(navigation);
+
   }
 
   /**

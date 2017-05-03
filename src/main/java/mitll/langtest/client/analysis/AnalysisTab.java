@@ -51,7 +51,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
 
@@ -115,7 +114,9 @@ public class AnalysisTab extends DivWidget {
     add(timeControls);
     add(analysisPlot);
 
-    Panel bottom = new HorizontalPanel();
+   // Panel bottom = new HorizontalPanel();
+    DivWidget bottom = new DivWidget();
+    bottom.addStyleName("inlineFlex");
     bottom.getElement().setId("bottom");
     bottom.addStyleName("floatLeftAndClear");
 
@@ -314,6 +315,7 @@ public class AnalysisTab extends DivWidget {
     soundsDiv.getElement().getStyle().setProperty("minHeight", 325, Style.Unit.PX);
     soundsDiv.addStyleName("cardBorderShadow");
     soundsDiv.addStyleName("floatRight");
+    soundsDiv.addStyleName("inlineFlex");
     soundsDiv.getElement().getStyle().setMargin(10, Style.Unit.PX);
     return soundsDiv;
   }
@@ -337,7 +339,7 @@ public class AnalysisTab extends DivWidget {
     final PhoneExampleContainer exampleContainer =
         new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
     final PhonePlot phonePlot = new PhonePlot();
-    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, isNarrow);
+    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot);
     analysisPlot.addListener(phoneContainer);
 
     service.getPhoneScores(userid, minRecordings, new AsyncCallback<PhoneReport>() {

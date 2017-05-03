@@ -580,7 +580,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     if (hasExercise(id)) {
-      // logger.info("checkAndAskServer for " + id);
+       logger.info("checkAndAskServer for " + id);
       askServerForExercise(id);
     } else {
       logger.warning("checkAndAskServer : skipping request for " + id);

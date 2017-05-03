@@ -72,22 +72,23 @@ import java.util.logging.Logger;
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
+  public static final int PHONE_CONTAINER_MIN_WIDTH = 225;
   private static final int MAX_EXAMPLES = 25;
 
   private static final int TABLE_WIDTH = 295;
   private static final int SCORE_COL_WIDTH = 60;
   private static final String SOUND = "Sound";
-  private static final String SCORE = "Initial";
+//  private static final String SCORE = "Initial";
   private static final String COUNT_COL_HEADER = "#";
-  private static final String CURR = "Curr.";
-  private static final String DIFF_COL_HEADER = "+/-";
+  private static final String CURR = "Avg. Score";//"Curr.";
+  //private static final String DIFF_COL_HEADER = "+/-";
   private static final int COUNT_COL_WIDTH = 45;
   private static final String TOOLTIP = "Click to see examples and scores over time";//"Click on an item to review.";
   private static final int SOUND_WIDTH = 75;
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
 
-  private final boolean isNarrow;
+ // private final boolean isNarrow;
   private long from;
   private long to;
   //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
@@ -97,15 +98,14 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @param controller
    * @param exampleContainer
    * @param phonePlot
-   * @param isNarrow
-   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
+   * @see AnalysisTab#getPhoneReport
    */
   public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,
-                        PhonePlot phonePlot, boolean isNarrow) {
+                        PhonePlot phonePlot) {
     super(controller);
     this.exampleContainer = exampleContainer;
     this.phonePlot = phonePlot;
-    this.isNarrow = isNarrow;
+   // this.isNarrow = isNarrow;
   }
 
   @Override
@@ -140,7 +140,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   /**
    * @param from
    * @param to
-   * @see AnalysisPlot#changed(long, long)
+   * @see AnalysisPlot#changed
    */
   @Override
   public void timeChanged(long from, long to) {
@@ -207,7 +207,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     }
 
     Collections.sort(phoneAndStatses);
-
 //    logger.info("getPhoneStatuses returned " + phoneAndStatses.size());
   }
 
@@ -271,7 +270,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @return
    * @see #clickOnPhone(String)
    */
-  private List<WordAndScore> getFilteredWords(Collection<WordAndScore> orig, long first, long last) {
+/*  private List<WordAndScore> getFilteredWords(Collection<WordAndScore> orig, long first, long last) {
     if (first > last) {
       // throw new IllegalArgumentException("getFilteredWords " + orig.size() + " first after last?");
       logger.warning("getFilteredWords " + orig.size() + " first after last?");
@@ -290,7 +289,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       // }
     }
     return filtered;
-  }
+  }*/
 
   /**
    * @param sortedHistory
@@ -299,6 +298,10 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    */
   private Panel getTableWithPager(List<PhoneAndStats> sortedHistory) {
     Panel tableWithPager = getTableWithPager(new ListOptions());
+   // table.setTableLayoutFixed(false);
+    table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH +
+        "px");
+
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
     tableWithPager.addStyleName("leftTenMargin");
@@ -369,7 +372,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return columnSortHandler;
   }
 
-  private ColumnSortEvent.ListHandler<PhoneAndStats> getScoreSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
+  /*private ColumnSortEvent.ListHandler<PhoneAndStats> getScoreSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
                                                                     List<PhoneAndStats> dataList) {
     ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
     columnSortHandler.setComparator(scoreCol,
@@ -395,7 +398,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
           }
         });
     return columnSortHandler;
-  }
+  }*/
 
   private int compIntThenPhone(PhoneAndStats o1, PhoneAndStats o2, int a1, int a2) {
     int i = Integer.valueOf(a1).compareTo(a2);
@@ -466,7 +469,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return columnSortHandler;
   }
 
-  private ColumnSortEvent.ListHandler<PhoneAndStats> getDiffSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
+  /*private ColumnSortEvent.ListHandler<PhoneAndStats> getDiffSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
                                                                    List<PhoneAndStats> dataList) {
     ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
     columnSortHandler.setComparator(scoreCol,
@@ -494,6 +497,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         });
     return columnSortHandler;
   }
+*/
 
   private void addReview() {
     Column<PhoneAndStats, SafeHtml> itemCol = getItemColumn();
@@ -520,11 +524,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     table.addColumnSortHandler(countSorter);
     countColumn.setSortable(true);
 
+/*
     Column<PhoneAndStats, SafeHtml> scoreColumn = getScoreColumn();
     table.setColumnWidth(scoreColumn, SCORE_COL_WIDTH, Style.Unit.PX);
     table.addColumn(scoreColumn, SCORE);
     scoreColumn.setSortable(true);
     table.addColumnSortHandler(getScoreSorter(scoreColumn, getList()));
+*/
 
     Column<PhoneAndStats, SafeHtml> currentCol = getCurrentCol();
     table.setColumnWidth(currentCol, SCORE_COL_WIDTH, Style.Unit.PX);
@@ -532,11 +538,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     currentCol.setSortable(true);
     table.addColumnSortHandler(getCurrSorter(currentCol, getList()));
 
+/*
     Column<PhoneAndStats, SafeHtml> diffCol = getDiff();
     table.setColumnWidth(diffCol, SCORE_COL_WIDTH, Style.Unit.PX);
     table.addColumn(diffCol, DIFF_COL_HEADER);
     diffCol.setSortable(true);
     table.addColumnSortHandler(getDiffSorter(diffCol, getList()));
+*/
 
     table.setWidth("100%", true);
 
@@ -594,7 +602,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
-  private Column<PhoneAndStats, SafeHtml> getScoreColumn() {
+ /* private Column<PhoneAndStats, SafeHtml> getScoreColumn() {
     return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
@@ -609,6 +617,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       }
     };
   }
+*/
 
   private Column<PhoneAndStats, SafeHtml> getCurrentCol() {
     return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -625,7 +634,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     };
   }
 
-  private Column<PhoneAndStats, SafeHtml> getDiff() {
+ /* private Column<PhoneAndStats, SafeHtml> getDiff() {
     return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
@@ -639,7 +648,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       }
     };
   }
-
+*/
   private String getScoreMarkup(int score) {
     return "<span " + "style='" + "margin-left:10px;" + "'" + ">" + score + "</span>";
   }

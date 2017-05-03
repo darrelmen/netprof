@@ -306,7 +306,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   public String getTypeAheadText() {
-    if (typeAhead == null) logger.warning("type ahead is null?");
+  //  if (typeAhead == null) logger.warning("type ahead is null?");
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
