@@ -244,11 +244,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long then;
     then = now;
     List<CommonExercise> exercises = db.getExercises(projectid);
+    String language = db.getLanguage(projectid);
     now = System.currentTimeMillis();
     if (now - then > WARN_THRESH)
       logger.info("ensureAudio for " + projectid + " - took " + (now - then) + " millis to get exercises");
 
-    ensureAudioForExercises(exercises);
+    ensureAudioForExercises(exercises,language);
   }
 
   public void ensureAudioForIDs(int projid, Collection<Integer> ids) {
@@ -260,8 +261,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     ensureAudioForExercises(collect);
   }
 
-  private void ensureAudioForExercises(List<CommonExercise> exercises) {
-    String language = getLanguage();
+  private void ensureAudioForExercises(List<CommonExercise> exercises, String language) {
+  //  String language = getLanguage();
     long then = System.currentTimeMillis();
     db.getAudioDAO().attachAudioToExercises(exercises, language);
     long now = System.currentTimeMillis();
@@ -293,7 +294,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                 audioAttribute.getAudioType(),
                 language);
             if (didit) success++;
-            if (c % 100 == 0) logger.debug("checkAudio checked " + c + ", success = " + success);
+            if (c % 100 == 0) logger.debug("checkAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
           } catch (Exception e1) {
             logger.warn("Got " + e1 + " for exercise " + exercise.getID() + " : " + audioAttribute.getAudioRef());
           }

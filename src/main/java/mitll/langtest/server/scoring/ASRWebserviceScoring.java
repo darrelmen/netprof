@@ -79,12 +79,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
 
-  //private static final SmallVocabDecoder svDecoderHelper = null;
   private final SLFFile slfFile = new SLFFile();
 
   // TODO make Scores + phoneLab + wordLab an object so have something more descriptive than Object[]
   private final Cache<String, Object[]> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
   private final Cache<String, Object[]> alignAudioToScore; // key => (Scores, wordLab, phoneLab)
+  private final Cache<String, Double> fileToDuration; // key => (Scores, wordLab, phoneLab)
 
   /**
    * Tell dcodr what grammar to use - include optional sils between words
@@ -103,10 +103,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
-//  private final String ip;
-//  private final int port;
   private boolean available = false;
-  Project project;
+  private Project project;
 
   /**
    * @param deployPath
@@ -123,6 +121,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     super(deployPath, properties, langTestDatabase, htkDictionary, project);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
     alignAudioToScore  = CacheBuilder.newBuilder().maximumSize(1000).build();
+    fileToDuration  = CacheBuilder.newBuilder().maximumSize(100000).build();
 
     this.project = project;
     String ip = getWebserviceIP();
@@ -258,7 +257,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       if (mustPrepend) {
         audioDir = props.getAudioBaseDir() + File.separator + audioDir;
         if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
-        else testAudioDir = audioDir;
+        else {
+          testAudioDir = audioDir;
+        }
       }
       testAudioFileNoSuffix = new AudioConversion(props).convertTo16Khz(audioDir, testAudioFileNoSuffix);
     } catch (UnsupportedAudioFileException e) {
@@ -268,24 +269,32 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
       noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
     }
-    String rawAudioPath = testAudioDir + File.separator + testAudioFileNoSuffix + ".raw";
-    AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
+    String filePath = testAudioDir + File.separator + testAudioFileNoSuffix;
+    //String rawAudioPath = filePath + ".raw";
+    //AudioConversion.wav2raw(filePath+ ".wav", rawAudioPath);
 
-    String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-    Object[] cached = useCache ? (decode ? decodeAudioToScore.getIfPresent(key) : alignAudioToScore.getIfPresent(key)) : null;
+    // check the cache...
+    Object[] cached = useCache ? (decode ?
+        decodeAudioToScore.getIfPresent(filePath) :
+        alignAudioToScore.getIfPresent(filePath)) : null;
     Scores scores = null;
     String phoneLab = "";
     String wordLab = "";
+
+    Double cachedDuration = fileToDuration.getIfPresent(filePath);
+    if (cachedDuration == null) {
+      cachedDuration = new AudioCheck(props).getDurationInSeconds(wavFile);
+      fileToDuration.put(filePath,cachedDuration);
+      logger.info("fileToDur now has "+fileToDuration.size());
+    }
     if (cached != null) {
       scores = (Scores) cached[0];
       wordLab = (String) cached[1];
       phoneLab = (String) cached[2];
     }
-
     // actually run the scoring
     //logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
     // TODO remove the 16k hardcoding?
-    double duration = new AudioCheck(props).getDurationInSeconds(wavFile);
 
     JsonObject jsonObject = null;
 
@@ -298,13 +307,23 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     int processDur = 0;
     if (scores == null) {
       long then = System.currentTimeMillis();
-      int end = (int) (duration * 100.0);
+      //double duration = new AudioCheck(props).getDurationInSeconds(wavFile);
+
+      int end = (int) (cachedDuration * 100.0);
       Path tempDir = null;
       try {
         tempDir = Files.createTempDirectory("scoreRepeatExercise_" + languageProperty);
 
         File tempFile = tempDir.toFile();
-        Object[] result = runHydra(rawAudioPath, sentence, transliteration, lmSentences, tempFile.getAbsolutePath(), decode, end);
+
+        // dcodr can't handle an equals in the file name... duh...
+        String rawAudioPath = filePath.replaceAll("\\=","") + ".raw";
+        //rawAudioPath = rawAudioPath.replaceAll("\\=","");
+        logger.info("Sending " + rawAudioPath + " to hydra");
+        AudioConversion.wav2raw(filePath + ".wav", rawAudioPath);
+
+        Object[] result = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
+            tempFile.getAbsolutePath(), decode, end);
         if (result == null) {
           return new PretestScore(0);
         } else {
@@ -316,7 +335,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             if (wordLab.contains("UNKNOWN")) {
               logger.info("note : hydra result includes UNKNOWNMODEL : " + wordLab);
             }
-            cacheHydraResult(decode, key, scores, phoneLab, wordLab);
+            cacheHydraResult(decode, filePath, scores, phoneLab, wordLab);
           } else {
             logger.warn("scoreRepeatExercise skipping invalid response from hydra.");
           }
@@ -339,7 +358,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         imageOptions,
         decode, prefix, noSuffix,
         scores, phoneLab, wordLab,
-        duration, processDur, usePhoneToDisplay, jsonObject);
+        cachedDuration, processDur, usePhoneToDisplay, jsonObject);
   }
 
   private void cacheHydraResult(boolean decode, String key, Scores scores, String phoneLab, String wordLab) {

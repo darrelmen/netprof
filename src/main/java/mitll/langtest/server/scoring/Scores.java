@@ -63,12 +63,7 @@ public class Scores {
     eventScores = Collections.emptyMap();
   }
 
-/*  private Scores(int processDur) {
-    eventScores = Collections.emptyMap();
-    this.processDur = processDur;
-  }*/
-
-  /**
+ /**
    * @param hydecScore
    * @param eventScores
    * @param processDur

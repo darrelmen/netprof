@@ -111,7 +111,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       int refID = currentAudioAttr.getUniqueID();
       //int contextRefID = -1; //contextPlay.getCurrentAudioID();
-      AudioAttribute currentAudioAttr1 = contextPlay.getCurrentAudioAttr();
+      AudioAttribute currentAudioAttr1 = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
       int contextRefID = currentAudioAttr1 != null ? currentAudioAttr1.getUniqueID() : -1;
 
       //  logger.info("getRefAudio asking for " + refID);
@@ -765,7 +765,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (alignmentOutput != null) {
       if (DEBUG || true) {
         logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
-            " alignment " +alignmentOutput);
+            " alignment " + alignmentOutput);
       }
       if (contextClickables == null) {
         logger.warning("huh? context not set for " + id);

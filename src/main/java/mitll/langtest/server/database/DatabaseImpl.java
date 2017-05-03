@@ -1510,10 +1510,7 @@ DominoExerciseDAO dominoExerciseDAO;
   }
 
   @Override
-  public String getLanguage(int projectid) {
-    Project project = getProject(projectid);
-    return getLanguage(project);
-  }
+  public String getLanguage(int projectid) {  return getLanguage(getProject(projectid));  }
 
   private String getLanguage(Project project) {
     return project.getLanguage();

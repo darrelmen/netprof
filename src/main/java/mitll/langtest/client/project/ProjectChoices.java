@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.*;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
@@ -34,8 +35,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
-  public static final String NEW_PROJECT = "New Project";
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+  private static final String NEW_PROJECT = "New Project";
 
   private static final int LANGUAGE_SIZE = 3;
 
@@ -249,8 +251,16 @@ public class ProjectChoices {
     //left.addStyleName("clear");
     header.add(left);
 
+    DivWidget right = new DivWidget();
+    right.addStyleName("floatRight");
+    header.add(right);
     if (isQC()) {
-      getCreateNewButton(header);
+      getCreateNewButton(right);
+    }
+
+    if (controller.getUserState().isAdmin()) {
+      getEnsureAllAudioButton(right);
+      right.addStyleName("topFiveMargin");
     }
 
     return header;
@@ -260,7 +270,7 @@ public class ProjectChoices {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(NEW_PROJECT);
 
     DivWidget right = new DivWidget();
-    right.addStyleName("floatRight");
+//    right.addStyleName("floatRight");
     right.add(w);
 
     w.addStyleName("floatLeft");
@@ -271,6 +281,34 @@ public class ProjectChoices {
     w.setType(ButtonType.WARNING);
     w.addClickHandler(event -> {
       showNewProjectDialog();
+    });
+  }
+
+  private void getEnsureAllAudioButton(DivWidget header) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Check Audio");
+
+    DivWidget right = new DivWidget();
+  //  right.addStyleName("floatRight");
+    right.add(w);
+
+    w.addStyleName("floatLeft");
+    header.add(right);
+
+    w.setIcon(IconType.CHECK);
+    w.setSize(ButtonSize.LARGE);
+    w.setType(ButtonType.SUCCESS);
+    w.addClickHandler(event -> {
+      controller.getAudioService().ensureAllAudio(new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          new ModalInfoDialog("Ensure Audio", "All audio checked!");
+        }
+      });
     });
   }
 
@@ -517,7 +555,8 @@ public class ProjectChoices {
   }
 
   private boolean isQC() {
-    return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || controller.getUserState().isAdmin();
+    boolean admin = controller.getUserState().isAdmin();
+    return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || admin;
   }
 
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {

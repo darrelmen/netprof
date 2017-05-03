@@ -123,14 +123,18 @@ public class ExerciseComparator {
    */
   public int compareStrings(String id1, String id2) {
     String t = id1.toLowerCase();
-    if (t.startsWith(A_SPACE)) t = t.substring(2);
+    if (ignoreFirst(t)) t = t.substring(2);
 
     t = dropPunct(t);
     String t1 = id2.toLowerCase();
-    if (t1.startsWith(A_SPACE)) t1 = t1.substring(2);
+    if (ignoreFirst(t1)) t1 = t1.substring(2);
     t1 = dropPunct(t1);
 
     return removePunct(t).compareTo(removePunct(t1));
+  }
+
+  private boolean ignoreFirst(String t) {
+    return t.startsWith(A_SPACE) ||t.startsWith("-");
   }
 
   protected String removePunct(String t) {

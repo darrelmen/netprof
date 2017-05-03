@@ -84,6 +84,6 @@ public class SimpleSorter extends ExerciseComparator {
    * @see AudioExport#writeZipJustOneAudio(OutputStream, SectionHelper, Collection, String, String)
    */
   public <T extends CommonShell> void sortByEnglish(List<T> exerciseShells) {
-    Collections.sort(exerciseShells, (o1, o2) -> compareByEnglish(o1, o2));
+    Collections.sort(exerciseShells, this::compareByEnglish);
   }
 }
