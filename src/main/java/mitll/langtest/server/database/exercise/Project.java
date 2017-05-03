@@ -303,6 +303,11 @@ public class Project implements PronunciationLookup {
         "' and '" + fl +
         "' found " + exercise);
 
+    if (exercise == null) {
+      exercise = getExerciseBySearch(english);
+      logger.info("getExerciseBySearchBoth looking for '" + english + " found " + exercise);
+    }
+
     return exercise;
   }
 

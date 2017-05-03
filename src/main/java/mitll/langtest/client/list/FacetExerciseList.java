@@ -561,7 +561,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void populateListChoices(ListItem liForDimensionForType) {
     ListServiceAsync listService = controller.getListService();
-    logger.info("populateListChoices ");
+    //logger.info("populateListChoices ");
     listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {

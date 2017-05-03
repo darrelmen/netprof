@@ -7,4 +7,5 @@ public interface IHighlightSegment {
   void setBlue();
   void clearBlue();
   boolean isHighlighted();
+  int getLength();
 }

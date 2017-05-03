@@ -197,6 +197,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     if (val) {
      // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
+      logger.info("addChoices current audio is " + toUse.getUniqueID());
 
       listener.audioChanged(toUse.getUniqueID(), toUse.getDurationInMillis());
 //      if (exercise.getID() == 2909) {
@@ -214,7 +215,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void addAudioChoice(SplitDropdownButton playButton, boolean isMale1, boolean isReg, AudioAttribute mr) {
-    addAudioChoice(playButton, isMale1, isReg).addClickHandler(getChoiceHandler(mr, isMale1, isReg));
+    addAudioChoice(playButton, isMale1, isReg)
+        .addClickHandler(getChoiceHandler(mr, isMale1, isReg));
   }
 
   @NotNull
@@ -236,7 +238,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void playAndRemember(int audioID, String audioRef, long durationInMillis, boolean isMale, boolean isReg) {
-    logger.info("playAndRemember " + audioRef);
+//    logger.info("playAndRemember " + audioID + " " +audioRef + " isMale " + isMale + " isReg " + isReg);
 
     doPause();
     listener.audioChanged(audioID,durationInMillis );

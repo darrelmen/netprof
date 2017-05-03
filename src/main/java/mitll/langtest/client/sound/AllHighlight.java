@@ -11,6 +11,7 @@ public class AllHighlight implements IHighlightSegment {
   public AllHighlight(Collection<IHighlightSegment> bulk) {
     this.set = bulk;
   }
+
   @Override
   public void setBlue() {
     set.forEach(IHighlightSegment::setBlue);
@@ -24,5 +25,16 @@ public class AllHighlight implements IHighlightSegment {
   @Override
   public boolean isHighlighted() {
     return !set.isEmpty() && set.iterator().next().isHighlighted();
+  }
+
+  @Override
+  public int getLength() {
+    int total = 0;
+    for (IHighlightSegment seg : set) total += seg.getLength();
+    return total;
+  }
+
+  public String toString() {
+    return set.size() + " segments " + getLength() + " long ";
   }
 }

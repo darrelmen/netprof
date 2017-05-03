@@ -2,6 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -45,6 +46,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   private static final String EMAIL = "Email Item";
+  private static final Set<String> toIgnore = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
+
   public static final int CONTEXT_INDENT = 56;//40;
 
   private final List<CorrectAndScore> correctAndScores;
@@ -57,10 +60,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<CommonShell, T> listContainer;
   private ChoicePlayAudioPanel playAudio;
-  Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+  private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
   private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>>> idToTypeToSegmentToWidget = new HashMap<>();
   private List<IHighlightSegment> altflClickables;
   private List<IHighlightSegment> flclickables;
+  private List<IHighlightSegment> contextClickables;
+
+  private static final boolean DEBUG = false;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -105,9 +111,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
 
       int refID = currentAudioAttr.getUniqueID();
-     // int contextRefID = -1; //contextPlay.getCurrentAudioID();
-      AudioAttribute currentAudioAttr1 = contextPlay.getCurrentAudioAttr();
-      int contextRefID =   currentAudioAttr1.getUniqueID();
+      int contextRefID = -1; //contextPlay.getCurrentAudioID();
+      //AudioAttribute currentAudioAttr1 = contextPlay.getCurrentAudioAttr();
+      //int contextRefID = currentAudioAttr1.getUniqueID();
 
       //  logger.info("getRefAudio asking for " + refID);
 //    logger.info("asking for " + contextRefID);
@@ -182,15 +188,25 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 //    }
   }
 
-  private static final boolean DEBUG = false;
 
+  /**
+   * @param id
+   * @param duration
+   * @see ChoicePlayAudioPanel#addChoices
+   */
   @Override
   public void audioChanged(int id, long duration) {
     AlignmentOutput value2 = alignments.get(id);
     if (value2 != null) {
       if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
-      matchSegmentToWidgetForAudio(id, duration, value2);
+
       Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(id);
+
+      if (typeToSegmentToWidget == null) {
+        matchSegmentToWidgetForAudio(id, duration, value2, flclickables);
+        typeToSegmentToWidget = idToTypeToSegmentToWidget.get(id);
+      }
+
       if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() +
           " audio id " + id + " : " +
           (typeToSegmentToWidget == null ? "missing" : typeToSegmentToWidget.size()));
@@ -220,9 +236,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param value2
    * @see #
    */
-  private void matchSegmentToWidgetForAudio(Integer audioID, long durationInMillis, AlignmentOutput value2) {
+  private void matchSegmentToWidgetForAudio(Integer audioID, long durationInMillis, AlignmentOutput value2, List<IHighlightSegment> flclickables) {
+
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> value = new HashMap<>();
+
     idToTypeToSegmentToWidget.put(audioID, value);
+
+
     TreeMap<TranscriptSegment, IHighlightSegment> segmentToWidget = new TreeMap<>();
     value.put(NetPronImageType.WORD_TRANSCRIPT, segmentToWidget);
 
@@ -231,13 +251,20 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       segmentToWidget.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0), new AllHighlight(flclickables));
     } else {
       Iterator<IHighlightSegment> iterator = flclickables.iterator();
+      if (DEBUG) logger.info("matchSegmentToWidgetForAudio " + audioID + " got clickables " + flclickables.size());
 
       List<TranscriptSegment> transcriptSegments = value2.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
-      if (transcriptSegments != null) {
+      if (transcriptSegments == null) {
+        if (DEBUG) logger.info("matchSegmentToWidgetForAudio no word segments in " + value2);
+      } else {
         for (TranscriptSegment seg : transcriptSegments) {
-          if (!seg.getEvent().equalsIgnoreCase("sil")) {
+          if (!shouldIgnore(seg)) {
+            int segmentLength = seg.getEvent().length();
+            if (DEBUG) logger.info("matchSegmentToWidgetForAudio got segment " + seg + " length " + segmentLength);
+
             if (iterator.hasNext()) {
-              segmentToWidget.put(seg, iterator.next());
+              IHighlightSegment segment = matchEventSegmentToClickable(iterator, segmentLength);
+              segmentToWidget.put(seg, segment);
             } else {
               logger.warning("matchSegmentToWidgetForAudio no match for " + seg);
             }
@@ -245,6 +272,41 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         }
       }
     }
+  }
+
+  private IHighlightSegment matchEventSegmentToClickable(//TreeMap<TranscriptSegment, IHighlightSegment> segmentToWidget,
+                                                         Iterator<IHighlightSegment> iterator, int segmentLength) {
+    IHighlightSegment clickable = iterator.next();
+
+    int clickLength = clickable.getLength();
+
+    int leftOver = segmentLength - clickLength;
+    if (DEBUG)
+      logger.info("matchSegmentToWidgetForAudio compare : leftover is " + leftOver + " segment length " + segmentLength + " vs " + clickable.getLength());
+    if (leftOver > 0) {
+      Collection<IHighlightSegment> bulk = new ArrayList<>();
+      AllHighlight allHighlight = new AllHighlight(bulk);
+      bulk.add(clickable);
+      //   segmentToWidget.put(seg, allHighlight);
+      while (leftOver > 0 && iterator.hasNext()) {
+        clickable = iterator.next();
+        leftOver = segmentLength - clickable.getLength();
+        if (leftOver < 0) {
+          logger.warning("matchSegmentToWidgetForAudio hmm - leftover is " + leftOver + " segment length " + segmentLength + " vs " + clickable.getLength());
+        }
+        bulk.add(clickable);
+      }
+      //  logger.info("matchSegmentToWidgetForAudio seg->click now " + segmentToWidget);
+      return allHighlight;
+    } else {
+      //   segmentToWidget.put(seg, clickable);
+      return clickable;
+    }
+  }
+
+
+  private boolean shouldIgnore(TranscriptSegment seg) {
+    return toIgnore.contains(seg.getEvent());
   }
 
   private HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
@@ -657,8 +719,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Widget addContextTranslation(AnnotationExercise e, String contextTranslation) {
     if (!contextTranslation.isEmpty()) {
       return getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, contextTranslation,
-          false, false, false, showInitially, new ArrayList<>());
-    } else return null;
+          false, false, false, showInitially, contextClickables = new ArrayList<>());
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -671,7 +735,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @paramx label
    * @see #getItemContent
    */
-  private Widget getEntry(AnnotationExercise e, final String field, String value, boolean isFL,
+  private Widget getEntry(AnnotationExercise e,
+                          final String field,
+                          String value,
+                          boolean isFL,
                           boolean isTranslit,
                           boolean isMeaning, boolean showInitially, List<IHighlightSegment> clickables) {
     return getEntry(field, value, e.getAnnotation(field), isFL, isTranslit, isMeaning, showInitially, clickables);
