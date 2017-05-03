@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -24,16 +25,38 @@ public class DecodeTest extends BaseTest {
   //public static final boolean DO_ONE = false;
 
   @Test
+  public void testPunct() {
+    String unicode = "\\u0xFF0C";
+
+    String repl = "上有天堂，下有苏杭";
+
+    List<String>tests = new ArrayList<>();
+
+    tests.add("\n" + "阿布.扎比");
+    tests.add("再添点茶，怎么样？");
+    logger.info("va " + clean(repl));
+    logger.info("va " + clean("戰爭就是要不斷在失敗中吸取教訓。"));
+
+    for (String test:tests) logger.info(clean(test));
+  }
+
+  private String clean(String repl) {
+    return repl
+        .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
+        .replaceAll("[\\p{M}\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002]", "");
+  }
+
+  @Test
   public void testRussianContext() {
     DatabaseImpl russian = getDatabase("russian");
-    CommonExercise exercise = russian.getExercise(1,2600);
+    CommonExercise exercise = russian.getExercise(1, 2600);
     String context = exercise.getContext();
     logger.info("got\n" + context);
   }
 
   @Test
   public void testSpanishEventCopy() {
-     getDatabase("spanish");
+    getDatabase("spanish");
   }
 
   @Test
@@ -68,7 +91,7 @@ public class DecodeTest extends BaseTest {
   public void testDominoSpanish() {
     DatabaseImpl russian = getDatabase("dominoSpanish");
     Collection exercises = russian.getExercises(-1);
-    logger.info("First " +exercises.iterator().next());
+    logger.info("First " + exercises.iterator().next());
   }
 /*
 
@@ -137,7 +160,7 @@ public class DecodeTest extends BaseTest {
   public void testRussian() {
     DatabaseImpl russian = getDatabase("russian");
     AudioFileHelper audioFileHelper = getAudioFileHelper(russian);
-    CommonExercise exercise = russian.getExercise(1,8);
+    CommonExercise exercise = russian.getExercise(1, 8);
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes)
       audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false, -1);
@@ -152,7 +175,7 @@ public class DecodeTest extends BaseTest {
   public void testEnglish() {
     DatabaseImpl russian = getDatabase("english");
     AudioFileHelper audioFileHelper = getAudioFileHelper(russian);
-    CommonExercise exercise = russian.getExercise(1,2253);
+    CommonExercise exercise = russian.getExercise(1, 2253);
     logger.info("got " + exercise);
 
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
@@ -165,8 +188,8 @@ public class DecodeTest extends BaseTest {
     DatabaseImpl db = getDatabase("spanish");
     AudioFileHelper audioFileHelper = getAudioFileHelper(db);
 
-    CommonExercise exercise = db.getExercise(1,50264);
-    logger.info("got " +exercise);
+    CommonExercise exercise = db.getExercise(1, 50264);
+    logger.info("got " + exercise);
 
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {

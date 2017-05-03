@@ -8,4 +8,8 @@ public interface IHighlightSegment {
   void clearBlue();
   boolean isHighlighted();
   int getLength();
+
+  boolean isClickable();
+
+  String getContent();
 }

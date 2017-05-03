@@ -174,7 +174,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
 
       if (customOrPredefExercise != null) {
-        logger.info("getAlignments decoding " + audioID + " for " + byID.getExid() + " : " + customOrPredefExercise.getEnglish() + " " + customOrPredefExercise.getForeignLanguage());
+        logger.info("getAlignments decoding " + audioID +
+            (byID.isContextAudio()? " CONTEXT" :"")+
+            " for exercise " + byID.getExid() + " : '" + customOrPredefExercise.getEnglish() + "' = '" + customOrPredefExercise.getForeignLanguage() + "'");
       }
 
       PretestScore pretestScore =

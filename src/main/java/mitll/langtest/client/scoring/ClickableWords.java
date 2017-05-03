@@ -83,17 +83,18 @@ public class ClickableWords<T extends CommonExercise> {
     return horizontal;
   }
 
+
   /**
    * So we want to highlight the vocab item in the context sentence.
    * This is separate from marking which tokens are matches to a search token.
    *
-   * @see TwoColumnExercisePanel#getContext
    * @param value
    * @param highlight
    * @param isFL
    * @param isTranslit
    * @param isMeaning
    * @return
+   * @see TwoColumnExercisePanel#getContext
    */
   DivWidget getClickableWordsHighlight(String value,
                                        String highlight,
@@ -116,13 +117,13 @@ public class ClickableWords<T extends CommonExercise> {
     String toFind = iterator.hasNext() ? iterator.next() : null;
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
-  //  int match = 0;
+    //  int match = 0;
     for (String token : tokens) {
       boolean isMatch = toFind != null && isMatch(token, toFind);
       horizontal.add(makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch));
-    //  match++;
+      //  match++;
       if (isMatch) {
-      //  logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "' at " + match);
+        //  logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "' at " + match);
         toFind = iterator.hasNext() ? iterator.next() : null;
       }
 //      else if (isMatch) {
@@ -163,7 +164,7 @@ public class ClickableWords<T extends CommonExercise> {
       return false;
     } else {
       String context = removePunct(token.toLowerCase());
-      String vocab   = removePunct(next.toLowerCase());
+      String vocab = removePunct(next.toLowerCase());
       boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
       // if (b) logger.info("match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
       return b;// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
@@ -175,10 +176,8 @@ public class ClickableWords<T extends CommonExercise> {
     List<String> tokens = new ArrayList<>();
     if (isChineseCharacter) {
       for (int i = 0, n = value.length(); i < n; i++) {
-        char c = value.charAt(i);
-        Character character = c;
-        final String html = character.toString();
-        tokens.add(html);
+        Character character = value.charAt(i);
+        tokens.add(character.toString());
       }
     } else {
       tokens = new ArrayList<>(Arrays.asList(value.split(GoodwaveExercisePanel.SPACE_REGEX)));
@@ -202,40 +201,43 @@ public class ClickableWords<T extends CommonExercise> {
   /**
    * @param isMeaning
    * @param dir
-   * @param html a token that can be clicked on to search on it
+   * @param html             a token that can be clicked on to search on it
    * @param chineseCharacter
    * @param isContextMatch
    * @return
    * @see #getClickableWordsHighlight
    */
   private HighlightSegment makeClickableText(boolean isMeaning,
-                                       HasDirection.Direction dir,
-                                       final String html,
-                                       boolean chineseCharacter,
-                                       boolean isContextMatch) {
-    final HighlightSegment w = new HighlightSegment(html, dir);
+                                             HasDirection.Direction dir,
+                                             final String html,
+                                             boolean chineseCharacter,
+                                             boolean isContextMatch) {
+    final HighlightSegment highlightSegment = new HighlightSegment(html, dir);
 
-    if (isContextMatch) w.addStyleName(CONTEXTMATCH);
+    if (isContextMatch) highlightSegment.addStyleName(CONTEXTMATCH);
 
     String searchToken = listContainer.getTypeAheadText().toLowerCase();
     if (isMatch(html, searchToken)) {
-      showSearchMatch(dir, html, w, searchToken);
+      showSearchMatch(dir, html, highlightSegment, searchToken);
     }
 
-    if (!removePunct(html).isEmpty()) {
-      w.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-      w.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(html)));
-      w.addMouseOverHandler(mouseOverEvent -> w.addStyleName("underline"));
-      w.addMouseOutHandler(mouseOutEvent -> w.removeStyleName("underline"));
+    boolean empty = removePunct(html).isEmpty();
+    if (empty) {
+      highlightSegment.setClickable(false);
+    } else {
+      highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+      highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(html)));
+      highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
+      highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
     }
 
-    w.addStyleName("Instruction-data-with-wrap-keep-word");
+    highlightSegment.addStyleName("Instruction-data-with-wrap-keep-word");
     if (isMeaning) {
-      w.addStyleName("englishFont");
+      highlightSegment.addStyleName("englishFont");
     }
-    if (!chineseCharacter) w.addStyleName("rightFiveMargin");
+    if (!chineseCharacter) highlightSegment.addStyleName("rightFiveMargin");
 
-    return w;
+    return highlightSegment;
   }
 
   private void showSearchMatch(HasDirection.Direction dir, String html, InlineHTML w, String searchToken) {
@@ -271,49 +273,9 @@ public class ClickableWords<T extends CommonExercise> {
     listContainer.searchBoxEntry(s2);
   }
 
-/*  private static class MyClickable extends InlineHTML {
-    private boolean has = false;
-
-    public MyClickable(@IsSafeHtml String html, Direction dir) {
-      super(html, dir);
-    }
-
-    public void setHas(boolean val) {
-      this.has = val;
-    }
-
-    public boolean isHas() {
-      return has;
-    }
-  }*/
-
-  /*  private void addTool(String toShow, boolean isFL, Widget w) {
-      exerciseServiceAsync.getExerciseIds(new ExerciseListRequest().setPrefix(toShow),
-          new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
-
-            @Override
-            public void onSuccess(ExerciseListWrapper<CommonShell> result) {
-              if (!result.getExercises().isEmpty()) {
-                CommonShell next = result.getExercises().iterator().next();
-                if (isFL) {
-                  logger.info("adding " + next.getEnglish());
-                  addTooltip(next.getEnglish(), w);
-                }
-              }
-            }
-          });
-    }*/
-/*
-  private void addTooltip(String value, Widget span) {
-    new TooltipHelper().addTooltip(span, value);
-  }
-*/
-
   protected String removePunct(String t) {
-    return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "").replaceAll("\\p{M}", "");
+    return t
+        .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
+        .replaceAll("[\\p{M}\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002]", "");
   }
 }

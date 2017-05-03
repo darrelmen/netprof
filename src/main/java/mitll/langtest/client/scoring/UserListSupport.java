@@ -28,21 +28,12 @@ import java.util.Set;
  * Created by go22670 on 4/19/17.
  */
 public class UserListSupport {
-  public static final int END_INDEX = 27;
   private final PopupContainerFactory popupContainer = new PopupContainerFactory();
+
+  private static final int END_INDEX = 15;
   private final ExerciseController controller;
-  //public static final String MAKE_A_NEW_LIST = "Make a new list";
-
-  //private static final String ADD_ITEM = "Add Item to List";
   private static final String ITEM_ALREADY_ADDED = "Item already added.";
-  //private static final String ADD_TO_LIST = "Add to List";
-  /**
-   * @seex #getNewListButton
-   */
-  //private static final String NEW_LIST = "New List";
   private static final String ITEM_ADDED = "Item Added!";
-  //private static final String ADDING_TO_LIST = "Adding to list ";
-
   private final Set<String> knownNames = new HashSet<>();
 
   UserListSupport(ExerciseController controller) {
@@ -53,12 +44,14 @@ public class UserListSupport {
    * @param dropdownContainer
    * @param exid
    */
-  public void addListOptions(
+  void addListOptions(
       Dropdown dropdownContainer,
       int exid) {
     DropdownSubmenu addToList = new DropdownSubmenu("Add to List");
     addToList.setRightDropdown(true);
+
     //  addToList.setStyleDependentName("pull-left", true);
+
     DropdownSubmenu removeFromList = new DropdownSubmenu("Remove from List");
     removeFromList.setRightDropdown(true);
 
@@ -184,7 +177,6 @@ public class UserListSupport {
   }
 
   /**
-   *
    * @return
    */
   public Set<String> getKnownNames() {

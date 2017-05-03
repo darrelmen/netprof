@@ -625,7 +625,7 @@ public class SlickUserExerciseDAO
 
     Collection<String> attrTypes = allByProject.values().stream().map(Pair::getProperty).collect(Collectors.toCollection(HashSet::new));
 
-    logger.info("getExercises attr types " + attrTypes);
+//    logger.info("getExercises attr types " + attrTypes);
 
     long then = System.currentTimeMillis();
     for (SlickExercise slickExercise : all) {

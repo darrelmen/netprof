@@ -83,7 +83,6 @@ public class HTTPClient {
         });
   }
 
- // @Deprecated
   public HTTPClient() {}
 
   /**

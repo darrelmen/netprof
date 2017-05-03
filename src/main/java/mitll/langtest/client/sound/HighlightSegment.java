@@ -18,6 +18,7 @@ public class HighlightSegment extends InlineHTML implements IHighlightSegment {
   private final int length;
   private String background = null;
   private boolean highlighted = false;
+  private boolean clickable = true;
 
   public HighlightSegment(@IsSafeHtml String html, Direction dir) {
     super(html, dir);
@@ -52,20 +53,30 @@ public class HighlightSegment extends InlineHTML implements IHighlightSegment {
   public void clearBlue() {
     highlighted = false;
     if (background == null) {
-//      logger.warning("no background color???");
       getElement().getStyle().clearBackgroundColor();
     } else {
-      //    logger.info("set background " + background);
       getElement().getStyle().setBackgroundColor(background);
     }
   }
 
   @Override
   public boolean isHighlighted() {
-    return highlighted;//getElement().getStyle().getBackgroundColor().equals(BLUE);
+    return highlighted;
   }
 
+  @Override
+  public boolean isClickable() {
+    return clickable;
+  }
+
+  public void setClickable(boolean clickable) {
+    this.clickable = clickable;
+  }
+
+  @Override
+  public String getContent() { return getHTML(); }
+
   public String toString() {
-    return  "one segment (" +getHTML()+ ")" + getLength() + " long ";
+    return  "segment (" +getHTML()+ ") " + getLength() + " long";
   }
 }

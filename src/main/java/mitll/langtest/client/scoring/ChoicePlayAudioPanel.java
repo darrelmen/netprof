@@ -40,7 +40,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   private ExerciseController controller;
   private CommonExercise exercise;
   private boolean includeContext = false;
-//  private int currentAudioID = -1;
+  //  private int currentAudioID = -1;
   private AudioAttribute currentAudioAttr = null;
   private AudioChangeListener listener;
   private Set<Integer> allIDs = new HashSet<>();
@@ -49,11 +49,12 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
    * @see TwoColumnExercisePanel#getPlayAudioPanel
    * @see TwoColumnExercisePanel#getContext
    */
-  public ChoicePlayAudioPanel(
+  ChoicePlayAudioPanel(
       SoundManagerAPI soundManager,
       CommonExercise exercise,
       ExerciseController exerciseController,
-      boolean includeContext, AudioChangeListener listener) {
+      boolean includeContext,
+      AudioChangeListener listener) {
     super(soundManager, new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -195,10 +196,9 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     setEnabled(val);
     splitDropdownButton.getTriggerWidget().setEnabled(val);
     if (val) {
-     // currentAudioID = toUse.getUniqueID();
+      // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
-      logger.info("addChoices current audio is " + toUse.getUniqueID());
-
+  //    logger.info("addChoices current audio is " + toUse.getUniqueID());
       listener.audioChanged(toUse.getUniqueID(), toUse.getDurationInMillis());
 //      if (exercise.getID() == 2909) {
 //        logger.info("addChoices For exercise " + exercise.getID() + " current audio is " + toUse.getUniqueID());
@@ -241,7 +241,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 //    logger.info("playAndRemember " + audioID + " " +audioRef + " isMale " + isMale + " isReg " + isReg);
 
     doPause();
-    listener.audioChanged(audioID,durationInMillis );
+    listener.audioChanged(audioID, durationInMillis);
 
     playAudio(audioRef);
     KeyStorage storage = controller.getStorage();
@@ -259,9 +259,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         if (isReg && audioAttribute.isRegularSpeed() || (!isReg && audioAttribute.isSlow())) {
           if (audioAttribute.getAudioRef().startsWith("Fast") || audioAttribute.getAudioRef().startsWith("Slow")) {
             logger.info("Skip " + audioAttribute);
-          }
-          else {
-          return audioAttribute;
+          } else {
+            return audioAttribute;
           }
         }
       }
@@ -291,7 +290,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
    * @see TwoColumnExercisePanel#getRefAudio
    */
   public AudioAttribute getCurrentAudioAttr() {
-    return currentAudioAttr  ;
+    return currentAudioAttr;
   }
 
   public Set<Integer> getAllAudioIDs() {
