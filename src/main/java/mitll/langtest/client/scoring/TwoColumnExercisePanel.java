@@ -105,7 +105,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
 
       int refID = currentAudioAttr.getUniqueID();
-      int contextRefID = -1; //contextPlay.getCurrentAudioID();
+     // int contextRefID = -1; //contextPlay.getCurrentAudioID();
+      AudioAttribute currentAudioAttr1 = contextPlay.getCurrentAudioAttr();
+      int contextRefID =   currentAudioAttr1.getUniqueID();
 
       //  logger.info("getRefAudio asking for " + refID);
 //    logger.info("asking for " + contextRefID);
@@ -173,10 +175,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void registerSegmentHighlight(int refID, int contextRefID, long durationInMillis) {
     if (refID != -1) {
       audioChanged(refID, durationInMillis);
-//      matchSegmentToWidgetForAudio(refID, alignments.get(refID));
-//      Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(refID);
-//      logger.info("registerSegment for " + refID + " : " + typeToSegmentToWidget);
-//      playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
     }
 
 //    if (contextRefID != -1) {
@@ -470,7 +468,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (contextTransWidget != null) {
         contextTransWidget.addStyleName("rightsidecolor");
         contextTransWidget.setWidth("50%");
-        // contextTransWidget.getElement().getStyle().setFontWeight(Style.FontWeight.LIGHTER);
         rowWidget.add(contextTransWidget);
       }
     }
@@ -623,7 +620,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
       hp.add(spacer);
 
-      AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
+      AudioAttribute audioAttrPrefGender =
+          contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
 
       contextPlay
           = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true, this);
