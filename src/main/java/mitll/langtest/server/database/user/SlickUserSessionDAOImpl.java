@@ -69,7 +69,7 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   /**
    * @param user
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser
+   * @see mitll.langtest.server.database.security.UserSecurityManager#setSessionUser
    */
   @Override
   public void add(SlickUserSession user) {

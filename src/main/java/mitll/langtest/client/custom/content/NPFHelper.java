@@ -38,8 +38,8 @@ import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -48,7 +48,7 @@ import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.scoring.ExerciseOptions;
+import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -56,6 +56,7 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -87,7 +88,7 @@ public class NPFHelper implements RequiresResize {
    * @param controller
    * @param showQC
    * @see mitll.langtest.client.custom.Navigation#Navigation
-   * @see mitll.langtest.client.custom.ListManager#ListManager
+   * @see ListManager#ListManager
    */
   public NPFHelper(ExerciseController controller,
                    boolean showQC,
@@ -102,9 +103,13 @@ public class NPFHelper implements RequiresResize {
    * @param tabAndContent
    * @param instanceName
    * @param loadExercises
-   * @see mitll.langtest.client.custom.ListManager#selectPreviouslyClickedSubTab(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean)
+   * @see ListManager#selectPreviouslyClickedSubTab(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean)
    */
   public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
+    logger.info(getClass() + " : adding npf content instanceName = " +
+        instanceName + " for list " + ul + " with " +ul.getExercises().size() + " load " + loadExercises);
+
+
     showNPF(ul, tabAndContent, instanceName, loadExercises, null);
   }
 
@@ -116,22 +121,23 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName  flex, review, etc.
    * @param loadExercises should we load exercises initially
    * @param toSelect
-   * @see mitll.langtest.client.custom.ListManager#getListOperations
+   * @see ListManager#getListOperations
    */
   public void showNPF(UserList<CommonShell> ul,
                       TabAndContent tabAndContent,
                       String instanceName,
                       boolean loadExercises,
                       HasID toSelect) {
-//    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
+    logger.info(getClass() + " : adding npf content instanceName = " +
+        instanceName + " for list " + ul + " with " +ul.getExercises().size());
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+       logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul + " load " + loadExercises);
       addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
-      // logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+       logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
       rememberAndLoadFirstFromUserList(ul, toSelect);
     }
   }
@@ -156,12 +162,13 @@ public class NPFHelper implements RequiresResize {
    * @see #addNPFToContent
    */
   private Panel doNPF(UserList<CommonShell> ul, String instanceName, boolean loadExercises, HasID toSelect) {
-    //logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul + " of size ");
+    logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul + " of size " + loadExercises);
 
     Panel hp = doInternalLayout(ul, instanceName);
     if (loadExercises) {
       rememberAndLoadFirstFromUserList(ul, toSelect);
     }
+    else logger.warning("not loading exercises?");
     return hp;
   }
 
@@ -246,10 +253,10 @@ public class NPFHelper implements RequiresResize {
     npfExerciseList.setUserListID(ul.getID());
 
     List<CommonShell> copy = new ArrayList<>();
-    for (CommonShell ex : ul.getExercises()) {
-      copy.add(ex);
-    }
+    copy.addAll(ul.getExercises());
+
     int id = toSelect == null ? -1 : toSelect.getID();
+    logger.info("rememberAndLoad " +copy.size() + " exercises for "  +id);
     npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
@@ -296,8 +303,10 @@ public class NPFHelper implements RequiresResize {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {
-          return new CommentNPFExercise<>(e, controller, exerciseList, new ExerciseOptions(instanceName));
-        }
+        //  return new CommentNPFExercise<>(e, controller, exerciseList, new ExerciseOptions(instanceName));
+          return new TwoColumnExercisePanel<CommonExercise>(e,
+              controller,
+              exerciseList, Collections.emptyList()); }
       }
     };
   }

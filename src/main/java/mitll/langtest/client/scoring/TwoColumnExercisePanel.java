@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -56,14 +55,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final ClickableWords<T> clickableWords;
   private final boolean showInitially = false;
   private final UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
-  private final ListInterface<CommonShell> listContainer;
+  private final ListInterface<CommonShell, T> listContainer;
   private ChoicePlayAudioPanel playAudio;
   Map<Integer, AlignmentOutput> alignments = new HashMap<>();
   private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>>> idToTypeToSegmentToWidget = new HashMap<>();
+  private List<IHighlightSegment> altflClickables;
+  private List<IHighlightSegment> flclickables;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
-   * and a right side -- the charts and gauges {@link ASRScorePanel}
+   * and a right side --
    *
    * @param commonExercise for this exercise
    * @param controller
@@ -77,7 +78,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
-                                final ListInterface<CommonShell> listContainer,
+                                final ListInterface<CommonShell, T> listContainer,
                                 List<CorrectAndScore> correctAndScores
   ) {
     this.exercise = commonExercise;
@@ -104,7 +105,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
 
       int refID = currentAudioAttr.getUniqueID();
-      int contextRefID = -1; //contextPlay.getCurrentAudioID();
+     // int contextRefID = -1; //contextPlay.getCurrentAudioID();
+      AudioAttribute currentAudioAttr1 = contextPlay.getCurrentAudioAttr();
+      int contextRefID =   currentAudioAttr1.getUniqueID();
 
       //  logger.info("getRefAudio asking for " + refID);
 //    logger.info("asking for " + contextRefID);
@@ -172,10 +175,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void registerSegmentHighlight(int refID, int contextRefID, long durationInMillis) {
     if (refID != -1) {
       audioChanged(refID, durationInMillis);
-//      matchSegmentToWidgetForAudio(refID, alignments.get(refID));
-//      Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(refID);
-//      logger.info("registerSegment for " + refID + " : " + typeToSegmentToWidget);
-//      playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
     }
 
 //    if (contextRefID != -1) {
@@ -285,8 +284,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       lr.add(getEnglishWidget(e, english));
       lr.add(getItemWidget(e));
-      Dropdown w = getDropdown();
-      lr.add(w);
+      lr.add(getDropdown());
 
       rowWidget.add(lr);
     }
@@ -332,20 +330,24 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private Dropdown getDropdown() {
     Dropdown dropdownContainer = new Dropdown("");
-    //DropdownContainer dropdownContainer = new DropdownContainer("");
     dropdownContainer.setIcon(IconType.REORDER);
     dropdownContainer.setRightDropdown(true);
     dropdownContainer.getMenuWiget().getElement().getStyle().setTop(10, Style.Unit.PCT);
+
+    dropdownContainer.addStyleName("leftThirtyMargin");
+    dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
+    dropdownContainer.getTriggerWidget().setCaret(false);
+
 
     new UserListSupport(controller).addListOptions(dropdownContainer, exercise.getID());
 
     NavLink share = new NavLink(EMAIL);
     dropdownContainer.add(share);
     share.setHref(getMailTo());
+
     dropdownContainer.add(getShowComments());
-    dropdownContainer.addStyleName("leftThirtyMargin");
-    dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
-    dropdownContainer.getTriggerWidget().setCaret(false);
+
+
     return dropdownContainer;
   }
 
@@ -373,7 +375,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return widget;
   }
 
-  List<IHighlightSegment> flclickables;
 
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget) {
@@ -467,7 +468,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (contextTransWidget != null) {
         contextTransWidget.addStyleName("rightsidecolor");
         contextTransWidget.setWidth("50%");
-        // contextTransWidget.getElement().getStyle().setFontWeight(Style.FontWeight.LIGHTER);
         rowWidget.add(contextTransWidget);
       }
     }
@@ -572,7 +572,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return rowWidget;
   }
 
-  List<IHighlightSegment> altflClickables;
 
   private Widget addAltFL(T e) {
     String translitSentence = e.getAltFL().trim();
@@ -621,7 +620,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
       hp.add(spacer);
 
-      AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
+      AudioAttribute audioAttrPrefGender =
+          contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
 
       contextPlay
           = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true, this);
@@ -643,8 +643,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       col.add(commentRow);
 
-      if (!context.equals(contextExercise.getAltFL())) {
-        col.add(getAltContext(altFL, contextExercise.getAltFL()));
+      String altFL1 = contextExercise.getAltFL();
+      if (!altFL1.isEmpty() && !context.equals(altFL1)) {
+        col.add(getAltContext(altFL, altFL1));
       }
 
       return hp;

@@ -36,7 +36,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.ContextPractice;
-import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 
@@ -77,7 +77,7 @@ public interface LangTestDatabase extends RemoteService {
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
   AVPScoreReport getUserHistoryForList(int userid, Collection<Integer> ids, long latestResultID,
-                                       Map<String, Collection<String>> typeToSection, long userListID);
+                                       Map<String, Collection<String>> typeToSection, int userListID);
   // Telemetry ---
 
   /**

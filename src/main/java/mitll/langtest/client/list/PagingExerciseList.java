@@ -87,16 +87,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     super(currentExerciseVPanel, factory, controller, listOptions);
     this.waitCursorHelper = new WaitCursorHelper();
     addComponents();
-  //  if (!listOptions.isShowPager()) {
-      //pagingContainer.
-  //  }
     getElement().setId("PagingExerciseList_" + getInstance());
   }
 
   void sortBy(Comparator<T> comp) {
     pagingContainer.sortBy(comp);
     loadFirst();
-    //markCurrentExercise(getFirstID());
   }
 
   public void loadFirst() {
@@ -202,7 +198,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void goToFirst(String searchIfAny, int exerciseID) {
     if (listOptions.isShowFirstNotCompleted()) {
-      // logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny +"'");
+       logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny +"'");
       loadFirstExercise(searchIfAny);
     } else {
       super.goToFirst(searchIfAny, exerciseID);
@@ -245,7 +241,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param pagingContainer
    * @see #addComponents
    */
-  protected void addTableWithPager(SimplePagingContainer<T> pagingContainer) {
+  protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
     // row 1
     Panel column = new FlowPanel();
     add(column);
@@ -310,7 +306,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   public String getTypeAheadText() {
-    if (typeAhead == null) logger.warning("type ahead is null?");
+  //  if (typeAhead == null) logger.warning("type ahead is null?");
     return typeAhead != null ? typeAhead.getText() : "";
   }
 

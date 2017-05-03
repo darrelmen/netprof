@@ -497,7 +497,7 @@ public class UserSecurityManager implements IUserSecurityManager {
    * @return
    * @see #lookupUserFromHttpSession(HttpServletRequest)
    */
-  private User rememberUser(int uidI) {
+/*  private User rememberUser(int uidI) {
     User sessUser = userDAO.getByID(uidI);
     if (sessUser == null) {
       log.error("rememberUser huh? no user with id " + uidI);
@@ -505,7 +505,7 @@ public class UserSecurityManager implements IUserSecurityManager {
     } else {
       return sessUser;
     }
-  }
+  }*/
 
   /**
    * @param id

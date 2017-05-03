@@ -117,9 +117,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     setMaxWidth();
     //   stillSettingUp = false;
-
 //    logger.info("still setting up... over");
-
     return column;
   }
 
@@ -178,11 +176,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return o;
   }
 
-  private void configureTable(boolean sortEnglish) {
+  protected void configureTable(boolean sortEnglish) {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     table.setWidth("100%");
     table.setHeight("auto");
-
     // Add a selection model to handle user selection.
     addSelectionModel();
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
@@ -346,8 +343,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   private Comparator<T> comp;
 
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#sortBy(Comparator)
    * @param comp
+   * @see mitll.langtest.client.list.PagingExerciseList#sortBy(Comparator)
    */
   @Override
   public void sortBy(Comparator<T> comp) {
@@ -356,7 +353,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     logger.info("about to sort ");
     Collections.sort(getList(), comp);
     long now = System.currentTimeMillis();
-    logger.info("finished sort in " + (now-then));
+    logger.info("finished sort in " + (now - then));
   }
 
   public void hide() {

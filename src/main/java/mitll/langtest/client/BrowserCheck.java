@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  * @since 2/23/16
  */
 public class BrowserCheck {
-  private final Logger logger = Logger.getLogger("BrowserCheck");
+//  private final Logger logger = Logger.getLogger("BrowserCheck");
 
   private static final String FIREFOX = "firefox";
   private static final String CHROME = "chrome";
@@ -60,8 +60,6 @@ public class BrowserCheck {
   private String version = "";
 
   private final Map<String, Integer> browserToVersion = new HashMap<String, Integer>();
-
-//  private String hostGuess;
 
   public BrowserCheck() {
     browserToVersion.put(FIREFOX, 14);
@@ -103,9 +101,11 @@ public class BrowserCheck {
     return getBrowserAndVersion().equals("IE 7");
   }
 
+/*
   public boolean isIE() {
     return browser.equals("IE");
   }
+*/
 
   public static boolean isIPad() {
     String userAgent = getUserAgent();
@@ -122,7 +122,7 @@ public class BrowserCheck {
     return getBrowser(getUserAgent());
   }
 
-  public String getBrowser(String agent) {
+  private String getBrowser(String agent) {
     agent = agent.toLowerCase();
     if (agent.contains(FIREFOX)) {
       version = agent.substring(agent.indexOf(FIREFOX) + FIREFOX.length() + 1).split("\\s+")[0];

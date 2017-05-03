@@ -49,7 +49,7 @@ import mitll.langtest.shared.exercise.Shell;
  */
 public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   protected final ExerciseController controller;
-  protected ListInterface<T> exerciseList;
+  protected ListInterface<T,U> exerciseList;
 
   /**
    * @param controller
@@ -57,12 +57,12 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    */
   public ExercisePanelFactory(final ExerciseController controller,
-                              ListInterface<T> exerciseList) {
+                              ListInterface<T,U> exerciseList) {
     this.controller = controller;
     this.exerciseList = exerciseList;
   }
 
-  public void setExerciseList(ListInterface<T> exerciseList) {
+  public void setExerciseList(ListInterface<T,U> exerciseList) {
     this.exerciseList = exerciseList;
   }
 

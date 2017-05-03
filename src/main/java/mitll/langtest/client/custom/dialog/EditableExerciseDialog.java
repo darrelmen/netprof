@@ -106,7 +106,7 @@ class EditableExerciseDialog extends NewUserExercise {
   protected void gotBlur(FormField foreignLang,
                          RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording,
-                         ListInterface<CommonShell> pagingContainer,
+                         ListInterface<CommonShell,CommonExercise> pagingContainer,
                          Panel toAddTo) {
     validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, false, foreignChanged());
   }
@@ -156,7 +156,7 @@ class EditableExerciseDialog extends NewUserExercise {
    */
   @Override
   protected Panel getCreateButton(UserList<CommonShell> ul,
-                                  ListInterface<CommonShell> pagingContainer,
+                                  ListInterface<CommonShell,CommonExercise> pagingContainer,
                                   Panel toAddTo,
                                   ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
@@ -177,7 +177,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @return
    * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
-  PrevNextList<CommonShell> getPrevNext(ListInterface<CommonShell> pagingContainer) {
+  PrevNextList<CommonShell> getPrevNext(ListInterface<CommonShell, CommonExercise> pagingContainer) {
     CommonShell shell = pagingContainer.byID(newUserExercise.getID());
     return new PrevNextList<>(shell, exerciseList, shouldDisableNext(), controller);
   }
@@ -211,7 +211,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #isValidForeignPhrase
    */
   @Override
-  void afterValidForeignPhrase(final ListInterface<CommonShell> exerciseList,
+  void afterValidForeignPhrase(final ListInterface<CommonShell, CommonExercise> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
     //  if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());

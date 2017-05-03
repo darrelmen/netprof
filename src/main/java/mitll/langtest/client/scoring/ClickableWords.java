@@ -8,16 +8,13 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.InlineHTML;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.dialog.WordBounds;
 import mitll.langtest.client.custom.dialog.WordBoundsFactory;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -184,7 +181,7 @@ public class ClickableWords<T extends CommonExercise> {
         tokens.add(html);
       }
     } else {
-      tokens = new ArrayList<>(Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX)));
+      tokens = new ArrayList<>(Arrays.asList(value.split(GoodwaveExercisePanel.SPACE_REGEX)));
     }
 
     if (isRTL(exercise) && flLine) {
@@ -269,8 +266,8 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   private void putTextInSearchBox(String html) {
-    String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
-    String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
+    String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
+    String s2 = s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
     listContainer.searchBoxEntry(s2);
   }
 
@@ -317,6 +314,6 @@ public class ClickableWords<T extends CommonExercise> {
 */
 
   protected String removePunct(String t) {
-    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "").replaceAll("\\p{M}", "");
+    return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "").replaceAll("\\p{M}", "");
   }
 }

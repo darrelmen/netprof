@@ -254,7 +254,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
-      String subtitle = "Score and average (" + rawTotal + " items, average " + (int) percentAvg + " %)";
+      String subtitle = "Score and average :" + rawTotal + " items, avg " + (int) percentAvg + " %";
       String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
       chart = getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance);
       add(chart);

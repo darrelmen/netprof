@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
@@ -87,7 +88,7 @@ public class SlickUserExerciseDAO
   private final ExerciseAttributeJoinDAOWrapper attributeJoinDAOWrapper;
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
-  private IRefResultDAO refResultDAO;
+  private final IRefResultDAO refResultDAO;
   public static final boolean ADD_PHONE_LENGTH = false;
   private SlickExercise unknownExercise;
 
@@ -151,25 +152,6 @@ public class SlickUserExerciseDAO
         never,
         shared.getNumPhones());
   }
-
-//  @Deprecated
-//  private List<String> typeOrder = null;
-
-  /**
-   * @return
-   * @deprecated bad idea -- for which project is this????
-   */
-/*  List<String> getTypeOrder() {
-    if (typeOrder == null) {
-      typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
-      logger.info("getTypeOrder : exercise DAO " + exerciseDAO + " type order " + typeOrder);
-      if (typeOrder.isEmpty()) {
-        typeOrder = exerciseDAO.getTypeOrder();
-        logger.info("\tgetTypeOrder : exercise DAO " + exerciseDAO + " type order " + typeOrder);
-      }
-    }
-    return typeOrder;
-  }*/
 
   /**
    * TODO : we won't do override items soon, since they will just be domino edits...?
@@ -244,7 +226,7 @@ public class SlickUserExerciseDAO
         shared.getNumPhones());
   }
 
-  private Timestamp never = new Timestamp(0);
+  private final Timestamp never = new Timestamp(0);
 
   /**
    * @param slick
@@ -269,7 +251,6 @@ public class SlickUserExerciseDAO
         slick.candecode(),
         slick.candecodechecked().getTime(),
         slick.numphones());
-
 //    logger.info("fromSlick created " + userExercise);
     return userExercise;
   }
@@ -361,8 +342,8 @@ public class SlickUserExerciseDAO
     return exercisePhoneInfo;
   }
 
-  int updated = 0;
-  int cantcalc = 0;
+  private int updated = 0;
+  private int cantcalc = 0;
 
   /**
    * Writes to table on cache miss.
@@ -415,7 +396,7 @@ public class SlickUserExerciseDAO
     return exercisePhoneInfo;
   }
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
    * TODO : What is this doing???
@@ -697,7 +678,7 @@ public class SlickUserExerciseDAO
    * @param isOverride
    * @param isContext
    * @param typeOrder
-   * @see mitll.langtest.server.database.custom.UserListManager#newExercise
+   * @see IUserListManager#newExercise
    */
   @Override
   public int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder) {
@@ -974,10 +955,10 @@ public class SlickUserExerciseDAO
     return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue());
   }
 
-  public int insertAttribute(int projid,
-                             long now,
-                             int userid,
-                             String property, String value) {
+  private int insertAttribute(int projid,
+                              long now,
+                              int userid,
+                              String property, String value) {
     return attributeDAOWrapper.insert(new SlickExerciseAttribute(-1,
         projid,
         userid,
@@ -986,6 +967,7 @@ public class SlickUserExerciseDAO
         value));
   }
 
+/*
   public int insertAttributeJoin(
       long now,
       int userid,
@@ -997,13 +979,14 @@ public class SlickUserExerciseDAO
         exid,
         attrid));
   }
+*/
 
   /**
    * @param projid
    * @return
    * @see SlickUserExerciseDAO#getIDToPair
    */
-  public Collection<SlickExerciseAttribute> getAllByProject(int projid) {
+  private Collection<SlickExerciseAttribute> getAllByProject(int projid) {
     return attributeDAOWrapper.allByProject(projid);
   }
 

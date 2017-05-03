@@ -316,7 +316,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @see UserListManager#getUserListByID
    */
   @Override
-  public UserList<CommonShell> getWithExercises(long unique) {
+  public UserList<CommonShell> getWithExercises(int unique) {
     UserList<CommonShell> where = getWhere(unique, true);
     if (where == null) {
       logger.error("couldn't find list by " + unique);
@@ -335,11 +335,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @param unique
    * @param warnIfMissing
    * @return
-   * @see #getWithExercises(long)
+   * @see IUserListDAO#getWithExercises(int)
    * @see UserListManager#reallyCreateNewItem
    */
   @Override
-  public UserList<CommonShell> getWhere(long unique, boolean warnIfMissing) {
+  public UserList<CommonShell> getWhere(int unique, boolean warnIfMissing) {
     if (unique < 0) return null;
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
     try {
@@ -405,7 +405,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @throws SQLException
    * @seex #getAllPredef(long)
    * @see IUserListDAO#getAllPublic
-   * @see #getWhere(long, boolean)
+   * @see IUserListDAO#getWhere(int, boolean)
    */
   private List<UserList<CommonShell>> getUserLists(String sql, long userid) throws SQLException {
     List<UserList<CommonShell>> lists = getWhere(sql);
@@ -434,7 +434,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
           rs.getString("description"), // exp
           rs.getString("classmarker"),
           rs.getBoolean(ISPRIVATE),
-          rs.getTimestamp("modified").getTime(), "", "")
+          rs.getTimestamp("modified").getTime(), "", "", -1)
       );
     }
     //logger.debug("getWhere : got " + lists);
@@ -447,7 +447,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    *
    * @param where
    * @see #getUserLists(String, long)
-   * @see #getWithExercises(long)
+   * @see IUserListDAO#getWithExercises(int)
    * @see IUserListDAO#getAllByUser(long, int)
    */
   private void populateList(UserList<CommonShell> where) {

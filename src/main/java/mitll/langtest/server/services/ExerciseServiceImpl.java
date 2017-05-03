@@ -64,19 +64,47 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int WARN_DUR = 100;
   private static final boolean DEBUG = false;
 
-  public static final int MIN_DEBUG_DURATION = 30;
-  public static final int MIN_WARN_DURATION = 1000;
+  private static final int MIN_DEBUG_DURATION = 30;
+  private static final int MIN_WARN_DURATION = 1000;
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
   /**
-   *
    * @param request
    * @return
    */
   public FilterResponse getTypeToValues(FilterRequest request) {
-    return getSectionHelper().getTypeToValues(request);
+    List<Pair> typeToSelection = request.getTypeToSelection();
+
+    logger.info("getTypeToValues " + request + " " + typeToSelection);
+    FilterResponse typeToValues = getSectionHelper().getTypeToValues(request);
+
+    int userListID = request.getUserListID();
+    UserList<CommonShell> next = db.getUserListManager().getSimpleUserListByID(userListID);
+
+    if (next != null) {  // echo it back
+      logger.info("\tgetTypeToValues " + request + " include list " + next);
+
+      typeToValues.getTypesToInclude().add("Lists");
+      Set<MatchInfo> value = new HashSet<>();
+      value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID));
+      typeToValues.getTypeToValues().put("Lists", value);
+    }
+    return typeToValues;
   }
+
+/*  @Nullable
+  private List<UserList<CommonShell>> getUserLists(List<Pair> typeToSelection) {
+    List<UserList<CommonShell>> byName = null;
+    for (Pair p : typeToSelection) {
+      if (p.getProperty().equalsIgnoreCase("Lists")) {
+        byName = db.getUserListManager().getByName(getUserIDFromSession(), p.getValue(), getProjectID());
+        logger.info("getTypeToValues byName " + byName);
+        if (byName.isEmpty()) byName = null;
+      }
+    }
+    return byName;
+  }*/
 
   /**
    * Complicated.
@@ -120,23 +148,22 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       if (tExerciseListWrapper != null) return tExerciseListWrapper;
     }
 
-    List<CommonExercise> exercises;
-
     logger.debug("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
     try {
       boolean isUserListReq = request.getUserListID() != -1;
       UserList<CommonExercise> userListByID = isUserListReq ? db.getUserListByIDExercises(request.getUserListID(), getProjectID()) : null;
 
+      logger.info("found user list " + isUserListReq + " " + userListByID);
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
         return getExerciseWhenNoUnitChapter(request, projectID, userListByID);
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         if (userListByID != null) {
-          Collection<CommonExercise> exercisesForState = getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
-          ArrayList<CommonExercise> commonExercises = new ArrayList<>(exercisesForState);
-          return getExerciseListWrapperForPrefix(request, filterExercises(request, commonExercises, projectID));
+          Collection<CommonExercise> exercisesForState =
+              getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
+          return getExerciseListWrapperForPrefix(request, filterExercises(request, new ArrayList<>(exercisesForState), projectID));
         } else {
           return getExercisesForSelectionState(request, projectID);
         }
@@ -159,16 +186,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     int userID = request.getUserID();
     TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
     if (!request.getPrefix().isEmpty()) {
+      logger.info("found prefix for " + userListByID);
       // now do a trie over matches
       exercisesForSearch = getExercisesForSearch(request.getPrefix(), exercises, predefExercises);
-      //exercises = exercisesForSearch;
-
       if (request.getLimit() > 0) {
         exercisesForSearch.setByExercise(getFirstFew(request, exercisesForSearch.getByExercise()));
       }
-//      exercises = getLimitedMatches(request, exercisesForSearch.getByExercise());
     }
+    logger.info("triple resp " + exercisesForSearch);
     exercisesForSearch.setByExercise(filterExercises(request, exercisesForSearch.getByExercise(), projectID));
+    logger.info("after triple resp " + exercisesForSearch);
 
     // TODO : I don't think we need this?
 /*        if (!isUserListReq) {
@@ -195,12 +222,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                   TripleExercises<CommonExercise> exercises,
                                                   boolean predefExercises,
                                                   int userID) {
-    List<CommonExercise> commonExercises;
+    List<CommonExercise> commonExercises = exercises.getByExercise();
     if (request.isIncorrectFirstOrder()) {
+      logger.info("adding isIncorrectFirstOrder " + exercises.getByExercise().size() + " basicExercises");
       commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getCollator(), getLanguage());
     } else {
-      commonExercises = new ArrayList<>();
+
       if (predefExercises) {
+        commonExercises = new ArrayList<>();
         List<CommonExercise> basicExercises = new ArrayList<CommonExercise>(exercises.getByExercise());
         boolean sortByFL = getProject().isEnglish();
         String searchTerm = request.getPrefix();
@@ -742,6 +771,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     public void setByContext(List<T> byContext) {
       this.byContext = byContext;
     }
+
+    public String toString() {
+      return "by id " + byID.size() + "  by ex " + byExercise.size() + " by context " + byContext.size();
+    }
   }
 
   private <T extends CommonExercise> List<T> getExercieByExid(String prefix) {
@@ -962,23 +995,30 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param <T>
    * @return
    */
-  private <T extends CommonShell & HasUnitChapter> Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
-                                                                                                  UserList<T> userListByID) {
-    SectionHelper<T> helper = new SectionHelper<T>();
+  private <T extends CommonShell & HasUnitChapter>
+  Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
+                                                 UserList<T> userListByID) {
     Collection<T> exercises2 = getCommonExercises(userListByID);
-    long then = System.currentTimeMillis();
-    for (T commonExercise : exercises2) {
-      helper.addExercise(commonExercise);
-    }
-    long now = System.currentTimeMillis();
+    typeToSelection.remove("Lists");
+    if (typeToSelection.isEmpty()) {
+      logger.info("getExercisesFromUserListFiltered returning  " + userListByID.getExercises().size() + " exercises for " + userListByID.getID());
+      return exercises2;
+    } else {
+      SectionHelper<T> helper = new SectionHelper<T>();
 
-    if (now - then > 100) {
-      logger.debug("used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
+      logger.info("getExercisesFromUserListFiltered found " + exercises2.size() + " for list " + userListByID);
+      long then = System.currentTimeMillis();
+      exercises2.forEach(helper::addExercise);
+      long now = System.currentTimeMillis();
+
+      if (now - then > 100) {
+        logger.debug("getExercisesFromUserListFiltered used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
+      }
+      //helper.report();
+      Collection<T> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
+      logger.debug("\tgetExercisesFromUserListFiltered after found " + exercisesForState.size() + " matches to " + typeToSelection);
+      return /*typeToSelection.isEmpty() ? exercises2 :*/ exercisesForState;
     }
-    //helper.report();
-    Collection<T> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
-    // logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
-    return exercisesForState;
   }
 
   /**

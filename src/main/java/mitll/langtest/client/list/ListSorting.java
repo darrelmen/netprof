@@ -20,7 +20,9 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   private String locale;
 
   private static final String ENGLISH_ASC = "English : A-Z";
+  private static final String MEANING_ASC = "Meaning : A-Z";
   private static final String ENGLISH_DSC = "English : Z-A";
+  private static final String MEANING_DSC = "Meaning : Z-A";
   private static final String LENGTH_SHORT_TO_LONG = "Length : short to long";
   private static final String LENGTH_LONG_TO_SHORT = "Length : long to short";
   private static final String SCORE_LOW_TO_HIGH = "Score : low to high";
@@ -40,23 +42,15 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
     locale = projectStartupInfo == null ? "" : projectStartupInfo.getLocale();
   }
 
-  private void sortBy(Comparator<T> comp) {
-//    Scheduler.get().scheduleDeferred(new Command() {
-//      public void execute() {
-    exerciseList.waitCursorHelper.scheduleWaitTimer();
-    exerciseList.sortBy(comp);
-    exerciseList.waitCursorHelper.showFinished();
-//      }
-    //  });
-  }
 
   ListBox getSortBox(ExerciseController controller) {
     ListBox w1 = new ListBox();
 
     String language = controller.getLanguage();
 
-    w1.addItem(ENGLISH_ASC);
-    w1.addItem(ENGLISH_DSC);
+    boolean isEnglish = language.equalsIgnoreCase("English");
+    w1.addItem(isEnglish ? MEANING_ASC : ENGLISH_ASC);
+    w1.addItem(isEnglish ? MEANING_DSC : ENGLISH_DSC);
     String langASC = language + " : ascending";
     w1.addItem(langASC);
     String langDSC = language + " : descending";
@@ -105,6 +99,16 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
         return compareShells(o1, o2, i);
       });
     }
+  }
+
+  private void sortBy(Comparator<T> comp) {
+//    Scheduler.get().scheduleDeferred(new Command() {
+//      public void execute() {
+    exerciseList.waitCursorHelper.scheduleWaitTimer();
+    exerciseList.sortBy(comp);
+    exerciseList.waitCursorHelper.showFinished();
+//      }
+    //  });
   }
 
   private int compPhones(CommonShell o1, CommonShell o2) {

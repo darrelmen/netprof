@@ -109,7 +109,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    * @see mitll.langtest.client.custom.content.AVPHelper#getFactory
    */
   public StatsFlashcardFactory(ExerciseController controller,
-                               ListInterface<L> exerciseList, String instance, UserList ul) {
+                               ListInterface<L,T> exerciseList, String instance, UserList ul) {
     super(controller, exerciseList);
     controlState = new ControlState();
     this.instance = instance;
@@ -165,9 +165,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     currentExercise = e;
     sticky.storeCurrent(e);
     boolean recordingEnabled = controller.isRecordingEnabled();
-    if (!recordingEnabled) {
-      logger.warning("Recording is *not* enabled!");
-    }
+//    if (!recordingEnabled) {
+//      logger.warning("Recording is *not* enabled!");
+//    }
     boolean hasModel = controller.getProjectStartupInfo().isHasModel();
     boolean showRecordingFlashcard = !hasModel || !recordingEnabled;
 
@@ -274,7 +274,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
 
-    public StatsPracticePanel(CommonAnnotatable e, ListInterface<L> exerciseListToUse) {
+    public StatsPracticePanel(CommonAnnotatable e, ListInterface<L,T> exerciseListToUse) {
       super(e,
           StatsFlashcardFactory.this.controller,
           ADD_KEY_BINDING,

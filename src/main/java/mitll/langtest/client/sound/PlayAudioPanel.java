@@ -212,7 +212,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected IconAnchor makePlayButton(DivWidget toAddTo) {
     Button playButton = new Button(playLabel);
 
-    playButton.setSize(ButtonSize.LARGE);
 
     playButton.addClickHandler(event -> doClick());
 
@@ -235,6 +234,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   private void stylePlayButton(Button playButton) {
     playButton.setType(ButtonType.INFO);
+    playButton.setSize(ButtonSize.LARGE);
+    playButton.getElement().getStyle().setProperty("minWidth","15px");
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
@@ -623,7 +624,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   /**
    * @return
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#getPlayButton()
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#getPlayButton
    */
   public Widget getPlayButton() {
     return playButton;

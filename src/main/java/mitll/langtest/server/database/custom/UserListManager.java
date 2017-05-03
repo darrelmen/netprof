@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.custom;
 
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.PathWriter;
@@ -127,6 +128,7 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * TODO put this back
    * TODO : this doesn't really do anything - doesn't touch the exercises?????
    * <p>
    * Turned off setting second state for now -- what does it mean?
@@ -142,6 +144,7 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * TODO put this back
    * @see  #setStateOnExercises()
    * @param exerciseToState
    * @param firstState
@@ -153,6 +156,7 @@ public class UserListManager implements IUserListManager {
   }*/
 
   /**
+   * TODO put this back
    * @param exerciseToState
    * @param firstState
    * @return
@@ -345,7 +349,7 @@ public class UserListManager implements IUserListManager {
         return null;
       } else {
         long now = System.currentTimeMillis();
-        UserList e = new UserList(i++, userid, userWhere.getUserID(), name, description, dliClass, isPrivate, now, "", "");
+        UserList e = new UserList(i++, userid, userWhere.getUserID(), name, description, dliClass, isPrivate, now, "", "", projid);
         userListDAO.add(e, projid);
         logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
         return e;
@@ -371,7 +375,7 @@ public class UserListManager implements IUserListManager {
    * @param projid
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getListsForUser
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
+   * @seex mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   @Override
   public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists,
@@ -532,10 +536,10 @@ public class UserListManager implements IUserListManager {
    * TODO : probably a bad idea to do a massive where in ... ids.
    *
    * @param typeOrder used by sorter to sort first in unit & chapter order
-   * @param ids
+   * @param ids only within this set
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getReviewLists
-   * @see UserListManager#getUserListByID
+   * @see IUserListManager#getUserListByID
    */
   @Override
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids) {
@@ -591,16 +595,18 @@ public class UserListManager implements IUserListManager {
    * @see IUserListManager#getDefectList(Collection, Set)
    */
   private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
-                                              String name, String description,
+                                              String name,
+                                              String description,
                                               Collection<Integer> ids,
                                               int userListID,
                                               Collection<String> typeOrder) {
     List<CommonExercise> onList = getReviewedExercises(allKnown, ids);
 
+    // TODO : is the projid really needed here?
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User qcUser = getQCUser();
     UserList<CommonShell> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(), "", "");
+        false, System.currentTimeMillis(), "", "", -1);
 
     List<CommonShell> copy = new ArrayList<>();
     for (CommonShell orig : onList) copy.add(orig.getShell());
@@ -619,7 +625,7 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User qcUser = getQCUser();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(), "", "");
+        false, System.currentTimeMillis(), "", "", -1);
 
 //    List<CommonShell> copy = new ArrayList<>();
 //    for (CommonShell orig : onList) copy.add(orig.getShell());
@@ -652,7 +658,6 @@ public class UserListManager implements IUserListManager {
   private List<CommonExercise> getReviewedExercises(Collection<CommonExercise> allKnown, Collection<Integer> ids) {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise ue : allKnown) idToEx.put(ue.getID(), ue);
-
     return getReviewedUserExercises(idToEx, ids);
   }
 
@@ -740,12 +745,12 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
-  public void newExercise(long userListID, CommonExercise userExercise, String mediaDir) {
-    UserList where = getUserList(userListID);
-    newExerciseOnList(where, userExercise, mediaDir);
+  public void newExercise(int userListID, CommonExercise userExercise, String mediaDir) {
+    newExerciseOnList(getUserList(userListID), userExercise, mediaDir);
   }
 
-  public UserList getUserList(long userListID) {
+  public UserList getUserList(int userListID) {
+    logger.info("getUserList for " + userListID);
     return userListDAO.getWhere(userListID, true);
   }
 
@@ -789,7 +794,7 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.server.services.ListServiceImpl#addItemToUserList
    */
   @Override
-  public void addItemToList(long userListID, @Deprecated String exerciseID, int exid) {
+  public void addItemToList(int userListID, @Deprecated String exerciseID, int exid) {
     UserList where = getUserList(userListID);
 
     if (where != null) {
@@ -869,7 +874,7 @@ public class UserListManager implements IUserListManager {
    * @param overwrite
    * @param mediaDir
    * @see UserListManager#editItem
-   * @see #newExercise
+   * @seex IUserListManager#newExercise
    */
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
@@ -980,7 +985,7 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserListByID
    */
   @Override
-  public UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder, Set<Integer> ids) {
+  public UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids) {
     if (id == -1) {
       logger.error("getUserListByID : huh? asking for id " + id);
       return null;
@@ -992,7 +997,22 @@ public class UserListManager implements IUserListManager {
                     userListDAO.getWithExercises(id);
   }
 
+  @Override
+  public UserList<CommonShell> getSimpleUserListByID(int id) {
+    if (id == -1) {
+      logger.error("getUserListByID : huh? asking for id " + id);
+      return null;
+    } else {
+      return userListDAO.getWithExercises(id);
+    }
+  }
+
+/*  public List<UserList<CommonShell>> getByName(int userid, String name, int projid) {
+    return userListDAO.getByName(userid, name, projid);
+  }*/
+
   /**
+   * TODO : OK the review, comment, and attention LL (if needed) lists need to be in context of project.
    * @param id
    * @param projid
    * @param typeOrder
@@ -1001,7 +1021,10 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserListByIDExercises
    */
   @Override
-  public UserList<CommonExercise> getUserListByIDExercises(long id, int projid, Collection<String> typeOrder, Set<Integer> ids) {
+  public UserList<CommonExercise> getUserListByIDExercises(long id,
+                                                           int projid,
+                                                           Collection<String> typeOrder,
+                                                           Set<Integer> ids) {
     if (id == -1) {
       logger.error("getUserListByID : huh? asking for id " + id);
       return null;
@@ -1021,8 +1044,8 @@ public class UserListManager implements IUserListManager {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#addVisitor
    */
   @Override
-  public void addVisitor(long userListID, long user) {
-    //logger.debug("addVisitor - user " + user + " visits " + userList.getRealID());
+  public void addVisitor(int userListID, long user) {
+    logger.debug("addVisitor - user " + user + " visits " + userListID);
     UserList where = getUserList(userListID);
     if (where != null) {
       userListDAO.addVisitor(where.getID(), user);
@@ -1031,7 +1054,7 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  private boolean listExists(long id) {
+  private boolean listExists(int id) {
     return userListDAO.getWhere(id, false) != null;
   }
 
@@ -1196,10 +1219,10 @@ public class UserListManager implements IUserListManager {
    * @param id
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#deleteList
-   * @see mitll.langtest.client.custom.ListManager#deleteList
+   * @see ListManager#deleteList
    */
   @Override
-  public boolean deleteList(long id) {
+  public boolean deleteList(int id) {
     logger.debug("deleteList " + id);
     userListExerciseJoinDAO.removeListRefs(id);
     boolean b = listExists(id);
@@ -1215,7 +1238,7 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.server.services.ListServiceImpl#deleteItemFromList
    */
   @Override
-  public boolean deleteItemFromList(long listid, int exid, Collection<String> typeOrder) {
+  public boolean deleteItemFromList(int listid, int exid, Collection<String> typeOrder) {
     logger.debug("deleteItemFromList " + listid + " " + exid);
 
     UserList<?> userListByID = getUserListByID(listid, typeOrder, Collections.emptySet());

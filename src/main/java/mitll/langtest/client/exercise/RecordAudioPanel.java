@@ -147,10 +147,10 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    */
   @Override
   protected Widget getAfterPlayWidget() {
-    HTML w = new HTML(DYNAMIC_RANGE);
-    w.addStyleName("leftTenMargin");
-    w.addStyleName("topBarMargin");
-    afterPlayWidget.add(w);
+    HTML label = new HTML(DYNAMIC_RANGE);
+    label.addStyleName("leftTenMargin");
+    label.addStyleName("topBarMargin");
+    afterPlayWidget.add(label);
     afterPlayWidget.add(progressBar);
 
     afterPlayWidget.setVisible(false);
@@ -285,12 +285,19 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
             }
 
           }, suffix, toTheRightWidget);
+
       add(recordImage1);
       recordImage1.setVisible(false);
+
       add(recordImage2);
       recordImage2.setVisible(false);
+
       getElement().setId("MyPlayAudioPanel");
       setHeight(HEIGHT_OF_RECORD_ROW + "px");
+
+      postAudioRecordButton.addStyleName("leftFiveMargin");
+      postAudioRecordButton.addStyleName("floatLeft");
+      playButton.addStyleName("floatLeft");
     }
 
     /**
@@ -301,7 +308,9 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     @Override
     protected void addButtons(Widget optionalToTheRight) {
       if (postAudioRecordButton == null) logger.warning("huh? postAudioRecordButton is null???");
-      else add(postAudioRecordButton);
+      else {
+        add(postAudioRecordButton);
+      }
       super.addButtons(optionalToTheRight);
     }
   }

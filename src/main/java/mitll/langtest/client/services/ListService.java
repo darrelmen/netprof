@@ -34,17 +34,12 @@ package mitll.langtest.client.services;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.TextArea;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
-import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -67,18 +62,18 @@ public interface ListService extends RemoteService {
   /**
    * @param userListID
    * @param isPublic
-   * @see mitll.langtest.client.custom.ListManager#setPublic(long, boolean)
+   * @see ListManager#setPublic(long, boolean)
    */
-  void setPublicOnList(long userListID, boolean isPublic);
+  void setPublicOnList(int userListID, boolean isPublic);
 
   // Deleting lists and exercises from lists
 
   /**
    * @param id
    * @return
-   * @see mitll.langtest.client.custom.ListManager#deleteList(Button, UserList, boolean)
+   * @see ListManager#deleteList(Button, UserList, boolean)
    */
-  boolean deleteList(long id);
+  boolean deleteList(int id);
 
   /**
    * @param listid
@@ -86,7 +81,7 @@ public interface ListService extends RemoteService {
    * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem
    */
-  boolean deleteItemFromList(long listid, int exid);
+  boolean deleteItemFromList(int listid, int exid);
   /**
    * @see ReviewEditableExercise#confirmThenDeleteItem()
    * @param exid
@@ -97,15 +92,15 @@ public interface ListService extends RemoteService {
   /**
    * @param userListID
    * @param user
-   * @see mitll.langtest.client.custom.ListManager#addVisitor(UserList)
+   * @see ListManager#addVisitor(UserList)
    */
-  void addVisitor(long userListID, int user);
+  void addVisitor(int userListID, int user);
 
   /**
    * @param onlyCreated
    * @param visited
    * @return
-   * @see mitll.langtest.client.custom.ListManager#viewLessons
+   * @see ListManager#viewLessons
    */
   Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited);
 
@@ -113,13 +108,13 @@ public interface ListService extends RemoteService {
    * TODO : not filled in yet
    * @param search
    * @return
-   * @see mitll.langtest.client.custom.ListManager#viewLessons
+   * @see ListManager#viewLessons
    */
   Collection<UserList<CommonShell>> getUserListsForText(String search);
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.ListManager#viewReview(Panel)
+   * @see ListManager#viewReview(Panel)
    */
   List<UserList<CommonShell>> getReviewLists();
 
@@ -128,7 +123,7 @@ public interface ListService extends RemoteService {
    * @param exID
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  void addItemToUserList(long userListID, int exID);
+  void addItemToUserList(int userListID, int exID);
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
@@ -136,14 +131,14 @@ public interface ListService extends RemoteService {
    * @param userExercise
    * @return
    */
-  CommonExercise newExercise(long userListID, CommonExercise userExercise);
+  CommonExercise newExercise(int userListID, CommonExercise userExercise);
   /**
    * @param userListID
    * @param userExerciseText
    * @return
-   * @see mitll.langtest.client.custom.ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
+   * @see ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
    */
-  Collection<CommonExercise> reallyCreateNewItems(long userListID, String userExerciseText);
+  Collection<CommonExercise> reallyCreateNewItems(int userListID, String userExerciseText);
 
   /**
    * @param id

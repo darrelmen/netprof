@@ -190,7 +190,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param firstExercise
    * @param language
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
-   * @see DatabaseImpl#writeUserListAudio(OutputStream, long, int, AudioExport.AudioExportOptions)
+   * @see DatabaseImpl#writeUserListAudio(OutputStream, int, int, AudioExport.AudioExportOptions)
    */
   public int attachAudioToExercise(CommonExercise firstExercise, String language) {
     long then = System.currentTimeMillis();

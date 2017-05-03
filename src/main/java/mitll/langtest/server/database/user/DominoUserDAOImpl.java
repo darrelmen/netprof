@@ -34,10 +34,7 @@ package mitll.langtest.server.database.user;
 
 import com.mongodb.MongoTimeoutException;
 import com.mongodb.client.MongoCollection;
-import mitll.hlt.domino.server.user.IGroupDAO;
-import mitll.hlt.domino.server.user.IUserServiceDelegate;
-import mitll.hlt.domino.server.user.MongoGroupDAO;
-import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
+import mitll.hlt.domino.server.user.*;
 import mitll.hlt.domino.server.util.*;
 import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
@@ -114,20 +111,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     populateRoles();
 
-    Properties props = database.getServerProps().getProps();
-
     try {
-      connectToMongo(database, props);
+      connectToMongo(database, database.getServerProps().getProps());
     } catch (Exception e) {
       logger.error("Couldn't connect to mongo - is it running and accessible? " + e);
     }
   }
 
+  private JSONSerializer serializer;
+
   private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
     pool = Mongo.createPool(new DBProperties(props));
 
     if (pool != null) {
-      JSONSerializer serializer = Mongo.makeSerializer();
+      serializer = Mongo.makeSerializer();
+
+      logger.info("OK made serializer " + serializer);
       Mailer mailer = new Mailer(new MailerProperties(props));
       ServerProperties dominoProps =
           new ServerProperties(props, "1.0", "demo", "0", "now");
@@ -149,13 +148,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         logger.debug("DominoUserDAOImpl no cache");
       }
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
-      logger.debug("DominoUserDAOImpl made delegate");
+      //logger.debug("DominoUserDAOImpl made delegate");
       myDelegate = makeMyServiceDelegate();//dominoProps.getUserServiceProperties(), mailer, pool, serializer);
 
       dominoAdminUser = delegate.getAdminUser();
     } else {
       logger.error("DominoUserDAOImpl couldn't connect to user service - no pool!\n\n");
     }
+  }
+
+  public JSONSerializer getSerializer() {
+    return serializer;
   }
 
   private void populateRoles() {
@@ -188,7 +191,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return Ignition.start(cfg);
   }
 
-  private MyMongoUserServiceDelegate makeMyServiceDelegate() {  return new MyMongoUserServiceDelegate();  }
+  private MyMongoUserServiceDelegate makeMyServiceDelegate() {
+    return new MyMongoUserServiceDelegate();
+  }
 
   @Override
   public void ensureDefaultUsers() {
@@ -257,7 +262,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult1.get();
       if (clientUserDetail.getGender() == UNSPECIFIED) {
-        logger.info("huh? " +clientUserDetail.getUserId() + " is " + clientUserDetail.getGender());
+        logger.info("huh? " + clientUserDetail.getUserId() + " is " + clientUserDetail.getGender());
       }
       return clientUserDetail;
     }
@@ -634,9 +639,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public User getUserWhere(int userid) { return getByID(userid);  }
+  public User getUserWhere(int userid) {
+    return getByID(userid);
+  }
 
-  private DBUser lookupUser(int id) {   return delegate.lookupDBUser(id);  }
+  private DBUser lookupUser(int id) {
+    return delegate.lookupDBUser(id);
+  }
 
   @Override
   public List<User> getUsers() {
@@ -689,10 +698,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.isMale() ? DMALE : DFEMALE;
 
     if (gender == UNSPECIFIED) {
-      logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' "+ user.getUserKind() + " gender is unspecified.");
-    }
-    else {
-      logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' "+ user.getUserKind() + " gender is "+gender);
+      logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' " + user.getUserKind() + " gender is unspecified.");
+    } else {
+      logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' " + user.getUserKind() + " gender is " + gender);
 
     }
 
@@ -707,7 +715,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         getGroup()
     );
 
-    if (clientUserDetail.getGender() != gender) logger.error("huh? wrote "+ gender + " but got back " +clientUserDetail.getGender());
+    if (clientUserDetail.getGender() != gender)
+      logger.error("huh? wrote " + gender + " but got back " + clientUserDetail.getGender());
 
     clientUserDetail.addSecondaryGroup(getGroupOrMake(projectName));
     clientUserDetail.setAcctDetail(new AccountDetail(
@@ -747,7 +756,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     String email = dominoUser.getEmail();
 
- //   logger.debug("toUser : user " + dominoUser.getUserId() + " email " + email);//, new Exception());
+    //   logger.debug("toUser : user " + dominoUser.getUserId() + " email " + email);//, new Exception());
 
     Set<User.Permission> permissionSet = new HashSet<>();
 //    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
@@ -854,9 +863,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
           if (!firstRole.startsWith("ILR")) {
             if (unknownRoles.contains(firstRole)) {
 
-            }
-            else {
-              logger.warn("getUserKind no user for " + firstRole + " : now seen these unmapped roles " +unknownRoles);
+            } else {
+              logger.warn("getUserKind no user for " + firstRole + " : now seen these unmapped roles " + unknownRoles);
               unknownRoles.add(firstRole);
             }
           }
@@ -1179,10 +1187,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     DBUser next = delegate.getDBUser(user);
 
     if (next == null) {
-      logger.warn("forgotPassword - can't find user " + user );
+      logger.warn("forgotPassword - can't find user " + user);
       return false;
-    }
-    else {
+    } else {
       if (next.getPrimaryGroup() == null) {
         next.setPrimaryGroup(getGroup());
       }

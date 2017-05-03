@@ -30,20 +30,64 @@
  *
  */
 
-package mitll.langtest.server.database.user;
+package mitll.langtest.shared.project;
 
-import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickInvite;
+import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.user.Affiliation;
+import mitll.langtest.shared.project.SlimProject;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
-public interface IInviteDAO {
-  int add(SlickInvite invite);
+/**
+ * Created with IntelliJ IDEA.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 11/19/13
+ * Time: 7:01 PM
+ * To change this template use File | Settings | File Templates.
+ */
+public class StartupInfo implements IsSerializable {
+  private List<Affiliation> affiliations;
+  private Map<String, String> properties;
+  private List<SlimProject> projects;
+  private String message = "";
 
-  void update(int id, String key);
+  public StartupInfo() {
+  } // for serialization
 
-  Collection<SlickInvite> getPending();
+  /**
+   * @param properties
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo
+   */
+  public StartupInfo(Map<String, String> properties,
+                     List<SlimProject> projects,
+                     String message,
+                     List<Affiliation> affiliations) {
+    this.properties = properties;
+    this.projects = projects;
+    this.message = message;
+    this.affiliations = affiliations;
+  }
 
-  Map<String,Integer> getInvitationCounts(User.Kind requestRole);
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
+  public List<SlimProject> getProjects() {
+    return projects;
+  }
+
+  /**
+   * If the app doesn't start properly, what to show
+   * @return
+   */
+  public String getMessage() {
+    return message;
+  }
+
+  public List<Affiliation> getAffiliations() {
+    return affiliations;
+  }
 }

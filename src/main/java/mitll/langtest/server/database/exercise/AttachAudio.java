@@ -50,6 +50,7 @@ import java.util.*;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 11/10/15.
+ * @deprecated
  */
 public class AttachAudio {
   private static final Logger logger = LogManager.getLogger(AttachAudio.class);
@@ -135,11 +136,11 @@ public class AttachAudio {
    * @see ExcelImport#attachAudio
    * @see ExcelImport#getRawExercises()
    */
-  private <T extends CommonExercise> void attachAudio(T imported, Collection<Integer> transcriptChanged) {
+/*  private <T extends CommonExercise> void attachAudio(T imported, Collection<Integer> transcriptChanged) {
     int id = imported.getID();
     int missing = 0;
 //    logger.info("Attach audio to " + imported);
-    if (exToAudio.containsKey(id) /*|| exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")*/) {
+    if (exToAudio.containsKey(id) *//*|| exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")*//*) {
       List<AudioAttribute> audioAttributes = exToAudio.get(id);
       //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
       Set<Integer> changedIDs = new HashSet<>();
@@ -166,7 +167,7 @@ public class AttachAudio {
         missing = attachAudio(imported, missing, transcriptToAudio.get(transcript), transcriptChanged, new HashSet<>());
       }
     }
-  }
+  }*/
 
   //int spew = 0;
   private int totalMissingContext = 0;
@@ -187,6 +188,7 @@ public class AttachAudio {
    * @paramx language
    * @see #attachAudio(CommonExercise, Collection)
    */
+/*
   private <T extends CommonExercise> int attachAudio(T exercise,
                                                      int missing,
                                                      Collection<AudioAttribute> audioAttributes,
@@ -251,16 +253,19 @@ public class AttachAudio {
           } else {
             transcriptChangedIDs.add(audio.getExid());
             changedIDs.add(audio.getExid());
+*/
 /*							if (m++ < 10) {
                 logger.warn("for " + exercise + " audio transcript " + audio.getTranscript() +
 										" doesn't match : '" + removePunct(audio.getTranscript()) + "' vs '" + removePunct(exercise.getForeignLanguage()) + "'");
-							}*/
+							}*//*
+
           }
           previouslyAttachedAudio.add(actualPath);
 //            logger.debug("exercise " +exercise.getOldID()+ " now " + exercise.getAudioAttributes());
         } else {
           logger.debug("skipping " + actualPath);
         }
+*/
 /*        } else {
           missing++;
           c++;
@@ -270,12 +275,15 @@ public class AttachAudio {
 //              logger.warn("installPath " + installPath + "mediaDir " + mediaDir + " mediaDir1 " + mediaDir1);
 //            }
           }
-        }*/
+        }*//*
+
       }
     }
     return missing;
   }
+*/
 
+/*
   private void addIfDNRAboveThreshold(MutableAudioExercise mutableAudio, AudioAttribute audio, String child) {
     float dnr1 = audio.getDnr();
     boolean dnrOK = dnr1 < 0 || dnr1 > audioCheck.getMinDNR();
@@ -287,6 +295,7 @@ public class AttachAudio {
 //      logger.debug("attachAudio skipping audio file with low dynamic range " + test);
     }
   }
+*/
 
   /**
    * @see BaseExerciseDAO#attachAudio

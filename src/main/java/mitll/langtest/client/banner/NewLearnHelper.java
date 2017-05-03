@@ -56,10 +56,7 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
       @Override
       public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
         List<CorrectAndScore> correctAndScores = wrapper.getHistories().get(e.getID());
-        return new TwoColumnExercisePanel<>(e, controller, exerciseList,
-            correctAndScores
-        );
-
+        return new TwoColumnExercisePanel<>(e, controller, exerciseList, correctAndScores);
       }
     };
   }

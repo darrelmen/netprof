@@ -32,8 +32,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 /**
  * An ASR scoring panel with a record button.
  */
-public class ASRRecordAudioPanel<T extends CommonExercise>// CommonShell & AudioRefExercise & ScoredExercise>
-    extends ASRScoringAudioPanel<T> {
+public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAudioPanel<T> {
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
   private static final String REFERENCE = "";

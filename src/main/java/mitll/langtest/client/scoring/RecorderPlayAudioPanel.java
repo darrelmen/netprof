@@ -22,6 +22,8 @@ import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * Created by go22670 on 4/5/17.
+ * @see SimpleRecordAudioPanel#makePlayAudioPanel
+ *
  */
 class RecorderPlayAudioPanel extends PlayAudioPanel {
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
@@ -75,8 +77,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
       }
     });
 
-    logger.info("configureButton " + playButton.getElement().getId());
-
+//    logger.info("configureButton " + playButton.getElement().getId());
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
     playButton.setSize(ButtonSize.LARGE);
@@ -85,12 +86,11 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     playButton.addStyleName("floatLeft");
   }
 
-  void hidePlayButton() {
-    playButton.setVisible(false);
-  }
-
   void showPlayButton() {
     playButton.setVisible(true);
+  }
+  void hidePlayButton() {
+    playButton.setVisible(false);
   }
 
   public void flip(boolean first) {
@@ -101,7 +101,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void showFirstRecord() {
     recordImage1.setVisible(true);
     downloadContainer.setVisible(false);
-
   }
 
   void hideRecord() {

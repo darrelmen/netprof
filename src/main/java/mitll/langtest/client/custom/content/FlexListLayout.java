@@ -57,7 +57,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   private final Logger logger = Logger.getLogger("FlexListLayout");
 
 //  private static final int RIGHT_SIDE_DIV_WIDTH = 70;
-
   public PagingExerciseList<T, U> npfExerciseList;
   private final ExerciseController controller;
 

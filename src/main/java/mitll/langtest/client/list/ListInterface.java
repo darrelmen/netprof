@@ -58,7 +58,7 @@ import java.util.Map;
  * Time: 5:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ListInterface<T extends Shell> extends RequiresResize, Reloadable {
+public interface ListInterface<T extends Shell, U extends Shell> extends RequiresResize, Reloadable {
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
    * @param hasID
@@ -81,7 +81,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    * @param factory
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    */
-  void setFactory(ExercisePanelFactory factory);
+  void setFactory(ExercisePanelFactory<T,U> factory);
 
   /**
    * @param userID

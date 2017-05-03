@@ -34,7 +34,7 @@ package mitll.langtest.server.services;
 
 import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
-import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.client.services.AudioService;
 import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.AnswerInfo;
@@ -212,28 +212,31 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * Kick off a thread to do this... so we can return.
    */
   public void ensureAllAudio() {
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        db.getProjects().forEach(project -> ensureAudio(project.getID()));
-      }
-    }).start();
+    new Thread(() -> db.getProjects().forEach(project -> ensureAudio(project.getID()))).start();
   }
 
+  /**
+   * @param projectid
+   * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio
+   */
   @Override
   public void checkAudio(int projectid) {
     Project project = db.getProject(projectid);
-    logger.info("0 checkAudio - for project " + projectid + " " + project);
+    logger.info("checkAudio - for project " + projectid + " " + project);
     long then = System.currentTimeMillis();
     db.getAudioDAO().makeSureAudioIsThere(projectid, project.getLanguage(), true);
     long now = System.currentTimeMillis();
-    if (now - then > WARN_THRESH) logger.info("1 checkAudio - took " + (now - then) + " millis to check audio");
+    if (now - then > WARN_THRESH) {
+      logger.info("checkAudio : for project " + projectid + " " + project +
+          " - took " + (now - then) + " millis to check audio");
+    }
 
     ensureAudio(projectid);
   }
 
   /**
    * This could take a long time - lots of files, shell out for each one...
+   *
    * @param projectid
    */
   private void ensureAudio(int projectid) {
@@ -242,55 +245,57 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     then = now;
     List<CommonExercise> exercises = db.getExercises(projectid);
     now = System.currentTimeMillis();
-    if (now - then > WARN_THRESH) logger.info("ensureAudio for " + projectid+ " - took " + (now - then) + " millis to get exercises");
+    if (now - then > WARN_THRESH)
+      logger.info("ensureAudio for " + projectid + " - took " + (now - then) + " millis to get exercises");
 
-    ensureAudioForExercises( exercises);
+    ensureAudioForExercises(exercises);
   }
 
   public void ensureAudioForIDs(int projid, Collection<Integer> ids) {
-    logger.info("ensureAudioForIDs for "+ ids.size());
+    logger.info("ensureAudioForIDs for " + ids.size());
     List<CommonExercise> collect = ids.stream().map(id -> db.getCustomOrPredefExercise(projid, id)).collect(Collectors.toList());
     if (collect.size() != ids.size()) {
-      logger.warn("only found " +collect.size() + " exercises???");
+      logger.warn("ensureAudioForIDs only found " + collect.size() + " exercises???");
     }
     ensureAudioForExercises(collect);
   }
 
-  private void ensureAudioForExercises(  List<CommonExercise> exercises) {
-    long now = System.currentTimeMillis();
-    long then;
+  private void ensureAudioForExercises(List<CommonExercise> exercises) {
     String language = getLanguage();
-    then = now;
+    long then = System.currentTimeMillis();
     db.getAudioDAO().attachAudioToExercises(exercises, language);
-    now = System.currentTimeMillis();
-    if (now - then > WARN_THRESH) logger.info("ensureAudioForExercises checkAudio - took " + (now - then) + " millis to attach audio");
+    long now = System.currentTimeMillis();
+    if (now - then > WARN_THRESH)
+      logger.info("ensureAudioForExercises checkAudio - took " + (now - then) + " millis to attach audio");
 
-    ensureCompressedAudio(exercises,  language);
+    ensureCompressedAudio(exercises, language);
   }
 
-  private void ensureCompressedAudio(List<CommonExercise> exercises,   String language) {
+  private void ensureCompressedAudio(List<CommonExercise> exercises, String language) {
     long then = System.currentTimeMillis();
 
     int c = 0;
     int success = 0;
-    for (CommonExercise e : exercises) {
-      if (e != null) {
-        for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
+    logger.info("ensureCompressedAudio examining " + exercises.size() + " exercises");
+
+    for (CommonExercise exercise : exercises) {
+      if (exercise != null) {
+        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
           c++;
           if (c < 10) {
-//            logger.info("checkAudio e.g. ensure audio for " + audioAttribute + " on " + e);
+//            logger.info("checkAudio exercise.g. ensure audio for " + audioAttribute + " on " + exercise);
           }
           try {
             boolean didit = ensureCompressedAudio(
                 audioAttribute.getUserid(),
-                e,
+                exercise,
                 audioAttribute.getAudioRef(),
                 audioAttribute.getAudioType(),
                 language);
             if (didit) success++;
-            if (c % 1000 == 0) logger.debug("checkAudio checked " + c + ", success = " + success);
+            if (c % 100 == 0) logger.debug("checkAudio checked " + c + ", success = " + success);
           } catch (Exception e1) {
-            logger.warn("Got " +e1 + " for exercise " +e.getID() + " : " + audioAttribute.getAudioRef());
+            logger.warn("Got " + e1 + " for exercise " + exercise.getID() + " : " + audioAttribute.getAudioRef());
           }
         }
       }
@@ -306,6 +311,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * Tries to remember if we've checked a file before...
+   *
    * @param user
    * @param commonShell
    * @param path
@@ -326,7 +332,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     boolean noExerciseYet = commonShell == null;
-    String title   = noExerciseYet ? "unknown" : commonShell.getForeignLanguage();
+    String title = noExerciseYet ? "unknown" : commonShell.getForeignLanguage();
     String comment = noExerciseYet ? "unknown" : commonShell.getEnglish();
     if (audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) && !noExerciseYet) {
       if (commonShell.hasContext()) {
@@ -339,7 +345,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     boolean b = ensureMP3(path, new TrackInfo(title, userID, comment, language));
     if (b) {
       checkedExists.add(path);
-      if (checkedExists.size() % CHECKED_INTERVAL == 10) logger.debug("ensureCompressedAudio checked " + checkedExists.size() + " files...");
+      if (checkedExists.size() % CHECKED_INTERVAL == 10)
+        logger.debug("ensureCompressedAudio checked " + checkedExists.size() + " files...");
     }
     return b;
   }

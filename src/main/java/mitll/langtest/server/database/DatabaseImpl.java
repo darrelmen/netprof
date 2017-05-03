@@ -175,7 +175,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private mitll.langtest.server.database.user.UserManagement userManagement = null;
 
   /**
-   * @see #writeUserListAudio(OutputStream, long, int, AudioExport.AudioExportOptions)
+   * @see #writeUserListAudio(OutputStream, int, int, AudioExport.AudioExportOptions)
    */
   // private final String configDir;
   /**
@@ -190,7 +190,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private RecordWordAndPhone recordWordAndPhone;
 
   private IUserSecurityManager userSecurityManager;
-
+DominoExerciseDAO dominoExerciseDAO;
   /**
    * JUST FOR TESTING
    *
@@ -313,11 +313,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     // logger.debug("initializeDAOs ---");
 
     eventDAO = new SlickEventImpl(dbConnection);
-    //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
-    this.userDAO = new DominoUserDAOImpl(this);
+    DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this);
+    this.userDAO = dominoUserDAO;
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
-    // this.inviteDAO = new SlickInviteDAOImpl(this, dbConnection);
-    SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
+     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
     answerDAO = new SlickAnswerDAO(this, dbConnection);
@@ -363,6 +362,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
+
+    dominoExerciseDAO = new DominoExerciseDAO(dominoUserDAO.getSerializer());
 //    long now = System.currentTimeMillis();
 //    if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
@@ -1551,13 +1552,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.server.DownloadServlet#writeUserList
    */
   public String writeUserListAudio(OutputStream out,
-                                   long listid,
+                                   int listid,
                                    int projectid,
                                    AudioExport.AudioExportOptions options) throws Exception {
     String language = getLanguage(projectid);
     if (listid == -1) return language + "_Unknown";
 
-    UserList<CommonShell> userListByID = getUserListByID(listid, projectid);
+    UserList<CommonShell> userListByID = getUserListManager().getSimpleUserListByID(listid);
 
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
@@ -1624,21 +1625,21 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.info(getLanguage() + " took " + (now - then) + " millis to attachAllAudio to " + exercises.size() + " exercises");
   }
 
-  public String getUserListName(long listid, int projectid) {
-    UserList userListByID = getUserListByID(listid, projectid);
-    String language1 = getLanguage(projectid);
+  public String getUserListName(int listid) {
+    UserList userListByID = getUserListManager().getSimpleUserListByID(listid);
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
-      return language1 + "_Unknown";
+      return "_Unknown";
     } else {
+      String language1 = getLanguage(userListByID.getProjid());
       return language1 + "_" + userListByID.getName();
     }
   }
 
-  @Override
+/*  @Override
   public UserList<CommonShell> getUserListByID(long listid, int projectid) {
     return getUserListManager().getUserListByID(listid, getSectionHelper(projectid).getTypeOrder(), getIDs(projectid));
-  }
+  }*/
 
   @Override
   public UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid) {
@@ -1908,5 +1909,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   public String toString() {
     return "Database : " + this.getClass().toString();
+  }
+
+  public DominoExerciseDAO getDominoExerciseDAO() {
+    return dominoExerciseDAO;
   }
 }

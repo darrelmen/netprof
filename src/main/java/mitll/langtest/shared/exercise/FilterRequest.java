@@ -46,17 +46,18 @@ import java.util.*;
  */
 public class FilterRequest implements IsSerializable {
   private int reqID = 1;
-  //  private Map<String, Collection<String>> typeToSelection = new HashMap<>();
   private List<Pair> typeToSelection = new ArrayList<>();
   private String prefix = "";
   private int limit = -1;
+  private int userListID = -1;
 
   public FilterRequest() {
   }
 
-  public FilterRequest(int reqID, List<Pair> pairs) {
+  public FilterRequest(int reqID, List<Pair> pairs, int userListID) {
     this.reqID = reqID;
     this.typeToSelection = pairs;
+    this.userListID = userListID;
   }
 
   public boolean isNoFilter() {
@@ -118,8 +119,17 @@ public class FilterRequest implements IsSerializable {
    */
   public String toString() {
     return
-        (limit == -1 ? "" : "limit                  '" + limit + "'") +
-            (prefix.isEmpty() ? "" : "prefix                  '" + prefix + "'") +
-            (getTypeToSelection().isEmpty() ? "" : "\n\tselection           " + getTypeToSelection());
+        (userListID == -1 ? "" : "userListID =" + userListID) +
+            (limit == -1 ? "" : "limit '" + limit + "'") +
+            (prefix.isEmpty() ? "" : "prefix '" + prefix + "'") +
+            (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
+  }
+
+  public int getUserListID() {
+    return userListID;
+  }
+
+  public void setUserListID(int userListID) {
+    this.userListID = userListID;
   }
 }

@@ -52,6 +52,7 @@ import java.util.*;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/10/16.
+ * @deprecated
  */
 public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
   private static final Logger logger = LogManager.getLogger(AMASJSONURLExerciseDAO.class);

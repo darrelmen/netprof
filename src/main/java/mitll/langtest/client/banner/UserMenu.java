@@ -22,6 +22,7 @@ import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
+import mitll.langtest.client.user.UserTable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

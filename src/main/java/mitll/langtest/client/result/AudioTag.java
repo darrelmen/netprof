@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.result;
 
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;

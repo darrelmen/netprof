@@ -35,15 +35,16 @@ package mitll.langtest.client.custom.dialog;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.ReloadableContainer;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.scoring.ExerciseOptions;
+import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
+import java.util.Collections;
 import java.util.logging.Logger;
 
 /**
@@ -76,7 +77,7 @@ public class EditItem {
 
   /**
    * @param controller
-   * @see mitll.langtest.client.custom.ListManager#ListManager
+   * @see ListManager#ListManager
    */
   public EditItem(ExerciseController controller,
                   ReloadableContainer predefinedContentList) {
@@ -90,7 +91,7 @@ public class EditItem {
    * @return
    * @paramx itemMarker
    * @paramx includeAddItem
-   * @see mitll.langtest.client.custom.ListManager#showEditItem
+   * @see ListManager#showEditItem
    */
   public Panel editItem(UserList<CommonShell> originalList) {
     Panel hp = new HorizontalPanel();
@@ -209,8 +210,13 @@ public class EditItem {
           panel.add(editableExercise.addFields(outer, panel));
           editableExercise.setFields(exercise);
         } else {
-          return new CommentNPFExercise<>(exercise, controller, exerciseList,
-              new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));
+//          return new CommentNPFExercise<>(exercise, controller, exerciseList,
+//              new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));
+
+          return new TwoColumnExercisePanel<CommonExercise>(exercise,
+              controller,
+              exerciseList, Collections.emptyList());
+//              new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));
         }
 
         return panel;

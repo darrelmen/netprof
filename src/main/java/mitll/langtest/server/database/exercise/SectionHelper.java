@@ -1015,28 +1015,24 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     this.parentToChildTypes = parentToChildTypes;
   }
 
+  /**
+   * @param request
+   * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
+   */
   @Override
   public FilterResponse getTypeToValues(FilterRequest request) {
     List<Pair> typeToSelection = request.getTypeToSelection();
-
-    List<String> typesInOrder = new ArrayList<>();
-    for (Pair pair : typeToSelection) typesInOrder.add(pair.getProperty());
+    List<String> typesInOrder = getTypesFromRequest(typeToSelection);
     Set<String> typesToInclude1 = new HashSet<>(typesInOrder);
 
 //    logger.info("getTypeToValues request is       " + typeToSelection);
     Map<String, Set<MatchInfo>> typeToMatches = getTypeToMatches(typeToSelection);
 //    logger.info("getTypeToValues typeToMatches is " + typeToMatches);
 
-    boolean someEmpty = false;
-    for (String type : typesInOrder) {
-      Set<MatchInfo> matches = typeToMatches.get(type);
-      if (matches == null || matches.isEmpty()) {
-        typesToInclude1.remove(type);
-        logger.info("getTypeToValues removing " + type);
-        someEmpty = true;
-      }
-    }
+    boolean someEmpty = checkIfAnyTypesAreEmpty(typesInOrder, typesToInclude1, typeToMatches);
 
+    int userListID = request.getUserListID();
     if (someEmpty) {
       List<Pair> typeToSelection2 = new ArrayList<>();
       logger.info("getTypeToValues back off including  " + typesToInclude1);
@@ -1049,9 +1045,39 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
       logger.info("getTypeToValues try search again with " + typeToSelection2);
 
-      return new FilterResponse(request.getReqID(), getTypeToMatches(typeToSelection2), typesToInclude1);
+      return new FilterResponse(request.getReqID(), getTypeToMatches(typeToSelection2), typesToInclude1, userListID);
     } else {
-      return new FilterResponse(request.getReqID(), typeToMatches, typesToInclude1);
+      return new FilterResponse(request.getReqID(), typeToMatches, typesToInclude1, userListID);
     }
+  }
+
+  @NotNull
+  private List<String> getTypesFromRequest(List<Pair> typeToSelection) {
+    List<String> typesInOrder = new ArrayList<>();
+    for (Pair pair : typeToSelection) typesInOrder.add(pair.getProperty());
+    return typesInOrder;
+  }
+
+  /**
+   * Removes types that have no matches...
+   *
+   * @param typesInOrder
+   * @param typesToInclude1
+   * @param typeToMatches
+   * @return
+   */
+  private boolean checkIfAnyTypesAreEmpty(List<String> typesInOrder,
+                                          Set<String> typesToInclude1,
+                                          Map<String, Set<MatchInfo>> typeToMatches) {
+    boolean someEmpty = false;
+    for (String type : typesInOrder) {
+      Set<MatchInfo> matches = typeToMatches.get(type);
+      if (matches == null || matches.isEmpty()) {
+        typesToInclude1.remove(type);
+        logger.info("getTypeToValues removing " + type);
+        someEmpty = true;
+      }
+    }
+    return someEmpty;
   }
 }

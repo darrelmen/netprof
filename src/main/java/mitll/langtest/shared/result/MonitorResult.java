@@ -41,6 +41,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
 
+/**
+ * @see mitll.langtest.client.result.ResultManager
+ */
 public class MonitorResult implements IsSerializable {
   private static final String ASC = "ASC";
   public static final String USERID = "userid";

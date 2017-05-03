@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.exercise.NewListButton;
 import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -27,46 +28,44 @@ import java.util.Set;
  * Created by go22670 on 4/19/17.
  */
 public class UserListSupport {
+  public static final int END_INDEX = 27;
   private final PopupContainerFactory popupContainer = new PopupContainerFactory();
-  ExerciseController controller;
-  public static final String MAKE_A_NEW_LIST = "Make a new list";
+  private final ExerciseController controller;
+  //public static final String MAKE_A_NEW_LIST = "Make a new list";
 
-  private static final String ADD_ITEM = "Add Item to List";
+  //private static final String ADD_ITEM = "Add Item to List";
   private static final String ITEM_ALREADY_ADDED = "Item already added.";
-  private static final String ADD_TO_LIST = "Add to List";
+  //private static final String ADD_TO_LIST = "Add to List";
   /**
    * @seex #getNewListButton
    */
-  private static final String NEW_LIST = "New List";
+  //private static final String NEW_LIST = "New List";
   private static final String ITEM_ADDED = "Item Added!";
-  private static final String ADDING_TO_LIST = "Adding to list ";
+  //private static final String ADDING_TO_LIST = "Adding to list ";
 
-  private Set<String> knownNames = new HashSet<>();
+  private final Set<String> knownNames = new HashSet<>();
 
   UserListSupport(ExerciseController controller) {
     this.controller = controller;
   }
 
-  public void addListOptions(//DropdownContainer dropdownContainer,
-                             Dropdown dropdownContainer,
-                             int exid) {
+  /**
+   * @param dropdownContainer
+   * @param exid
+   */
+  public void addListOptions(
+      Dropdown dropdownContainer,
+      int exid) {
     DropdownSubmenu addToList = new DropdownSubmenu("Add to List");
     addToList.setRightDropdown(true);
     //  addToList.setStyleDependentName("pull-left", true);
     DropdownSubmenu removeFromList = new DropdownSubmenu("Remove from List");
     removeFromList.setRightDropdown(true);
 
-  /*  dropdownContainer.addShowHandler(new ShowHandler() {
-      @Override
-      public void onShow(ShowEvent showEvent) {
-        populateListChoices(exid, addToList, removeFromList, dropdownContainer);
-      }
-    });*/
     dropdownContainer.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         populateListChoices(exid, addToList, removeFromList, dropdownContainer);
-
       }
     });
 
@@ -82,8 +81,7 @@ public class UserListSupport {
       @Override
       public void onClick(ClickEvent event) {
         NewListButton newListButton = new NewListButton(exid, controller, outer, dropdownContainer);
-        DecoratedPopupPanel newListButton2 = newListButton.getNewListButton2();
-        newListButton.showOrHide(newListButton2, widget);
+        newListButton.showOrHide(newListButton.getNewListButton2(), widget);
       }
     });
     dropdownContainer.add(widget);
@@ -99,8 +97,9 @@ public class UserListSupport {
    * @seex #makeAddToList
    * @seex #wasRevealed()
    */
-  private void populateListChoices(final int id, final DropdownBase addToList, final DropdownBase removeFromList,
-                                   // DropdownContainer container
+  private void populateListChoices(final int id,
+                                   final DropdownBase addToList,
+                                   final DropdownBase removeFromList,
                                    Dropdown container
   ) {
     ListServiceAsync listService = controller.getListService();
@@ -114,14 +113,11 @@ public class UserListSupport {
         addToList.clear();
         removeFromList.clear();
 
-        //  activeCount = 0;
         boolean anyAdded = false;
         boolean anyToRemove = false;
-        //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         for (final UserList ul : result) {
           knownNames.add(ul.getName());
           if (!ul.containsByID(id)) {
-            //    activeCount++;
             anyAdded = true;
             getAddListLink(ul, addToList, id, container);
           } else {
@@ -139,74 +135,58 @@ public class UserListSupport {
     });
   }
 
-  private void getAddListLink(UserList ul, DropdownBase addToList,
+  private void getAddListLink(UserList ul,
+                              DropdownBase addToList,
                               int exid,
-                              // DropdownContainer container
                               Widget container
   ) {
-    final NavLink widget = new NavLink(ul.getName());
+    String name = ul.getName();
+    if (name.length() > END_INDEX) name = name.substring(0, END_INDEX) + "...";
+    final NavLink widget = new NavLink(name);
     addToList.add(widget);
-    widget.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(addToList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
+    widget.addClickHandler(event -> {
+      controller.logEvent(addToList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
 
-        controller.getListService().addItemToUserList(ul.getID(), exid, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
+      controller.getListService().addItemToUserList(ul.getID(), exid, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
 
-          @Override
-          public void onSuccess(Void result) {
-            //container.hideContainer();
-            popupContainer.showPopup(ITEM_ADDED, container);
-            //widget.setVisible(false);
-//            populateListChoices(exid, addToList, removeFromList, container);
-            //          activeCount--;
-            //        if (activeCount == 0) {
-            //        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
-            //      addToList.add(widget);
-            //  }
-          }
-        });
-      }
+        @Override
+        public void onSuccess(Void result) {
+          popupContainer.showPopup(ITEM_ADDED, container);
+          LangTest.EVENT_BUS.fireEvent(new ListChangedEvent());
+        }
+      });
     });
   }
 
   private void getRemoveListLink(UserList ul, DropdownBase removeFromList, int exid,
-                                 //DropdownContainer container
                                  Dropdown container
   ) {
     final NavLink widget = new NavLink(ul.getName());
     removeFromList.add(widget);
-    widget.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(removeFromList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
+    widget.addClickHandler(event -> {
+      controller.logEvent(removeFromList, "DropUp", exid, "remove_" + ul.getID() + "/" + ul.getName());
 
-        controller.getListService().deleteItemFromList(ul.getID(), exid, new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
+      controller.getListService().deleteItemFromList(ul.getID(), exid, new AsyncCallback<Boolean>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
 
-          @Override
-          public void onSuccess(Boolean result) {
-            //  container.hideContainer();
-            popupContainer.showPopup(result ? "Item removed." : "Item *not* removed.", container);
-            //widget.setVisible(false);
-
-            //   widget.setVisible(false);
-            //          activeCount--;
-            //        if (activeCount == 0) {
-            //        NavLink widget = new NavLink(ITEM_ALREADY_ADDED);
-            //      addToList.add(widget);
-            //  }
-          }
-        });
-      }
+        @Override
+        public void onSuccess(Boolean result) {
+          popupContainer.showPopup(result ? "Item removed." : "Item *not* removed.", container);
+          LangTest.EVENT_BUS.fireEvent(new ListChangedEvent());
+        }
+      });
     });
   }
 
+  /**
+   *
+   * @return
+   */
   public Set<String> getKnownNames() {
     return knownNames;
   }

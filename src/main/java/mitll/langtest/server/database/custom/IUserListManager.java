@@ -51,8 +51,11 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IUserListManager {
+  @Deprecated
   int REVIEW_MAGIC_ID  = -100;
+  @Deprecated
   int COMMENT_MAGIC_ID = -200;
+  @Deprecated
   int ATTN_LL_MAGIC_ID = -300;
 
   void setStateOnExercises();
@@ -67,6 +70,12 @@ public interface IUserListManager {
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists, int projid);
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject(int, int)
+   * @param userid
+   * @param projid
+   * @return
+   */
   UserList createFavorites(int userid, int projid);
 
   UserList<CommonShell> getCommentedList(Collection<String> typeOrder, Set<Integer> ids);
@@ -77,7 +86,10 @@ public interface IUserListManager {
   UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids);
   UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder, Set<Integer> ids);
 
-  UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder, Set<Integer> ids);
+//  List<UserList<CommonShell>> getByName(int userid,String name,int projid);
+  @Deprecated
+  UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonShell> getSimpleUserListByID(int id);
   UserList<CommonExercise> getUserListByIDExercises(long id, int projid, Collection<String> typeOrder, Set<Integer> ids);
 
   Collection<Integer> getDefectExercises();
@@ -86,18 +98,18 @@ public interface IUserListManager {
 
   List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
 
-  UserList getUserList(long userListID);
-  void newExercise(long userListID, CommonExercise userExercise, String mediaDir);
+  UserList getUserList(int userListID);
+  void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
   void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir);
 
-  void addItemToList(long userListID, String exerciseID, int exid);
+  void addItemToList(int userListID, String exerciseID, int exid);
 
   void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder);
 
   CommonExercise duplicate(CommonExercise userExercise);
 
 
-  void addVisitor(long userListID, long user);
+  void addVisitor(int userListID, long user);
 
 
   boolean addDefect(int exerciseID, String field, String comment);
@@ -119,9 +131,9 @@ public interface IUserListManager {
 
   void markCorrectness(int id, boolean correct, int userid);
 
-  boolean deleteList(long id);
+  boolean deleteList(int id);
 
-  boolean deleteItemFromList(long listid, int exid, Collection<String> typeOrder);
+  boolean deleteItemFromList(int listid, int exid, Collection<String> typeOrder);
 
   void setPublicOnList(long userListID, boolean isPublic);
 

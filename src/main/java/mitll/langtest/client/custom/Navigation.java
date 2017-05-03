@@ -58,6 +58,7 @@ import mitll.langtest.client.contextPractice.DialogViewer;
 import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.tabs.TabAndContent;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.list.ListInterface;
@@ -87,6 +88,7 @@ import java.util.logging.Logger;
  * @since 9/27/13
  * Time: 8:50 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated replaced with NewContentChooser
  */
 public class Navigation implements RequiresResize, ShowTab, INavigation {
   private final Logger logger = Logger.getLogger("Navigation");
@@ -193,7 +195,7 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
       makeDialogWindow(service, controller);
     }
 
-    markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
+    markDefectsHelper = new MarkDefectsChapterNPFHelper(controller, learnHelper);
     practiceHelper = new PracticeHelper(controller);
     recorderHelper = new RecorderNPFHelper(controller, true, learnHelper);
     recordExampleHelper = new RecorderNPFHelper(controller, false, learnHelper);
@@ -213,34 +215,7 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
   }
 
   @Override
-  public void showLearn() {
-
-  }
-
-  @Override
-  public void showDrill() {
-
-  }
-
-  @Override
-  public void showProgress() {
-
-  }
-
-  @Override
-  public void showLists() {
-
-  }
-
-  @Override
-  public void showRecord() {
-
-  }
-
-  @Override
-  public void showRecordExample() {
-
-  }
+  public void showView(VIEWS view) {}
 
   /**
    * Defines order of tabs...

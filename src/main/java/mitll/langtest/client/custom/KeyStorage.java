@@ -37,6 +37,7 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.LifecycleSupport;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;

@@ -40,12 +40,11 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.list.*;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -75,11 +74,10 @@ public class ReviewItemHelper extends NPFHelper {
    * @param controller
    * @param predefinedContent
    * @see mitll.langtest.client.custom.Navigation#Navigation
-   * @see mitll.langtest.client.custom.ListManager#ListManager
+   * @see ListManager#ListManager
    */
   public ReviewItemHelper(final ExerciseController controller, final ReloadableContainer predefinedContent) {
     super(controller, true, false);
-    //   this.itemMarker = null;
     this.predefinedContent = predefinedContent;
     if (predefinedContent == null) logger.warning("huh? predefinedContent is null");
   }
@@ -94,7 +92,7 @@ public class ReviewItemHelper extends NPFHelper {
    */
   @Override
   protected Panel doInternalLayout(final UserList<CommonShell> ul, String instanceName) {
-//    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
     this.flexListLayout = new ReviewFlexListLayout(ul);
     Panel widgets = flexListLayout.doInternalLayout(ul == null ? -1 : ul.getID(), instanceName, true);
     npfExerciseList = flexListLayout.npfExerciseList;
@@ -108,12 +106,8 @@ public class ReviewItemHelper extends NPFHelper {
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
     }
-    //else {
-      //System.out.println("ReviewItemHelper.onResize : not sending resize event - flexListLayout is null?");
-    //}
   }
 
-  // private class ReviewFlexListLayout<CommonExercise extends CommonShell & AnnotationExercise & AudioRefExercise> extends FlexListLayout<CommonExercise> {
   private class ReviewFlexListLayout extends FlexListLayout<CommonShell, CommonExercise> {
     private final UserList<CommonShell> ul;
 
@@ -153,7 +147,8 @@ public class ReviewItemHelper extends NPFHelper {
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                String instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
-      return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel, new ListOptions(instanceName), listHeader, footer, 1) {
+      return new NPExerciseList<ListSectionWidget>( currentExercisePanel,outer.getController(),
+          new ListOptions(instanceName)) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         /**
@@ -173,7 +168,7 @@ public class ReviewItemHelper extends NPFHelper {
         }
 
         @Override
-        protected void addTableWithPager(SimplePagingContainer<CommonShell> pagingContainer) {
+        protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
           // row 1
           Panel column = new FlowPanel();
           add(column);

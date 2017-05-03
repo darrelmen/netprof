@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -57,7 +58,7 @@ public interface IUserListDAO extends IDAO {
 
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#addVisitor(long, long)
+   * @see IUserListManager#addVisitor(int, long)
    * @param listid
    * @param userid
    */
@@ -77,10 +78,10 @@ public interface IUserListDAO extends IDAO {
 
   boolean remove(long unique);
 
-  UserList<CommonShell> getWithExercises(long unique);
+  UserList<CommonShell> getWithExercises(int unique);
   UserList<CommonExercise> getWithExercisesEx(long unique);
 
-  UserList<CommonShell> getWhere(long unique, boolean warnIfMissing);
+  UserList<CommonShell> getWhere(int unique, boolean warnIfMissing);
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid);
 

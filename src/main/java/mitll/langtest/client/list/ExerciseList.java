@@ -66,7 +66,7 @@ import java.util.logging.Logger;
  */
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
-    implements ListInterface<T>, ProvidesResize {
+    implements ListInterface<T, U>, ProvidesResize {
   public static final String EMPTY_SEARCH = "<b>Your search or selection did not match any items.</b>";
   private final Logger logger = Logger.getLogger("ExerciseList");
 
@@ -98,7 +98,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private UserState userState;
   ListOptions listOptions;
 
@@ -149,7 +149,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param factory
    * @see mitll.langtest.client.custom.content.NPFHelper#setFactory(PagingExerciseList, String, boolean)
    */
-  public void setFactory(ExercisePanelFactory factory) {
+  public void setFactory(ExercisePanelFactory<T, U> factory) {
     this.factory = factory;
   }
 
@@ -181,7 +181,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @seex NPFHelper#reload
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
    */
-  public void reload() {  getExercises(getUser());  }
+  public void reload() {
+    getExercises(getUser());
+  }
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#doAfterEditComplete
@@ -232,7 +234,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   abstract void pushNewItem(String search, int exerciseID);
 
   /**
-   *
    * @return
    */
   abstract ActivityType getActivityType();
@@ -471,7 +472,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       loadFirstExercise(searchIfAny);
     } else {
       markCurrentExercise(exerciseID);
-     // logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny + "'");
+      // logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny + "'");
       pushFirstSelection(exerciseID, searchIfAny);
     }
   }
@@ -520,8 +521,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       if (DEBUG) logger.info("loadFirstExercise (" + getInstance() + ") : current exercises is empty?");
       removeCurrentExercise();
     } else {
-     // if (DEBUG) logger.info("loadFirstExercise ex id =" + firstID + " instance " + getInstance());
-      pushFirstSelection(findFirstID(), searchIfAny);
+      int firstID = findFirstID();
+      if (DEBUG) logger.info("loadFirstExercise ex id =" + firstID + " instance " + getInstance());
+      pushFirstSelection(firstID, searchIfAny);
     }
   }
 
@@ -546,9 +548,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   protected abstract T getFirst();
 
-  int getFirstID() {  return getFirst().getID();  }
+  int getFirstID() {
+    return getFirst().getID();
+  }
 
-  boolean hasExercise(int id) {  return byID(id) != null;  }
+  boolean hasExercise(int id) {
+    return byID(id) != null;
+  }
 
   public abstract T byID(int name);
 
@@ -564,8 +570,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see HistoryExerciseList#checkAndAskOrFirst
    * @param id
+   * @see HistoryExerciseList#checkAndAskOrFirst
    */
   @Override
   public void checkAndAskServer(int id) {
@@ -574,7 +580,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     if (hasExercise(id)) {
-     // logger.info("checkAndAskServer for " + id);
+       logger.info("checkAndAskServer for " + id);
       askServerForExercise(id);
     } else {
       logger.warning("checkAndAskServer : skipping request for " + id);
@@ -652,28 +658,28 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-        logger.info("ExerciseList.showExercise : item id " + commonExercise.getID() + " currentExercise " +getCurrentExercise() +
-      " or " + getCurrentExerciseID() );
+        logger.info("ExerciseList.showExercise : item id " + commonExercise.getID() + " currentExercise " + getCurrentExercise() +
+            " or " + getCurrentExerciseID());
         addExerciseWidget(commonExercise, wrapper);
       }
     });
   }
 
   /**
-   * @see FacetExerciseList#showExercises(Collection, ExerciseListWrapper)
    * @param commonExercise
    * @param wrapper
+   * @see FacetExerciseList#showExercises(Collection, ExerciseListWrapper)
    */
-   void addExerciseWidget(U commonExercise, ExerciseListWrapper<CommonExercise> wrapper) {
+  void addExerciseWidget(U commonExercise, ExerciseListWrapper<CommonExercise> wrapper) {
     createdPanel = factory.getExercisePanel(commonExercise, wrapper);
-   // logger.info("Add exercise widget "  + commonExercise.getID());
-   //  innerContainer.add(createdPanel);
-     innerContainer.setWidget(createdPanel);
+    // logger.info("Add exercise widget "  + commonExercise.getID());
+    //  innerContainer.add(createdPanel);
+    innerContainer.setWidget(createdPanel);
   }
 
   public int getCurrentExerciseID() {
     T currentExercise = getCurrentExercise();
- //   logger.info("Current exercise is " + currentExercise);
+    //   logger.info("Current exercise is " + currentExercise);
     return currentExercise != null ? currentExercise.getID() : -1;//"Unknown";
   }
 
@@ -879,7 +885,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     loadFirstExercise("");
   }
 
-  public void redraw() {}
+  public void redraw() {
+  }
 
   /**
    * @param listener
@@ -911,6 +918,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * JUST FOR AMAS
+   *
    * @return
    */
   public Collection<Integer> getIDs() {

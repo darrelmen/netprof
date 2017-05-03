@@ -46,14 +46,17 @@ public class FilterResponse implements IsSerializable {
   private Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
   private Set<String> typesToInclude;
   private int reqid;
+  private int userListID;
 
   public FilterResponse() {
   }
 
-  public FilterResponse(int reqid, Map<String, Set<MatchInfo>> typeToValues, Set<String> typesToInclude) {
+  public FilterResponse(int reqid, Map<String, Set<MatchInfo>> typeToValues, Set<String> typesToInclude,
+                        int userListID) {
     this.reqid = reqid;
     this.typeToValues = typeToValues;
     this.typesToInclude = typesToInclude;
+    this.userListID = userListID;
   }
 
   public Map<String, Set<MatchInfo>> getTypeToValues() {
@@ -70,5 +73,9 @@ public class FilterResponse implements IsSerializable {
 
   public String toString() {
     return "response " + reqid + " " + typesToInclude + " " + typeToValues;
+  }
+
+  public int getUserListID() {
+    return userListID;
   }
 }

@@ -8,6 +8,7 @@ import mitll.langtest.client.list.Reloadable;
  */
 public interface ExerciseListContent {
   void showContent(Panel listContent, String instanceName);
+ // void showContent(Panel listContent, INavigation.VIEWS instanceName);
 
   void hideList();
 

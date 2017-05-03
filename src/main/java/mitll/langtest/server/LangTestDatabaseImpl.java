@@ -42,13 +42,13 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.shared.ContextPractice;
-import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.user.SlimProject;
+import mitll.langtest.shared.project.SlimProject;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.logging.log4j.LogManager;
@@ -254,9 +254,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
                                               Collection<Integer> ids,
                                               long latestResultID,
                                               Map<String, Collection<String>> typeToSection,
-                                              long userListID) {
+                                              int userListID) {
     //logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
-    UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID, getProjectID()) : null;
+    UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
     List<Integer> allIDs = new ArrayList<>();
     Map<Integer, CollationKey> idToKey = new HashMap<>();
 
