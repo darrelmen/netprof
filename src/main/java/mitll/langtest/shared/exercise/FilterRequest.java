@@ -119,9 +119,10 @@ public class FilterRequest implements IsSerializable {
    */
   public String toString() {
     return
-        (limit == -1 ? "" : "limit                  '" + limit + "'") +
-            (prefix.isEmpty() ? "" : "prefix                  '" + prefix + "'") +
-            (getTypeToSelection().isEmpty() ? "" : "\n\tselection           " + getTypeToSelection());
+        (userListID == -1 ? "" : "userListID =" + userListID) +
+            (limit == -1 ? "" : "limit '" + limit + "'") +
+            (prefix.isEmpty() ? "" : "prefix '" + prefix + "'") +
+            (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
   }
 
   public int getUserListID() {

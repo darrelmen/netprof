@@ -28,6 +28,7 @@ import java.util.Set;
  * Created by go22670 on 4/19/17.
  */
 public class UserListSupport {
+  public static final int END_INDEX = 27;
   private final PopupContainerFactory popupContainer = new PopupContainerFactory();
   private final ExerciseController controller;
   //public static final String MAKE_A_NEW_LIST = "Make a new list";
@@ -49,20 +50,19 @@ public class UserListSupport {
   }
 
   /**
-   *
    * @param dropdownContainer
    * @param exid
    */
   public void addListOptions(
-                             Dropdown dropdownContainer,
-                             int exid) {
+      Dropdown dropdownContainer,
+      int exid) {
     DropdownSubmenu addToList = new DropdownSubmenu("Add to List");
     addToList.setRightDropdown(true);
     //  addToList.setStyleDependentName("pull-left", true);
     DropdownSubmenu removeFromList = new DropdownSubmenu("Remove from List");
     removeFromList.setRightDropdown(true);
 
-   dropdownContainer.addClickHandler(new ClickHandler() {
+    dropdownContainer.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         populateListChoices(exid, addToList, removeFromList, dropdownContainer);
@@ -81,8 +81,7 @@ public class UserListSupport {
       @Override
       public void onClick(ClickEvent event) {
         NewListButton newListButton = new NewListButton(exid, controller, outer, dropdownContainer);
-        DecoratedPopupPanel newListButton2 = newListButton.getNewListButton2();
-        newListButton.showOrHide(newListButton2, widget);
+        newListButton.showOrHide(newListButton.getNewListButton2(), widget);
       }
     });
     dropdownContainer.add(widget);
@@ -141,7 +140,9 @@ public class UserListSupport {
                               int exid,
                               Widget container
   ) {
-    final NavLink widget = new NavLink(ul.getName());
+    String name = ul.getName();
+    if (name.length() > END_INDEX) name = name.substring(0, END_INDEX) + "...";
+    final NavLink widget = new NavLink(name);
     addToList.add(widget);
     widget.addClickHandler(event -> {
       controller.logEvent(addToList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
@@ -166,7 +167,7 @@ public class UserListSupport {
     final NavLink widget = new NavLink(ul.getName());
     removeFromList.add(widget);
     widget.addClickHandler(event -> {
-      controller.logEvent(removeFromList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
+      controller.logEvent(removeFromList, "DropUp", exid, "remove_" + ul.getID() + "/" + ul.getName());
 
       controller.getListService().deleteItemFromList(ul.getID(), exid, new AsyncCallback<Boolean>() {
         @Override
@@ -182,6 +183,10 @@ public class UserListSupport {
     });
   }
 
+  /**
+   *
+   * @return
+   */
   public Set<String> getKnownNames() {
     return knownNames;
   }

@@ -66,6 +66,9 @@ dependencies {
     compile('mitll.hlt:audioimage:1.0.0') { changing = true }
     compile('mitll.hlt:npdata:1.0.0') { changing = true }
 
+    compile group: 'javax.json', name: 'javax.json-api', version: '1.0'
+    compile group: 'org.glassfish', name: 'javax.json', version: '1.0.4'
+
     // gwt stuff
     providedCompile('com.google.gwt:gwt-dev:2.8.0')
     providedCompile('com.google.gwt:gwt-user:2.8.0')

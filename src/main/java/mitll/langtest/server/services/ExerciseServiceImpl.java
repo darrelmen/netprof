@@ -82,13 +82,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     int userListID = request.getUserListID();
     UserList<CommonShell> next = db.getUserListManager().getSimpleUserListByID(userListID);
 
-    if (next != null) {
+    if (next != null) {  // echo it back
       logger.info("\tgetTypeToValues " + request + " include list " + next);
 
       typeToValues.getTypesToInclude().add("Lists");
       Set<MatchInfo> value = new HashSet<>();
-      MatchInfo matchInfo = new MatchInfo(next.getName(), next.getNumItems(), userListID);
-      value.add(matchInfo);
+      value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID));
       typeToValues.getTypeToValues().put("Lists", value);
     }
     return typeToValues;
@@ -996,10 +995,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param <T>
    * @return
    */
-  private <T extends CommonShell & HasUnitChapter> Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
-                                                                                                  UserList<T> userListByID) {
-
+  private <T extends CommonShell & HasUnitChapter>
+  Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
+                                                 UserList<T> userListByID) {
     Collection<T> exercises2 = getCommonExercises(userListByID);
+    typeToSelection.remove("Lists");
     if (typeToSelection.isEmpty()) {
       logger.info("getExercisesFromUserListFiltered returning  " + userListByID.getExercises().size() + " exercises for " + userListByID.getID());
       return exercises2;
@@ -1008,15 +1008,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
       logger.info("getExercisesFromUserListFiltered found " + exercises2.size() + " for list " + userListByID);
       long then = System.currentTimeMillis();
-      for (T commonExercise : exercises2) {
-        helper.addExercise(commonExercise);
-      }
+      exercises2.forEach(helper::addExercise);
       long now = System.currentTimeMillis();
 
       if (now - then > 100) {
         logger.debug("getExercisesFromUserListFiltered used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
       }
-      typeToSelection.remove("Lists");
       //helper.report();
       Collection<T> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
       logger.debug("\tgetExercisesFromUserListFiltered after found " + exercisesForState.size() + " matches to " + typeToSelection);

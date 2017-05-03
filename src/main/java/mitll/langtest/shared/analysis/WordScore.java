@@ -43,9 +43,8 @@ import java.util.Map;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 10/21/15.
- *
  * @see mitll.langtest.client.analysis.WordContainer#getTableWithPager(List)
+ * @since 10/21/15.
  */
 public class WordScore implements Serializable, Comparable<WordScore> {
   private int exid;
@@ -67,13 +66,15 @@ public class WordScore implements Serializable, Comparable<WordScore> {
    * @see mitll.langtest.server.database.analysis.Analysis#getWordScore
    */
   public WordScore(BestScore bs, Map<NetPronImageType, List<TranscriptSegment>> transcript) {
-    this(bs.getExId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(), bs.getNativeAudio(), transcript);
+    this(bs.getExId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(),
+        bs.getNativeAudio(), transcript);
   }
 
   protected WordScore(int exid,
-                    float pronScore,
-                    long timestamp, int resultID, String answerAudio, String refAudio,
-                    Map<NetPronImageType, List<TranscriptSegment>> transcript) {
+                      float pronScore,
+                      long timestamp,
+                      int resultID, String answerAudio, String refAudio,
+                      Map<NetPronImageType, List<TranscriptSegment>> transcript) {
     this.exid = exid;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
     this.timestamp = timestamp;
@@ -121,8 +122,8 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.WordContainer#getPlayNativeAudio
    * @return
+   * @see mitll.langtest.client.analysis.WordContainer#getPlayNativeAudio
    */
   public String getRefAudio() {
     return refAudio;

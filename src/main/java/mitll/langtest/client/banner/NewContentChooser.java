@@ -66,9 +66,9 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showView(VIEWS view) {
-    logger.info("Got showView " + view  );
+   // logger.info("Got showView " + view  );
     if (currentSection.equals(view)) {
-      logger.info("showView - already showing " + view);
+    //  logger.info("showView - already showing " + view);
     } else {
       currentSection = view;
       switch (view) {

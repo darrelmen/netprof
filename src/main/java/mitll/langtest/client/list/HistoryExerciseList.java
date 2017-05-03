@@ -347,7 +347,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   protected void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
-    logger.info("loadFromSelectionState old state " + selectionState.getInfo() + " new state " + newState.getInfo());
+    logger.info("loadFromSelectionState" +
+        " old state " + selectionState.getInfo() +
+        " new state " + newState.getInfo());
     loadExercisesUsingPrefix(
         newState.getTypeToSection(),
         selectionState.getSearch(),
@@ -403,17 +405,13 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   public void onValueChange(ValueChangeEvent<String> event) {
     // if (DEBUG_ON_VALUE_CHANGE) logger.info("HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
     String value = event.getValue();
-    selectionStateChanged(value);
-  }
-
-  protected void selectionStateChanged(String value) {
     SelectionState selectionState = getSelectionState(value);
-    logger.info("selectionStateChanged got " + value + " sel " + selectionState + " " + selectionState.getInfo());
+    logger.info("onValueChange got " + value + " sel " + selectionState + " " + selectionState.getInfo());
     String instance1 = selectionState.getInstance();
 
     if (!instance1.equals(getInstance()) && instance1.length() > 0) {
       if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info("selectionStateChanged : skipping event " + value + " for instance '" + instance1 +
+        logger.info("onValueChange : skipping event " + value + " for instance '" + instance1 +
             "' that is not mine '" + getInstance() + "'");
       }
       if (getCreatedPanel() == null) {
@@ -423,7 +421,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       return;
     }
     if (DEBUG_ON_VALUE_CHANGE) {
-      logger.info("HistoryExerciseList.selectionStateChanged : originalValue '" + value +
+      logger.info("HistoryExerciseList.onValueChange : originalValue '" + value +
           "'" +
           " token is '" + value + "' for " + instance1 + " vs my instance " + getInstance());
     }
