@@ -142,8 +142,8 @@ dependencies {
     // TODO : get these as artifactory dependencies
 
 //    compile name: 'pronz_2.11-1.0'
-    compile name: 'hydec_2.11-1.0'
-    compile name: 'utils_2.11-1.0.0-SNAPSHOT'
+    compile name: 'hydec_2.11-1.1'
+    compile name: 'utils_2.11-1.1'
 
     // the only way I can get war to accept my explicit command to include these jars
     compile name: 'commons-codec-1.10'
