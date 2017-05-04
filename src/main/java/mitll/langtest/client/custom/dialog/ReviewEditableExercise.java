@@ -50,7 +50,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.*;
@@ -139,13 +138,11 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
                                 UserList<CommonShell> originalList,
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
-                                ReloadableContainer predefinedContent,
                                 String instanceName) {
     super(controller,
         changedUserExercise,
         originalList,
         exerciseList,
-        predefinedContent,
         instanceName);
     this.exerciseList = exerciseList;
   }
@@ -496,7 +493,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
           @Override
           public void onSuccess(Void result) {
             widgets.getParent().setVisible(false);
-            reloadLearnList();
+         //   reloadLearnList();
             LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
             // TODO : need to update other lists too?
           }
@@ -510,7 +507,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   /**
    * @see #doAfterEditComplete(ListInterface, boolean)
    */
-  private void reloadLearnList() {
+ /* private void reloadLearnList() {
     Reloadable exerciseList = predefinedContentList.getReloadable();
     if (exerciseList != null) {
       exerciseList.clearCachedExercise();
@@ -519,7 +516,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 //      logger.warning("reloadLearnList : no exercise list ref ");
     }
   }
-
+*/
   private Button getDeleteButton(String tip, ClickHandler handler) {
     Button delete = new Button(DELETE_AUDIO);
     addTooltip(delete, tip);
@@ -835,7 +832,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param buttonClicked
    * @seex #doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    * @see #reallyChange
-   * @see #postEditItem
+   * @seex #postEditItem
    */
   @Override
   protected void doAfterEditComplete(ListInterface<CommonShell,CommonExercise> pagingContainer, boolean buttonClicked) {
@@ -868,11 +865,11 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         logger.info("doAfterEditComplete : forgetting exercise " + id);
         exerciseList.forgetExercise(id);
 
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      /*  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
             reloadLearnList();
           }
-        });
+        });*/
       }
     });
     //else {

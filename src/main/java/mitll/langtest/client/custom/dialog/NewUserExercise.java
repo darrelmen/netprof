@@ -49,7 +49,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
@@ -75,7 +74,7 @@ import java.util.logging.Logger;
  */
 abstract class NewUserExercise extends BasicDialog {
   public static final String OPTIONAL = "optional";
-  final ReloadableContainer predefinedContentList;
+  //final ReloadableContainer predefinedContentList;
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   public static final String CONTEXT = "context";
@@ -160,13 +159,12 @@ abstract class NewUserExercise extends BasicDialog {
       ExerciseController controller,
       CommonExercise newExercise,
       String instance,
-      UserList<CommonShell> originalList,
-      ReloadableContainer predefinedContent) {
+      UserList<CommonShell> originalList) {
     this.controller = controller;
     this.newUserExercise = newExercise;
     this.instance = instance;
     this.originalList = originalList;
-    this.predefinedContentList = predefinedContent;
+  //  this.predefinedContentList = predefinedContent;
   }
 
   /**
@@ -446,7 +444,7 @@ abstract class NewUserExercise extends BasicDialog {
    */
   void doAfterEditComplete(ListInterface<CommonShell,CommonExercise> pagingContainer, boolean buttonClicked) {
     changeTooltip(pagingContainer);
-    if (predefinedContentList != null) {
+/*    if (predefinedContentList != null) {
       if (DEBUG)
         logger.info("doAfterEditComplete : predef content list not null");// + " id " + predefinedContentList.getCurrentExerciseID());
 
@@ -456,7 +454,7 @@ abstract class NewUserExercise extends BasicDialog {
       } else {
         reloadable.reloadWithCurrent();
       }
-    }
+    }*/
     //else {
     //   if (DEBUG || true) logger.warning("doAfterEditComplete : no predef content " + buttonClicked);// + " id " + predefinedContentList.getCurrentExerciseID());
     //}

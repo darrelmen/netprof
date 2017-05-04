@@ -49,7 +49,6 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.TextArea;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.content.AVPHelper;
 import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.custom.content.ReviewItemHelper;
@@ -135,12 +134,10 @@ public class ListManager implements RequiresResize {
   /**
    * @param controller
    * @param tabPanel
-   * @see Navigation#getNavigation
+   * @see mitll.langtest.client.banner.NewContentChooser#NewContentChooser
    */
   public ListManager(final ExerciseController controller,
-                     HasWidgets tabPanel,
-                     ReloadableContainer exerciseList) {
-    if (exerciseList == null) logger.warning("huh? exerciselist is null?\n\n\n");
+                     HasWidgets tabPanel) {
     this.userManager = controller.getUserManager();
     this.controller = controller;
     storage = new KeyStorage(controller);
@@ -159,9 +156,9 @@ public class ListManager implements RequiresResize {
     }
 
     npfHelper = new NPFHelper(controller, false, false);
-    reviewItem = new ReviewItemHelper(controller, exerciseList);
+    reviewItem = new ReviewItemHelper(controller);
     avpHelper = new AVPHelper(controller);
-    editItem = new EditItem(controller, exerciseList);
+    editItem = new EditItem(controller);
   }
 
   /**

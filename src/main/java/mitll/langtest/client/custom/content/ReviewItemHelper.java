@@ -38,7 +38,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -68,18 +67,17 @@ public class ReviewItemHelper extends NPFHelper {
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
 
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
-  private final ReloadableContainer predefinedContent;
+ // private final ReloadableContainer predefinedContent;
 
   /**
    * @param controller
-   * @param predefinedContent
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see ListManager#ListManager
    */
-  public ReviewItemHelper(final ExerciseController controller, final ReloadableContainer predefinedContent) {
+  public ReviewItemHelper(final ExerciseController controller) {
     super(controller, true, false);
-    this.predefinedContent = predefinedContent;
-    if (predefinedContent == null) logger.warning("huh? predefinedContent is null");
+   // this.predefinedContent = predefinedContent;
+   // if (predefinedContent == null) logger.warning("huh? predefinedContent is null");
   }
 
   /**
@@ -127,7 +125,6 @@ public class ReviewItemHelper extends NPFHelper {
               new ReviewEditableExercise(controller,
                   userExercise, ul,
                   pagingExerciseList,
-                  predefinedContent,
                   "ReviewEditableExercise"
               );
 

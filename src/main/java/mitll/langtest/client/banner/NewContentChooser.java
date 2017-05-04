@@ -9,13 +9,11 @@ import mitll.langtest.client.analysis.StudentAnalysis;
 import mitll.langtest.client.custom.ExerciseListContent;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
-import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
-import scala.tools.nsc.backend.icode.Primitives;
 
 import java.util.logging.Logger;
 
@@ -45,7 +43,7 @@ public class NewContentChooser implements INavigation {
     learnHelper = newLearnHelper;
     practiceHelper = new PracticeHelper(controller);
     this.controller = controller;
-    this.listManager = new ListManager(controller, null, newLearnHelper);
+    this.listManager = new ListManager(controller, null);
     this.banner = banner;
   }
 

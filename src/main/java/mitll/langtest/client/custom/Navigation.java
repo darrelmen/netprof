@@ -295,7 +295,7 @@ public class Navigation implements RequiresResize, ShowTab, INavigation {
     tabPanel = new TabPanel();
     tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     tabPanel.getElement().setId("tabPanel");
-    this.listManager = new ListManager(controller, tabPanel, learnHelper);
+    this.listManager = new ListManager(controller, tabPanel);
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
       @Override

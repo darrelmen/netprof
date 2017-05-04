@@ -252,14 +252,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     ensureAudioForExercises(exercises,language);
   }
 
-  public void ensureAudioForIDs(int projid, Collection<Integer> ids) {
+/*  public void ensureAudioForIDs(int projid, Collection<Integer> ids) {
     logger.info("ensureAudioForIDs for " + ids.size());
     List<CommonExercise> collect = ids.stream().map(id -> db.getCustomOrPredefExercise(projid, id)).collect(Collectors.toList());
     if (collect.size() != ids.size()) {
       logger.warn("ensureAudioForIDs only found " + collect.size() + " exercises???");
     }
     ensureAudioForExercises(collect);
-  }
+  }*/
 
   private void ensureAudioForExercises(List<CommonExercise> exercises, String language) {
   //  String language = getLanguage();

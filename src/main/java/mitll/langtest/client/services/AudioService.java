@@ -93,7 +93,9 @@ public interface AudioService extends RemoteService {
    */
   void checkAudio(int projectid);
   void ensureAllAudio();
+/*
   void ensureAudioForIDs(int projid, Collection<Integer> ids);
+*/
 
   void recalcRefAudio(int projectid);
 }

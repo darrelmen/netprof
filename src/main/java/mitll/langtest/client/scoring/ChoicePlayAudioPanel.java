@@ -198,7 +198,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     if (val) {
       // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
-  //    logger.info("addChoices current audio is " + toUse.getUniqueID());
+//    logger.info("addChoices current audio is " + toUse.getUniqueID());
       listener.audioChanged(toUse.getUniqueID(), toUse.getDurationInMillis());
 //      if (exercise.getID() == 2909) {
 //        logger.info("addChoices For exercise " + exercise.getID() + " current audio is " + toUse.getUniqueID());
@@ -238,8 +238,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void playAndRemember(int audioID, String audioRef, long durationInMillis, boolean isMale, boolean isReg) {
-//    logger.info("playAndRemember " + audioID + " " +audioRef + " isMale " + isMale + " isReg " + isReg);
-
+    logger.info("playAndRemember " + audioID + " " +audioRef + " isMale " + isMale + " isReg " + isReg);
     doPause();
     listener.audioChanged(audioID, durationInMillis);
 

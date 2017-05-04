@@ -66,5 +66,7 @@ public interface AudioServiceAsync {
 
   void ensureAllAudio(AsyncCallback<Void> async);
 
+/*
   void ensureAudioForIDs(int projid, Collection<Integer> ids, AsyncCallback<Void> async);
+*/
 }

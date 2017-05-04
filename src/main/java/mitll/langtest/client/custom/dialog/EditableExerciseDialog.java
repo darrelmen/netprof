@@ -40,7 +40,6 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
@@ -85,9 +84,8 @@ class EditableExerciseDialog extends NewUserExercise {
                                 UserList<CommonShell> originalList,
 
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
-                                ReloadableContainer predefinedContent,
                                 String instanceName) {
-    super(controller, changedUserExercise, instanceName, originalList, predefinedContent);
+    super(controller, changedUserExercise, instanceName, originalList);
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
     this.originalList = originalList;

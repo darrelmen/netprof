@@ -70,7 +70,7 @@ public class EditItem {
 
   private final ExerciseController controller;
 
-  private final ReloadableContainer predefinedContentList;
+//  private final ReloadableContainer predefinedContentList;
 
   private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   private final String instanceName;
@@ -79,10 +79,9 @@ public class EditItem {
    * @param controller
    * @see ListManager#ListManager
    */
-  public EditItem(ExerciseController controller,
-                  ReloadableContainer predefinedContentList) {
+  public EditItem(ExerciseController controller) {
     this.controller = controller;
-    this.predefinedContentList = predefinedContentList;
+ //   this.predefinedContentList = predefinedContentList;
     this.instanceName = "EditItem";//instanceName;
   }
 
@@ -198,13 +197,12 @@ public class EditItem {
         boolean iCreatedThisItem = didICreateThisItem(exercise) ||
             (controller.getUserManager().isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
         if (iCreatedThisItem) {  // it's mine!
-          ReloadableContainer predefinedContentList = EditItem.this.predefinedContentList;
+          //ReloadableContainer predefinedContentList = EditItem.this.predefinedContentList;
           EditableExerciseDialog editableExercise =
               new EditableExerciseDialog(controller,
                   exercise,
                   originalList,
                   outer,
-                  predefinedContentList,
                   getInstance()
               );
           panel.add(editableExercise.addFields(outer, panel));
@@ -213,7 +211,7 @@ public class EditItem {
 //          return new CommentNPFExercise<>(exercise, controller, exerciseList,
 //              new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));
 
-          return new TwoColumnExercisePanel<CommonExercise>(exercise,
+          return new TwoColumnExercisePanel<>(exercise,
               controller,
               exerciseList, Collections.emptyList());
 //              new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));

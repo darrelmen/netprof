@@ -232,7 +232,6 @@ public class ProjectChoices {
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
-//    header.addStyleName("inlineFlex");
     String text = PLEASE_SELECT_A_LANGUAGE;
     if (nest == 1) {
       text = PLEASE_SELECT_A_COURSE;
@@ -288,8 +287,9 @@ public class ProjectChoices {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Check Audio");
 
     DivWidget right = new DivWidget();
-  //  right.addStyleName("floatRight");
+    //  right.addStyleName("floatRight");
     right.add(w);
+    right.addStyleName("topFiveMargin");
 
     w.addStyleName("floatLeft");
     header.add(right);
@@ -306,7 +306,7 @@ public class ProjectChoices {
 
         @Override
         public void onSuccess(Void result) {
-          new ModalInfoDialog("Ensure Audio", "All audio checked!");
+          new ModalInfoDialog("Ensure Audio", "Audio check started... This will take awhile...");
         }
       });
     });

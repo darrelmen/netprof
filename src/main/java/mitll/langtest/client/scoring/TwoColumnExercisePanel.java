@@ -65,7 +65,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private List<IHighlightSegment> flclickables;
   private List<IHighlightSegment> contextClickables, altContextClickables;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -110,7 +110,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
 
       int refID = currentAudioAttr.getUniqueID();
-      //int contextRefID = -1; //contextPlay.getCurrentAudioID();
+
       AudioAttribute currentAudioAttr1 = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
       int contextRefID = currentAudioAttr1 != null ? currentAudioAttr1.getUniqueID() : -1;
 
@@ -142,13 +142,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               @Override
               public void onSuccess(Map<Integer, AlignmentOutput> result) {
                 alignments.putAll(result);
-                // registerSegmentHighlight(refID, contextRefID, currentAudioAttr.getDurationInMillis());
                 registerSegments(refID, currentAudioAttr, contextRefID, currentAudioAttr1);
-
-
-//    if (contextRefID != -1) {
-//      matchSegmentToWidgetForAudio(contextRefID, alignments.get(contextRefID));
-//    }
                 cacheOthers();
               }
             });
@@ -172,6 +166,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void cacheOthers() {
     Set<Integer> req = new HashSet<>(playAudio.getAllAudioIDs());
 
+    if (contextPlay != null) {
+      req.addAll(contextPlay.getAllAudioIDs());
+    }
+
     req.removeAll(alignments.keySet());
 
     if (!req.isEmpty()) {
@@ -189,24 +187,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               @Override
               public void onSuccess(Map<Integer, AlignmentOutput> result) {
                 alignments.putAll(result);
-                //registerSegmentHighlight(refID, contextRefID);
               }
             });
       }
     }
   }
-
-
-/*  private void registerSegmentHighlight(int refID, int contextRefID, long durationInMillis) {
-    if (refID != -1) {
-      audioChanged(refID, durationInMillis);
-    }
-
-//    if (contextRefID != -1) {
-//      matchSegmentToWidgetForAudio(contextRefID, alignments.get(contextRefID));
-//    }
-  }*/
-
 
   /**
    * @param id
@@ -218,11 +203,19 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     AlignmentOutput alignmentOutput = alignments.get(id);
     if (alignmentOutput != null) {
       if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
-      //   Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(id);
       matchSegmentsToClickables(id, duration, alignmentOutput, idToTypeToSegmentToWidget.get(id), this.flclickables, this.playAudio);
     }
   }
 
+  /**
+   * @see #contextAudioChanged
+   * @param id
+   * @param duration
+   * @param alignmentOutput
+   * @param typeToSegmentToWidget
+   * @param flclickables
+   * @param playAudio
+   */
   private void matchSegmentsToClickables(int id,
                                          long duration,
                                          AlignmentOutput alignmentOutput,
@@ -250,7 +243,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   * TODO : what to do about chinese?
+   * TODOx : what to do about chinese?
    *
    * @param audioID
    * @param value2
