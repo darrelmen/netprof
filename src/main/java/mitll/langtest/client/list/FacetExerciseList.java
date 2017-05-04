@@ -80,7 +80,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private static final int TOTAL = 28;//32;
   private static final int CLOSE_TO_END = 2;
+
+  /**
+   * @see #getShowLess
+   */
   private static final String SHOW_LESS = "<i>View fewer</i>";
+
+  /**
+   * @see #getShowMoreAnchor
+   */
   private static final String SHOW_MORE = "<i>View all</i>";
   private static final String ANY = "Any";
   private static final String MENU_ITEM = "menuItem";
@@ -306,7 +314,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     w.addStyleName("inlineFlex");
 
     w.add(w1);
-    w.add(new ListSorting<>(this).getSortBox(controller));
+    w.add(new ListSorting<>(this).getSortBox(controller.getLanguage()));
     return w;
   }
 
@@ -570,7 +578,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void populateListChoices(ListItem liForDimensionForType) {
     ListServiceAsync listService = controller.getListService();
     //logger.info("populateListChoices ");
-    listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -680,8 +688,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                                  Panel choices,
                                  Set<MatchInfo> keys) {
     int j = 0;
-    int toShow = TOTAL / typeToValues.keySet().size();
+//    Set<String> types = typeToValues.keySet();
+    int size = rootNodesInOrder.size()+1;
+
+    int toShow = TOTAL / size;
     int diff = keys.size() - toShow;
+
+    logger.info("addChoices type " +type + " : "+ size  +// "(" +types+
+        ")  vs " + toShow + " keys " + keys.size());
+
     boolean hasMore = keys.size() > toShow && diff > CLOSE_TO_END;
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
     for (MatchInfo key : keys) {
@@ -716,7 +731,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   @NotNull
   private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type) {
     Anchor anchor = new Anchor();
-
     anchor.setHTML(SHOW_MORE);
     anchor.addClickHandler(event -> {
       typeToShowAll.put(type, true);
@@ -1044,7 +1058,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         //      logger.info("restoreListBoxState t->sel    " + selectionState + " typeOrder " + typeOrder);
         Map<String, String> newTypeToSelection = getNewTypeToSelection(selectionState, typeOrder);
         if (typeToSelection.equals(newTypeToSelection) && typeOrderContainer.iterator().hasNext()) {
-          logger.info("restoreListBoxState state already consistent with " + newTypeToSelection);
+         // logger.info("restoreListBoxState state already consistent with " + newTypeToSelection);
         } else {
           int userListID = -1;
           try {
@@ -1064,11 +1078,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       public String getHistoryToken() {
         StringBuilder builder = new StringBuilder();
 //        logger.info("getHistoryToken t->sel " + typeToSelection);
-
         for (Map.Entry<String, String> pair : typeToSelection.entrySet()) {
           builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
         }
-
         String s = builder.toString();
 //        logger.info("getHistoryToken token '" + s + "'");
         return s;
@@ -1113,9 +1125,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
-    logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
+ //   logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
-      logger.info("askServerForExercises show empty -- ");
+   //   logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();
     } else {
       if (numToShow == 1 && itemID > 0) {
@@ -1198,7 +1210,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void getExercises(Collection<Integer> visibleIDs) {
     long then = System.currentTimeMillis();
 
-    logger.info("getExercises asking for " + visibleIDs.size() + " visible ");
+   // logger.info("getExercises asking for " + visibleIDs.size() + " visible ");
 
     service.getFullExercises(freqid++, visibleIDs, false,
         new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
@@ -1263,7 +1275,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           break;
         }
         Panel exercisePanel = factory.getExercisePanel(exercise, wrapper);
-        if (exercisePanel instanceof  RefAudioGetter) {
+        if (exercisePanel instanceof RefAudioGetter) {
           getters.add(((RefAudioGetter) exercisePanel));
         }
         if (first) {
@@ -1301,6 +1313,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * Don't recurse...
+   *
    * @param iterator
    */
 
@@ -1309,7 +1322,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
 //    logger.info("asking next panel...");
     next.getRefAudio(() -> {
-  //    logger.info("\tpanel complete...");
+      //    logger.info("\tpanel complete...");
 
    /*   if (iterator.hasNext()) {
         getRefAudio(iterator);

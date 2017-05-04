@@ -1,12 +1,6 @@
 package mitll.langtest.client.custom.exercise;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.Tooltip;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -15,11 +9,9 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.UserListSupport;
-import mitll.langtest.shared.custom.UserList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -28,7 +20,6 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/13/17.
  */
 public class NewListButton {
-
   private final Logger logger = Logger.getLogger("NewListButton");
 
   private final UserListSupport userListSupport;
@@ -45,37 +36,12 @@ public class NewListButton {
     this.dropdown =dropdown;
   }
 
-  /**
-   * @return
-   * @seex #getNavigationHelper
-   */
-/*  private Widget getNewListButton() {
-    String buttonTitle = NEW_LIST;
-
-    final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList();
-
-    final Button newListButton = new Button(buttonTitle);
-    configureNewListButton(newListButton);
-
-    Tooltip tooltip = addTooltip(newListButton, MAKE_A_NEW_LIST);
-    // final DecoratedPopupPanel thePopup =
-    new PopupContainerFactory().makePopupAndButton(textBox, newListButton, tooltip, new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        makeANewList(textBox);
-      }
-    });
-
-    return newListButton;
-  }*/
-
   private final PopupContainerFactory popupContainerFactory = new PopupContainerFactory();
   private PopupContainerFactory.HidePopupTextBox textBox;
 
   public DecoratedPopupPanel getNewListButton2() {
     final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList();
     this.textBox = textBox;
-
     return popupContainerFactory.getPopup(textBox, event -> makeANewList(textBox));
   }
 
@@ -108,12 +74,13 @@ public class NewListButton {
   }
 
   private void makeANewList(TextBox textEntry) {
-    String newListName = textEntry.getValue();
+    String newListName = textEntry.getValue().trim();
     if (!newListName.isEmpty()) {
       controller.logEvent(textEntry, "NewList_TextBox", exid, "make new list called '" + newListName + "'");
       boolean duplicateName = isDuplicateName(newListName);
       if (duplicateName) {
         logger.info("---> not adding duplicate list " + newListName);
+        popupContainerFactory.showPopup("Already list with that name.", dropdown);
       } else {
         addUserList(newListName, textEntry);
       }
@@ -152,6 +119,6 @@ public class NewListButton {
   }
 
   private boolean isDuplicateName(String newListName) {
-    return userListSupport.getKnownNames().contains(newListName);
+    return userListSupport.getKnownNamesForDuplicateCheck().contains(newListName);
   }
 }

@@ -7,10 +7,15 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 
+import java.util.logging.Logger;
+
 /**
  * Created by go22670 on 3/28/17.
  */
 public class WaitCursorHelper {
+  private Logger logger = Logger.getLogger("WaitCursorHelper");
+
+
   private Timer waitTimer = null;
   private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
@@ -52,6 +57,7 @@ public class WaitCursorHelper {
     waitTimer = new Timer() {
       @Override
       public void run() {
+      logger.info("timer expired...");
         waitCursor.setUrl(animated);
         show();
       }

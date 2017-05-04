@@ -72,19 +72,22 @@ public class ScoreToJSON {
    * @see AudioFileHelper#getAudioAnswerAlignment
    * @see AudioFileHelper#getAudioAnswerDecoding
    */
-  JSONObject getJsonFromAnswer(AudioAnswer answer) {  return getJsonObject(answer.getPretestScore());  }
+  JSONObject getJsonFromAnswer(AudioAnswer answer) {
+    return getJsonObject(answer.getPretestScore());
+  }
 
   /**
-   * @see AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
    * @param pretestScore
    * @return
+   * @see AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
    */
   String asJson(PretestScore pretestScore) {
     return getJsonObject(pretestScore).toString();
   }
 
+  private static final JSONObject jsonNULL = new JSONObject(true);
+
   /**
-   *
    * @param pretestScore
    * @return
    */
@@ -94,13 +97,18 @@ public class ScoreToJSON {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getTypeToSegments();
 
       if (netPronImageTypeListMap.isEmpty()) {
-        JSONObject jsonObject1 = JSONObject.fromObject(pretestScore.getJson());
-        logger.info("getJsonObject returning" +
-            "\n\t" + jsonObject1 +
-          "\n\t from " + pretestScore.getJson());
-        return jsonObject1;
-      }
-      else {
+        String json = pretestScore.getJson();
+        if (json == null || json.equalsIgnoreCase("null")) {
+          logger.warn("no json for score");
+          return jsonNULL;
+        } else {
+          JSONObject jsonObject1 = JSONObject.fromObject(json);
+          logger.info("getJsonObject returning" +
+              "\n\t json " + jsonObject1 +
+              "\n\t from " + json);
+          return jsonObject1;
+        }
+      } else {
         List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
         List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
         if (words != null) {
@@ -145,8 +153,7 @@ public class ScoreToJSON {
           logger.warn("no word transcript for " + pretestScore, new Exception());
         }
       }
-    }
-    else {
+    } else {
 //      logger.warn("pretest score is null?");
     }
     return jsonObject;
@@ -181,7 +188,7 @@ public class ScoreToJSON {
    * @return
    * @see mitll.langtest.server.ScoreServlet#getJsonForAudioForUser
    */
-  public JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps ) {
+  public JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps) {
     JSONObject jsonObject = new JSONObject();
 
     jsonObject.put(SCORE, score.getHydecScore());

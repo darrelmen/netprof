@@ -428,7 +428,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private boolean isQC() {
-    logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
+  //  logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
     return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || isAdmin();
   }
 
@@ -439,7 +439,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   @Override
   public void checkProjectSelected() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
     // Collection<NavLink> values = nameToLink.values();
 //    logger.info("project info " + projectStartupInfo);
 //    logger.info("setting " + values.size() + " links");
@@ -450,7 +449,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 //    }
 
     lnav.setVisible(show);
-
 
     showActive(firstChoice);
 

@@ -115,7 +115,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       logger = Logger.getLogger("HistoryExerciseList");
     }
 
-    logger.info(getInstance() + " : getHistoryTokenFromUIState for " + id + " and search '" + search + "'");
+   // logger.info(getInstance() + " : getHistoryTokenFromUIState for " + id + " and search '" + search + "'");
 
     boolean hasItemID = id != -1;
     String instanceSuffix = getInstance().isEmpty() ? "" : SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();

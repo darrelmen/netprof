@@ -104,11 +104,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
 
-    addMouseOverHandler(event -> getRefAudio(new RefAudioListener() {
-      @Override
-      public void refAudioComplete() {
-
-      }
+    addMouseOverHandler(event -> getRefAudio(() -> {
     }));
 
 /*    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {

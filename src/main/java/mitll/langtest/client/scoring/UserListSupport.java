@@ -1,16 +1,12 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Dropdown;
-import com.github.gwtbootstrap.client.ui.DropdownContainer;
 import com.github.gwtbootstrap.client.ui.DropdownSubmenu;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DropdownBase;
-import com.github.gwtbootstrap.client.ui.event.ShowEvent;
-import com.github.gwtbootstrap.client.ui.event.ShowHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.exercise.NewListButton;
@@ -28,6 +24,8 @@ import java.util.Set;
  * Created by go22670 on 4/19/17.
  */
 public class UserListSupport {
+//  private final Logger logger = Logger.getLogger("UserListSupport");
+
   public static final String ADD_TO_LIST = "Add to List";
   public static final String REMOVE_FROM_LIST = "Remove from List";
   public static final String NEW_LIST = "New List";
@@ -38,7 +36,7 @@ public class UserListSupport {
   private final ExerciseController controller;
   private static final String ITEM_ALREADY_ADDED = "Item already added.";
   private static final String ITEM_ADDED = "Item Added!";
-  private final Set<String> knownNames = new HashSet<>();
+  private final Set<String> knownNamesForDuplicateCheck = new HashSet<>();
 
   UserListSupport(ExerciseController controller) {
     this.controller = controller;
@@ -79,6 +77,8 @@ public class UserListSupport {
    * <p>
    * TODO : do this better -- tell server to return lists that don't have exercise in them.
    *
+   * Visited are OK, I guess.
+   *
    * @param id
    * @param addToList
    * @seex #makeAddToList
@@ -90,6 +90,8 @@ public class UserListSupport {
                                    Dropdown container
   ) {
     ListServiceAsync listService = controller.getListService();
+
+  //  logger.info("asking for " + id );
     listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -103,7 +105,7 @@ public class UserListSupport {
         boolean anyAdded = false;
         boolean anyToRemove = false;
         for (final UserList ul : result) {
-          knownNames.add(ul.getName());
+          knownNamesForDuplicateCheck.add(ul.getName().trim().toLowerCase());
           if (!ul.containsByID(id)) {
             anyAdded = true;
             getAddListLink(ul, addToList, id, container);
@@ -173,7 +175,7 @@ public class UserListSupport {
   /**
    * @return
    */
-  public Set<String> getKnownNames() {
-    return knownNames;
+  public Set<String> getKnownNamesForDuplicateCheck() {
+    return knownNamesForDuplicateCheck;
   }
 }

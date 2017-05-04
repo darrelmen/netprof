@@ -336,6 +336,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   @Override
   public Collection<UserList<CommonShell>> getListsForUser(int userid, int projid) {
     List<UserList<CommonShell>> userLists = fromSlick(dao.getVisitedBy(userid, projid));
+    logger.info("found " + userLists.size() + " visited by " + userid);
     populateLists(userLists, userid);
     return userLists;
   }

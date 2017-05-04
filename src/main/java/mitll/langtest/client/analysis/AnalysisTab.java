@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.services.AnalysisService;
@@ -72,7 +73,7 @@ public class AnalysisTab extends DivWidget {
   private static final String WORDS_USING_SOUND = "Words using Sound";
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "scores > 20";
-  private boolean isNarrow = false;
+  //private boolean isNarrow = false;
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
   enum TIME_HORIZON {WEEK, MONTH, ALL}
@@ -84,19 +85,20 @@ public class AnalysisTab extends DivWidget {
 
   /**
    * @param controller
-   * @see Navigation#showAnalysis()
+   * @param userid
+   * @see NewContentChooser#showProgress
    * @see UserContainer#gotClickOnItem
    */
   public AnalysisTab(final ExerciseController controller,
                      final ShowTab showTab,
                      int minRecordings,
-                     DivWidget overallBottom
-  ) {
+                     DivWidget overallBottom,
+                     int userid) {
     getElement().setId("AnalysisTab");
 
     this.controller = controller;
     Icon playFeedback = new Icon(IconType.PLAY);
-    int userid = controller.getUser();
+   // int userid = controller.getUser();
     String userChosenID = controller.getUserManager().getUserID();
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid, userChosenID, minRecordings,
         controller.getSoundManager(), playFeedback);
@@ -122,7 +124,7 @@ public class AnalysisTab extends DivWidget {
     if (overallBottom != null) { // are we in student or teacher view
       overallBottom.clear();
       overallBottom.add(bottom); // teacher
-      isNarrow = true;
+    //  isNarrow = true;
     } else {
       add(bottom); // student
     }
@@ -187,12 +189,7 @@ public class AnalysisTab extends DivWidget {
     final Button right = new Button();
     right.setIcon(IconType.CARET_RIGHT);
     controller.register(right, "timeWindowAdvance");
-    right.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        analysisPlot.gotNextClick();
-      }
-    });
+    right.addClickHandler(event -> analysisPlot.gotNextClick());
     right.setEnabled(false);
     return right;
   }
@@ -261,9 +258,13 @@ public class AnalysisTab extends DivWidget {
    * @param lowerHalf
    * @param minRecordings
    */
-  private void getWordScores(final AnalysisServiceAsync service, final ExerciseController controller,
-                             final int userid, final ShowTab showTab, final AnalysisPlot analysisPlot,
-                             final Panel lowerHalf, final int minRecordings) {
+  private void getWordScores(final AnalysisServiceAsync service,
+                             final ExerciseController controller,
+                             final int userid,
+                             final ShowTab showTab,
+                             final AnalysisPlot analysisPlot,
+                             final Panel lowerHalf,
+                             final int minRecordings) {
     service.getWordScores(userid, minRecordings, new AsyncCallback<List<WordScore>>() {
       @Override
       public void onFailure(Throwable throwable) {

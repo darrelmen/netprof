@@ -42,11 +42,13 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
     locale = projectStartupInfo == null ? "" : projectStartupInfo.getLocale();
   }
 
-
-  ListBox getSortBox(ExerciseController controller) {
+  /**
+   * @see FacetExerciseList#addSortBox
+   * @param language
+   * @return
+   */
+  ListBox getSortBox(String language) {
     ListBox w1 = new ListBox();
-
-    String language = controller.getLanguage();
 
     boolean isEnglish = language.equalsIgnoreCase("English");
     w1.addItem(isEnglish ? MEANING_ASC : ENGLISH_ASC);
@@ -59,12 +61,8 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
     w1.addItem(LENGTH_LONG_TO_SHORT);
     w1.addItem(SCORE_LOW_TO_HIGH);
     w1.addItem(SCORE_DSC);
-    w1.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        ListSorting.this.onChange(w1, langASC, langDSC);
-      }
-    });
+
+    w1.addChangeHandler(event -> ListSorting.this.onChange(w1, langASC, langDSC));
 
     return w1;
   }
@@ -72,20 +70,22 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   private void onChange(ListBox w1, String langASC, String langDSC) {
     String selectedValue = w1.getSelectedValue();
     if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
-      sortBy((o1, o2) -> {
-        return compareShells(o1, o2, compPhones(o1, o2));
-      });
+      sortBy((o1, o2) -> compareShells(o1, o2, compPhones(o1, o2)));
     } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
       sortBy((o1, o2) -> {
         int i = -1 * compPhones(o1, o2);
         return compareShells(o1, o2, i);
       });
     } else if (selectedValue.equals(ENGLISH_ASC)) {
-      sortBy((o1, o2) -> compEnglish(o1, o2));
+      sortBy(this::compEnglish);
     } else if (selectedValue.equals(ENGLISH_DSC)) {
       sortBy((o1, o2) -> -1 * compEnglish(o1, o2));
+    } else if (selectedValue.equals(MEANING_ASC)) {
+      sortBy(this::compMeaning);
+    } else if (selectedValue.equals(MEANING_DSC)) {
+      sortBy((o1, o2) -> -1 * compMeaning(o1, o2));
     } else if (selectedValue.equals(langASC)) {
-      sortBy((o1, o2) -> compForeign(o1, o2));
+      sortBy(this::compForeign);
     } else if (selectedValue.equals(langDSC)) {
       sortBy((o1, o2) -> -1 * compForeign(o1, o2));
     } else if (selectedValue.equals(SCORE_LOW_TO_HIGH)) {
@@ -114,7 +114,6 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   private int compPhones(CommonShell o1, CommonShell o2) {
     return Integer.valueOf(o1.getNumPhones()).compareTo(o2.getNumPhones());
   }
-
 
   private int compareShells(CommonShell o1, CommonShell o2, int i) {
     if (i == 0) i = compForeign(o1, o2);
@@ -147,7 +146,11 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   }
 
   private int compEnglish(CommonShell o1, CommonShell o2) {
-    return o1.getEnglish().trim().toLowerCase().compareTo(o2.getEnglish().toLowerCase().trim());
+    return o1.getEnglish().toLowerCase().compareTo(o2.getEnglish().toLowerCase());
+  } 
+  
+  private int compMeaning(CommonShell o1, CommonShell o2) {
+    return o1.getMeaning().toLowerCase().compareTo(o2.getMeaning().toLowerCase());
   }
 
 }

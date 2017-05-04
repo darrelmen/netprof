@@ -44,7 +44,6 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.analysis.UserInfo;
 
 import java.util.Comparator;
@@ -71,7 +70,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private final ShowTab learnTab;
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
- // private final ExerciseServiceAsync exerciseServiceAsync;
 
   /**
    * @param controller
@@ -89,7 +87,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     this.rightSide = rightSide;
     this.learnTab = learnTab;
     logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
-   // this.exerciseServiceAsync = controller.getExerciseService();
     this.overallBottom = overallBottom;
   }
 
@@ -369,8 +366,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     super.gotClickOnItem(user);
     //MiniUser user1 = user.getUser();
    // int id = user.getID();
-    logger.warning("gotClickOnItem " +overallBottom.getElement().getId());
-
+//    logger.warning("gotClickOnItem " +overallBottom.getElement().getId());
 /*    if (overallBottom != null) {
       overallBottom.clear();
     }
@@ -378,8 +374,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       logger.warning("\n\n\n no bottom div for " );
     }*/
 
-    AnalysisTab widgets = new AnalysisTab(controller, learnTab, MIN_RECORDINGS, overallBottom);
     rightSide.clear();
-    rightSide.add(widgets);
+    rightSide.add(new AnalysisTab(controller, learnTab, MIN_RECORDINGS, overallBottom, user.getID()));
   }
 }

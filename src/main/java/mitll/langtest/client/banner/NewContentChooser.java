@@ -121,27 +121,15 @@ public class NewContentChooser implements INavigation {
 
   public void showProgress() {
     boolean hasTeacher = controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM);
-
-//    logger.info("has teacher " + hasTeacher);
- //   logger.info("controller " + controller);
-
     ShowTab showTab = getShowTab();
- //   logger.info("showTab " + showTab);
 
     DivWidget w = hasTeacher ?
         new StudentAnalysis(controller, showTab) :
-        new AnalysisTab(controller, showTab, 1, null);
+        new AnalysisTab(controller, showTab, 1, null, controller.getUser());
 
     divWidget.add(w);
     currentSection = PROGRESS;
   }
-
-/*  public void showLists() {
-    if (currentSection.equals(LISTS)) return;
-    clear();
-    divWidget.add(listManager.showLists());
-    currentSection = LISTS;
-  }*/
 
   private void clear() {
     divWidget.clear();

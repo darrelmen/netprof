@@ -151,7 +151,7 @@ public class ExerciseComparator {
       return t;
     }
     else {
-      return (t.startsWith("\"") || t.startsWith("\\'") || t.startsWith("-")) ? t.substring(1) : t;
+      return (t.startsWith("\"") || t.startsWith("\\'") || t.startsWith("-") || t.startsWith("\\u007E")) ? t.substring(1) : t;
     }
   }
 }

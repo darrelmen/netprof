@@ -87,7 +87,8 @@ public class UserListManager implements IUserListManager {
   private static final String REVIEW = "Defects";
   private static final String ATTENTION = "AttentionLL";
   private static final String ITEMS_TO_REVIEW = "Possible defects to fix";
-  private static final boolean DEBUG = false;
+
+  private static final boolean DEBUG = true;
 
   private final IUserDAO userDAO;
   private final IReviewedDAO reviewedDAO, secondStateDAO;
@@ -378,19 +379,24 @@ public class UserListManager implements IUserListManager {
    * @seex mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   @Override
-  public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists,
+  public Collection<UserList<CommonShell>> getListsForUser(int userid,
+                                                           boolean listsICreated,
+                                                           boolean visitedLists,
                                                            int projid) {
     if (userid == -1) {
       return Collections.emptyList();
     }
-    if (DEBUG)
+    if (DEBUG) {
       logger.debug("getListsForUser for user #" + userid + " only created " + listsICreated + " visited " + visitedLists);
+    }
 
     List<UserList<CommonShell>> listsForUser = new ArrayList<>();
     UserList<CommonShell> favorite = null;
     Set<Integer> ids = new HashSet<>();
+
     if (listsICreated) {
       listsForUser = userListDAO.getAllByUser(userid, projid);
+      logger.info("found " + listsForUser.size() + " created by " + userid);
       for (UserList<CommonShell> userList : listsForUser) {
         if (userList.isFavorite()) {
           favorite = userList;
@@ -400,8 +406,12 @@ public class UserListManager implements IUserListManager {
         ids.add(userList.getID());
       }
     }
+
     if (visitedLists) {
-      for (UserList<CommonShell> userList : userListDAO.getListsForUser(userid, projid)) {
+      Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid);
+      logger.info("found " + listsForUser1.size() + " visited by " + userid);
+
+      for (UserList<CommonShell> userList : listsForUser1) {
         if (!ids.contains(userList.getID())) {
           listsForUser.add(userList);
         }

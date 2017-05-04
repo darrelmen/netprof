@@ -687,7 +687,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseIds(ExerciseListRequest)
    */
   private <T extends CommonShell> void sortExercises(boolean isRecorder, List<T> commonExercises, boolean sortByFL) {
-
     new ExerciseSorter(db.getTypeOrder(getProjectID()))
         .getSorted(commonExercises, isRecorder, sortByFL);
   }
