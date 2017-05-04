@@ -267,7 +267,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     db.getAudioDAO().attachAudioToExercises(exercises, language);
     long now = System.currentTimeMillis();
     if (now - then > WARN_THRESH)
-      logger.info("ensureAudioForExercises checkAudio - took " + (now - then) + " millis to attach audio");
+      logger.info("ensureAudioForExercises (" +language+
+          ") checkAudio - took " + (now - then) + " millis to attach audio");
 
     ensureCompressedAudio(exercises, language);
   }
@@ -277,7 +278,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     int c = 0;
     int success = 0;
-    logger.info("ensureCompressedAudio examining " + exercises.size() + " exercises");
+    logger.info("ensureCompressedAudio (" +language+
+        ") examining " + exercises.size() + " exercises");
 
     for (CommonExercise exercise : exercises) {
       if (exercise != null) {
@@ -294,7 +296,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                 audioAttribute.getAudioType(),
                 language);
             if (didit) success++;
-            if (c % 100 == 0) logger.debug("checkAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
+            if (c % 1000 == 0) logger.debug("checkAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
           } catch (Exception e1) {
             logger.warn("Got " + e1 + " for exercise " + exercise.getID() + " : " + audioAttribute.getAudioRef());
           }

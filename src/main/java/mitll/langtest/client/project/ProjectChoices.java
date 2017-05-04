@@ -260,6 +260,9 @@ public class ProjectChoices {
     if (controller.getUserState().isAdmin()) {
       getEnsureAllAudioButton(right);
       right.addStyleName("topFiveMargin");
+
+      getRecalcRefAudioButton(right);
+
     }
 
     return header;
@@ -289,7 +292,7 @@ public class ProjectChoices {
     DivWidget right = new DivWidget();
     //  right.addStyleName("floatRight");
     right.add(w);
-    right.addStyleName("topFiveMargin");
+    w.addStyleName("topFiveMargin");
 
     w.addStyleName("floatLeft");
     header.add(right);
@@ -307,6 +310,35 @@ public class ProjectChoices {
         @Override
         public void onSuccess(Void result) {
           new ModalInfoDialog("Ensure Audio", "Audio check started... This will take awhile...");
+        }
+      });
+    });
+  }
+
+  private void getRecalcRefAudioButton(DivWidget header) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Recalc Ref");
+
+    DivWidget right = new DivWidget();
+    //  right.addStyleName("floatRight");
+    right.add(w);
+    w.addStyleName("topFiveMargin");
+
+    w.addStyleName("floatLeft");
+    header.add(right);
+
+    w.setIcon(IconType.MEDKIT);
+    w.setSize(ButtonSize.LARGE);
+    w.setType(ButtonType.SUCCESS);
+    w.addClickHandler(event -> {
+      controller.getScoringService().getAllAlignments(new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          new ModalInfoDialog("Recalc Ref Audio", "Audio recalc started... This will take awhile...");
         }
       });
     });

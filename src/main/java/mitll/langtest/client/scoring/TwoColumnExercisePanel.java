@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -41,7 +42,8 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener {
+public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener,
+    RefAudioGetter {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   private static final String EMAIL = "Email Item";
@@ -102,15 +104,25 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
 
-    addMouseOverHandler(event -> getRefAudio(controller));
+    addMouseOverHandler(event -> getRefAudio(new RefAudioListener() {
+      @Override
+      public void refAudioComplete() {
+
+      }
+    }));
+
+/*    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        getRefAudio(controller);
+      }
+    });*/
   }
 
-  private void getRefAudio(ExerciseController controller) {
+  @Override
+  public void getRefAudio(RefAudioListener listener) {
     if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
       AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
-
       int refID = currentAudioAttr.getUniqueID();
-
       AudioAttribute currentAudioAttr1 = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
       int contextRefID = currentAudioAttr1 != null ? currentAudioAttr1.getUniqueID() : -1;
 
@@ -143,7 +155,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               public void onSuccess(Map<Integer, AlignmentOutput> result) {
                 alignments.putAll(result);
                 registerSegments(refID, currentAudioAttr, contextRefID, currentAudioAttr1);
-                cacheOthers();
+                cacheOthers(listener);
               }
             });
       }
@@ -163,7 +175,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  private void cacheOthers() {
+  private void cacheOthers(RefAudioListener listener) {
     Set<Integer> req = new HashSet<>(playAudio.getAllAudioIDs());
 
     if (contextPlay != null) {
@@ -187,6 +199,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               @Override
               public void onSuccess(Map<Integer, AlignmentOutput> result) {
                 alignments.putAll(result);
+                listener.refAudioComplete();
               }
             });
       }

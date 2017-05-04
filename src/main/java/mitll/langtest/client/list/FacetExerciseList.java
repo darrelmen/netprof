@@ -54,6 +54,8 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.ListChangedEvent;
+import mitll.langtest.client.scoring.RefAudioGetter;
+import mitll.langtest.client.scoring.RefAudioListener;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -1254,16 +1256,21 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       int reqID = wrapper.getReqID();
       boolean first = true;
+      List<RefAudioGetter> getters = new ArrayList<>();
       for (CommonExercise exercise : result) {
         if (isStaleReq(wrapper)) {
           logger.info("showExercises stop stale req " + reqID + " vs  current " + (freqid - 1));
           break;
         }
+        Panel exercisePanel = factory.getExercisePanel(exercise, wrapper);
+        if (exercisePanel instanceof  RefAudioGetter) {
+          getters.add(((RefAudioGetter) exercisePanel));
+        }
         if (first) {
           markCurrentExercise(exercise.getID());
           first = false;
         }
-        exerciseContainer.add(factory.getExercisePanel(exercise, wrapper));
+        exerciseContainer.add(exercisePanel);
       }
       if (isStaleReq(wrapper)) {
         logger.info("showExercises Skip stale req " + reqID);
@@ -1271,6 +1278,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         Scheduler.get().scheduleDeferred(new Command() {
           public void execute() {
             setProgressBarScore(getInOrder());
+          }
+        });
+
+        Scheduler.get().scheduleDeferred(new Command() {
+          public void execute() {
+            if (!getters.isEmpty()) {
+              Iterator<RefAudioGetter> iterator = getters.iterator();
+              getRefAudio(iterator);
+            }
           }
         });
         //  innerContainer.setWidget(layoutPanel);
@@ -1281,6 +1297,24 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         showPrevNext();
       }
     }
+  }
+
+  /**
+   * Don't recurse...
+   * @param iterator
+   */
+
+  private void getRefAudio(Iterator<RefAudioGetter> iterator) {
+    RefAudioGetter next = iterator.next();
+
+    logger.info("asking next panel...");
+    next.getRefAudio(() -> {
+      logger.info("\tpanel complete...");
+
+   /*   if (iterator.hasNext()) {
+        getRefAudio(iterator);
+      }*/
+    });
   }
 
   private void setProgressBarScore(Collection<CommonShell> result) {

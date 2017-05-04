@@ -55,6 +55,8 @@ public interface ScoringService extends RemoteService {
    */
   PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions);
 
+  void getAllAlignments();
+
   Map<Integer, AlignmentOutput> getAlignments(int projid, Collection<Integer> audioIDs);
 
   /**
