@@ -124,8 +124,8 @@ public class ExerciseComparator {
   public int compareStrings(String id1, String id2) {
     String t = id1.toLowerCase();
     if (ignoreFirst(t)) t = t.substring(2);
-
     t = dropPunct(t);
+
     String t1 = id2.toLowerCase();
     if (ignoreFirst(t1)) t1 = t1.substring(2);
     t1 = dropPunct(t1);
@@ -134,7 +134,7 @@ public class ExerciseComparator {
   }
 
   private boolean ignoreFirst(String t) {
-    return t.startsWith(A_SPACE) ||t.startsWith("-");
+    return t.startsWith(A_SPACE);
   }
 
   protected String removePunct(String t) {
@@ -142,18 +142,16 @@ public class ExerciseComparator {
   }
 
   private <T extends CommonShell> int compareByFL(T o1, T o2) {
-    return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
+    return dropPunct(o1.getForeignLanguage()).compareTo(dropPunct(o2.getForeignLanguage()));
   }
 
   @NotNull
   private String dropPunct(String t) {
-    if (t.isEmpty()) return t;
-    else {
-      String first = t.substring(0, 1);
-      if (first.equals("\"") || first.equals("\\'")) {
-        t = t.substring(1);
-      }
+    if (t.isEmpty()) {
       return t;
+    }
+    else {
+      return (t.startsWith("\"") || t.startsWith("\\'") || t.startsWith("-")) ? t.substring(1) : t;
     }
   }
 }

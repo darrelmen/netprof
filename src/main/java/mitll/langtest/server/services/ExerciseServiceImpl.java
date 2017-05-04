@@ -62,12 +62,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   private static final int SLOW_MILLIS = 50;
   private static final int WARN_DUR = 100;
-  private static final boolean DEBUG = false;
 
   private static final int MIN_DEBUG_DURATION = 30;
   private static final int MIN_WARN_DURATION = 1000;
+  private static final String LISTS = "Lists";
 
   private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param request
@@ -83,28 +85,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     UserList<CommonShell> next = db.getUserListManager().getSimpleUserListByID(userListID);
 
     if (next != null) {  // echo it back
-      logger.info("\tgetTypeToValues " + request + " include list " + next);
-
-      typeToValues.getTypesToInclude().add("Lists");
+//      logger.info("\tgetTypeToValues " + request + " include list " + next);
+      typeToValues.getTypesToInclude().add(LISTS);
       Set<MatchInfo> value = new HashSet<>();
       value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID));
-      typeToValues.getTypeToValues().put("Lists", value);
+      typeToValues.getTypeToValues().put(LISTS, value);
     }
     return typeToValues;
   }
-
-/*  @Nullable
-  private List<UserList<CommonShell>> getUserLists(List<Pair> typeToSelection) {
-    List<UserList<CommonShell>> byName = null;
-    for (Pair p : typeToSelection) {
-      if (p.getProperty().equalsIgnoreCase("Lists")) {
-        byName = db.getUserListManager().getByName(getUserIDFromSession(), p.getValue(), getProjectID());
-        logger.info("getTypeToValues byName " + byName);
-        if (byName.isEmpty()) byName = null;
-      }
-    }
-    return byName;
-  }*/
 
   /**
    * Complicated.
@@ -139,13 +127,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     if (serverProps.isAMAS()) {
-      ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
-      return (ExerciseListWrapper<T>) amasExerciseIds; // TODO : how to do this without forcing it.
+      return (ExerciseListWrapper<T>) getAMASExerciseIds(request); // TODO : how to do this without forcing it.
     }
 
     if (request.isNoFilter()) {
       ExerciseListWrapper<T> tExerciseListWrapper = getCachedExerciseWrapper(request, projectID);
-      if (tExerciseListWrapper != null) return tExerciseListWrapper;
+      if (tExerciseListWrapper != null) {
+        return tExerciseListWrapper;
+      }
     }
 
     logger.debug("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
@@ -154,7 +143,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       boolean isUserListReq = request.getUserListID() != -1;
       UserList<CommonExercise> userListByID = isUserListReq ? db.getUserListByIDExercises(request.getUserListID(), getProjectID()) : null;
 
-      logger.info("found user list " + isUserListReq + " " + userListByID);
+     // logger.info("found user list " + isUserListReq + " " + userListByID);
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
         return getExerciseWhenNoUnitChapter(request, projectID, userListByID);
@@ -218,6 +207,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 
+  /**
+   * Complicated -- put the vocab matches first, then context matches second
+   * @param request
+   * @param exercises
+   * @param predefExercises
+   * @param userID
+   * @return
+   */
   private List<CommonExercise> getSortedExercises(ExerciseListRequest request,
                                                   TripleExercises<CommonExercise> exercises,
                                                   boolean predefExercises,
@@ -239,18 +236,18 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           if (!basicExercises.isEmpty() && hasSearch) {
             // if the search term is in the fl, sort by fl
             sortByFL = basicExercises.iterator().next().getForeignLanguage().contains(searchTerm);
-            logger.info("found search term " + searchTerm + " = " + sortByFL);
+  //          logger.info("found search term " + searchTerm + " = " + sortByFL);
           }
           sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL);
         }
 
         Set<Integer> unique = new HashSet<>();
-        logger.info("adding " + exercises.getByID().size() + " by id exercises");
+//        logger.info("adding " + exercises.getByID().size() + " by id exercises");
 
         commonExercises.addAll(exercises.getByID());
         exercises.getByID().forEach(e -> unique.add(e.getID()));
 
-        logger.info("adding " + basicExercises.size() + " basicExercises");
+//        logger.info("adding " + basicExercises.size() + " basicExercises");
 
         basicExercises
             .stream()
@@ -264,7 +261,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           if (!contextExercises.isEmpty() && hasSearch) {
             // if the search term is in the fl, sort by fl
             sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
-            logger.info("2 found search term " + searchTerm + " = " + sortByFL);
+  //          logger.info("2 found search term " + searchTerm + " = " + sortByFL);
           }
           sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL);
         }
@@ -999,7 +996,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
                                                  UserList<T> userListByID) {
     Collection<T> exercises2 = getCommonExercises(userListByID);
-    typeToSelection.remove("Lists");
+    typeToSelection.remove(LISTS);
     if (typeToSelection.isEmpty()) {
       logger.info("getExercisesFromUserListFiltered returning  " + userListByID.getExercises().size() + " exercises for " + userListByID.getID());
       return exercises2;
