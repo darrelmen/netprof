@@ -30,30 +30,39 @@ public class ExerciseCopy {
    * @param db
    * @param oldToNewUser
    * @param projectid
+   * @param typeOrder
    * @see CopyToPostgres#copyUserAndPredefExercisesAndLists
    */
   Map<String, Integer> copyUserAndPredefExercises(DatabaseImpl db,
                                                   Map<Integer, Integer> oldToNewUser,
                                                   int projectid,
-                                                  Map<Integer, String> idToFL) {
+                                                  Map<Integer, String> idToFL,
+                                                  Collection<String> typeOrder) {
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
     Map<String, Integer> exToInt;
-    Collection<String> typeOrder = db.getTypeOrder(projectid);
+
+    logger.info("copyUserAndPredefExercises for " + projectid + " typeOrder is " + typeOrder);
+    if (typeOrder.isEmpty()) {
+      logger.error("copyUserAndPredefExercises huh? type order is empty?\n\n\n");
+    }
     {
       int importUser = ((DominoUserDAOImpl) db.getUserDAO()).getImportUser();
-      Collection<CommonExercise> exercises = db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID);
-      addExercises(importUser, projectid, idToFL, slickUEDAO, exercises, typeOrder);
+      addExercises(importUser, projectid, idToFL, slickUEDAO, db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID), typeOrder);
     }
 
-    addUserExercises(db, oldToNewUser, projectid, slickUEDAO);
+    addUserExercises(db, oldToNewUser, projectid, slickUEDAO, typeOrder);
     exToInt = slickUEDAO.getOldToNew(projectid);
 
     logger.info("copyUserAndPredefExercises : finished copying exercises - found " + exToInt.size());
     return exToInt;
   }
 
-  private void addExercises(int importUser, int projectid, Map<Integer, String> idToFL, SlickUserExerciseDAO slickUEDAO,
-                            Collection<CommonExercise> exercises, Collection<String> typeOrder) {
+  private void addExercises(int importUser,
+                            int projectid,
+                            Map<Integer, String> idToFL,
+                            SlickUserExerciseDAO slickUEDAO,
+                            Collection<CommonExercise> exercises,
+                            Collection<String> typeOrder) {
     Map<String, Integer> exToInt;
     logger.info("copyUserAndPredefExercises found " + exercises.size() + " old exercises.");
 
@@ -65,10 +74,12 @@ public class ExerciseCopy {
     addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder);
   }
 
-  private Map<String, Integer> addExercisesAndAttributes(int importUser, int projectid, SlickUserExerciseDAO slickUEDAO,
-                                                         Collection<CommonExercise> exercises, Collection<String> typeOrder) {
+  private Map<String, Integer> addExercisesAndAttributes(int importUser,
+                                                         int projectid,
+                                                         SlickUserExerciseDAO slickUEDAO,
+                                                         Collection<CommonExercise> exercises,
+                                                         Collection<String> typeOrder) {
     Map<String, Integer> exToInt;
-    //int importUser = ((DominoUserDAOImpl) db.getUserDAO()).getImportUser();
     Map<String, List<Integer>> exToJoins = addPredefExercises(projectid, slickUEDAO, importUser, exercises, typeOrder);
     exToInt = slickUEDAO.getOldToNew(projectid);
 
@@ -113,6 +124,11 @@ public class ExerciseCopy {
     List<SlickRelatedExercise> pairs = new ArrayList<>();
 
     Timestamp now = new Timestamp(System.currentTimeMillis());
+
+    if (typeOrder.isEmpty()) {
+      logger.error("huh? type order is empty...?");
+    }
+
     for (CommonExercise ex : exercises) {
       String oldID = ex.getOldID();
       if (oldID == null) logger.error("huh? old id is null for " + ex);
@@ -139,16 +155,19 @@ public class ExerciseCopy {
    * @param importUser
    * @param exercises
    * @param typeOrder
-   * @see #copyUserAndPredefExercises(DatabaseImpl, Map, int, Map)
+   * @see #copyUserAndPredefExercises(DatabaseImpl, Map, int, Map, Collection)
    */
   public Map<String, List<Integer>> addPredefExercises(int projectid,
                                                        SlickUserExerciseDAO slickUEDAO,
 
                                                        int importUser,
-                                                       Collection<CommonExercise> exercises, Collection<String> typeOrder) {
+                                                       Collection<CommonExercise> exercises,
+                                                       Collection<String> typeOrder) {
     List<SlickExercise> bulk = new ArrayList<>();
     logger.info("addPredefExercises copying " + exercises.size() + " exercises");
-    //Set<ExerciseAttribute> known = new HashSet<>();
+    if (typeOrder == null || typeOrder.isEmpty()) {
+      logger.error("huh? no type order?");
+    }
     long now = System.currentTimeMillis();
 
     Map<ExerciseAttribute, Integer> attrToID = new HashMap<>();
@@ -163,7 +182,6 @@ public class ExerciseCopy {
 
       addAttrbutes(slickUEDAO,
           projectid, importUser,
-          //known,
           now, attrToID, exToJoins,
 
           ex.getOldID(), ex.getAttributes());
@@ -181,20 +199,20 @@ public class ExerciseCopy {
    * @param projectid
    * @param importUser
    * @param now
-   * @param attrToID map of attribute to db id
+   * @param attrToID   map of attribute to db id
    * @param exToJoins  map of old ex id to new attribute db id
-   * @param oldID - at this point we don't have exercise db ids - could be done differently...
+   * @param oldID      - at this point we don't have exercise db ids - could be done differently...
    */
   public void addAttrbutes(SlickUserExerciseDAO slickUEDAO,
-                            int projectid,
-                            int importUser,
-                            //  Set<ExerciseAttribute> known,
-                            long now,
-                            Map<ExerciseAttribute, Integer> attrToID,
-                            Map<String, List<Integer>> exToJoins,
+                           int projectid,
+                           int importUser,
+                           //  Set<ExerciseAttribute> known,
+                           long now,
+                           Map<ExerciseAttribute, Integer> attrToID,
+                           Map<String, List<Integer>> exToJoins,
 
-                            String oldID,
-                            List<ExerciseAttribute> attributes) {
+                           String oldID,
+                           List<ExerciseAttribute> attributes) {
     //  List<ExerciseAttribute> attributes = ex.getAttributes();
     if (attributes != null && !attributes.isEmpty()) {
       List<Integer> joins;
@@ -245,19 +263,32 @@ public class ExerciseCopy {
     }
   }
 
+  /**
+   * @see #copyUserAndPredefExercises
+   * @param db
+   * @param oldToNewUser
+   * @param projectid
+   * @param slickUEDAO
+   * @param typeOrder
+   */
   private void addUserExercises(DatabaseImpl db,
                                 Map<Integer, Integer> oldToNewUser,
                                 int projectid,
-                                SlickUserExerciseDAO slickUEDAO) {
+                                SlickUserExerciseDAO slickUEDAO,
+                                Collection<String> typeOrder) {
     List<SlickExercise> bulk = new ArrayList<>();
     try {
       int c = 0;
       UserExerciseDAO ueDAO = new UserExerciseDAO(db);
       ueDAO.setExerciseDAO(db.getExerciseDAO(projectid));
       Collection<Exercise> allUserExercises = ueDAO.getAllUserExercises();
-      logger.info("copying  " + allUserExercises.size() + " user exercises");
+      logger.info("addUserExercises copying  " + allUserExercises.size() + " user exercises");
 
-      Collection<String> typeOrder = db.getTypeOrder(projectid);
+    //  Collection<String> typeOrder = db.getTypeOrder(projectid);
+
+      if (typeOrder.isEmpty()) {
+        logger.error("addUserExercises huh? for " +projectid + " type order is empty?\n\n\n");
+      }
 
       for (Exercise userExercise : allUserExercises) {
         Integer userID = oldToNewUser.get(userExercise.getCreator());

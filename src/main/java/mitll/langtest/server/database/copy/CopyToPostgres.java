@@ -257,9 +257,11 @@ public class CopyToPostgres<T extends CommonShell> {
    * @seex PostgresTest#testCopy
    */
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {
-    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev);  // TODO : course?
+    Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
-    logger.info("copyOneConfig project is " + projectID + " type order is " + db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID));
+    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev, typeOrder);  // TODO : course?
+
+    logger.info("copyOneConfig project is " + projectID + " type order is " + typeOrder + " for import project id " +DatabaseImpl.IMPORT_PROJECT_ID);
 
     // first add the user table
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
@@ -272,7 +274,11 @@ public class CopyToPostgres<T extends CommonShell> {
       Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO, optName);
 
       Map<Integer, String> idToFL = new HashMap<>();
-      Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL);
+
+      logger.info("copyOneConfig type order  " + typeOrder);
+
+    if (typeOrder.isEmpty()) logger.error("huh? type order is empty????\\n\n\n");
+      Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder);
 
       SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
       copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL);
@@ -337,8 +343,9 @@ public class CopyToPostgres<T extends CommonShell> {
                                        String cc,
                                        String optName,
                                        int displayOrder,
-                                       boolean isDev) {
-    return new CreateProject().createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev);
+                                       boolean isDev,
+                                       Collection<String> typeOrder) {
+    return new CreateProject().createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev, typeOrder);
   }
 
   /**
@@ -346,14 +353,16 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param projectID
    * @param oldToNewUser
    * @param idToFL
+   * @param typeOrder
    * @return
    * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
    */
   private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db,
                                                                   int projectID,
                                                                   Map<Integer, Integer> oldToNewUser,
-                                                                  Map<Integer, String> idToFL) {
-    Map<String, Integer> exToID = new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL);
+                                                                  Map<Integer, String> idToFL,
+                                                                  Collection<String> typeOrder) {
+    Map<String, Integer> exToID = new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder);
 
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
     copyUserExerciseList(db, oldToNewUser, slickUserListDAO, projectID);

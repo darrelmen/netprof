@@ -290,7 +290,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
     public void onSuccess(ExerciseListWrapper<T> result) {
       showFinishedGettingExercises();
-      if (DEBUG) logger.info("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
+      if (DEBUG) {
+        List<T> exercises = result.getExercises();
+        if (exercises == null)
+        logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results");
+      }
       if (isStaleResponse(result)) {
         if (DEBUG)
           logger.info("SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);

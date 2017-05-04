@@ -169,6 +169,8 @@ public class SlickUserExerciseDAO
     return toSlick(shared, isOverride, shared.getProjectID(), BaseUserDAO.DEFAULT_USER_ID, isContext, typeOrder);
   }
 
+  int spew = 0;
+
   /**
    * @param shared
    * @param isOverride
@@ -187,7 +189,8 @@ public class SlickUserExerciseDAO
                                Collection<String> typeOrder) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     if (typeOrder.isEmpty()) {
-      logger.error("toSlick type order is empty?");
+      if (spew++ < 100 || spew % 100 == 0)
+        logger.error("toSlick type order is empty? (" + spew + " )");
       return null;
     }
     Iterator<String> iterator = typeOrder.iterator();//getTypeOrder().iterator();
@@ -203,7 +206,7 @@ public class SlickUserExerciseDAO
     String orDefault = unitToValue.getOrDefault(first, "");
     String orDefault1 = unitToValue.getOrDefault(second, "");
 
-    logger.info("toSlick for " + shared.getID() + " : first = '" + orDefault + "' " + second + " = '" + orDefault1 + "'");
+    //logger.info("toSlick for " + shared.getID() + " : first = '" + orDefault + "' " + second + " = '" + orDefault1 + "'");
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),
@@ -260,13 +263,17 @@ public class SlickUserExerciseDAO
     Map<String, String> unitToValue = new HashMap<>();
     Collection<String> typeOrder = userDAO.getDatabase().getTypeOrder(slick.projid());
 
-    if (typeOrder == null || typeOrder.isEmpty()) logger.warn("no types for " + slick);
+    if (typeOrder == null || typeOrder.isEmpty()) {
+      logger.warn("getUnitToValue no types for exercise " + slick);
+    }
+
     Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
     unitToValue.put(first, slick.unit());
-    if (!second.isEmpty())
+    if (!second.isEmpty()) {
       unitToValue.put(second, slick.lesson());
+    }
     return unitToValue;
   }
 
@@ -396,7 +403,7 @@ public class SlickUserExerciseDAO
     return exercisePhoneInfo;
   }
 
-  private int spew = 0;
+  //private int spew = 0;
 
   /**
    * TODO : What is this doing???

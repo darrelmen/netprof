@@ -23,6 +23,7 @@ public class CreateProject {
    * @param countryCode
    * @param course
    * @param isDev
+   * @param typeOrder
    * @return
    * @see CopyToPostgres#copyOneConfig
    */
@@ -31,7 +32,8 @@ public class CreateProject {
                                       String optName,
                                       String course,
                                       int displayOrder,
-                                      boolean isDev) {
+                                      boolean isDev,
+                                      Collection<String> typeOrder) {
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
 
@@ -43,7 +45,7 @@ public class CreateProject {
       logger.info("createProjectIfNotExists checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
           "' - non found");
 
-      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder, isDev);
+      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder, isDev, typeOrder);
       db.rememberProject(byName);
       //    db.populateProjects();
     } else {
@@ -61,6 +63,7 @@ public class CreateProject {
    * @param course
    * @param displayOrder
    * @param isDev
+   * @param typeOrder
    * @see #createProjectIfNotExists
    */
   private int createProject(DatabaseImpl db,
@@ -69,8 +72,9 @@ public class CreateProject {
                             String name,
                             String course,
                             int displayOrder,
-                            boolean isDev) {
-    Iterator<String> iterator = db.getTypeOrder(-1).iterator();
+                            boolean isDev,
+                            Collection<String> typeOrder) {
+    Iterator<String> iterator = typeOrder.iterator();
     String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
     String language = getOldLanguage(db);

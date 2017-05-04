@@ -28,6 +28,10 @@ import java.util.Set;
  * Created by go22670 on 4/19/17.
  */
 public class UserListSupport {
+  public static final String ADD_TO_LIST = "Add to List";
+  public static final String REMOVE_FROM_LIST = "Remove from List";
+  public static final String NEW_LIST = "New List";
+  public static final String NOT_ON_ANY_LISTS = "Not on any lists.";
   private final PopupContainerFactory popupContainer = new PopupContainerFactory();
 
   private static final int END_INDEX = 15;
@@ -44,32 +48,22 @@ public class UserListSupport {
    * @param dropdownContainer
    * @param exid
    */
-  void addListOptions(
-      Dropdown dropdownContainer,
-      int exid) {
-    DropdownSubmenu addToList = new DropdownSubmenu("Add to List");
+  void addListOptions(Dropdown dropdownContainer, int exid) {
+    DropdownSubmenu addToList = new DropdownSubmenu(ADD_TO_LIST);
     addToList.setRightDropdown(true);
-
     //  addToList.setStyleDependentName("pull-left", true);
 
-    DropdownSubmenu removeFromList = new DropdownSubmenu("Remove from List");
+    DropdownSubmenu removeFromList = new DropdownSubmenu(REMOVE_FROM_LIST);
     removeFromList.setRightDropdown(true);
 
-    dropdownContainer.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        populateListChoices(exid, addToList, removeFromList, dropdownContainer);
-      }
-    });
+    dropdownContainer.addClickHandler(event -> populateListChoices(exid, addToList, removeFromList, dropdownContainer));
 
-
-    //  NavLink addToList = new NavLink("Add to List");
     dropdownContainer.add(addToList);
     dropdownContainer.add(removeFromList);
 
     UserListSupport outer = this;
 
-    NavLink widget = new NavLink("New List");
+    NavLink widget = new NavLink(NEW_LIST);
     widget.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -122,7 +116,7 @@ public class UserListSupport {
           addToList.add(new NavLink(ITEM_ALREADY_ADDED));
         }
         if (!anyToRemove) {
-          removeFromList.add(new NavLink("Not on any lists."));
+          removeFromList.add(new NavLink(NOT_ON_ANY_LISTS));
         }
       }
     });

@@ -285,7 +285,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     if (cachedDuration == null) {
       cachedDuration = new AudioCheck(props).getDurationInSeconds(wavFile);
       fileToDuration.put(filePath,cachedDuration);
-      logger.info("fileToDur now has "+fileToDuration.size());
+  //    logger.info("fileToDur now has "+fileToDuration.size());
     }
     if (cached != null) {
       scores = (Scores) cached[0];

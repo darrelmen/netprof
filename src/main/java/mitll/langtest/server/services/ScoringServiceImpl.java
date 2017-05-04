@@ -179,7 +179,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     int userIDFromSession = getUserIDFromSession();
     recalcAlignments(projid, audioIDs, idToAlignment, userIDFromSession);
-    logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
+  //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
     return idToAlignment;
   }
 
@@ -228,12 +228,15 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
 
       boolean contextAudio = byID.isContextAudio();
+
+/*
       if (customOrPredefExercise != null) {
         logger.info("getAlignments decoding " + audioID +
             (contextAudio ? " CONTEXT" : "") +
             " for exercise " + byID.getExid() + " : '" +
             customOrPredefExercise.getEnglish() + "' = '" + customOrPredefExercise.getForeignLanguage() + "'");
       }
+      */
 
       // cover for import bug...
       if (contextAudio &&
@@ -242,12 +245,12 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           !customOrPredefExercise.getDirectlyRelated().isEmpty()) {
         customOrPredefExercise = customOrPredefExercise.getDirectlyRelated().iterator().next();
 
-        logger.info("using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
+        //logger.info("getAlignments using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
       PretestScore pretestScore =
           audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession);
-      logger.info("getAlignments decoding " + audioID + " for " + byID.getExid() + " got " + pretestScore);
+      //logger.info("getAlignments decoding " + audioID + " for " + byID.getExid() + " got " + pretestScore);
       idToAlignment.put(audioID, pretestScore);
     } else {
       logger.info("getAlignments can't find audio id " + audioID);
@@ -255,16 +258,16 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
-                                                                               boolean usePhoneToDisplay) {
+                                                                                boolean usePhoneToDisplay) {
     return
         new ParseResultJson(db.getServerProps())
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
   }
 
   /**
-   * @see #getCachedAudioRef
    * @param typeToEvent
    * @return
+   * @see #getCachedAudioRef
    */
   @NotNull
   private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {

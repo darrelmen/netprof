@@ -190,7 +190,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private RecordWordAndPhone recordWordAndPhone;
 
   private IUserSecurityManager userSecurityManager;
-DominoExerciseDAO dominoExerciseDAO;
+  DominoExerciseDAO dominoExerciseDAO;
+
   /**
    * JUST FOR TESTING
    *
@@ -316,7 +317,7 @@ DominoExerciseDAO dominoExerciseDAO;
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this);
     this.userDAO = dominoUserDAO;
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
-     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
+    SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
     answerDAO = new SlickAnswerDAO(this, dbConnection);
@@ -501,10 +502,15 @@ DominoExerciseDAO dominoExerciseDAO;
 
   public Collection<String> getTypeOrder(int projectid) {
     ISection sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
-    if (sectionHelper == null) logger.warn("no section helper for " + this);
+    if (sectionHelper == null) {
+      logger.warn("no section helper for " + this + " and " + projectid);
+    }
     List<String> objects = Collections.emptyList();
     Collection<String> strings = (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
-//   logger.info("getTypeOrder : " + projectid + " = " + strings);
+
+    if (strings.isEmpty()) {
+      logger.error("\n\n\ngetTypeOrder : " + projectid + " = " + strings);
+    }
     return strings;
   }
 
@@ -744,7 +750,9 @@ DominoExerciseDAO dominoExerciseDAO;
     return projectManagement.getProject(projectid);
   }
 
-  public Collection<Project> getProjects()  { return projectManagement.getProjects(); }
+  public Collection<Project> getProjects() {
+    return projectManagement.getProjects();
+  }
 
   /**
    * A little dusty...
@@ -816,7 +824,7 @@ DominoExerciseDAO dominoExerciseDAO;
         " audio " + userExercise.getAudioAttributes());
 
     if (userExercise.getProjectID() < 0) {
-      logger.warn("huh? no project id on user exer "+ userExercise);
+      logger.warn("huh? no project id on user exer " + userExercise);
     }
     getUserListManager().editItem(userExercise,
         // create if doesn't exist
@@ -912,13 +920,17 @@ DominoExerciseDAO dominoExerciseDAO;
     return getJsonSupport(userid).getJsonScoreHistory(userid, typeToSection, sorter);
   }
 
-  private JsonSupport getJsonSupport(int userid) {  return getJsonSupportForProject(projectForUser(userid));  }
+  private JsonSupport getJsonSupport(int userid) {
+    return getJsonSupportForProject(projectForUser(userid));
+  }
 
   private int projectForUser(int userid) {
     return getUserProjectDAO().mostRecentByUser(userid);
   }
 
-  private JsonSupport getJsonSupportForProject(int i) {  return getProject(i).getJsonSupport();  }
+  private JsonSupport getJsonSupportForProject(int i) {
+    return getProject(i).getJsonSupport();
+  }
 
   /**
    * @param typeToSection
@@ -1276,11 +1288,11 @@ DominoExerciseDAO dominoExerciseDAO;
    * @param projid
    * @param exerciseID
    * @param audioid
-   *@param durationInMillis
+   * @param durationInMillis
    * @param correct
    * @param isMale
    * @param speed
-   * @param model      @return
+   * @param model            @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    */
   @Override
@@ -1425,13 +1437,13 @@ DominoExerciseDAO dominoExerciseDAO;
 */
 
   /**
-   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserToResults
-   * @see SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
    * @param userToGender
    * @param userid
    * @param exid
    * @param project
    * @return
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserToResults
+   * @see SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
    */
   @Nullable
   public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project) {
@@ -1510,7 +1522,9 @@ DominoExerciseDAO dominoExerciseDAO;
   }
 
   @Override
-  public String getLanguage(int projectid) {  return getLanguage(getProject(projectid));  }
+  public String getLanguage(int projectid) {
+    return getLanguage(getProject(projectid));
+  }
 
   private String getLanguage(Project project) {
     return project.getLanguage();

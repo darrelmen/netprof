@@ -702,7 +702,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
         }
       }
     } else {
-      logger.info("no perms column???");
+      logger.info("getPermissions : no perms column???");
     }
     return permissions;
   }

@@ -43,6 +43,7 @@ import java.util.List;
 /**
  * @Deprecated
  * @see ListSectionWidget#addChoices
+ * @deprecated
  */
 public class ListBoxSelect {
   //  private final Logger logger = Logger.getLogger("TableSelect");

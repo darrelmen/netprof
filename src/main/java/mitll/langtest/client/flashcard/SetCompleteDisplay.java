@@ -56,7 +56,7 @@ import java.util.List;
  */
 public class SetCompleteDisplay {
   //  private final Logger logger = Logger.getLogger("SetCompleteDisplay");
-  private static final String PRONUNCIATION = "Pronunciation ";
+/*  private static final String PRONUNCIATION = "Pronunciation ";
 
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
 
@@ -66,10 +66,10 @@ public class SetCompleteDisplay {
   private static final String SCORE_SUBTITLE = "score %";
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
-  private static final int TABLE_HISTORY_WIDTH = ScoreHistoryContainer.TABLE_HISTORY_WIDTH;
-  private static final int ONE_TABLE_WIDTH = 275;//-(TABLE_HISTORY_WIDTH/2);//275;
-  private static final int TABLE_WIDTH = 2 * ONE_TABLE_WIDTH;
-  private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
+  private static final int TABLE_HISTORY_WIDTH = ScoreHistoryContainer.TABLE_HISTORY_WIDTH;*/
+ // private static final int ONE_TABLE_WIDTH = 275;//-(TABLE_HISTORY_WIDTH/2);//275;
+  //private static final int TABLE_WIDTH = 2 * ONE_TABLE_WIDTH;
+  //private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
   private static final int MAX_TO_SHOW = 5;
 
   /**
@@ -81,7 +81,7 @@ public class SetCompleteDisplay {
    * @param numExercises
    * @param container
    */
-  void addLeftAndRightCharts(List<AVPHistoryForList> result,
+/*  void addLeftAndRightCharts(List<AVPHistoryForList> result,
                              Collection<Double> scores,
 //  void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore,
                              int numCorrect, int numIncorrect, int numExercises, Panel container) {
@@ -96,14 +96,14 @@ public class SetCompleteDisplay {
     Chart chart2 = makePronChart(getAvgScore(scores), sessionAVPHistoryForListScore);
     container.add(chart2);
     container.add(makeTable(sessionAVPHistoryForListScore, SCORE));
-  }
+  }*/
 
-  private Chart makeCorrectChart(List<AVPHistoryForList> result,
+/*  private Chart makeCorrectChart(List<AVPHistoryForList> result,
                                  AVPHistoryForList sessionAVPHistoryForList,
                                  int totalCorrect, int totalIncorrect, int numExercises) {
     int all = totalCorrect + totalIncorrect;
-/*    logger.info("onSetComplete.onSuccess : results " + result + " " + (numExercises) +
-        " all " + all + " correct " + totalCorrect + " inc " + totalIncorrect);*/
+*//*    logger.info("onSetComplete.onSuccess : results " + result + " " + (numExercises) +
+        " all " + all + " correct " + totalCorrect + " inc " + totalIncorrect);*//*
 
     return makeChart(totalCorrect, all, sessionAVPHistoryForList, totalIncorrect, numExercises);
   }
@@ -113,7 +113,7 @@ public class SetCompleteDisplay {
     Chart chart2 = new LeaderboardPlot().getChart(sessionAVPHistoryForListScore, pronunciation, SCORE_SUBTITLE);
     scaleCharts(chart2);
     return chart2;
-  }
+  }*/
 
   /**
    * @param totalCorrect
@@ -122,7 +122,7 @@ public class SetCompleteDisplay {
    * @return
    * @see #makeCorrectChart(java.util.List, mitll.langtest.shared.flashcard.AVPHistoryForList, int, int, int)
    */
-  private Chart makeChart(int totalCorrect, int numAttempted, AVPHistoryForList sessionAVPHistoryForList,
+/*  private Chart makeChart(int totalCorrect, int numAttempted, AVPHistoryForList sessionAVPHistoryForList,
                           int incorrent, int numExercises) {
     String suffix = getSkippedSuffix(totalCorrect, incorrent, numExercises);
     String correct = totalCorrect + " of " + numAttempted +
@@ -131,9 +131,9 @@ public class SetCompleteDisplay {
 
     scaleCharts(chart);
     return chart;
-  }
+  }*/
 
-  private String getSkippedSuffix(int correct, int incorrect, int numExercises) {
+/*  private String getSkippedSuffix(int correct, int incorrect, int numExercises) {
     int attempted = correct + incorrect;
     int skipped = numExercises - attempted;
     String suffix = "";
@@ -158,13 +158,15 @@ public class SetCompleteDisplay {
     }
 
     if (neither) chart.addStyleName("chartDim");
-  }
+  }*/
 
+/*
   private int getChartWidth() {
     return (Window.getClientWidth() - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
   }
+*/
 
-  private float needToScaleX() {
+/*  private float needToScaleX() {
     float width = (float) getChartWidth();
     return width / HORIZ_SPACE_FOR_CHARTS;
   }
@@ -172,7 +174,7 @@ public class SetCompleteDisplay {
   private float needToScaleY() {
     float height = (float) Window.getClientHeight();
     return height / 707;
-  }
+  }*/
 
   /**
    * Make a three column table -- rank, name, and score
@@ -183,7 +185,7 @@ public class SetCompleteDisplay {
    * @see #addLeftAndRightCharts(List, Map, int, int, int, Panel)
    * @see #showFeedbackCharts(java.util.List, java.util.Map, int, int, int)
    */
-  private Table makeTable(AVPHistoryForList sessionAVPHistoryForList, String scoreColHeader) {
+/*  private Table makeTable(AVPHistoryForList sessionAVPHistoryForList, String scoreColHeader) {
     Table table = new Table();
     table.getElement().setId("LeaderboardTable_" + scoreColHeader.substring(0, 3));
     TableHeader w = new TableHeader(RANK);
@@ -195,8 +197,8 @@ public class SetCompleteDisplay {
     List<AVPHistoryForList.UserScore> scores = sessionAVPHistoryForList.getScores();
     int size = scale ? Math.min(ROWS_IN_TABLE, scores.size()) : scores.size();
 
-/*      if (scale) logger.info("scale! client " +Window.getClientWidth()+
-        " : using " + size + " vs " + scores.size());*/
+*//*      if (scale) logger.info("scale! client " +Window.getClientWidth()+
+        " : using " + size + " vs " + scores.size());*//*
 
     int used = 0;
     for (int i = 0; i < scores.size(); i++) {
@@ -228,14 +230,14 @@ public class SetCompleteDisplay {
       }
     }
     return table;
-  }
+  }*/
 
   /**
    * @param sortedHistory
    * @param allExercises
    * @param controller
    * @return
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts(List, List)
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
    */
   public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
                                Collection<? extends CommonShell> allExercises, ExerciseController controller) {
@@ -243,7 +245,7 @@ public class SetCompleteDisplay {
     return scoreHistoryContainer.getTableWithPager(sortedHistory);
   }
 
-  public static String getScoreHistory(List<CorrectAndScore> correctAndScores) {
+   static String getScoreHistory(List<CorrectAndScore> correctAndScores) {
     int size = correctAndScores.size();
     if (size > MAX_TO_SHOW) correctAndScores = correctAndScores.subList(size - MAX_TO_SHOW, size);
 
@@ -268,15 +270,15 @@ public class SetCompleteDisplay {
     }
     return builder.toString();
   }
-
+/*
   private String bold(AVPHistoryForList.UserScore score, String html) {
     return score.isCurrent() ? "<b>" + html + "</b>" : html;
   }
 
-  /**
+  *//**
    * @return
    * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
-   */
+   *//*
   private double getAvgScore(Collection<Double> scores) {
     // Collection<Double> scores = exToScore.values();
     double count = 0;
@@ -296,5 +298,5 @@ public class SetCompleteDisplay {
 
   private String toPercent(double num) {
     return ((int) (num * 100f)) + "%";
-  }
+  }*/
 }
