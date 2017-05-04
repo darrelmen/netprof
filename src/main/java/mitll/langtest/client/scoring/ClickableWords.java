@@ -280,12 +280,13 @@ public class ClickableWords<T extends CommonExercise> {
   /**
    * Chinese punctuation marks, spanish punct marks
    * horizontal ellipsis...
+   * reverse solidus
    * @param t
    * @return
    */
   protected String removePunct(String t) {
     return t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("[\\p{M}\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u2026]", "");
+        .replaceAll("[\\p{M}\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C]", "");
   }
 }

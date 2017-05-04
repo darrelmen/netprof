@@ -69,7 +69,6 @@ public class UserSecurityManager implements IUserSecurityManager {
 
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
-  //private MyRemoteServiceServlet userService;
 
   /**
    * @param userDAO
@@ -80,7 +79,6 @@ public class UserSecurityManager implements IUserSecurityManager {
                              IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
-    //this.userService = userService;
     //startShiro();
   }
 
@@ -161,7 +159,6 @@ public class UserSecurityManager implements IUserSecurityManager {
 
   public long setSessionUser(HttpSession session, User loggedInUser) {
 //    logger.debug("setSessionUser - made session - " + session + " user - " + loggedInUser);
-
     try {
       int id1 = loggedInUser.getID();
       session.setAttribute(USER_SESSION_ATT, id1);

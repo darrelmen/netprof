@@ -42,7 +42,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.MiniUser;

@@ -249,7 +249,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (now - then > WARN_THRESH)
       logger.info("ensureAudio for " + projectid + " - took " + (now - then) + " millis to get exercises");
 
-    ensureAudioForExercises(exercises,language);
+    ensureAudioForExercises(exercises, language);
   }
 
 /*  public void ensureAudioForIDs(int projid, Collection<Integer> ids) {
@@ -262,13 +262,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }*/
 
   private void ensureAudioForExercises(List<CommonExercise> exercises, String language) {
-  //  String language = getLanguage();
     long then = System.currentTimeMillis();
     db.getAudioDAO().attachAudioToExercises(exercises, language);
     long now = System.currentTimeMillis();
+
     if (now - then > WARN_THRESH)
-      logger.info("ensureAudioForExercises (" +language+
-          ") checkAudio - took " + (now - then) + " millis to attach audio");
+      logger.info("ensureAudioForExercises (" + language + ") checkAudio - took " + (now - then) + " millis to attach audio");
 
     ensureCompressedAudio(exercises, language);
   }
@@ -278,7 +277,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     int c = 0;
     int success = 0;
-    logger.info("ensureCompressedAudio (" +language+
+    logger.info("ensureCompressedAudio (" + language +
         ") examining " + exercises.size() + " exercises");
 
     for (CommonExercise exercise : exercises) {
@@ -296,7 +295,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                 audioAttribute.getAudioType(),
                 language);
             if (didit) success++;
-            if (c % 1000 == 0) logger.debug("checkAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
+            if (c % 1000 == 0)
+              logger.debug("checkAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
           } catch (Exception e1) {
             logger.warn("Got " + e1 + " for exercise " + exercise.getID() + " : " + audioAttribute.getAudioRef());
           }

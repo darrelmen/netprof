@@ -42,11 +42,9 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
-import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.*;
@@ -58,7 +56,6 @@ import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.

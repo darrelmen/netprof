@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.dialog.PrevNextList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;

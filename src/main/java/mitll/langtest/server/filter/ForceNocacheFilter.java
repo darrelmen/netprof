@@ -33,6 +33,7 @@
 package mitll.langtest.server.filter;
 
 import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.servlet.*;
@@ -53,13 +54,21 @@ import java.util.UUID;
  * @since Feb 6, 2014 8:44:28 AM
  */
 public class ForceNocacheFilter implements Filter {
+  /**
+   * The key to get/set the id of the user stored in the session
+   *
+   * @param request
+   * @param response
+   * @param chain
+   * @throws IOException
+   * @throws ServletException
+   * @see UserSecurityManager#setSessionUser
+   */
   @Override
-  public void doFilter(final ServletRequest request,
-                       final ServletResponse response, final FilterChain chain)
+  public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
       throws IOException, ServletException {
-
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
-    final String requestUri = httpRequest.getRequestURI();
+
     HttpSession session = httpRequest.getSession(false);
     String sessionId;
     String loginId = "no-user";
@@ -85,7 +94,7 @@ public class ForceNocacheFilter implements Filter {
     ThreadContext.put("loginId", loginId);
     ThreadContext.put("hostName", request.getServerName());
 
-    if (requestUri.contains(".nocache.")) {
+    if (httpRequest.getRequestURI().contains(".nocache.")) {
       Date now = new Date();
       HttpServletResponse httpResponse = (HttpServletResponse) response;
       httpResponse.setDateHeader("Date", now.getTime());
@@ -94,7 +103,6 @@ public class ForceNocacheFilter implements Filter {
       httpResponse.setHeader("Pragma", "no-cache");
       httpResponse.setHeader("Cache-control", "no-cache, no-store, must-revalidate");
     }
-
 
     chain.doFilter(request, response);
     ThreadContext.clearAll();

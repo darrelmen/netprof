@@ -47,7 +47,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;

@@ -52,7 +52,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.DefectEvent;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -83,11 +82,10 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QCNPFExercise<T extends CommonExercise>
-    extends GoodwaveExercisePanel<T> {
-  public static final String UNINSPECTED_TOOLTIP = "Item has uninspected audio.";
+public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
   private Logger logger = Logger.getLogger("QCNPFExercise");
 
+  private static final String UNINSPECTED_TOOLTIP = "Item has uninspected audio.";
   private static final String VOCABULARY = "Vocabulary:";
 
   private static final String DEFECT = "Defect?";
@@ -114,6 +112,9 @@ public class QCNPFExercise<T extends CommonExercise>
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
   private static final String ATTENTION_LL = "Attention LL";
   private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
+
+  public static final String REVIEW = "review";
+  //public static final String COMMENT = "comment";
 
   private static final int DEFAULT_MALE_ID = -2;
   private static final int DEFAULT_FEMALE_ID = -3;
@@ -212,7 +213,7 @@ public class QCNPFExercise<T extends CommonExercise>
         "Click to indicate item has been reviewed." :
         UNINSPECTED_TOOLTIP);
 
-    if (!getInstance().contains(Navigation.REVIEW) && !getInstance().contains(Navigation.COMMENT)) {
+    if (!getInstance().contains(REVIEW) && !getInstance().toLowerCase().contains(COMMENT.toLowerCase())) {
       approvedButton = addApprovedButton(listContainer, navHelper);
       if (controller.hasModel()) {
         addAttnLLButton(listContainer, navHelper);
@@ -310,7 +311,7 @@ public class QCNPFExercise<T extends CommonExercise>
   }
 
   private boolean isCourseContent() {
-    return !getInstance().equals(Navigation.REVIEW) && !getInstance().equals(Navigation.COMMENT);
+    return !getInstance().equals(REVIEW) && !getInstance().equalsIgnoreCase(COMMENT);
   }
 
   /**
@@ -394,7 +395,7 @@ public class QCNPFExercise<T extends CommonExercise>
   }
 
   private Heading getComment() {
-    boolean isComment = getInstance().equals(Navigation.COMMENT);
+    boolean isComment = getInstance().equalsIgnoreCase(COMMENT);
     String columnLabel = isComment ? COMMENT : DEFECT;
     Heading heading = new Heading(4, columnLabel);
     heading.addStyleName("borderBottomQC");
@@ -840,7 +841,7 @@ public class QCNPFExercise<T extends CommonExercise>
    */
   private CheckBox makeCheckBox(final String field, final Panel commentRow, final FocusWidget commentEntry,
                                 boolean alreadyMarkedCorrect) {
-    boolean isComment = getInstance().equals(Navigation.COMMENT);
+    boolean isComment = getInstance().equalsIgnoreCase(COMMENT);
 
     final CheckBox checkBox = new CheckBox("");
     checkBox.getElement().setId("CheckBox_" + field);

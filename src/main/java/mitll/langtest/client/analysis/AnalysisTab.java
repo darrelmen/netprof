@@ -46,7 +46,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.services.AnalysisService;

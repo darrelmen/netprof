@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.LifecycleSupport;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ProjectService;

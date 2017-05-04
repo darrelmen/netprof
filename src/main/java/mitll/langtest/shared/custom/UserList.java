@@ -33,7 +33,6 @@
 package mitll.langtest.shared.custom;
 
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;

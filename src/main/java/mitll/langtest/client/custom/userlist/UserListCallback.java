@@ -42,7 +42,6 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.custom.UserList;
