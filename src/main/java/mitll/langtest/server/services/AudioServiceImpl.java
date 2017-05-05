@@ -52,11 +52,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * does image generation here too - since it's done from a file.
@@ -129,6 +127,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int exerciseID = audioContext.getExid();
     boolean isExistingExercise = exerciseID > 0;
 
+/*
     logger.info("writeAudioFile got " +
         "\n\trequest         " + audioContext +
         "\n\tdo flashcard    " + doFlashcard +
@@ -136,6 +135,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         "\n\taddToAudioTable " + addToAudioTable +
         "\n\tallowAlternates " + allowAlternates +
         "\n\tpayload bytes   " + base64EncodedString.length());
+*/
 
     if (addToAudioTable && !recordInResults) { // we have a foreign key from audio into result table - must record in results
       recordInResults = true;
@@ -168,8 +168,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         .setRefRecording(addToAudioTable)
         .setAllowAlternates(allowAlternates);
 
-    logger.info("writeAudioFile recording info " + recordingInfo);
-
+//    logger.info("writeAudioFile recording info " + recordingInfo);
     AudioAnswer audioAnswer = amas ?
         audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
         audioFileHelper.writeAudioFile(

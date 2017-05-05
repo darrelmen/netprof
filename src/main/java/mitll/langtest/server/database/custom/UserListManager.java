@@ -1055,17 +1055,17 @@ public class UserListManager implements IUserListManager {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#addVisitor
    */
   @Override
-  public String addVisitor(int userListID, long user) {
+  public UserList addVisitor(int userListID, long user) {
     logger.debug("addVisitor - user " + user + " visits " + userListID);
     UserList where = getUserList(userListID);
     if (where != null) {
       userListDAO.addVisitor(where.getID(), user);
-      return where.getName();
+      return where;
     } else if (userListID > 0) {
       logger.warn("addVisitor - can't find list with id " + userListID);
-      return "Unknown";
+      return null;
     } else {
-      return "Unknown";
+      return null;
     }
   }
 

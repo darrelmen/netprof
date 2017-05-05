@@ -344,7 +344,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           protected void gotRangeChanged(Range newRange) {
-            logger.info("makePagingContainer : gotRangeChanged for " + newRange);
+          //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
             gotVisibleRangeChanged(getIdsForRange(newRange));
           }
 
@@ -358,7 +358,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                 return numToShow;
               }
             } else {
-
               return numToShow;
             }
           }
@@ -679,21 +678,24 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
             else {
               logger.info("addChoices couldn't find list in known lists...");
 
-
-              controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<String>() {
+              controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
                 @Override
                 public void onFailure(Throwable caught) {
                 }
 
                 @Override
-                public void onSuccess(String result) {
-
-                  choices.add(getSelectedAnchor(type, result));
+                public void onSuccess(UserList result) {
+                  if (result.getProjid() != controller.getProjectStartupInfo().getProjectid()) {
+                    logger.warning("list "  +result.getName() + " is NOT in the project #" +result.getProjid());
+                  }
+                  else {
+                    choices.add(getSelectedAnchor(type, result.getName()));
+                  }
                 }
               });
             }
           } catch (NumberFormatException e) {
-            logger.warning("could n't parse " + selectionForType);
+            logger.warning("couldn't parse " + selectionForType);
           }
         }
         else {
@@ -1089,7 +1091,28 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           } catch (NumberFormatException e) {
             logger.warning("can't parse " + newTypeToSelection.get(LISTS));
           }
-          getTypeToValues(newTypeToSelection, userListID);
+         final int fUserListID = userListID;
+          if (userListID != -1) {
+            controller.getListService().getProjectIDForList(userListID, new AsyncCallback<Integer>() {
+              @Override
+              public void onFailure(Throwable caught) {
+
+              }
+
+              @Override
+              public void onSuccess(Integer result) {
+                if (result != controller.getProjectStartupInfo().getProjectid()) {
+                  getTypeToValues(newTypeToSelection, -1);
+                }
+                else {
+                  getTypeToValues(newTypeToSelection, fUserListID);
+                }
+              }
+            });
+          }
+          else {
+            getTypeToValues(newTypeToSelection, userListID);
+          }
         }
       }
 

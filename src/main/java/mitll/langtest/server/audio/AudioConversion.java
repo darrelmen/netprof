@@ -149,7 +149,7 @@ public class AudioConversion extends AudioBase {
       outputStream.write(byteArray);
       outputStream.close();
     } catch (Exception e) {
-      logger.error("got " + e, e);
+      logger.error("writeToFile got " + e, e);
     }
   }
 
@@ -592,8 +592,10 @@ public class AudioConversion extends AudioBase {
     File testMP3 = new File(mp3File);
     if (!testMP3.exists()) {
       if (!new File(pathToAudioFile).exists()) {
-        if (SPEW && spew++ < 10) logger.error("huh? source file " + pathToAudioFile + " doesn't exist?",
-            new Exception("can't find " + pathToAudioFile));
+        if (SPEW && spew++ < 10) {
+          logger.error("convertToMP3FileAndCheck huh? source file " + pathToAudioFile + " doesn't exist?",
+              new Exception("can't find " + pathToAudioFile));
+        }
       } else {
         logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
             " exe path " + lamePath +

@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -99,7 +98,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     setWidth("100%");
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
-    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), controller.getExerciseService());
+    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
     this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
@@ -132,7 +131,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
 
       if (contextRefID != -1) {
-        logger.info("asking for context " + contextRefID);
+        logger.info("getRefAudio asking for context " + contextRefID);
         if (!alignments.containsKey(contextRefID))
           req.add(contextRefID);
       }
@@ -182,8 +181,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     req.removeAll(alignments.keySet());
 
     if (!req.isEmpty()) {
-      logger.info("Asking for audio alignments for " + req);
-
+      //logger.info("cacheOthers Asking for audio alignments for " + req);
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
@@ -260,11 +258,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @see #
    */
   private void matchSegmentToWidgetForAudio(Integer audioID, long durationInMillis, AlignmentOutput value2, List<IHighlightSegment> flclickables) {
-
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> value = new HashMap<>();
 
     idToTypeToSegmentToWidget.put(audioID, value);
-
 
     TreeMap<TranscriptSegment, IHighlightSegment> segmentToWidget = new TreeMap<>();
     value.put(NetPronImageType.WORD_TRANSCRIPT, segmentToWidget);

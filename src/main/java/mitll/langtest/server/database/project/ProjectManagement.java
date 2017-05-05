@@ -253,7 +253,7 @@ public class ProjectManagement implements IProjectManagement {
       project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
 
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
-      logMemory();
+    //  logMemory();
 
       Set<Integer> exids = new HashSet<>();
       for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());
@@ -266,7 +266,7 @@ public class ProjectManagement implements IProjectManagement {
 
       //   db.getUserExerciseDAO().useExToPhones();
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
-      logMemory();
+      //logMemory();
     } else {
       logger.warn("\n\n\nhuh? no slick project for " + project);
     }

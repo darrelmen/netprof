@@ -410,7 +410,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     if (selectionState.getProject() != controller.getProjectStartupInfo().getProjectid()) {
       //controller.
       // TODO : change the project --- ... and come back and call code below.
-
+      logger.info("project from state " + selectionState.getProject() + " != " +controller.getProjectStartupInfo().getProjectid() );
     }
 
     if (DEBUG_ON_VALUE_CHANGE) logger.info("onValueChange got " + value + " sel " + selectionState + " " + selectionState.getInfo());

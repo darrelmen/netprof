@@ -65,7 +65,6 @@ public interface ListService extends RemoteService {
    * @see ListManager#setPublic(long, boolean)
    */
   void setPublicOnList(int userListID, boolean isPublic);
-
   // Deleting lists and exercises from lists
 
   /**
@@ -92,9 +91,11 @@ public interface ListService extends RemoteService {
   /**
    * @param userListID
    * @param user
-   * @see ListManager#addVisitor(UserList)
+   * @see ListManager#addVisitor
    */
-  String addVisitor(int userListID, int user);
+  UserList addVisitor(int userListID, int user);
+
+  int getProjectIDForList(int userListID);
 
   /**
    * @param onlyCreated
@@ -155,6 +156,5 @@ public interface ListService extends RemoteService {
 
   void updateContext(long userListID, String context);
   void updateRichText(long userListID, String richText);
-
   void updateName(long userListID, String name);
 }

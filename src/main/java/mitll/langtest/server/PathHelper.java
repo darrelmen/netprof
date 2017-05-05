@@ -35,6 +35,7 @@ package mitll.langtest.server;
 import mitll.langtest.shared.scoring.AudioContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletContext;
@@ -57,6 +58,7 @@ public class PathHelper {
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
   private static final String IMAGE_OUTDIR = "imageOutdir";
+  public static final String ANSWER = "answer_";
 
   private String realContextPathTest;
   private final ServletContext context;
@@ -169,11 +171,19 @@ public class PathHelper {
   /**
    * CHEESY - assumes audio base dir is related to answers.
    *
-   * @param audioContext
+   * @paramx audioContext
    * @return
    */
+/*
   public String getRelToAnswer(AudioContext audioContext) {
-    return getAbsoluteToAnswer(audioContext).substring(properties.getAudioBaseDir().length());
+    String absoluteToAnswer = getAbsoluteToAnswer(audioContext);
+    return getRelToAnswer(absoluteToAnswer);
+  }
+*/
+
+  @NotNull
+  public String getRelToAnswer(String absoluteToAnswer) {
+    return absoluteToAnswer.substring(properties.getAudioBaseDir().length());
   }
 
   String getAbsoluteToAnswer(String language, int exercise, int user) {
@@ -188,7 +198,7 @@ public class PathHelper {
    * @param user
    * @return
    */
-  String getAbsoluteToAnswer(String language, int exercise, int question, int user) {
+  private String getAbsoluteToAnswer(String language, int exercise, int question, int user) {
     String planAndTestPath =
         language.toLowerCase() + File.separator +
             exercise + File.separator +
@@ -197,10 +207,7 @@ public class PathHelper {
     return getAbsoluteWavPathUnder(planAndTestPath);
   }
 
-  public String getAbsoluteWavPathUnder(String planAndTestPath) {
-    return getWavPath(getAnswerDir(), planAndTestPath);
-  }
-
+  public String getAbsoluteWavPathUnder(String planAndTestPath) { return getWavPath(getAnswerDir(), planAndTestPath); }
   private String getAnswerDir() {
     return properties.getAnswerDir();
   }
@@ -208,6 +215,7 @@ public class PathHelper {
   /**
    * TODO : make wave file name more helpful - include exercise, user, etc.
    *
+   *  Each file has a unique timestamp...
    * @param tomcatWriteDirectory
    * @param planAndTestPath
    * @return
@@ -216,7 +224,8 @@ public class PathHelper {
     String wavPath =
         tomcatWriteDirectory + File.separator +
             planAndTestPath + File.separator +
-            "answer_" + System.currentTimeMillis() + ".wav";
+            ANSWER + System.currentTimeMillis() + ".wav";
+    logger.debug("getWavPath : file  : " + wavPath);
     //if (mkdirs) logger.debug("getAbsoluteToAnswer : making dir at : " + audioFilePath.getAbsolutePath());
     return wavPath;
   }

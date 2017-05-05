@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.InlineHTML;
 import mitll.langtest.client.custom.dialog.WordBounds;
 import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -45,9 +44,8 @@ public class ClickableWords<T extends CommonExercise> {
    * @param listContainer
    * @param exercise
    * @param language
-   * @param exerciseServiceAsync
    */
-  ClickableWords(ListInterface listContainer, T exercise, String language, ExerciseServiceAsync exerciseServiceAsync) {
+  ClickableWords(ListInterface listContainer, T exercise, String language) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
@@ -217,8 +215,12 @@ public class ClickableWords<T extends CommonExercise> {
                                              boolean chineseCharacter,
                                              boolean isContextMatch) {
     final HighlightSegment highlightSegment = new HighlightSegment(html, dir);
+    highlightSegment.addStyleName("Instruction-data-with-wrap-keep-word");
 
     if (isContextMatch) highlightSegment.addStyleName(CONTEXTMATCH);
+    if (isMeaning) highlightSegment.addStyleName("englishFont");
+    if (!chineseCharacter) highlightSegment.addStyleName("rightFiveMargin");
+
 
     String searchToken = listContainer.getTypeAheadText().toLowerCase();
     if (isMatch(html, searchToken)) {
@@ -234,12 +236,6 @@ public class ClickableWords<T extends CommonExercise> {
       highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
       highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
     }
-
-    highlightSegment.addStyleName("Instruction-data-with-wrap-keep-word");
-    if (isMeaning) {
-      highlightSegment.addStyleName("englishFont");
-    }
-    if (!chineseCharacter) highlightSegment.addStyleName("rightFiveMargin");
 
     return highlightSegment;
   }

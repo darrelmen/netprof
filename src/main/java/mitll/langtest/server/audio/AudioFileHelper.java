@@ -294,7 +294,7 @@ public class AudioFileHelper implements AlignDecode {
 
                                     DecoderOptions options) {
     String wavPath = pathHelper.getAbsoluteToAnswer(audioContext);
-    String relPath = pathHelper.getRelToAnswer(audioContext);
+    String relPath = pathHelper.getRelToAnswer(wavPath);
 
     File file = new File(wavPath);
     logger.debug("writeAudioFile got req" +
@@ -452,6 +452,9 @@ public class AudioFileHelper implements AlignDecode {
                                              DecoderOptions decoderOptions
   ) {
     logValidity(context, file, validity);
+
+//    logger.info("getAudioAnswerDecoding wavPath " + wavPath);
+//    logger.info("getAudioAnswerDecoding file " + file.getName());
 
     AudioAnswer answer = getAudioAnswer(context.getReqid(), exercise, wavPath, file, validity, decoderOptions, context.getUserid());
 
@@ -929,7 +932,6 @@ public class AudioFileHelper implements AlignDecode {
 
   private File getPathUnder(String postedAudio) {
     String absoluteWavPathUnder = pathHelper.getAbsoluteWavPathUnder(postedAudio);
-    //  return pathHelper.getAbsoluteFile(absoluteWavPathUnder);
     return new File(absoluteWavPathUnder);
   }
 

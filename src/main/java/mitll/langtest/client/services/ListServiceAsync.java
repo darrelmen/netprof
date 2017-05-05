@@ -55,7 +55,7 @@ public interface ListServiceAsync {
   void addUserList(String name, String description, String dliClass,
                    boolean isPublic, AsyncCallback<Long> async);
 
-  void addVisitor(int userListID, int user, AsyncCallback<String> asyncCallback);
+  void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 
   void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
 
@@ -83,4 +83,6 @@ public interface ListServiceAsync {
   void updateRichText(long userListID, String richText, AsyncCallback<Void> async);
 
   void updateName(long userListID, String name, AsyncCallback<Void> async);
+
+  void getProjectIDForList(int userListID, AsyncCallback<Integer> async);
 }

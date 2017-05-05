@@ -109,7 +109,7 @@ public interface IUserListManager {
   CommonExercise duplicate(CommonExercise userExercise);
 
 
-  String addVisitor(int userListID, long user);
+  UserList addVisitor(int userListID, long user);
 
 
   boolean addDefect(int exerciseID, String field, String comment);
