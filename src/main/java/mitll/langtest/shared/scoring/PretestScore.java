@@ -33,6 +33,7 @@
 package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
@@ -86,7 +87,8 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
    */
   public PretestScore(float hydecScore,
                       Map<String, Float> phoneScores,
-                      Map<String, Float> wordScores, Map<NetPronImageType, String> sTypeToImage,
+                      Map<String, Float> wordScores,
+                      Map<NetPronImageType, String> sTypeToImage,
                       Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes,
                       String recoSentence,
                       float wavFileLengthSeconds,
@@ -96,7 +98,6 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
     this.hydecScore = hydecScore;
     this.phoneScores = phoneScores;
     this.wordScores = wordScores;
-  //  this.sTypeToEndTimes = sTypeToEndTimes;
     this.recoSentence = recoSentence;
     this.wavFileLengthSeconds = wavFileLengthSeconds;
     this.processDur = processDur;
@@ -153,6 +154,7 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
 
   /**
    * @see AlignDecode#getASRScoreForAudio
+   * @see AudioFileHelper#getASRScoreForAudio
    * @param json
    */
   public void setJson(String json) {

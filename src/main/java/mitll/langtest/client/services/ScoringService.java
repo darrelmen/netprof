@@ -43,8 +43,8 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 @RemoteServiceRelativePath("scoring-manager")
 public interface ScoringService extends RemoteService {
@@ -57,7 +57,7 @@ public interface ScoringService extends RemoteService {
 
   void getAllAlignments();
 
-  Map<Integer, AlignmentOutput> getAlignments(int projid, Collection<Integer> audioIDs);
+  Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs);
 
   /**
    * @param reqid

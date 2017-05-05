@@ -123,36 +123,21 @@ public abstract class Scoring {
           LogAndNotify langTestDatabase, HTKDictionary htkDictionary,
           Project project) {
     this.deployPath = deployPath;
-
- //   String persistentLocation = props.getAudioBaseDir();
-    //String scoringDir = getScoringDir(persistentLocation);
-
     this.props = props;
     this.langTestDatabase = langTestDatabase;
     this.htkDictionary = htkDictionary;
-
-    // logger.debug("Creating Scoring object");
   //  lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
-
-    // Map<String, String> properties = props.getProperties();
-    // languageProperty = properties.get("language");
     String language = project.getLanguage();
     this.languageProperty = language;
-    // String language = languageProperty != null ? languageProperty : "";
-
     isMandarin = language.equalsIgnoreCase(MANDARIN);
     if (isMandarin) logger.warn("using mandarin segmentation.");
     try {
 //      logger.debug("\n" + this + " : Factory for " + languageProperty);
-
       ltsFactory = new LTSFactory(languageProperty);
     } catch (Exception e) {
       ltsFactory = null;
       logger.error("\n" + this + " : Scoring for " + languageProperty + " got " + e);
     }
-//    this.configFileCreator = new ConfigFileCreator(props.getProperties(), getLTS(), scoringDir, project.getModelsDir());
-
-    // readDictionary();
     makeDecoder();
     checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.hasModel());
   }
@@ -164,27 +149,6 @@ public abstract class Scoring {
   public static String getScoringDir(String deployPath) {
     return deployPath + File.separator + SCORING;
   }
-
-  /**
-   * For chinese, maybe later other languages.
-   *
-   * @param longPhrase
-   * @return
-   * @seex AutoCRT#getRefs
-   * @see ASRWebserviceScoring#runHydra(String, String, String, Collection, String, boolean, int)
-   */
-/*  public String getSegmented(String longPhrase) {
-    Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
-*//*    System.err.println("got '" + longPhrase +
-        "' -> '" +tokens +
-        "'");*//*
-    StringBuilder builder = new StringBuilder();
-    for (String token : tokens) {
-      builder.append(svDecoderHelper.segmentation(token.trim()));
-      builder.append(" ");
-    }
-    return builder.toString();
-  }*/
 
   /**
    * Given an audio file without a suffix, check if there are label files, and if so, for each one,

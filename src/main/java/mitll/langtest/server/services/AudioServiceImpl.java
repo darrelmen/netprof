@@ -180,8 +180,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
             options);
 
-    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
-
+//    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
     int user = audioContext.getUserid();
     if (addToAudioTable && audioAnswer.isValid()) {
       audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), commonExercise, exerciseID, audioAnswer));
@@ -199,7 +198,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         logEvent("audioRecording", "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
       } else {
         ensureCompressedAudio(user, commonExercise, audioAnswer.getPath(), audioContext.getAudioType(), language);
-        logger.info("wrote compressed...");
+//        logger.info("wrote compressed...");
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);

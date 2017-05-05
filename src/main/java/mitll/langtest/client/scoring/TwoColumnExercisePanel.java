@@ -125,7 +125,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //  logger.info("getRefAudio asking for " + refID);
 //    logger.info("asking for " + contextRefID);
 
-      List<Integer> req = new ArrayList<>();
+      Set<Integer> req = new HashSet<>();
       if (refID != -1) {
         if (!alignments.containsKey(refID))
           req.add(refID);
@@ -140,7 +140,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (req.isEmpty()) {
         registerSegments(refID, currentAudioAttr, contextRefID, currentAudioAttr1);
       } else {
-        controller.getScoringService().getAlignments(controller.getProjectStartupInfo().getProjectid(),
+        controller.getScoringService().getAlignments(
+            controller.getProjectStartupInfo().getProjectid(),
             req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
               @Override
               public void onFailure(Throwable caught) {
@@ -827,7 +828,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                           boolean showInitially,
                           List<IHighlightSegment> clickables) {
     Panel contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning, clickables);
-    if (!isFL) contentWidget.addStyleName("topFiveMargin");
+   // if (!isFL) contentWidget.addStyleName("topFiveMargin");
     return getCommentBox(true).getEntry(field, contentWidget, annotation, showInitially);
   }
 

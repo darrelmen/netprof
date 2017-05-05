@@ -207,7 +207,7 @@ public class MailSupport {
 
       if (testEmail) {
         props.put(MAIL_SMTP_PORT, ""+MAIL_PORT);
-        logger.debug("Testing : using port " + MAIL_PORT);
+//        logger.debug("Testing : using port " + MAIL_PORT);
       }
 
       Session session = Session.getDefaultInstance(props, null);
@@ -303,7 +303,7 @@ public class MailSupport {
     Message msg = new MimeMessage(session);
     msg.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
     InternetAddress address = new InternetAddress(recipientEmail, recipientName);
-    logger.debug("Sending to " + address);
+    logger.debug("Sending to " + address + " at port " + MAIL_PORT);
     msg.addRecipient(Message.RecipientType.TO, address);
     addCC(ccEmails, msg);
     msg.setSubject(subject);

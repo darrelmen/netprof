@@ -715,6 +715,9 @@ public class AudioFileHelper implements AlignDecode {
       //	recordWordAndPhoneInfo(decodeAnswer, answerID);
       //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
     }
+    else {
+      logger.warn("not writing to db since alignment output is not valid for audio " +audioid);
+    }
   }
 
   private AudioAnswer getDecodeAnswer(CommonExercise exercise1,
@@ -1194,7 +1197,7 @@ public class AudioFileHelper implements AlignDecode {
     ASR asrScoring = /*options.isUseOldSchool() || isOldSchoolService() ? oldschoolScoring :*/ getASRScoring();
 //    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
-    boolean isWebservice = isWebservice(asrScoring);
+  //  boolean isWebservice = isWebservice(asrScoring);
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences, transliteration,

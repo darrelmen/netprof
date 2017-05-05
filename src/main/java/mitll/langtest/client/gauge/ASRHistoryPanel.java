@@ -50,13 +50,13 @@ import mitll.langtest.client.scoring.SimpleRecordAudioPanel;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * ASR Scoring panel -- shows phonemes.
@@ -67,6 +67,7 @@ import java.util.List;
  * @since
  */
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
+  private final Logger logger = Logger.getLogger("ASRHistoryPanel");
   //private Logger logger = Logger.getLogger("ASRHistoryPanel");
   private static final int NUM_TO_SHOW = 2;
 
@@ -284,7 +285,11 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   private Widget makeColoredTable(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
     row.addStyleName("inlineFlex");
-    row.getElement().setInnerHTML(new WordTable().makeColoredTable(scoreAndPath.getScores()));
+    Map<NetPronImageType, List<TranscriptSegment>> scores = scoreAndPath.getScores();
+    if (scores.isEmpty()) {
+      logger.warning("no segments for "+ scoreAndPath);
+    }
+    row.getElement().setInnerHTML(new WordTable().makeColoredTable(scores));
     tooltipHelper.createAddTooltip(row, "Score" + (" " + scoreAndPath.getPercentScore() + "%"), Placement.BOTTOM);
     row.addStyleName("leftFiveMargin");
     return row;

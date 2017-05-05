@@ -80,10 +80,10 @@ public class ExerciseToPhone {
     return exToPhones;
   }*/
 
-  public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(List<SlickRefResultJson> jsonResults) {
+  public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(Collection<SlickRefResultJson> jsonResults) {
     long then = System.currentTimeMillis();
-    long now = System.currentTimeMillis();
-    logger.info("getExerciseToPhone took " + (now - then) + " millis to get ref results");
+//    long now = System.currentTimeMillis();
+//    logger.info("getExerciseToPhone took " + (now - then) + " millis to get ref results");
     Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
 
     ParseResultJson parseResultJson = new ParseResultJson(null);
@@ -103,7 +103,9 @@ public class ExerciseToPhone {
       }
       phonesForEx.setNumPhones(exjson.numalignphones());
     }
-    logger.info("getExerciseToPhone took " + (System.currentTimeMillis() - then) +
+
+    long l = System.currentTimeMillis() - then;
+    if (l > 20)  logger.info("getExerciseToPhone took " + l +
         " millis to populate ex->phone map of size " + exToPhones.size());
 
     return exToPhones;
@@ -252,7 +254,9 @@ public class ExerciseToPhone {
       }
     }
 
-    logger.info("took " + (System.currentTimeMillis() - then) + " millis to populate ex->phone map");
+    long diff = System.currentTimeMillis() - then;
+    if (diff > 20)  logger.info("took " + diff + " millis to populate ex->phone map");
+
     return exToPhones;
   }
 

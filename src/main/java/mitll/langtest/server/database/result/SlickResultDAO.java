@@ -395,7 +395,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
       }
     }
     long now = System.currentTimeMillis();
-    if (now-then >100) {
+    if (now - then > 100) {
       logger.info("setScores took " + (now - then) + " to get " + c + " scores");
     }
   }
@@ -411,22 +411,30 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return cs;
   }
 
- ParseResultJson parser = new ParseResultJson(database.getServerProps());
+  private ParseResultJson parser = new ParseResultJson(database.getServerProps());
 
   @NotNull
-  private CorrectAndScore fromSlickCorrectAndScoreWithRelPath(SlickCorrectAndScore cs, String relPrefix) {
+  private CorrectAndScore fromSlickCorrectAndScoreWithRelPath(SlickCorrectAndScore cs,
+                                                              String relPrefix) {
     String path = cs.path();
     boolean isLegacy = path.startsWith("answers");
     String filePath = isLegacy ?
         relPrefix + path :
         trimPathForWebPage2(path);
 
+    String json = cs.json();
     CorrectAndScore correctAndScore = new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
-        trimPathForWebPage2(filePath), cs.json());
+        trimPathForWebPage2(filePath), json);
 
-    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parser.readFromJSON(cs.json());
+    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
+        parser.readFromJSON(json);
+
+    if (netPronImageTypeListMap.isEmpty()) {
+      logger.warn("no word and phones for " + json + " for " + cs);
+    }
 
     correctAndScore.setScores(netPronImageTypeListMap);
+    logger.info("returning " + correctAndScore);
     return correctAndScore;
   }
 

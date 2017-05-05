@@ -157,11 +157,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
         long then = System.currentTimeMillis();
         AudioFileHelper audioFileHelper = project.getAudioFileHelper();
-        logger.info("Doing project " + project + " " + ids.size() + " audio cuts with " + audioFileHelper);
+        logger.info("getAllAlignments Doing project " + project + " " + ids.size() + " audio cuts with " + audioFileHelper);
 
-        // getAlignments(id, ids);
-
-        recalcAlignments(id, ids, new HashMap<>(), audioFileHelper, userIDFromSession);
+        Map<Integer, ISlimResult> audioToResult = getAudioIDMap(id);
+        logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
+        recalcAlignments(id, ids, new HashMap<>(), audioFileHelper, userIDFromSession, audioToResult);
 
         long now = System.currentTimeMillis();
 
@@ -175,26 +175,54 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   }
 
+  @NotNull
+  private Map<Integer, ISlimResult> getAudioIDMap(int id) {
+    Collection<ISlimResult> jsonResultsForProject = db.getRefResultDAO().getAllSlimForProject(id);
+    return getAudioIDMap(jsonResultsForProject);
+  }
+
+  @NotNull
+  private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
+    Map<Integer, ISlimResult> audioToResult = new HashMap<>();
+    for (ISlimResult slimResult : jsonResultsForProject) audioToResult.put(slimResult.getAudioID(), slimResult);
+    return audioToResult;
+  }
+
   @Override
-  public Map<Integer, AlignmentOutput> getAlignments(int projid, Collection<Integer> audioIDs) {
+  public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) {
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
 //    logger.info("getAlignments asking for " + audioIDs);
-
     int userIDFromSession = getUserIDFromSession();
-    recalcAlignments(projid, audioIDs, idToAlignment, userIDFromSession);
+    Map<Integer, ISlimResult> audioIDMap =
+        getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
+
+    logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
+
+    recalcAlignments(projid, audioIDs, idToAlignment, userIDFromSession,audioIDMap);
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
     return idToAlignment;
   }
 
-  private void recalcAlignments(int projid, Collection<Integer> audioIDs, Map<Integer, AlignmentOutput> idToAlignment, int userIDFromSession) {
+  private void recalcAlignments(int projid,
+                                Collection<Integer> audioIDs,
+                                Map<Integer, AlignmentOutput> idToAlignment,
+                                int userIDFromSession,
+                                Map<Integer, ISlimResult> audioToResult) {
     AudioFileHelper audioFileHelper = getAudioFileHelper();
-    recalcAlignments(projid, audioIDs, idToAlignment, audioFileHelper, userIDFromSession);
+    recalcAlignments(projid, audioIDs, idToAlignment, audioFileHelper, userIDFromSession, audioToResult);
   }
 
-  private void recalcAlignments(int projid, Collection<Integer> audioIDs, Map<Integer, AlignmentOutput> idToAlignment,
-                                AudioFileHelper audioFileHelper, int userIDFromSession) {
+  private void recalcAlignments(int projid,
+                                Collection<Integer> audioIDs,
+                                Map<Integer, AlignmentOutput> idToAlignment,
+                                AudioFileHelper audioFileHelper,
+                                int userIDFromSession,
+                                Map<Integer, ISlimResult> audioToResult) {
     for (Integer audioID : audioIDs) {
-      ISlimResult cachedResult = db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
+      ISlimResult cachedResult = audioToResult.get(audioID);
+      if (cachedResult == null) {
+        cachedResult = db.getRefResultDAO().getResult(audioID);
+      }
       if (cachedResult == null || !cachedResult.isValid()) {
         if (cachedResult != null && !cachedResult.isValid()) {
           boolean b = db.getRefResultDAO().removeByAudioID(audioID);

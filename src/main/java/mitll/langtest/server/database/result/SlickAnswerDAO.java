@@ -59,6 +59,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 
   /**
    * Cheesy thing where audio file path is actually in the audio file slot and not the answer.
+   *
    * @param answerInfo
    * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerAlignment(CommonExercise, AudioContext, AnswerInfo.RecordingInfo, String, File, AudioCheck.ValidityAndDur, float, boolean, boolean, boolean)
@@ -72,7 +73,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getUserid(),
         answerInfo.getId(),
         new Timestamp(System.currentTimeMillis()),
-       // answerInfo.getQuestionID(),
+        // answerInfo.getQuestionID(),
         answerInfo.getAudioType().toString(),
         answerInserted,
         answerInfo.isValid(),
@@ -92,9 +93,16 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getProjid(),
         answerInfo.getModel());
 
-    logger.info("addAnswer inserting answer by " + answerInfo.getUserid() + " to " + answerInfo.getId() + " :  " + answerInfo.getAnswer() + " :\n" +res);
+    int id = dao.insert(res).id();
 
-    return dao.insert(res).id();
+    logger.info("addAnswer inserting answer" +
+        "\n\tby     " + answerInfo.getUserid() +
+        "\n\tto     " + answerInfo.getId() +
+        "\n\tanswer " + answerInfo.getAnswer() +
+        "\n\tslick  " + res +
+        "\n\tid     " + id);
+
+    return id;
   }
 
   @Override
@@ -109,6 +117,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 
   /**
    * TODO : set the isCorrect field
+   *
    * @param id
    * @param score
    * @param processDur

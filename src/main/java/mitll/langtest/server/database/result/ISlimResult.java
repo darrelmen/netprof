@@ -7,4 +7,5 @@ public interface ISlimResult {
   float getPronScore();
   String getJsonScore();
   boolean isValid();
+  int getAudioID();
 }

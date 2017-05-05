@@ -1,22 +1,23 @@
 package mitll.langtest.server.database.result;
 
-import mitll.npdata.dao.SlickRefResultJson;
-
 /**
  * Created by go22670 on 4/13/17.
  */
-public class SlimResult implements  ISlimResult{
+public class SlimResult implements ISlimResult {
   protected boolean valid;
   protected float pronScore;
   private transient String jsonScore;
+  private int audioID;
 
   /**
-   * @see mitll.langtest.server.database.refaudio.SlickRefResultDAO#fromSlickToSlim
+   * @param audioID
    * @param valid
    * @param jsonScore
    * @param pronScore
+   * @see mitll.langtest.server.database.refaudio.SlickRefResultDAO#fromSlickToSlim
    */
-  public SlimResult(boolean valid, String jsonScore, float pronScore) {
+  public SlimResult(int audioID, boolean valid, String jsonScore, float pronScore) {
+    this.audioID = audioID;
     this.valid = valid;
     this.jsonScore = jsonScore;
     this.pronScore = pronScore;
@@ -24,6 +25,11 @@ public class SlimResult implements  ISlimResult{
 
   public boolean isValid() {
     return valid;
+  }
+
+  @Override
+  public int getAudioID() {
+    return audioID;
   }
 
   @Override

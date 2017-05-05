@@ -68,6 +68,8 @@ import java.util.Collection;
  */
 public class HTTPClient {
   private static final Logger logger = LogManager.getLogger(HTTPClient.class);
+  public static final int CONNECT_TIMEOUT = 5000;
+  public static final int READ_TIMEOUT = 20000;
 
   private HttpURLConnection httpConn;
 
@@ -116,16 +118,16 @@ public class HTTPClient {
     }
   }
 
-  private void postFile(File theFile) {
-    try {
-      OutputStream outputStream = httpConn.getOutputStream();
-      Files.copy(theFile.toPath(), outputStream);
-
-      outputStream.flush();
-      outputStream.close();
-    } catch (IOException e) {
-      logger.error("Got " + e, e);
-    }
+  /**
+   * @see ASRWebserviceScoring#runHydra
+   * @param input
+   * @return
+   * @throws IOException
+   */
+  public String sendAndReceiveAndClose(String input) throws IOException {
+    String s = sendAndReceive(input);
+    closeConn();
+    return s;
   }
 
   void addRequestProperty(String k, String v) {
@@ -185,8 +187,8 @@ public class HTTPClient {
     HttpURLConnection httpConn = getHttpURLConnection(url);
     httpConn.setRequestMethod("POST");
     httpConn.setDoOutput(true);
-    httpConn.setConnectTimeout(5000);
-    httpConn.setReadTimeout(20000);
+    httpConn.setConnectTimeout(CONNECT_TIMEOUT);
+    httpConn.setReadTimeout(READ_TIMEOUT);
     //httpConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
     setRequestProperties(httpConn);
     return httpConn;
@@ -251,12 +253,16 @@ public class HTTPClient {
   }
 
   private String receive(HttpURLConnection httpConn) throws IOException  {
-   // try {
-      return receive(httpConn, getReader(httpConn));
-   // } catch (IOException e) {
-   //   logger.error("Got " + e, e);
-   //   return "";
-   // }
+    // try {
+    return receive(httpConn, getReader(httpConn));
+    // } catch (IOException e) {
+    //   logger.error("Got " + e, e);
+    //   return "";
+    // }
+  }
+
+  private BufferedReader getReader(HttpURLConnection httpConn) throws IOException {
+    return new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF8"));
   }
 
   private String receive(HttpURLConnection httpConn, BufferedReader reader) throws IOException {
@@ -276,20 +282,12 @@ public class HTTPClient {
     }
   }
 
-  private BufferedReader getReader(HttpURLConnection httpConn) throws IOException {
-    return new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF8"));
-  }
-
-  public String sendAndReceiveAndClose(String input) throws IOException {
-    String s = sendAndReceive(input);
-    closeConn();
-    return s;
-  }
-
-  private String sendAndReceive(String input) throws IOException {
+  public String sendAndReceive(String input) throws IOException {
     try {
+      logger.info("sending START " + input.length());
       send(input);
-      return receive();
+      logger.info("sending END   " + input.length());
+
     } catch (ConnectException ce) {
       logger.error("sendAndReceive sending" +
           "\n\tmessage " + input +
@@ -300,8 +298,30 @@ public class HTTPClient {
       logger.error("sendAndReceive sending " + input + " got " + e, e);
       throw e;
     }
+
+    try {
+      logger.info("receive START " + input.length());
+      String receive = receive();
+      logger.info("receive END   " + input.length());
+      return receive;
+    } catch (ConnectException ce) {
+      logger.error("sendAndReceive receiving" +
+          "\n\tmessage " + input +
+          "\n\tcouldn't connect to server " + httpConn.getURL() +
+          "\n\tgot     " + ce);
+      return "";
+    } catch (IOException e) {
+      logger.error("sendAndReceive receiving from " + input + " got " + e, e);
+      throw e;
+    }
   }
 
+  /**
+   * @see AudioFileHelper#getProxyScore
+   * @param input
+   * @return
+   * @throws IOException
+   */
   String sendAndReceiveAndClose(File input) throws IOException {
     try {
       return postAndClose(input);
@@ -320,5 +340,17 @@ public class HTTPClient {
     String receive = receive();
     closeConn();
     return receive;
+  }
+
+  private void postFile(File theFile) {
+    try {
+      OutputStream outputStream = httpConn.getOutputStream();
+      Files.copy(theFile.toPath(), outputStream);
+
+      outputStream.flush();
+      outputStream.close();
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
   }
 }

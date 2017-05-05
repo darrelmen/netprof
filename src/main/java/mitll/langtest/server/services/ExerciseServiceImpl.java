@@ -321,12 +321,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param exercises
    * @return
    */
-/*  private List<CommonExercise> getLimitedMatches(ExerciseListRequest request, List<CommonExercise> exercises) {
-    if (request.getLimit() > 0) {
-      exercises = getFirstFew(request, exercises);
-    }
-    return exercises;
-  }*/
   @NotNull
   private List<CommonExercise> getFirstFew(ExerciseListRequest request, List<CommonExercise> exercises) {
     Collections.sort(exercises, (o1, o2) -> {

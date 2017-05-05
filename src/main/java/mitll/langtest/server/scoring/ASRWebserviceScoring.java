@@ -78,6 +78,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final Logger logger = LogManager.getLogger(ASRWebserviceScoring.class);
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
+  public static final String DCODR = "dcodr";
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -98,6 +99,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * Used in possible trimming
    */
   private static final boolean INCLUDE_SELF_SIL_LINK = false;
+  private final HTTPClient httpClient;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
@@ -120,8 +122,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               Project project) {
     super(deployPath, properties, langTestDatabase, htkDictionary, project);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
-    alignAudioToScore  = CacheBuilder.newBuilder().maximumSize(1000).build();
-    fileToDuration  = CacheBuilder.newBuilder().maximumSize(100000).build();
+    alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
+    fileToDuration = CacheBuilder.newBuilder().maximumSize(100000).build();
 
     this.project = project;
     String ip = getWebserviceIP();
@@ -135,6 +137,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         logger.info("\n\nASRWebserviceScoring CAN talk to " + ip + ":" + port);
       }
     }
+
+    this.httpClient = getDcodr();
   }
 
   private int getWebservicePort() {
@@ -158,7 +162,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   public boolean isAvailableCheckNow() {
-    return new HTTPClient().isAvailable(getWebserviceIP(), getWebservicePort(), "dcodr");
+    return new HTTPClient().isAvailable(getWebserviceIP(), getWebservicePort(), DCODR);
   }
 
   /**
@@ -284,8 +288,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     Double cachedDuration = fileToDuration.getIfPresent(filePath);
     if (cachedDuration == null) {
       cachedDuration = new AudioCheck(props).getDurationInSeconds(wavFile);
-      fileToDuration.put(filePath,cachedDuration);
-  //    logger.info("fileToDur now has "+fileToDuration.size());
+      fileToDuration.put(filePath, cachedDuration);
+      //    logger.info("fileToDur now has "+fileToDuration.size());
     }
     if (cached != null) {
       scores = (Scores) cached[0];
@@ -299,7 +303,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     JsonObject jsonObject = null;
 
     if (precalcScores != null && precalcScores.isValid()) {
-      logger.info("scoreRepeatExercise got valid precalc  " + precalcScores);
+//      logger.info("scoreRepeatExercise got valid precalc  " + precalcScores);
       scores = precalcScores.getScores();
       jsonObject = precalcScores.getJsonObject();
     }
@@ -317,9 +321,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         File tempFile = tempDir.toFile();
 
         // dcodr can't handle an equals in the file name... duh...
-        String rawAudioPath = filePath.replaceAll("\\=","") + ".raw";
+        String rawAudioPath = filePath.replaceAll("\\=", "") + ".raw";
         //rawAudioPath = rawAudioPath.replaceAll("\\=","");
-        logger.info("Sending " + rawAudioPath + " to hydra");
+        logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra");
         AudioConversion.wav2raw(filePath + ".wav", rawAudioPath);
 
         Object[] result = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
@@ -369,6 +373,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   /**
    * TODO : don't copy this method in both ASRScoring and ASRWebserviceScoring
    *
+   * TODO : don't write images unless we really want them
+   *
    * @param imageOutDir
    * @param decode
    * @param prefix
@@ -385,8 +391,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private PretestScore getPretestScore(String imageOutDir,
                                        ImageOptions imageOptions,
 
-                                       boolean decode, String prefix, String noSuffix, Scores scores, String phoneLab,
-                                       String wordLab, double duration, int processDur, boolean usePhoneToDisplay,
+                                       boolean decode, String prefix, String noSuffix,
+                                       Scores scores,
+                                       String phoneLab,
+                                       String wordLab,
+                                       double duration, int processDur, boolean usePhoneToDisplay,
                                        JsonObject jsonObject
   ) {
     try {
@@ -414,10 +423,19 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               prefix1, "", decode, false, jsonObject, reallyUsePhone);
       Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
       Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
-//
-//     logger.info("getPretestScore sTypeToImage" +
-//          "\n\tsTypeToImage " + sTypeToImage
-//      );
+
+/*
+      logger.info("getPretestScore sTypeToImage" +
+          "\n\tsTypeToImage " + sTypeToImage
+      );
+*/
+
+      if (typeToEndTimes.isEmpty()) {
+        logger.warn("getPretestScore huh? no segments from words " + wordLab + " phones " + phoneLab);
+      }
+/*      logger.info("getPretestScore typeToEndTimes" +
+          "\n\ttypeToEndTimes " + typeToEndTimes
+      );*/
 
       return new PretestScore(scores.hydraScore,
           getPhoneToScore(scores),
@@ -694,7 +712,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             "[<s>" + cleanedTranscript + "</s>]";
 
     long then = System.currentTimeMillis();
-    String resultsStr = runHydra(hydraInput, getDcodr());
+
+    HTTPClient dcodr = getDcodr();
+
+    String resultsStr = runHydra(hydraInput, dcodr);
     if (resultsStr.startsWith("ERROR")) {
       String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
       message = "hydra said " + resultsStr + " : " + message;
@@ -718,7 +739,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Scores scores = new Scores(split);
       // clean up tmp directory if above score threshold
       logger.debug(languageProperty + " : Took " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
-          " hydra on " + audioPath + " - score: " + split[0]);
+          " hydra on " + audioPath + " - score: " + split[0] + " raw reply : " + resultsStr);
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
@@ -733,7 +754,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   @NotNull
   private HTTPClient getDcodr() {
-    return new HTTPClient(getWebserviceIP(), getWebservicePort(), "dcodr");
+    return new HTTPClient(getWebserviceIP(), getWebservicePort(), DCODR);
   }
 
   private String getCleanedTranscript(String cleaned, String sep) {
@@ -765,7 +786,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     try {
       String resultsStr;
       try {
-        resultsStr = httpClient.sendAndReceiveAndClose(hydraInput);
+        // synchronized (this) {
+        //    resultsStr = httpClient.sendAndReceiveAndClose(hydraInput);
+        resultsStr = httpClient.sendAndReceive(hydraInput);
+        // }
       } catch (IOException e) {
         logger.error("Error closing http connection " + e, e);
         langTestDatabase.logAndNotifyServerException(e, "running hydra with " + hydraInput);

@@ -590,9 +590,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     boolean foundFiles = didFindAnyAudioFiles(projectID);
     String mediaDir = serverProps.getMediaDir();
     File file = new File(mediaDir);
-    logger.info("makeSureAudioIsThere " + projectID + " " + language + " " + validateAll);
+    //logger.info("makeSureAudioIsThere " + projectID + " " + language + " " + validateAll);
     if (file.exists()) {
-      logger.debug("makeSureAudioIsThere media dir " + file + " exists ");
+      //logger.debug("makeSureAudioIsThere media dir " + file + " exists ");
       if (file.isDirectory()) {
         String[] list = file.list();
         if (list == null) {

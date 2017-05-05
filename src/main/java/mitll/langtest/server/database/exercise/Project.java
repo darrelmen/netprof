@@ -154,8 +154,7 @@ public class Project implements PronunciationLookup {
       String second = project.second();
       if (first != null && !first.isEmpty()) types.add(first);
       if (second != null && !second.isEmpty()) types.add(second);
-
-      logger.info("getTypeOrder Type order " + types);
+      //logger.info("getTypeOrder Type order " + types);
     }
 
     return types;
@@ -166,7 +165,6 @@ public class Project implements PronunciationLookup {
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
-    //logger.info("setExerciseDAO - ");
     this.exerciseDAO = exerciseDAO;
   }
 
@@ -198,7 +196,6 @@ public class Project implements PronunciationLookup {
     this.analysis = analysis;
     buildExerciseTrie();
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper(), hasModel());
-//    refResultDecoder.doRefDecode(getExercisesForUser());
   }
 
   /**
@@ -381,13 +378,6 @@ public class Project implements PronunciationLookup {
     return exerciseDAO != null && exerciseDAO.isConfigured();
   }
 
-  /**
-   * @paramx wasConfigured
-   * @see IProjectManagement#configureProject
-   */
-//  public void setConfigured(boolean wasConfigured) {
-//    this.wasConfigured = wasConfigured;
-//  }
   public ProjectStatus getStatus() {
     try {
       return ProjectStatus.valueOf(project.status());
@@ -409,11 +399,11 @@ public class Project implements PronunciationLookup {
     return project.id();
   }
 
-  public String toString() {
-    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
-  }
-
   public void ensureAudio(Set<CommonExercise> toAddAudioTo) {
     refResultDecoder.ensure(getLanguage(), toAddAudioTo);
+  }
+
+  public String toString() {
+    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }

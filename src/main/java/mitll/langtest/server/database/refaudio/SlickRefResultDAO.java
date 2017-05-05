@@ -47,16 +47,16 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickRefResult;
 import mitll.npdata.dao.SlickRefResultJson;
 import mitll.npdata.dao.refaudio.RefResultDAOWrapper;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import scala.Tuple3;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   private static final Logger logger = LogManager.getLogger(SlickRefResultDAO.class);
+  private static final int WARN_THRESHOLD = 50;
 
   private final RefResultDAOWrapper dao;
 
@@ -169,12 +169,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     );
   }
 
-/*
-  @Override
-  public boolean removeForAudioFile(String audioFile) {
-    return dao.deleteByAudioFile(audioFile) > 0;
-  }*/
-
   @Override
   public boolean removeByAudioID(int audioID) {
     return dao.deleteByAudioID(audioID) > 0;
@@ -191,20 +185,21 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return results;
   }
 
-/*  public List<String> getAllFilesForProject(int projid) {
-    return dao.getAllFiles(projid);
-  }*/
-
   public List<Integer> getAllAudioIDsForProject(int projid) {
     return dao.getAllAudioID(projid);
   }
 
-  private List<SlickRefResultJson> getJsonResultsForProject(int projid) {
+  public Collection<SlickRefResultJson> getJsonResultsForProject(int projid) {
     return dao.getAllSlimForProject(projid);
   }
 
-  private List<SlickRefResultJson> getSlimForAudioID(int audioid) {
-    return dao.getAllSlimForProject(audioid);
+  public Collection<ISlimResult> getAllSlimForProject(int projid) {
+    return dao.getAllSlimForProject(projid).stream().map(this::fromSlickToSlim).collect(Collectors.toList());
+  }
+
+  public Collection<ISlimResult> getAllSlimForProjectIn(int projid,
+                                                        Set<Integer> audioIDs) {
+    return dao.getAllSlimIn(projid, audioIDs).stream().map(this::fromSlickToSlim).collect(Collectors.toList());
   }
 
   /**
@@ -213,62 +208,24 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    * @see DBExerciseDAO#readExercises
    */
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
-    List<SlickRefResultJson> jsonResults = getJsonResultsForProject(projid);
+    Collection<SlickRefResultJson> jsonResults = getJsonResultsForProject(projid);
     return new ExerciseToPhone().getExerciseToPhoneForProject(jsonResults);
   }
-
-/*
-  @Override
-  public ISlimResult getResult(int exid, String answer) {
-    long then = System.currentTimeMillis();
-    Collection<SlickRefResult> slickRefResults = dao.byExAndAnswer(exid, answer);
-    long now = System.currentTimeMillis();
-    if (now - then > 20) logger.info("took " + (now - then) + " to lookup " + exid);
-
-    if (slickRefResults.isEmpty()) {
-      logger.info("no results for " + exid + " and " + answer);
-      return null;
-    } else {
-      return fromSlick(slickRefResults.iterator().next());
-    }
-  }
-*/
 
   @Override
   public ISlimResult getResult(int audioid) {
     long then = System.currentTimeMillis();
     Collection<SlickRefResultJson> slickRefResults = dao.getAllSlimByAudioID(audioid);
     long now = System.currentTimeMillis();
-      if (now - then > 20) logger.info("getResult took " + (now - then) + " to lookup " + audioid);
+    if (now - then > WARN_THRESHOLD) logger.info("getResult took " + (now - then) + " to lookup " + audioid);
 
     if (slickRefResults.isEmpty()) {
-     // logger.info("getResult : no results for " + audioid);
+      // logger.info("getResult : no results for " + audioid);
       return null;
     } else {
       return fromSlickToSlim(slickRefResults.iterator().next());
     }
   }
-
-  /**
-   * @param ids
-   * @return
-   * @seex mitll.langtest.server.database.JsonSupport#getJsonRefResults(Map)
-   */
-/*  @Override
-  public JSONObject getJSONScores(Collection<Integer> ids) {
-    Collection<Tuple3<Integer, String, String>> tuple3s = dao.jsonByExIDs(ids);
-    Map<Integer, List<String>> idToAnswers = new HashMap<>();
-    Map<Integer, List<String>> idToJSONs = new HashMap<>();
-    for (Tuple3<Integer, String, String> three : tuple3s) {
-      Integer exid = three._1();
-      String answer = three._2();
-      String json = three._3();
-
-      addToAnswers(idToAnswers, exid, answer);
-      addToJSONs(idToJSONs, exid, json);
-    }
-    return getJsonObject(idToAnswers, idToJSONs);
-  }*/
 
   private static final String WORDS = "{\"words\":[]}";
 
@@ -311,10 +268,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
 
     boolean validAlignJSON = alignScore > 0 && !scoreJson.contains(WORDS);
     if (!validAlignJSON) {
-      logger.info("slickRef " +slickRef +         " not valid " + alignScore + " score " +scoreJson);
+      logger.info("slickRef " + slickRef + " not valid " + alignScore + " score " + scoreJson);
     }
 
-    return new SlimResult(validAlignJSON, scoreJson, alignScore);
+    return new SlimResult(slickRef.audioid(), validAlignJSON, scoreJson, alignScore);
   }
 
   @Override

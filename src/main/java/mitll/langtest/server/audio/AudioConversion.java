@@ -224,8 +224,12 @@ public class AudioConversion extends AudioBase {
         wavFile = copyFileAndDeleteOriginal(wavFile, convertTo16KHZ, SIXTEEN_K_SUFFIX);
 
         long now = System.currentTimeMillis();
-        logger.info("convertTo16Khz : took " + (now - then) + " millis to convert original " + orig.getName() + " at " + sampleRate +
-            " to 16K wav file : " + wavFile.getName());
+        long diff = now - then;
+
+        if (diff > 25) {
+          logger.info("convertTo16Khz : took " + diff + " millis to convert original " + orig.getName() + " at " + sampleRate +
+              " to 16K wav file : " + wavFile.getName());
+        }
       }
     } catch (IOException e) {
       logger.error("Got " + e, e);

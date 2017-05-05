@@ -649,10 +649,10 @@ public class SlickUserExerciseDAO
     }
 
     if (addTypesToSection) {
-      logger.info("getExercises type order " + typeOrder);
+//      logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allPairs);
     }
-    logger.info("getExercises created " + copy.size() + " exercises");
+  //  logger.info("getExercises created " + copy.size() + " exercises");
     return copy;
   }
 

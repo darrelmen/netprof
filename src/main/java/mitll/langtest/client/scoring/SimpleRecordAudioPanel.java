@@ -210,25 +210,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     return historyPanel;
   }
 
-  /**
-   * @return
-   */
-/*  private IconAnchor getDownloadIcon() {
-    IconAnchor download = new IconAnchor();
-    download.getElement().setId("Download_user_audio_link");
-    download.setIcon(IconType.DOWNLOAD);
-    download.setIconSize(IconSize.TWO_TIMES);
-    addTooltip(download, DOWNLOAD_YOUR_RECORDING);
-
-    download.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(download, "DownloadUserAudio_Icon", exercise,
-            "downloading audio file ");
-      }
-    });
-    return download;
-  }*/
   private Tooltip addTooltip(Widget w, String tip) {
     return new TooltipHelper().addTooltip(w, tip);
   }
@@ -252,7 +233,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private void scoreAudio(AudioAnswer result) {
     clearScoreFeedback();
     PretestScore pretestScore = result.getPretestScore();
-
     scoreFeedback.add(getWordTableContainer(pretestScore));
     useResult(pretestScore, false, result.getPath());
   }
@@ -346,7 +326,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     audioPath = result.getPath();
     setDownloadHref();
     scoreAudio(result);
-    // waitCursorHelper.showFinished();
+
     waitCursorHelper.cancelTimer();
     waitCursorHelper.setWhite();
     waitCursorHelper.show();
@@ -356,7 +336,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   public void useInvalidResult(boolean isValid) {
     setVisible(hasScoreHistory);
 
-    logger.info("useInvalidResult " + isValid);
+//    logger.info("useInvalidResult " + isValid);
 
     if (!isValid) playAudioPanel.hidePlayButton();
     else playAudioPanel.showPlayButton();

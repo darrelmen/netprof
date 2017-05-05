@@ -38,11 +38,13 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface IRefResultDAO extends IDAO {
   boolean removeForExercise(int exid);
@@ -88,7 +90,8 @@ public interface IRefResultDAO extends IDAO {
    * @paramx answer
    * @return
    */
- // ISlimResult getResult(int exid, String answer);
+  Collection<ISlimResult> getAllSlimForProject(int projid);
+  Collection<ISlimResult> getAllSlimForProjectIn(int projid, Set<Integer> audioIDs);
   ISlimResult getResult(int audioid);
   //JSONObject getJSONScores(Collection<Integer> ids);
 
@@ -102,4 +105,5 @@ public interface IRefResultDAO extends IDAO {
   List<Integer> getAllAudioIDsForProject(int projid);
 
   void deleteForProject(int projid);
+
 }

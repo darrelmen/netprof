@@ -55,7 +55,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   /**
    * For AMAS
    */
-  private int qid;
+ // private int qid;
   private boolean correct;
   /**
    * For AMAS
@@ -152,8 +152,12 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
     return scoreJson;
   }
 
+  /**
+   * TODO : maybe put this back someday
+   * @return
+   */
   public int getQid() {
-    return qid;
+    return 0;
   }
 
   public boolean hasUserScore() {
@@ -163,18 +167,9 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   public float getUserScore() {
     return userScore;
   }
-/*
-  public float getClassifierScore() {
-    return classifierScore;
-  }
-*/
 
   public boolean isMatch(HasID ex) {
     return getExid() == ex.getID();
-  }
-
-  public String toString() {
-    return "id " + getExid() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();
   }
 
   public void setJson(String json) {
@@ -187,5 +182,10 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
 
   public void setScores(Map<NetPronImageType, List<TranscriptSegment>> scores) {
     this.scores = scores;
+  }
+
+  public String toString() {
+    return "id " + getExid() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore() +
+        (scores == null ? "":" segments for "+scores.keySet());
   }
 }

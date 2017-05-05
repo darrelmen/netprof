@@ -43,6 +43,7 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -338,6 +339,16 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
   @Override
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
+    return null;
+  }
+
+  @Override
+  public Collection<ISlimResult> getAllSlimForProject(int projid) {
+    return null;
+  }
+
+  @Override
+  public Collection<ISlimResult> getAllSlimForProjectIn(int projid, Set<Integer> audioIDs) {
     return null;
   }
 

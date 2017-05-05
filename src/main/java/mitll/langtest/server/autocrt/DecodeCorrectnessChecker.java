@@ -156,9 +156,15 @@ public class DecodeCorrectnessChecker {
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
             asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
-    logger.debug("recoSentence is " + recoSentence + " (" + recoSentence.length() + ")");
+
+    //    logger.debug("recoSentence is " + recoSentence + " (" + recoSentence.length() + ")");
 
     boolean isCorrect = isCorrect(possibleSentences, recoSentence);
+
+    if (!isCorrect) {
+      logger.debug("recoSentence (not correct) is " + recoSentence + " (" + recoSentence.length() + ")");
+    }
+
     double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
     answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
     answer.setSaidAnswer(isCorrect);
