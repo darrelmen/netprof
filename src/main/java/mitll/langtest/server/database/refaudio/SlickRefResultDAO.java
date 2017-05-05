@@ -242,7 +242,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
       if (now - then > 20) logger.info("getResult took " + (now - then) + " to lookup " + audioid);
 
     if (slickRefResults.isEmpty()) {
-      logger.info("getResult : no results for " + audioid);
+     // logger.info("getResult : no results for " + audioid);
       return null;
     } else {
       return fromSlickToSlim(slickRefResults.iterator().next());

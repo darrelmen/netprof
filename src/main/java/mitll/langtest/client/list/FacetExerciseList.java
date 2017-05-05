@@ -572,12 +572,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * TODO: reverse this - get the lists first, then build the facets
+   * @see #addFacetsForReal
    *
    * @param liForDimensionForType
    */
   private void populateListChoices(ListItem liForDimensionForType) {
     ListServiceAsync listService = controller.getListService();
-    //logger.info("populateListChoices ");
+    logger.info("populateListChoices --- ");
     listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -610,7 +611,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
     return value;
   }
-
 
   @NotNull
   private ListItem getTypeContainer(String type) {
@@ -670,14 +670,35 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       } else {
         if (type.equalsIgnoreCase(LISTS)) {
           try {
-            int i = Integer.parseInt(selectionForType);
-            String s = idToName.get(i);
-            if (s != null) selectionForType = s;
+            int userListID = Integer.parseInt(selectionForType);
+            String s = idToName.get(userListID);
+            if (s != null) {
+              selectionForType = s;
+              choices.add(getSelectedAnchor(type, selectionForType));
+            }
+            else {
+              logger.info("addChoices couldn't find list in known lists...");
+
+
+              controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+
+                @Override
+                public void onSuccess(String result) {
+
+                  choices.add(getSelectedAnchor(type, result));
+                }
+              });
+            }
           } catch (NumberFormatException e) {
             logger.warning("could n't parse " + selectionForType);
           }
         }
-        choices.add(getSelectedAnchor(type, selectionForType));
+        else {
+          choices.add(getSelectedAnchor(type, selectionForType));
+        }
       }
     }
     return choices;
@@ -688,14 +709,16 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                                  Panel choices,
                                  Set<MatchInfo> keys) {
     int j = 0;
-//    Set<String> types = typeToValues.keySet();
     int size = rootNodesInOrder.size()+1;
 
     int toShow = TOTAL / size;
     int diff = keys.size() - toShow;
 
+/*
     logger.info("addChoices type " +type + " : "+ size  +// "(" +types+
         ")  vs " + toShow + " keys " + keys.size());
+
+        */
 
     boolean hasMore = keys.size() > toShow && diff > CLOSE_TO_END;
     Boolean showAll = typeToShowAll.getOrDefault(type, false);

@@ -20,6 +20,7 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -80,6 +81,11 @@ public class ProjectChoices {
   private Panel contentRow;
   //private static final boolean DEBUG = false;
 
+  /**
+   * @see InitialUI#InitialUI
+   * @param langTest
+   * @param uiLifecycle
+   */
   public ProjectChoices(LangTest langTest, UILifecycle uiLifecycle) {
     this.lifecycleSupport = langTest;
     this.props = langTest.getProps();

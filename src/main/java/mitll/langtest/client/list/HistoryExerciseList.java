@@ -72,7 +72,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected long userID;
   private final FacetContainer sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH = false;
 
@@ -406,7 +406,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     // if (DEBUG_ON_VALUE_CHANGE) logger.info("HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
     String value = event.getValue();
     SelectionState selectionState = getSelectionState(value);
-    logger.info("onValueChange got " + value + " sel " + selectionState + " " + selectionState.getInfo());
+
+    if (selectionState.getProject() != controller.getProjectStartupInfo().getProjectid()) {
+      //controller.
+      // TODO : change the project --- ... and come back and call code below.
+
+    }
+
+    if (DEBUG_ON_VALUE_CHANGE) logger.info("onValueChange got " + value + " sel " + selectionState + " " + selectionState.getInfo());
     String instance1 = selectionState.getInstance();
 
     if (!instance1.equals(getInstance()) && instance1.length() > 0) {

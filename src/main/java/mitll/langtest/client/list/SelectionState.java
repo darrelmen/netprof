@@ -45,9 +45,11 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class SelectionState {
+  private final Logger logger = Logger.getLogger("SelectionState");
+
   public static final String ITEM = "item";
   public static final String SEARCH = "search";
-  private final Logger logger = Logger.getLogger("SelectionState");
+  public static final String PROJECT = "project";
 
   public static final String SECTION_SEPARATOR = "###";
 
@@ -130,7 +132,7 @@ public class SelectionState {
             }
           } else if (isMatch(type, SEARCH)) {
             search = section;
-          } else if (isMatch(type, "project")) {
+          } else if (isMatch(type, PROJECT)) {
             try {
               setProject(Integer.parseInt(section));
             } catch (NumberFormatException e) {

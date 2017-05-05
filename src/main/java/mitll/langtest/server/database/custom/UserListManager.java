@@ -375,8 +375,8 @@ public class UserListManager implements IUserListManager {
    * @param visitedLists
    * @param projid
    * @return
-   * @see mitll.langtest.server.services.ListServiceImpl#getListsForUser
    * @seex mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
+   * @see mitll.langtest.server.services.ListServiceImpl#getListsForUser
    */
   @Override
   public Collection<UserList<CommonShell>> getListsForUser(int userid,
@@ -546,7 +546,7 @@ public class UserListManager implements IUserListManager {
    * TODO : probably a bad idea to do a massive where in ... ids.
    *
    * @param typeOrder used by sorter to sort first in unit & chapter order
-   * @param ids only within this set
+   * @param ids       only within this set
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getReviewLists
    * @see IUserListManager#getUserListByID
@@ -883,8 +883,8 @@ public class UserListManager implements IUserListManager {
    * @param userExercise
    * @param overwrite
    * @param mediaDir
-   * @see UserListManager#editItem
    * @seex IUserListManager#newExercise
+   * @see UserListManager#editItem
    */
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
@@ -1023,6 +1023,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * TODO : OK the review, comment, and attention LL (if needed) lists need to be in context of project.
+   *
    * @param id
    * @param projid
    * @param typeOrder
@@ -1054,13 +1055,17 @@ public class UserListManager implements IUserListManager {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#addVisitor
    */
   @Override
-  public void addVisitor(int userListID, long user) {
+  public String addVisitor(int userListID, long user) {
     logger.debug("addVisitor - user " + user + " visits " + userListID);
     UserList where = getUserList(userListID);
     if (where != null) {
       userListDAO.addVisitor(where.getID(), user);
+      return where.getName();
     } else if (userListID > 0) {
       logger.warn("addVisitor - can't find list with id " + userListID);
+      return "Unknown";
+    } else {
+      return "Unknown";
     }
   }
 

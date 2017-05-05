@@ -94,7 +94,7 @@ public interface ListService extends RemoteService {
    * @param user
    * @see ListManager#addVisitor(UserList)
    */
-  void addVisitor(int userListID, int user);
+  String addVisitor(int userListID, int user);
 
   /**
    * @param onlyCreated

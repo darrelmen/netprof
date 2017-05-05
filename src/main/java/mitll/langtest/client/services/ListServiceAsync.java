@@ -55,7 +55,7 @@ public interface ListServiceAsync {
   void addUserList(String name, String description, String dliClass,
                    boolean isPublic, AsyncCallback<Long> async);
 
-  void addVisitor(int userListID, int user, AsyncCallback<Void> asyncCallback);
+  void addVisitor(int userListID, int user, AsyncCallback<String> asyncCallback);
 
   void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
 

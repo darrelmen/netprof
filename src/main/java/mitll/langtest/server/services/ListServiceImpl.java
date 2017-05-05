@@ -101,8 +101,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param user
    * @see ListManager#addVisitor(mitll.langtest.shared.custom.UserList)
    */
-  public void addVisitor(int userListID, int user) {
-    getUserListManager().addVisitor(userListID, user);
+  public String addVisitor(int userListID, int user) {
+    return getUserListManager().addVisitor(userListID, user);
   }
 
   /**

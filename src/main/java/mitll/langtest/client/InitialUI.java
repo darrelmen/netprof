@@ -133,7 +133,6 @@ public class InitialUI implements UILifecycle {
     this.controller = langTest;
     userFeedback = langTest;
     this.choices = new ProjectChoices(langTest, this);
-    //banner = new Banner(props, this, langTest, userMenu, langTest);
     UserMenu userMenu = new UserMenu(langTest, userManager, this);
 //    logger.info("made user menu"+ userMenu);
     banner = new NewBanner(userManager, this, userMenu, breadcrumbs = getBreadcrumbs(), controller);

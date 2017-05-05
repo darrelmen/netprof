@@ -6,15 +6,19 @@ import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.exercise.NewListButton;
 import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -45,6 +49,7 @@ public class UserListSupport {
   /**
    * @param dropdownContainer
    * @param exid
+   * @see TwoColumnExercisePanel#getDropdown
    */
   void addListOptions(Dropdown dropdownContainer, int exid) {
     DropdownSubmenu addToList = new DropdownSubmenu(ADD_TO_LIST);
@@ -54,29 +59,33 @@ public class UserListSupport {
     DropdownSubmenu removeFromList = new DropdownSubmenu(REMOVE_FROM_LIST);
     removeFromList.setRightDropdown(true);
 
-    dropdownContainer.addClickHandler(event -> populateListChoices(exid, addToList, removeFromList, dropdownContainer));
+    DropdownSubmenu sendList = new DropdownSubmenu("Email List");
+    sendList.setRightDropdown(true);
+
+    dropdownContainer.addClickHandler(event -> populateListChoices(exid, addToList, removeFromList, sendList, dropdownContainer));
 
     dropdownContainer.add(addToList);
     dropdownContainer.add(removeFromList);
+    dropdownContainer.add(sendList);
 
     UserListSupport outer = this;
 
-    NavLink widget = new NavLink(NEW_LIST);
-    widget.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
+    {
+      NavLink widget = new NavLink(NEW_LIST);
+      widget.addClickHandler(event -> {
         NewListButton newListButton = new NewListButton(exid, controller, outer, dropdownContainer);
         newListButton.showOrHide(newListButton.getNewListButton2(), widget);
-      }
-    });
-    dropdownContainer.add(widget);
+      });
+      dropdownContainer.add(widget);
+    }
+
   }
 
   /**
    * Ask server for the set of current lists for this user.
    * <p>
    * TODO : do this better -- tell server to return lists that don't have exercise in them.
-   *
+   * <p>
    * Visited are OK, I guess.
    *
    * @param id
@@ -87,11 +96,12 @@ public class UserListSupport {
   private void populateListChoices(final int id,
                                    final DropdownBase addToList,
                                    final DropdownBase removeFromList,
+                                   final DropdownBase emailList,
                                    Dropdown container
   ) {
     ListServiceAsync listService = controller.getListService();
 
-  //  logger.info("asking for " + id );
+    //  logger.info("asking for " + id );
     listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -101,6 +111,7 @@ public class UserListSupport {
       public void onSuccess(Collection<UserList<CommonShell>> result) {
         addToList.clear();
         removeFromList.clear();
+        emailList.clear();
 
         boolean anyAdded = false;
         boolean anyToRemove = false;
@@ -113,6 +124,7 @@ public class UserListSupport {
             anyToRemove = true;
             getRemoveListLink(ul, removeFromList, id, container);
           }
+          addSendLink(ul, emailList);
         }
         if (!anyAdded) {
           addToList.add(new NavLink(ITEM_ALREADY_ADDED));
@@ -124,14 +136,50 @@ public class UserListSupport {
     });
   }
 
+  private void addSendLink(UserList ul,
+                           DropdownBase addToList
+                           //    ,Widget container
+  ) {
+    final NavLink widget = getListLink(ul);
+    addToList.add(widget);
+    widget.setHref(getMailTo(ul.getID(), ul.getName()));
+
+    widget.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.logEvent(addToList, "DropUp", ul.getID(), "sharing_" + ul.getID() + "/" + ul.getName());
+      }
+    });
+  }
+
+  @NotNull
+  private String getMailTo(int listid, String name) {
+    String s1 = trimURL(Window.Location.getHref());
+
+    String s = s1 +
+        "#" +
+        SelectionState.SECTION_SEPARATOR + "Lists=" + listid +
+        SelectionState.SECTION_SEPARATOR + "project=" + controller.getProjectStartupInfo().getProjectid();
+
+    String encode = URL.encode(s);
+    return "mailto:" +
+        "?" +
+        "Subject=Share netprof " + controller.getLanguage() +
+        " list " + name +
+        "&body=Link to " + name + " list : " + encode;
+  }
+
+  private String trimURL(String url) {
+    return url.split("\\?")[0].split("#")[0];
+  }
+
+
   private void getAddListLink(UserList ul,
                               DropdownBase addToList,
                               int exid,
                               Widget container
   ) {
-    String name = ul.getName();
-    if (name.length() > END_INDEX) name = name.substring(0, END_INDEX) + "...";
-    final NavLink widget = new NavLink(name);
+    final NavLink widget = getListLink(ul);
     addToList.add(widget);
     widget.addClickHandler(event -> {
       controller.logEvent(addToList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
@@ -150,10 +198,17 @@ public class UserListSupport {
     });
   }
 
+  @NotNull
+  private NavLink getListLink(UserList ul) {
+    String name = ul.getName();
+    if (name.length() > END_INDEX) name = name.substring(0, END_INDEX) + "...";
+    return new NavLink(name);
+  }
+
   private void getRemoveListLink(UserList ul, DropdownBase removeFromList, int exid,
                                  Dropdown container
   ) {
-    final NavLink widget = new NavLink(ul.getName());
+    final NavLink widget = getListLink(ul);
     removeFromList.add(widget);
     widget.addClickHandler(event -> {
       controller.logEvent(removeFromList, "DropUp", exid, "remove_" + ul.getID() + "/" + ul.getName());

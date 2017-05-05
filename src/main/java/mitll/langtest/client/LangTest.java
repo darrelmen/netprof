@@ -62,7 +62,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
-import mitll.langtest.client.project.ProjectOps;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButton;
@@ -75,10 +74,10 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.user.User;
 
@@ -327,7 +326,7 @@ public class LangTest implements
   /**
    * after we change state
    *
-   * @see ProjectOps#refreshStartupInfo
+   * @seex ProjectOps#refreshStartupInfo
    * @param reloadWindow
    */
   public void refreshStartupInfo(boolean reloadWindow) {

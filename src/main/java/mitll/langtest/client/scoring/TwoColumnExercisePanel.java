@@ -438,15 +438,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
     dropdownContainer.getTriggerWidget().setCaret(false);
 
-
     new UserListSupport(controller).addListOptions(dropdownContainer, exercise.getID());
 
-    NavLink share = new NavLink(EMAIL);
-    dropdownContainer.add(share);
-    share.setHref(getMailTo());
+    {
+      NavLink share = new NavLink(EMAIL);
+      dropdownContainer.add(share);
+      share.setHref(getMailTo());
+    }
 
     dropdownContainer.add(getShowComments());
-
 
     return dropdownContainer;
   }
