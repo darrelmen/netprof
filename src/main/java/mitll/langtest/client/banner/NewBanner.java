@@ -8,6 +8,8 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -20,12 +22,15 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.UILifecycle;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.download.DownloadEvent;
+import mitll.langtest.client.exercise.AudioChangedEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
+import slick.ast.Drop;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -38,11 +43,7 @@ import static mitll.langtest.client.banner.NewContentChooser.*;
 public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeHandler<String> {
   private final Logger logger = Logger.getLogger("NewBanner");
 
-
   private static final String LEARN = "Learn";
-//  private static final String DRILL = "Drill";
-//  private static final String PROGRESS = "Progress";
-//  private static final String LISTS = "Lists";
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
@@ -183,25 +184,44 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private Nav getRightSideChoices(UserManager userManager, UserMenu userMenu) {
     Nav rnav = new Nav();
     rnav.setAlignment(Alignment.RIGHT);
-    rnav.add(subtitle = new Label());
-
-    subtitle.addStyleName("floatLeft");
-    subtitle.setType(LabelType.WARNING);
-    subtitle.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-    new TooltipHelper().addTooltip(subtitle, "Is your microphone active?");
+    addSubtitle(rnav);
 
     //recordMenu = getRecordMenu(rnav);
     addUserMenu(userManager, userMenu, rnav);
 
-    subtitle.setVisible(!controller.isRecordingEnabled());
+    Dropdown view = new Dropdown("View");
+    view.setIcon(IconType.REORDER);
+    NavLink download = new NavLink("Download");
+    download.setIcon(IconType.DOWNLOAD_ALT);
+    view.add(download);
+    download.addClickHandler(event -> LangTest.EVENT_BUS.fireEvent(new DownloadEvent()));
+
+    DropdownSubmenu showChoices = new DropdownSubmenu("Show");
+    showChoices.add(new NavLink("Alternate text"));
+    showChoices.add(new NavLink("Primary text"));
+    showChoices.add(new NavLink("Both Primary and Alternate"));
+    view.add(showChoices);
+    rnav.add(view);
+
 
     cog = new Dropdown("");
     cog.setIcon(IconType.COG);
     userMenu.getCogMenuChoices2().forEach(lt -> cog.add(lt.getLink()));
     rnav.add(cog);
 
+
     getInfoMenu(userMenu, rnav);
     return rnav;
+  }
+
+  private void addSubtitle(Nav rnav) {
+    rnav.add(subtitle = new Label());
+
+    subtitle.addStyleName("floatLeft");
+    subtitle.setType(LabelType.WARNING);
+    subtitle.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    new TooltipHelper().addTooltip(subtitle, "Is your microphone active?");
+    subtitle.setVisible(!controller.isRecordingEnabled());
   }
 
   private void addUserMenu(UserManager userManager, UserMenu userMenu, Nav rnav) {

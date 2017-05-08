@@ -49,13 +49,14 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
+import mitll.langtest.client.exercise.AudioChangedEvent;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.RefAudioGetter;
-import mitll.langtest.client.scoring.RefAudioListener;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -174,7 +175,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     LangTest.EVENT_BUS.addHandler(ListChangedEvent.TYPE, authenticationEvent -> {
       gotListChanged();
     });
+
+    LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> {
+      downloadHelper.showDialog();
+    });
   }
+
 
   private void getProgressBarContainer(ProgressBar progressBar) {
     Style style = progressBar.getElement().getStyle();

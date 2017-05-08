@@ -61,15 +61,16 @@ public class DownloadHelper {
 
   private SelectionState selectionState;
   private Collection<String> typeOrder;
-  private Heading selectionStatus;
+  //private Heading selectionStatus;
 
   public DownloadHelper(HistoryExerciseList exerciseList) {
     this.exerciseList = exerciseList;
+    selectionState = exerciseList.getSelectionState();
   }
 
   /**
    * @return
-   * @see FlexSectionExerciseList#getBottomRow
+   * @see mitll.langtest.client.list.SimpleSelectExerciseList#getBottomRow
    */
   public Panel getDownloadButton() {
     Button download = new Button("Download", IconType.DOWNLOAD);
@@ -87,7 +88,7 @@ public class DownloadHelper {
 
   /**
    * @param selectionState
-   * @see FlexSectionExerciseList#showSelectionState(SelectionState)
+   * @see mitll.langtest.client.list.FacetExerciseList#showSelectionState
    */
   public void updateDownloadLinks(SelectionState selectionState, Collection<String> typeOrder) {
     this.selectionState = selectionState;
@@ -103,7 +104,7 @@ public class DownloadHelper {
   private Heading status2 = new Heading(4, "");
   private Heading status3 = new Heading(4, "");
 
-  private void showDialog() {
+  public void showDialog() {
     isMale = false;
     isContext = false;
     isRegular = true;

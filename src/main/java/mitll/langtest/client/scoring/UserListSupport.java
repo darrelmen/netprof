@@ -53,7 +53,7 @@ public class UserListSupport {
    */
   void addListOptions(Dropdown dropdownContainer, int exid) {
     DropdownSubmenu addToList = new DropdownSubmenu(ADD_TO_LIST);
-    addToList.setRightDropdown(true);
+  //  addToList.setRightDropdown(true);
     //  addToList.setStyleDependentName("pull-left", true);
 
     DropdownSubmenu removeFromList = new DropdownSubmenu(REMOVE_FROM_LIST);
