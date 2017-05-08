@@ -110,6 +110,8 @@ public class ClickableWords<T extends CommonExercise> {
     boolean flLine = isFL || (isJapanese && isTranslit);
     boolean isChineseCharacter = flLine && hasClickable;
 
+    logger.info("value " +value + " highlight " + highlight);
+
     List<String> tokens = getTokens(value, flLine, isChineseCharacter);
 
     // if the highlight token is not in the display, skip over it -
@@ -140,6 +142,12 @@ public class ClickableWords<T extends CommonExercise> {
     return horizontal;
   }
 
+  /**
+   * @see #getClickableWords(String, boolean, boolean, boolean, List)
+   * @param tokens
+   * @param highlightTokens
+   * @return
+   */
   @NotNull
   private List<String> getMatchingHighlight(List<String> tokens, List<String> highlightTokens) {
     List<String> realHighlight = new ArrayList<>();
@@ -163,19 +171,25 @@ public class ClickableWords<T extends CommonExercise> {
     return realHighlight;
   }
 
+  /**
+   *
+   * @param token
+   * @param next
+   * @return
+   */
   private boolean isMatch(String token, String next) {
     if (next.isEmpty()) {
       return false;
     } else {
-      String context = stripAccents(token.toLowerCase());
-      String vocab   = stripAccents(next.toLowerCase());
+      String context = removePunct(token.toLowerCase());
+      String vocab   = removePunct(next.toLowerCase());
       boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
       // if (b) logger.info("match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
       return b;// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
     }
   }
 
-  private static String stripAccents(final String input) {
+/*  private String stripAccents(final String input) {
     if(input == null) {
       return null;
     }
@@ -186,7 +200,7 @@ public class ClickableWords<T extends CommonExercise> {
     return pattern.matcher(decomposed).replaceAll(StringUtils.EMPTY);
   }
 
-  private static void convertRemainingAccentCharacters(StringBuilder decomposed) {
+  private void convertRemainingAccentCharacters(StringBuilder decomposed) {
     for (int i = 0; i < decomposed.length(); i++) {
       if (decomposed.charAt(i) == '\u0141') {
         decomposed.deleteCharAt(i);
@@ -196,7 +210,7 @@ public class ClickableWords<T extends CommonExercise> {
         decomposed.insert(i, 'l');
       }
     }
-  }
+  }*/
 
   @NotNull
   private List<String> getTokens(String value, boolean flLine, boolean isChineseCharacter) {

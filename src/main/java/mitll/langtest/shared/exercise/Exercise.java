@@ -38,8 +38,8 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.npdata.dao.SlickExercise;
 
 import java.util.*;
 
@@ -86,6 +86,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private transient List<ExerciseAttribute> attributes;
 
+  private String noAccentFL;
+
   //private List<String> tokens = new ArrayList<>();
   // for serialization
   public Exercise() {
@@ -96,6 +98,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param altcontext
    * @param projectid
    * @param updateTime
+   * @param noAccentFL
    * @paramx content
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
@@ -105,7 +108,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String contextTranslation,
                   String meaning,
                   int projectid,
-                  long updateTime) {
+                  long updateTime,
+                  String noAccentFL) {
     super(-1, projectid);
     this.oldid = id;
     try {
@@ -139,17 +143,18 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param context
    * @param altcontext
    * @param contextTranslation
-   * @param projectid
-   * @Deprecated - use related exercise join table
+   * @param noAccentFL
+   *@param projectid  @Deprecated - use related exercise join table
    * @see #addContext
    */
   @Deprecated
-  private Exercise(String id, String context, String altcontext, String contextTranslation, int projectid) {
+  private Exercise(String id, String context, String altcontext, String contextTranslation, String noAccentFL, int projectid) {
     super(-1, projectid);
     this.foreignLanguage = context;
     this.altfl = altcontext;
     this.english = contextTranslation;
     this.oldid = id;
+    this.noAccentFL = noAccentFL;
   }
 
 
@@ -159,6 +164,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param creator
    * @param englishSentence
    * @param foreignLanguage
+   * @param noAccentFL
    * @param altFL
    * @param meaning
    * @param transliteration
@@ -172,6 +178,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int creator,
                   String englishSentence,
                   String foreignLanguage,
+                  String noAccentFL,
                   String altFL,
                   String meaning,
                   String transliteration,
@@ -184,6 +191,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
     setForeignLanguage(foreignLanguage);
+    this.noAccentFL = noAccentFL;
     setTransliteration(transliteration);
     setAltFL(altFL);
     this.safeToDecode = candecode;
@@ -196,6 +204,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param creator
    * @param english
    * @param foreignLanguage
+   * @param noAccentFL
    * @param altFL
    * @param transliteration
    * @param isOverride
@@ -203,14 +212,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param projectid
    * @param candecode
    * @param lastChecked
-   * @see UserExerciseDAO#getUserExercise
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#fromSlick(SlickExercise)
    */
   public Exercise(int uniqueID,
                   String exerciseID,
                   int creator,
                   String english,
                   String foreignLanguage,
-                  String altFL,
+                  String noAccentFL, String altFL,
                   String transliteration,
                   boolean isOverride,
                   Map<String, String> unitToValue,
@@ -219,7 +228,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   boolean candecode,
                   long lastChecked,
                   int numPhones) {
-    this(uniqueID, exerciseID, creator, english, foreignLanguage, altFL, "", transliteration, projectid, candecode, lastChecked);
+    this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration, projectid, candecode, lastChecked);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
@@ -329,7 +338,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   private void addContext(String context, String altcontext, String contextTranslation) {
     if (!context.isEmpty()) {
-      Exercise contextExercise = new Exercise("c" + getID(), context, altcontext, contextTranslation, getProjectID());
+      Exercise contextExercise = new Exercise("c" + getID(), context, altcontext, contextTranslation, noAccentFL, getProjectID());
       contextExercise.setUpdateTime(getUpdateTime());
       contextExercise.setUnitToValue(getUnitToValue());
       addContextExercise(contextExercise);
@@ -427,6 +436,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   public boolean hasContext() {
     return !getDirectlyRelated().isEmpty();
+  }
+
+  @Override
+  public String getNoAccentFL() {
+    return noAccentFL;
   }
 
   public String getContext() {

@@ -38,6 +38,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.Pair;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.POIXMLProperties;
@@ -454,8 +455,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               CommonExercise imported = isDelete ? null :
                   getExercise(idToUse, english, foreignLanguagePhrase, altfl, translit,
                       meaning,
-                      context, altcontext, contextTranslation,
-                      hasAudioIndex ? getCell(next, audioIndex) : "");
+                      context, altcontext, contextTranslation
+                  );
 
               if (imported != null) imported.setAttributes(exerciseAttributes);
 
@@ -694,7 +695,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
               CommonExercise imported = getExercise(idToUse, english, foreignLanguagePhrase, altfl, translit,
-                  meaning, context, altcontext, contextTranslation, (audioIndex != -1) ? getCell(next, audioIndex) : "");
+                  meaning, context, altcontext, contextTranslation);
               if (isDelete) {
                 deleted++;
               } else if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
@@ -820,9 +821,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                                      String meaning,
                                      String context,
                                      String altcontext,
-                                     String contextTranslation,
-                                     String audioIndex) {
-    Exercise imported = new Exercise(id, context, altcontext, contextTranslation, meaning, -1, lastModified);
+                                     String contextTranslation) {
+    Exercise imported = new Exercise(id, context, altcontext, contextTranslation, meaning, -1, lastModified, StringUtils.stripAccents(context));
 
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {

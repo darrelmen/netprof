@@ -526,13 +526,14 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
     Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
 
+    String foreignLanguage = rs.getString("foreignLanguage");
     return new Exercise(
         rs.getInt("uniqueid"),
         rs.getString(EXERCISEID),
         rs.getInt("creatorid"),
         rs.getString("english"),
-        rs.getString("foreignLanguage"),
-        "",
+        foreignLanguage,
+        foreignLanguage, "",
         rs.getString(TRANSLITERATION),
         rs.getBoolean(OVERRIDE),
         unitToValue,

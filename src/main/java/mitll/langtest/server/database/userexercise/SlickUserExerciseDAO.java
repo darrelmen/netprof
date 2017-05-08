@@ -49,6 +49,7 @@ import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
 import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
 import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -239,12 +240,14 @@ public class SlickUserExerciseDAO
   private Exercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = getUnitToValue(slick);
 
+    String noAccentFL = StringUtils.stripAccents(slick.foreignlanguage());
     Exercise userExercise = new Exercise(
         slick.id(),
         slick.exid(),
         slick.userid(),
         slick.english(),
         slick.foreignlanguage(),
+        noAccentFL,
         slick.altfl(),
         slick.transliteration(),
         slick.isoverride(),
@@ -313,12 +316,14 @@ public class SlickUserExerciseDAO
   @NotNull
   private Exercise makeExercise(SlickExercise slick) {
     int id = slick.id();
+    String noAccentFL = StringUtils.stripAccents(slick.foreignlanguage());
     Exercise exercise = new Exercise(
         id,
         slick.exid(),
         BaseUserDAO.UNDEFINED_USER,
         slick.english(),
         slick.foreignlanguage(),
+        noAccentFL,
         slick.altfl(),
         slick.meaning(),
         slick.transliteration(),

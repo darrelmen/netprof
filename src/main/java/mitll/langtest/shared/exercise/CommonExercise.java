@@ -59,6 +59,8 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
 
   boolean hasContext();
 
+  String getNoAccentFL();
+
   /**
    * Get the first context sentence.
    * @return

@@ -349,7 +349,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 //            "' after '" + fixedAgainst +
 //            "'");
 //      }
-
       return matchTranscript(foreignLanguage);
     } catch (Exception e) {
       return true;

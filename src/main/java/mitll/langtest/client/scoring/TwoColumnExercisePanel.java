@@ -578,7 +578,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private void addContext(T e, Panel card, DivWidget rowWidget) {
     int c = 0;
-    String foreignLanguage = e.getForeignLanguage();
+    String foreignLanguage = e.getNoAccentFL();// e.getForeignLanguage();
     String altFL = e.getAltFL();
     for (CommonExercise contextEx : e.getDirectlyRelated()) {
       addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
@@ -592,8 +592,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  private void addContextFields(DivWidget rowWidget, String foreignLanguage,
-                                String altFL, CommonExercise contextEx) {
+  private void addContextFields(DivWidget rowWidget,
+                                String foreignLanguage,
+                                String altFL,
+                                CommonExercise contextEx) {
     Panel context = getContext(contextEx, foreignLanguage, altFL);
     if (context != null) {
       rowWidget.add(context);
@@ -746,12 +748,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private final List<CommentBox> comments = new ArrayList<>();
-  ChoicePlayAudioPanel contextPlay;
+  private ChoicePlayAudioPanel contextPlay;
 
   /**
    * @param contextExercise
    * @return
-   * @seex #addContextButton
+   * @see #addContextFields(DivWidget, String, String, CommonExercise)
    */
   private Panel getContext(CommonExercise contextExercise, String itemText, String altFL) {
     String context = contextExercise.getForeignLanguage();
@@ -764,7 +766,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.add(getSpacer());
       hp.add(getContextPlay(contextExercise));
 
-      Panel contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
+      Panel contentWidget = clickableWords.getClickableWordsHighlight(contextExercise.getNoAccentFL(), itemText,
           true, false, false, contextClickables = new ArrayList<>());
 
       CommentBox commentBox = getCommentBox(true);
