@@ -160,7 +160,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         logger.info("getAllAlignments Doing project " + project + " " + ids.size() + " audio cuts with " + audioFileHelper);
 
         Map<Integer, ISlimResult> audioToResult = getAudioIDMap(id);
-        logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
+    //    logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
         recalcAlignments(id, ids, new HashMap<>(), audioFileHelper, userIDFromSession, audioToResult);
 
         long now = System.currentTimeMillis();
@@ -195,8 +195,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     int userIDFromSession = getUserIDFromSession();
     Map<Integer, ISlimResult> audioIDMap =
         getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-
-    logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
+    //logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
 
     recalcAlignments(projid, audioIDs, idToAlignment, userIDFromSession,audioIDMap);
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());

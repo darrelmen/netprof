@@ -124,7 +124,8 @@ public class ClickableWords<T extends CommonExercise> {
 
     // if the highlight token is not in the display, skip over it -
     List<String> realHighlight = getMatchingHighlight(tokens, getTokens(highlight, flLine, isChineseCharacter));
-    logger.info("getClickableWordsHighlight real " + realHighlight);
+
+    if (DEBUG) logger.info("getClickableWordsHighlight real " + realHighlight);
 
     Iterator<String> iterator = realHighlight.iterator();
     String toFind = iterator.hasNext() ? iterator.next() : null;
@@ -189,7 +190,7 @@ public class ClickableWords<T extends CommonExercise> {
       return false;
     } else {
       String context = removePunct(token.toLowerCase());
-      String vocab = removePunct(next.toLowerCase());
+      String vocab   = removePunct(next.toLowerCase());
       if (DEBUG) logger.info("context " + context + " token " + token);
       boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
       if (b && DEBUG)

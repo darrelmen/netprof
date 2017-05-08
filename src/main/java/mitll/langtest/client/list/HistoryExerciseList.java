@@ -72,7 +72,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected long userID;
   private final FacetContainer sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH = false;
 
@@ -391,7 +391,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
     List<String> added = new ArrayList<>(typeOrder);
     added.add(LISTS);
-    sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
+    if (sectionWidgetContainer != null) {
+      sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
+    }
   }
 
   /**

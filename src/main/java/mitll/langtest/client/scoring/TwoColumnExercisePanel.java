@@ -105,8 +105,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     this.choices = choices;
 
-    logger.info("TwoColumnExercisePanel choices is " + choices);
-
+ //   logger.info("TwoColumnExercisePanel choices is " + choices);
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
     this.correctAndScores = correctAndScores;
@@ -553,7 +552,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     DivWidget fieldContainer = new DivWidget();
     fieldContainer.getElement().setId("fieldContainer");
 
-    if (choices == BOTH || choices == FL || e.getForeignLanguage().trim().equals(e.getAltFL().trim())) {
+    String trim = e.getAltFL().trim();
+    if (choices == BOTH || choices == FL || e.getForeignLanguage().trim().equals(trim) || trim.isEmpty()) {
       fieldContainer.add(getFLEntry(e));
     }
 
@@ -598,7 +598,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private void addContext(T e, Panel card, DivWidget rowWidget) {
     int c = 0;
-    String foreignLanguage = e.getNoAccentFL();// e.getForeignLanguage();
+    String foreignLanguage = e.getForeignLanguage();//e.getNoAccentFL();// e.getForeignLanguage();
     String altFL = e.getAltFL();
     for (CommonExercise contextEx : e.getDirectlyRelated()) {
       addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
@@ -800,12 +800,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       col.setWidth("100%");
       hp.add(col);
 
-      if (choices == BOTH || choices == FL) {
+      String altFL1 = contextExercise.getAltFL();
+      if (choices == BOTH || choices == FL || altFL1.isEmpty()) {
         col.add(commentRow);
       }
 
       if (choices == BOTH || choices == ALTFL) {
-        String altFL1 = contextExercise.getAltFL();
         if (!altFL1.isEmpty() && !context.equals(altFL1)) {
           col.add(getAltContext(altFL, altFL1));
         }
@@ -837,7 +837,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void contextAudioChanged(int id, long duration) {
     AlignmentOutput alignmentOutput = alignments.get(id);
     if (alignmentOutput != null) {
-      if (DEBUG) {
+      if (DEBUG || true) {
         logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
             " alignment " + alignmentOutput);
       }

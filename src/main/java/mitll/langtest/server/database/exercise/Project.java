@@ -296,14 +296,20 @@ public class Project implements PronunciationLookup {
 
     if (exercise == null) {
       exercise = getMatchEither(english, fl, exercisesInVocab);
-      logger.info("\tgetExerciseBySearchBoth looking for '" + english + " found " + exercise);
+      logger.info("\tgetExerciseBySearchBoth looking for '" + english + " and " +fl +
+          " found " + exercise);
     }
 
     if (exercise == null && !fl.isEmpty()) {
       List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(fl);
+      logger.info("\tinitially context num = " + fullContextTrieExercises.size());
       exercise = getMatchEither(english, fl, fullContextTrieExercises);
-      logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " or " +fl+
-          "  found " + exercise);
+      logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " or '" +fl+
+          "' found " + exercise);
+      if (exercise == null && !fullContextTrieExercises.isEmpty()) {
+        exercise = fullContextTrieExercises.iterator().next();
+        logger.info("\tnow returning " + exercise);
+      }
     }
 
     return exercise;
