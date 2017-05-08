@@ -35,8 +35,8 @@ public class NewContentChooser implements INavigation {
   private VIEWS currentSection = VIEWS.NONE;
 
   /**
-   * @see InitialUI#makeNavigation
    * @param controller
+   * @see InitialUI#makeNavigation
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     NewLearnHelper newLearnHelper = new NewLearnHelper(controller);
@@ -62,9 +62,9 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showView(VIEWS view) {
-   // logger.info("Got showView " + view  );
+    // logger.info("Got showView " + view  );
     if (currentSection.equals(view)) {
-    //  logger.info("showView - already showing " + view);
+      //  logger.info("showView - already showing " + view);
     } else {
       currentSection = view;
       switch (view) {
@@ -110,7 +110,7 @@ public class NewContentChooser implements INavigation {
 //            showView(LEARN);
 //          }
 //          else {
-            logger.info("skipping choice " + view);
+          logger.info("skipping choice " + view);
 //          }
           break;
         default:
@@ -125,7 +125,9 @@ public class NewContentChooser implements INavigation {
 
     DivWidget w = hasTeacher ?
         new StudentAnalysis(controller, showTab) :
-        new AnalysisTab(controller, showTab, 1, null, controller.getUser());
+        new AnalysisTab(controller, showTab, 1, null,
+            controller.getUser(), controller.getUserManager().getUserID()
+        );
 
     divWidget.add(w);
     currentSection = PROGRESS;

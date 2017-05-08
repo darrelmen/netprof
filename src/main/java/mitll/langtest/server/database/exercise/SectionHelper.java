@@ -60,12 +60,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public static final String TOPIC = "Topic";
   public static final String SUB_TOPIC = "Sub-topic";
   private static final String GRAMMAR = "Grammar";
+  private static final String DIALECT = "Dialect";
   private static final String ANY = "any";
   private static final String ALL = "all";
   //  private static final String SOUND = "Sound";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
-  private final boolean DEBUG = false;
+  private final boolean DEBUG = true;
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
 /*  private final Map<String,
@@ -160,10 +161,16 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     }
   }
 
+  /**
+   * Make arbitrary order here...
+   * TODO : maybe let user configure this somehow.
+   * @param types
+   */
   public void putSoundAtEnd(List<String> types) {
     putAtEnd(types, TOPIC);
     putAtEnd(types, SUB_TOPIC);
     putAtEnd(types, GRAMMAR);
+    putAtEnd(types, DIALECT);
   }
 
   private void putAtEnd(List<String> types, String sound) {

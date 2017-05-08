@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -78,6 +79,10 @@ public interface ISection<T> {
 
   void putSoundAtEnd(List<String> types);
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo
+   * @return
+   */
   Set<String> getRootTypes();
 
   void setRootTypes(Set<String> rootTypes);

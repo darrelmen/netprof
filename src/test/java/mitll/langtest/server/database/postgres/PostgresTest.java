@@ -111,6 +111,10 @@ public class PostgresTest extends BaseTest {
   public void testCopyHindi() {
     copyDev("hindi");
   }
+  @Test
+  public void testCopyPortuguese() {
+    copyDev("portuguese");
+  }
 
   @Test
   public void testCopyCroatian() {

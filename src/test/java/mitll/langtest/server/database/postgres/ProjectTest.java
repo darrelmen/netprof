@@ -334,6 +334,16 @@ public class ProjectTest extends BaseTest {
   }
 
   @Test
+  public void testReport() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    int english = andPopulate.getProjectDAO().getByName("portuguese");
+    Project project = andPopulate.getProject(english);
+    project.getSectionHelper().report();;
+   // logger.info("project " + project.getAudioFileHelper().isHydraAvailableCheckNow());
+    andPopulate.close();
+  }
+
+  @Test
   public void testParse() {
     ServerProperties serverProperties = new ServerProperties();
 

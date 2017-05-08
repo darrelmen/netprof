@@ -84,6 +84,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   public static final String CHAPTER = "chapter";
   public static final String LESSON = "lesson";
   public static final String OTHER = "Other";
+  public static final String EN_TRANSLATION = "EN Translation";
 
   private final List<String> errors = new ArrayList<String>();
   private final String file;
@@ -365,7 +366,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                 addColToHeaderForProperty(colToHeader, col, i);
               }
             } else if (isFirstTypeMatch(colNormalized, first) && unitIndex == -1) {
-  //            logger.info("first type match " + colNormalized + " " + first + " unit " + i);
+              //            logger.info("first type match " + colNormalized + " " + first + " unit " + i);
               unitIndex = i;
               predefinedTypeOrder.add(col);
               unitName = col;
@@ -582,7 +583,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   private boolean contextTransMatch(String colNormalized) {
-    return colNormalized.contains(CONTEXT_TRANSLATION.toLowerCase()) || colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase());
+    return
+        colNormalized.contains(CONTEXT_TRANSLATION.toLowerCase()) ||
+        colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase()) ||
+        colNormalized.contains(EN_TRANSLATION.toLowerCase());
   }
 
   private Collection<CommonExercise> readFromSheetSkips(Sheet sheet, int id) {
@@ -849,7 +853,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String week = getCell(next, weekIndex);
 
     if (unit.isEmpty() && chapter.isEmpty() && week.isEmpty()) {
-      unit   = OTHER;
+      unit = OTHER;
       chapter = OTHER;
     }
 
@@ -887,8 +891,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (week.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, week));
     }
-//    logger.info("now  " + imported.getID() + " = " + imported.getUnitToValue());
-    //  sectionHelper.addAssociations(pairs);
+    logger.info("recordUnitChapterWeek now  " + imported.getID() + " = " + imported.getUnitToValue());
   }
 
   private String getCell(Row next, int col) {
@@ -915,6 +918,5 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   @Override
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
-
   }
 }

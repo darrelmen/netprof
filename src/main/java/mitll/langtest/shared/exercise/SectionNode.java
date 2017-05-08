@@ -151,21 +151,25 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
 
   public String toComplete(int level) {
     StringBuilder builder = new StringBuilder();
-    for (SectionNode sectionNode : children) {
-      for (int i = 0; i < level; i++) builder.append("\t");
-      builder.append(sectionNode.toComplete(level + 1));
-      builder.append("\n");
+    if (children != null) {
+      for (SectionNode sectionNode : children) {
+        for (int i = 0; i < level; i++) builder.append("\t");
+        builder.append(sectionNode.toComplete(level + 1));
+        builder.append("\n");
+      }
     }
+    boolean leaf = isLeaf();
     return
         //getProperty() + "=" +
-        name + " children are " + childType +
-            (this.children.isEmpty() ? "" : (" : [(" + this.children.size() + "), " + builder.toString() + "]"));
+        name +
+            (!leaf ? " children are " + childType : "") +
+            (leaf ? "" :  (" : [(" + this.children.size() + "), " + builder.toString() + "]"));
   }
 
   public String toString() {
     String example = isLeaf() ? "" : children.toString();
     return
-        name + "/" +count+
+        name + "/" + count +
             "" +
             (isLeaf() ? "" : (" " + childType +
                 " : [" +

@@ -363,6 +363,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   }
 
   public void gotClickOnItem(final UserInfo user) {
+    logger.info("gotClickOnItem " + user.getUserID());
     super.gotClickOnItem(user);
     //MiniUser user1 = user.getUser();
    // int id = user.getID();
@@ -375,6 +376,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     }*/
 
     rightSide.clear();
-    rightSide.add(new AnalysisTab(controller, learnTab, MIN_RECORDINGS, overallBottom, user.getID()));
+    rightSide.add(new AnalysisTab(controller, learnTab, MIN_RECORDINGS, overallBottom, user.getID(), user.getUserID()));
   }
 }

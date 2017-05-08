@@ -234,10 +234,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   private void setRootTypes() {
     Collection<String> attributeTypes = getAttributeTypes();
-    Set<String> collect = attributeTypes.stream().filter(p -> !p.equals(SectionHelper.SUB_TOPIC)).collect(Collectors.toSet());
+    logger.info("setRootTypes attributeTypes " + attributeTypes);
+
+    Set<String> collect = attributeTypes
+        .stream()
+        .filter(p -> !p.equals(SectionHelper.SUB_TOPIC))
+        .collect(Collectors.toSet());
 
     Set<String> rootTypes = new HashSet<>(Arrays.asList(project.first()));
     rootTypes.addAll(collect);
+
+    logger.info("setRootTypes roots " + rootTypes);
 
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     sectionHelper.setRootTypes(rootTypes);
@@ -253,7 +260,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
     sectionHelper.setParentToChildTypes(parentToChild);
 
-//    logger.info("roots " + rootTypes);
+    logger.info("setRootTypes roots " + rootTypes);
     //   logger.info("parentToChild " + parentToChild);
   }
 

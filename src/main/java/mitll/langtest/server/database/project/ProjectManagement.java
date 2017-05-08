@@ -599,7 +599,7 @@ public class ProjectManagement implements IProjectManagement {
         configureProject(project, true, false);
 
         SlickProject project1 = project.getProject();
-        List<String> typeOrder = getTypeOrder(project);
+        List<String> typeOrder = project.getTypeOrder();
 
         ISection<CommonExercise> sectionHelper = project.getSectionHelper();
 

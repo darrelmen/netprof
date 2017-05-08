@@ -138,7 +138,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
    */
   public AnalysisPlot(ExerciseServiceAsync service,
                       int userid,
-                      final String userChosenID, final int minRecordings,
+                      final String userChosenID,
+                      final int minRecordings,
                       SoundManagerAPI soundManagerAPI, Icon playFeedback) {
     getElement().setId("AnalysisPlot");
     int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
@@ -177,6 +178,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
                                      int userid,
                                      final String userChosenID,
                                      int minRecordings) {
+
+    logger.info("getPerformanceForUser " + userid + " : " + userChosenID);
+
     service.getPerformanceForUser(userid, minRecordings, new AsyncCallback<UserPerformance>() {
       @Override
       public void onFailure(Throwable throwable) {

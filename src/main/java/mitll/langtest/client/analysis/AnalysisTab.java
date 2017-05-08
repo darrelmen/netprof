@@ -93,13 +93,14 @@ public class AnalysisTab extends DivWidget {
                      final ShowTab showTab,
                      int minRecordings,
                      DivWidget overallBottom,
-                     int userid) {
+                     int userid,
+                     String userChosenID) {
     getElement().setId("AnalysisTab");
 
     this.controller = controller;
     Icon playFeedback = new Icon(IconType.PLAY);
    // int userid = controller.getUser();
-    String userChosenID = controller.getUserManager().getUserID();
+  //  String userChosenID = controller.getUserManager().getUserID();
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid, userChosenID, minRecordings,
         controller.getSoundManager(), playFeedback);
 
