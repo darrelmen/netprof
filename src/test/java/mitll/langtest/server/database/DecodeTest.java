@@ -9,6 +9,7 @@ import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.*;
 import org.junit.Test;
 
@@ -38,6 +39,13 @@ public class DecodeTest extends BaseTest {
     logger.info("va " + clean("戰爭就是要不斷在失敗中吸取教訓。"));
 
     for (String test:tests) logger.info(clean(test));
+  }
+
+  @Test
+  public void testRussianAccent() {
+    String value = StringUtils.stripAccents("оди́ннадцать");
+
+    logger.info("Value " + value);
   }
 
   private String clean(String repl) {

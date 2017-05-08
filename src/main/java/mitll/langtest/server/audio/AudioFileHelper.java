@@ -662,10 +662,6 @@ public class AudioFileHelper implements AlignDecode {
     return serverProps.isQuietAudioOK();
   }
 
-//  private boolean useScoreCache() {
-//    return serverProps.useScoreCache();
-//  }
-
   /**
    * Really helpful - could have annotation info always at hand, so don't have to wait for it in learn tab...
    * AND we can send it along to the iPad and have it do highlighting of words and phones in time with the audio
@@ -1033,7 +1029,6 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("checkForWebservice exists  " + theFile.exists());
       */
       if (theFile.exists()) {
-        //  String hydraHost = serverProps.getHydraHost();//"https://netprof1-dev.llan.ll.mit.edu/netprof/";
         PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, serverProps.getHydraHost());
         if (precalcScores != null) return precalcScores;
         return null;
@@ -1064,7 +1059,9 @@ public class AudioFileHelper implements AlignDecode {
     httpClient.addRequestProperty("request", "align");
 //    httpClient.addRequestProperty("exercise", "" + exid);
     httpClient.addRequestProperty("english", english);
-    httpClient.addRequestProperty(EXERCISE_TEXT, StringUtils.stripAccents(foreignLanguage));
+    byte[] encode = Base64.getEncoder().encode(foreignLanguage.getBytes());
+    String encoded = new String(encode);
+    httpClient.addRequestProperty(EXERCISE_TEXT, encoded);
     // USE THE LANGUAGE INSTEAD
     //  httpClient.addRequestProperty("projid", "-1");//  + projid);
     httpClient.addRequestProperty("language", getLanguage());

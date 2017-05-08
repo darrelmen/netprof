@@ -14,10 +14,13 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.CommonExercise;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.Normalizer;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * Created by go22670 on 3/23/17.
@@ -153,7 +156,6 @@ public class ClickableWords<T extends CommonExercise> {
           index = i;
           realHighlight.add(toFind);
           //logger.info("- found '" + toFind + "' = '" +next+ "' at " + index);
-
           break;
         }
       }
@@ -165,11 +167,34 @@ public class ClickableWords<T extends CommonExercise> {
     if (next.isEmpty()) {
       return false;
     } else {
-      String context = removePunct(token.toLowerCase());
-      String vocab = removePunct(next.toLowerCase());
+      String context = stripAccents(token.toLowerCase());
+      String vocab   = stripAccents(next.toLowerCase());
       boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
       // if (b) logger.info("match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
       return b;// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
+    }
+  }
+
+  private static String stripAccents(final String input) {
+    if(input == null) {
+      return null;
+    }
+    final Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");//$NON-NLS-1$
+    final StringBuilder decomposed = new StringBuilder(Normalizer.normalize(input, Normalizer.Form.NFD));
+    convertRemainingAccentCharacters(decomposed);
+    // Note that this doesn't correctly remove ligatures...
+    return pattern.matcher(decomposed).replaceAll(StringUtils.EMPTY);
+  }
+
+  private static void convertRemainingAccentCharacters(StringBuilder decomposed) {
+    for (int i = 0; i < decomposed.length(); i++) {
+      if (decomposed.charAt(i) == '\u0141') {
+        decomposed.deleteCharAt(i);
+        decomposed.insert(i, 'L');
+      } else if (decomposed.charAt(i) == '\u0142') {
+        decomposed.deleteCharAt(i);
+        decomposed.insert(i, 'l');
+      }
     }
   }
 

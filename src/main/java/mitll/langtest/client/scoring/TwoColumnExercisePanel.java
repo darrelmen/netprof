@@ -282,7 +282,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             if (DEBUG) logger.info("matchSegmentToWidgetForAudio got segment " + seg + " length " + segmentLength);
 
             if (iterator.hasNext()) {
-              IHighlightSegment segment = matchEventSegmentToClickable(iterator, segmentLength);
+              IHighlightSegment segment = matchEventSegmentToClickable(iterator, segmentLength, seg.getEvent());
               segmentToWidget.put(seg, segment);
             } else {
               logger.warning("matchSegmentToWidgetForAudio no match for " + seg);
@@ -293,17 +293,26 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  private IHighlightSegment matchEventSegmentToClickable(Iterator<IHighlightSegment> iterator, int segmentLength) {
-    IHighlightSegment clickable = iterator.next();
 
-    while (!clickable.isClickable() && iterator.hasNext()) {
-      logger.info("skip " + clickable);
-      clickable = iterator.next();
+  private IHighlightSegment matchEventSegmentToClickable2(Iterator<IHighlightSegment> iterator, int segmentLength, String segment) {
+    IHighlightSegment clickable = iterator.next();
+    clickable = skipUnclickable(iterator, clickable);
+
+    String content = clickable.getContent();
+    boolean isMatch = content.equalsIgnoreCase(segment);
+
+    if (isMatch) {
+      return clickable;
+    }
+    else {
+      if (segment.startsWith(content)) {
+        Collection<IHighlightSegment> bulk = new ArrayList<>();
+        AllHighlight allHighlight = new AllHighlight(bulk);
+        bulk.add(clickable);
+      }
     }
 
     int clickLength = clickable.getLength();
-
-//    int leftOver = segmentLength - clickLength;
     if (DEBUG)
       logger.info("matchSegmentToWidgetForAudio compare : segment length " + segmentLength + " vs " + clickable.getLength());
     if (segmentLength > clickLength) {
@@ -313,11 +322,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //   segmentToWidget.put(seg, allHighlight);
       while (allHighlight.getLength() < segmentLength && iterator.hasNext()) {
         clickable = iterator.next();
-
-        while (!clickable.isClickable() && iterator.hasNext()) {
-          // logger.info("2 skip " + clickable);
-          clickable = iterator.next();
-        }
+        clickable = skipUnclickable(iterator, clickable);
 
    /*     leftOver = segmentLength - clickable.getLength();
         if (leftOver < 0) {
@@ -338,6 +343,51 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //   segmentToWidget.put(seg, clickable);
       return clickable;
     }
+  }
+
+  private IHighlightSegment matchEventSegmentToClickable(Iterator<IHighlightSegment> iterator, int segmentLength, String segment) {
+    IHighlightSegment clickable = iterator.next();
+    clickable = skipUnclickable(iterator, clickable);
+
+    String content = clickable.getContent();
+    boolean isMatch = content.equalsIgnoreCase(segment);
+    int clickLength = clickable.getLength();
+    if (DEBUG)
+      logger.info("matchSegmentToWidgetForAudio compare : segment length " + segmentLength + " vs " + clickable.getLength());
+    if (segmentLength > clickLength) {
+      Collection<IHighlightSegment> bulk = new ArrayList<>();
+      AllHighlight allHighlight = new AllHighlight(bulk);
+      bulk.add(clickable);
+      //   segmentToWidget.put(seg, allHighlight);
+      while (allHighlight.getLength() < segmentLength && iterator.hasNext()) {
+        clickable = iterator.next();
+        clickable = skipUnclickable(iterator, clickable);
+
+   /*     leftOver = segmentLength - clickable.getLength();
+        if (leftOver < 0) {
+          logger.warning("matchSegmentToWidgetForAudio hmm - leftover is " + leftOver + " segment length " + segmentLength + " vs " + clickable.getLength());
+        } else if (DEBUG) {
+          logger.info("matchSegmentToWidgetForAudio Adding " + clickable + " to " + allHighlight);
+        }*/
+        bulk.add(clickable);
+        if (DEBUG)
+          logger.info("matchSegmentToWidgetForAudio compare : segment length " + segmentLength + " vs to highlight length =" + allHighlight.getLength());
+      }
+      if (DEBUG) {
+        logger.info("Finally highlight is " + allHighlight);
+      }
+      //  logger.info("matchSegmentToWidgetForAudio seg->click now " + segmentToWidget);
+      return allHighlight;
+    } else {
+      //   segmentToWidget.put(seg, clickable);
+      return clickable;
+    }
+  }
+
+  @NotNull
+  private IHighlightSegment skipUnclickable(Iterator<IHighlightSegment> iterator, IHighlightSegment clickable) {
+    while (!clickable.isClickable() && iterator.hasNext()) { clickable = iterator.next(); }
+    return clickable;
   }
 
   private boolean shouldIgnore(TranscriptSegment seg) {
@@ -531,11 +581,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String foreignLanguage = e.getForeignLanguage();
     String altFL = e.getAltFL();
     for (CommonExercise contextEx : e.getDirectlyRelated()) {
-      //logger.info("Add context " + contextEx.getID());
       addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
 
       c++;
-
       if (c < e.getDirectlyRelated().size()) {
         rowWidget = getRowWidget();
         card.add(rowWidget);

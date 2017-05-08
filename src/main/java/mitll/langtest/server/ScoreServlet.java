@@ -590,7 +590,6 @@ public class ScoreServlet extends DatabaseServlet {
     String deviceType = getOrUnk(request, DEVICE_TYPE);
     String device = getOrUnk(request, DEVICE);
 
-
     JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
       Request realRequest = getRequest(requestType);
@@ -837,7 +836,7 @@ public class ScoreServlet extends DatabaseServlet {
     } catch (NumberFormatException e) {
       logger.info("couldn't parse "+ request.getHeader(EXERCISE));
     }
-    int reqid = getReqID(request);
+    int reqid  = getReqID(request);
     int projid = getProject(request);
 
     logger.debug("getJsonForAudio got projid from session " + projid);
@@ -916,7 +915,12 @@ public class ScoreServlet extends DatabaseServlet {
       Project project1 = db.getProject(projid);
       String flText = request.getHeader(EXERCISE_TEXT);
 
-      CommonExercise exercise = project1.getExerciseBySearchBoth(exerciseText, flText);
+      byte[] de = Base64.getDecoder().decode(flText.getBytes());
+      String decoded = new String(de);
+
+      logger.info("request to decode " + exerciseText + " = "+decoded);
+
+      CommonExercise exercise = project1.getExerciseBySearchBoth(exerciseText, decoded);
 
       if (exercise != null) {
         logger.info("getExerciseIDFromText for '" + exerciseText + "' found exercise id " + exercise.getID());

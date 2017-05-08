@@ -82,9 +82,9 @@ public class ProjectChoices {
   //private static final boolean DEBUG = false;
 
   /**
-   * @see InitialUI#InitialUI
    * @param langTest
    * @param uiLifecycle
+   * @see InitialUI#InitialUI
    */
   public ProjectChoices(LangTest langTest, UILifecycle uiLifecycle) {
     this.lifecycleSupport = langTest;
@@ -164,7 +164,7 @@ public class ProjectChoices {
    * @see InitialUI#addProjectChoices
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-    logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+   // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
     final Section section = new Section("section");
     section.add(getHeader(result, nest));
 
@@ -181,14 +181,15 @@ public class ProjectChoices {
    * @see #showProjectChoices(List, int)
    */
   private void addFlags(List<SlimProject> result, int nest, Container flags) {
-    Panel current = new Thumbnails();
+    Thumbnails current = new Thumbnails();
+    //Panel current = new DivWidget();
     flags.add(current);
 
     List<SlimProject> languages = new ArrayList<>(result);
 //    logger.info("addProjectChoices " + languages.size() + " languages");
     sortLanguages(nest, languages);
 
-    int size = languages.size();
+/*    int size = languages.size();
     //  logger.info("addProjectChoices " + size + "-------- nest " + nest);
     int total = 0;
     for (int i = 0; i < size; i += ITEMS_IN_ROW) {
@@ -197,8 +198,7 @@ public class ProjectChoices {
 
       for (int j = i; j < max; j++) {
         SlimProject project = languages.get(j);
-        String language = project.getLanguage();
-        language = capitalize(language);
+        String language = capitalize(project.getLanguage());
         current.add(getLangIcon(language, project, nest));
         total++;
       }
@@ -206,6 +206,10 @@ public class ProjectChoices {
       if (total < size) {
         flags.add(current = new Thumbnails());
       }
+    }*/
+
+    for (SlimProject project : languages) {
+      current.add(getLangIcon(capitalize(project.getLanguage()), project, nest));
     }
   }
 
