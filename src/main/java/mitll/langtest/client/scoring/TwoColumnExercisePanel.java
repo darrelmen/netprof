@@ -38,6 +38,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.scoring.ShowChoices.ALTFL;
+import static mitll.langtest.client.scoring.ShowChoices.BOTH;
+import static mitll.langtest.client.scoring.ShowChoices.FL;
+
 /**
  * Created by go22670 on 3/23/17.
  */
@@ -65,6 +69,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private List<IHighlightSegment> altflClickables;
   private List<IHighlightSegment> flclickables;
   private List<IHighlightSegment> contextClickables, altContextClickables;
+  private ShowChoices choices;
 
   private static final boolean DEBUG = false;
 
@@ -85,7 +90,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
                                 final ListInterface<CommonShell, T> listContainer,
-                                List<CorrectAndScore> correctAndScores
+                                List<CorrectAndScore> correctAndScores,
+                                ShowChoices choices
   ) {
     this.exercise = commonExercise;
     this.controller = controller;
@@ -97,6 +103,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     addStyleName("floatLeftAndClear");
     setWidth("100%");
 
+    this.choices = choices;
+
+    logger.info("TwoColumnExercisePanel choices is " + choices);
+
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
     this.correctAndScores = correctAndScores;
@@ -105,7 +115,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     addMouseOverHandler(event -> getRefAudio(() -> {
     }));
-
 /*    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         getRefAudio(controller);
@@ -131,7 +140,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
 
       if (contextRefID != -1) {
-        logger.info("getRefAudio asking for context " + contextRefID);
+        // logger.info("getRefAudio asking for context " + contextRefID);
         if (!alignments.containsKey(contextRefID))
           req.add(contextRefID);
       }
@@ -216,13 +225,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   * @see #contextAudioChanged
    * @param id
    * @param duration
    * @param alignmentOutput
    * @param typeToSegmentToWidget
    * @param flclickables
    * @param playAudio
+   * @see #contextAudioChanged
    */
   private void matchSegmentsToClickables(int id,
                                          long duration,
@@ -303,8 +312,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (isMatch) {
       return clickable;
-    }
-    else {
+    } else {
       if (segment.startsWith(content)) {
         Collection<IHighlightSegment> bulk = new ArrayList<>();
         AllHighlight allHighlight = new AllHighlight(bulk);
@@ -386,7 +394,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private IHighlightSegment skipUnclickable(Iterator<IHighlightSegment> iterator, IHighlightSegment clickable) {
-    while (!clickable.isClickable() && iterator.hasNext()) { clickable = iterator.next(); }
+    while (!clickable.isClickable() && iterator.hasNext()) {
+      clickable = iterator.next();
+    }
     return clickable;
   }
 
@@ -539,20 +549,19 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //playAudio.setListener(new SegmentHighlightAudioControl(idToTypeToSegmentToWidget.get()));
     }
 
-    flclickables = new ArrayList<>();
-    Widget flEntry =
-        getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially, flclickables);
-    flEntry.addStyleName("floatLeft");
-    //logger.info("makeFirstRow Set with on " + flEntry.getElement().getId());
-
-    flEntry.setWidth("100%");
 
     DivWidget fieldContainer = new DivWidget();
     fieldContainer.getElement().setId("fieldContainer");
-    fieldContainer.add(flEntry);
 
-    addField(fieldContainer, addAltFL(e), "altflrow");
-    addField(fieldContainer, addTransliteration(e), "transliterationrow");
+    if (choices == BOTH || choices == FL || e.getForeignLanguage().trim().equals(e.getAltFL().trim())) {
+      fieldContainer.add(getFLEntry(e));
+    }
+
+    if (choices == BOTH || choices == ALTFL) {
+      addField(fieldContainer, addAltFL(e, choices == BOTH));
+    }
+
+    addField(fieldContainer, addTransliteration(e));
 
     boolean meaningValid = isMeaningValid(e);
     boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
@@ -560,9 +569,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (!useMeaningInsteadOfEnglish && meaningValid) {
       Widget meaningWidget = getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially, new ArrayList<>());
-      addField(fieldContainer, meaningWidget, "meaningRow");
+      addField(fieldContainer, meaningWidget);
     }
-
 
     flContainer.add(fieldContainer);
     flContainer.setWidth("50%");
@@ -570,6 +578,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     rowWidget.add(flContainer);
     return recordPanel;
+  }
+
+  @NotNull
+  private Widget getFLEntry(T e) {
+    flclickables = new ArrayList<>();
+    Widget flEntry =
+        getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, e.getForeignLanguage(), true, false, false, showInitially, flclickables);
+    flEntry.addStyleName("floatLeft");
+    //logger.info("makeFirstRow Set with on " + flEntry.getElement().getId());
+
+    flEntry.setWidth("100%");
+    return flEntry;
   }
 
   private boolean hasAudio(T e) {
@@ -664,7 +684,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return englishWidget;
   }
 
-  private void addField(Panel grid, Widget widget, String altflrow) {
+  private void addField(Panel grid, Widget widget) {
     if (widget != null) {
       widget.addStyleName("topFiveMargin");
       grid.add(widget);
@@ -720,12 +740,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
 
-  private Widget addAltFL(T e) {
+  private Widget addAltFL(T e, boolean addTopMargin) {
     String translitSentence = e.getAltFL().trim();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A") && !e.getForeignLanguage().trim().equals(translitSentence)) {
       altflClickables = new ArrayList<>();
       Widget entry = getEntry(e, QCNPFExercise.ALTFL, translitSentence, true, true, false, showInitially, altflClickables);
-      entry.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+      if (addTopMargin) entry.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
       return entry;
     } else return null;
   }
@@ -766,7 +786,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.add(getSpacer());
       hp.add(getContextPlay(contextExercise));
 
-      Panel contentWidget = clickableWords.getClickableWordsHighlight(contextExercise.getNoAccentFL(), itemText,
+      // String noAccentFL = contextExercise.getNoAccentFL();
+      Panel contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
           true, false, false, contextClickables = new ArrayList<>());
 
       CommentBox commentBox = getCommentBox(true);
@@ -779,11 +800,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       col.setWidth("100%");
       hp.add(col);
 
-      col.add(commentRow);
+      if (choices == BOTH || choices == FL) {
+        col.add(commentRow);
+      }
 
-      String altFL1 = contextExercise.getAltFL();
-      if (!altFL1.isEmpty() && !context.equals(altFL1)) {
-        col.add(getAltContext(altFL, altFL1));
+      if (choices == BOTH || choices == ALTFL) {
+        String altFL1 = contextExercise.getAltFL();
+        if (!altFL1.isEmpty() && !context.equals(altFL1)) {
+          col.add(getAltContext(altFL, altFL1));
+        }
       }
 
       return hp;
@@ -812,7 +837,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void contextAudioChanged(int id, long duration) {
     AlignmentOutput alignmentOutput = alignments.get(id);
     if (alignmentOutput != null) {
-      if (DEBUG || true) {
+      if (DEBUG) {
         logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
             " alignment " + alignmentOutput);
       }
@@ -874,7 +899,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                           boolean showInitially,
                           List<IHighlightSegment> clickables) {
     Panel contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning, clickables);
-   // if (!isFL) contentWidget.addStyleName("topFiveMargin");
+    // if (!isFL) contentWidget.addStyleName("topFiveMargin");
     return getCommentBox(true).getEntry(field, contentWidget, annotation, showInitially);
   }
 

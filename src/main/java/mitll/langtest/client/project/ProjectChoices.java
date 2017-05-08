@@ -164,7 +164,7 @@ public class ProjectChoices {
    * @see InitialUI#addProjectChoices
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-   // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+    // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
     final Section section = new Section("section");
     section.add(getHeader(result, nest));
 
@@ -429,11 +429,13 @@ public class ProjectChoices {
       Heading label = new Heading(LANGUAGE_SIZE, name);
       label.setWidth("100%");
       label.getElement().getStyle().setLineHeight(25, Style.Unit.PX);
-      if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
-        label.setSubtext(projectForLang.getStatus().name());
-      } else if (projectForLang.hasChildren()) {
+
+      if (projectForLang.hasChildren()) {
         label.setSubtext(projectForLang.getChildren().size() + " courses");
+      } else if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
+        label.setSubtext(projectForLang.getStatus().name());
       }
+
       label.addStyleName("floatLeft");
 
       DivWidget container = new DivWidget();
@@ -449,7 +451,9 @@ public class ProjectChoices {
         DivWidget importButtonContainer = getImportButtonContainer(projectForLang);
         importButtonContainer.addStyleName("leftFiveMargin");
         horiz2.add(importButtonContainer);
-        horiz2.add(getButtonContainer(getDeleteButton(projectForLang)));
+        Button deleteButton = getDeleteButton(projectForLang);
+        deleteButton.addStyleName("leftFiveMargin");
+        horiz2.add(getButtonContainer(deleteButton));
         container.add(horiz2);
       }
 
@@ -483,7 +487,6 @@ public class ProjectChoices {
     editButton.addStyleName("floatRight");
     buttonContainer.setWidth("100%");
     buttonContainer.addStyleName("topFiveMargin");
-//    buttonContainer.addStyleName("topTwentyMargin");
     buttonContainer.add(editButton);
     return buttonContainer;
   }
@@ -604,7 +607,6 @@ public class ProjectChoices {
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
     List<SlimProject> children = projectForLang.getChildren();
-
 //    logger.info("gotClickOnFlag project " + projid + " has " + children);
 
     if (children.size() < 2) {
@@ -613,7 +615,6 @@ public class ProjectChoices {
       setProjectForUser(projid);
     } else {
       logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");
-
       projectCrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
       uiLifecycle.clearContent();
       contentRow.add(showProjectChoices(children, nest));

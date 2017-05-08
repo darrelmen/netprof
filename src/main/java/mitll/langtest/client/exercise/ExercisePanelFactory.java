@@ -33,10 +33,13 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created with IntelliJ IDEA.
@@ -70,7 +73,23 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
    * @param e
    * @param wrapper
    * @return
-   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel
+   * @seex mitll.langtest.client.list.ExerciseList#makeExercisePanel
    */
   public abstract Panel getExercisePanel(U e, ExerciseListWrapper<CommonExercise> wrapper);
+
+  @NotNull
+  protected ShowChoices getChoices() {
+    ShowChoices choices = ShowChoices.BOTH;
+    String show = controller.getStorage().getValue(NewBanner.SHOW);
+    if (show != null) {
+     // logger.warning("value for show " + controller.getStorage().getValue("show"));
+      try {
+        choices = ShowChoices.valueOf(show);
+       // logger.info("ExercisePanelFactory got " + choices);
+      } catch (IllegalArgumentException ee) {
+       // logger.warning("got " + ee);
+      }
+    }
+    return choices;
+  }
 }

@@ -51,12 +51,14 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
+import mitll.langtest.client.download.ShowEvent;
 import mitll.langtest.client.exercise.AudioChangedEvent;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.RefAudioGetter;
+import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -66,6 +68,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.scoring.ShowChoices.BOTH;
 import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.FIRST_STEP;
 import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.SECOND_STEP;
 
@@ -109,7 +112,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private Set<String> rootNodesInOrder = new HashSet<>();
   //private int selectedUserListID = -1;
   private Map<Integer, String> idToName = new HashMap<>();
-
+  private ShowChoices choices = BOTH;
   /**
    * @param secondRow             add the section panel to this row
    * @param currentExerciseVPanel
@@ -163,7 +166,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     tableWithPager.addStyleName("floatLeft");
     tableWithPager.setWidth("100%");
     this.sortBox = addSortBox(controller);
-    //pagesize =
 
     addPageSize(pagerAndSort);
     pagerAndSort.add(sortBox);
@@ -178,6 +180,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> {
       downloadHelper.showDialog();
+    });
+
+
+    LangTest.EVENT_BUS.addHandler(ShowEvent.TYPE, authenticationEvent -> {
+      reloadWithCurrent();
     });
   }
 

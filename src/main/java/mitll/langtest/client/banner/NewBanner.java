@@ -15,6 +15,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.InitialUI;
@@ -23,9 +24,11 @@ import mitll.langtest.client.UILifecycle;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadEvent;
+import mitll.langtest.client.download.ShowEvent;
 import mitll.langtest.client.exercise.AudioChangedEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
@@ -43,6 +46,7 @@ import static mitll.langtest.client.banner.NewContentChooser.*;
 public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeHandler<String> {
   private final Logger logger = Logger.getLogger("NewBanner");
 
+  public static final String SHOW = "showStorage";
   private static final String LEARN = "Learn";
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
@@ -177,6 +181,22 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     return lnav;
   }
 
+
+  @NotNull
+  protected ShowChoices getChoices() {
+    ShowChoices choices = ShowChoices.BOTH;
+    String show = controller.getStorage().getValue(SHOW);
+    if (show != null) {
+      try {
+        choices = ShowChoices.valueOf(show);
+        // logger.info("ExercisePanelFactory got " + choices);
+      } catch (IllegalArgumentException ee) {
+        // logger.warning("got " + ee);
+      }
+    }
+    return choices;
+  }
+
   private  Nav lnav;
   private Dropdown cog;
 
@@ -194,12 +214,56 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     NavLink download = new NavLink("Download");
     download.setIcon(IconType.DOWNLOAD_ALT);
     view.add(download);
+
     download.addClickHandler(event -> LangTest.EVENT_BUS.fireEvent(new DownloadEvent()));
 
     DropdownSubmenu showChoices = new DropdownSubmenu("Show");
-    showChoices.add(new NavLink("Alternate text"));
-    showChoices.add(new NavLink("Primary text"));
-    showChoices.add(new NavLink("Both Primary and Alternate"));
+
+    NavLink altflChoice = new NavLink("Alternate text");
+    NavLink primary = new NavLink("Primary text");
+    NavLink both = new NavLink("Both Primary and Alternate");
+
+    ShowChoices choices = getChoices();
+    final IconType checkEmpty = IconType.CHECK;
+    switch(choices) {
+      case BOTH:both.setIcon(checkEmpty); break;
+      case FL:primary.setIcon(checkEmpty); break;
+      case ALTFL:altflChoice.setIcon(checkEmpty); break;
+    }
+    altflChoice.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.getStorage().storeValue(SHOW, ShowChoices.ALTFL.toString());
+        logger.info("show now " + controller.getStorage().getValue(SHOW));
+        LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+        altflChoice.setIcon(checkEmpty);
+        both.setIcon(null);
+        primary.setIcon(null);
+      }
+    });
+    showChoices.add(primary);
+    showChoices.add(altflChoice);
+    primary.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.getStorage().storeValue(SHOW, ShowChoices.FL.toString());
+        LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+        altflChoice.setIcon(null);
+        both.setIcon(null);
+        primary.setIcon(checkEmpty);
+      }
+    });
+    showChoices.add(both);
+    both.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.getStorage().storeValue(SHOW, ShowChoices.BOTH.toString());
+        LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+        altflChoice.setIcon(null);
+        both.setIcon(checkEmpty);
+        primary.setIcon(null);
+      }
+    });
     view.add(showChoices);
     rnav.add(view);
 

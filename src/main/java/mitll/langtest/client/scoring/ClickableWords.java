@@ -21,6 +21,7 @@ import java.text.Normalizer;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by go22670 on 3/23/17.
@@ -42,6 +43,8 @@ public class ClickableWords<T extends CommonExercise> {
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private final ListInterface listContainer;
   private WordBoundsFactory factory = new WordBoundsFactory();
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param listContainer
@@ -110,13 +113,18 @@ public class ClickableWords<T extends CommonExercise> {
     boolean flLine = isFL || (isJapanese && isTranslit);
     boolean isChineseCharacter = flLine && hasClickable;
 
-    logger.info("value " +value + " highlight " + highlight);
-
     List<String> tokens = getTokens(value, flLine, isChineseCharacter);
+
+    if (DEBUG) {
+      logger.info("getClickableWordsHighlight " +
+          "\n\tvalue     '" + value + "'" +
+          "\n\thighlight '" + highlight + "'" +
+          "\n\ttokens     " + tokens.size());
+    }
 
     // if the highlight token is not in the display, skip over it -
     List<String> realHighlight = getMatchingHighlight(tokens, getTokens(highlight, flLine, isChineseCharacter));
-//    logger.info("getClickableWordsHighlight real " + realHighlight);
+    logger.info("getClickableWordsHighlight real " + realHighlight);
 
     Iterator<String> iterator = realHighlight.iterator();
     String toFind = iterator.hasNext() ? iterator.next() : null;
@@ -130,7 +138,7 @@ public class ClickableWords<T extends CommonExercise> {
       horizontal.add(clickable);
       //  match++;
       if (isMatch) {
-        //  logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "' at " + match);
+        if (DEBUG) logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "'");
         toFind = iterator.hasNext() ? iterator.next() : null;
       }
 //      else if (isMatch) {
@@ -143,10 +151,10 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   /**
-   * @see #getClickableWords(String, boolean, boolean, boolean, List)
    * @param tokens
    * @param highlightTokens
    * @return
+   * @see #getClickableWords(String, boolean, boolean, boolean, List)
    */
   @NotNull
   private List<String> getMatchingHighlight(List<String> tokens, List<String> highlightTokens) {
@@ -172,7 +180,6 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   /**
-   *
    * @param token
    * @param next
    * @return
@@ -182,9 +189,11 @@ public class ClickableWords<T extends CommonExercise> {
       return false;
     } else {
       String context = removePunct(token.toLowerCase());
-      String vocab   = removePunct(next.toLowerCase());
+      String vocab = removePunct(next.toLowerCase());
+      if (DEBUG) logger.info("context " + context + " token " + token);
       boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
-      // if (b) logger.info("match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
+      if (b && DEBUG)
+        logger.info("isMatch match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
       return b;// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
     }
   }
@@ -222,6 +231,7 @@ public class ClickableWords<T extends CommonExercise> {
       }
     } else {
       tokens = new ArrayList<>(Arrays.asList(value.split(GoodwaveExercisePanel.SPACE_REGEX)));
+      tokens = tokens.stream().filter(p -> !removePunct(p).isEmpty()).collect(Collectors.toList());
     }
 
     if (isRTL(exercise) && flLine) {
@@ -316,12 +326,13 @@ public class ClickableWords<T extends CommonExercise> {
    * Chinese punctuation marks, spanish punct marks
    * horizontal ellipsis...
    * reverse solidus
+   *
    * @param t
    * @return
    */
   protected String removePunct(String t) {
     return t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("[\\p{M}\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
+        .replaceAll("[\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
   }
 }

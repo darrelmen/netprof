@@ -288,10 +288,10 @@ public class Project implements PronunciationLookup {
         "' and '" + fl +
         "' found " + exercise);
 
-    if (exercise == null) {
+    if (exercise == null && !english.isEmpty()) {
       List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(english);
       exercise = getFirstMatchingLength(english, fl, fullContextTrieExercises);
-      logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " found " + exercise);
+      logger.info("\tgetExerciseBySearchBoth context looking for '" + english + "' found " + exercise);
     }
 
     if (exercise == null) {
@@ -299,8 +299,8 @@ public class Project implements PronunciationLookup {
       logger.info("\tgetExerciseBySearchBoth looking for '" + english + " found " + exercise);
     }
 
-    if (exercise == null) {
-      List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(english);
+    if (exercise == null && !fl.isEmpty()) {
+      List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(fl);
       exercise = getMatchEither(english, fl, fullContextTrieExercises);
       logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " or " +fl+
           "  found " + exercise);

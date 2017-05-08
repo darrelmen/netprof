@@ -35,10 +35,13 @@ public class DecodeTest extends BaseTest {
 
     tests.add("\n" + "阿布.扎比");
     tests.add("再添点茶，怎么样？");
-    logger.info("va " + clean(repl));
-    logger.info("va " + clean("戰爭就是要不斷在失敗中吸取教訓。"));
+    tests.add("professor");
+    tests.add("profesor,");
+    ;
+    logger.info("va " + removePunct(repl));
+    logger.info("va " + removePunct("戰爭就是要不斷在失敗中吸取教訓。"));
 
-    for (String test:tests) logger.info(clean(test));
+    for (String test:tests) logger.info(removePunct(test));
   }
 
   @Test
@@ -52,6 +55,12 @@ public class DecodeTest extends BaseTest {
     return repl
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
         .replaceAll("[\\p{M}\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002]", "");
+  }
+
+  protected String removePunct(String t) {
+    return t
+        .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
+        .replaceAll("[\\p{M}\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
   }
 
   @Test

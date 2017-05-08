@@ -39,6 +39,7 @@ import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -213,7 +214,7 @@ public class EditItem {
 
           return new TwoColumnExercisePanel<>(exercise,
               controller,
-              exerciseList, Collections.emptyList());
+              exerciseList, Collections.emptyList(), getChoices());
 //              new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));
         }
 
