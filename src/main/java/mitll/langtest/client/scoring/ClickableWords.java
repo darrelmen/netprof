@@ -38,7 +38,7 @@ public class ClickableWords<T extends CommonExercise> {
   private final T exercise;
   private boolean hasClickable = false;
   private static final String MANDARIN = "Mandarin";
-  private static final String KOREAN = "Korean";
+  //private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private final ListInterface listContainer;
@@ -55,7 +55,7 @@ public class ClickableWords<T extends CommonExercise> {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
-    this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
+    this.hasClickable = language.equalsIgnoreCase(MANDARIN);// || language.equals(KOREAN) || isJapanese;
   }
 
   /**
@@ -191,10 +191,12 @@ public class ClickableWords<T extends CommonExercise> {
     } else {
       String context = removePunct(token.toLowerCase());
       String vocab   = removePunct(next.toLowerCase());
-      if (DEBUG) logger.info("context " + context + " token " + token);
+     // if (DEBUG) logger.info("context " + context + " token " + token);
       boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
-      if (b && DEBUG)
+
+/*      if (b && DEBUG)
         logger.info("isMatch match '" + token + "' '" + next + "' context '" + context + "' vocab '" + vocab + "'");
+     */
       return b;// && ((float) vocab.length() / (float) context.length()) > THRESHOLD);
     }
   }
@@ -270,7 +272,6 @@ public class ClickableWords<T extends CommonExercise> {
     if (isContextMatch) highlightSegment.addStyleName(CONTEXTMATCH);
     if (isMeaning) highlightSegment.addStyleName("englishFont");
     if (!chineseCharacter) highlightSegment.addStyleName("rightFiveMargin");
-
 
     String searchToken = listContainer.getTypeAheadText().toLowerCase();
     if (isMatch(html, searchToken)) {

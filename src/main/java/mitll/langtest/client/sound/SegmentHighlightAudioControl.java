@@ -35,7 +35,6 @@ public class SegmentHighlightAudioControl implements AudioControl {
   @Override
   public void reinitialize() {
    // logger.info("reinitialize ");
-    //    initialize();
   }
 
   @Override
@@ -68,7 +67,6 @@ public class SegmentHighlightAudioControl implements AudioControl {
     private final Logger logger = Logger.getLogger("SegmentAudioControl");
     private TranscriptSegment currentWord;
     private final TreeMap<TranscriptSegment, IHighlightSegment> words;
-    //private boolean isWordHighlighted = false;
     private static boolean DEBUG = false;
 
     /**
@@ -119,6 +117,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
           if (currentWord != null) {
             if (currentWord.contains(posInMillis)) {
+              if (DEBUG) logger.info(currentWord + " (1) highlighted at " + posInMillis);
               showHighlight();
             }
           } else {
@@ -130,6 +129,8 @@ public class SegmentHighlightAudioControl implements AudioControl {
         } else { // contains
           if (!isHighlighted()) {
             if (currentWord.contains(posInMillis)) {
+              if (DEBUG) logger.info(currentWord + " (2) highlighted at " + posInMillis);
+
               showHighlight();
             } else {
               if (DEBUG) logger.info(currentWord + " doesn't contain " + posInMillis);
@@ -150,7 +151,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
 //      else {
       for (IHighlightSegment segment : words.values()) {
         if (segment.isHighlighted()) {
-          logger.info("segment "+ segment + " highlighted");
+        //  logger.info("songFinished segment "+ segment + " highlighted");
           segment.clearBlue();
         }
       }
@@ -168,7 +169,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
         words.get(currentWord).clearBlue();
 //        widget.getElement().getStyle().setBackgroundColor(backgroundColor);
       } else {
-        logger.warning("no current word....");
+        logger.warning("removeHighlight no current word....");
       }
     }
 

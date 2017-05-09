@@ -228,7 +228,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   private void setRootTypes(List<String> typeOrder) {
     Collection<String> attributeTypes = getAttributeTypes();
-    logger.info("setRootTypes attributeTypes " + attributeTypes);
+    //logger.info("setRootTypes attributeTypes " + attributeTypes);
 
     Set<String> collect = attributeTypes
         .stream()
@@ -238,8 +238,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     String firstProjectType = project.first();
     Set<String> rootTypes = new HashSet<>(Collections.singletonList(firstProjectType));
     rootTypes.addAll(collect);
-
-    logger.info("setRootTypes roots " + rootTypes);
+    //logger.info("setRootTypes roots " + rootTypes);
 
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     sectionHelper.setRootTypes(rootTypes);

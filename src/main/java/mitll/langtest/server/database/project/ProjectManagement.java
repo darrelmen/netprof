@@ -362,7 +362,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #configureProject
    */
   private void setDependencies(ExerciseDAO exerciseDAO, int projid) {
-    logger.info("setDependencies - project #" + projid);
+    //logger.info("setDependencies - project #" + projid);
     IAudioDAO audioDAO = db.getAudioDAO();
 
     if (audioDAO == null) {

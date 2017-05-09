@@ -837,7 +837,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void contextAudioChanged(int id, long duration) {
     AlignmentOutput alignmentOutput = alignments.get(id);
     if (alignmentOutput != null) {
-      if (DEBUG || true) {
+      if (DEBUG) {
         logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
             " alignment " + alignmentOutput);
       }
