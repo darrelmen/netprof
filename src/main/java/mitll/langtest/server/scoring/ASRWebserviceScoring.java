@@ -410,7 +410,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       );
 */
 
-      int imageWidth = imageOptions.getWidth();
+      int imageWidth  = imageOptions.getWidth();
       int imageHeight = imageOptions.getHeight();
 
       boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
@@ -480,7 +480,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       logger.warn(this + " : createHydraDict : LTS is null???");
     }
 
-    String dict = "[";
+    String dict
+          = "[";
     dict += getPronunciations(transcript, transliteration, false);
     dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
     dict += "]";
@@ -586,14 +587,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                     getLTS().process(translitTokens[index]);
 
                 if (ltsOutputOk(translitprocess)) {
-                  logger.info("got pronunciation from transliteration");
+                  logger.info("getPronunciations got pronunciation from transliteration");
                   for (String[] pron : translitprocess) {
                     dict += getPronStringForWord(word, pron, false);
                   }
                 } else {
-                  logger.info("transliteration LTS failed");
-                  logger.warn("couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
-                  logger.info("attempting to fall back to default pronunciation");
+                  logger.info("getPronunciations transliteration LTS failed");
+                  logger.warn("getPronunciations couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
+                  logger.info("getPronunciations attempting to fall back to default pronunciation");
                   if (translitprocess != null && (translitprocess.length > 0) && (translitprocess[0].length > 1)) {
                     dict += getDefaultPronStringForWord(word, translitprocess, justPhones);
                   }
@@ -638,7 +639,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return justPhones ? s + " " : word + "," + s + " sp" + ";";
   }
 
-  //last resort, if we can't even use the transliteration to get some kind of pronunciation
+  /**
+   * last resort, if we can't even use the transliteration to get some kind of pronunciation
+   * @see #getPronunciations
+   * @param word
+   * @param apply
+   * @param justPhones
+   * @return
+   */
   private String getDefaultPronStringForWord(String word, String[][] apply, boolean justPhones) {
     for (String[] pc : apply) {
       String result = getPhones(pc);
@@ -646,7 +654,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         return justPhones ? result + " " : word + "," + result + " sp;";
       }
     }
-    return justPhones ? "" : word + ",  sp;"; //hopefully we never get here...
+    return justPhones ? "" : word + ",+UNK+ sp;"; //hopefully we never get here...
   }
 
   private String getPhones(String[] pc) {

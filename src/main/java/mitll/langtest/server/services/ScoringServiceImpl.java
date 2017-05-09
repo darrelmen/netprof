@@ -144,34 +144,44 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public void getAllAlignments() {
     final int userIDFromSession = getUserIDFromSession();
 
-    new Thread(() -> db.getProjects().forEach(project -> {
-      if (project.getWebservicePort() > 100) {
-        logger.info("getAllAlignments Doing project " + project);
+    new Thread(() -> {
+      Collection<Project> projects = db.getProjects();
 
-        int id = project.getID();
-        Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(id);
-        List<Integer> ids = new ArrayList<>();
-        for (List<AudioAttribute> values : exToAudio.values()) {
-          ids.addAll(values.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toList()));
+      logger.info("getAllAlignments Doing " + projects.size() + " projects...");
+
+      projects.forEach(project -> {
+        if (project.getWebservicePort() > 100) {
+          try {
+            logger.info("getAllAlignments Doing project : " +project);
+
+            int id = project.getID();
+            Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(id);
+            List<Integer> ids = new ArrayList<>();
+            for (List<AudioAttribute> values : exToAudio.values()) {
+              ids.addAll(values.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toList()));
+            }
+
+            long then = System.currentTimeMillis();
+            AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+            logger.info("getAllAlignments Doing project " + project + " " + ids.size() + " audio cuts with " + audioFileHelper);
+
+            Map<Integer, ISlimResult> audioToResult = getAudioIDMap(id);
+            //    logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
+            recalcAlignments(id, ids, new HashMap<>(), audioFileHelper, userIDFromSession, audioToResult);
+
+            long now = System.currentTimeMillis();
+
+            long l = (now - then) / 1000;
+            long min = l / 60;
+            logger.info("getAllAlignments Doing project " + project + " " + ids.size() + " audio cuts took " + min + " minutes.");
+          } catch (Exception e) {
+            logger.error("getAllAlignments got " + e,e);
+          }
+        } else {
+          logger.info("getAllAlignments no hydra service for " + project);
         }
-
-        long then = System.currentTimeMillis();
-        AudioFileHelper audioFileHelper = project.getAudioFileHelper();
-        logger.info("getAllAlignments Doing project " + project + " " + ids.size() + " audio cuts with " + audioFileHelper);
-
-        Map<Integer, ISlimResult> audioToResult = getAudioIDMap(id);
-    //    logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
-        recalcAlignments(id, ids, new HashMap<>(), audioFileHelper, userIDFromSession, audioToResult);
-
-        long now = System.currentTimeMillis();
-
-        long l = (now - then) / 1000;
-        long min = l / 60;
-        logger.info("Doing project " + project + " " + ids.size() + " audio cuts took " + min + " minutes.");
-      } else {
-        logger.info("no hydra service for " + project);
-      }
-    })).start();
+      });
+    }).start();
 
   }
 

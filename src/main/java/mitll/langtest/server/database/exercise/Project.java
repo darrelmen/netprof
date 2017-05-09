@@ -291,6 +291,9 @@ public class Project implements PronunciationLookup {
     if (exercise == null && !english.isEmpty()) {
       List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(english);
       exercise = getFirstMatchingLength(english, fl, fullContextTrieExercises);
+      if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
+        exercise = exercise.getDirectlyRelated().iterator().next();
+      }
       logger.info("\tgetExerciseBySearchBoth context looking for '" + english + "' found " + exercise);
     }
 
@@ -304,10 +307,16 @@ public class Project implements PronunciationLookup {
       List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(fl);
       logger.info("\tinitially context num = " + fullContextTrieExercises.size());
       exercise = getMatchEither(english, fl, fullContextTrieExercises);
+      if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
+        exercise = exercise.getDirectlyRelated().iterator().next();
+      }
       logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " or '" +fl+
           "' found " + exercise);
       if (exercise == null && !fullContextTrieExercises.isEmpty()) {
         exercise = fullContextTrieExercises.iterator().next();
+        if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
+          exercise = exercise.getDirectlyRelated().iterator().next();
+        }
         logger.info("\tnow returning " + exercise);
       }
     }

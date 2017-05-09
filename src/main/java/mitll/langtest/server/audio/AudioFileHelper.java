@@ -85,6 +85,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String SLOW = "slow";
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
+  public static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false);
 //  private static final boolean USE_HYDEC_FALLBACK = false;
 
   private final PathHelper pathHelper;
@@ -951,7 +952,7 @@ public class AudioFileHelper implements AlignDecode {
 
   private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, DecoderOptions options) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), exercise.getTransliteration(),
-        DEFAULT, "" + exercise.getID(), null,
+        NO_IMAGE_PLEASE, "" + exercise.getID(), null,
         options);
   }
 
