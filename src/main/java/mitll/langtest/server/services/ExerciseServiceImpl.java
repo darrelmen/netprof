@@ -72,23 +72,24 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final boolean DEBUG = false;
 
   /**
+   * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    * @param request
    * @return
    */
   public FilterResponse getTypeToValues(FilterRequest request) {
     List<Pair> typeToSelection = request.getTypeToSelection();
 
-    logger.info("getTypeToValues " + request + " " + typeToSelection);
+    logger.info("getTypeToValues \n\trequest" + request + "\n\ttype->selection" + typeToSelection);
     FilterResponse typeToValues = getSectionHelper().getTypeToValues(request);
 
     int userListID = request.getUserListID();
     UserList<CommonShell> next = db.getUserListManager().getSimpleUserListByID(userListID);
 
     if (next != null) {  // echo it back
-//      logger.info("\tgetTypeToValues " + request + " include list " + next);
+      logger.info("\tgetTypeToValues " + request + " include list " + next);
       typeToValues.getTypesToInclude().add(LISTS);
       Set<MatchInfo> value = new HashSet<>();
-      value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID));
+      value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
       typeToValues.getTypeToValues().put(LISTS, value);
     }
     return typeToValues;

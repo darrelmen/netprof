@@ -367,8 +367,6 @@ public class InitialUI implements UILifecycle {
       }
 
       banner.checkProjectSelected();
-    } else {
-      //logger.info("getBreadcrumbs no current user --- ????");
     }
   }
 

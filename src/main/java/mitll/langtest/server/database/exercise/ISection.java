@@ -77,7 +77,7 @@ public interface ISection<T> {
 
   SectionNode getNode(SectionNode node, String type, String name);
 
-  void putSoundAtEnd(List<String> types);
+  void reorderTypes(List<String> types);
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo

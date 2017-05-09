@@ -79,7 +79,7 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
 
   @NotNull
   protected ShowChoices getChoices() {
-    ShowChoices choices = ShowChoices.BOTH;
+    ShowChoices choices = ShowChoices.FL;
     String show = controller.getStorage().getValue(NewBanner.SHOW);
     if (show != null) {
      // logger.warning("value for show " + controller.getStorage().getValue("show"));

@@ -114,7 +114,7 @@ public class SectionTest extends BaseTest {
     toMatch = new ArrayList<>();
     toMatch.add(getUnit2());
     toMatch.add(getChapterA());
-    FilterResponse typeToValues = sectionHelper.getTypeToValues(new FilterRequest(-1, toMatch,-1));
+    FilterResponse typeToValues = sectionHelper.getTypeToValues(new FilterRequest(-1, toMatch, -1));
 
     logger.info("match for " + toMatch + " is " + typeToValues);
   }
@@ -139,7 +139,7 @@ public class SectionTest extends BaseTest {
 
     List<Pair> toMatch = new ArrayList<>();
     toMatch.add(getUnitOne());
-    Map<String, Set<MatchInfo>> unit  = sectionHelper.getTypeToMatches(toMatch);
+    Map<String, Set<MatchInfo>> unit = sectionHelper.getTypeToMatches(toMatch);
     logger.info("match for " + toMatch + " is " + unit);
 
     toMatch = new ArrayList<>();
@@ -517,6 +517,67 @@ public class SectionTest extends BaseTest {
   }
 
   @Test
+  public void testSectionP() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    IProjectDAO projectDAO = andPopulate.getProjectDAO();
+    int byLanguage = projectDAO.getByLanguage("portuguese");
+    Project project = andPopulate.getProject(byLanguage);
+
+    ISection<CommonExercise> sectionHelper = project.getSectionHelper();
+
+    logger.info("sections " + sectionHelper.getSectionNodesForTypes());
+   // SectionNode unit = sectionHelper.getFirstNode("1");
+
+    SectionNode unit = sectionHelper.getNode(sectionHelper.getRoot(), "Unit", "1");
+
+    logger.info("Got for 2 = " + unit);
+    if (unit != null) {
+      Collection<SectionNode> children = unit.getChildren();
+      for (SectionNode node:children) logger.warn("node " + node.getType() + " " + node.getName());
+      SectionNode chapter = sectionHelper.getNode(unit, "Lesson", "1");
+      logger.info("unit 1 lesson 1 " +chapter);
+    }
+
+    SectionNode unit2 = sectionHelper.getNode(sectionHelper.getRoot(), "Unit", "2");
+    if (unit2 != null) {
+      Collection<SectionNode> children = unit2.getChildren();
+      for (SectionNode node:children) logger.warn("node " + node.getType() + " " + node.getName());
+      SectionNode chapter = sectionHelper.getNode(unit2, "Lesson", "2");
+      logger.info("unit 2 lesson 2 " +chapter);
+    }
+
+    SectionNode root = sectionHelper.getRoot();
+    logger.info("Got " + root);
+    logger.info("depth " + root.childCount());
+    logger.info("type to distinct " + sectionHelper.getTypeToDistinct());
+
+    // [Lesson=Any, Unit=1, Topic=Any, Dialect=Any]
+    List<Pair> pairs =new ArrayList<>();
+    pairs.add(new Pair("Unit","1"));
+    pairs.add(new Pair("Lesson","Any"));
+    pairs.add(new Pair("Topic","Any"));
+    pairs.add(new Pair("Dialect","Any"));
+
+    Map<String, Set<MatchInfo>> typeToMatches = sectionHelper.getTypeToMatches(pairs);
+    logger.info("got " +typeToMatches);
+
+    Map<String, Set<MatchInfo>> typeToMatches2 = sectionHelper.getTypeToMatches(pairs);
+    logger.info("got " +typeToMatches2);
+
+    List<Pair> pairs2 =new ArrayList<>();
+    pairs2.add(new Pair("Unit","Any"));
+    pairs2.add(new Pair("Lesson","Any"));
+    pairs2.add(new Pair("Topic","Any"));
+    pairs2.add(new Pair("Dialect","Any"));
+
+    Map<String, Set<MatchInfo>> typeToMatches3 = sectionHelper.getTypeToMatches(pairs2);
+    logger.info("got " +typeToMatches3);
+
+    Map<String, Set<MatchInfo>> typeToMatches4 = sectionHelper.getTypeToMatches(pairs2);
+    logger.info("got " +typeToMatches4);
+  }
+
+  @Test
   public void testSection2() {
     DatabaseImpl andPopulate = getAndPopulate();
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
@@ -525,7 +586,7 @@ public class SectionTest extends BaseTest {
 
     ISection<CommonExercise> sectionHelper = project.getSectionHelper();
     SectionNode unit = sectionHelper.getFirstNode("2");
-    logger.info("Got " + unit);
+    logger.info("Got for 2 = " + unit);
     SectionNode chapter = sectionHelper.getNode(unit, "Chapter", "2");
 
     if (chapter != null) {
@@ -534,6 +595,8 @@ public class SectionTest extends BaseTest {
       logger.info("Got " + sound);
       SectionNode sound2 = sectionHelper.getNode(chapter, "Sound", "ng");
       logger.info("Got " + sound2);
+    } else {
+      logger.warn("nothing for chapter 2?");
     }
 
     SectionNode root = sectionHelper.getRoot();

@@ -48,9 +48,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.DIFFICULTY;
-import static mitll.langtest.server.database.userexercise.SlickUserExerciseDAO.SOUND;
-
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
   private SlickUserExerciseDAO userExerciseDAO;
@@ -114,8 +111,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   List<CommonExercise> readExercises() {
     try {
       List<String> typeOrder = getTypeOrderFromProject();
-      getSectionHelper().putSoundAtEnd(typeOrder);
-      setRootTypes();
+      //getSectionHelper().reorderTypes(typeOrder);
+      setRootTypes(typeOrder);
 
       int projid = project.id();
 
@@ -207,12 +204,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   /**
    * First basic types, then attribute types...
    * Might want to allow this to be configurable.
+   *
    * @return
    */
   @NotNull
   private List<String> getTypeOrderFromProject() {
     List<String> typeOrder = getBaseTypeOrder();
     typeOrder.addAll(getAttributeTypes());
+    getSectionHelper().reorderTypes(typeOrder);
     return typeOrder;
   }
 
@@ -223,16 +222,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     if (!project.second().isEmpty()) {
       typeOrder.add(project.second());
     }
-/*
-    typeOrder.add(SOUND);
-    if (SlickUserExerciseDAO.ADD_PHONE_LENGTH) {
-      typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
-    }
-    */
+
     return typeOrder;
   }
 
-  private void setRootTypes() {
+  private void setRootTypes(List<String> typeOrder) {
     Collection<String> attributeTypes = getAttributeTypes();
     logger.info("setRootTypes attributeTypes " + attributeTypes);
 
@@ -241,7 +235,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         .filter(p -> !p.equals(SectionHelper.SUB_TOPIC))
         .collect(Collectors.toSet());
 
-    Set<String> rootTypes = new HashSet<>(Arrays.asList(project.first()));
+    String firstProjectType = project.first();
+    Set<String> rootTypes = new HashSet<>(Collections.singletonList(firstProjectType));
     rootTypes.addAll(collect);
 
     logger.info("setRootTypes roots " + rootTypes);
@@ -250,8 +245,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     sectionHelper.setRootTypes(rootTypes);
 
     Map<String, String> parentToChild = new HashMap<>();
-    if (project.second() != null && !project.second().isEmpty()) {
-      parentToChild.put(project.first(), project.second());
+    String second = project.second();
+    if (second != null && !second.isEmpty()) {
+      parentToChild.put(firstProjectType, second);
     }
 
     if (rootTypes.contains(SectionHelper.TOPIC)) {
@@ -261,6 +257,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     sectionHelper.setParentToChildTypes(parentToChild);
 
     logger.info("setRootTypes roots " + rootTypes);
+
+    sectionHelper.setPredefinedTypeOrder(typeOrder);
     //   logger.info("parentToChild " + parentToChild);
   }
 

@@ -52,13 +52,11 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.download.ShowEvent;
-import mitll.langtest.client.exercise.AudioChangedEvent;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.RefAudioGetter;
-import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -68,7 +66,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.scoring.ShowChoices.BOTH;
 import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.FIRST_STEP;
 import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.SECOND_STEP;
 
@@ -109,10 +106,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private Map<String, String> typeToSelection = new HashMap<>();
   private final Map<String, Boolean> typeToShowAll = new HashMap<>();
-  private Set<String> rootNodesInOrder = new HashSet<>();
-  //private int selectedUserListID = -1;
+  private List<String> rootNodesInOrder = new ArrayList<>();
   private Map<Integer, String> idToName = new HashMap<>();
-  private ShowChoices choices = BOTH;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -464,7 +459,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       logger.info("getTypeOrder type order " +typeOrder);
 
-      this.rootNodesInOrder = new HashSet<>(projectStartupInfo.getTypeOrder());
+      this.rootNodesInOrder = new ArrayList<>(projectStartupInfo.getTypeOrder());
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
   }
@@ -597,7 +592,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void populateListChoices(ListItem liForDimensionForType) {
     ListServiceAsync listService = controller.getListService();
-    logger.info("populateListChoices --- ");
+   // logger.info("populateListChoices --- ");
     listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -624,8 +619,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private Set<MatchInfo> getMatchInfoForEachList(Collection<UserList<CommonShell>> result) {
     Set<MatchInfo> value = new HashSet<>();
     idToName.clear();
+    int currentUser = controller.getUser();
     for (UserList<?> list : result) {
-      value.add(new MatchInfo(list.getName(), list.getNumItems(), list.getID()));
+      boolean isVisit = list.getUserID() != currentUser;
+      String tooltip = isVisit ? " from " + list.getUserChosenID():"";
+      value.add(new MatchInfo(list.getName(), list.getNumItems(), list.getID(), isVisit, tooltip));
       idToName.put(list.getID(), list.getName());
     }
     return value;
@@ -688,39 +686,43 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         liForDimension.add(addChoices(typeToValues, childType));
       } else {
         if (type.equalsIgnoreCase(LISTS)) {
-          try {
-            int userListID = Integer.parseInt(selectionForType);
-            String s = idToName.get(userListID);
-            if (s != null) {
-              selectionForType = s;
-              choices.add(getSelectedAnchor(type, selectionForType));
-            } else {
-              logger.info("addChoices couldn't find list in known lists...");
-
-              controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                }
-
-                @Override
-                public void onSuccess(UserList result) {
-                  if (result.getProjid() != controller.getProjectStartupInfo().getProjectid()) {
-                    logger.warning("list " + result.getName() + " is NOT in the project #" + result.getProjid());
-                  } else {
-                    choices.add(getSelectedAnchor(type, result.getName()));
-                  }
-                }
-              });
-            }
-          } catch (NumberFormatException e) {
-            logger.warning("couldn't parse " + selectionForType);
-          }
+          addListChoice(type, choices, selectionForType);
         } else {
           choices.add(getSelectedAnchor(type, selectionForType));
         }
       }
     }
     return choices;
+  }
+
+  private void addListChoice(String type, Panel choices, String selectionForType) {
+    try {
+      int userListID = Integer.parseInt(selectionForType);
+      String s = idToName.get(userListID);
+      if (s != null) {
+        selectionForType = s;
+        choices.add(getSelectedAnchor(type, selectionForType));
+      } else {
+        logger.info("addChoices couldn't find list in known lists...");
+
+        controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(UserList result) {
+            if (result.getProjid() != controller.getProjectStartupInfo().getProjectid()) {
+              logger.warning("list " + result.getName() + " is NOT in the project #" + result.getProjid());
+            } else {
+              choices.add(getSelectedAnchor(type, result.getName()));
+            }
+          }
+        });
+      }
+    } catch (NumberFormatException e) {
+      logger.warning("couldn't parse " + selectionForType);
+    }
   }
 
   private void addChoicesForType(Map<String, Set<MatchInfo>> typeToValues,
@@ -742,8 +744,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     boolean hasMore = keys.size() > toShow && diff > CLOSE_TO_END;
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
     for (MatchInfo key : keys) {
-      addLIChoice(choices, getAnchor(type, key, key.getUserListID()));
-
+      addLIChoice(choices, getAnchor(type, key, key.getUserListID(), key.isItalic()));
       if (hasMore && !showAll && ++j == toShow) {
         addLIChoice(choices, getShowMoreAnchor(typeToValues, type));
         break;
@@ -826,7 +827,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     choices.add(li);
   }
 
-  private Widget getAnchor(String type, MatchInfo key, int newUserListID) {
+  private Widget getAnchor(String type, MatchInfo key, int newUserListID, boolean italic) {
     Panel span = getSpan();
     span.addStyleName(MENU_ITEM);
 
@@ -838,22 +839,25 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Anchor anchor = getAnchor(choiceName);
     anchor.addClickHandler(choiceHandler);
     anchor.addStyleName("choice");
+
+    if (italic) anchor.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+
     span.add(anchor);
-
-    {
-      String countLabel = "" + key.getCount();
-
-      Anchor qty = getAnchor(countLabel);
-      qty.addClickHandler(choiceHandler);
-      qty.addStyleName("qty");
-      span.add(qty);
-    }
+    span.add(getQty("" + key.getCount(), choiceHandler));
 
     return span;
   }
 
+  @NotNull
+  private Anchor getQty(String label, ClickHandler choiceHandler) {
+    Anchor qty = getAnchor(label);
+    qty.addClickHandler(choiceHandler);
+    qty.addStyleName("qty");
+    return qty;
+  }
+
   private void addMatchInfoTooltip(String type, MatchInfo key, Panel span) {
-    addTooltip(type, key.getValue(), span);
+    addTooltip(type, key.getValue() + key.getTooltip(), span);
   }
 
   private Tooltip addTooltip(String type, String value, Panel span) {
@@ -1058,8 +1062,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void showSelectionState(SelectionState selectionState) {
     // keep the download link info in sync with the selection
-    // Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
-    //  logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
   }
 

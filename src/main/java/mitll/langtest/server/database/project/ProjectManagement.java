@@ -65,6 +65,9 @@ public class ProjectManagement implements IProjectManagement {
   private static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
 
+  /**
+   * JUST FOR TESTING
+   */
   private static final boolean DEBUG_ONE_PROJECT = false;
   private static final String ONE_TO_LOAD = "korean";
 

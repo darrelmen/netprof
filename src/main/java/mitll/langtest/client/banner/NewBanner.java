@@ -60,6 +60,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private HandlerRegistration handlerRegistration;
   private final Map<String, NavLink> nameToLink = new HashMap<>();
   private Dropdown userDrop;
+  private Dropdown viewMenu;
 
   private final List<Widget> choices = new ArrayList<>();
 
@@ -92,11 +93,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
 //    upperLower.add(navCollapse);
     add(navCollapse);
-  //  add(upperLower);
+    //  add(upperLower);
 
 //    NavCollapse navCollapse2 = new NavCollapse();
- //   navCollapse2.addStyleName("topFiveMargin");
-   // navCollapse2.getElement().setId("navCollapse2");
+    //   navCollapse2.addStyleName("topFiveMargin");
+    // navCollapse2.getElement().setId("navCollapse2");
 
 //    add(navCollapse2);
 
@@ -133,8 +134,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
     recnav.addStyleName("inlineFlex");
-    recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX  );
-    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX  );
+    recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
+    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
 
     getChoice(recnav, VIEWS.ITEMS.toString());
     getChoice(recnav, VIEWS.CONTEXT.toString());
@@ -146,8 +147,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     Nav recnav = new Nav();
     recnav.getElement().setId("defectnav");
     recnav.addStyleName("inlineFlex");
-    recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX  );
-    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX  );
+    recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
+    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
 
     getChoice(recnav, VIEWS.DEFECTS.toString());
     getChoice(recnav, VIEWS.FIX.toString());
@@ -175,8 +176,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     Nav lnav = new Nav();
     lnav.getElement().setId("lnav");
     lnav.addStyleName("inlineFlex");
-    lnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX  );
-    lnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX  );
+    lnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
+    lnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
 
     return lnav;
   }
@@ -184,7 +185,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   @NotNull
   protected ShowChoices getChoices() {
-    ShowChoices choices = ShowChoices.BOTH;
+    ShowChoices choices = ShowChoices.FL;
     String show = controller.getStorage().getValue(SHOW);
     if (show != null) {
       try {
@@ -197,7 +198,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     return choices;
   }
 
-  private  Nav lnav;
+  private Nav lnav;
   private Dropdown cog;
 
   @NotNull
@@ -209,6 +210,20 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     //recordMenu = getRecordMenu(rnav);
     addUserMenu(userManager, userMenu, rnav);
 
+    rnav.add(viewMenu = getRealViewMenu());
+
+    cog = new Dropdown("");
+    cog.setIcon(IconType.COG);
+    userMenu.getCogMenuChoices2().forEach(lt -> cog.add(lt.getLink()));
+    rnav.add(cog);
+
+
+    getInfoMenu(userMenu, rnav);
+    return rnav;
+  }
+
+  @NotNull
+  private Dropdown getRealViewMenu() {
     Dropdown view = new Dropdown("View");
     view.setIcon(IconType.REORDER);
     NavLink download = new NavLink("Download");
@@ -217,6 +232,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     download.addClickHandler(event -> LangTest.EVENT_BUS.fireEvent(new DownloadEvent()));
 
+    DropdownSubmenu showChoices = getViewMenu();
+    view.add(showChoices);
+    return view;
+  }
+
+  @NotNull
+  private DropdownSubmenu getViewMenu() {
     DropdownSubmenu showChoices = new DropdownSubmenu("Show");
 
     NavLink altflChoice = new NavLink("Alternate text");
@@ -225,10 +247,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     ShowChoices choices = getChoices();
     final IconType checkEmpty = IconType.CHECK;
-    switch(choices) {
-      case BOTH:both.setIcon(checkEmpty); break;
-      case FL:primary.setIcon(checkEmpty); break;
-      case ALTFL:altflChoice.setIcon(checkEmpty); break;
+    switch (choices) {
+      case BOTH:
+        both.setIcon(checkEmpty);
+        break;
+      case FL:
+        primary.setIcon(checkEmpty);
+        break;
+      case ALTFL:
+        altflChoice.setIcon(checkEmpty);
+        break;
     }
     altflChoice.addClickHandler(new ClickHandler() {
       @Override
@@ -264,18 +292,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
         primary.setIcon(null);
       }
     });
-    view.add(showChoices);
-    rnav.add(view);
-
-
-    cog = new Dropdown("");
-    cog.setIcon(IconType.COG);
-    userMenu.getCogMenuChoices2().forEach(lt -> cog.add(lt.getLink()));
-    rnav.add(cog);
-
-
-    getInfoMenu(userMenu, rnav);
-    return rnav;
+    return showChoices;
   }
 
   private void addSubtitle(Nav rnav) {
@@ -314,9 +331,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     String token = event.getValue();
     SelectionState selectionState = new SelectionState(token, false);
     String instance1 = selectionState.getInstance();
-
-    logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");
-
+ //   logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");
     showSection(instance1);
   }
 
@@ -341,6 +356,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   NavLink firstChoice = null;
+
   /**
    * @param nav
    */
@@ -427,6 +443,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   public Panel getBanner() {
     return this;
   }
+
   @Override
   public Panel getBanner2() {
 
@@ -512,7 +529,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   private boolean isQC() {
-  //  logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
+    //  logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
     return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || isAdmin();
   }
 
@@ -522,21 +539,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   @Override
   public void checkProjectSelected() {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    // Collection<NavLink> values = nameToLink.values();
-//    logger.info("project info " + projectStartupInfo);
-//    logger.info("setting " + values.size() + " links");
-
-    boolean show = projectStartupInfo != null;
-//    for (NavLink link : values) {
-//      link.setDisabled(!show);
-//    }
-
-    lnav.setVisible(show);
-
+    setVisibleChoices(controller.getProjectStartupInfo() != null);
     showActive(firstChoice);
-
     recordMenuVisible();
+  }
+
+  private void setVisibleChoices(boolean show) {
+    lnav.setVisible(show);
+    viewMenu.setVisible(show);
   }
 
   private NavLink getContactUs() {

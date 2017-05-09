@@ -434,7 +434,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     }
 
     correctAndScore.setScores(netPronImageTypeListMap);
-    logger.info("returning " + correctAndScore);
+//    logger.info("returning " + correctAndScore);
     return correctAndScore;
   }
 

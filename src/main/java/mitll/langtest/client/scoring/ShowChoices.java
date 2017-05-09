@@ -7,6 +7,4 @@ public enum ShowChoices {
   FL,
   ALTFL,
   BOTH
-
-
 }

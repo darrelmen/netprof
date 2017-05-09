@@ -128,8 +128,9 @@ public class FilterRequest implements IsSerializable {
   public int getUserListID() {
     return userListID;
   }
-
+/*
   public void setUserListID(int userListID) {
     this.userListID = userListID;
   }
+*/
 }

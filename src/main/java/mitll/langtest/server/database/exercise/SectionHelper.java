@@ -57,25 +57,23 @@ import java.util.*;
  */
 public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection<T> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
-  public static final String TOPIC = "Topic";
-  public static final String SUB_TOPIC = "Sub-topic";
+
+  static final String TOPIC = "Topic";
+  static final String SUB_TOPIC = "Sub-topic";
   private static final String GRAMMAR = "Grammar";
   private static final String DIALECT = "Dialect";
   private static final String ANY = "any";
   private static final String ALL = "all";
-  //  private static final String SOUND = "Sound";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
-  private final boolean DEBUG = true;
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
-/*  private final Map<String,
-      Map<String,
-          Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<>();*/
-  private SectionNode root = null;
 
+  private SectionNode root = null;
   private Set<String> rootTypes = new HashSet<>();
   private Map<String, String> parentToChildTypes = new HashMap<>();
+
+  private final boolean DEBUG = false;
 
   public SectionHelper() {
     makeRoot();
@@ -124,7 +122,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
       // TODO : I feel like I did this before...?
       // put sound at end...
-      putSoundAtEnd(types);
+      reorderTypes(types);
       // }
       if (DEBUG) logger.info("getTypeOrder types " + types);
 
@@ -146,10 +144,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     if (childType != null) { // i.e. not leaf
       // logger.info("recurseAndCount on " + node.getName() + " child type " + childType);
-      Set<String> members = typeToCount.get(childType);//, new HashSet<>());
-      if (members == null) {
-        typeToCount.put(childType, members = new TreeSet<>(itemSorter));
-      }
+      Set<String> members = typeToCount.computeIfAbsent(childType, k -> new TreeSet<>(itemSorter));
 
       for (SectionNode child : node.getChildren()) {
         if (!child.getType().equals(childType)) {
@@ -164,9 +159,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   /**
    * Make arbitrary order here...
    * TODO : maybe let user configure this somehow.
+   *
    * @param types
    */
-  public void putSoundAtEnd(List<String> types) {
+  public void reorderTypes(List<String> types) {
     putAtEnd(types, TOPIC);
     putAtEnd(types, SUB_TOPIC);
     putAtEnd(types, GRAMMAR);
@@ -203,8 +199,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   @Override
   public SectionNode getFirstNode(String name) {
-    Collection<SectionNode> sectionNodesForTypes = getSectionNodesForTypes();
-    return getMatch(sectionNodesForTypes, name);
+    return getMatch(getSectionNodesForTypes(), name);
   }
 
   /**
@@ -227,8 +222,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   @Nullable
   private SectionNode getMatch(Collection<SectionNode> sectionNodesForTypes, String name) {
     for (SectionNode node : sectionNodesForTypes) {
-      if (//node.getProperty().equals(type) &&
-          node.getName().equals(name)) return node;
+      if (node.getName().equals(name)) return node;
     }
     return null;
   }
@@ -355,6 +349,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return getTypeToMatches(typeToMatchPairs);
   }
 
+  //private boolean DEBUG =true;
+
   /**
    * Assumes a partial path implies = type=any for unmentioned?
    *
@@ -377,7 +373,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String toMatch = next.getValue();
 
     boolean isAll = toMatch.equalsIgnoreCase(ANY) || toMatch.equalsIgnoreCase(ALL);
-//    logger.info("to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
+    if (DEBUG) logger.info("to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
     if (!node.isLeaf() && node.getChildType().equals(type)) {
       Map<String, MatchInfo> matches = new HashMap<>();
       typeToMatch.put(type, matches);
@@ -453,7 +449,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return typeToMatch;
   }
 
-
+  /**
+   * @see #getTypeToMatches
+   * @param typeToMatch
+   * @return
+   */
   private Map<String, Set<MatchInfo>> getTypeToMatches(Map<String, Map<String, MatchInfo>> typeToMatch) {
     Map<String, Set<MatchInfo>> typeToMatchRet = new HashMap<>();
     for (Map.Entry<String, Map<String, MatchInfo>> pair : typeToMatch.entrySet()) {
@@ -462,17 +462,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return typeToMatchRet;
   }
 
-  private void addOrMerge(Map<String, MatchInfo> matches, SectionNode child) {
-    String name = child.getName();
-    MatchInfo matchInfo = matches.get(name);
-    if (matchInfo == null) {
-      matches.put(name, new MatchInfo(child));
-    } else {
-      matchInfo.incr(child.getCount());
-    }
-  }
-
-
   private void recurseAndCountMatchInfo(SectionNode node, Map<String, Map<String, MatchInfo>> typeToCount) {
     String childType = node.getChildType();
 
@@ -480,7 +469,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       // logger.info("recurseAndCount on " + node.getName() + " child type " + childType);
       Map<String, MatchInfo> members = typeToCount.get(childType);
       if (members == null) {
-        typeToCount.put(childType, members = new HashMap<String, MatchInfo>());
+        typeToCount.put(childType, members = new HashMap<>());
       }
 
       for (SectionNode child : node.getChildren()) {
@@ -489,9 +478,22 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         }
 
         addOrMerge(members, child);
-        // members.add(child.getName());
         recurseAndCountMatchInfo(child, typeToCount);
       }
+    }
+  }
+
+  private void addOrMerge(Map<String, MatchInfo> matches, SectionNode child) {
+    String name = child.getName();
+    MatchInfo matchInfo = matches.get(name);
+
+    if (DEBUG) logger.info("addOrMerge " + name  + " match info " + matchInfo);
+    if (matchInfo == null) {
+      matches.put(name, new MatchInfo(child));
+    } else {
+      int count = child.getCount();
+      if (DEBUG) logger.info("\taddOrMerge " + name  + " add " +child.getName() + "="+child.getCount() + " to " + matchInfo);
+      matchInfo.incr(count);
     }
   }
 
@@ -785,38 +787,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     this.predefinedTypeOrder = predefinedTypeOrder;
   }
 
-  /**
-   * @param pairs
-   * @see mitll.langtest.server.database.exercise.ExcelImport#recordUnitChapterWeek
-   */
-/*  @Override
-  public void addAssociations(Collection<Pair> pairs) {
-    for (Pair p : pairs) {
-      List<Pair> others = new ArrayList<>(pairs);
-      others.remove(p);
-      for (Pair o : others) {
-        addAssociation(p, o);
-      }
-    }
-  }*/
-
-/*  private void addAssociation(Pair first, Pair second) {
-    addAssociation(first.type, first.section, second.type, second.section);
-  }
-
-  private void addAssociation(String type, String unitName, String otherType, String otherSection) {
-    Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(type);
-    if (sectionToTypeToSections == null) {
-      typeToSectionToTypeToSections.put(type, sectionToTypeToSections = new HashMap<>());
-    }
-    Map<String, Collection<String>> subsections = sectionToTypeToSections.get(unitName);
-    if (subsections == null) {
-      sectionToTypeToSections.put(unitName, subsections = new HashMap<>());
-    }
-    Collection<String> sections = subsections.get(otherType);
-    if (sections == null) subsections.put(otherType, sections = new HashSet<>());
-    sections.add(otherSection);
-  }*/
 
   private final File temp = new File("output.txt");
 
@@ -852,6 +822,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
       logger.debug("\t# section nodes " + getSectionNodesForTypes().size());
       for (SectionNode node : getSectionNodesForTypes()) {
+        logger.info("--- node " + node.getType() + " : " + node.getName());
         Collection<T> exercisesForSelectionState = getExercisesForSelectionState(node.getType(), node.getName());
         String message = "\tfor " + node.toComplete(0) + " got " + exercisesForSelectionState.size();
         logger.info(message);
@@ -953,7 +924,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       logger.info("after " + pairs);
 */
 
-    if (DEBUG) logger.info("for " + child + " got types " + predefinedTypeOrder + " " + pairs.size());
+//    if (DEBUG) logger.info("for " + child + " got types " + predefinedTypeOrder + " " + pairs.size());
 
     return rememberOne(child, pairs);
   }
