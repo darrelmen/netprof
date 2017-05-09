@@ -68,7 +68,7 @@ import java.util.logging.Logger;
 public class CommentBox extends PopupContainerFactory {
   private final Logger logger = Logger.getLogger("CommentBox");
 
-  public static final int ENTRY_VISIBLE_LENGTH = 70;
+  private static final int ENTRY_VISIBLE_LENGTH = 70;
 
   private static final int MAX_LENGTH = 500;
 
@@ -105,9 +105,9 @@ public class CommentBox extends PopupContainerFactory {
    * @param content
    * @param annotation
    * @return
-   * @see CommentNPFExercise#getContext
+   * @seex CommentNPFExercise#getContext
    */
-  public Widget getNoPopup(String field,
+/*  public Widget getNoPopup(String field,
                            Widget content,
                            final ExerciseAnnotation annotation,
                            AnnotationExercise toSet) {
@@ -162,7 +162,7 @@ public class CommentBox extends PopupContainerFactory {
 //        "'");
     styleCommentButton(commentButton);
 
-    /*Tooltip tooltip =*/
+    *//*Tooltip tooltip =*//*
     setButtonTitle(commentButton, isCorrect, comment);
     //showQC(commentButton);
 
@@ -195,9 +195,10 @@ public class CommentBox extends PopupContainerFactory {
 
     return row;
 
-  }
+  }*/
 
-  Button commentButton, clearButton;
+  private Button commentButton;
+  private Button clearButton;
 
   public void showButtons() {
     commentButton.setVisible(true);
@@ -209,7 +210,7 @@ public class CommentBox extends PopupContainerFactory {
     clearButton.setVisible(false);
   }
 
-  boolean hasComment = false;
+  private boolean hasComment = false;
 
   /**
    * @param field         of the exerciseID to comment on
@@ -217,10 +218,10 @@ public class CommentBox extends PopupContainerFactory {
    * @param annotation    to get current comment from
    * @param showInitially
    * @return three part widget -- content, comment button, and clear button
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getEntry
+   * @seex mitll.langtest.client.custom.exercise.CommentNPFExercise#getEntry
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
-  public Widget getEntry(String field, Widget content, ExerciseAnnotation annotation, boolean showInitially) {
+  public DivWidget getEntry(String field, Widget content, ExerciseAnnotation annotation, boolean showInitially) {
     field = fixAudioField(field);
     final HidePopupTextBox commentEntryText = getCommentBox(field);
 
@@ -249,7 +250,7 @@ public class CommentBox extends PopupContainerFactory {
 
     // content on left side, comment button on right
 
-    Panel row = getCommentAndButtonsRow(field, content, commentButton, clearButton);
+    DivWidget row = getCommentAndButtonsRow(field, content, commentButton, clearButton);
     showOrHideCommentButton(commentButton, clearButton, isCorrect);
 
     if (!showInitially) {
@@ -260,8 +261,8 @@ public class CommentBox extends PopupContainerFactory {
     return row;
   }
 
-  private Panel getCommentAndButtonsRow(String field, Widget content, Button commentButton, Button clearButton) {
-    Panel row = new DivWidget();
+  private DivWidget getCommentAndButtonsRow(String field, Widget content, Button commentButton, Button clearButton) {
+    DivWidget row = new DivWidget();
     row.getElement().setId("comment_and_clear_container_for_" + field);
     if (content != null) {
       row.add(content);
