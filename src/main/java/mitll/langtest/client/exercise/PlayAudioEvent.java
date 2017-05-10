@@ -13,10 +13,6 @@ public class PlayAudioEvent extends GwtEvent<PlayAudioEventHandler> {
     this.id = id;
   }
 
-/*  public String getSource() {
-    return source;
-  }*/
-
   @Override
   public Type<PlayAudioEventHandler> getAssociatedType() {
     return TYPE;

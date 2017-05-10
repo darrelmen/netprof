@@ -36,9 +36,11 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -117,29 +119,30 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   public void setExerciseID(int exercise) {
     this.exerciseID = exercise;
   }
+
   protected int getExerciseID() {
     return exerciseID;
   }
 
   /**
-   * @see RecordButton#stop
    * @param duration
+   * @see RecordButton#stop
    */
   public void stopRecording(long duration) {
     if (duration > MIN_DURATION) {
       controller.stopRecording(this::postAudioFile);
-    }
-    else {
+    } else {
       showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt());
       hideWaveform();
     }
   }
 
-  protected void hideWaveform() {}
+  protected void hideWaveform() {
+  }
 
   /**
-   * @see RecordingListener#stopRecording
    * @param base64EncodedWavFile
+   * @see RecordingListener#stopRecording
    */
   protected void postAudioFile(String base64EncodedWavFile) {
     reqid++;
@@ -261,14 +264,15 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   public void startRecording() {
+    LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
     controller.startRecording();
   }
 
   /**
    * TODO : consider why we have to do this from the client.
    *
-   * @see PostAudioRecordButton#postAudioFile
    * @param result
+   * @see PostAudioRecordButton#postAudioFile
    */
   protected void useInvalidResult(AudioAnswer result) {
     controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + result.getValidity());
@@ -288,6 +292,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   public abstract void useResult(AudioAnswer result);
+
   public boolean hasValidAudio() {
     return validAudio;
   }

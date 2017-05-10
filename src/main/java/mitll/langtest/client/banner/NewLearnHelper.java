@@ -10,14 +10,14 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by go22670 on 4/5/17.
@@ -54,12 +54,11 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
+      private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+
       @Override
       public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
-        List<CorrectAndScore> correctAndScores = wrapper.getHistories().get(e.getID());
-        ShowChoices choices = getChoices();
-
-        return new TwoColumnExercisePanel<>(e, controller, exerciseList, correctAndScores, choices);
+        return new TwoColumnExercisePanel<>(e, controller, exerciseList, wrapper.getHistories().get(e.getID()), getChoices(), getPhoneChoices(), alignments);
       }
     };
   }

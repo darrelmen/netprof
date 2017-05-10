@@ -271,8 +271,6 @@ public class LangTest implements
    * Make an exception handler that displays the exception.
    */
   public void onModuleLoad() {
-    //  KeyStorage storage = new KeyStorage(this);
-
     // set uncaught exception handler
     dealWithExceptions();
     askForStartupInfo();
@@ -1032,8 +1030,9 @@ public class LangTest implements
   }
 
   public KeyStorage getStorage() {
-
-    if (storage == null) storage = new KeyStorage(this);
+    if (storage == null) {
+      storage = new KeyStorage(this);
+    }
     return storage;
   }
 }

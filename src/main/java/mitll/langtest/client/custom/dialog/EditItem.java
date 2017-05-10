@@ -34,18 +34,19 @@ package mitll.langtest.client.custom.dialog;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -82,7 +83,7 @@ public class EditItem {
    */
   public EditItem(ExerciseController controller) {
     this.controller = controller;
- //   this.predefinedContentList = predefinedContentList;
+    //   this.predefinedContentList = predefinedContentList;
     this.instanceName = "EditItem";//instanceName;
   }
 
@@ -190,6 +191,8 @@ public class EditItem {
 
     exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(
         controller, exerciseList) {
+      private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+
       @Override
       public Panel getExercisePanel(CommonExercise exercise, ExerciseListWrapper<CommonExercise> wrapper) {
         Panel panel = new ResizableSimple();
@@ -198,7 +201,6 @@ public class EditItem {
         boolean iCreatedThisItem = didICreateThisItem(exercise) ||
             (controller.getUserManager().isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
         if (iCreatedThisItem) {  // it's mine!
-          //ReloadableContainer predefinedContentList = EditItem.this.predefinedContentList;
           EditableExerciseDialog editableExercise =
               new EditableExerciseDialog(controller,
                   exercise,
@@ -209,13 +211,9 @@ public class EditItem {
           panel.add(editableExercise.addFields(outer, panel));
           editableExercise.setFields(exercise);
         } else {
-//          return new CommentNPFExercise<>(exercise, controller, exerciseList,
-//              new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));
-
           return new TwoColumnExercisePanel<>(exercise,
               controller,
-              exerciseList, Collections.emptyList(), getChoices());
-//              new ExerciseOptions("editItemInspect").setAllowRecording(false).setIncludeListButtons(false));
+              exerciseList, Collections.emptyList(), getChoices(), getPhoneChoices(), alignments);
         }
 
         return panel;

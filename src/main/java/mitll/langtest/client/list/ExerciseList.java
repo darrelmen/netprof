@@ -301,7 +301,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         ignoreStaleRequest(result);
       } else {
         lastSuccessfulRequest = request;
-        if (DEBUG || true) logger.info("onSuccess last req now " + lastSuccessfulRequest);
+        if (DEBUG) logger.info("onSuccess last req now " + lastSuccessfulRequest);
         checkForEmptyExerciseList(result.getExercises().isEmpty());
         int idToUse = exerciseID == -1 ? result.getFirstExercise() == null ? -1 : result.getFirstExercise().getID() : exerciseID;
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);

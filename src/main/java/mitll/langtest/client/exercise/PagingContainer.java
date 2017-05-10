@@ -64,8 +64,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
-  public static final double FIFTY = 50.0;
   private final Logger logger = Logger.getLogger("PagingContainer");
+
+  public static final double FIFTY = 50.0;
   private static final int MAX_LENGTH_ID = 17;
   private static final int JAPANESE_LENGTH = 9;
   private static final String TRUNCATED = "...";

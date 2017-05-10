@@ -35,11 +35,16 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.logging.Logger;
+
+import static mitll.langtest.client.banner.NewBanner.SHOW_PHONES;
 
 /**
  * Created with IntelliJ IDEA.
@@ -51,8 +56,10 @@ import org.jetbrains.annotations.NotNull;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
+  private final Logger logger = Logger.getLogger("ExercisePanelFactory");
+
   protected final ExerciseController controller;
-  protected ListInterface<T,U> exerciseList;
+  protected ListInterface<T, U> exerciseList;
 
   /**
    * @param controller
@@ -60,12 +67,12 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    */
   public ExercisePanelFactory(final ExerciseController controller,
-                              ListInterface<T,U> exerciseList) {
+                              ListInterface<T, U> exerciseList) {
     this.controller = controller;
     this.exerciseList = exerciseList;
   }
 
-  public void setExerciseList(ListInterface<T,U> exerciseList) {
+  public void setExerciseList(ListInterface<T, U> exerciseList) {
     this.exerciseList = exerciseList;
   }
 
@@ -82,12 +89,27 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
     ShowChoices choices = ShowChoices.FL;
     String show = controller.getStorage().getValue(NewBanner.SHOW);
     if (show != null) {
-     // logger.warning("value for show " + controller.getStorage().getValue("show"));
+      // logger.warning("value for show " + controller.getStorage().getValue("show"));
       try {
         choices = ShowChoices.valueOf(show);
-       // logger.info("ExercisePanelFactory got " + choices);
+        // logger.info("ExercisePanelFactory got " + choices);
       } catch (IllegalArgumentException ee) {
-       // logger.warning("got " + ee);
+        // logger.warning("got " + ee);
+      }
+    }
+    return choices;
+  }
+
+  @NotNull
+  protected PhonesChoices getPhoneChoices() {
+    PhonesChoices choices = PhonesChoices.SHOW;
+    String show = controller.getStorage().getValue(SHOW_PHONES);
+    if (show != null) {
+      try {
+        choices = PhonesChoices.valueOf(show);
+    //    logger.info("ExercisePanelFactory got " + choices);
+      } catch (IllegalArgumentException ee) {
+        logger.warning("got " + ee);
       }
     }
     return choices;

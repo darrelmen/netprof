@@ -48,18 +48,15 @@ import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.HasID;
-import org.jetbrains.annotations.NotNull;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -299,21 +296,18 @@ public class NPFHelper implements RequiresResize {
       final String instanceName,
       final boolean showQC) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
+      private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
       @Override
       public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {
-          ShowChoices choices = getChoices();
-
-          //  return new CommentNPFExercise<>(e, controller, exerciseList, new ExerciseOptions(instanceName));
           return new TwoColumnExercisePanel<CommonExercise>(e,
               controller,
               exerciseList, Collections.emptyList(),
-              choices);
+              getChoices(), getPhoneChoices(), alignments);
         }
       }
-
     };
   }
 

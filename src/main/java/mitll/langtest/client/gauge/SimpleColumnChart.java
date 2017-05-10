@@ -39,7 +39,7 @@ package mitll.langtest.client.gauge;
  * @since 5/21/2014.
  */
 public class SimpleColumnChart {
-  public static String MAX = getColor(1.0f);
+  public static String MAX = "#EEF3E2";//getColor(1.0f);
 
   /**
    * This gives a smooth range red->yellow->green:

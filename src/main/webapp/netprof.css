@@ -1411,6 +1411,7 @@ document sections.*/
     /*
     width: 750px;
     */
+    margin-left:220px;
     zoom: 1;
 }
 
@@ -1437,15 +1438,6 @@ document sections.*/
 }
 */
 
-/*
-
-.sidebar > nav ul {
-    list-style: outside none none;
-    margin: 0;
-    padding: 6px 0;
-}
-*/
-
 .sidebar a {
     text-decoration: none;
     cursor: hand;
@@ -1467,13 +1459,6 @@ document sections.*/
     color: #2b95d0;
     text-decoration: none;
 }
-
-/*
-
-.sidebar li, .sidebar nav li {
-    padding: 4px 10px;
-}
-*/
 
 .sidebar .selected {
     color: #b71f39;
@@ -1806,4 +1791,20 @@ h1, h2, h3, h4, h5, h6 {
         background-repeat: repeat-x;*/
     color: #fff;
     text-decoration: none;
+}
+
+.initialpos {
+    bottom: auto;
+    position: absolute;
+    /*
+    top: 191px;
+    */
+}
+
+.scrolledpos {
+    /*
+    bottom: 46px;
+    */
+    position: fixed;
+    top: auto;
 }

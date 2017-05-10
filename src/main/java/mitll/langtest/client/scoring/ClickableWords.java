@@ -60,6 +60,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param value
    * @param clickables
    * @param isSimple
+   * @param addRightMargin
    * @see TwoColumnExercisePanel#getEntry
    */
   DivWidget getClickableWords(String value,
@@ -67,8 +68,8 @@ public class ClickableWords<T extends CommonExercise> {
                               boolean isTranslit,
                               boolean isMeaning,
                               List<IHighlightSegment> clickables,
-                              boolean isSimple
-                              ) {
+                              boolean isSimple,
+                              boolean addRightMargin) {
     DivWidget horizontal = new DivWidget();
     horizontal.getElement().setId("clickableRow");
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
@@ -83,7 +84,7 @@ public class ClickableWords<T extends CommonExercise> {
       IHighlightSegment w = makeClickableText(isMeaning, dir, token, false, id++, isSimple);
       clickables.add(w);
       horizontal.add(w.asWidget());
-      if (isSimple && !isChineseCharacter) {
+      if ((isSimple && !isChineseCharacter) || addRightMargin) {
         w.getClickable().addStyleName("rightFiveMargin");
       }
     }
@@ -166,7 +167,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param tokens
    * @param highlightTokens
    * @return
-   * @see #getClickableWords(String, boolean, boolean, boolean, List, boolean)
+   * @see #getClickableWords(String, boolean, boolean, boolean, List, boolean, boolean)
    */
   @NotNull
   private List<String> getMatchingHighlight(List<String> tokens, List<String> highlightTokens) {

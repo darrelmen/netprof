@@ -29,11 +29,11 @@ import java.util.Set;
  */
 public class UserListSupport {
 //  private final Logger logger = Logger.getLogger("UserListSupport");
-
-  public static final String ADD_TO_LIST = "Add to List";
-  public static final String REMOVE_FROM_LIST = "Remove from List";
-  public static final String NEW_LIST = "New List";
-  public static final String NOT_ON_ANY_LISTS = "Not on any lists.";
+  private static final String ADD_TO_LIST = "Add to List";
+  private static final String REMOVE_FROM_LIST = "Remove from List";
+  private static final String NEW_LIST = "New List";
+  private static final String NOT_ON_ANY_LISTS = "Not on any lists.";
+  private static final String EMAIL_LIST = "Email List";
   private final PopupContainerFactory popupContainer = new PopupContainerFactory();
 
   private static final int END_INDEX = 15;
@@ -59,7 +59,7 @@ public class UserListSupport {
     DropdownSubmenu removeFromList = new DropdownSubmenu(REMOVE_FROM_LIST);
     removeFromList.setRightDropdown(true);
 
-    DropdownSubmenu sendList = new DropdownSubmenu("Email List");
+    DropdownSubmenu sendList = new DropdownSubmenu(EMAIL_LIST);
     sendList.setRightDropdown(true);
 
     dropdownContainer.addClickHandler(event -> populateListChoices(exid, addToList, removeFromList, sendList, dropdownContainer));

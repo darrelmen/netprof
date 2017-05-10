@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -56,7 +57,7 @@ import java.util.logging.Logger;
 public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize {
   private final Logger logger = Logger.getLogger("FlexListLayout");
 
-//  private static final int RIGHT_SIDE_DIV_WIDTH = 70;
+  //  private static final int RIGHT_SIDE_DIV_WIDTH = 70;
   public PagingExerciseList<T, U> npfExerciseList;
   private final ExerciseController controller;
 
@@ -105,7 +106,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     bottomRow.add(exerciseListContainer);
     bottomRow.getElement().setId("NPFHelper_bottomRow");
 
-  //  bottomRow.addStyleName("inlineFlex");
+    //  bottomRow.addStyleName("inlineFlex");
     styleBottomRow(bottomRow);
     if (!hasTopRow) bottomRow.setWidth("100%");
 
@@ -135,27 +136,44 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     return twoRows;
   }
 
+  boolean atTop = true;
+
   protected void styleTopRow(Panel twoRows, Panel topRow) {
     topRow.addStyleName("floatLeft");
     topRow.addStyleName("leftBlock");
     topRow.addStyleName("rightFiveMargin");
 
     twoRows.addStyleName("inlineFlex");
-   // twoRows.getElement().getStyle().setTop(0, Style.Unit.PX  );
-  //  topRow.getElement().getStyle().setTop(0, Style.Unit.PX  );
-
-    //  twoRows.getElement().getStyle().setMarginRight(100, Style.Unit.PX);
 
     FlowPanel section = new FlowPanel("section");
-  //  section.getElement().getStyle().setTop(0, Style.Unit.PX  );
     section.addStyleName("sidebar");
+    section.addStyleName("initialpos");
 
-//    Affix affix = new Affix();
-//affix.setOffsetBottom(40);
-//affix.setWidget(section);
-//affix.reconfigure();
     twoRows.add(section);
     section.add(topRow);
+
+    makeSureFacetsAlwaysVisible(section);
+  }
+
+  private void makeSureFacetsAlwaysVisible(FlowPanel section) {
+    Window.addWindowScrollHandler(new Window.ScrollHandler() {
+      @Override
+      public void onWindowScroll(Window.ScrollEvent event) {
+        //logger.info("got scroll " + event + " " + event.getScrollTop());
+
+        boolean nowAtTop = event.getScrollTop() == 0;
+        if (atTop != nowAtTop) {
+          atTop = nowAtTop;
+          if (!atTop) {
+            section.removeStyleName("initialpos");
+            section.addStyleName("scrolledpos");
+          } else {
+            section.addStyleName("initialpos");
+            section.removeStyleName("scrolledpos");
+          }
+        }
+      }
+    });
   }
 
   private void styleBottomRowDiv(DivWidget bottomRowDiv, DivWidget listHeader) {

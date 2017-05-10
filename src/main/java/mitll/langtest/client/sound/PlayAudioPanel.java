@@ -134,6 +134,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @param path
    * @param doSlow
    * @seex PressAndHoldExercisePanel#getPlayAudioPanel
+   * @deprecated only for amas and dialog
    */
   public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow) {
     this(soundManager, "", null, doSlow);
@@ -256,14 +257,12 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   protected void doClick() {
     //logger.info("PlayAudioPanel doClick " + playing + " " +currentPath);
-
     if (playButton.isVisible() && isEnabled()) {
       if (isPlaying()) {
         if (DEBUG) logger.info("PlayAudioPanel doClick pause " + playing + " " + currentPath);
         pause();  // somehow get exception here?
       } else {
         if (DEBUG) logger.info("PlayAudioPanel doClick start " + playing + " " + currentPath);
-
         startPlaying();
       }
     }
@@ -302,7 +301,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   /**
-   * @see #doClick()
+   * @see #doClick
    */
   private void play() {
     if (DEBUG || LOCAL_TESTING) {
@@ -315,21 +314,13 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   private void setPlayButtonText() {
     boolean playing1 = isPlaying();
-    //logger.info("setPlayButtonText now playing = " + isPlaying());
     playButton.setText(playing1 ? pauseLabel : playLabel);
     if (playing1) {
-      //  logger.info("setPlayButtonText set cursor to pause ");
       playButton.setIcon(IconType.PAUSE);
-/*
-      playButton.getElement().getStyle().setPaddingBottom(4, Style.Unit.PX);
-      playButton.getElement().getStyle().setPaddingLeft(BUTTON_WIDTH, Style.Unit.PX);
-      playButton.getElement().getStyle().setPaddingRight(BUTTON_WIDTH, Style.Unit.PX);
-      */
     } else {
       logger.info("setPlayButtonText set cursor to play ");
       showPlayIcon(playButton);
     }
-    //  playButton.setIcon(playing1 ? IconType.PAUSE : PLAY);
   }
 
   protected boolean isEnabled() {
@@ -408,7 +399,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   /**
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#configureButton2
    */
-  public void playAudio() {
+  protected void playAudio() {
     if (currentPath == null) {
       logger.warning("playAudio " + currentPath);
     } else {
@@ -548,7 +539,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   private void resetAudio() {
     setPlayLabel();
     update(0);
-    soundManager.setPosition(currentSound, 0);
+    if (currentSound != null) {
+      soundManager.setPosition(currentSound, 0);
+    }
   }
 
   /**

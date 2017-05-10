@@ -457,7 +457,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     else {
       typeOrder = projectStartupInfo.getTypeOrder();
 
-      logger.info("getTypeOrder type order " +typeOrder);
+      logger.info("getTypeOrder type order " + typeOrder);
 
       this.rootNodesInOrder = new ArrayList<>(projectStartupInfo.getTypeOrder());
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
@@ -592,7 +592,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void populateListChoices(ListItem liForDimensionForType) {
     ListServiceAsync listService = controller.getListService();
-   // logger.info("populateListChoices --- ");
+    // logger.info("populateListChoices --- ");
     listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -622,7 +622,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     int currentUser = controller.getUser();
     for (UserList<?> list : result) {
       boolean isVisit = list.getUserID() != currentUser;
-      String tooltip = isVisit ? " from " + list.getUserChosenID():"";
+      String tooltip = isVisit ? " from " + list.getUserChosenID() : "";
       value.add(new MatchInfo(list.getName(), list.getNumItems(), list.getID(), isVisit, tooltip));
       idToName.put(list.getID(), list.getName());
     }
@@ -1380,16 +1380,19 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @param iterator
    */
 
-  private void getRefAudio(Iterator<RefAudioGetter> iterator) {
+  private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     RefAudioGetter next = iterator.next();
 
 //    logger.info("asking next panel...");
     next.getRefAudio(() -> {
       //    logger.info("\tpanel complete...");
-
-   /*   if (iterator.hasNext()) {
-        getRefAudio(iterator);
-      }*/
+      if (iterator.hasNext()) {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          public void execute() {
+            getRefAudio(iterator);
+          }
+        });
+      }
     });
   }
 
@@ -1398,7 +1401,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     for (CommonShell exercise : result) {
       if (exercise.getScore() > -1) exercisesWithScores.add(exercise.getID());
     }
-    //progressBar.setPercent(100f*(float)exercisesWithScores.size()/(float)result.size());
     showScore(exercisesWithScores.size(), result.size());
   }
 

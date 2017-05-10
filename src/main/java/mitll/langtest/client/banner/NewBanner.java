@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.constants.Alignment;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -25,6 +26,7 @@ import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.ShowEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.User;
@@ -39,6 +41,7 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeHandler<String> {
+  public static final String SHOW_PHONES = "showPhones";
   private final Logger logger = Logger.getLogger("NewBanner");
 
   public static final String SHOW = "showStorage";
@@ -109,7 +112,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     recordMenuVisible();
 
-
     Nav defectnav = getDefectNav();
     this.defectnav = defectnav;
     navCollapse.add(defectnav);
@@ -179,15 +181,28 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
 
   @NotNull
-  protected ShowChoices getChoices() {
+  private ShowChoices getChoices() {
     ShowChoices choices = ShowChoices.FL;
     String show = controller.getStorage().getValue(SHOW);
     if (show != null) {
       try {
         choices = ShowChoices.valueOf(show);
-        // logger.info("ExercisePanelFactory got " + choices);
       } catch (IllegalArgumentException ee) {
-        // logger.warning("got " + ee);
+      }
+    }
+    return choices;
+  }
+
+  @NotNull
+  private PhonesChoices getPhonesDisplay() {
+    PhonesChoices choices = PhonesChoices.SHOW;
+    String show = controller.getStorage().getValue(SHOW_PHONES);
+    if (show != null) {
+      try {
+        choices = PhonesChoices.valueOf(show);
+        logger.info("getPhonesDisplay got " +choices);
+      } catch (IllegalArgumentException ee) {
+        logger.warning("getPhonesDisplay got " +ee);
       }
     }
     return choices;
@@ -202,7 +217,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     rnav.setAlignment(Alignment.RIGHT);
     addSubtitle(rnav);
 
-    //recordMenu = getRecordMenu(rnav);
     addUserMenu(userManager, userMenu, rnav);
 
     rnav.add(viewMenu = getRealViewMenu());
@@ -220,6 +234,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   @NotNull
   private Dropdown getRealViewMenu() {
     Dropdown view = new Dropdown("View");
+    view.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        logger.info("show phones " + getPhonesDisplay());
+        phoneChoice.setText(getPhoneMenuTitle());
+      }
+    });
     view.setIcon(IconType.REORDER);
     NavLink download = new NavLink("Download");
     download.setIcon(IconType.DOWNLOAD_ALT);
@@ -232,10 +253,46 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     return view;
   }
 
+  NavLink phoneChoice;
   @NotNull
   private DropdownSubmenu getViewMenu() {
     DropdownSubmenu showChoices = new DropdownSubmenu("Show");
+    flTextChoices(showChoices);
 
+    phoneChoice = new NavLink(getPhoneMenuTitle());
+
+    Scheduler.get().scheduleDeferred(() -> {
+      logger.info("show phones " + getPhonesDisplay());
+      phoneChoice.setText(getPhoneMenuTitle());
+    });
+
+    showChoices.add(phoneChoice);
+    phoneChoice.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        if ( getPhonesDisplay() == PhonesChoices.SHOW) {
+          phoneChoice.setText("Hide Sounds");
+          storePhoneChoices(PhonesChoices.HIDE.toString());
+          logger.info("show phones now " + getPhonesDisplay());
+        }
+        else {
+          phoneChoice.setText("Show Sounds");
+          storePhoneChoices(PhonesChoices.SHOW.toString());
+        }
+        fireShowEvent();
+      }
+    });
+
+    return showChoices;
+  }
+
+  @NotNull
+  private String getPhoneMenuTitle() {
+    return ( getPhonesDisplay() == PhonesChoices.SHOW ? "Hide" : "Show") +
+        " Sounds";
+  }
+
+  private void flTextChoices(DropdownSubmenu showChoices) {
     NavLink altflChoice = new NavLink("Alternate text");
     NavLink primary = new NavLink("Primary text");
     NavLink both = new NavLink("Both Primary and Alternate");
@@ -256,9 +313,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     altflChoice.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controller.getStorage().storeValue(SHOW, ShowChoices.ALTFL.toString());
-        logger.info("show now " + controller.getStorage().getValue(SHOW));
-        LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+        storeShowChoices(ShowChoices.ALTFL.toString());
+        //  logger.info("show now " + controller.getStorage().getValue(SHOW));
+        fireShowEvent();
         altflChoice.setIcon(checkEmpty);
         both.setIcon(null);
         primary.setIcon(null);
@@ -269,8 +326,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     primary.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controller.getStorage().storeValue(SHOW, ShowChoices.FL.toString());
-        LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+        storeShowChoices(ShowChoices.FL.toString());
+        fireShowEvent();
         altflChoice.setIcon(null);
         both.setIcon(null);
         primary.setIcon(checkEmpty);
@@ -280,15 +337,30 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     both.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controller.getStorage().storeValue(SHOW, ShowChoices.BOTH.toString());
-        LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+        storeShowChoices(ShowChoices.BOTH.toString());
+        fireShowEvent();
         altflChoice.setIcon(null);
         both.setIcon(checkEmpty);
         primary.setIcon(null);
       }
     });
-    return showChoices;
   }
+
+  private void storeShowChoices(String toStore) {
+    controller.getStorage().storeValue(SHOW, toStore);
+  }
+
+  private void storePhoneChoices(String toStore) {
+    controller.getStorage().storeValue(SHOW_PHONES, toStore);
+  }
+
+  private void fireShowEvent() {
+    LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+  }
+
+//  private void fireSoundsEvent() {
+//    LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+//  }
 
   private void addSubtitle(Nav rnav) {
     rnav.add(subtitle = new Label());
@@ -326,7 +398,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     String token = event.getValue();
     SelectionState selectionState = new SelectionState(token, false);
     String instance1 = selectionState.getInstance();
- //   logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");
+    //   logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");
     showSection(instance1);
   }
 
