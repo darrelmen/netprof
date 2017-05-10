@@ -14,26 +14,16 @@ public class SegmentHighlightAudioControl implements AudioControl {
   private final Logger logger = Logger.getLogger("SegmentHighlightAudioControl");
   private SegmentAudioControl wordSegments, phoneSegments = null;
 
-  /**
-   * @paramz typeToSegmentToWidget
-   * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#getWordTableContainer
-   */
-  public SegmentHighlightAudioControl(/*Map<NetPronImageType,
-      TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget*/) {
-    //setTypeToSegments(typeToSegmentToWidget);
-  }
-
   public SegmentHighlightAudioControl(Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
     setTypeToSegments(typeToSegmentToWidget);
   }
 
-  public void setTypeToSegments(Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
+  private void setTypeToSegments(Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
     TreeMap<TranscriptSegment, IHighlightSegment> words = typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
     wordSegments = new SegmentAudioControl(words);
     TreeMap<TranscriptSegment, IHighlightSegment> phones = typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (phones != null) {
       phoneSegments = new SegmentAudioControl(phones);
-//
 //      logger.info("phoneSegments now has " + phones.size());
 //      logger.info("wordSegments  now has " + words.size());
     }
@@ -46,6 +36,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
   @Override
   public void reinitialize() {
    // logger.info("reinitialize ");
+    songFinished();
   }
 
   @Override
@@ -100,6 +91,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
     @Override
     public void reinitialize() {
+      songFinished();
     }
 
     @Override
@@ -158,18 +150,11 @@ public class SegmentHighlightAudioControl implements AudioControl {
     @Override
     public void songFinished() {
       if (DEBUG) logger.info("songFinished..." + words.values().size() + " segments...");
-//      if (isHighlighted()) {
-//        removeHighlight();
-//      }
-//      else {
       for (IHighlightSegment segment : words.values()) {
         if (segment.isHighlighted()) {
-        //  logger.info("songFinished segment "+ segment + " highlighted");
           segment.clearBlue();
         }
       }
-      // if (DEBUG) logger.info("nothing highlighted...");
-//      }
       initialize();
     }
 
@@ -180,7 +165,6 @@ public class SegmentHighlightAudioControl implements AudioControl {
     private void removeHighlight() {
       if (currentWord != null) {
         words.get(currentWord).clearBlue();
-//        widget.getElement().getStyle().setBackgroundColor(backgroundColor);
       } else {
         logger.warning("removeHighlight no current word....");
       }

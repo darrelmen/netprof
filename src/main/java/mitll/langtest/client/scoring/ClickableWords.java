@@ -66,8 +66,11 @@ public class ClickableWords<T extends CommonExercise> {
                               boolean isFL,
                               boolean isTranslit,
                               boolean isMeaning,
-                              List<IHighlightSegment> clickables, boolean isSimple) {
+                              List<IHighlightSegment> clickables,
+                              boolean isSimple
+                              ) {
     DivWidget horizontal = new DivWidget();
+    horizontal.getElement().setId("clickableRow");
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
     boolean flLine = isFL || (isJapanese && isTranslit);
@@ -77,9 +80,12 @@ public class ClickableWords<T extends CommonExercise> {
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
     int id = 0;
     for (String token : tokens) {
-      IHighlightSegment w = makeClickableText(isMeaning, dir, token, isChineseCharacter, false, id++, isSimple);
+      IHighlightSegment w = makeClickableText(isMeaning, dir, token, false, id++, isSimple);
       clickables.add(w);
       horizontal.add(w.asWidget());
+      if (isSimple && !isChineseCharacter) {
+        w.getClickable().addStyleName("rightFiveMargin");
+      }
     }
 
     horizontal.addStyleName("leftFiveMargin");
@@ -107,10 +113,11 @@ public class ClickableWords<T extends CommonExercise> {
                                        boolean isFL,
                                        boolean isTranslit,
                                        boolean isMeaning,
-                                       List<IHighlightSegment> clickables, boolean isSimple) {
+                                       List<IHighlightSegment> clickables,
+                                       boolean isSimple) {
     DivWidget horizontal = new DivWidget();
-   // horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_FLEX);
-//highlight.get
+
+    horizontal.getElement().setId("clickableWordsHightlightRow");
     boolean flLine = isFL || (isJapanese && isTranslit);
     boolean isChineseCharacter = flLine && hasClickable;
 
@@ -132,11 +139,11 @@ public class ClickableWords<T extends CommonExercise> {
     String toFind = iterator.hasNext() ? iterator.next() : null;
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
-    //  int match = 0;
+
     int id = 0;
     for (String token : tokens) {
       boolean isMatch = toFind != null && isMatch(token, toFind);
-      IHighlightSegment clickable = makeClickableText(isMeaning, dir, token, isChineseCharacter, isMatch, id++, isSimple);
+      IHighlightSegment clickable = makeClickableText(isMeaning, dir, token, isMatch, id++, isSimple);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
       w.addStyleName("rightFiveMargin");
@@ -260,7 +267,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param isMeaning
    * @param dir
    * @param html             a token that can be clicked on to search on it
-   * @param chineseCharacter
+   * @paramx chineseCharacter
    * @param isContextMatch
    * @param id
    * @param isSimple
@@ -270,7 +277,7 @@ public class ClickableWords<T extends CommonExercise> {
   private IHighlightSegment makeClickableText(boolean isMeaning,
                                               HasDirection.Direction dir,
                                               final String html,
-                                              boolean chineseCharacter,
+                                            //  boolean chineseCharacter,
                                               boolean isContextMatch,
                                               int id,
                                               boolean isSimple) {
@@ -283,7 +290,7 @@ public class ClickableWords<T extends CommonExercise> {
 
     if (isContextMatch) highlightSegment.addStyleName(CONTEXTMATCH);
     if (isMeaning) highlightSegment.addStyleName("englishFont");
-    if (!chineseCharacter || isSimple) highlightSegment.addStyleName("rightFiveMargin");
+   // if (!chineseCharacter || isSimple) highlightSegment.addStyleName("rightFiveMargin");
 
     String searchToken = listContainer.getTypeAheadText().toLowerCase();
     if (isMatch(html, searchToken)) {

@@ -34,12 +34,9 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    */
   public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir) {
     add(north = new DivWidget());
-    //north.addStyleName("floatLeft");
-    // north.setWidth("100%");
     add(south = new DivWidget());
     south.setWidth("100%");
     south.addStyleName("floatLeft");
-    //setWidth("100%");
     getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
     this.span = new InlineHTML(html, dir);
     this.content = html;
@@ -115,31 +112,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     return "'" + content + "' (" + getLength() + ")";
   }
 
-/*  @Override
-  public DivWidget getSouth() {
-    return south;
-  }*/
-
   public void setSouth(Widget widget) {
     south.clear();
     south.add(widget);
   }
-
-/*  @Override
-  public void addSouth() {
-    logger.info("addSouth #" + id + " : " + getContent());
-    Widget parent = getParent();
-    removeFromParent();
-
-    DivWidget vert = new DivWidget();
-    vert.add(asWidget());
-    DivWidget south = new DivWidget();
-    this.south = south;
-    vert.add(south);
-
-    ((Panel) parent).add(vert);
-  }*/
-//  public void setSouth(Widget south) {
-//    this.south = south;
-//  }
 }

@@ -38,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.client.scoring.ShowChoices.ALTFL;
 import static mitll.langtest.client.scoring.ShowChoices.BOTH;
@@ -48,6 +49,7 @@ import static mitll.langtest.client.scoring.ShowChoices.FL;
  */
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener,
     RefAudioGetter {
+  public static final String HALF_WIDTH = "50%";
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   private static final String EMAIL = "Email Item";
@@ -78,6 +80,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   //private DivWidget flEntry;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_MATCH = true;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -290,32 +293,38 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       Iterator<IHighlightSegment> iterator = flclickables.iterator();
       if (DEBUG) logger.info("matchSegmentToWidgetForAudio " + audioID + " got clickables " + flclickables.size());
 
-      List<TranscriptSegment> transcriptSegments = alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+      List<TranscriptSegment> wordSegments = alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+
+      wordSegments = wordSegments.stream().filter(seg -> !shouldIgnore(seg)).collect(Collectors.toList());
+
       List<TranscriptSegment> phones = alignmentOutput.getTypeToSegments().get(NetPronImageType.PHONE_TRANSCRIPT);
-      if (transcriptSegments == null) {
+      if (wordSegments == null) {
         if (DEBUG) logger.info("matchSegmentToWidgetForAudio no word segments in " + alignmentOutput);
       } else {
-     //   Iterator<TranscriptSegment> iterator1 = phones.iterator();
-        for (TranscriptSegment seg : transcriptSegments) {
-          if (!shouldIgnore(seg)) {
-            if (iterator.hasNext()) {
-              int segmentLength = seg.getEvent().length();
+        if (transcriptMatches(flclickables, wordSegments)) {
+          for (TranscriptSegment word : wordSegments) {
+            if (!shouldIgnore(word)) {
+              if (iterator.hasNext()) {
+                int segmentLength = word.getEvent().length();
 
-              List<TranscriptSegment> phonesInWord = getSegs(phones, seg);
+                List<TranscriptSegment> phonesInWord = getSegs(phones, word);
 
-              if (DEBUG) logger.info("matchSegmentToWidgetForAudio got segment " + seg + " length " + segmentLength);
-              IHighlightSegment value1 =
-                  matchEventSegmentToClickable(iterator, segmentLength, seg.getEvent(), phonesInWord, audioControl, phoneMap);
+                if (DEBUG) logger.info("matchSegmentToWidgetForAudio got segment " + word + " length " + segmentLength);
+                IHighlightSegment value1 =
+                    matchEventSegmentToClickable(iterator, word, phonesInWord, audioControl, phoneMap);
 
-              if (value1 == null) {
-                logger.warning("can't find match for seg " + seg);
+                if (value1 == null) {
+                  logger.warning("can't find match for word " + word);
+                } else {
+                  segmentToWidget.put(word, value1);
+                }
               } else {
-                segmentToWidget.put(seg, value1);
+                logger.warning("matchSegmentToWidgetForAudio no match for " + word);
               }
-            } else {
-              logger.warning("matchSegmentToWidgetForAudio no match for " + seg);
             }
           }
+        } else {
+          if (DEBUG_MATCH) logger.warning("no match for " + wordSegments + " to " + flclickables);
         }
       }
     }
@@ -323,70 +332,61 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return value;
   }
 
- private List<TranscriptSegment> getSegs(List<TranscriptSegment> phones, TranscriptSegment word) {
+  private List<TranscriptSegment> getSegs(List<TranscriptSegment> phones, TranscriptSegment word) {
     List<TranscriptSegment> phonesInWord = new ArrayList<>();
     for (TranscriptSegment phone : phones) {
       if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
         phonesInWord.add(phone);
       }
     }
-    return  phonesInWord;
+    return phonesInWord;
   }
 
   private IHighlightSegment matchEventSegmentToClickable(Iterator<IHighlightSegment> iterator,
-                                                         int segmentLength,
-                                                         String segment,
+                                                         TranscriptSegment wordSegment,
                                                          List<TranscriptSegment> phonesInWord,
+
                                                          AudioControl audioControl,
                                                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap) {
     IHighlightSegment clickable = iterator.next();
     clickable = skipUnclickable(iterator, clickable);
+    String segment = wordSegment.getEvent();
 
-//    String content = clickable.getContent();
+    //    String content = clickable.getContent();
     //boolean isMatch = content.equalsIgnoreCase(segment);
     if (DEBUG)
       logger.info("matchSegmentToWidgetForAudio compare : segment " + segment + //" length " + segmentLength +
           " vs " + clickable);
 
-    String lcSegment = segment.toLowerCase();
-    String fragment1 = clickable.getContent().toLowerCase();
+    String lcSegment = removePunct(segment.toLowerCase());
+    String fragment1 = removePunct(clickable.getContent().toLowerCase());
 
-
-    boolean fragmentHasSegment = fragment1.startsWith(lcSegment);
-
-    // easy case - they match
-    if (lcSegment.equalsIgnoreCase(fragment1) || fragmentHasSegment) {
-      clickable.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true));
+    if (lcSegment.equalsIgnoreCase(fragment1)) {
+      clickable.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment));
       return clickable;
-    } else {
+    }
+    else {
       Collection<IHighlightSegment> bulk = new ArrayList<>();
 
-      logger.info("\tmatchSegmentToWidgetForAudio (2) compare : segment " + lcSegment +
+      if (DEBUG) logger.info("\tmatchSegmentToWidgetForAudio (2) compare : segment " + lcSegment +
           " vs " + clickable);
 
       while (!lcSegment.isEmpty()) {
         String fragment = clickable.getContent().toLowerCase();
 
-        logger.info("\tmatchSegmentToWidgetForAudio compare : segment " + lcSegment +
+        if (DEBUG) logger.info("\tmatchSegmentToWidgetForAudio compare : segment " + lcSegment +
             " vs fragment " + fragment);
 
         boolean segmentHasFragment = lcSegment.startsWith(fragment);
-       // boolean fragmentHasSegment = fragment.startsWith(lcSegment);
         if (segmentHasFragment) {
           bulk.add(clickable);
-
           lcSegment = lcSegment.substring(fragment.length());
-          logger.info("\tmatchSegmentToWidgetForAudiosegment now " + lcSegment);
+          if (DEBUG) logger.info("\tmatchSegmentToWidgetForAudiosegment now " + lcSegment);
           clickable = iterator.next();
           clickable = skipUnclickable(iterator, clickable);
           if (!iterator.hasNext()) break;
-        }
-//        else if (fragmentHasSegment) {
-//          bulk.add(clickable);
-//          break;
-//        }
-        else {
-          logger.info("\tmatchSegmentToWidgetForAudio compare : segment '" + lcSegment +
+        } else {
+          if (DEBUG) logger.info("\tmatchSegmentToWidgetForAudio compare : segment '" + lcSegment +
               "' vs fragment '" + fragment + "'");
           break;
         }
@@ -400,44 +400,97 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         return null;
       } else {
         AllHighlight allHighlight = new AllHighlight(bulk);
-        logger.info("create composite from " + bulk.size() + " = " + allHighlight);
+        if (DEBUG) logger.info("create composite from " + bulk.size() + " = " + allHighlight);
         return allHighlight;
       }
     }
+  }
 
-/*    while (lcSegment.contains(clickable.getContent().toLowerCase())) {
+  private boolean transcriptMatches(List<IHighlightSegment> clickables,
+                                    List<TranscriptSegment> segments) {
+    logger.info("Check   " + clickables);
+    logger.info("Against " + segments);
 
+
+    Iterator<TranscriptSegment> iterator = segments.iterator();
+    boolean allMatch = true;
+
+    TranscriptSegment word = null;
+
+    if (iterator.hasNext()) {
+      word = iterator.next();
     }
 
-    if (segmentLength > clickLength) {
-      Collection<IHighlightSegment> bulk = new ArrayList<>();
-      AllHighlight allHighlight = new AllHighlight(bulk);
-      bulk.add(clickable);
-      while (allHighlight.getLength() < segmentLength && iterator.hasNext()) {
-        clickable = iterator.next();
-        clickable = skipUnclickable(iterator, clickable);
+    if (word == null) return false;
 
-   *//*     leftOver = segmentLength - clickable.getLength();
-        if (leftOver < 0) {
-          logger.warning("matchSegmentToWidgetForAudio hmm - leftover is " + leftOver + " segment length " + segmentLength + " vs " + clickable.getLength());
-        } else if (DEBUG) {
-          logger.info("matchSegmentToWidgetForAudio Adding " + clickable + " to " + allHighlight);
-        }*//*
-        bulk.add(clickable);
-        if (DEBUG)
-          logger.info("matchSegmentToWidgetForAudio compare : segment length " + segmentLength + " vs to highlight length =" + allHighlight.getLength());
+    String lcSegment =  getWordEvent(word);
+
+    for (IHighlightSegment clickable : clickables) {
+      logger.info("Clickable " + clickable);
+      logger.info("Word      " + lcSegment);
+
+      if (clickable.isClickable()) {
+        String fragment = removePunct(clickable.getContent().toLowerCase());
+
+
+        if (lcSegment.equalsIgnoreCase(fragment)) {
+          if (iterator.hasNext()) {
+            word = iterator.next();
+            lcSegment = getWordEvent(word);
+            logger.info("now Clickable " + clickable);
+            logger.info("now Word      " + lcSegment);
+          } else break;
+        } else {
+          if (DEBUG_MATCH) logger.info("\tmatchSegmentToWidgetForAudio compare : segment " + lcSegment +
+              " vs fragment " + fragment);
+
+          boolean segmentHasFragment = lcSegment.startsWith(fragment);
+          if (segmentHasFragment) {
+            lcSegment = lcSegment.substring(fragment.length());
+            if (DEBUG_MATCH) logger.info("\tmatchSegmentToWidgetForAudiosegment now " + lcSegment);
+
+            if (lcSegment.isEmpty()) {
+              if (iterator.hasNext()) {
+                word = iterator.next();
+                lcSegment = getWordEvent(word);
+              }
+            }
+          } else {
+            if (DEBUG_MATCH) logger.info("\tmatchSegmentToWidgetForAudio compare : segment '" + lcSegment +
+                "' vs fragment '" + fragment + "'");
+            allMatch = false;
+            break;
+          }
+        }
       }
-      //allHighlight.addSouth();
-      if (DEBUG) {
-        logger.info("Finally highlight is " + allHighlight);
-      }
-      //  logger.info("matchSegmentToWidgetForAudio seg->click now " + segmentToWidget);
-      allHighlight.addAll();
-      return allHighlight;
-    } else {
-      clickable.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true));
-      return clickable;
-    }*/
+    }
+    return allMatch;
+  }
+
+  private String getWordEvent(TranscriptSegment word) {
+    return removePunct(word.getEvent().toLowerCase());
+  }
+//
+//  private TranscriptSegment getNextValidWord(Iterator<TranscriptSegment> iterator) {
+//    TranscriptSegment word = iterator.next();
+//    word = skipSils(iterator, word);
+//    return word;
+//  }
+
+  protected String removePunct(String t) {
+    return t
+        .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
+        .replaceAll("[\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
+  }
+
+  private TranscriptSegment skipSils(Iterator<TranscriptSegment> iterator, TranscriptSegment word) {
+    TranscriptSegment val = word;
+    while (shouldIgnore(word) && iterator.hasNext()) {
+      logger.warning("skipSils before " + val);
+      val = iterator.next();
+      logger.warning("skipSils now    " + val);
+    }
+    return val;
   }
 
   @NotNull
@@ -450,7 +503,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private boolean shouldIgnore(TranscriptSegment seg) {
-    return toIgnore.contains(seg.getEvent());
+    boolean contains = toIgnore.contains(seg.getEvent());
+    if (contains) logger.warning("match " + seg);
+    return contains;
   }
 
   private HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
@@ -486,7 +541,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (isValid(english)) {
       DivWidget lr = getHorizDiv();
       lr.addStyleName("floatLeft");
-      lr.setWidth("50%");
+      lr.setWidth(HALF_WIDTH);
 
       lr.add(getEnglishWidget(e, english));
       lr.add(getItemWidget(e));
@@ -621,8 +676,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
 
     flContainer.add(fieldContainer);
-    flContainer.setWidth("50%");
-
+    flContainer.setWidth(HALF_WIDTH);
 
     rowWidget.add(flContainer);
     return recordPanel;
@@ -644,7 +698,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private void addContext(T e, Panel card, DivWidget rowWidget) {
     int c = 0;
-    String foreignLanguage = e.getForeignLanguage();//e.getNoAccentFL();// e.getForeignLanguage();
+    String foreignLanguage = e.getForeignLanguage();//e.getNoAccentFL();
     String altFL = e.getAltFL();
     for (CommonExercise contextEx : e.getDirectlyRelated()) {
       addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
@@ -672,15 +726,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     boolean same = contextEx.getForeignLanguage().equals(contextTranslation);
     if (!same) {
-      if (context != null) {
-        context.setWidth("50%");
+      if (context != null && !contextTranslation.isEmpty()) {
+        context.setWidth(HALF_WIDTH);
       }
 
       Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation);
 
       if (contextTransWidget != null) {
         contextTransWidget.addStyleName("rightsidecolor");
-        contextTransWidget.setWidth("50%");
+        contextTransWidget.setWidth(HALF_WIDTH);
         rowWidget.add(contextTransWidget);
       }
     }

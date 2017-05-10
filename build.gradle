@@ -35,7 +35,7 @@ apply plugin: 'distribution'
 
 putnami {
     module 'mitll.langtest.LangTest'
-    gwtVersion = '2.8.0'
+    gwtVersion = '2.8.1'
     /** add gwt nature on eclipse project */
     googlePluginEclipse = true
 
@@ -70,10 +70,10 @@ dependencies {
     compile group: 'org.glassfish', name: 'javax.json', version: '1.0.4'
 
     // gwt stuff
-    providedCompile('com.google.gwt:gwt-dev:2.8.0')
-    providedCompile('com.google.gwt:gwt-user:2.8.0')
-    runtime('com.google.gwt:gwt-servlet:2.8.0')
-    testRuntime('com.google.gwt:gwt-codeserver:2.8.0')
+    providedCompile('com.google.gwt:gwt-dev:2.8.1')
+    providedCompile('com.google.gwt:gwt-user:2.8.1')
+    runtime('com.google.gwt:gwt-servlet:2.8.1')
+    testRuntime('com.google.gwt:gwt-codeserver:2.8.1')
 
     runtime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'

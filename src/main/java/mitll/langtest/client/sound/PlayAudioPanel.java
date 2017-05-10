@@ -90,7 +90,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
       "Please add this site to its whitelist.</font>");
-  //private AudioControl listener;
   private Collection<AudioControl> listeners = new HashSet<>();
   private SimpleAudioListener simpleAudioListener;
   private final List<PlayListener> playListeners = new ArrayList<PlayListener>();
@@ -122,7 +121,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     LangTest.EVENT_BUS.addHandler(PlayAudioEvent.TYPE, authenticationEvent -> {
       if (authenticationEvent.getId() != id) {
         // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
-        if (isPlaying()) pause();
+        if (isPlaying()) {
+          pause();
+          reinitialize();
+        }
       }
     });
   }
@@ -248,27 +250,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     style.setPaddingLeft(6, Style.Unit.PX);
     style.setPaddingRight(6, Style.Unit.PX);
   }
-
-  /**
-   * Make sure play button doesn't squish down when it says "pause"
-   */
-/*
-  @Override
-  protected void onLoad() {
-    super.onLoad();
-
-    int offsetWidth = playButton.getOffsetWidth();
-    if (offsetWidth < minWidth && minWidth > 0) {
-      offsetWidth = minWidth;
-    }
-
-    if (minWidth > 0) {
-//      logger.info("setting min width " + minWidth + " on " + playButton.getElement().getExID());
-      if (minWidth == BUTTON_WIDTH) offsetWidth = BUTTON_WIDTH;
-      playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
-    }
-  }
-  */
 
   /**
    * @see #addButtons(Widget)
@@ -552,9 +533,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       logger.info("PlayAudioPanel :reinitialize " + getElement().getId());
     }
 
-    setPlayLabel();
-    update(0);
-    soundManager.setPosition(currentSound, 0);
+    resetAudio();
 
     if (DEBUG || LOCAL_TESTING)
       logger.info("PlayAudioPanel :reinitialize - telling listener to reinitialize " + listeners);
@@ -564,6 +543,12 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 //    else {
 //      logger.info("PlayAudioPanel :reinitialize - no listener");
 //    }
+  }
+
+  private void resetAudio() {
+    setPlayLabel();
+    update(0);
+    soundManager.setPosition(currentSound, 0);
   }
 
   /**

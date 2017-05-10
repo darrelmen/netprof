@@ -201,7 +201,7 @@ public class WordTable {
         hdiv.add(header);
         col.add(hdiv);
 
-        DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, pair.getValue(), false);
+        DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, pair.getValue(), false, null);
         col.add(phones);
       }
     }
@@ -210,39 +210,24 @@ public class WordTable {
   }
 
   /**
-   *
    * @param audioControl so when clicked, we can play audio
    * @param phoneMap
    * @param value
    * @param simpleLayout
+   * @param wordSegment
    * @return
    */
   @NotNull
   public DivWidget getPhoneDivBelowWord(AudioControl audioControl,
                                         TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                        List<TranscriptSegment> value, boolean simpleLayout) {
+                                        List<TranscriptSegment> value,
+                                        boolean simpleLayout, TranscriptSegment wordSegment) {
     DivWidget phones = new DivWidget();
     phones.addStyleName("inlineFlex");
-    addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout);
+    addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment);
     return phones;
   }
 
-  /**
-   * When clicked, tell audioControl to play segment
-   * @param audioControl
-   * @param word
-   * @param header
-   */
-  private void addClickHandler(AudioControl audioControl, TranscriptSegment word, Label header) {
-    if (audioControl != null) {
-      header.addStyleName("handCursor");
-    }
-    header.addClickHandler(event -> {
-      if (audioControl != null) {
-        audioControl.repeatSegment(word.getStart(), word.getEnd());
-      }
-    });
-  }
 
   /**
    * @param netPronImageTypeToEndTime
@@ -344,32 +329,52 @@ public class WordTable {
    * @param audioControl
    * @param phoneMap
    * @param simpleLayout
+   * @param wordSegment
    * @see #getDivWord
    */
   public void addPhonesBelowWord2(List<TranscriptSegment> value,
                                   DivWidget scoreRow,
                                   AudioControl audioControl,
-                                  TreeMap<TranscriptSegment, IHighlightSegment> phoneMap, boolean simpleLayout) {
+                                  TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                                  boolean simpleLayout,
+                                  TranscriptSegment wordSegment) {
     int id = 0;
     for (TranscriptSegment phoneSegment : value) {
       String phoneLabel = phoneSegment.getEvent();
       if (!shouldSkipPhone(phoneLabel)) {
         SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel);
         alignCenter(h);
-        addClickHandler(audioControl, phoneSegment, h.getClickable());
+        addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
         phoneMap.put(phoneSegment, h);
         if (simpleLayout) {
           h.getElement().getStyle().setPaddingRight(5, Style.Unit.PX);
           h.setBackground(SimpleColumnChart.MAX);
-          //    h.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
-        }
-        else {
+        } else {
           setColorClickable(phoneSegment, h);
           h.addStyleName("phoneWidth");
         }
         scoreRow.add(h);
       }
     }
+  }
+
+
+  /**
+   * When clicked, tell audioControl to play segment
+   *
+   * @param audioControl
+   * @param segmentToPlay
+   * @param header
+   */
+  private void addClickHandler(AudioControl audioControl, TranscriptSegment segmentToPlay, Label header) {
+    if (audioControl != null) {
+      header.addStyleName("handCursor");
+    }
+    header.addClickHandler(event -> {
+      if (audioControl != null) {
+        audioControl.repeatSegment(segmentToPlay.getStart(), segmentToPlay.getEnd());
+      }
+    });
   }
 
   @NotNull
@@ -385,7 +390,9 @@ public class WordTable {
     h.setBackground(SimpleColumnChart.getColor(phone.getScore()));
   }
 
-  private void alignCenter(UIObject header) { header.addStyleName("center");  }
+  private void alignCenter(UIObject header) {
+    header.addStyleName("center");
+  }
 
   private int getPercent(Float aFloat) {
     return getScore(aFloat * 100);

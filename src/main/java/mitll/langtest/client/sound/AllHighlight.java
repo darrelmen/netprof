@@ -74,13 +74,11 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   @Override
   public InlineHTML getClickable() {
     throw new IllegalArgumentException("don't call me");
-    //return null;
   }
 
   @Override
   public void setClickable(boolean clickable) {
     throw new IllegalArgumentException("don't call me");
-
   }
 
   @Override
@@ -93,35 +91,6 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     return builder.toString();
   }
 
-  //DivWidget composite = null;
-
-/*  @Override
-  public void addSouth() {
-    logger.info("addSouth " + this);
-    DivWidget vert = new DivWidget();
-    this.composite = vert;
-    Widget parent = null;
-
-    for (IHighlightSegment seg : set) {
-      if (parent == null) {
-        parent = seg.getParent();
-      }
-      vert.add(seg.asWidget());
-    }
-
-    this.south = new DivWidget();
-    vert.add(south);
-
-    if (parent != null) {
-      ((Panel) parent).add(vert);
-    }
-  }*/
-
-//  @Override
-//  public DivWidget getSouth() {
-//    return south;
-//  }
-
   public void setSouth(Widget widget) {
     south.clear();
     south.add(widget);
@@ -131,11 +100,6 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   public Widget getParent() {
     return set.iterator().next().getParent();
   }
-
-/*  @Override
-  public Widget asWidget() {
-    return composite;
-  }*/
 
   public String toString() {
     return set.size() + " segments " + getLength() + " long : " + getContent();
