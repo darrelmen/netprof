@@ -39,6 +39,8 @@ package mitll.langtest.client.gauge;
  * @since 5/21/2014.
  */
 public class SimpleColumnChart {
+  public static String MAX = getColor(1.0f);
+
   /**
    * This gives a smooth range red->yellow->green:
    *  on green 0->255 over score 0->0.5, 255 for > 0.5 and

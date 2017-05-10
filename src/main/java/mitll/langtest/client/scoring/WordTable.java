@@ -36,14 +36,13 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.incubator.Table;
 import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
+import mitll.langtest.client.sound.SimpleHighlightSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
@@ -173,8 +172,11 @@ public class WordTable {
 
     TreeMap<TranscriptSegment, IHighlightSegment> words = new TreeMap<>();
     typeToSegmentToWidget.put(NetPronImageType.WORD_TRANSCRIPT, words);
+
     TreeMap<TranscriptSegment, IHighlightSegment> phoneMap = new TreeMap<>();
     typeToSegmentToWidget.put(NetPronImageType.PHONE_TRANSCRIPT, phoneMap);
+
+    int id = 0;
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
       TranscriptSegment word = pair.getKey();
 
@@ -184,26 +186,22 @@ public class WordTable {
         col.addStyleName("wordTableWord");
         table.add(col);
 
-        HighlightSegment header = new HighlightSegment(wordLabel);
+        HighlightSegment header = new HighlightSegment(id++, wordLabel);
         alignCenter(header);
         header.addStyleName("floatLeft");
         header.setWidth("100%");
 
         words.put(word, header);
-        addClickHandler(audioControl, word, header);
+        addClickHandler(audioControl, word, header.getClickable());
 
         setColorClickable(word, header);
 
         DivWidget hdiv = new DivWidget();
-        //setColor(word, hdiv);
-
         hdiv.setWidth("100%");
         hdiv.add(header);
         col.add(hdiv);
 
-        DivWidget phones = new DivWidget();
-        phones.addStyleName("inlineFlex");
-        addPhonesBelowWord2(pair.getValue(), phones, audioControl, phoneMap);
+        DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, pair.getValue(), false);
         col.add(phones);
       }
     }
@@ -211,17 +209,37 @@ public class WordTable {
     return table;
   }
 
+  /**
+   *
+   * @param audioControl so when clicked, we can play audio
+   * @param phoneMap
+   * @param value
+   * @param simpleLayout
+   * @return
+   */
+  @NotNull
+  public DivWidget getPhoneDivBelowWord(AudioControl audioControl,
+                                        TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                                        List<TranscriptSegment> value, boolean simpleLayout) {
+    DivWidget phones = new DivWidget();
+    phones.addStyleName("inlineFlex");
+    addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout);
+    return phones;
+  }
 
-  private void addClickHandler(AudioControl audioControl, TranscriptSegment word, InlineHTML header) {
+  /**
+   * When clicked, tell audioControl to play segment
+   * @param audioControl
+   * @param word
+   * @param header
+   */
+  private void addClickHandler(AudioControl audioControl, TranscriptSegment word, Label header) {
     if (audioControl != null) {
       header.addStyleName("handCursor");
     }
-    header.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        if (audioControl != null) {
-          audioControl.repeatSegment(word.getStart(), word.getEnd());
-        }
+    header.addClickHandler(event -> {
+      if (audioControl != null) {
+        audioControl.repeatSegment(word.getStart(), word.getEnd());
       }
     });
   }
@@ -321,26 +339,34 @@ public class WordTable {
   }
 
   /**
-   * @see #getDivWord
    * @param value
    * @param scoreRow
    * @param audioControl
    * @param phoneMap
+   * @param simpleLayout
+   * @see #getDivWord
    */
-  private void addPhonesBelowWord2(List<TranscriptSegment> value,
-                                   DivWidget scoreRow,
-                                   AudioControl audioControl,
-                                   TreeMap<TranscriptSegment, IHighlightSegment> phoneMap) {
-    for (TranscriptSegment phone : value) {
-      String phoneLabel = phone.getEvent();
+  public void addPhonesBelowWord2(List<TranscriptSegment> value,
+                                  DivWidget scoreRow,
+                                  AudioControl audioControl,
+                                  TreeMap<TranscriptSegment, IHighlightSegment> phoneMap, boolean simpleLayout) {
+    int id = 0;
+    for (TranscriptSegment phoneSegment : value) {
+      String phoneLabel = phoneSegment.getEvent();
       if (!shouldSkipPhone(phoneLabel)) {
-        HighlightSegment h = new HighlightSegment(phoneLabel);
+        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel);
         alignCenter(h);
-        addClickHandler(audioControl, phone, h);
-        phoneMap.put(phone, h);
-        setColorClickable(phone, h);
-        h.addStyleName("phoneWidth");
-//        h.getElement().getStyle().setWidth(PHONE_WIDTH, Style.Unit.PX);
+        addClickHandler(audioControl, phoneSegment, h.getClickable());
+        phoneMap.put(phoneSegment, h);
+        if (simpleLayout) {
+          h.getElement().getStyle().setPaddingRight(5, Style.Unit.PX);
+          h.setBackground(SimpleColumnChart.MAX);
+          //    h.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+        }
+        else {
+          setColorClickable(phoneSegment, h);
+          h.addStyleName("phoneWidth");
+        }
         scoreRow.add(h);
       }
     }
@@ -352,19 +378,14 @@ public class WordTable {
   }
 
   private void setColor(TranscriptSegment phone, UIObject h) {
-    String color = SimpleColumnChart.getColor(phone.getScore());
-    h.getElement().getStyle().setBackgroundColor(color);
+    h.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(phone.getScore()));
   }
 
-  private void setColorClickable(TranscriptSegment phone, HighlightSegment h) {
-    String color = SimpleColumnChart.getColor(phone.getScore());
-    h.setBackground(color);
+  private void setColorClickable(TranscriptSegment phone, IHighlightSegment h) {
+    h.setBackground(SimpleColumnChart.getColor(phone.getScore()));
   }
 
-  private void alignCenter(UIObject header) {
-    header.addStyleName("center");
-//    header.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
-  }
+  private void alignCenter(UIObject header) { header.addStyleName("center");  }
 
   private int getPercent(Float aFloat) {
     return getScore(aFloat * 100);
@@ -375,6 +396,8 @@ public class WordTable {
   }
 
   /**
+   * Slower than needs to be.
+   *
    * @param netPronImageTypeToEndTime
    * @return
    * @see #getDivWord

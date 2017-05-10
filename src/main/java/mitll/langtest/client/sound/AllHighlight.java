@@ -1,15 +1,40 @@
 package mitll.langtest.client.sound;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.Widget;
+
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/26/17.
  */
-public class AllHighlight implements IHighlightSegment {
+public class AllHighlight extends DivWidget implements IHighlightSegment {
+  protected final Logger logger = Logger.getLogger("AllHighlight");
+
   private final Collection<IHighlightSegment> set;
+
+  private DivWidget north;
+  private DivWidget south;
+  private int id;
+  String content;
 
   public AllHighlight(Collection<IHighlightSegment> bulk) {
     this.set = bulk;
+    add(north =new DivWidget());
+    addAll();
+    add(south =new DivWidget());
+  }
+
+  public void addAll() {
+    north.clear();
+    for (IHighlightSegment seg : set) north.add(seg.asWidget());
+  }
+
+  @Override
+  public void setBackground(String background) {
+
   }
 
   @Override
@@ -47,6 +72,18 @@ public class AllHighlight implements IHighlightSegment {
   }
 
   @Override
+  public InlineHTML getClickable() {
+    throw new IllegalArgumentException("don't call me");
+    //return null;
+  }
+
+  @Override
+  public void setClickable(boolean clickable) {
+    throw new IllegalArgumentException("don't call me");
+
+  }
+
+  @Override
   public String getContent() {
     StringBuilder builder = new StringBuilder();
     for (IHighlightSegment seg : set) {
@@ -55,6 +92,50 @@ public class AllHighlight implements IHighlightSegment {
 
     return builder.toString();
   }
+
+  //DivWidget composite = null;
+
+/*  @Override
+  public void addSouth() {
+    logger.info("addSouth " + this);
+    DivWidget vert = new DivWidget();
+    this.composite = vert;
+    Widget parent = null;
+
+    for (IHighlightSegment seg : set) {
+      if (parent == null) {
+        parent = seg.getParent();
+      }
+      vert.add(seg.asWidget());
+    }
+
+    this.south = new DivWidget();
+    vert.add(south);
+
+    if (parent != null) {
+      ((Panel) parent).add(vert);
+    }
+  }*/
+
+//  @Override
+//  public DivWidget getSouth() {
+//    return south;
+//  }
+
+  public void setSouth(Widget widget) {
+    south.clear();
+    south.add(widget);
+  }
+
+  @Override
+  public Widget getParent() {
+    return set.iterator().next().getParent();
+  }
+
+/*  @Override
+  public Widget asWidget() {
+    return composite;
+  }*/
 
   public String toString() {
     return set.size() + " segments " + getLength() + " long : " + getContent();

@@ -1,17 +1,18 @@
 package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.Widget;
 
-import java.util.List;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/25/17.
  */
-public class HighlightSegment extends InlineHTML implements IHighlightSegment {
+public class HighlightSegment extends DivWidget implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("HighlightSegment");
 
   private static final String BLUE = "#2196F3";
@@ -19,19 +20,41 @@ public class HighlightSegment extends InlineHTML implements IHighlightSegment {
   private String background = null;
   private boolean highlighted = false;
   private boolean clickable = true;
+  private final DivWidget north;
+  private final DivWidget south;
+  private final int id;
+  private final String content;
+  private final InlineHTML span;
 
-  public HighlightSegment(@IsSafeHtml String html, Direction dir) {
-    super(html, dir);
+  /**
+   * @param id
+   * @param html
+   * @param dir
+   * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
+   */
+  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir) {
+    add(north = new DivWidget());
+    //north.addStyleName("floatLeft");
+    // north.setWidth("100%");
+    add(south = new DivWidget());
+    south.setWidth("100%");
+    south.addStyleName("floatLeft");
+    //setWidth("100%");
+    getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+    this.span = new InlineHTML(html, dir);
+    this.content = html;
+    north.add(span);
     length = html.length();
+    this.id = id;
   }
 
   /**
+   * @param id
    * @param content
-   * @see mitll.langtest.client.scoring.WordTable#addPhonesBelowWord2(List, DivWidget, AudioControl, TreeMap)
+   * @see mitll.langtest.client.scoring.WordTable#addPhonesBelowWord2
    */
-  public HighlightSegment(String content) {
-    super(content);
-    this.length = content.length();
+  public HighlightSegment(int id, String content) {
+    this(id, content, HasDirection.Direction.LTR);
   }
 
   public int getLength() {
@@ -40,23 +63,27 @@ public class HighlightSegment extends InlineHTML implements IHighlightSegment {
 
   public void setBackground(String background) {
     this.background = background;
-    getElement().getStyle().setBackgroundColor(background);
+    getSpanStyle().setBackgroundColor(background);
   }
 
   @Override
   public void setBlue() {
     highlighted = true;
-    getElement().getStyle().setBackgroundColor(BLUE);
+    getSpanStyle().setBackgroundColor(BLUE);
   }
 
   @Override
   public void clearBlue() {
     highlighted = false;
     if (background == null) {
-      getElement().getStyle().clearBackgroundColor();
+      getSpanStyle().clearBackgroundColor();
     } else {
-      getElement().getStyle().setBackgroundColor(background);
+      getSpanStyle().setBackgroundColor(background);
     }
+  }
+
+  private Style getSpanStyle() {
+    return span.getElement().getStyle();
   }
 
   @Override
@@ -69,14 +96,50 @@ public class HighlightSegment extends InlineHTML implements IHighlightSegment {
     return clickable;
   }
 
+  @Override
+  public InlineHTML getClickable() {
+    return span;
+  }
+
+  @Override
   public void setClickable(boolean clickable) {
     this.clickable = clickable;
   }
 
   @Override
-  public String getContent() { return getHTML(); }
+  public String getContent() {
+    return content;
+  }
 
   public String toString() {
-    return  "segment (" +getHTML()+ ") " + getLength() + " long";
+    return "'" + content + "' (" + getLength() + ")";
   }
+
+/*  @Override
+  public DivWidget getSouth() {
+    return south;
+  }*/
+
+  public void setSouth(Widget widget) {
+    south.clear();
+    south.add(widget);
+  }
+
+/*  @Override
+  public void addSouth() {
+    logger.info("addSouth #" + id + " : " + getContent());
+    Widget parent = getParent();
+    removeFromParent();
+
+    DivWidget vert = new DivWidget();
+    vert.add(asWidget());
+    DivWidget south = new DivWidget();
+    this.south = south;
+    vert.add(south);
+
+    ((Panel) parent).add(vert);
+  }*/
+//  public void setSouth(Widget south) {
+//    this.south = south;
+//  }
 }

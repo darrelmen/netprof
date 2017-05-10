@@ -100,7 +100,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.index = index;
     this.exerciseID = exerciseID;
     this.controller = controller;
-    //this.buttonWidth = buttonWidth;
     this.scoreAudioNow = scoreAudioNow;
 
     this.recordInResults = recordInResults;

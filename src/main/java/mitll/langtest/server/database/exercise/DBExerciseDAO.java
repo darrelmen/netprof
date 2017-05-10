@@ -255,7 +255,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
     sectionHelper.setParentToChildTypes(parentToChild);
 
-    logger.info("setRootTypes roots " + rootTypes);
+//    logger.info("setRootTypes roots " + rootTypes);
 
     sectionHelper.setPredefinedTypeOrder(typeOrder);
     //   logger.info("parentToChild " + parentToChild);

@@ -2,7 +2,6 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Alignment;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
@@ -15,7 +14,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.InitialUI;
@@ -25,20 +23,17 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.ShowEvent;
-import mitll.langtest.client.exercise.AudioChangedEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
-import slick.ast.Drop;
 
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.banner.NewContentChooser.*;
+import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 
 /**
  * Created by go22670 on 4/10/17.

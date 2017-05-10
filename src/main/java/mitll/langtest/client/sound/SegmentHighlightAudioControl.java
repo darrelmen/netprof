@@ -15,16 +15,27 @@ public class SegmentHighlightAudioControl implements AudioControl {
   private SegmentAudioControl wordSegments, phoneSegments = null;
 
   /**
-   * @param typeToSegmentToWidget
+   * @paramz typeToSegmentToWidget
    * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#getWordTableContainer
    */
-  public SegmentHighlightAudioControl(Map<NetPronImageType,
-      TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
-    wordSegments = new SegmentAudioControl(typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT));
-    TreeMap<TranscriptSegment, IHighlightSegment> words =
-        typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
-    if (words != null) {
-      phoneSegments = new SegmentAudioControl(words);
+  public SegmentHighlightAudioControl(/*Map<NetPronImageType,
+      TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget*/) {
+    //setTypeToSegments(typeToSegmentToWidget);
+  }
+
+  public SegmentHighlightAudioControl(Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
+    setTypeToSegments(typeToSegmentToWidget);
+  }
+
+  public void setTypeToSegments(Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
+    TreeMap<TranscriptSegment, IHighlightSegment> words = typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
+    wordSegments = new SegmentAudioControl(words);
+    TreeMap<TranscriptSegment, IHighlightSegment> phones = typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
+    if (phones != null) {
+      phoneSegments = new SegmentAudioControl(phones);
+//
+//      logger.info("phoneSegments now has " + phones.size());
+//      logger.info("wordSegments  now has " + words.size());
     }
   }
 
@@ -54,7 +65,9 @@ public class SegmentHighlightAudioControl implements AudioControl {
   @Override
   public void update(double position) {
     wordSegments.update(position);
-    if (phoneSegments != null) phoneSegments.update(position);
+    if (phoneSegments != null) {
+      phoneSegments.update(position);
+    }
   }
 
   @Override

@@ -249,10 +249,13 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     if (pretestScore.getHydecScore() > 0) {
       DivWidget scoreFeedbackDiv = new DivWidget();
       scoreFeedbackDiv.add(progressBar);
+
       Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
       scoreFeedbackDiv.add(new WordScoresTable()
           .getStyledWordTable(pretestScore, playAudioPanel, typeToSegmentToWidget));
-      playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
+      SegmentHighlightAudioControl listener = new SegmentHighlightAudioControl(typeToSegmentToWidget);
+      playAudioPanel.setListener(listener);
+
       wordTableContainer.add(scoreFeedbackDiv);
       logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
     } else {
