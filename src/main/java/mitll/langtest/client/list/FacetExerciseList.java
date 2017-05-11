@@ -395,7 +395,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   public void showList(int newUserListID) {
     Map<String, String> candidate = new HashMap<>(typeToSelection);
     candidate.put(LISTS, "" + newUserListID);
-//      logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID);
+      logger.info("showList " + candidate);
     getTypeToValues(candidate, newUserListID);
   }
 
@@ -432,8 +432,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
       typeOrder = projectStartupInfo.getTypeOrder();
-//      logger.info("getTypeOrder type order " + typeOrder);
-      this.rootNodesInOrder = new ArrayList<>(projectStartupInfo.getTypeOrder());
+      logger.info("getTypeOrder type order " + typeOrder);
+      this.rootNodesInOrder = new ArrayList<>(typeOrder);
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
   }
@@ -604,6 +604,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   @NotNull
   private ListItem getTypeContainer(String type) {
+    if (type.isEmpty()) logger.warning("huh? type is empty???");
     boolean hasSelection = typeToSelection.containsKey(type);
     ListItem liForDimensionForType = getLIDimension(hasSelection);
     liForDimensionForType.add(hasSelection ? getTypeHeader(type) : getSimpleHeader(type));

@@ -711,14 +711,14 @@ public class ListManager implements RequiresResize {
 
     final boolean isNormalList = !isReview && !isComment && !isAttention;
 
-    final TabAndContent learn = isNormalList ? getLearnTab(ul, tabPanel, isReview, instanceName1, learnTitle) : null;
+    final TabAndContent learn = null;//isNormalList ? getLearnTab(ul, tabPanel, isReview, instanceName1, learnTitle) : null;
 
     // add practice tab
     TabAndContent practice = null;
-    if (isNormalList) {
+/*    if (isNormalList) {
       logger.info("getListOperations : isNormalList ");
       practice = getPracticeTab(ul, toSelect, tabPanel);
-    }
+    }*/
 
     // add add item and edit tabs (conditionally)
     TabAndContent editItemTab = null;
@@ -755,6 +755,7 @@ public class ListManager implements RequiresResize {
     return tabPanel;
   }
 
+/*
   private TabAndContent getLearnTab(final UserList<CommonShell> ul, TabPanel tabPanel, boolean isReview,
                                     final String instanceName1, String learnTitle) {
     logger.info("getLearnTab " + ul.getID() + " instance " + instanceName1);
@@ -774,8 +775,9 @@ public class ListManager implements RequiresResize {
     });
     return learn;
   }
+*/
 
-  private TabAndContent getPracticeTab(final UserList<CommonShell> ul, final HasID toSelect, TabPanel tabPanel) {
+/*  private TabAndContent getPracticeTab(final UserList<CommonShell> ul, final HasID toSelect, TabPanel tabPanel) {
     TabAndContent practice;
     practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
     final TabAndContent fpractice = practice;
@@ -791,7 +793,7 @@ public class ListManager implements RequiresResize {
       }
     });
     return practice;
-  }
+  }*/
 
   /**
    * @param ul
@@ -893,7 +895,7 @@ public class ListManager implements RequiresResize {
   /**
    * @param uniqueID
    * @param isPublic
-   * @see UserListCallback#getIsPublic(UserList, long)
+   * @see UserListCallback#getIsPublic
    */
   void setPublic(int uniqueID, boolean isPublic) {
     listService.setPublicOnList(uniqueID, isPublic, new AsyncCallback<Void>() {
@@ -1023,10 +1025,15 @@ public class ListManager implements RequiresResize {
           logger.info("selectTabGivenHistory doing sublearn " + instanceName1+ " learn " + learn);
 
         if (learn == null) {
-          tabPanel.selectTab(0); // first tab
+          try {
+            tabPanel.selectTab(0); // first tab
+          } catch (Exception e) {
+            logger.info("no tabs to select...");
+          }
           //   reviewItem.showNPF(ul, edit, getInstanceName(isReview), false, toSelect);
-          showEditReviewOrComment(ul, edit, isReview, isComment);
-
+          if (edit != null) {
+            showEditReviewOrComment(ul, edit, isReview, isComment);
+          }
         } else {
           tabPanel.selectTab(SUBTAB_LEARN_INDEX);
           showLearnTab(learn, ul, instanceName1, toSelect);
@@ -1117,8 +1124,10 @@ public class ListManager implements RequiresResize {
    * @param isComment
    * @see #selectTabGivenHistory
    */
-  private void showEditReviewOrComment(UserList ul, TabAndContent finalEditItem,
-                                       boolean isReview, boolean isComment) {
+  private void showEditReviewOrComment(UserList ul,
+                                       TabAndContent finalEditItem,
+                                       boolean isReview,
+                                       boolean isComment) {
     boolean reviewOrComment = isReview || isComment;
     if (reviewOrComment) {
       reviewItem.showNPF(ul, finalEditItem, getInstanceName(isReview), true);

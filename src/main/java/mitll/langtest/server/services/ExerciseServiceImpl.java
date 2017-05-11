@@ -1206,6 +1206,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.info("getFullExercises all " + ids.size() + " exercises have audio");
     }
 
+
     addScores(userID, exercises);
 
     return new ExerciseListWrapper<>(reqid, exercises, null, getScoreHistories(ids, exercises, userID));
@@ -1217,6 +1218,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
+      addAnnotations(byID); // todo do this in a better way
+
       if (byID.getAudioAttributes().isEmpty()) {
         toAddAudioTo.add(byID);
         logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");

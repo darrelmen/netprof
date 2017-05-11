@@ -28,7 +28,7 @@ import java.util.Set;
  * Created by go22670 on 4/19/17.
  */
 public class UserListSupport {
-//  private final Logger logger = Logger.getLogger("UserListSupport");
+  //  private final Logger logger = Logger.getLogger("UserListSupport");
   private static final String ADD_TO_LIST = "Add to List";
   private static final String REMOVE_FROM_LIST = "Remove from List";
   private static final String NEW_LIST = "New List";
@@ -53,7 +53,7 @@ public class UserListSupport {
    */
   void addListOptions(Dropdown dropdownContainer, int exid) {
     DropdownSubmenu addToList = new DropdownSubmenu(ADD_TO_LIST);
-  //  addToList.setRightDropdown(true);
+    //  addToList.setRightDropdown(true);
     //  addToList.setStyleDependentName("pull-left", true);
 
     DropdownSubmenu removeFromList = new DropdownSubmenu(REMOVE_FROM_LIST);
@@ -102,7 +102,7 @@ public class UserListSupport {
     ListServiceAsync listService = controller.getListService();
 
     //  logger.info("asking for " + id );
-    listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -116,14 +116,18 @@ public class UserListSupport {
         boolean anyAdded = false;
         boolean anyToRemove = false;
         for (final UserList ul : result) {
-          knownNamesForDuplicateCheck.add(ul.getName().trim().toLowerCase());
-          if (!ul.containsByID(id)) {
-            anyAdded = true;
-            getAddListLink(ul, addToList, id, container);
-          } else {
-            anyToRemove = true;
-            getRemoveListLink(ul, removeFromList, id, container);
+
+          if (ul.getUserID() == controller.getUser()) {
+            knownNamesForDuplicateCheck.add(ul.getName().trim().toLowerCase());
+            if (!ul.containsByID(id)) {
+              anyAdded = true;
+              getAddListLink(ul, addToList, id, container);
+            } else {
+              anyToRemove = true;
+              getRemoveListLink(ul, removeFromList, id, container);
+            }
           }
+
           addSendLink(ul, emailList);
         }
         if (!anyAdded) {

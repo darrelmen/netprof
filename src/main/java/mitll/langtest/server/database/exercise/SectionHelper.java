@@ -99,14 +99,14 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public List<String> getTypeOrder() {
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<>();
-      //  types.addAll(typeToSectionToTypeToSections.keySet());
+
       types.addAll(typeToUnitToLesson.keySet());
       if (DEBUG) logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
       if (DEBUG) logger.info("getTypeOrder typeToCount = " + typeToCount);
 
       if (types.isEmpty()) {
         types.addAll(typeToCount.keySet());
-      } //else {
+      }
 
       if (!typeToCount.isEmpty()) {
         Collections.sort(types, new Comparator<String>() {
@@ -124,7 +124,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       // put sound at end...
       reorderTypes(types);
       // }
-      if (DEBUG) logger.info("getTypeOrder types " + types);
+      //if (DEBUG)
+        logger.warn("getTypeOrder types " + types);
 
       return types;
     } else {
@@ -771,6 +772,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    * @see #addExerciseToLesson(Shell, String, String)
    */
   private Map<String, Lesson<T>> getSectionToLesson(String section) {
+    if (section.isEmpty()) {
+      logger.error("huh? section is empty ",new Exception());
+    }
     Map<String, Lesson<T>> unit = typeToUnitToLesson.get(section);
     if (unit == null) {
       typeToUnitToLesson.put(section, unit = new HashMap<>());

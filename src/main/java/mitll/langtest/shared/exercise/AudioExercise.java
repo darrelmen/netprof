@@ -526,12 +526,10 @@ public class AudioExercise extends ExerciseShell {
     if (!fieldToAnnotation.containsKey(field)) {
       if (field.endsWith(WAV)) {
         String key = field.replaceAll(WAV, MP3);
-        ExerciseAnnotation exerciseAnnotation = fieldToAnnotation.get(key);
-        return exerciseAnnotation;
+        return fieldToAnnotation.get(key);
       } else if (field.endsWith(MP3)) {
         String key = field.replaceAll(MP3, WAV);
-        ExerciseAnnotation exerciseAnnotation = fieldToAnnotation.get(key);
-        return exerciseAnnotation;
+        return fieldToAnnotation.get(key);
       }
     }
     return fieldToAnnotation.get(field);

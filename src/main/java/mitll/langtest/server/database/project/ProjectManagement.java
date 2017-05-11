@@ -363,8 +363,8 @@ public class ProjectManagement implements IProjectManagement {
    * @see #configureProject
    */
   private void setDependencies(ExerciseDAO exerciseDAO, int projid) {
-    //logger.info("setDependencies - project #" + projid);
     IAudioDAO audioDAO = db.getAudioDAO();
+    logger.info("setDependencies - project #" + projid  + " audio dao " + audioDAO);
 
     if (audioDAO == null) {
       logger.error("setDependencies no audio dao ", new Exception());
@@ -374,7 +374,8 @@ public class ProjectManagement implements IProjectManagement {
         db.getUserExerciseDAO(),
         null /*addRemoveDAO*/,
         audioDAO,
-        projid);
+        projid,
+        db);
   }
 
   /**
@@ -608,6 +609,11 @@ public class ProjectManagement implements IProjectManagement {
         ISection<CommonExercise> sectionHelper = project.getSectionHelper();
 
         String language = project1.language();
+
+        for (String type:typeOrder) {
+          if (type.isEmpty()) logger.error("huh? type order has blank?? " + type);
+        }
+
         ProjectStartupInfo startupInfo = new ProjectStartupInfo(
             serverProps.getProperties(),
             typeOrder,

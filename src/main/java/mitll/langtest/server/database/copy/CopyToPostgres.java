@@ -176,7 +176,6 @@ public class CopyToPostgres<T extends CommonShell> {
                                               String optPropsFile,
                                               String installPath) {
     // logger.info("getDatabaseLight db " + config + " optional props " + optPropsFile);
-
     String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
     logger.info("getDatabaseLight db " + config + " props " + propsFile);
@@ -258,6 +257,8 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
+
+    logger.info("copyOneConfig project is  type order is " + typeOrder + " for import project id " +DatabaseImpl.IMPORT_PROJECT_ID);
 
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev, typeOrder);  // TODO : course?
 

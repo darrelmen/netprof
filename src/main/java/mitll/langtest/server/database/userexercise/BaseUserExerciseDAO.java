@@ -51,7 +51,7 @@ public class BaseUserExerciseDAO extends DAO {
 
   /**
    * @see #getPredefExercise
-   * @see #
+   * @see #setExerciseDAO
    */
   ExerciseDAO<CommonExercise> exerciseDAO;
 
@@ -109,7 +109,7 @@ public class BaseUserExerciseDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    * @param exerciseDAO
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {

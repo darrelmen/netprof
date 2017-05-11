@@ -122,24 +122,6 @@ public class UserList<T extends HasID> extends BaseExercise {
     return userid;
   }
 
-  /**
-   * @paramx ul
-   * @seex mitll.langtest.shared.custom.UserList#getCopy
-   */
-/*  public UserList(UserList<T> ul) {
-    this(ul.getID(), ul.getUserID() , ul.getUserChosenID(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified(),
-        ul.getContextURL());
-  }*/
-
-/*
-  public UserList<T> getCopy() {
-    UserList<T> copy = new UserList<>(this);
-    for (T ue : getExercises()) {
-      copy.addExercise(ue);
-    }
-    return copy;
-  }
-*/
   public void addExerciseAfter(T after, T toAdd) {
     int index = exercises.indexOf(after);
     if (index == -1) {

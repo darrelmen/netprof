@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
@@ -47,7 +48,7 @@ import java.util.Set;
  * Container for exercises for the site.
  * Mainly we want to be able to add and remove exercies, and add overlays of user exercises
  * Also attaches audio (join) to exercises.
- *
+ * <p>
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -58,9 +59,9 @@ import java.util.Set;
  */
 public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends SimpleExerciseDAO<T> {
   /**
-   * @Deprecated - do we still need this with domino content management?
    * @param userExercise
    * @return
+   * @Deprecated - do we still need this with domino content management?
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
    */
   CommonExercise addOverlay(CommonExercise userExercise);
@@ -86,7 +87,8 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   void setDependencies(IUserExerciseDAO userExerciseDAO,
                        AddRemoveDAO addRemoveDAO,
                        IAudioDAO audioDAO,
-                       int projid);
+                       int projid,
+                       Database database);
 
   /**
    * @paramx all
@@ -94,9 +96,9 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
    */
   //void attachAudio(Collection<CommonExercise> all);
 
-  Map<Integer,String> getIDToFL(int projid);
+  Map<Integer, String> getIDToFL(int projid);
 
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe);
 
-  void updatePhones(int id,int count);
+  void updatePhones(int id, int count);
 }

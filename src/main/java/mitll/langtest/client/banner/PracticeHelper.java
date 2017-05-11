@@ -61,6 +61,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
+  NPFlexSectionExerciseList facetExerciseList;
 
   public PracticeHelper(ExerciseController controller) { super(controller, null);  }
 
@@ -80,6 +81,11 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   }
 
   @Override
+  public void showList(int listid) {
+    facetExerciseList.showList(listid);
+  }
+
+  @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>( controller, outer) {
       final FlexListLayout outer = this;
@@ -88,7 +94,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
-        return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel,
+        return facetExerciseList = new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel,
             new ListOptions(instanceName)
                 .setShowPager(false).
                 setShowTypeAhead(false), listHeader, footer, 1) {
@@ -112,9 +118,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
             }
           }
 
-          protected void gotVisibleRangeChanged(Collection<Integer> idsForRange) {
-           // askServerForExercises(-1, idsForRange);
-          }
+          protected void gotVisibleRangeChanged(Collection<Integer> idsForRange) {}
 
           @Override
           protected void onLastItem() {

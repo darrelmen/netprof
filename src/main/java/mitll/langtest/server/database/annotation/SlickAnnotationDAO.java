@@ -114,6 +114,9 @@ public class SlickAnnotationDAO
 
     Collection<SlickAnnotation> latestByExerciseID = dao.getLatestByExerciseID(exerciseID);
 
+    if (!latestByExerciseID.isEmpty()) {
+      logger.info("found " + latestByExerciseID.size() + " for "+exerciseID);
+    }
     long now = System.currentTimeMillis();
 
     if (now-then >20) {

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
  */
 public class ClickableWords<T extends CommonExercise> {
   private final Logger logger = Logger.getLogger("ClickableWords");
+
   private static final String CONTEXTMATCH = "contextmatch";
 
   private static final String STRONG = "strong";
@@ -111,7 +112,7 @@ public class ClickableWords<T extends CommonExercise> {
     int i = 0;
     for (IHighlightSegment segment : segmentsForTokens) {
       horizontal.add(segment.asWidget());
-      logger.info("adding token " + (i++) + " " + segment);
+     // logger.info("adding token " + (i++) + " " + segment);
       if (addRightMargin) {
         segment.getClickable().addStyleName("rightFiveMargin");
       }
@@ -288,10 +289,9 @@ public class ClickableWords<T extends CommonExercise> {
     }
 
     if (isRTL(exercise) && flLine) {
-      logger.info("Reversing tokens " + tokens);
+//      logger.info("Reversing tokens " + tokens);
       Collections.reverse(tokens);
-      logger.info("Reversing tokens now " + tokens);
-
+  //    logger.info("Reversing tokens now " + tokens);
     }
     return tokens;
   }

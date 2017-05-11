@@ -544,7 +544,8 @@ public class SlickUserExerciseDAO
   private List<Pair> getUnitToValue(SlickExercise slick, Collection<String> typeOrder) {
     List<Pair> pairs = new ArrayList<>();
     Iterator<String> iterator = typeOrder.iterator();
-    String first = iterator.next();
+
+    String first  = iterator.hasNext() ? iterator.next() : "Unit";
     String second = iterator.hasNext() ? iterator.next() : "";
     boolean firstEmpty = slick.unit().isEmpty();
 
@@ -577,6 +578,7 @@ public class SlickUserExerciseDAO
 
   @NotNull
   private Pair getPair(String first, String value) {
+    if (first.isEmpty()) logger.error("huh type is empty " + value, new Exception());
     return new Pair(first, value);
   }
 
@@ -657,7 +659,7 @@ public class SlickUserExerciseDAO
 //      logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allPairs);
     }
-  //  logger.info("getExercises created " + copy.size() + " exercises");
+    //  logger.info("getExercises created " + copy.size() + " exercises");
     return copy;
   }
 
@@ -818,8 +820,14 @@ public class SlickUserExerciseDAO
   private List<String> getBaseTypeOrder(Project project) {
     List<String> typeOrder = new ArrayList<>();
     SlickProject project1 = project.getProject();
-    typeOrder.add(project1.first());
-    if (!project1.second().isEmpty()) typeOrder.add(project1.second());
+    if (!project1.first().isEmpty()) {
+      typeOrder.add(project1.first());
+    } else {
+      logger.error("huh? project " + project + " first type is empty?");
+    }
+    if (!project1.second().isEmpty()) {
+      typeOrder.add(project1.second());
+    }
     return typeOrder;
   }
 

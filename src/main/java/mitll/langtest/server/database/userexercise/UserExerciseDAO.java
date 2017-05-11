@@ -35,6 +35,7 @@ package mitll.langtest.server.database.userexercise;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -500,7 +501,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       //logger.debug("getUserExercises sql = " + sql);
       ResultSet rs = statement.executeQuery();
 
-      List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
+      ISection<CommonExercise> sectionHelper = exerciseDAO.getSectionHelper();
+      List<String> typeOrder = sectionHelper.getTypeOrder();
       while (rs.next()) {
         Exercise e = getUserExercise(rs, typeOrder);
 //        logger.info("getUserExercises " + e);

@@ -33,7 +33,12 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -127,6 +132,18 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
+  }
+
+  @Override
+  public void setDependencies(IUserExerciseDAO userExerciseDAO,
+                              AddRemoveDAO addRemoveDAO,
+                              IAudioDAO audioDAO,
+                              int projid,
+                              Database database) {
+    this.userExerciseDAO = new UserExerciseDAO(database);
+    this.userExerciseDAO.setExerciseDAO(this);
+    this.addRemoveDAO = addRemoveDAO;
+    setAudioDAO(audioDAO, projid);
   }
 
   protected List<CommonExercise> readExercises() {

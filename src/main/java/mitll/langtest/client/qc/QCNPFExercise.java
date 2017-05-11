@@ -94,8 +94,13 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   public static final String ALTFL = "alternate";
   public static final String ENGLISH = "english";
   public static final String MEANING = "meaning";
+
+  @Deprecated
   public static final String CONTEXT = "context";
+
   public static final String ALTCONTEXT = "altcontext";
+
+  @Deprecated
   public static final String CONTEXT_TRANSLATION = "context translation";
 
   private static final String REF_AUDIO = "refAudio";

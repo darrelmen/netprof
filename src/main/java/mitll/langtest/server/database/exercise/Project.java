@@ -150,11 +150,11 @@ public class Project implements PronunciationLookup {
     List<String> types = sectionHelper == null ? Collections.EMPTY_LIST : sectionHelper.getTypeOrder();
     if (project != null && (types == null || types.isEmpty())) {
       types = new ArrayList<>();
-      String first = project.first();
+      String first  = project.first();
       String second = project.second();
-      if (first != null && !first.isEmpty()) types.add(first);
+      if (first != null && !first.isEmpty())   types.add(first);
       if (second != null && !second.isEmpty()) types.add(second);
-      //logger.info("getTypeOrder Type order " + types);
+      logger.info("getTypeOrder type order " + types);
     }
 
     return types;

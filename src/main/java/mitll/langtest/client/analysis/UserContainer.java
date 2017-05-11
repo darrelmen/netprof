@@ -99,7 +99,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     super.addColumnsToTable(sortEnglish);
 
     addNumber();
-  //  addInitialScore();
     addCurrent();
     addFinalScore();
     addDate();

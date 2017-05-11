@@ -202,7 +202,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     if (show != null && !show.isEmpty()) {
       try {
         choices = PhonesChoices.valueOf(show);
-        logger.info("getPhonesDisplay got " + choices);
+     //   logger.info("getPhonesDisplay got " + choices);
       } catch (IllegalArgumentException ee) {
         logger.warning("getPhonesDisplay got " + ee);
       }
@@ -239,7 +239,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     view.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        logger.info("show phones " + getPhonesDisplay());
+     //   logger.info("show phones " + getPhonesDisplay());
         phoneChoice.setText(getPhoneMenuTitle());
       }
     });

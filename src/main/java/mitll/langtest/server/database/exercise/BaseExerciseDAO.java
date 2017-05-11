@@ -34,6 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
@@ -70,13 +71,13 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private final boolean addDefects;
 
   private List<CommonExercise> exercises = null;
-  private AddRemoveDAO addRemoveDAO;
+  protected AddRemoveDAO addRemoveDAO;
   /**
    * @see #addNewExercises
    * @see #addOverlays
    * @see #setDependencies
    */
-  private IUserExerciseDAO userExerciseDAO;
+  protected IUserExerciseDAO userExerciseDAO;
   /**
    * TODO : what's the story here?
    * @see #attachAudio
@@ -251,10 +252,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param projectID
    * @see #setDependencies
    */
-  private void setAudioDAO(IAudioDAO audioDAO, int projectID) {
+  protected void setAudioDAO(IAudioDAO audioDAO, int projectID) {
     this.audioDAO = audioDAO;
     if (!serverProps.isLaptop()) {
-//      logger.info("setAudioDAO makeSureAudioIsThere " + projectID);
+      logger.info("setAudioDAO makeSureAudioIsThere " + projectID);
       audioDAO.makeSureAudioIsThere(projectID, language, false);
     }
   }
@@ -500,7 +501,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   public void setDependencies(IUserExerciseDAO userExerciseDAO,
                               AddRemoveDAO addRemoveDAO,
                               IAudioDAO audioDAO,
-                              int projid) {
+                              int projid,
+
+                              Database database) {
     this.userExerciseDAO = userExerciseDAO;
     this.addRemoveDAO = addRemoveDAO;
     setAudioDAO(audioDAO, projid);
