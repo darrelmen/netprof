@@ -408,7 +408,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     // TODO : for now, since we need to deal with underline... somehow...
     // and when clicking inside dialog, seems like we need to dismiss dialog...
     if (label.contains(CONTEXT)) {
-      InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
+      InlineHTML englishPhrase = new InlineHTML(value, getDirection(value));
       englishPhrase.addStyleName("Instruction-data-with-wrap");
       if (label.contains(MEANING)) {
         englishPhrase.addStyleName("englishFont");
@@ -459,11 +459,15 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   }
 
   private boolean isRTLContent(String content) {
-    return controller.isRightAlignContent() || WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
+    return getDirection(content) == HasDirection.Direction.RTL;
+  }
+
+  private HasDirection.Direction getDirection(String content) {
+    return WordCountDirectionEstimator.get().estimateDirection(content);
   }
 
   private InlineHTML makeClickableText(String label, String value, final String html, boolean chineseCharacter) {
-    final InlineHTML w = new InlineHTML(html, WordCountDirectionEstimator.get().estimateDirection(value));
+    final InlineHTML w = new InlineHTML(html, getDirection(value));
 
     String s = removePunct(html);
     if (!s.isEmpty()) {

@@ -39,6 +39,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -102,7 +104,10 @@ abstract class AmasExercisePanel extends VerticalPanel implements
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
     hp.setWidth("100%");
-    boolean rightAlignContent = controller.isRightAlignContent();
+
+    boolean rightAlignContent =
+        WordCountDirectionEstimator.get().estimateDirection(exerciseList.getCurrentExercise().getForeignLanguage()) == HasDirection.Direction.RTL;
+
     if (rightAlignContent) {
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
     }

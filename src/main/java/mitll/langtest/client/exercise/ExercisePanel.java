@@ -167,8 +167,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    */
   protected HTML getMaybeRTLContent(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
-    HasDirection.Direction direction =
-        rightAlignContent ? HasDirection.Direction.RTL : getDirection(content);
+    HasDirection.Direction direction = rightAlignContent ? HasDirection.Direction.RTL : getDirection(content);
 
     HTML html = new HTML(content, direction);
     html.setWidth("100%");
@@ -185,16 +184,16 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return html;
   }
 
-  private HasDirection.Direction getDirection(String content) {
-    return WordCountDirectionEstimator.get().estimateDirection(content);
+  protected boolean isRTL(T exercise) {
+    return isRTLContent(exercise.getForeignLanguage());
   }
 
   private boolean isRTLContent(String content) {
     return controller.isRightAlignContent() || getDirection(content) == HasDirection.Direction.RTL;
   }
 
-  protected boolean isRTL(T exercise) {
-    return isRTLContent(exercise.getForeignLanguage());
+  private HasDirection.Direction getDirection(String content) {
+    return WordCountDirectionEstimator.get().estimateDirection(content);
   }
 
   private boolean isPashto() {

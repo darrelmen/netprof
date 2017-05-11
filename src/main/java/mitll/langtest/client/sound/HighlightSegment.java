@@ -7,6 +7,7 @@ import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 
+import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -25,6 +26,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   private final int id;
   private final String content;
   private final InlineHTML span;
+  private DivWidget divParent;
 
   /**
    * @param id
@@ -108,12 +110,30 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     return content;
   }
 
-  public String toString() {
-    return "'" + content + "' (" + getLength() + ")";
-  }
-
   public void setSouth(Widget widget) {
     south.clear();
     south.add(widget);
+  }
+
+  /**
+   * @see AllHighlight#AllHighlight
+   * @return
+   */
+  @Override
+  public DivWidget getDivParent() {
+    logger.info("getDivParent " + this);
+    if (this.divParent == null) logger.warning("getDivParent huh??? parent is null for " + this);
+    return this.divParent;
+  }
+
+  @Override
+  public void setDivParent(DivWidget horizontal) {
+    logger.info("setDivParent " + this);
+    if (horizontal == null) logger.warning("setDivParent huh??? parent is null for " + this);
+    this.divParent = horizontal;
+  }
+
+  public String toString() {
+    return "id " +id+  " '" + content + "' (" + getLength() + ")";
   }
 }

@@ -60,38 +60,6 @@ public class LTSFactory {
 
   private final Language thisLanguage;
 
-  /**
-   * TODO : are we limited to these?
-   */
-  // known languages
-  /*public enum Language implements IsSerializable {
-    ARABIC,
-    CROATIAN,
-    DARI,
-    EGYPTIAN,
-    ENGLISH,
-    FARSI,
-    FRENCH,
-    GERMAN,
-    HINDI,
-    IRAQI,
-    JAPANESE,
-    LEVANTINE,
-    KOREAN,
-    MANDARIN,
-    MSA,
-    PASHTO,
-    PORTUGUESE,
-    RUSSIAN,
-    SERBIAN,
-    SORANI,
-    SPANISH,
-    SUDANESE,
-    TAGALOG,
-    TURKISH,
-    URDU
-  }*/
-
   private final LTS unknown = new EmptyLTS();
   private LTS ltsForLanguage = unknown; /// attempt to deal with undefined LTS...
 
@@ -106,7 +74,7 @@ public class LTSFactory {
    * ARABIC and MSA  map to MSA LTS
    *
    * @param thisLanguage
-   * @see ASRScoring#ASRScoring
+   * @seex ASRScoring#ASRScoring
    */
   private LTSFactory(Language thisLanguage) {
     this.thisLanguage = thisLanguage;
@@ -188,7 +156,7 @@ public class LTSFactory {
   }
 
   public static String getLocale(String language1) {
-    Language lang = null;
+    Language lang;
     try {
       lang = Language.valueOf(language1.toUpperCase());
     } catch (IllegalArgumentException e) {

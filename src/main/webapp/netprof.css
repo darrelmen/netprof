@@ -555,7 +555,7 @@ fieldset > legend {
     word-wrap: normal; /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
-    font-family: Arial, sans-serif;
+    font-family: sans-serif;
     line-height: 100%;
     float: left;
 }

@@ -23,6 +23,8 @@ import java.util.Map;
  * Created by go22670 on 4/5/17.
  */
 public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+  NPFlexSectionExerciseList facetExerciseList;
+
   public NewLearnHelper(ExerciseController controller) {
     super(controller, null);
   }
@@ -46,8 +48,10 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
-        return new NPFlexSectionExerciseList(outerC, topRow, currentExercisePanel,
+        NPFlexSectionExerciseList widgets = new NPFlexSectionExerciseList(outerC, topRow, currentExercisePanel,
             new ListOptions(instanceName), listHeader, footer, FacetExerciseList.FIRST_PAGE_SIZE);
+        facetExerciseList = widgets;
+        return widgets;
       }
     };
   }
@@ -61,5 +65,10 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
         return new TwoColumnExercisePanel<>(e, controller, exerciseList, wrapper.getHistories().get(e.getID()), getChoices(), getPhoneChoices(), alignments);
       }
     };
+  }
+
+  @Override
+  public void showList(int listid) {
+    facetExerciseList.showList(listid);
   }
 }

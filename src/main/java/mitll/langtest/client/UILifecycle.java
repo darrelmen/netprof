@@ -33,6 +33,8 @@
 package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.NavLink;
+import mitll.langtest.client.banner.IBanner;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +47,7 @@ public interface UILifecycle {
    */
   void populateRootPanel();
 
-  boolean isRTL();
+//  boolean isRTL();
 
   int getHeightOfTopRows();
 
@@ -74,4 +76,6 @@ public interface UILifecycle {
   void clearContent();
 
   void chooseProjectAgain();
+
+  INavigation getNavigation();
 }

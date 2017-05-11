@@ -60,6 +60,7 @@ import java.util.logging.Logger;
  */
 public class WaveformExercisePanel<L extends CommonShell, T extends CommonExercise> extends ExercisePanel<L,T> {
   private final Logger logger = Logger.getLogger("WaveformExercisePanel");
+
   public static final String CONTEXT = "context=";
 
   /**

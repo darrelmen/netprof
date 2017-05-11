@@ -67,8 +67,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 class WordContainer extends AudioExampleContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
-  public static final int NARROW_THRESHOLD = 1450;
   private final Logger logger = Logger.getLogger("WordContainer");
+
+  public static final int NARROW_THRESHOLD = 1450;
 
   private static final int ROWS_TO_SHOW = 8;
 
@@ -76,7 +77,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   private static final int ITEM_COL_WIDTH_NARROW = 190;
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 68;
-  private static final int PLAY_WIDTH = 42;
+//  private static final int PLAY_WIDTH = 42;
 //  private static final int NATIVE_WIDTH = PLAY_WIDTH;
 //  private static final String NATIVE = "Ref";
 //  private static final String PLAY = "Play";

@@ -147,34 +147,52 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
     FlowPanel section = new FlowPanel("section");
     section.addStyleName("sidebar");
-    section.addStyleName("initialpos");
+    section.addStyleName("scrolledpos");
 
     twoRows.add(section);
     section.add(topRow);
 
-    makeSureFacetsAlwaysVisible(section);
+  //  makeSureFacetsAlwaysVisible(section);
   }
 
-  private void makeSureFacetsAlwaysVisible(FlowPanel section) {
+ /* private void makeSureFacetsAlwaysVisible(FlowPanel section) {
     Window.addWindowScrollHandler(new Window.ScrollHandler() {
       @Override
       public void onWindowScroll(Window.ScrollEvent event) {
-        //logger.info("got scroll " + event + " " + event.getScrollTop());
-
         boolean nowAtTop = event.getScrollTop() == 0;
+        logger.info("onWindowScroll got scroll " + event + " " + event.getScrollTop()+ " : " + nowAtTop + " pos " +event.getScrollTop());
         if (atTop != nowAtTop) {
           atTop = nowAtTop;
           if (!atTop) {
-            section.removeStyleName("initialpos");
-            section.addStyleName("scrolledpos");
+
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+              @Override
+              public void execute() {
+                logger.info("onWindowScroll got scroll " + event + " adding scrollpos\n\n\n");
+
+                section.removeStyleName("initialpos");
+                section.addStyleName("scrolledpos");
+              }
+            });
+
+
           } else {
-            section.addStyleName("initialpos");
-            section.removeStyleName("scrolledpos");
+
+
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+              @Override
+              public void execute() {
+                logger.info("onWindowScroll got scroll " + event + " adding initialpos");
+                section.addStyleName("initialpos");
+                section.removeStyleName("scrolledpos");
+              }
+            });
+
           }
         }
       }
     });
-  }
+  }*/
 
   private void styleBottomRowDiv(DivWidget bottomRowDiv, DivWidget listHeader) {
     bottomRowDiv.addStyleName("floatLeft");

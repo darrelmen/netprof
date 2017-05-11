@@ -80,6 +80,7 @@ public interface ExerciseController extends EventRegistration {
   ScoringServiceAsync getScoringService();
 
   ExerciseServiceAsync getExerciseService();
+
   ListServiceAsync getListService();
 
 
@@ -139,4 +140,7 @@ public interface ExerciseController extends EventRegistration {
   boolean isMicAvailable();
 
   KeyStorage getStorage();
+
+  void showLearnList(int id);
+  void showDrillList(int id);
 }

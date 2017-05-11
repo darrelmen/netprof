@@ -32,13 +32,11 @@
 
 package mitll.langtest.client.download;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
-import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 
 public class DownloadLink {
@@ -47,6 +45,10 @@ public class DownloadLink {
 
   private final ExerciseController controller;
 
+  /**
+   * @see mitll.langtest.client.custom.userlist.ListOperations#getDownloadLink
+   * @param controller
+   */
   public DownloadLink(ExerciseController controller) {
     this.controller = controller;
   }
@@ -60,12 +62,7 @@ public class DownloadLink {
   public Anchor getDownloadLink(long listid, String linkid, final String name) {
     final Anchor downloadLink = new Anchor(getURLForDownload(listid));
     new TooltipHelper().addTooltip(downloadLink, DOWNLOAD_SPREADSHEET_AND_AUDIO);
-    downloadLink.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(downloadLink, "DownloadLink", "N/A", "downloading audio for " + name);
-      }
-    });
+    downloadLink.addClickHandler(event -> controller.logEvent(downloadLink, "DownloadLink", "N/A", "downloading audio for " + name));
     downloadLink.getElement().setId("DownloadLink_" + linkid);
     downloadLink.addStyleName("leftFiveMargin");
     return downloadLink;
@@ -73,13 +70,11 @@ public class DownloadLink {
 
   /**
    * @return
-   * @seex #showSelectionState(mitll.langtest.client.list.SelectionState)
-   * @paramx xselectionState
    */
   private SafeHtml getURLForDownload(long listid) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a class='" + "icon-download" +
-        "' href='" +
+    sb.appendHtmlConstant("<a class='" + "icon-download" + "' " +
+        "href='" +
         DOWNLOAD_AUDIO +
         "?list=" + listid +
         "'" +

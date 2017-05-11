@@ -1,7 +1,7 @@
 package mitll.langtest.client.custom.userlist;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -19,7 +19,6 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.download.DownloadLink;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +30,9 @@ import java.util.logging.Logger;
 public class ListOperations {
   private final Logger logger = Logger.getLogger("ListOperations");
 
-  public static final int TEXT_WIDTH = 640;
+  private static final String SHOW_HIDE_MEDIA = "Show/Hide Media";
+
+  private static final int TEXT_WIDTH = 640;
   /**
    * @see #addDocContainer
    */
@@ -42,35 +43,60 @@ public class ListOperations {
 
   private Button showHideMedia;
   private Collapse collapse;
-  private DivWidget mediaContainer;
+  private final DivWidget mediaContainer;
   private final ExerciseController controller;
-  private final ListServiceAsync listService;
-  UserList ul;
+  private final UserList ul;
 
-  public ListOperations(ExerciseController controller, ListServiceAsync listService, UserList ul) {
+  /**
+   * @param controller
+   * @param ul
+   * @see ListManager#makeTabContent
+   */
+  public ListOperations(ExerciseController controller, UserList ul) {
     this.controller = controller;
-    this.listService = listService;
     mediaContainer = new DivWidget();
     this.ul = ul;
   }
 
-  public DivWidget getMediaContainer() {
+  DivWidget getMediaContainer() {
     return mediaContainer;
   }
 
-  public Panel getOperations(String instanceName) {
+  Panel getOperations(String instanceName) {
     Panel r1 = getRowForButtons();
     r1.add(getDownloadLink(ul, instanceName));
     r1.add(getAddMedia(ul.getID(), ul.getContextURL()));
 
-    showHideMedia = new Button("Show/Hide Media");
+
+    showHideMedia = new Button(SHOW_HIDE_MEDIA);
     configureNewListButton(showHideMedia);
 
     CollapseTrigger trigger = new CollapseTrigger("#" + COLLAPSIBLE_DOCUMENT_VIEWER);
     trigger.setWidget(showHideMedia);
-
-    //showHideMedia.setVisible(!ul.getContextURL().isEmpty());
     r1.add(trigger);
+
+
+    Button learn = new Button("Learn");
+    learn.setType(ButtonType.SUCCESS);
+    learn.addStyleName("leftFiveMargin");
+    r1.add(learn);
+    learn.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.showLearnList(ul.getID());
+      }
+    });
+
+    Button drill = new Button("Drill");
+    drill.setType(ButtonType.SUCCESS);
+    r1.add(drill);
+    drill.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.showDrillList(ul.getID());
+      }
+    });
+    drill.addStyleName("leftFiveMargin");
 
     return r1;
   }
@@ -93,22 +119,15 @@ public class ListOperations {
    * @see #getOperations
    */
   private Button getAddMedia(int id, String current) {
-    logger.info("getAddMedia " + id + " current " + current);
-
+    //logger.info("getAddMedia " + id + " current " + current);
     final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList(id, 250);
     textBox.setText(current);
     final Button newListButton = new Button(ADD_MEDIA);
     configureNewListButton(newListButton);
     newListButton.addStyleName("floatLeft");
 
-    Tooltip tooltip = new TooltipHelper().addTooltip(newListButton, ADD_MEDIA);
-
-    new PopupContainerFactory().makePopupAndButton(textBox, newListButton, tooltip, new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        attachMedia(textBox, id);
-      }
-    });
+    new PopupContainerFactory().makePopupAndButton(textBox, newListButton,
+        new TooltipHelper().addTooltip(newListButton, ADD_MEDIA), event -> attachMedia(textBox, id));
 
     return newListButton;
   }
@@ -141,8 +160,6 @@ public class ListOperations {
       }
     };
 
-//    logger.info("text box is " + textBox);
-
     textBox.getElement().setId("NewList");
     textBox.setVisibleLength(length);
     textBox.setWidth("300px");
@@ -153,8 +170,8 @@ public class ListOperations {
     String newListName = textEntry.getValue();
     if (!newListName.isEmpty()) {
       //  controller.logEvent(textEntry, "NewList_TextBox", exercise.getID(), "make new list called '" + newListName + "'");
-      logger.info("got " + newListName);
-      listService.updateContext(id, newListName, new AsyncCallback<Void>() {
+      //  logger.info("got " + newListName);
+      controller.getListService().updateContext(id, newListName, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
 
@@ -189,8 +206,8 @@ public class ListOperations {
         w.addStyleName("floatLeft");
       } else {
         Frame frame = new Frame(mediaURL);
-        frame.setHeight(315 +          "px");
-        frame.setWidth(615+"px");
+        frame.setHeight(315 + "px");
+        frame.setWidth(615 + "px");
         DivWidget container = new DivWidget();
         container.addStyleName("floatLeft");
         container.add(frame);
@@ -208,11 +225,10 @@ public class ListOperations {
     docContainer.add(widgets);
     widgets.addStyleName("floatLeft");
 
-
     richTextArea.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        listService.updateRichText(ul.getID(), richTextArea.getHTML(), new AsyncCallback<Void>() {
+        controller.getListService().updateRichText(ul.getID(), richTextArea.getHTML(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
 
@@ -261,8 +277,7 @@ public class ListOperations {
     long listID = ul.getID();
     String linkid = instanceName + "_" + listID;
     Anchor downloadLink = new DownloadLink(controller).getDownloadLink(listID, linkid, ul.getName());
-    Node child = downloadLink.getElement().getChild(0);
-    AnchorElement.as(child).getStyle().setColor("#333333");
+    AnchorElement.as(downloadLink.getElement().getChild(0)).getStyle().setColor("#333333");
     downloadLink.addStyleName("floatLeft");
     return downloadLink;
   }

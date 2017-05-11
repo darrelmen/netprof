@@ -44,6 +44,7 @@ import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -71,14 +72,14 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   protected CellTable<T> table;
   protected SingleSelectionModel<T> selectionModel;
   int verticalUnaccountedFor = 100;
+  private SimplePager pager;
+
   //  private static final boolean debug = false;
 
   protected SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
     this.dataProvider = new ListDataProvider<T>();
   }
-
-  private SimplePager pager;
 
   /**
    * @param listOptions
@@ -94,30 +95,26 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     // Create a SimplePager.
     final SimplePager pager =
-        new SimplePager(SimplePager.TextLocation.CENTER, true, true) {
+        new SimplePager(SimplePager.TextLocation.CENTER, true, true);
+    /*{
           @Override
           protected void onRangeOrRowCountChanged() {
             super.onRangeOrRowCountChanged();
-            //   if (!stillSettingUp) {
-            //           logger.info("not still setting up...");
-            //     gotRangeChange();
-            //    }
           }
         };
-
+*/
     this.pager = pager;
     // Set the cellList as the display.
     pager.setDisplay(table);
     pager.setVisible(listOptions.isShowPager());
+
     Panel column = new FlowPanel();
     column.add(pager);
-
     column.add(table);
     table.addStyleName("floatLeftAndClear");
 
     setMaxWidth();
-    //   stillSettingUp = false;
-//    logger.info("still setting up... over");
+
     return column;
   }
 
@@ -137,8 +134,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     pager.previousPage();
   }
 
-  protected void gotRangeChange() {
-  }
+/*  protected void gotRangeChange() {
+  }*/
 
   /**
    * @param sortEnglish
@@ -150,6 +147,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
   }
 
+  /**
+   * @param sortEnglish
+   * @see #getTableWithPager
+   */
   private void makeCellTable(boolean sortEnglish) {
     this.table = makeCellTable(chooseResources());
     configureTable(sortEnglish);
@@ -164,9 +165,12 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   protected CellTable.Resources chooseResources() {
-    CellTable.Resources o;
 
-    if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    boolean isRTL = projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
+
+    CellTable.Resources o;
+    if (isRTL) {   // so when we truncate long entries, the ... appears on the correct end
       //logger.info("simplePaging : chooseResources RTL - content");
       o = GWT.create(RTLTableResources.class);
     } else {
@@ -194,13 +198,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     });
   }
 
-  protected void gotRangeChanged(Range newRange) {
+  protected void gotRangeChanged(Range newRange) {}
 
-  }
-
-  protected void addSelectionModel() {
-  }
-
+  protected void addSelectionModel() {}
 
   public void flush() {
     if (comp != null) {
@@ -253,7 +253,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    */
   public void onResize() {
-    logger.info("on resize called!");
+//    logger.info("on resize called!");
     int numRows = getNumTableRowsGivenScreenHeight();
     if (table.getPageSize() != numRows) {
       table.setPageSize(numRows);
@@ -336,7 +336,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     }
   }
 
-  public Range getVisibleRange() {
+  Range getVisibleRange() {
     return table.getVisibleRange();
   }
 
@@ -350,10 +350,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   public void sortBy(Comparator<T> comp) {
     this.comp = comp;
     long then = System.currentTimeMillis();
-    logger.info("about to sort ");
+    logger.info("sortBy about to sort ------- ");
     Collections.sort(getList(), comp);
     long now = System.currentTimeMillis();
-    logger.info("finished sort in " + (now - then));
+    logger.info("sortBy finished sort in " + (now - then) + " ----- ");
   }
 
   public void hide() {

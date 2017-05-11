@@ -39,8 +39,7 @@ public class NewContentChooser implements INavigation {
    * @see InitialUI#makeNavigation
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
-    NewLearnHelper newLearnHelper = new NewLearnHelper(controller);
-    learnHelper = newLearnHelper;
+    learnHelper = new NewLearnHelper(controller);
     practiceHelper = new PracticeHelper(controller);
     this.controller = controller;
     this.listManager = new ListManager(controller, null);
@@ -51,14 +50,7 @@ public class NewContentChooser implements INavigation {
   public void showInitialState() {
     clearCurrent();
     showView(LEARN);
-    // History.fireCurrentHistoryState();
   }
-
-/*
-  private boolean hasProjectChoice() {
-    return controller.getProjectStartupInfo() != null;
-  }
-*/
 
   @Override
   public void showView(VIEWS view) {
@@ -138,11 +130,23 @@ public class NewContentChooser implements INavigation {
   }
 
   @NotNull
-  private ShowTab getShowTab() {
+  public ShowTab getShowTab() {
     return exid -> {
       banner.showLearn();
       learnHelper.loadExercise(exid);
     };
+  }
+
+  @Override
+  public void showLearnList(int listid) {
+    banner.showLearn();
+    learnHelper.showList(listid);
+  }
+
+  @Override
+  public void showDrillList(int listid) {
+    banner.showDrill();
+    practiceHelper.showList(listid);
   }
 
   @Override

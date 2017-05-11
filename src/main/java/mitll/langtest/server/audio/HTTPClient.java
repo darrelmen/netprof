@@ -68,24 +68,25 @@ import java.util.Collection;
  */
 public class HTTPClient {
   private static final Logger logger = LogManager.getLogger(HTTPClient.class);
-  public static final int CONNECT_TIMEOUT = 5000;
-  public static final int READ_TIMEOUT = 20000;
+  private static final int CONNECT_TIMEOUT = 5000;
+  private static final int READ_TIMEOUT = 20000;
 
   private HttpURLConnection httpConn;
 
   static {
     //for localhost testing only
     javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-        new javax.net.ssl.HostnameVerifier(){
+        new javax.net.ssl.HostnameVerifier() {
           public boolean verify(String hostname,
                                 javax.net.ssl.SSLSession sslSession) {
-              System.err.println("verify " +hostname);
-              return true;
+            logger.warn("verify " + hostname);
+            return true;
           }
         });
   }
 
-  public HTTPClient() {}
+  public HTTPClient() {
+  }
 
   /**
    * @param webserviceIP
@@ -111,7 +112,7 @@ public class HTTPClient {
    */
   public HTTPClient(String url) {
     try {
-     // logger.info("HTTPClient URL is : " + url);
+      // logger.info("HTTPClient URL is : " + url);
       httpConn = setupPostHttpConn(url);
     } catch (IOException e) {
       logger.error("Error constructing HTTPClient:\n" + e, e);
@@ -119,10 +120,10 @@ public class HTTPClient {
   }
 
   /**
-   * @see ASRWebserviceScoring#runHydra
    * @param input
    * @return
    * @throws IOException
+   * @see ASRWebserviceScoring#runHydra
    */
   public String sendAndReceiveAndClose(String input) throws IOException {
     String s = sendAndReceive(input);
@@ -135,7 +136,6 @@ public class HTTPClient {
   }
 
   /**
-   *
    * @param webserviceIP
    * @param webservicePort
    * @param service
@@ -162,11 +162,11 @@ public class HTTPClient {
    */
   public String readFromGET(String url) throws IOException {
     //try {
-      logger.info("Reading from " + url);
-      HttpURLConnection httpConn = setupGetHttpConn(url);
-      String receive = receive(httpConn);
-      httpConn.disconnect();
-      return receive;
+    logger.info("Reading from " + url);
+    HttpURLConnection httpConn = setupGetHttpConn(url);
+    String receive = receive(httpConn);
+    httpConn.disconnect();
+    return receive;
 //    } catch (IOException e) {
 //      e.printStackTrace();
 //      return "";
@@ -199,7 +199,7 @@ public class HTTPClient {
 
     try {
       SSLContext ctx = SSLContext.getInstance("TLS");
-      ctx.init(new KeyManager[0], new TrustManager[] {new DefaultTrustManager()}, new SecureRandom());
+      ctx.init(new KeyManager[0], new TrustManager[]{new DefaultTrustManager()}, new SecureRandom());
       SSLContext.setDefault(ctx);
     } catch (NoSuchAlgorithmException | KeyManagementException e) {
       e.printStackTrace();
@@ -214,10 +214,12 @@ public class HTTPClient {
   private static class DefaultTrustManager implements X509TrustManager {
 
     @Override
-    public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+    public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+    }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+    public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+    }
 
     @Override
     public X509Certificate[] getAcceptedIssuers() {
@@ -252,7 +254,7 @@ public class HTTPClient {
     return receive(this.httpConn, getReader(this.httpConn));
   }
 
-  private String receive(HttpURLConnection httpConn) throws IOException  {
+  private String receive(HttpURLConnection httpConn) throws IOException {
     // try {
     return receive(httpConn, getReader(httpConn));
     // } catch (IOException e) {
@@ -282,12 +284,17 @@ public class HTTPClient {
     }
   }
 
+  /**
+   *
+   * @param input
+   * @return
+   * @throws IOException
+   */
   public String sendAndReceive(String input) throws IOException {
     try {
-      logger.info("sending START " + input.length());
+      //logger.info("sending START " + input.length());
       send(input);
-      logger.info("sending END   " + input.length());
-
+      //logger.info("sending END   " + input.length());
     } catch (ConnectException ce) {
       logger.error("sendAndReceive sending" +
           "\n\tmessage " + input +
@@ -300,9 +307,9 @@ public class HTTPClient {
     }
 
     try {
-      logger.info("receive START " + input.length());
+      //logger.info("receive START " + input.length());
       String receive = receive();
-      logger.info("receive END   " + input.length());
+      //logger.info("receive END   " + input.length());
       return receive;
     } catch (ConnectException ce) {
       logger.error("sendAndReceive receiving" +
@@ -317,10 +324,10 @@ public class HTTPClient {
   }
 
   /**
-   * @see AudioFileHelper#getProxyScore
    * @param input
    * @return
    * @throws IOException
+   * @see AudioFileHelper#getProxyScore
    */
   String sendAndReceiveAndClose(File input) throws IOException {
     try {

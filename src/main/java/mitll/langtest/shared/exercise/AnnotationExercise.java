@@ -49,7 +49,7 @@ public interface AnnotationExercise {
   Map<String, ExerciseAnnotation> getFieldToAnnotation();
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#setFields(CommonShell)
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#setFields
    * @param field
    * @return
    */

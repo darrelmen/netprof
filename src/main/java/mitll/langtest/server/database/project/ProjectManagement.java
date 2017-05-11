@@ -48,6 +48,7 @@ import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.SlimProject;
@@ -256,7 +257,7 @@ public class ProjectManagement implements IProjectManagement {
       project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
 
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
-    //  logMemory();
+      //  logMemory();
 
       Set<Integer> exids = new HashSet<>();
       for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());
@@ -606,17 +607,18 @@ public class ProjectManagement implements IProjectManagement {
 
         ISection<CommonExercise> sectionHelper = project.getSectionHelper();
 
+        String language = project1.language();
         ProjectStartupInfo startupInfo = new ProjectStartupInfo(
             serverProps.getProperties(),
             typeOrder,
             sectionHelper.getSectionNodesForTypes(),
             project1.id(),
-            project1.language(),
-            LTSFactory.getLocale(project1.language()),
+            language,
+            toEnum(language),
+            LTSFactory.getLocale(language),
             hasModel(project1),
             sectionHelper.getTypeToDistinct(),
-            sectionHelper.getRootTypes(),
-            sectionHelper.getParentToChildTypes());
+            sectionHelper.getRootTypes(), sectionHelper.getParentToChildTypes());
 
         logger.info("setStartupInfo : For " + userWhere +
             "\n\t " + typeOrder +
@@ -627,6 +629,17 @@ public class ProjectManagement implements IProjectManagement {
 //        logger.info("setStartupInfo - got here");
       }
     }
+  }
+
+  private Language toEnum(String language) {
+    Language language1;
+
+    try {
+      language1 = Language.valueOf(language.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      language1 = Language.UNKNOWN;
+    }
+    return language1;
   }
 
   /**
@@ -733,7 +746,7 @@ public class ProjectManagement implements IProjectManagement {
     try {
       return Integer.parseInt(project.getProp(ServerProperties.WEBSERVICE_HOST_PORT));
     } catch (NumberFormatException e) {
-      logger.error("for " +project+ " got " + e);
+      logger.error("for " + project + " got " + e);
       return -1;
     }
   }

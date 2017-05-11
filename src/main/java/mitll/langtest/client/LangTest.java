@@ -905,7 +905,8 @@ public class LangTest implements
   }
 
   public boolean isRightAlignContent() {
-    return props.isRightAlignContent() || initialUI.isRTL();
+    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
+    return projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
   }
 
   // services
@@ -951,7 +952,6 @@ public class LangTest implements
   public Widget getFlashRecordPanel() {
     return flashRecordPanel;
   }
-//  private long then = 0;
 
   private long then = 0;
 
@@ -1034,5 +1034,15 @@ public class LangTest implements
       storage = new KeyStorage(this);
     }
     return storage;
+  }
+
+  @Override
+  public void showLearnList(int id) {
+    initialUI.getNavigation().showLearnList(id);
+  }
+
+  @Override
+  public void showDrillList(int id) {
+    initialUI.getNavigation().showDrillList(id);
   }
 }

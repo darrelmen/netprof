@@ -2,9 +2,14 @@ package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -17,25 +22,44 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
 
   private DivWidget north;
   private DivWidget south;
-  private int id;
-  String content;
+  //private String content;
 
+  /**
+   *
+   * @param bulk
+   */
   public AllHighlight(Collection<IHighlightSegment> bulk) {
+    logger.info("making all highlight for " + bulk);
+
     this.set = bulk;
-    add(north =new DivWidget());
-    addAll();
-    add(south =new DivWidget());
+    add(north = new DivWidget());
+
+    DivWidget divParent = set.iterator().next().getDivParent();
+    //Widget parent = getParent();
+    //   addAll();
+    for (IHighlightSegment seg : set) {
+      Widget w = seg.asWidget();
+      w.removeFromParent();
+      north.add(w);
+    }
+    add(south = new DivWidget());
+
+    if (divParent != null) {
+      divParent.add(this);
+    }
+    else {
+      logger.warning("no parent for " + bulk);
+    }
+//    ((Panel) parent).add(this);
   }
 
-  public void addAll() {
-    north.clear();
-    for (IHighlightSegment seg : set) north.add(seg.asWidget());
-  }
+//  public void addAll() {
+//    north.clear();
+//    for (IHighlightSegment seg : set) north.add(seg.asWidget());
+//  }
 
   @Override
-  public void setBackground(String background) {
-
-  }
+  public void setBackground(String background) {}
 
   @Override
   public void setBlue() {
@@ -91,14 +115,23 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     return builder.toString();
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchEventSegmentToClickable(Iterator, TranscriptSegment, List, AudioControl, TreeMap)
+   * @param widget
+   */
   public void setSouth(Widget widget) {
     south.clear();
     south.add(widget);
   }
 
   @Override
-  public Widget getParent() {
-    return set.iterator().next().getParent();
+  public DivWidget getDivParent() {
+    return null;
+  }
+
+  @Override
+  public void setDivParent(DivWidget horizontal) {
+    throw new IllegalArgumentException("don't call me");
   }
 
   public String toString() {

@@ -50,31 +50,31 @@ public enum ActivityType implements IsSerializable {
   MARK_DEFECTS("markDefects");  // TODO : somehow user role gets expressed with this
 
   private final String text;
-  private final String type;
-  private final String speed;
+ // private final String type;
+ // private final String speed;
 
   ActivityType(final String text) {
     this.text = text;
-    type = "";
-    speed = "";
+   // type = "";
+   // speed = "";
   }
 
-  ActivityType(final String text, String type, String speed) {
+/*  ActivityType(final String text, String type, String speed) {
     this.text = text;
     this.type = type;
     this.speed = speed;
-  }
+  }*/
 
   @Override
   public String toString() {
     return text;
   }
-
+/*
   public String getType() {
     return type;
   }
 
   public String getSpeed() {
     return speed;
-  }
+  }*/
 }

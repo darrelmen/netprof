@@ -51,6 +51,7 @@ import java.util.logging.Logger;
  */
 public class NPFlexSectionExerciseList extends FacetExerciseList {
   private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList");
+
   private static final String COMPLETE = "Complete";
   private static final String LIST_COMPLETE = "List complete!";
 
@@ -76,19 +77,11 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
 
   @Override
   protected void onLastItem() {
-    new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
-      @Override
-      public void onHidden(HiddenEvent hiddenEvent) {
-        reloadExercises();
-      }
-    });
+    new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
   }
 
   @Override
   protected void noSectionsGetExercises(long userID) {
- //   simpleLoadExercises(getInitialHistoryToken(), getPrefix());
-    String historyToken = getHistoryToken();
-   // logger.info("noSections " + userID + " " + historyToken);
-    simpleLoadExercises(historyToken, getPrefix());
+    simpleLoadExercises(getHistoryToken(), getPrefix());
   }
 }

@@ -42,10 +42,12 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeHandler<String> {
   public static final String SHOW_PHONES = "showPhones";
+  public static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
+  public static final String MAILTO_SUBJECT = "Question%20about%20netprof";
   private final Logger logger = Logger.getLogger("NewBanner");
 
   public static final String SHOW = "showStorage";
-  private static final String LEARN = "Learn";
+  //  private static final String LEARN = "Learn";
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
@@ -197,12 +199,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private PhonesChoices getPhonesDisplay() {
     PhonesChoices choices = PhonesChoices.SHOW;
     String show = controller.getStorage().getValue(SHOW_PHONES);
-    if (show != null) {
+    if (show != null && !show.isEmpty()) {
       try {
         choices = PhonesChoices.valueOf(show);
-        logger.info("getPhonesDisplay got " +choices);
+        logger.info("getPhonesDisplay got " + choices);
       } catch (IllegalArgumentException ee) {
-        logger.warning("getPhonesDisplay got " +ee);
+        logger.warning("getPhonesDisplay got " + ee);
       }
     }
     return choices;
@@ -254,6 +256,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   NavLink phoneChoice;
+
   @NotNull
   private DropdownSubmenu getViewMenu() {
     DropdownSubmenu showChoices = new DropdownSubmenu("Show");
@@ -270,12 +273,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     phoneChoice.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if ( getPhonesDisplay() == PhonesChoices.SHOW) {
+        if (getPhonesDisplay() == PhonesChoices.SHOW) {
           phoneChoice.setText("Hide Sounds");
           storePhoneChoices(PhonesChoices.HIDE.toString());
           logger.info("show phones now " + getPhonesDisplay());
-        }
-        else {
+        } else {
           phoneChoice.setText("Show Sounds");
           storePhoneChoices(PhonesChoices.SHOW.toString());
         }
@@ -288,7 +290,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   @NotNull
   private String getPhoneMenuTitle() {
-    return ( getPhonesDisplay() == PhonesChoices.SHOW ? "Hide" : "Show") +
+    return (getPhonesDisplay() == PhonesChoices.SHOW ? "Hide" : "Show") +
         " Sounds";
   }
 
@@ -422,7 +424,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     info.add(getContactUs());
   }
 
-  NavLink firstChoice = null;
+  private Map<VIEWS, NavLink> viewToLink = new HashMap<>();
 
   /**
    * @param nav
@@ -432,14 +434,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     boolean hasProject = hasProjectChoice();
 
     logger.info("addChoicesForUser has project " + hasProject);
-    for (String choice : Arrays.asList(VIEWS.LEARN.toString(), VIEWS.DRILL.toString(), VIEWS.PROGRESS.toString(), VIEWS.LISTS.toString())) {
-      NavLink choice1 = getChoice(nav, choice);
+    for (VIEWS choice : Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS, VIEWS.LISTS)) {
+      NavLink choice1 = getChoice(nav, choice.toString());
       if (first) {
         choice1.addStyleName("leftTenMargin");
-        firstChoice = choice1;
       }
       first = false;
       choices.add(choice1);
+
+      viewToLink.put(choice, choice1);
     }
   }
 
@@ -456,13 +459,17 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     return learn;
   }
 
+  public void showLearn() {
+    gotClickOnChoice(VIEWS.LEARN.toString(), viewToLink.get(VIEWS.LEARN));
+  }
+
+  public void showDrill() {
+    gotClickOnChoice(VIEWS.DRILL.toString(), viewToLink.get(VIEWS.DRILL));
+  }
+
   private void gotClickOnChoice(String instanceName, NavLink learn) {
     showSection(instanceName);
     showActive(learn);
-  }
-
-  public void showLearn() {
-    gotClickOnChoice(LEARN, firstChoice);
   }
 
 /*  private void setHistoryItem(String historyToken) {
@@ -496,43 +503,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     flashcardImage.addClickHandler(event -> lifecycle.chooseProjectAgain());
   }
 
-  /**
-   * @return
-   * @seez #gotUser
-   * @seez #makeHeaderRow()
-   */
-/*
-  private String getGreeting() {
-    return userManager.getUserID() == null ? "" : ("" + userManager.getUserID());
-  }
-*/
   @Override
   public Panel getBanner() {
     return this;
-  }
-
-  @Override
-  public Panel getBanner2() {
-
-    return null;
-/*    ResponsiveNavbar responsiveNavbar = new ResponsiveNavbar();
-    NavCollapse navCollapse = new NavCollapse();
-    navCollapse.addStyleName("topFiveMargin");
-    navCollapse.getElement().setId("navCollapseBelow");
-    responsiveNavbar.add(navCollapse);
-
-    Nav recnav = getRecNav();
-    this.recnav = recnav;
-    navCollapse.add(recnav);
-
-    recordMenuVisible();
-
-    Nav defectnav = getDefectNav();
-    this.defectnav = defectnav;
-    navCollapse.add(defectnav);
-    defectMenuVisible();
-
-    return responsiveNavbar;*/
   }
 
   @Override
@@ -607,7 +580,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   @Override
   public void checkProjectSelected() {
     setVisibleChoices(controller.getProjectStartupInfo() != null);
-    showActive(firstChoice);
+    showActive(viewToLink.get(VIEWS.LEARN));
     recordMenuVisible();
   }
 
@@ -622,10 +595,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   @NotNull
   private String getMailTo() {
-    return "mailto:" +
-        NETPROF_HELP_LL_MIT_EDU + "?" +
-        //   "cc=" + LTEA_DLIFLC_EDU + "&" +
-        "Subject=Question%20about%20NetProF";
+    return "mailto:" + NETPROF_HELP_LL_MIT_EDU + "?" + "Subject=" + MAILTO_SUBJECT;
   }
 
   /**
@@ -634,7 +604,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
    * @return
    */
   private NavLink getManual() {
-    NavLink anchor = getAnchor(DOCUMENTATION, "langtest/NetProF_Manual.pdf");
+    NavLink anchor = getAnchor(DOCUMENTATION, NETPROF_MANUAL);
     anchor.getElement().getStyle().setColor("#5bb75b");
     return anchor;
   }

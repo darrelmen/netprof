@@ -133,11 +133,11 @@ public class InitialUI implements UILifecycle {
     this.controller = langTest;
     userFeedback = langTest;
     this.choices = new ProjectChoices(langTest, this);
-    UserMenu userMenu = new UserMenu(langTest, userManager, this);
-//    logger.info("made user menu"+ userMenu);
-    banner = new NewBanner(userManager, this, userMenu, breadcrumbs = getBreadcrumbs(), controller);
+    banner = new NewBanner(userManager, this, new UserMenu(langTest, userManager, this),
+        breadcrumbs = getBreadcrumbs(), controller);
   }
 
+  public INavigation getNavigation() { return navigation; }
   /**
    * @see LangTest#showLogin()
    * @see LangTest#populateRootPanel()
@@ -149,8 +149,7 @@ public class InitialUI implements UILifecycle {
     this.verticalContainer = verticalContainer;
     // header/title line
     // first row ---------------
-    Panel contentRow = makeFirstTwoRows(verticalContainer);
-    choices.setContentRow(contentRow);
+    choices.setContentRow(makeFirstTwoRows(verticalContainer));
     if (!showLogin()) {
       populateBelowHeader(verticalContainer);
     }
@@ -195,11 +194,6 @@ public class InitialUI implements UILifecycle {
   private Widget makeHeaderRow() {
     return banner.getBanner();
   }
-/*
-  private Widget makeHeaderRow2() {
-    return banner.getBanner2();
-  }
-*/
 
   /**
    * @return
@@ -215,13 +209,13 @@ public class InitialUI implements UILifecycle {
    *
    * @return
    */
-  @Deprecated
+/*  @Deprecated
   @Override
   public boolean isRTL() {
     boolean b = controller.getProps().isRightAlignContent();//navigation != null && navigation.isRTL();
     //  if (b) logger.info("content is RTL!");
     return b;
-  }
+  }*/
 
   public void logout() {
     lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
@@ -347,7 +341,6 @@ public class InitialUI implements UILifecycle {
     crumbs.setVisible(false);
     addCrumbs(crumbs);
     // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
-
     return crumbs;
   }
 
@@ -453,10 +446,8 @@ public class InitialUI implements UILifecycle {
   }
 
   private void makeNavigation() {
-    // navigation = new Navigation(service, userManager, controller, userFeedback, lifecycleSupport);
     navigation = new NewContentChooser(controller,banner);
     banner.setNavigation(navigation);
-
   }
 
   /**

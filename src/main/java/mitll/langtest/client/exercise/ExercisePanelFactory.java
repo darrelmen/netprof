@@ -104,12 +104,12 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   protected PhonesChoices getPhoneChoices() {
     PhonesChoices choices = PhonesChoices.SHOW;
     String show = controller.getStorage().getValue(SHOW_PHONES);
-    if (show != null) {
+    if (show != null && !show.isEmpty()) {
       try {
         choices = PhonesChoices.valueOf(show);
     //    logger.info("ExercisePanelFactory got " + choices);
       } catch (IllegalArgumentException ee) {
-        logger.warning("got " + ee);
+        logger.warning("getPhoneChoices for '" + show + "' got " + ee);
       }
     }
     return choices;

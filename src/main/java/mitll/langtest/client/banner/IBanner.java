@@ -1,6 +1,5 @@
 package mitll.langtest.client.banner;
 
-import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.shared.user.User;
@@ -12,7 +11,6 @@ import java.util.Collection;
  */
 public interface IBanner {
   Panel getBanner();
-  Panel getBanner2();
 
   void setNavigation(INavigation navigation);
 
@@ -37,4 +35,5 @@ public interface IBanner {
   void checkProjectSelected();
 
   void showLearn();
+  void showDrill();
 }

@@ -23,16 +23,10 @@ public interface IHighlightSegment {
 
   String getContent();
 
- // void addSouth();
-  //DivWidget getSouth();
   void setSouth(Widget widget);
 
-  Widget getParent();
   Widget asWidget();
-  /*  Widget getParent();
+  DivWidget getDivParent();
 
-  void removeFromParent();
-  void setSouth(Widget south);
-
-  */
+  void setDivParent(DivWidget horizontal);
 }

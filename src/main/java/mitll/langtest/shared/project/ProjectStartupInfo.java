@@ -33,7 +33,6 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.SectionNode;
 
@@ -51,6 +50,11 @@ public class ProjectStartupInfo implements IsSerializable {
   private Collection<SectionNode> sectionNodes;
   private int projectid;
   private String language;
+
+  /**
+   * TODO : Might want to do more with this - attach associated font, etc.
+   */
+  private Language languageInfo;
   private boolean hasModel;
   private Map<String, Set<MatchInfo>> typeToDistinct;
   private Set<String> rootNodes;
@@ -65,16 +69,18 @@ public class ProjectStartupInfo implements IsSerializable {
    * @param typeOrder
    * @param sectionNodes
    * @param projectid
+   * @param languageInfo
    * @param hasModel
    * @param rootNodes
    * @param parentToChild
-   *  @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo
    */
   public ProjectStartupInfo(Map<String, String> properties,
                             List<String> typeOrder,
                             Collection<SectionNode> sectionNodes,
                             int projectid,
                             String language,
+                            Language languageInfo,
                             String locale,
                             boolean hasModel,
                             Map<String, Set<MatchInfo>> typeToDistinct,
@@ -85,6 +91,7 @@ public class ProjectStartupInfo implements IsSerializable {
     this.sectionNodes = sectionNodes;
     this.projectid = projectid;
     this.language = language;
+    this.languageInfo = languageInfo;
     this.locale = locale;
     this.hasModel = hasModel;
     this.typeToDistinct = typeToDistinct;
@@ -144,5 +151,9 @@ public class ProjectStartupInfo implements IsSerializable {
 
   public String getLocale() {
     return locale;
+  }
+
+  public Language getLanguageInfo() {
+    return languageInfo;
   }
 }

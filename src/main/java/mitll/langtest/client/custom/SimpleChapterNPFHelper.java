@@ -143,7 +143,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   /**
    * @return
-   * @see Navigation#getNavigation()
+   * @see SimpleChapterNPFHelper#getCreatedPanel
    */
   public ListInterface<?,?> getExerciseList() {
     return npfExerciseList;
@@ -155,16 +155,17 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   /**
-   * @see Navigation#addPracticeTab()
-   * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
+   * @see mitll.langtest.client.banner.NewContentChooser#showView(INavigation.VIEWS)
    */
   @Override
   public void hideList() {
     npfExerciseList.hide();
   }
 
-  public void loadExercise(int exid) {
-    npfExerciseList.loadExercise(exid);
+  public void loadExercise(int exid) { npfExerciseList.loadExercise(exid);  }
+
+  public void showList(int userlistID) {
+
   }
 
   /**

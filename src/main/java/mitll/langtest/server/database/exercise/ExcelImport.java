@@ -891,7 +891,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (week.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, week));
     }
-    logger.info("recordUnitChapterWeek now  " + imported.getID() + " = " + imported.getUnitToValue());
+//    logger.info("recordUnitChapterWeek now  " + imported.getID() + " = " + imported.getUnitToValue());
   }
 
   private String getCell(Row next, int col) {

@@ -511,7 +511,7 @@ public class ListManager implements RequiresResize {
       addCreatedBy(listOperationsContainer, userID);
     }
 
-    ListOperations listOperations = new ListOperations(controller, listService, ul);
+    ListOperations listOperations = new ListOperations(controller, ul);
     listOperationsContainer.add(listOperations.getOperations(instanceName));
     listOperationsContainer.add(listOperations.getMediaContainer());
 

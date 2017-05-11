@@ -323,7 +323,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         // dcodr can't handle an equals in the file name... duh...
         String rawAudioPath = filePath.replaceAll("\\=", "") + ".raw";
         //rawAudioPath = rawAudioPath.replaceAll("\\=","");
-        logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra");
+       // logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra");
         AudioConversion.wav2raw(filePath + ".wav", rawAudioPath);
 
         Object[] result = runHydra(rawAudioPath, sentence, transliteration, lmSentences,

@@ -71,7 +71,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final int LIST_HEIGHT = 450;
-  private static final int MIN_WIDTH = 300;
+ // private static final int MIN_WIDTH = 300;
   /**
    * @see #showEmptyExercise
    */
@@ -98,7 +98,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private UserState userState;
   ListOptions listOptions;
 

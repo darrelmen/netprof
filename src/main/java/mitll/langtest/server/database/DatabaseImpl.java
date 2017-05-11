@@ -605,9 +605,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.server.database.security.UserSecurityManager#setSessionUser
    * @see UserServiceImpl#getUserFromSession
    */
-  public void setStartupInfo(User userWhere) {
-    setStartupInfo(userWhere, projectForUser(userWhere.getID()));
-  }
+  public void setStartupInfo(User userWhere) {  setStartupInfo(userWhere, projectForUser(userWhere.getID()));  }
 
   /**
    * @param userWhere

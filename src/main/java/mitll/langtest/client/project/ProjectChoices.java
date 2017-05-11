@@ -424,6 +424,10 @@ public class ProjectChoices {
     DivWidget horiz = new DivWidget();
     horiz.addStyleName("inlineFlex");
     horiz.setWidth("100%");
+    if (isQC()) {
+      horiz.getElement().getStyle().setProperty("minHeight", "110px"); // so they wrap nicely
+    }
+
     thumbnail.add(horiz);
     {
       Heading label = new Heading(LANGUAGE_SIZE, name);
@@ -445,27 +449,26 @@ public class ProjectChoices {
 
 
       if (isQC() && !projectForLang.hasChildren()) {
-        DivWidget horiz2 = new DivWidget();
-        horiz2.addStyleName("inlineFlex");
-        horiz2.add(getEditButtonContainer(projectForLang));
-        DivWidget importButtonContainer = getImportButtonContainer(projectForLang);
-        importButtonContainer.addStyleName("leftFiveMargin");
-        horiz2.add(importButtonContainer);
-        Button deleteButton = getDeleteButton(projectForLang);
-        deleteButton.addStyleName("leftFiveMargin");
-        horiz2.add(getButtonContainer(deleteButton));
-        container.add(horiz2);
+        addQCButtons(projectForLang, container);
       }
 
       horiz.add(container);
     }
 
-//    if (isQC() && !projectForLang.hasChildren()) {
-//      horiz.add(getEditButtonContainer(projectForLang));
-//      horiz.add(getImportButtonContainer(projectForLang));
-//    }
-
     return thumbnail;
+  }
+
+  private void addQCButtons(SlimProject projectForLang, DivWidget container) {
+    DivWidget horiz2 = new DivWidget();
+    horiz2.addStyleName("inlineFlex");
+    horiz2.add(getEditButtonContainer(projectForLang));
+    DivWidget importButtonContainer = getImportButtonContainer(projectForLang);
+    importButtonContainer.addStyleName("leftFiveMargin");
+    horiz2.add(importButtonContainer);
+    Button deleteButton = getDeleteButton(projectForLang);
+    deleteButton.addStyleName("leftFiveMargin");
+    horiz2.add(getButtonContainer(deleteButton));
+    container.add(horiz2);
   }
 
   @NotNull

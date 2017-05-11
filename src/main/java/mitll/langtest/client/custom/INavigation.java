@@ -6,31 +6,7 @@ import com.google.gwt.user.client.ui.Widget;
  * Created by go22670 on 4/10/17.
  */
 public interface INavigation {
-  void showInitialState();
-/*
-  void showLearn();
-
-  void showDrill();
-
-  void showProgress();
-
-  void showLists();
-
-  void showRecord();
-
-  void showRecordExample();*/
-
-  void showView(VIEWS view);
-
-  Widget getNavigation();
-
-  void onResize();
-
-  void showPreviousState();
-
-  void clearCurrent();
-
-  public enum VIEWS {
+  enum VIEWS {
     NONE,
     LISTS,
     PROGRESS,
@@ -45,4 +21,21 @@ public interface INavigation {
       return name().substring(0,1) + name().substring(1).toLowerCase();
     }
   }
+
+  void showView(VIEWS view);
+
+
+  void showInitialState();
+
+  void showLearnList(int listid);
+
+  void showDrillList(int listid);
+
+  Widget getNavigation();
+
+  void onResize();
+
+  void showPreviousState();
+
+  void clearCurrent();
 }
