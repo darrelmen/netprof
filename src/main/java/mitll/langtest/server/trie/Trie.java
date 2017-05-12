@@ -245,8 +245,8 @@ public class Trie<T> {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives(Map, long, String, String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(Map, long, String)
+   * @see mitll.langtest.server.services.ResultServiceImpl#getResultAlternatives
+   * @see mitll.langtest.server.services.ResultServiceImpl#getResults
    * @param toMatch
    * @return
    */
@@ -259,7 +259,7 @@ public class Trie<T> {
    * @see ExerciseTrie#getExercises(String)
    * @see Trie#getMatchesLC(String)
    */
-  public List<T> getMatches(String lc) {
+   List<T> getMatches(String lc) {
     List<EmitValue<T>> emits = getEmits(lc);
     Set<T> unique = new HashSet<>();
     List<T> ids = new ArrayList<>();

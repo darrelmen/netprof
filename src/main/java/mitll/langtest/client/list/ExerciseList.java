@@ -33,7 +33,6 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -42,7 +41,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -158,7 +156,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    *
    * @param userID
    * @return true if we asked the server for exercises
-   * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
+   * @see HistoryExerciseList#noSectionsGetExercises(long, int)
    */
   public boolean getExercises(long userID) {
     if (DEBUG) logger.info("ExerciseList.getExercises for user " + userID + " instance " + getInstance());
@@ -569,7 +567,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ListInterface ListInterface#loadPreviousExercise
    */
   public void loadExercise(int itemID) {
-//    if (DEBUG) logger.info("ExerciseList.loadExercise itemID " + itemID);
+//   if (DEBUG) logger.info("ExerciseList.loadExercise itemID " + itemID);
     pushNewItem("", itemID);
   }
 

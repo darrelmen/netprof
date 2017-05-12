@@ -14,7 +14,7 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
   private int count;
   private int userListID;
   private boolean italic = false;
-  private String tooltip;
+  private String tooltip = "";
 
   private ItemSorter itemSorter = new ItemSorter();
 

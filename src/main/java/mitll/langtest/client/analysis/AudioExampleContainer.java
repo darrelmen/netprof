@@ -19,9 +19,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by go22670 on 1/20/17.
  */
-public abstract class AudioExampleContainer<T extends WordScore> extends
-    SimplePagingContainer<T> {
-
+public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T> {
   static final int PLAY_WIDTH = 42;
   private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
@@ -50,13 +48,8 @@ public abstract class AudioExampleContainer<T extends WordScore> extends
 
   void addAudioColumns() {
     Column<T, SafeHtml> column = getPlayAudio();
-    SafeHtmlHeader header = new SafeHtmlHeader(new SafeHtml() {
-      @Override
-      public String asString() {
-        return "<span style=\"text-align:left;\">" + PLAY +
-            "</span>";
-      }
-    });
+    SafeHtmlHeader header = new SafeHtmlHeader((SafeHtml) () -> "<span style=\"text-align:left;\">" + PLAY +
+        "</span>");
 
     table.addColumn(column, header);
     table.setColumnWidth(column, PLAY_WIDTH + "px");
@@ -78,8 +71,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends
       public SafeHtml getValue(T shell) {
         CommonShell exercise = getShell(shell.getExid());
        // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + shell.getFileRef());
-        String title = getTitle(exercise);
-        return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), title);
+        return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), getTitle(exercise));
       }
     };
   }
@@ -99,9 +91,8 @@ public abstract class AudioExampleContainer<T extends WordScore> extends
       public SafeHtml getValue(T shell) {
         CommonShell exercise = getShell(shell.getExid());
      //   logger.info("getPlayNativeAudio : Got " +  shell.getId() + "  : " + shell.getNativeAudio());
-        String title = getTitle(exercise);
         if (shell.getRefAudio() != null) {
-          return PlayAudioWidget.getAudioTagHTML(shell.getRefAudio(), title);
+          return PlayAudioWidget.getAudioTagHTML(shell.getRefAudio(), getTitle(exercise));
         } else {
           //if  (exercise != null) logger.info("no native audio for " + exercise.getOldID());
           return new SafeHtmlBuilder().toSafeHtml();

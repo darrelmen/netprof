@@ -346,6 +346,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             if (iterator.hasNext()) {
               int segmentLength = word.getEvent().length();
               List<TranscriptSegment> phonesInWord = getSegs(phones, word);
+              if (rtl) { // phones should play right to left
+                Collections.reverse(phonesInWord);
+              }
 
               if (DEBUG) logger.info("matchSegmentToWidgetForAudio got segment " + word + " length " + segmentLength);
               IHighlightSegment value1 =

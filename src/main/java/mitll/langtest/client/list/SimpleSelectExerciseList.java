@@ -44,7 +44,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.SectionNode;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.*;

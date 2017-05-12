@@ -74,8 +74,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private static final int PAGE_SIZE = 11;
   private final Long selectedUser;
   private final String selectedUserKey;
-  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
-  private final Date now = new Date();
   private final String header;
 
   static final int ID_WIDTH = 130;
@@ -84,6 +82,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private static final int STUDENT_WIDTH = 300;
   private static final String storageKey = "selectedUser";
   private int idWidth = ID_WIDTH;
+
+  private final String todayYear;
+  private final String todaysDate;
+
+  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
+  private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
 
   /**
    * @param controller
@@ -98,6 +102,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     this.selectedUserKey = selectedUserKey;
     this.selectedUser = getSelectedUser(selectedUserKey);
     this.header = header;
+    todaysDate = format.format(new Date());
+    todayYear = todaysDate.substring(todaysDate.length() - 2);
   }
 
   /**
@@ -106,15 +112,17 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param idWidth
    * @see mitll.langtest.client.analysis.BasicUserContainer#BasicUserContainer
    */
-  public MemoryItemContainer(ExerciseController controller, String header, int idWidth) {
+  MemoryItemContainer(ExerciseController controller, String header, int idWidth) {
     super(controller);
     this.selectedUserKey = getSelectedUserKey(controller, header);
     this.selectedUser = getSelectedUser(selectedUserKey);
     this.header = header;
     this.idWidth = idWidth;
+    todaysDate = format.format(new Date());
+    todayYear = todaysDate.substring(todaysDate.length() - 2);
   }
 
-  public DivWidget getTable(Collection<T> users, String title, String subtitle) {
+  DivWidget getTable(Collection<T> users, String title, String subtitle) {
     return getStudentContainer(getTableWithPager(users), title, subtitle);
   }
 
@@ -411,13 +419,18 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
       @Override
       public SafeHtml getValue(T shell) {
-        String signedUp = format.format(
-            //     new Date(shell.getUser().getTimestampMillis())
-            new Date(getItemDate(shell))
-        );
+        Date date = new Date(getItemDate(shell));
+        String signedUp = format.format(date);
 
-        String format = MemoryItemContainer.this.format.format(now);
-        if (format.substring(format.length() - 2).equals(signedUp.substring(signedUp.length() - 2))) {
+//        String format = MemoryItemContainer.this.format.format(now);
+//        if (format.substring(format.length() - 2).equals(signedUp.substring(signedUp.length() - 2))) {
+//          signedUp = signedUp.substring(0, signedUp.length() - 4);
+//        }
+
+        // drop year if this year
+        if (signedUp.equals(todaysDate)) {
+          signedUp = todayTimeFormat.format(date);
+        } else if (todayYear.equals(signedUp.substring(signedUp.length() - 2))) {
           signedUp = signedUp.substring(0, signedUp.length() - 4);
         }
 

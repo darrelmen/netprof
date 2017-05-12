@@ -265,7 +265,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     phoneChoice = new NavLink(getPhoneMenuTitle());
 
     Scheduler.get().scheduleDeferred(() -> {
-      logger.info("show phones " + getPhonesDisplay());
+    //  logger.info("show phones " + getPhonesDisplay());
       phoneChoice.setText(getPhoneMenuTitle());
     });
 
@@ -400,8 +400,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     String token = event.getValue();
     SelectionState selectionState = new SelectionState(token, false);
     String instance1 = selectionState.getInstance();
-    //   logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");
-    showSection(instance1);
+      logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");
+    //showSection(instance1);
   }
 
   private void showSection(String instance1) {
@@ -452,7 +452,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
-      logger.info("getChoice got click on " + instanceName + " = " + historyToken);
+    //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
       gotClickOnChoice(instanceName, learn);
       // setHistoryItem(historyToken);
     });

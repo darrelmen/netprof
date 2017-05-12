@@ -93,9 +93,10 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   private final boolean spanish;
   private List<WordScore> sortedHistory;
   private SortedSet<WordScore> byTime;
-  private final Date now = new Date();
   private final String todayYear;
   private final String todaysDate;
+  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
+  private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
 
   /**
    * What sort order do we want?
@@ -112,7 +113,8 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
     this.learnTab = learnTab;
     this.heading = w;
 
-    todaysDate = WordContainer.this.format.format(now);
+    Date now = new Date();
+    todaysDate = format.format(now);
     todayYear = todaysDate.substring(todaysDate.length() - 2);
   }
 
@@ -265,8 +267,6 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
     new TooltipHelper().addTooltip(table, "Click on an item to review.");
   }
 
-  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
-
   private Column<WordScore, SafeHtml> getDateColumn() {
     return new Column<WordScore, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -284,11 +284,12 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
 
       @Override
       public SafeHtml getValue(WordScore shell) {
-        String signedUp = format.format(new Date(shell.getTimestamp()));
+        Date date = new Date(shell.getTimestamp());
+        String signedUp = format.format(date);
 
         // drop year if this year
         if (signedUp.equals(todaysDate)) {
-          signedUp = "Today";
+          signedUp = todayTimeFormat.format(date);
         } else if (todayYear.equals(signedUp.substring(signedUp.length() - 2))) {
           signedUp = signedUp.substring(0, signedUp.length() - 4);
         }
@@ -349,7 +350,6 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
         if (columnText.isEmpty()) {
           CommonShell exercise = getShell(shell.getExid());
           // logger.info("getItemColumn : column text empty for id " + shell.getExID() + " and found ex " + exercise);
-
           String foreignLanguage = exercise == null ? "" : exercise.getForeignLanguage();
           if (spanish) foreignLanguage = foreignLanguage.toUpperCase();
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
@@ -401,12 +401,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
       // logger.info("Starting from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
       heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " + yearShortFormat.format(new Date(to)));
 
-      WordScore fromElement = new WordScore();
-      fromElement.setTimestamp(from);
-      WordScore toElement = new WordScore();
-      toElement.setTimestamp(to);
-
-      SortedSet<WordScore> wordScores = byTime.subSet(fromElement, toElement);
+      SortedSet<WordScore> wordScores = byTime.subSet(new WordScore(from), new WordScore(to));
       List<WordScore> filtered = new ArrayList<>(wordScores);
       Collections.sort(filtered); // put sort back to by score first
       addItems(filtered);

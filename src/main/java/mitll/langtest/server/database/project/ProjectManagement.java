@@ -173,7 +173,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   private void configureProjects() {
     Collection<Project> projects = getProjects();
-    logger.info("configureProjects got " + projects.size() + " projects");
+//    logger.info("configureProjects got " + projects.size() + " projects");
     for (Project project : projects) {
       configureProject(project, false, false);
     }

@@ -132,8 +132,8 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public ShowTab getShowTab() {
     return exid -> {
-      banner.showLearn();
       learnHelper.loadExercise(exid);
+      banner.showLearn();
     };
   }
 

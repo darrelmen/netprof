@@ -85,7 +85,7 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
   /**
    * @param userID
    * @see mitll.langtest.client.LangTest#gotUser
-   * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
+   * @see HistoryExerciseList#noSectionsGetExercises(long, int)
    */
   boolean getExercises(long userID);
 

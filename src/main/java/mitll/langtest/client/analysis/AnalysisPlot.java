@@ -414,7 +414,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @see #gotExtremes(AxisSetExtremesEvent)
    */
   private void setVisibility(long start, long end) {
-    logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
+  //  logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
+
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);
@@ -812,7 +813,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
       this.lastTime = timeAndScore.getTimestamp();
 
       if (!toGet.isEmpty()) {
-        logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
+       // logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
         service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {

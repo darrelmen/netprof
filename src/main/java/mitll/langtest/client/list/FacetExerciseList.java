@@ -395,7 +395,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   public void showList(int newUserListID) {
     Map<String, String> candidate = new HashMap<>(typeToSelection);
     candidate.put(LISTS, "" + newUserListID);
-      logger.info("showList " + candidate);
+   // logger.info("showList " + candidate);
     getTypeToValues(candidate, newUserListID);
   }
 
@@ -1094,11 +1094,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
               @Override
               public void onSuccess(Integer result) {
-                if (result != controller.getProjectStartupInfo().getProjectid()) {
-                  getTypeToValues(newTypeToSelection, -1);
-                } else {
-                  getTypeToValues(newTypeToSelection, fUserListID);
-                }
+                int fUserListID1 = result == controller.getProjectStartupInfo().getProjectid() ? fUserListID : -1;
+                getTypeToValues(newTypeToSelection, fUserListID1);
               }
             });
           } else {
@@ -1221,7 +1218,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     next.setEnabled(pagingContainer.hasNextPage());
   }*/
 
-private Map<Integer, CommonExercise> idToExercise = new HashMap<>();
+  private Map<Integer, CommonExercise> idToExercise = new HashMap<>();
 
   /**
    * @param visibleIDs

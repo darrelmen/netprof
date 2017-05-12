@@ -33,8 +33,6 @@
 package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -81,7 +79,8 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
   }
 
   @Override
-  protected void noSectionsGetExercises(long userID) {
-    simpleLoadExercises(getHistoryToken(), getPrefix());
+  protected void noSectionsGetExercises(long userID, int exerciseID) {
+    logger.info("noSectionsGetExercies for " + userID + " " + getPrefix());
+    simpleLoadExercises(getHistoryToken(), getPrefix(),exerciseID);
   }
 }

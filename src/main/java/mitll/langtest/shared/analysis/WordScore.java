@@ -60,6 +60,10 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   public WordScore() {
   }
 
+  public WordScore(long timestamp) {
+    this.timestamp = timestamp;
+  }
+
   /**
    * @param bs
    * @param transcript

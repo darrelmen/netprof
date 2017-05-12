@@ -129,6 +129,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param onlyUnrecorded
    * @param onlyDefaultUser
    * @param onlyUninspected
+   * @param exerciseID
    * @paramx setTypeAheadText
    * @see #gotTypeAheadEvent
    * @see HistoryExerciseList#simpleLoadExercises
@@ -138,7 +139,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
                      boolean onlyWithAudioAnno,
                      boolean onlyUnrecorded,
                      boolean onlyDefaultUser,
-                     boolean onlyUninspected) {
+                     boolean onlyUninspected, int exerciseID) {
     waitCursorHelper.scheduleWaitTimer();
     logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());

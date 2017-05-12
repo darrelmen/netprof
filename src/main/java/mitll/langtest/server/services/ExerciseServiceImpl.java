@@ -72,9 +72,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final boolean DEBUG = false;
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    * @param request
    * @return
+   * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) {
     List<Pair> typeToSelection = request.getTypeToSelection();
@@ -144,7 +144,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       boolean isUserListReq = request.getUserListID() != -1;
       UserList<CommonExercise> userListByID = isUserListReq ? db.getUserListByIDExercises(request.getUserListID(), getProjectID()) : null;
 
-     // logger.info("found user list " + isUserListReq + " " + userListByID);
+      // logger.info("found user list " + isUserListReq + " " + userListByID);
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
         return getExerciseWhenNoUnitChapter(request, projectID, userListByID);
@@ -210,6 +210,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * Complicated -- put the vocab matches first, then context matches second
+   *
    * @param request
    * @param exercises
    * @param predefExercises
@@ -237,7 +238,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           if (!basicExercises.isEmpty() && hasSearch) {
             // if the search term is in the fl, sort by fl
             sortByFL = basicExercises.iterator().next().getForeignLanguage().contains(searchTerm);
-  //          logger.info("found search term " + searchTerm + " = " + sortByFL);
+            //          logger.info("found search term " + searchTerm + " = " + sortByFL);
           }
           sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL);
         }
@@ -262,7 +263,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           if (!contextExercises.isEmpty() && hasSearch) {
             // if the search term is in the fl, sort by fl
             sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
-  //          logger.info("2 found search term " + searchTerm + " = " + sortByFL);
+            //          logger.info("2 found search term " + searchTerm + " = " + sortByFL);
           }
           sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL);
         }
@@ -416,8 +417,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseIds
    */
   private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
-    Collection<CommonExercise> exercisesForState =
-        getSectionHelper().getExercisesForSelectionState(request.getTypeToSelection());
+    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(request.getTypeToSelection());
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
     exercisesForState = filterExercises(request, copy, projid);
     return getExerciseListWrapperForPrefix(request, exercisesForState);
@@ -448,8 +448,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     //logger.debug("marked " +i + " as recorded role " +role);
 
     if (hasPrefix) {
-      ExerciseTrie<CommonExercise> trie = new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder(), true);
-      exercisesForState = trie.getExercises(prefix);
+      exercisesForState = getSearchMatches(exercisesForState, prefix);
     }
 
     if (exercisesForState.isEmpty() && !prefix.isEmpty()) { // allow lookup by id
@@ -467,6 +466,32 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     return makeExerciseListWrapper(request, copy);
+  }
+
+  @NotNull
+  private Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState, String prefix) {
+    Collection<CommonExercise> originalSet = exercisesForState;
+    long then = System.currentTimeMillis();
+    ExerciseTrie<CommonExercise> trie = new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder(), true);
+    long now = System.currentTimeMillis();
+    if (now - then > 20)
+      logger.info("took " + (now - then) + " millis to build trie for " + exercisesForState.size() + " exercises");
+    exercisesForState = trie.getExercises(prefix);
+
+    {
+      List<CommonExercise> contextSentences = new ArrayList<>();
+      then = System.currentTimeMillis();
+      for (CommonExercise exercise : originalSet) contextSentences.addAll(exercise.getDirectlyRelated());
+
+      logger.info("getExerciseListWrapperForPrefix made " + contextSentences.size() + " from " + exercisesForState.size());
+
+      trie = new ExerciseTrie<>(contextSentences, getLanguage(), getSmallVocabDecoder(), true);
+      now = System.currentTimeMillis();
+      if (now - then > 20)
+        logger.info("took " + (now - then) + " millis to build trie for " + contextSentences.size() + " context exercises");
+      exercisesForState.addAll(trie.getExercises(prefix));
+    }
+    return exercisesForState;
   }
 
   /**

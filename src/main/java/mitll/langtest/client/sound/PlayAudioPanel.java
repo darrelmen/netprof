@@ -358,6 +358,33 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   @Override
   public void repeatSegment(float startInSeconds, float endInSeconds) {
+    if (  currentSound != null) {
+      doPlaySegment(startInSeconds, endInSeconds);
+    } else {
+      if (DEBUG || currentPath == null) logger.info("repeatSegment - new path " + currentPath);
+
+      addSimpleListener(new SimpleAudioListener() {
+        @Override
+        public void songLoaded(double duration) {
+          if (DEBUG) logger.info("playAudio - songLoaded " + currentPath + " this " + this);
+          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            public void execute() {
+              if (DEBUG) logger.info("playAudio - songLoaded calling doClick  " + currentPath);
+              doPlaySegment(startInSeconds, endInSeconds);
+            }
+          });
+        }
+
+        @Override
+        public void songFinished() {
+        }
+      });
+
+      loadAudio(currentPath);
+    }
+  }
+
+  private void doPlaySegment(float startInSeconds, float endInSeconds) {
     playing = true;
     setPlayButtonText();
     playSegment(startInSeconds, endInSeconds);
@@ -417,7 +444,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       doClick();
     } else {
       if (DEBUG) logger.info("playAudio - new path " + path);
-      loadAudio(path);
 
       addSimpleListener(new SimpleAudioListener() {
         @Override
@@ -435,6 +461,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
         public void songFinished() {
         }
       });
+
+      loadAudio(path);
     }
   }
 

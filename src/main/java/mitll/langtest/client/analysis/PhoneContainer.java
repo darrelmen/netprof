@@ -105,7 +105,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     super(controller);
     this.exampleContainer = exampleContainer;
     this.phonePlot = phonePlot;
-    // this.isNarrow = isNarrow;
   }
 
   @Override
