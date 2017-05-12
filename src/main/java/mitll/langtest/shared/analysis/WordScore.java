@@ -134,6 +134,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   }
 
   public String toString() {
-    return "WordScore exid " + exid + "/" + resultID + " score " + pronScore + "  : " + transcript + " native " + refAudio + " fileRef " + answerAudio;
+    return "WordScore exid " + exid + "/" + resultID + " score " + pronScore + "  : " + transcript +
+        " native " + refAudio + " fileRef " + answerAudio;
   }
 }

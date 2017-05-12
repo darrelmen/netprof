@@ -1115,8 +1115,7 @@ public class UserListManager implements IUserListManager {
     if (exercise != null) {
       MutableAnnotationExercise mutableAnnotation = exercise.getMutableAnnotation();
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
-
-      logger.info("AddAnnoations " +exercise.getID() + " got " + latestByExerciseID);
+//      logger.info("AddAnnoations " +exercise.getID() + " got " + latestByExerciseID);
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
         mutableAnnotation.addAnnotation(pair.getKey(), pair.getValue().getStatus(), pair.getValue().getComment());
       }

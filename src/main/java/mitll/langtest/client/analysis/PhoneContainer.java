@@ -72,13 +72,13 @@ import java.util.logging.Logger;
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
-  public static final int PHONE_CONTAINER_MIN_WIDTH = 225;
+  public static final int PHONE_CONTAINER_MIN_WIDTH = 220;
   private static final int MAX_EXAMPLES = 25;
 
   private static final int TABLE_WIDTH = 295;
   private static final int SCORE_COL_WIDTH = 60;
   private static final String SOUND = "Sound";
-//  private static final String SCORE = "Initial";
+  //  private static final String SCORE = "Initial";
   private static final String COUNT_COL_HEADER = "#";
   private static final String CURR = "Avg. Score";//"Curr.";
   //private static final String DIFF_COL_HEADER = "+/-";
@@ -88,7 +88,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
 
- // private final boolean isNarrow;
+  // private final boolean isNarrow;
   private long from;
   private long to;
   //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
@@ -105,7 +105,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     super(controller);
     this.exampleContainer = exampleContainer;
     this.phonePlot = phonePlot;
-   // this.isNarrow = isNarrow;
+    // this.isNarrow = isNarrow;
   }
 
   @Override
@@ -156,8 +156,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private List<PhoneAndStats> getPhoneAndStatsList(long from, long to) {
     if (phoneReport == null) {
       return Collections.emptyList();
-    }
-    else {
+    } else {
       Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
       return getPhoneAndStatsListForPeriod(phoneToAvgSorted, from, to);
     }
@@ -298,9 +297,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    */
   private Panel getTableWithPager(List<PhoneAndStats> sortedHistory) {
     Panel tableWithPager = getTableWithPager(new ListOptions());
-   // table.setTableLayoutFixed(false);
-    table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH +
-        "px");
+    // table.setTableLayoutFixed(false);
+    table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH + "px");
 
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
@@ -511,7 +509,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
 
-
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
     addReview();
@@ -634,21 +631,21 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     };
   }
 
- /* private Column<PhoneAndStats, SafeHtml> getDiff() {
-    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkForClick(object, event);
-      }
+  /* private Column<PhoneAndStats, SafeHtml> getDiff() {
+     return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
+       @Override
+       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
+         super.onBrowserEvent(context, elem, object, event);
+         checkForClick(object, event);
+       }
 
-      @Override
-      public SafeHtml getValue(PhoneAndStats shell) {
-        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getDiff())).toSafeHtml();
-      }
-    };
-  }
-*/
+       @Override
+       public SafeHtml getValue(PhoneAndStats shell) {
+         return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getDiff())).toSafeHtml();
+       }
+     };
+   }
+ */
   private String getScoreMarkup(int score) {
     return "<span " + "style='" + "margin-left:10px;" + "'" + ">" + score + "</span>";
   }

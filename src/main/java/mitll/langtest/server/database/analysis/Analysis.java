@@ -267,11 +267,9 @@ public abstract class Analysis extends DAO {
     Collection<UserInfo> values = best.values();
     if (values.isEmpty()) {
       //logger.warn("no best values for " + id);
-      List<BestScore> bestScores = Collections.emptyList();
-      return getWordScore(bestScores);
+      return getWordScore(Collections.emptyList());
     } else {
-      UserInfo next = values.iterator().next();
-      List<BestScore> resultsForQuery = next.getBestScores();
+      List<BestScore> resultsForQuery = values.iterator().next().getBestScores();
       //  if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
 
       List<WordScore> wordScore = getWordScore(resultsForQuery);

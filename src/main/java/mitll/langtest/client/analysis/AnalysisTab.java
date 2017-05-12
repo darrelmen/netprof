@@ -99,8 +99,6 @@ public class AnalysisTab extends DivWidget {
 
     this.controller = controller;
     Icon playFeedback = new Icon(IconType.PLAY);
-   // int userid = controller.getUser();
-  //  String userChosenID = controller.getUserManager().getUserID();
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid, userChosenID, minRecordings,
         controller.getSoundManager(), playFeedback);
 
@@ -274,18 +272,16 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(List<WordScore> wordScores) {
-        logger.info("getWordScores : got " + wordScores.size() + " for user #" + userid);
-
+//        logger.info("getWordScores : got " + wordScores.size() + " for user #" + userid);
         showWordScores(wordScores, controller, analysisPlot, showTab, lowerHalf, /*service,*/ userid, minRecordings);
       }
     });
   }
 
-  private void showWordScores(List<WordScore> wordScores, ExerciseController controller, AnalysisPlot analysisPlot,
+  private void showWordScores(List<WordScore> wordScores,
+                              ExerciseController controller, AnalysisPlot analysisPlot,
                               ShowTab showTab, Panel lowerHalf,
-                              //AnalysisServiceAsync service,
                               int userid, int minRecordings) {
-   // Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
     Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab, new Heading(3, WORDS, SUBTITLE));
 
     DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", new Heading(3, WORDS, SUBTITLE));
@@ -305,9 +301,7 @@ public class AnalysisTab extends DivWidget {
                                  AnalysisPlot analysisPlot,
                                  ShowTab showTab,
                                  Heading wordsTitle) {
-    final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle);
-
-    return wordContainer.getTableWithPager(wordScores);
+    return new WordContainer(controller, analysisPlot, showTab, wordsTitle).getTableWithPager(wordScores);
   }
 
   private DivWidget getSoundsDiv() {

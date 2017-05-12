@@ -104,7 +104,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param controller
    * @param header
    * @param idWidth
-   * @see mitll.langtest.client.project.ProjectContainer#ProjectContainer
+   * @see mitll.langtest.client.analysis.BasicUserContainer#BasicUserContainer
    */
   public MemoryItemContainer(ExerciseController controller, String header, int idWidth) {
     super(controller);
@@ -164,23 +164,25 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   protected Column<T, SafeHtml> dateCol;
 
   /**
-   *
    * @param sortEnglish
    */
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
-    Column<T, SafeHtml> userCol = getItemColumn();
-    userCol.setSortable(true);
-    table.setColumnWidth(userCol, idWidth + "px");
-    addColumn(userCol, new TextHeader(header));
-    ColumnSortEvent.ListHandler<T> columnSortHandler = getUserSorter(userCol, getList());
-    table.addColumnSortHandler(columnSortHandler);
+    {
+      Column<T, SafeHtml> userCol = getItemColumn();
+      userCol.setSortable(true);
+      table.setColumnWidth(userCol, idWidth + "px");
+      addColumn(userCol, new TextHeader(header));
+      table.addColumnSortHandler(getUserSorter(userCol, getList()));
+    }
 
-    dateCol = getDateColumn();
-    dateCol.setSortable(true);
-    addColumn(dateCol, new TextHeader(SIGNED_UP1));
-    table.setColumnWidth(dateCol, SIGNED_UP + "px");
-    table.addColumnSortHandler(getDateSorter(dateCol, getList()));
+    {
+      dateCol = getDateColumn();
+      dateCol.setSortable(true);
+      addColumn(dateCol, new TextHeader(SIGNED_UP1));
+      table.setColumnWidth(dateCol, SIGNED_UP + "px");
+      table.addColumnSortHandler(getDateSorter(dateCol, getList()));
+    }
   }
 
   /**
@@ -189,7 +191,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<T> users) {
-    logger.info("getTableWithPager" +users.size());
+    logger.info("getTableWithPager" + users.size());
 
     Panel tableWithPager = getTableWithPager(new ListOptions());
 
@@ -237,16 +239,16 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     Scheduler.get().scheduleDeferred(() -> {
           if (selectedUser == null || finalUser == null) {
             T next = users.iterator().next();
-    //        logger.info("\t makeInitialSelection make initial selection " + next);
+            //        logger.info("\t makeInitialSelection make initial selection " + next);
             table.getSelectionModel().setSelected(next, true);
             gotClickOnItem(next);
           } else {
 //            if (finalUser != null) {
-              table.getSelectionModel().setSelected(finalUser, true);
-              gotClickOnItem(finalUser);
-  //          } else {
-    //          logger.warning("makeInitialSelection no initial user?");
-      //      }
+            table.getSelectionModel().setSelected(finalUser, true);
+            gotClickOnItem(finalUser);
+            //          } else {
+            //          logger.warning("makeInitialSelection no initial user?");
+            //      }
           }
         }
     );

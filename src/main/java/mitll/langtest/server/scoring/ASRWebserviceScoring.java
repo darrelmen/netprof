@@ -150,7 +150,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   public void setAvailable() {
-    available = isAvailableCheckNow();
+    new Thread(() -> available = isAvailableCheckNow()).start();
   }
 
   /**

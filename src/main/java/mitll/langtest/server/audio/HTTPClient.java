@@ -70,6 +70,8 @@ public class HTTPClient {
   private static final Logger logger = LogManager.getLogger(HTTPClient.class);
   private static final int CONNECT_TIMEOUT = 5000;
   private static final int READ_TIMEOUT = 20000;
+  public static final String GET = "GET";
+  public static final String POST = "POST";
 
   private HttpURLConnection httpConn;
 
@@ -143,14 +145,15 @@ public class HTTPClient {
    */
   public boolean isAvailable(String webserviceIP, int webservicePort, String service) {
     try {
-      String s = readFromGET("http://" + webserviceIP + ":" + webservicePort + "/" + service + "/index.html");
-      logger.info("response " + s);
+      //String s =
+      readFromGET("http://" + webserviceIP + ":" + webservicePort + "/" + service + "/index.html");
+      //logger.info("response " + s);
       return true;
     } catch (FileNotFoundException fnf) {
-      logger.debug("isAvailable " + fnf);
+      logger.debug("isAvailable for " + webserviceIP + " " + webservicePort + " " + service + " :" + fnf);
       return true;
     } catch (IOException e) {
-      logger.warn("Got " + e);
+      logger.warn("isAvailable : Got " + e);
       return false;
     }
   }
@@ -162,7 +165,7 @@ public class HTTPClient {
    */
   public String readFromGET(String url) throws IOException {
     //try {
-    logger.info("Reading from " + url);
+//    logger.info("Reading from " + url);
     HttpURLConnection httpConn = setupGetHttpConn(url);
     String receive = receive(httpConn);
     httpConn.disconnect();
@@ -175,21 +178,19 @@ public class HTTPClient {
 
   private HttpURLConnection setupGetHttpConn(String url) throws IOException {
     HttpURLConnection httpConn = getHttpURLConnection(url);
-    httpConn.setRequestMethod("GET");
-    httpConn.setConnectTimeout(1000);
-    //httpConn.setReadTimeout(20000);
-    //httpConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+    httpConn.setRequestMethod(GET);
+    httpConn.setConnectTimeout(CONNECT_TIMEOUT);
+    httpConn.setReadTimeout(READ_TIMEOUT);
     setRequestProperties(httpConn);
     return httpConn;
   }
 
   private HttpURLConnection setupPostHttpConn(String url) throws IOException {
     HttpURLConnection httpConn = getHttpURLConnection(url);
-    httpConn.setRequestMethod("POST");
+    httpConn.setRequestMethod(POST);
     httpConn.setDoOutput(true);
     httpConn.setConnectTimeout(CONNECT_TIMEOUT);
     httpConn.setReadTimeout(READ_TIMEOUT);
-    //httpConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
     setRequestProperties(httpConn);
     return httpConn;
   }
@@ -285,7 +286,6 @@ public class HTTPClient {
   }
 
   /**
-   *
    * @param input
    * @return
    * @throws IOException
