@@ -35,22 +35,23 @@ public class ClickableWords<T extends CommonExercise> {
 
   private boolean isJapanese = false;
 
-  private final T exercise;
+  private T exercise;
   private boolean hasClickableAsian = false;
   private static final String MANDARIN = "Mandarin";
   private static final String JAPANESE = "Japanese";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
-  private final ListInterface listContainer;
+  private  ListInterface listContainer;
   private WordBoundsFactory factory = new WordBoundsFactory();
 
   private static final boolean DEBUG = false;
 
+  public ClickableWords() {}
   /**
    * @param listContainer
    * @param exercise
    * @param language
    */
-  ClickableWords(ListInterface listContainer, T exercise, String language) {
+  public ClickableWords(ListInterface listContainer, T exercise, String language) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);

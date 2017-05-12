@@ -77,6 +77,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
 
   private static final int ITEM_COL_WIDTH = 250;
   private static final int ITEM_COL_WIDTH_NARROW = 190;
+
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 68;
   private static final int SIGNED_UP = 95;

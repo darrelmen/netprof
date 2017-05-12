@@ -265,29 +265,13 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
         exerciseID, controller);
   }
 
-  /**
-   * This row will be 3-100 pixels wide.
-   *
-   * @param tooltipHelper
-   * @param scoreAndPath
-   * @return
-   * @see #getAudioAndScore
-   */
-/*  private Widget makeRow(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
-    Widget row = getRow(scoreAndPath);
-    int iScore = scoreAndPath.getPercentScore();
-    row.setWidth(Math.max(3, iScore) + "px");
-
-    tooltipHelper.createAddTooltip(row, "Score" + (" " + iScore + "%"), Placement.BOTTOM);
-    return row;
-  }*/
 
   private Widget makeColoredTable(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
     row.addStyleName("inlineFlex");
     Map<NetPronImageType, List<TranscriptSegment>> scores = scoreAndPath.getScores();
     if (scores.isEmpty()) {
-      logger.warning("no segments for "+ scoreAndPath);
+      logger.warning("makeColoredTable no segments for "+ scoreAndPath);
     }
     row.getElement().setInnerHTML(new WordTable().makeColoredTable(scores));
     tooltipHelper.createAddTooltip(row, "Score" + (" " + scoreAndPath.getPercentScore() + "%"), Placement.BOTTOM);
@@ -295,11 +279,4 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     return row;
   }
 
-/*  private Widget getRow(CorrectAndScore scoreAndPath) {
-    Widget row = new DivWidget();
-    row.setHeight(HEIGHT + "px");
-    row.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(scoreAndPath.getScore()));
-    row.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
-    return row;
-  }*/
 }

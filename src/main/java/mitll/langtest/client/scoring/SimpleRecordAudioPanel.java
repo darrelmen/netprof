@@ -252,7 +252,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
       Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
       scoreFeedbackDiv.add(new WordScoresTable()
-          .getStyledWordTable(pretestScore, playAudioPanel, typeToSegmentToWidget));
+          .getStyledWordTable(pretestScore, playAudioPanel, typeToSegmentToWidget, isRTL));
       SegmentHighlightAudioControl listener = new SegmentHighlightAudioControl(typeToSegmentToWidget);
       playAudioPanel.setListener(listener);
 

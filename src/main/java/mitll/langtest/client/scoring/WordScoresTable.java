@@ -2,7 +2,6 @@ package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.sound.AudioControl;
-import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -33,27 +32,19 @@ public class WordScoresTable {
    * @param result
    * @param audioControl
    * @param typeToSegmentToWidget
+   * @param isRTL
    * @return
    */
-  public Widget getStyledWordTable(PretestScore result, AudioControl audioControl,
-                                   Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
-    Widget table2 = new WordTable().getDivWord(result.getTypeToSegments(), audioControl, typeToSegmentToWidget);
+  public Widget getStyledWordTable(PretestScore result,
+                                   AudioControl audioControl,
+                                   Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
+                                   boolean isRTL) {
+    Widget table2 = new WordTable().getDivWord(result.getTypeToSegments(), audioControl, typeToSegmentToWidget, isRTL);
     table2.addStyleName("topFiveMargin");
     table2.addStyleName("leftFiveMargin");
     table2.addStyleName("floatLeftAndClear");
     return table2;
   }
-
-  /**
-   * @see ScoringAudioPanel#scoreAudio
-   * @param score
-   * @return
-   * @see #scoreAudio
-   */
-//  private Widget getWordTable(PretestScore score) {
-//   // return new WordTable().getWordTable(score.getTypeToSegments(), false);
-//    return new WordTable().getDivWord(score.getTypeToSegments());
-//  }
 
   /**
    * TODO : don't sort!

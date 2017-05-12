@@ -407,7 +407,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (lcSegment.equalsIgnoreCase(fragment1)) {
       if (phonesChoices == PhonesChoices.SHOW) {
-        clickable.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment));
+        clickable.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, rtl));
       }
       return clickable;
     } else {
@@ -418,7 +418,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       } else {
         AllHighlight allHighlight = new AllHighlight(bulk);
 
-        allHighlight.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment));
+        allHighlight.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, rtl));
 
         if (DEBUG)
           logger.info("matchSegmentToWidgetForAudio create composite from " + bulk.size() + " = " + allHighlight);

@@ -57,7 +57,6 @@ import java.util.logging.Logger;
 public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize {
   private final Logger logger = Logger.getLogger("FlexListLayout");
 
-  //  private static final int RIGHT_SIDE_DIV_WIDTH = 70;
   public PagingExerciseList<T, U> npfExerciseList;
   private final ExerciseController controller;
 
@@ -138,6 +137,12 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
   boolean atTop = true;
 
+  /**
+   * TODO: Do something smarter here - if we scroll down and can't see facets anymore, change position to fixed, but with the bottom close to the bottom.
+   * If we can see the facets, don't do anything.
+   * @param twoRows
+   * @param topRow
+   */
   protected void styleTopRow(Panel twoRows, Panel topRow) {
     topRow.addStyleName("floatLeft");
     topRow.addStyleName("leftBlock");
@@ -147,7 +152,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
     FlowPanel section = new FlowPanel("section");
     section.addStyleName("sidebar");
-    section.addStyleName("scrolledpos");
+//    section.addStyleName("scrolledpos");
 
     twoRows.add(section);
     section.add(topRow);

@@ -441,13 +441,17 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
-      logger.debug("getExerciseListWrapperForPrefix userID " + userID + " prefix '" + prefix + "' activity " + request.getActivityType());
+      logger.debug("getExerciseListWrapperForPrefix" +
+          "\n\tuserID   " + userID +
+          "\n\tprefix   '" + prefix + "'" +
+          "\n\tactivity " + request.getActivityType());
     }
 
     int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
     //logger.debug("marked " +i + " as recorded role " +role);
 
     if (hasPrefix) {
+      //logger.info("check for prefix match over " + exercisesForState.size());
       exercisesForState = getSearchMatches(exercisesForState, prefix);
     }
 
@@ -471,6 +475,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   @NotNull
   private Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState, String prefix) {
     Collection<CommonExercise> originalSet = exercisesForState;
+
+   // logger.info("original set" +originalSet.size());
     long then = System.currentTimeMillis();
     ExerciseTrie<CommonExercise> trie = new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder(), true);
     long now = System.currentTimeMillis();
@@ -483,7 +489,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       then = System.currentTimeMillis();
       for (CommonExercise exercise : originalSet) contextSentences.addAll(exercise.getDirectlyRelated());
 
-      logger.info("getExerciseListWrapperForPrefix made " + contextSentences.size() + " from " + exercisesForState.size());
+     // logger.info("getExerciseListWrapperForPrefix made " + contextSentences.size() + " from " + originalSet.size());
 
       trie = new ExerciseTrie<>(contextSentences, getLanguage(), getSmallVocabDecoder(), true);
       now = System.currentTimeMillis();

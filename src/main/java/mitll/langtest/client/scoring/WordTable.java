@@ -158,12 +158,14 @@ public class WordTable {
   /**
    * @param netPronImageTypeToEndTime
    * @param audioControl
+   * @param isRTL
    * @return
    * @see WordScoresTable#getStyledWordTable
    */
   Widget getDivWord(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime,
                     AudioControl audioControl,
-                    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
+                    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
+                    boolean isRTL) {
     DivWidget table = new DivWidget();
     table.addStyleName("topFiveMargin");
     table.addStyleName("leftFiveMargin");
@@ -177,7 +179,15 @@ public class WordTable {
     typeToSegmentToWidget.put(NetPronImageType.PHONE_TRANSCRIPT, phoneMap);
 
     int id = 0;
-    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
+    Collection<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries = wordToPhones.entrySet();
+
+    if (isRTL) {
+      List<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries1 = new ArrayList<>(entries);
+      Collections.reverse(entries1);
+      entries = entries1;
+    }
+
+    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : entries) {
       TranscriptSegment word = pair.getKey();
 
       String wordLabel = word.getEvent();
@@ -201,7 +211,7 @@ public class WordTable {
         hdiv.add(header);
         col.add(hdiv);
 
-        DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, pair.getValue(), false, null);
+        DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, pair.getValue(), false, null, isRTL);
         col.add(phones);
       }
     }
@@ -215,16 +225,18 @@ public class WordTable {
    * @param value
    * @param simpleLayout
    * @param wordSegment
+   * @param isRTL
    * @return
    */
   @NotNull
   public DivWidget getPhoneDivBelowWord(AudioControl audioControl,
                                         TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                         List<TranscriptSegment> value,
-                                        boolean simpleLayout, TranscriptSegment wordSegment) {
+                                        boolean simpleLayout,
+                                        TranscriptSegment wordSegment, boolean isRTL) {
     DivWidget phones = new DivWidget();
     phones.addStyleName("inlineFlex");
-    addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment);
+    addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment, isRTL);
     return phones;
   }
 
@@ -324,22 +336,29 @@ public class WordTable {
   }
 
   /**
-   * @param value
+   * @param phoneSegments
    * @param scoreRow
    * @param audioControl
    * @param phoneMap
    * @param simpleLayout
    * @param wordSegment
+   * @param isRTL
    * @see #getDivWord
    */
-  public void addPhonesBelowWord2(List<TranscriptSegment> value,
+  public void addPhonesBelowWord2(List<TranscriptSegment> phoneSegments,
                                   DivWidget scoreRow,
                                   AudioControl audioControl,
                                   TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                   boolean simpleLayout,
-                                  TranscriptSegment wordSegment) {
-    int id = 0;
-    for (TranscriptSegment phoneSegment : value) {
+                                  TranscriptSegment wordSegment, boolean isRTL) {
+    //int id = 0;
+
+    if (isRTL) {
+      List<TranscriptSegment> copy = new ArrayList<>(phoneSegments);
+      Collections.reverse(copy);
+      phoneSegments = copy;
+    }
+    for (TranscriptSegment phoneSegment : phoneSegments) {
       String phoneLabel = phoneSegment.getEvent();
       if (!shouldSkipPhone(phoneLabel)) {
         SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel);

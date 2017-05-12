@@ -52,6 +52,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.scoring.ClickableWords;
 import mitll.langtest.client.scoring.WordScoresTable;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -500,8 +501,10 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     //showHeard(heard);
     //}
 
+    boolean isRTL = new ClickableWords<>().isRTL(exercise);
+
     recoOutput.clear();
-    recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null, new HashMap<>()));
+    recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null, new HashMap<>(), isRTL));
   }
 
   /**

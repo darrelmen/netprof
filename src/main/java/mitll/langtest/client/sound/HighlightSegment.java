@@ -7,7 +7,6 @@ import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
