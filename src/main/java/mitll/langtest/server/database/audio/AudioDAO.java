@@ -871,9 +871,14 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise) {
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language) {
     return null;
   }
+
+//  @Override
+//  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise) {
+//    return null;
+//  }
 
   @Override
   public Map<String, Integer> getPairs(int projid) {

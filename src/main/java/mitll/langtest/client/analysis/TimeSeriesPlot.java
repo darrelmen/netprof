@@ -66,14 +66,7 @@ class TimeSeriesPlot extends DivWidget {
    * @return
    * @see PhonePlot#getErrorBarChart(String)
    */
-  ToolTip getErrorBarToolTip() {
-    return new ToolTip()
-        .setFormatter(new ToolTipFormatter() {
-          public String format(ToolTipData toolTipData) {
-            return getTooltipText(toolTipData);
-          }
-        });
-  }
+  ToolTip getErrorBarToolTip() {  return new ToolTip().setFormatter(this::getTooltipText);  }
 
   /**
    * @see #getErrorBarToolTip

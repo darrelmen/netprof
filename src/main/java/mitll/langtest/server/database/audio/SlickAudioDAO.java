@@ -34,6 +34,7 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -462,7 +463,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param s
    * @param miniUser
    * @return
-   * @see #toAudioAttribute(List)
+   * @see #toAudioAttribute
    */
   private AudioAttribute toAudioAttribute(SlickAudio s, MiniUser miniUser) {
     if (miniUser == null && spew++ < 20) {
@@ -624,16 +625,34 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param userid
    * @param exercise
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getNativeAudio
    */
   @Nullable
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise) {
-    String nativeAudio = null;
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language) {
+    //String nativeAudio = null;
     if (exercise != null) {
       MiniUser.Gender orDefault = getGender(userToGender, userid);
       if (orDefault == null) {
+        logger.error("getNativeAudio can't find user " + userid);
         return null; // no user with this id?
       }
 
+      if (!exercise.hasRefAudio()) {
+        logger.info("Attach audio to " + exercise.getID());
+        attachAudioToExercise(exercise,language);
+      }
+
+      AudioAttribute audioAttributePrefGender = exercise.getAudioAttributePrefGender(orDefault == MiniUser.Gender.Male, true);
+
+      if (audioAttributePrefGender == null) {
+        logger.warn("no audio for " + exercise.getID());
+        return null;
+      }
+      else {
+        return audioAttributePrefGender.getAudioRef();
+      }
+
+/*
       Map<MiniUser, List<AudioAttribute>> userMap = exercise.getUserMap(orDefault == MiniUser.Gender.Male,false);
       Collection<List<AudioAttribute>> audioByMatchingGender = userMap.values();
 
@@ -651,9 +670,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         if (nativeAudio == null) {
           nativeAudio = getSlowSpeedFromARecorder(audioByMatchingGender);
         }
-      }
+      }*/
     }
-    return nativeAudio;
+    else {
+      return null;
+    }
   }
 
   @Nullable

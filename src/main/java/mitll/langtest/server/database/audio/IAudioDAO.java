@@ -125,7 +125,7 @@ public interface IAudioDAO extends IDAO {
 
   void makeSureAudioIsThere(int projectID, String language, boolean validateAll);
 
-  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise);
+  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language);
 
   Map<String,Integer> getPairs(int projid);
 

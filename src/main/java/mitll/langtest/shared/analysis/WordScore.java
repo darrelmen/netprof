@@ -74,6 +74,16 @@ public class WordScore implements Serializable, Comparable<WordScore> {
         bs.getNativeAudio(), transcript);
   }
 
+  /**
+   * @see WordAndScore
+   * @param exid
+   * @param pronScore
+   * @param timestamp
+   * @param resultID
+   * @param answerAudio
+   * @param refAudio
+   * @param transcript
+   */
   protected WordScore(int exid,
                       float pronScore,
                       long timestamp,

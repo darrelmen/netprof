@@ -1448,7 +1448,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     CommonExercise exercise = project.getExerciseByID(exid);
 
     if (exercise == null) {
-      if (warns++ < 50) {
+      if (warns++ < 50 || warns % 100 == 0) {
         int projid = project.getID();
         logger.info("getCustomOrPredefExercise couldn't find exercise " + exid + " in project #" + projid + " looking in user exercise table");
       }
@@ -1456,7 +1456,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       exercise = getUserExerciseByExID(exid);
     }
 
-    return audioDAO.getNativeAudio(userToGender, userid, exercise);
+    return audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguage());
   }
 
   /**

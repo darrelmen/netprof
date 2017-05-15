@@ -185,6 +185,12 @@ public class AudioExercise extends ExerciseShell {
     return audioAttributes.values();
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
+   * @param isMale
+   * @param isRegular
+   * @return
+   */
   public AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular) {
     Collection<AudioAttribute> collect = getAudioPrefGender(isMale);
     Optional<AudioAttribute> max = collect.stream()
@@ -193,6 +199,11 @@ public class AudioExercise extends ExerciseShell {
     return max.orElse(null);
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay(CommonExercise)
+   * @param isMale
+   * @return
+   */
   public AudioAttribute getAudioAttrPrefGender(boolean isMale) {
     Collection<AudioAttribute> audioPrefGender = getAudioPrefGender(isMale);
     return audioPrefGender.isEmpty() ? null : audioPrefGender.iterator().next();
@@ -275,13 +286,8 @@ public class AudioExercise extends ExerciseShell {
     return males;
   }
 
-  public void sortByAge(List<AudioAttribute> males) {
-    Collections.sort(males, new Comparator<AudioAttribute>() {
-      @Override
-      public int compare(AudioAttribute o1, AudioAttribute o2) {
-        return o1.getUser().getAge() < o2.getUser().getAge() ? -1 : o1.getUser().getAge() > o2.getUser().getAge() ? +1 : 0;
-      }
-    });
+  private void sortByAge(List<AudioAttribute> males) {
+    Collections.sort(males, (o1, o2) -> Integer.valueOf(o1.getUser().getAge()).compareTo(o2.getUser().getAge()));
   }
 
   /**
@@ -375,7 +381,7 @@ public class AudioExercise extends ExerciseShell {
       if (!attribute.getAttributeKeys().contains(CONTEXT) || includeContext) {
         List<AudioAttribute> audioAttributes1 = userToAudio.get(attribute.getUser());
         if (audioAttributes1 == null)
-          userToAudio.put(attribute.getUser(), audioAttributes1 = new ArrayList<AudioAttribute>());
+          userToAudio.put(attribute.getUser(), audioAttributes1 = new ArrayList<>());
         audioAttributes1.add(attribute);
       }
       //  else {
