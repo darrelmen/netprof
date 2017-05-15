@@ -211,8 +211,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       req.addAll(contextPlay.getAllAudioIDs());
     }
 
-    Set<Integer> knownAlignments = alignments.keySet();
-    req.removeAll(knownAlignments);
+    req.removeAll(alignments.keySet());
 
     if (!req.isEmpty()) {
       //   logger.info("cacheOthers Asking for audio alignments for " + req + " knownAlignments " + knownAlignments.size());
@@ -230,11 +229,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                 //           logger.info("cacheOthers before knownAlignments " + alignments.keySet().size());
                 alignments.putAll(result);
                 //         logger.info("cacheOthers after knownAlignments " + alignments.keySet().size());
-
                 listener.refAudioComplete();
               }
             });
       }
+    }
+    else {
+      listener.refAudioComplete();
     }
   }
 

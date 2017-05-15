@@ -155,6 +155,8 @@ public class ClickableWords<T extends CommonExercise> {
     DivWidget horizontal = new DivWidget();
 
     horizontal.getElement().setId("clickableWordsHightlightRow");
+    horizontal.setWidth("100%");
+
     boolean flLine = isFL || (isJapanese && isTranslit);
     boolean isChineseCharacter = flLine && hasClickableAsian;
 
