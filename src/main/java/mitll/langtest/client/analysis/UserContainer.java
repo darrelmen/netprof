@@ -76,8 +76,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    * @param rightSide
    * @see StudentAnalysis#StudentAnalysis
    */
-  UserContainer(
-                ExerciseController controller,
+  UserContainer(ExerciseController controller,
                 DivWidget rightSide,
                 DivWidget overallBottom,
                 ShowTab learnTab,
@@ -91,8 +90,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   }
 
   /**
-   * @see SimplePagingContainer#configureTable
    * @param sortEnglish
+   * @see SimplePagingContainer#configureTable
    */
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
@@ -134,15 +133,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     table.setColumnWidth(num, 50 + "px");
   }
 
-/*
- private void addInitialScore() {
-    Column<UserInfo, SafeHtml> start = getStart();
-    start.setSortable(true);
-    addColumn(start, new TextHeader("Initial Score"));
-    table.setColumnWidth(start, INITIAL_SCORE_WIDTH + "px");
-    table.addColumnSortHandler(getStartSorter(start, getList()));
-  }
-  */
+
 
   private void addFinalScore() {
     Column<UserInfo, SafeHtml> start = getFinal();
@@ -161,49 +152,23 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
                                                              List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<UserInfo>() {
-          public int compare(UserInfo o1, UserInfo o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return Integer.valueOf(o1.getNum()).compareTo(o2.getNum());
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              return Integer.valueOf(o1.getNum()).compareTo(o2.getNum());
+            }
+          }
+          return -1;
         });
     return columnSortHandler;
   }
 
-  /*
-  private ColumnSortEvent.ListHandler<UserInfo> getStartSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                               List<UserInfo> dataList) {
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        new Comparator<UserInfo>() {
-          public int compare(UserInfo o1, UserInfo o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return Integer.valueOf(o1.getStart()).compareTo(o2.getStart());
-              }
-            }
-            return -1;
-          }
-        });
-    return columnSortHandler;
-  }
-  */
 
   private ColumnSortEvent.ListHandler<UserInfo> getFinalSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                List<UserInfo> dataList) {
@@ -275,24 +240,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return columnSortHandler;
   }
 
-/*
-  private Column<UserInfo, SafeHtml> getStart() {
-    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getProperty())) {
-          gotClickOnItem(object);
-        }
-      }
-
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + shell.getStart());
-      }
-    };
-  }*/
-
   private Column<UserInfo, SafeHtml> getCurrent() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -362,10 +309,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   }
 
   public void gotClickOnItem(final UserInfo user) {
-    logger.info("gotClickOnItem " + user.getUserID());
+//    logger.info("gotClickOnItem " + user.getUserID());
     super.gotClickOnItem(user);
     //MiniUser user1 = user.getUser();
-   // int id = user.getID();
+    // int id = user.getID();
 //    logger.warning("gotClickOnItem " +overallBottom.getElement().getId());
 /*    if (overallBottom != null) {
       overallBottom.clear();

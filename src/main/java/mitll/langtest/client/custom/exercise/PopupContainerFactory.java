@@ -181,7 +181,7 @@ public class PopupContainerFactory {
   }
 
   /**
-   * @see CommentBox#getEntry(String, Widget, ExerciseAnnotation, boolean)
+   * @see CommentBox#getEntry(String, Widget, ExerciseAnnotation, boolean, boolean)
    */
   public static class HidePopupTextBox extends TextBox {
     void configure(final PopupPanel popup) {

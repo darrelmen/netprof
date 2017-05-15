@@ -77,7 +77,9 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   protected WordScore(int exid,
                       float pronScore,
                       long timestamp,
-                      int resultID, String answerAudio, String refAudio,
+                      int resultID,
+                      String answerAudio,
+                      String refAudio,
                       Map<NetPronImageType, List<TranscriptSegment>> transcript) {
     this.exid = exid;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;

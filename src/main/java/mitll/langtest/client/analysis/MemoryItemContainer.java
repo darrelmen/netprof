@@ -348,6 +348,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #MemoryItemContainer(ExerciseController, String, int)
    */
   private Long getSelectedUser(String selectedUserKey) {
+    if (selectedUserKey == null) return null;
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String item = localStorageIfSupported.getItem(selectedUserKey);
@@ -357,7 +358,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
         } catch (NumberFormatException e) {
           logger.warning("got " + e);
           return null;
-
         }
       }
     }
@@ -370,7 +370,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param selectedUser
    * @see #gotClickOnItem
    */
-  public void storeSelectedUser(long selectedUser) {
+  private void storeSelectedUser(long selectedUser) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);

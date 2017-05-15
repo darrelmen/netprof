@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -61,15 +62,14 @@ public class StudentAnalysis extends DivWidget {
   private static final String OR_MORE_RECORDINGS = "5 or more recordings";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
-  public StudentAnalysis(final ExerciseController controller,
-                         final ShowTab showTab) {
-    String appTitle = controller.getProps().getAppTitle();
+  public StudentAnalysis(final ExerciseController controller, final ShowTab showTab) {
     //logger.info("StudentAnalysis got here " + appTitle);
 
     getElement().setId("StudentAnalysis");
 
-    final String selectedUserKey = getSelectedUserKey(controller, appTitle);
+    final String selectedUserKey = getRememberedSelectedUser(controller);
 
+    add(new HTML("Please wait..."));
     analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -90,14 +90,21 @@ public class StudentAnalysis extends DivWidget {
 
         DivWidget top = getTop(userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS), rightSide);
 
+        clear();
         add(top);
         add(bottom);
 
-        logger.info("onSuccess added top and bottom " + top.getElement().getId());
-        logger.info("onSuccess added top and bottom " + bottom.getElement().getId());
+        //   logger.info("onSuccess added top and bottom " + top.getElement().getId());
+        //   logger.info("onSuccess added top and bottom " + bottom.getElement().getId());
 
       }
     });
+  }
+
+  @NotNull
+  private String getRememberedSelectedUser(ExerciseController controller) {
+    String appTitle = controller.getProps().getAppTitle();
+    return getSelectedUserKey(controller, appTitle);
   }
 
   @NotNull
@@ -125,29 +132,10 @@ public class StudentAnalysis extends DivWidget {
     return appTitle + ":" + controller.getUser() + ":";
   }
 
-/*  private DivWidget getStudentContainer(Panel tableWithPager) {
-    String title = STUDENTS;
-    String subtitle = OR_MORE_RECORDINGS;
-    return getStudentContainer(tableWithPager, title, subtitle);
-  }
-
-  private DivWidget getStudentContainer(Panel tableWithPager, String title, String subtitle) {
-    Heading students = new Heading(3, title, subtitle);
-    students.setWidth(STUDENT_WIDTH + "px");
-    students.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
-    DivWidget leftSide = new DivWidget();
-    leftSide.getElement().setId("studentDiv");
-    leftSide.addStyleName("floatLeftList");
-    leftSide.add(students);
-    leftSide.add(tableWithPager);
-    return leftSide;
-  }*/
-
   private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
     List<UserInfo> filtered = new ArrayList<UserInfo>();
     for (UserInfo userInfo : users) {
       String userID = userInfo.getUserID();
-//      MiniUser user = userInfo.getUser();
       if (userID != null && !userID.equals("defectDetector")) {
         filtered.add(userInfo);
       } else {

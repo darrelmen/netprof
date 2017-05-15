@@ -45,6 +45,8 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -67,7 +69,6 @@ import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.flashcard.BootstrapExercisePanel.DELAY_MILLIS_LONG;
 import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
 
 /**
@@ -303,7 +304,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
         true);
 
     DivWidget left = new DivWidget();
-    left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE), true));
+    boolean rtlContent = isRTLContent(exercise.getForeignLanguage());
+    left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE), true, rtlContent));
     left.addStyleName("floatLeftAndClear");
     left.getElement().setId("leftCommentBoxContainer");
     // left.setWidth("50%");
@@ -312,6 +314,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     firstRow.add(left);
     firstRow.getElement().setId("firstRow");
     return firstRow;
+  }
+
+  private boolean isRTLContent(String content) {
+    return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
   }
 
   private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost) {

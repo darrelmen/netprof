@@ -36,6 +36,8 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -323,11 +325,17 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
           : maybeRTLContent;
 
       boolean exampleRecord = isExampleRecord();
+
       Widget entry = getEntry(e, exampleRecord ? QCNPFExercise.CONTEXT : QCNPFExercise.FOREIGN_LANGUAGE,
-          contentWidget);
+          contentWidget, isRTLContent(content));
       entry.addStyleName("floatLeftAndClear");
 
       return entry;
+    }
+
+
+    private boolean isRTLContent(String content) {
+      return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
     }
 
     /**
@@ -344,23 +352,25 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     /**
      * @param e
      * @param field
+     * @param isRTL
      * @return
      * @seex #getContext
      * @see GoodwaveExercisePanel#getQuestionContent
      */
-    private Widget getEntry(AnnotationExercise e, final String field, Widget contentWidget) {
-      return getEntry(field, e.getAnnotation(field), contentWidget);
+    private Widget getEntry(AnnotationExercise e, final String field, Widget contentWidget, boolean isRTL) {
+      return getEntry(field, e.getAnnotation(field), contentWidget, isRTL);
     }
 
     /**
      * @param field
      * @param annotation
+     * @param isRTL
      * @return
      * @seex #makeFastAndSlowAudio(String)
      * @see #getEntry
      */
-    private Widget getEntry(final String field, ExerciseAnnotation annotation, Widget contentWidget) {
-      return getCommentBox(true).getEntry(field, contentWidget, annotation, true);
+    private Widget getEntry(final String field, ExerciseAnnotation annotation, Widget contentWidget, boolean isRTL) {
+      return getCommentBox(true).getEntry(field, contentWidget, annotation, true, isRTL);
     }
 
     /**

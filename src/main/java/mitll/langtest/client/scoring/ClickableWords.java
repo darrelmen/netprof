@@ -40,12 +40,14 @@ public class ClickableWords<T extends CommonExercise> {
   private static final String MANDARIN = "Mandarin";
   private static final String JAPANESE = "Japanese";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
-  private  ListInterface listContainer;
+  private ListInterface listContainer;
   private WordBoundsFactory factory = new WordBoundsFactory();
 
   private static final boolean DEBUG = false;
 
-  public ClickableWords() {}
+  public ClickableWords() {
+  }
+
   /**
    * @param listContainer
    * @param exercise
@@ -90,8 +92,7 @@ public class ClickableWords<T extends CommonExercise> {
     List<IHighlightSegment> segmentsForTokens = getSegmentsForTokens(isMeaning, isSimple, tokens, dir);
     clickables.addAll(segmentsForTokens);
 
-
-    return getClickableDivFromSegments(segmentsForTokens, addRightMargin);
+    return getClickableDivFromSegments(segmentsForTokens, addRightMargin, dir == HasDirection.Direction.RTL);
   }
 
   private List<IHighlightSegment> getSegmentsForTokens(boolean isMeaning, boolean isSimple, List<String> tokens, HasDirection.Direction dir) {
@@ -105,15 +106,18 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   @NotNull
-  public DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean addRightMargin) {
+  public DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean addRightMargin, boolean isRTL) {
     DivWidget horizontal = new DivWidget();
     horizontal.getElement().setId("clickableRow");
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
+    if (isRTL) {
+      setDirection(horizontal);
+    }
     int i = 0;
     for (IHighlightSegment segment : segmentsForTokens) {
       horizontal.add(segment.asWidget());
-     // logger.info("adding token " + (i++) + " " + segment);
+      // logger.info("adding token " + (i++) + " " + segment);
       if (addRightMargin) {
         segment.getClickable().addStyleName("rightFiveMargin");
       }
@@ -173,6 +177,11 @@ public class ClickableWords<T extends CommonExercise> {
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
 
+    logger.info("getClickableWordsHighlight exercise " + exercise.getID() + " dir " + dir + " isfL " + isFL);
+    if ((dir == HasDirection.Direction.RTL) && isFL) {
+      logger.info("exercise " + exercise.getID() + " is RTL ");
+      setDirection(horizontal);
+    }
     int id = 0;
     for (String token : tokens) {
       boolean isMatch = toFind != null && isMatch(token, toFind);
@@ -193,6 +202,10 @@ public class ClickableWords<T extends CommonExercise> {
 
     horizontal.addStyleName("leftFiveMargin");
     return horizontal;
+  }
+
+  public void setDirection(DivWidget horizontal) {
+    horizontal.getElement().getStyle().setProperty("direction", "rtl");
   }
 
   /**
@@ -245,29 +258,6 @@ public class ClickableWords<T extends CommonExercise> {
     }
   }
 
-/*  private String stripAccents(final String input) {
-    if(input == null) {
-      return null;
-    }
-    final Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");//$NON-NLS-1$
-    final StringBuilder decomposed = new StringBuilder(Normalizer.normalize(input, Normalizer.Form.NFD));
-    convertRemainingAccentCharacters(decomposed);
-    // Note that this doesn't correctly remove ligatures...
-    return pattern.matcher(decomposed).replaceAll(StringUtils.EMPTY);
-  }
-
-  private void convertRemainingAccentCharacters(StringBuilder decomposed) {
-    for (int i = 0; i < decomposed.length(); i++) {
-      if (decomposed.charAt(i) == '\u0141') {
-        decomposed.deleteCharAt(i);
-        decomposed.insert(i, 'L');
-      } else if (decomposed.charAt(i) == '\u0142') {
-        decomposed.deleteCharAt(i);
-        decomposed.insert(i, 'l');
-      }
-    }
-  }*/
-
   /**
    * Will reverse order of tokens if it's an RTL exercise...
    *
@@ -289,11 +279,11 @@ public class ClickableWords<T extends CommonExercise> {
       tokens = tokens.stream().filter(p -> !removePunct(p).isEmpty()).collect(Collectors.toList());
     }
 
-    if (isRTL(exercise) && flLine) {
+/*    if (isRTL(exercise) && flLine) {
 //      logger.info("Reversing tokens " + tokens);
       Collections.reverse(tokens);
   //    logger.info("Reversing tokens now " + tokens);
-    }
+    }*/
     return tokens;
   }
 

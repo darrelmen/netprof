@@ -86,7 +86,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MATCH = false;
-  private boolean rtl = false;
+  private boolean isRTL = false;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -133,7 +133,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
-    this.rtl = clickableWords.isRTL(exercise);
+    this.isRTL = clickableWords.isRTL(exercise);
     this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
@@ -333,7 +333,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
          // logger.info("these should match ---- " + wordSegments);
 
           // List<IHighlightSegment> compOrder = flclickables;
-          if (rtl) {
+          if (isRTL) {
             List<IHighlightSegment> compOrder = new ArrayList<>(flclickables);
 //            logger.info("transcriptMatches2 did reverse, so before  " + compOrder);
             Collections.reverse(compOrder);
@@ -346,7 +346,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             if (iterator.hasNext()) {
               int segmentLength = word.getEvent().length();
               List<TranscriptSegment> phonesInWord = getSegs(phones, word);
-              if (rtl) { // phones should play right to left
+              if (isRTL) { // phones should play right to left
                 Collections.reverse(phonesInWord);
               }
 
@@ -407,7 +407,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (lcSegment.equalsIgnoreCase(fragment1)) {
       if (phonesChoices == PhonesChoices.SHOW) {
-        clickable.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, rtl));
+        clickable.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, isRTL));
       }
       return clickable;
     } else {
@@ -418,7 +418,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       } else {
         AllHighlight allHighlight = new AllHighlight(bulk);
 
-        allHighlight.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, rtl));
+        allHighlight.setSouth(new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, isRTL));
 
         if (DEBUG)
           logger.info("matchSegmentToWidgetForAudio create composite from " + bulk.size() + " = " + allHighlight);
@@ -530,7 +530,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     int i = 0;
     List<IHighlightSegment> compOrder = clickables;
-    if (rtl) {
+    if (isRTL) {
       compOrder = new ArrayList<>(clickables);
       Collections.reverse(compOrder);
     }
@@ -735,7 +735,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
 
     DivWidget fieldContainer = new DivWidget();
-    fieldContainer.getElement().setId("fieldContainer");
+    fieldContainer.setWidth("100%");
+    fieldContainer.getElement().setId("leftSideFieldContainer");
+//    if (isRTL) {
+//      clickableWords.setDirection(fieldContainer);
+//    }
 
     String trim = e.getAltFL().trim();
     if (choices == BOTH || choices == FL || e.getForeignLanguage().trim().equals(trim) || trim.isEmpty()) {
@@ -777,7 +781,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             showInitially,
             flclickables,
             true, annotationHelper);
-    flEntry.addStyleName("floatLeft");
+    if (!isRTL) {
+      flEntry.addStyleName("floatLeft");
+    }
+    else {
+      clickableWords.setDirection(flEntry);
+    }
     flEntry.setWidth("100%");
     return flEntry;
   }
@@ -838,7 +847,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     CommentBox commentBox = getCommentBox(annotationHelper);
     return commentBox
         .getEntry(QCNPFExercise.ALTCONTEXT, contentWidget,
-            exercise.getAnnotation(QCNPFExercise.ALTCONTEXT), showInitially);
+            exercise.getAnnotation(QCNPFExercise.ALTCONTEXT), showInitially, isRTL);
   }
 
   /**
@@ -946,8 +955,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Widget addTransliteration(T e) {
     String translitSentence = e.getTransliteration();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
-      return getEntry(e, QCNPFExercise.TRANSLITERATION, translitSentence, false, true, false,
+      DivWidget entry = getEntry(e, QCNPFExercise.TRANSLITERATION, translitSentence, false, true, false,
           showInitially, new ArrayList<>(), true, annotationHelper);
+      return entry;
     }
     return null;
   }
@@ -996,7 +1006,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       Widget commentRow =
           commentBox
               .getEntry(context1, contentWidget,
-                  annotation, showInitially);
+                  annotation, showInitially, isRTL);
 
       commentRow.setWidth("100%");
 
@@ -1057,7 +1067,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                        AnnotationHelper annotationHelper) {
     if (!contextTranslation.isEmpty()) {
       return getEntry(e,
-          //QCNPFExercise.CONTEXT_TRANSLATION,
           ENGLISH,
           contextTranslation,
           false, false, false, showInitially, new ArrayList<>(), true,
@@ -1105,12 +1114,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         annotationHelper);
   }
 
-  private DivWidget getEntrySegments(AnnotationExercise e,
+/*  private DivWidget getEntrySegments(AnnotationExercise e,
                                      final String field,
                                      List<IHighlightSegment> segments,
                                      boolean addRightMargin) {
-    return getEntryFromSegments(field, e.getAnnotation(field), segments, addRightMargin);
-  }
+    return getEntryFromSegments(field, e.getAnnotation(field), segments, addRightMargin, isRTL);
+  }*/
 
   /**
    * @param field
@@ -1136,15 +1145,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              boolean addRightMargin,
                              AnnotationHelper annotationHelper) {
     DivWidget contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning, clickables, !isFL, addRightMargin);
-    return getCommentBox(annotationHelper).getEntry(field, contentWidget, annotation, showInitially);
+    return getCommentBox(annotationHelper).getEntry(field, contentWidget, annotation, showInitially, isRTL);
   }
 
   private DivWidget getEntryFromSegments(final String field,
                                          ExerciseAnnotation annotation,
                                          List<IHighlightSegment> segments,
-                                         boolean addRightMargin) {
-    DivWidget contentWidget = clickableWords.getClickableDivFromSegments(segments, addRightMargin);
-    return getCommentBox(annotationHelper).getEntry(field, contentWidget, annotation, showInitially);
+                                         boolean addRightMargin, boolean isRTL) {
+    DivWidget contentWidget = clickableWords.getClickableDivFromSegments(segments, addRightMargin, isRTL);
+    return getCommentBox(annotationHelper).getEntry(field, contentWidget, annotation, showInitially, isRTL);
   }
 
   /**
@@ -1163,5 +1172,4 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     comments.add(commentBox);
     return commentBox;
   }
-
 }

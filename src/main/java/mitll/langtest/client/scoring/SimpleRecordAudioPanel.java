@@ -41,7 +41,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
   private Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
-  public static final String OGG = ".ogg";
+  private static final String OGG = ".ogg";
   /**
    * @see #scoreAudio
    */
@@ -61,7 +61,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   private WaitCursorHelper waitCursorHelper;
 
-  protected String audioPath;
+  private String audioPath;
 
   ExerciseController controller;
   T exercise;
@@ -72,6 +72,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private ProgressBar progressBar;
   private boolean hasScoreHistory = false;
   private ListInterface<CommonShell,T> listContainer;
+  boolean isRTL;
 
   /**
    * @param controller
@@ -91,7 +92,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     this.listContainer = listContainer;
 
     getElement().setId("SimpleRecordAudioPanel");
-    //   addStyleName("inlineFlex");
+    this.isRTL = new ClickableWords<>().isRTL(exercise);
     setWidth("100%");
     addWidgets();
     showRecordingHistory(history);
@@ -228,17 +229,18 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   /**
    * @param result
+   * @param isRTL
    * @see #useResult(PretestScore, boolean, String)
    */
-  private void scoreAudio(AudioAnswer result) {
+  private void scoreAudio(AudioAnswer result, boolean isRTL) {
     clearScoreFeedback();
     PretestScore pretestScore = result.getPretestScore();
-    scoreFeedback.add(getWordTableContainer(pretestScore));
+    scoreFeedback.add(getWordTableContainer(pretestScore, isRTL));
     useResult(pretestScore, false, result.getPath());
   }
 
   @NotNull
-  private DivWidget getWordTableContainer(PretestScore pretestScore) {
+  private DivWidget getWordTableContainer(PretestScore pretestScore, boolean isRTL) {
     DivWidget wordTableContainer = new DivWidget();
     wordTableContainer.getElement().setId("wordTableContainer");
     wordTableContainer.addStyleName("inlineFlex");
@@ -328,7 +330,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     audioPath = result.getPath();
     setDownloadHref();
-    scoreAudio(result);
+    scoreAudio(result, isRTL);
 
     waitCursorHelper.cancelTimer();
     waitCursorHelper.setWhite();

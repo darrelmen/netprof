@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
@@ -52,7 +51,6 @@ import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.ExerciseAnnotation.TYPICAL;
-import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 
 import java.util.HashMap;
@@ -217,11 +215,12 @@ public class CommentBox extends PopupContainerFactory {
    * @param content       to wrap
    * @param annotation    to get current comment from
    * @param showInitially
+   * @param isRTL
    * @return three part widget -- content, comment button, and clear button
    * @seex mitll.langtest.client.custom.exercise.CommentNPFExercise#getEntry
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
-  public DivWidget getEntry(String field, Widget content, ExerciseAnnotation annotation, boolean showInitially) {
+  public DivWidget getEntry(String field, Widget content, ExerciseAnnotation annotation, boolean showInitially, boolean isRTL) {
     field = fixAudioField(field);
     final HidePopupTextBox commentEntryText = getCommentBox(field);
 
@@ -250,7 +249,8 @@ public class CommentBox extends PopupContainerFactory {
 
     // content on left side, comment button on right
 
-    DivWidget row = getCommentAndButtonsRow(field, content, commentButton, clearButton);
+    DivWidget row = getCommentAndButtonsRow(field, content, commentButton, clearButton, isRTL);
+    row.setWidth("100%");
     showOrHideCommentButton(commentButton, clearButton, isCorrect);
 
     if (!showInitially) {
@@ -261,12 +261,14 @@ public class CommentBox extends PopupContainerFactory {
     return row;
   }
 
-  private DivWidget getCommentAndButtonsRow(String field, Widget content, Button commentButton, Button clearButton) {
+  private DivWidget getCommentAndButtonsRow(String field, Widget content, Button commentButton, Button clearButton, boolean isRTL) {
     DivWidget row = new DivWidget();
     row.getElement().setId("comment_and_clear_container_for_" + field);
     if (content != null) {
       row.add(content);
-      content.addStyleName("floatLeft");
+      if (!isRTL) {
+        content.addStyleName("floatLeft");
+      }
     }
     row.add(commentButton);
     commentButton.addStyleName("floatLeft");
@@ -307,7 +309,7 @@ public class CommentBox extends PopupContainerFactory {
    * @param commentEntryText
    * @param clearButton
    * @return
-   * @see #getEntry(String, Widget, ExerciseAnnotation, boolean)
+   * @see #getEntry(String, Widget, ExerciseAnnotation, boolean, boolean)
    */
   private DecoratedPopupPanel makeCommentPopup(String field,
                                                Button commentButton,
@@ -336,7 +338,7 @@ public class CommentBox extends PopupContainerFactory {
    * @param commentButton
    * @param field
    * @return
-   * @see #getEntry(String, Widget, ExerciseAnnotation, boolean)
+   * @see #getEntry(String, Widget, ExerciseAnnotation, boolean, boolean)
    */
   private Button getClearButton(final TextBox commentEntryText,
                                 final Widget commentButton,
@@ -413,7 +415,7 @@ public class CommentBox extends PopupContainerFactory {
    * @param comment
    * @param commentEntry
    * @return
-   * @see #getEntry(String, Widget, ExerciseAnnotation, boolean)
+   * @see #getEntry(String, Widget, ExerciseAnnotation, boolean, boolean)
    */
   private void configureCommentButton(final Button commentButton,
                                       final boolean alreadyMarkedCorrect,
