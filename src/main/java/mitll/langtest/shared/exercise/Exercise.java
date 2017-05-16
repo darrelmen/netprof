@@ -601,6 +601,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.tokens = tokens;
   }*/
 
+  public void setPredef(boolean isPredef) { this.isPredef = isPredef;}
+
   public void setDominoID(int dominoID) {
     this.dominoID = dominoID;
   }

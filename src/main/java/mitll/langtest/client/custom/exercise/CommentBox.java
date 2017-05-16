@@ -266,10 +266,18 @@ public class CommentBox extends PopupContainerFactory {
     row.getElement().setId("comment_and_clear_container_for_" + field);
     if (content != null) {
       row.add(content);
-      if (!isRTL) {
+      if (isRTL) {
+        content.addStyleName("floatRight");
+      } else {
         content.addStyleName("floatLeft");
       }
     }
+    if (isRTL) {
+      row.addStyleName("floatRight");
+    } else {
+      row.addStyleName("floatLeft");
+    }
+
     row.add(commentButton);
     commentButton.addStyleName("floatLeft");
 

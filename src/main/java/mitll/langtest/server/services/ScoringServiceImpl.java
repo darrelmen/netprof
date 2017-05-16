@@ -36,6 +36,7 @@ import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.scoring.RefAudioListener;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
@@ -152,30 +153,26 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       projects.forEach(project -> {
         if (project.getWebservicePort() > 100) {
           try {
-            logger.info("getAllAlignments Doing project : " +project);
+            logger.info("getAllAlignments Doing project : " + project);
 
-            int id = project.getID();
-            Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(id);
-            List<Integer> ids = new ArrayList<>();
-            for (List<AudioAttribute> values : exToAudio.values()) {
-              ids.addAll(values.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toList()));
-            }
+            int projectID = project.getID();
+            List<Integer> audioIDs = getAllAudioIDs(projectID);
 
             long then = System.currentTimeMillis();
             AudioFileHelper audioFileHelper = project.getAudioFileHelper();
-            logger.info("getAllAlignments Doing project " + project + " " + ids.size() + " audio cuts with " + audioFileHelper);
+            logger.info("getAllAlignments Doing project " + project + " " + audioIDs.size() + " audio cuts with " + audioFileHelper);
 
-            Map<Integer, ISlimResult> audioToResult = getAudioIDMap(id);
+            Map<Integer, ISlimResult> audioToResult = getAudioIDMap(projectID);
             //    logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
-            recalcAlignments(id, ids, new HashMap<>(), audioFileHelper, userIDFromSession, audioToResult);
+            recalcAlignments(projectID, audioIDs, audioFileHelper, userIDFromSession, audioToResult);
 
             long now = System.currentTimeMillis();
 
             long l = (now - then) / 1000;
             long min = l / 60;
-            logger.info("getAllAlignments Doing project " + project + " " + ids.size() + " audio cuts took " + min + " minutes.");
+            logger.info("getAllAlignments Doing project " + project + " " + audioIDs.size() + " audio cuts took " + min + " minutes.");
           } catch (Exception e) {
-            logger.error("getAllAlignments got " + e,e);
+            logger.error("getAllAlignments got " + e, e);
           }
         } else {
           logger.info("getAllAlignments no hydra service for " + project);
@@ -186,9 +183,18 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   @NotNull
+  private List<Integer> getAllAudioIDs(int projectID) {
+    Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projectID);
+    List<Integer> audioIDs = new ArrayList<>();
+    for (List<AudioAttribute> values : exToAudio.values()) {
+      audioIDs.addAll(values.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toList()));
+    }
+    return audioIDs;
+  }
+
+  @NotNull
   private Map<Integer, ISlimResult> getAudioIDMap(int id) {
-    Collection<ISlimResult> jsonResultsForProject = db.getRefResultDAO().getAllSlimForProject(id);
-    return getAudioIDMap(jsonResultsForProject);
+    return getAudioIDMap(db.getRefResultDAO().getAllSlimForProject(id));
   }
 
   @NotNull
@@ -198,50 +204,61 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return audioToResult;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getRefAudio
+   * @param projid
+   * @param audioIDs
+   * @return
+   */
   @Override
   public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) {
-    Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
+    //Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
 //    logger.info("getAlignments asking for " + audioIDs);
-    int userIDFromSession = getUserIDFromSession();
-    Map<Integer, ISlimResult> audioIDMap =
-        getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
+    Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
     //logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
 
-    recalcAlignments(projid, audioIDs, idToAlignment, userIDFromSession,audioIDMap);
+    return recalcAlignments(projid, audioIDs, getUserIDFromSession(), audioIDMap);
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
-    return idToAlignment;
+    //return idToAlignment;
   }
 
-  private void recalcAlignments(int projid,
-                                Collection<Integer> audioIDs,
-                                Map<Integer, AlignmentOutput> idToAlignment,
-                                int userIDFromSession,
-                                Map<Integer, ISlimResult> audioToResult) {
-    AudioFileHelper audioFileHelper = getAudioFileHelper();
-    recalcAlignments(projid, audioIDs, idToAlignment, audioFileHelper, userIDFromSession, audioToResult);
+  private Map<Integer, AlignmentOutput> recalcAlignments(int projid,
+                                                         Collection<Integer> audioIDs,
+                                                         //           Map<Integer, AlignmentOutput> idToAlignment,
+                                                         int userIDFromSession,
+                                                         Map<Integer, ISlimResult> audioToResult) {
+    return recalcAlignments(projid, audioIDs, getAudioFileHelper(), userIDFromSession, audioToResult);
   }
 
-  private void recalcAlignments(int projid,
-                                Collection<Integer> audioIDs,
-                                Map<Integer, AlignmentOutput> idToAlignment,
-                                AudioFileHelper audioFileHelper,
-                                int userIDFromSession,
-                                Map<Integer, ISlimResult> audioToResult) {
+  private Map<Integer, AlignmentOutput> recalcAlignments(int projid,
+                                                         Collection<Integer> audioIDs,
+                                                         AudioFileHelper audioFileHelper,
+                                                         int userIDFromSession,
+                                                         Map<Integer, ISlimResult> audioToResult) {
+    Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
     for (Integer audioID : audioIDs) {
+      // do we have alignment for this audio in the map
       ISlimResult cachedResult = audioToResult.get(audioID);
-      if (cachedResult == null) {
+
+      if (cachedResult == null) { // nope, ask the database
         cachedResult = db.getRefResultDAO().getResult(audioID);
       }
-      if (cachedResult == null || !cachedResult.isValid()) {
+
+      if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now
         if (cachedResult != null && !cachedResult.isValid()) {
           boolean b = db.getRefResultDAO().removeByAudioID(audioID);
           logger.error("getAlignments remove invalid ref result for audio id " + audioID + " = " + b);
         }
-        recalcRefAudioWithHelper(projid, idToAlignment, audioID, audioFileHelper, userIDFromSession);
+
+        PretestScore pretestScore = recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
+        if (pretestScore != null) {
+          idToAlignment.put(audioID, pretestScore);
+        }
       } else {
-        getCachedAudioRef(idToAlignment, audioID, cachedResult);
+        getCachedAudioRef(idToAlignment, audioID, cachedResult);  // OK, let's translate the db info into the alignment output
       }
     }
+    return idToAlignment;
   }
 
   private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult) {
@@ -253,16 +270,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
   }
 
-//  private void recalcAudioRef(int projid, Map<Integer, AlignmentOutput> idToAlignment, Integer audioID) {
-//    AudioFileHelper audioFileHelper = getAudioFileHelper();
-//    recalcRefAudioWithHelper(projid, idToAlignment, audioID, audioFileHelper);
-//  }
-
-  private void recalcRefAudioWithHelper(int projid,
-                                        Map<Integer, AlignmentOutput> idToAlignment,
-                                        Integer audioID,
-                                        AudioFileHelper audioFileHelper,
-                                        int userIDFromSession) {
+  private PretestScore recalcRefAudioWithHelper(int projid,
+                                                // Map<Integer, AlignmentOutput> idToAlignment,
+                                                Integer audioID,
+                                                AudioFileHelper audioFileHelper,
+                                                int userIDFromSession) {
     AudioAttribute byID = db.getAudioDAO().getByID(audioID);
     if (byID != null) {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
@@ -288,12 +300,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         //logger.info("getAlignments using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
-      PretestScore pretestScore =
-          audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession);
       //logger.info("getAlignments decoding " + audioID + " for " + byID.getExid() + " got " + pretestScore);
-      idToAlignment.put(audioID, pretestScore);
+      return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession);
     } else {
       logger.info("getAlignments can't find audio id " + audioID);
+      return null;
     }
   }
 

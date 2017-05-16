@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 public class ClickableWords<T extends CommonExercise> {
   private final Logger logger = Logger.getLogger("ClickableWords");
 
+  private static final String CLICKABLE_ROW = "clickableRow";
+
   private static final String CONTEXTMATCH = "contextmatch";
 
   private static final String STRONG = "strong";
@@ -67,6 +69,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param clickables
    * @param isSimple
    * @param addRightMargin
+   * @param isRTL
    * @see TwoColumnExercisePanel#getEntry
    */
   DivWidget getClickableWords(String value,
@@ -75,31 +78,37 @@ public class ClickableWords<T extends CommonExercise> {
                               boolean isMeaning,
                               List<IHighlightSegment> clickables,
                               boolean isSimple,
-                              boolean addRightMargin) {
+                              boolean addRightMargin,
+                              boolean isRTL) {
     boolean flLine = isFL || (isJapanese && isTranslit);
     boolean isChineseCharacter = flLine && hasClickableAsian;
     List<String> tokens = getTokens(value, flLine, isChineseCharacter);
 
-    HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
+    HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL :
+        WordCountDirectionEstimator.get().estimateDirection(value);
 
     boolean addRight = (isSimple && !isChineseCharacter) || addRightMargin;
-    return getClickableDiv(tokens, isSimple, isMeaning, addRight, dir, clickables);
+    return getClickableDiv(tokens, isSimple, isMeaning, addRight, dir, clickables, isFL);
   }
 
   @NotNull
   private DivWidget getClickableDiv(List<String> tokens, boolean isSimple, boolean isMeaning,
-                                    boolean addRightMargin, HasDirection.Direction dir, List<IHighlightSegment> clickables) {
-    List<IHighlightSegment> segmentsForTokens = getSegmentsForTokens(isMeaning, isSimple, tokens, dir);
+                                    boolean addRightMargin,
+                                    HasDirection.Direction dir,
+                                    List<IHighlightSegment> clickables,
+                                    boolean isFL) {
+    List<IHighlightSegment> segmentsForTokens = getSegmentsForTokens(isMeaning, isSimple, tokens, dir, isFL);
     clickables.addAll(segmentsForTokens);
 
     return getClickableDivFromSegments(segmentsForTokens, addRightMargin, dir == HasDirection.Direction.RTL);
   }
 
-  private List<IHighlightSegment> getSegmentsForTokens(boolean isMeaning, boolean isSimple, List<String> tokens, HasDirection.Direction dir) {
+  private List<IHighlightSegment> getSegmentsForTokens(boolean isMeaning, boolean isSimple, List<String> tokens,
+                                                       HasDirection.Direction dir, boolean isFL) {
     List<IHighlightSegment> segments = new ArrayList<>();
     int id = 0;
     for (String token : tokens) {
-      IHighlightSegment segment = makeClickableText(isMeaning, dir, token, false, id++, isSimple);
+      IHighlightSegment segment = makeClickableText(isMeaning, dir, token, false, id++, isSimple, isFL);
       segments.add(segment);
     }
     return segments;
@@ -108,7 +117,7 @@ public class ClickableWords<T extends CommonExercise> {
   @NotNull
   public DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean addRightMargin, boolean isRTL) {
     DivWidget horizontal = new DivWidget();
-    horizontal.getElement().setId("clickableRow");
+    horizontal.getElement().setId(CLICKABLE_ROW);
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
     if (isRTL) {
@@ -118,9 +127,11 @@ public class ClickableWords<T extends CommonExercise> {
     for (IHighlightSegment segment : segmentsForTokens) {
       horizontal.add(segment.asWidget());
       // logger.info("adding token " + (i++) + " " + segment);
+      InlineHTML clickable = segment.getClickable();
       if (addRightMargin) {
-        segment.getClickable().addStyleName("rightFiveMargin");
+        clickable.addStyleName("rightFiveMargin");
       }
+      if (isRTL) clickable.addStyleName("floatRight");
     }
 
     horizontal.addStyleName("leftFiveMargin");
@@ -187,7 +198,7 @@ public class ClickableWords<T extends CommonExercise> {
     int id = 0;
     for (String token : tokens) {
       boolean isMatch = toFind != null && isMatch(token, toFind);
-      IHighlightSegment clickable = makeClickableText(isMeaning, dir, token, isMatch, id++, isSimple);
+      IHighlightSegment clickable = makeClickableText(isMeaning, dir, token, isMatch, id++, isSimple, isFL);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
       w.addStyleName("rightFiveMargin");
@@ -214,7 +225,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param tokens
    * @param highlightTokens
    * @return
-   * @see #getClickableWords(String, boolean, boolean, boolean, List, boolean, boolean)
+   * @see #getClickableWords(String, boolean, boolean, boolean, List, boolean, boolean, boolean)
    */
   @NotNull
   private List<String> getMatchingHighlight(List<String> tokens, List<String> highlightTokens) {
@@ -304,6 +315,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param isContextMatch
    * @param id
    * @param isSimple
+   * @param isFL
    * @return
    * @paramx chineseCharacter
    * @see #getClickableWords
@@ -312,16 +324,26 @@ public class ClickableWords<T extends CommonExercise> {
   private IHighlightSegment makeClickableText(boolean isMeaning,
                                               HasDirection.Direction dir,
                                               final String html,
-                                              //  boolean chineseCharacter,
                                               boolean isContextMatch,
                                               int id,
-                                              boolean isSimple) {
+                                              boolean isSimple, boolean isFL) {
     final IHighlightSegment highlightSegmentDiv = isSimple ?
         new SimpleHighlightSegment(html) :
         new HighlightSegment(id, html, dir);
 
     InlineHTML highlightSegment = highlightSegmentDiv.getClickable();
-    highlightSegment.addStyleName("Instruction-data-with-wrap-keep-word");
+    if (isFL) {
+      if (dir == HasDirection.Direction.RTL) {
+        highlightSegment.addStyleName("bigflfont");
+
+      }
+      else {
+        highlightSegment.addStyleName("flfont");
+      }
+    }
+    else {
+      highlightSegment.addStyleName("Instruction-data-with-wrap-keep-word");
+    }
 
     if (isContextMatch) highlightSegment.addStyleName(CONTEXTMATCH);
     if (isMeaning) highlightSegment.addStyleName("englishFont");

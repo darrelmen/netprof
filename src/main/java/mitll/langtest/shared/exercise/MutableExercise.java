@@ -45,8 +45,6 @@ import java.util.List;
  * @since 2/1/16.
  */
 public interface MutableExercise extends CommonShell, MutableShell {
- // void setBagOfPhones(Set<String> bagOfPhones);
-
   void setFirstPron(List<String> phones);
 
   void setTransliteration(String transliteration);
@@ -56,12 +54,6 @@ public interface MutableExercise extends CommonShell, MutableShell {
    * @param scoreTotal
    */
   void setScores(List<CorrectAndScore> scoreTotal);
-
-  /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio
-   * @paramx v
-   */
-//  void setAvgScore(float v);
 
   void setRefSentences(Collection<String> orDefault);
 
@@ -74,14 +66,15 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void setOldID(String id);
 
   void setID(int id);
+
   void setCreator(int id);
 
+  void setPredef(boolean isPredef);
   /**
    * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
    * @return
    */
   String getAltFL();
-
 
   /**
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson

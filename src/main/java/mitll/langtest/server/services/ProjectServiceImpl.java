@@ -44,6 +44,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.SlimProject;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickProject;
@@ -137,6 +138,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     return getProjectDAO().delete(id);
   }
 
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#showImportDialog(SlimProject)
+   * @param projectid
+   */
   @Override
   public void addPending(int projectid) {
     Collection<CommonExercise> toImport = db.getProjectManagement().getFileUploadHelper().getExercises(projectid);
@@ -183,7 +188,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       //  logger.info("typeorder for " +projectid + " is " + typeOrder);
       logger.info("typeorder for " + projectid + " is " + typeOrder2);
 
-      new ExerciseCopy().addPredefExercises(projectid, slickUEDAO, importUser, newEx, typeOrder2);
+      new ExerciseCopy().addPredefExercises(projectid, slickUEDAO, importUser, newEx, typeOrder2, new HashMap<>());
 
       // now update...
       // update the exercises...

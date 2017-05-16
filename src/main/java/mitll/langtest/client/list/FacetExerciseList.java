@@ -395,7 +395,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   public void showList(int newUserListID) {
     Map<String, String> candidate = new HashMap<>(typeToSelection);
     candidate.put(LISTS, "" + newUserListID);
-   // logger.info("showList " + candidate);
+    // logger.info("showList " + candidate);
     getTypeToValues(candidate, newUserListID);
   }
 
@@ -1334,15 +1334,18 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     RefAudioGetter next = iterator.next();
 
-//    logger.info("asking next panel...");
+    logger.info("getRefAudio asking next panel...");
     next.getRefAudio(() -> {
-      //    logger.info("\tpanel complete...");
       if (iterator.hasNext()) {
+        logger.info("\tgetRefAudio panel complete...");
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
             getRefAudio(iterator);
           }
         });
+      }
+      else {
+        logger.info("\tgetRefAudio all panels complete...");
       }
     });
   }

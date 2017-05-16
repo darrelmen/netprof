@@ -47,6 +47,7 @@ import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,6 +76,7 @@ public class Project implements PronunciationLookup {
   private DatabaseImpl db;
   private ServerProperties serverProps;
   private boolean isRTL;
+  private Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
 
@@ -416,6 +418,14 @@ public class Project implements PronunciationLookup {
 
   public void ensureAudio(Set<CommonExercise> toAddAudioTo) {
     refResultDecoder.ensure(getLanguage(), toAddAudioTo);
+  }
+
+  public Map<Integer, AlignmentOutput> getAudioToAlignment() {
+    return audioToAlignment;
+  }
+
+  public void setAudioToAlignment(Map<Integer, AlignmentOutput> audioToAlignment) {
+    this.audioToAlignment = audioToAlignment;
   }
 
   public String toString() {

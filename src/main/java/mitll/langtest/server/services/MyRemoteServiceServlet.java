@@ -129,6 +129,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    */
   protected int getProjectID() {
     int userIDFromSession = getUserIDFromSession();
+    return getProjectID(userIDFromSession);
+  }
+
+  protected int getProjectID(int userIDFromSession) {
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
       logger.warn("getProjectID : no user in session, so we can't get the project id for the user.");

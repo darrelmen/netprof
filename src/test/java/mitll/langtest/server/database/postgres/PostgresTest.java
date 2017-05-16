@@ -208,9 +208,7 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testMSA() {
-    copyProd("msa");
-  }
+  public void testMSA() {  copyProd("msa");  }
 
   @Test
   public void testTagalog() {

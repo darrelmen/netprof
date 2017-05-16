@@ -35,6 +35,7 @@ package mitll.langtest.shared.exercise;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.sql.Connection;
@@ -97,6 +98,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private Map<String, String> attributes = new HashMap<String, String>();
   private boolean hasBeenPlayed;
   private AudioType audioType;
+  private AlignmentOutput alignmentOutput = null;
 
   public AudioAttribute() {
   }
@@ -434,5 +436,13 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
         "\n\tby         " + userid + "/" + user +
         "\n\ttranscript '" + transcript +
         "'\n\tdnr\t" + dnr;
+  }
+
+  public AlignmentOutput getAlignmentOutput() {
+    return alignmentOutput;
+  }
+
+ public void setAlignmentOutput(AlignmentOutput alignmentOutput) {
+    this.alignmentOutput = alignmentOutput;
   }
 }

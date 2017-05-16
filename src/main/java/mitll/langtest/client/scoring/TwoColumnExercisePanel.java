@@ -125,12 +125,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     this.phonesChoices = phonesChoices;
     this.alignments = alignments;
 
-/*
-    if (!commonExercise.getFieldToAnnotation().isEmpty()) {
-      logger.info("Annos " + commonExercise.getFieldToAnnotation());
-    }
-    */
-
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
     this.isRTL = clickableWords.isRTL(exercise);
@@ -147,31 +141,34 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     });*/
   }
 
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio(Iterator)
+   * @param listener
+   */
   @Override
   public void getRefAudio(RefAudioListener listener) {
     if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
       AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
       int refID = currentAudioAttr.getUniqueID();
-      AudioAttribute currentAudioAttr1 = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
-      int contextRefID = currentAudioAttr1 != null ? currentAudioAttr1.getUniqueID() : -1;
-
-      //  logger.info("getRefAudio asking for " + refID);
+      AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
+      int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
+      logger.info("getRefAudio asking for audio #" + refID);
 //    logger.info("asking for " + contextRefID);
 
       Set<Integer> req = new HashSet<>();
       if (refID != -1) {
-        if (!alignments.containsKey(refID))
-          req.add(refID);
-      }
+        if (addToRequest(currentAudioAttr, refID)) req.add(refID);
+      } else logger.warning("huh? how can audio id be -1??? " + currentAudioAttr);
 
       if (contextRefID != -1) {
         // logger.info("getRefAudio asking for context " + contextRefID);
-        if (!alignments.containsKey(contextRefID))
-          req.add(contextRefID);
+
+        if (addToRequest(contextAudioAttr, contextRefID)) req.add(contextRefID);
       }
 
       if (req.isEmpty()) {
-        registerSegments(refID, currentAudioAttr, contextRefID, currentAudioAttr1);
+        registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
+        listener.refAudioComplete();
       } else {
         controller.getScoringService().getAlignments(
             controller.getProjectStartupInfo().getProjectid(),
@@ -184,12 +181,25 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               @Override
               public void onSuccess(Map<Integer, AlignmentOutput> result) {
                 alignments.putAll(result);
-                registerSegments(refID, currentAudioAttr, contextRefID, currentAudioAttr1);
+                registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
                 cacheOthers(listener);
               }
             });
       }
     }
+  }
+
+  private boolean addToRequest(AudioAttribute currentAudioAttr, int refID) {
+    if (!alignments.containsKey(refID)) {
+      AlignmentOutput alignmentOutput = currentAudioAttr.getAlignmentOutput();
+      if (alignmentOutput == null) {
+        return true;
+      } else {
+        logger.info("addToRequest remember " + refID + " " + alignmentOutput);
+        alignments.put(refID, alignmentOutput);
+        return false;
+      }
+    } else return false;
   }
 
   private void registerSegments(int refID,
@@ -199,6 +209,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (refID != -1) {
       audioChanged(refID, currentAudioAttr.getDurationInMillis());
     }
+    else logger.warning("huh? register " + refID);
     if (contextRefID != -1) {
       contextAudioChanged(contextRefID, currentAudioAttr1.getDurationInMillis());
     }
@@ -233,8 +244,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               }
             });
       }
-    }
-    else {
+    } else {
       listener.refAudioComplete();
     }
   }
@@ -330,17 +340,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         if (DEBUG) logger.info("matchSegmentToWidgetForAudio no word segments in " + alignmentOutput);
       } else {
         if (transcriptMatches2(flclickables, wordSegments)) {
-
-         // logger.info("these should match ---- " + wordSegments);
-
+          // logger.info("these should match ---- " + wordSegments);
           // List<IHighlightSegment> compOrder = flclickables;
-          if (isRTL) {
+/*          if (isRTL) {
             List<IHighlightSegment> compOrder = new ArrayList<>(flclickables);
 //            logger.info("transcriptMatches2 did reverse, so before  " + compOrder);
             Collections.reverse(compOrder);
             iterator = compOrder.iterator();
-  //          logger.info("transcriptMatches2 did reverse, so after  " + compOrder);
-          }
+            //          logger.info("transcriptMatches2 did reverse, so after  " + compOrder);
+          }*/
 
           for (TranscriptSegment word : wordSegments) {
             // if (!shouldIgnore(word)) {
@@ -356,7 +364,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                   matchEventSegmentToClickable(iterator, word, phonesInWord, audioControl, phoneMap);
 
               if (value1 == null) {
-                logger.warning("can't find match for word " + word);
+                logger.warning("matchSegmentToWidgetForAudio can't find match for word " + word);
               } else {
                 segmentToWidget.put(word, value1);
               }
@@ -366,7 +374,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           }
           // }
         } else {
-          if (DEBUG_MATCH) logger.warning("no match for" +
+          if (DEBUG_MATCH) logger.warning("matchSegmentToWidgetForAudio no match for" +
               "\n\tsegments " + wordSegments +
               "\n\tto       " + flclickables);
         }
@@ -531,15 +539,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     int i = 0;
     List<IHighlightSegment> compOrder = clickables;
-    if (isRTL) {
+/*    if (isRTL) {
       compOrder = new ArrayList<>(clickables);
       Collections.reverse(compOrder);
-    }
+    }*/
     for (IHighlightSegment clickable : compOrder) {
       if (clickable.isClickable()) {
         String fragment = removePunct(clickable.getContent().toLowerCase());
         clickableSentence.append(fragment);
-       // logger.info("clickable seg " + (i++) + " " + fragment);
+        // logger.info("clickable seg " + (i++) + " " + fragment);
       }
     }
 
@@ -760,7 +768,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (!useMeaningInsteadOfEnglish && meaningValid) {
       Widget meaningWidget =
           getEntry(e, QCNPFExercise.MEANING, e.getMeaning(), false, false, true, showInitially,
-              new ArrayList<>(), true, annotationHelper);
+              new ArrayList<>(), true, annotationHelper, false);
       addField(fieldContainer, meaningWidget);
     }
 
@@ -781,11 +789,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             true, false, false,
             showInitially,
             flclickables,
-            true, annotationHelper);
+            true, annotationHelper, isRTL);
     if (!isRTL) {
       flEntry.addStyleName("floatLeft");
-    }
-    else {
+    } else {
       clickableWords.setDirection(flEntry);
     }
     flEntry.setWidth("100%");
@@ -878,7 +885,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private Widget getEnglishWidget(T e, String english) {
     Widget englishWidget = getEntry(e, QCNPFExercise.ENGLISH, english, false, false, false,
-        showInitially, new ArrayList<>(), true, annotationHelper);
+        showInitially, new ArrayList<>(), true, annotationHelper, false);
     englishWidget.addStyleName("rightsidecolor");
     englishWidget.getElement().setId("englishWidget");
     englishWidget.addStyleName("floatLeft");
@@ -947,7 +954,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A") && !e.getForeignLanguage().trim().equals(translitSentence)) {
       altflClickables = new ArrayList<>();
       Widget entry = getEntry(e, QCNPFExercise.ALTFL, translitSentence, true, true, false,
-          showInitially, altflClickables, phonesChoices == HIDE, annotationHelper);
+          showInitially, altflClickables, phonesChoices == HIDE, annotationHelper, isRTL);
       if (addTopMargin) entry.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
       return entry;
     } else return null;
@@ -957,7 +964,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String translitSentence = e.getTransliteration();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
       DivWidget entry = getEntry(e, QCNPFExercise.TRANSLITERATION, translitSentence, false, true, false,
-          showInitially, new ArrayList<>(), true, annotationHelper);
+          showInitially, new ArrayList<>(), true, annotationHelper, true);
       return entry;
     }
     return null;
@@ -1071,7 +1078,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           ENGLISH,
           contextTranslation,
           false, false, false, showInitially, new ArrayList<>(), true,
-          annotationHelper);
+          annotationHelper, false);
     } else {
       return null;
     }
@@ -1085,6 +1092,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param clickables
    * @param addRightMargin
    * @param annotationHelper
+   * @param isRTL
    * @return
    * @paramx label
    * @see #getFLEntry
@@ -1101,7 +1109,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              boolean showInitially,
                              List<IHighlightSegment> clickables,
                              boolean addRightMargin,
-                             AnnotationHelper annotationHelper) {
+                             AnnotationHelper annotationHelper,
+                             boolean isRTL) {
     ExerciseAnnotation annotation = e.getAnnotation(field);
 /*    logger.info("anno for '" + field +
         "' = '" + annotation +
@@ -1112,7 +1121,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }*/
 
     return getEntry(field, value, annotation, isFL, isTranslit, isMeaning, showInitially, clickables, addRightMargin,
-        annotationHelper);
+        annotationHelper, isRTL);
   }
 
 /*  private DivWidget getEntrySegments(AnnotationExercise e,
@@ -1130,6 +1139,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param clickables
    * @param addRightMargin
    * @param annotationHelper
+   * @param isRTL
    * @return
    * @paramx label
    * @seex #makeFastAndSlowAudio(String)
@@ -1144,8 +1154,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              boolean showInitially,
                              List<IHighlightSegment> clickables,
                              boolean addRightMargin,
-                             AnnotationHelper annotationHelper) {
-    DivWidget contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning, clickables, !isFL, addRightMargin);
+                             AnnotationHelper annotationHelper,
+                             boolean isRTL) {
+    DivWidget contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning, clickables, !isFL, addRightMargin, isRTL);
+    logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
+    if (isTranslit && isRTL) {
+      logger.info("- float right value " + value + " translit " + isTranslit + " is fl " + isFL);
+      contentWidget.addStyleName("floatRight");
+    }
     return getCommentBox(annotationHelper).getEntry(field, contentWidget, annotation, showInitially, isRTL);
   }
 

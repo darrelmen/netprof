@@ -32,10 +32,18 @@
 
 package mitll.langtest.server.services;
 
+import audio.image.ImageType;
+import audio.image.TranscriptEvent;
+import com.google.gson.JsonObject;
 import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.user.BaseUserDAO;
+import mitll.langtest.server.scoring.ParseResultJson;
+import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -44,6 +52,10 @@ import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.AlignmentOutput;
+import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -476,7 +488,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState, String prefix) {
     Collection<CommonExercise> originalSet = exercisesForState;
 
-   // logger.info("original set" +originalSet.size());
+    // logger.info("original set" +originalSet.size());
     long then = System.currentTimeMillis();
     ExerciseTrie<CommonExercise> trie = new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder(), true);
     long now = System.currentTimeMillis();
@@ -489,7 +501,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       then = System.currentTimeMillis();
       for (CommonExercise exercise : originalSet) contextSentences.addAll(exercise.getDirectlyRelated());
 
-     // logger.info("getExerciseListWrapperForPrefix made " + contextSentences.size() + " from " + originalSet.size());
+      // logger.info("getExerciseListWrapperForPrefix made " + contextSentences.size() + " from " + originalSet.size());
 
       trie = new ExerciseTrie<>(contextSentences, getLanguage(), getSmallVocabDecoder(), true);
       now = System.currentTimeMillis();
@@ -1220,8 +1232,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   public ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids, boolean isFlashcardReq) {
     List<CommonExercise> exercises = new ArrayList<>();
 
-    int projectID = getProjectID();
     int userID = getUserIDFromSession();
+    int projectID = getProjectID(userID);
 
     Set<CommonExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
 
@@ -1232,16 +1244,139 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     if (!toAddAudioTo.isEmpty()) {
-      db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
+      addAlignmentOutput(projectID, toAddAudioTo);
     } else {
       logger.info("getFullExercises all " + ids.size() + " exercises have audio");
     }
-
 
     addScores(userID, exercises);
 
     return new ExerciseListWrapper<>(reqid, exercises, null, getScoreHistories(ids, exercises, userID));
   }
+
+  private void addAlignmentOutput(int projectID, Set<CommonExercise> toAddAudioTo) {
+    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
+    Project project = db.getProject(projectID);
+
+    if (project != null) {
+      Map<Integer, AlignmentOutput> audioToAlignment = project.getAudioToAlignment();
+      Map<Integer, AudioAttribute> idToAudio = new HashMap<>();
+
+      for (CommonExercise exercise : toAddAudioTo) {
+        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+
+          AlignmentOutput alignmentOutput = audioAttribute.getAlignmentOutput();
+          if (alignmentOutput == null) {
+            AlignmentOutput alignmentOutput1 = audioToAlignment.get(audioAttribute.getUniqueID());
+
+            if (alignmentOutput1 == null) {
+              idToAudio.put(audioAttribute.getUniqueID(), audioAttribute);
+            } else {
+              audioAttribute.setAlignmentOutput(alignmentOutput1);
+            }
+          }
+        }
+      }
+      if (!idToAudio.isEmpty()) logger.warn("getting " + idToAudio.size() + " alignment output from database");
+
+      Map<Integer, AlignmentOutput> alignments = getAlignments(projectID, idToAudio.keySet());
+      for (Map.Entry<Integer, AudioAttribute> pair : idToAudio.entrySet()) {
+        AlignmentOutput alignmentOutput = alignments.get(pair.getKey());
+        if (alignmentOutput == null) logger.warn("couldn't get alignment for "+ pair.getValue());
+        else pair.getValue().setAlignmentOutput(alignmentOutput);
+      }
+      audioToAlignment.putAll(alignments);
+    }
+  }
+
+  public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) {
+    //Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
+//    logger.info("getAlignments asking for " + audioIDs);
+    Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
+    //logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
+
+    return recalcAlignments(audioIDs, audioIDMap);
+    //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
+    //return idToAlignment;
+  }
+
+//  @NotNull
+//  private Map<Integer, ISlimResult> getAudioIDMap(int id) {
+//    return getAudioIDMap(db.getRefResultDAO().getAllSlimForProject(id));
+//  }
+
+  @NotNull
+  private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
+    Map<Integer, ISlimResult> audioToResult = new HashMap<>();
+    for (ISlimResult slimResult : jsonResultsForProject) audioToResult.put(slimResult.getAudioID(), slimResult);
+    return audioToResult;
+  }
+
+  private Map<Integer, AlignmentOutput> recalcAlignments(
+      Collection<Integer> audioIDs,
+      Map<Integer, ISlimResult> audioToResult) {
+    Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
+    for (Integer audioID : audioIDs) {
+      // do we have alignment for this audio in the map
+      ISlimResult cachedResult = audioToResult.get(audioID);
+
+      if (cachedResult == null) { // nope, ask the database
+        cachedResult = db.getRefResultDAO().getResult(audioID);
+      }
+
+      if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now
+      } else {
+        getCachedAudioRef(idToAlignment, audioID, cachedResult);  // OK, let's translate the db info into the alignment output
+      }
+    }
+    return idToAlignment;
+  }
+
+  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult) {
+    PrecalcScores precalcScores = getPrecalcScores(false, cachedResult);
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
+        getTypeToTranscriptEvents(precalcScores.getJsonObject(), false);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents);
+//    logger.info("cache HIT for " + audioID + " returning " + typeToSegments);
+    idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
+  }
+
+  @NotNull
+  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult) {
+    return new PrecalcScores(serverProps, cachedResult, usePhoneToDisplay || serverProps.usePhoneToDisplay());
+  }
+
+  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
+                                                                                boolean usePhoneToDisplay) {
+    return
+        new ParseResultJson(db.getServerProps())
+            .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
+  }
+
+  /**
+   * @param typeToEvent
+   * @return
+   * @see #getCachedAudioRef
+   */
+  @NotNull
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
+
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) {
+        typeToEndTimes.put(key, endTimes = new ArrayList<>());
+      }
+      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        TranscriptEvent value = event.getValue();
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
+      }
+    }
+
+    return typeToEndTimes;
+  }
+
 
   @NotNull
   private Set<CommonExercise> getCommonExercisesWithoutAudio(Collection<Integer> ids, List<CommonExercise> exercises, int projectID) {

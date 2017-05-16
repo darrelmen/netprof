@@ -162,6 +162,8 @@ public class SlickUserExerciseDAO
    * @param isContext
    * @param typeOrder
    * @return
+   * @see #add(CommonExercise, boolean, boolean, Collection)
+   * @see #update(CommonExercise, boolean, Collection)
    */
   private SlickExercise toSlick(CommonExercise shared,
                                 @Deprecated boolean isOverride,
@@ -309,7 +311,6 @@ public class SlickUserExerciseDAO
     exercise.setNumPhones(numToUse);
 
     List<Pair> pairs = addPhoneInfo(slick, baseTypeOrder, sectionHelper, exercise, attrTypes);
-
     return pairs;
   }
 
@@ -512,25 +513,6 @@ public class SlickUserExerciseDAO
     return pairs;
   }
 
-  /**
-   * @return
-   * @paramx sectionHelper
-   * @paramx unitToValue
-   * @paramx exercise
-   * @see #addPhoneInfo
-   */
-//  private void addPairs(ISection<CommonExercise> sectionHelper,
-//                              List<Pair> pairs,
-//                              Exercise exercise) {
-//    for (Pair pair : pairs) sectionHelper.addExerciseToLesson(exercise, pair);
-//    for (Pair pair : exercise.getAttributes()) sectionHelper.addExerciseToLesson(exercise, pair);
-//  }
-//  private void addPair(ISection<CommonExercise> sectionHelper,
-//                       Exercise exercise,
-//                       Pair pair) {
-//    sectionHelper.addExerciseToLesson(exercise, pair);
-//  }
-
   private int c = 0;
 
   /**
@@ -586,9 +568,7 @@ public class SlickUserExerciseDAO
     return dao.insert(UserExercise);
   }
 
-  public void addBulk(List<SlickExercise> bulk) {
-    dao.addBulk(bulk);
-  }
+  public void addBulk(List<SlickExercise> bulk) {  dao.addBulk(bulk);  }
 
   public int getNumRows() {
     return dao.getNumRows();
@@ -987,20 +967,6 @@ public class SlickUserExerciseDAO
         value));
   }
 
-/*
-  public int insertAttributeJoin(
-      long now,
-      int userid,
-      int exid,
-      int attrid) {
-    return attributeJoinDAOWrapper.insert(new SlickExerciseAttributeJoin(-1,
-        userid,
-        new Timestamp(now),
-        exid,
-        attrid));
-  }
-*/
-
   /**
    * @param projid
    * @return
@@ -1054,9 +1020,19 @@ public class SlickUserExerciseDAO
     return attribute;
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercisesAndAttributes(int, int, SlickUserExerciseDAO, Collection, Collection)
+   * @param projectid
+   * @return
+   */
   public Map<String, Integer> getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
-    for (SlickExercise exercise : dao.getAllPredefByProject(projectid)) oldToNew.put(exercise.exid(), exercise.id());
+    List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(projectid);
+    for (SlickExercise exercise : allPredefByProject) {
+      Integer before = oldToNew.put(exercise.exid(), exercise.id());
+      if (before != null) logger.warn("huh? already saw an exercise with id " + exercise.exid() + " replace with " + exercise);
+    }
+    logger.info("getOldToNew found for project #" + projectid + " " + allPredefByProject.size() +  " exercises, " + oldToNew.size() + " old->new");
 //    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
     return oldToNew;
   }

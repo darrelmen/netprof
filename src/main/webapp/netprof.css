@@ -548,7 +548,41 @@ fieldset > legend {
     /*
     color: #CC6600;
     */
-    font-size: 22px;
+    font-size: 24px;
+    /*
+    font-weight: bold;
+    */
+    word-wrap: normal; /* Internet Explorer 5.5+ */
+    word-break: keep-all;
+    white-space: normal;
+    font-family: sans-serif;
+    line-height: 100%;
+    float: left;
+}
+
+.flfont {
+    /*
+    color: #CC6600;
+    */
+    font-size: 24px;
+    /*
+    font-weight: bold;
+    */
+    word-wrap: normal; /* Internet Explorer 5.5+ */
+    word-break: keep-all;
+    white-space: normal;
+    font-family: sans-serif;
+    line-height: 100%;
+    /*
+    float: left;
+    */
+}
+
+.bigflfont {
+    /*
+    color: #CC6600;
+    */
+    font-size: 32px;
     /*
     font-weight: bold;
     */

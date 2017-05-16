@@ -82,7 +82,6 @@ public class ProjectManagement implements IProjectManagement {
   private final Map<Integer, Project> idToProject = new HashMap<>();
   private FileUploadHelper fileUploadHelper;
 
-
   /**
    * @param pathHelper
    * @param properties
@@ -157,9 +156,8 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     if (!idToProject.isEmpty()) {
-      ExerciseDAO<CommonExercise> exerciseDAO = getFirstProject().getExerciseDAO();
-      logger.info("using exercise dao from first project " + exerciseDAO);
-      db.getUserExerciseDAO().setExerciseDAO(exerciseDAO);
+     // logger.info("using exercise dao from first project " + exerciseDAO);
+      db.getUserExerciseDAO().setExerciseDAO(getFirstProject().getExerciseDAO());
     }
 
     configureProjects();
@@ -511,36 +509,41 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public Project getProject(int projectid) {
-    if (projectid == -1 && !idToProject.isEmpty()) return getFirstProject();
-    Project project = idToProject.get(projectid);
-
-    Set<Integer> knownProjects = idToProject.keySet();
-
-    if (project == null) {
-      Set<Integer> dbProjects = getNewProjects(knownProjects);
-
-      if (!dbProjects.isEmpty()) {
-        logger.debug("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-            ") - refreshing projects");
-        populateProjects();
-        project = idToProject.get(projectid);
-      }
-
-      if (project == null && !idToProject.isEmpty()) {
-        Project firstProject = getFirstProject();
-        logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-                ") returning first " + firstProject,
-            new IllegalArgumentException());
-        return firstProject;
-      }
+    if (projectid == -1 && !idToProject.isEmpty()) {
+      return getFirstProject();
     }
-    return project;
+    else {
+      Project project = idToProject.get(projectid);
+
+      if (project == null) {
+        Set<Integer> dbProjects = getNewProjects(idToProject.keySet());
+
+        if (!dbProjects.isEmpty()) {
+          project = lazyGetProject(projectid);
+        }
+
+        if (project == null && !idToProject.isEmpty()) {
+          Project firstProject = getFirstProject();
+          logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+                  ") returning first " + firstProject,
+              new IllegalArgumentException());
+          return firstProject;
+        }
+      }
+      return project;
+    }
+  }
+
+  private Project lazyGetProject(int projectid) {
+    logger.debug("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+        ") - refreshing projects");
+    populateProjects();
+    return idToProject.get(projectid);
   }
 
   @NotNull
   private Set<Integer> getNewProjects(Set<Integer> knownProjects) {
     Set<Integer> dbProjects = projectDAO.getAll().stream().map(SlickProject::id).collect(Collectors.toSet());
-
     dbProjects.removeAll(knownProjects);
     return dbProjects;
   }
