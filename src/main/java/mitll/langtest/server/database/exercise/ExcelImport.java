@@ -90,6 +90,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   public static final String LESSON = "lesson";
   public static final String OTHER = "Other";
   public static final String EN_TRANSLATION = "EN Translation";
+  public static final String ENGLISH = "English";
+  public static final String WEEK = "week";
 
   private final List<String> errors = new ArrayList<String>();
   private final String file;
@@ -131,7 +133,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
-    if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
+    if (DEBUG || unitIndex > 0) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
   @Override
@@ -319,7 +321,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String unitName = null, chapterName = null, weekName = null;
 
     List<String> typeOrder = getTypeOrder();
-    String first = typeOrder.size() > 0 ? typeOrder.get(0) : "";
+    String first  = typeOrder.size() > 0 ? typeOrder.get(0) : "";
     String second = typeOrder.size() > 1 ? typeOrder.get(1) : "";
 
     logger.info("First " + first + " second '" + second + "'");
@@ -342,13 +344,13 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         if (!gotHeader) {
           columns = getHeader(next); // could be several junk rows at the top of the spreadsheet
 
-          List<String> predefinedTypeOrder = new ArrayList<String>();
+          List<String> predefinedTypeOrder = new ArrayList<>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
             int i = columns.indexOf(col);
 
 //            logger.info("col " + i + " '" + colNormalized + "'");
-            if (colNormalized.startsWith(WORD)) {
+            if (isMatchForEnglish(colNormalized)) {
               gotHeader = true;
               colIndexOffset = i;
             } else if (colNormalized.contains("transliteration")) {
@@ -367,7 +369,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               contextIndex = i;
             } else if (colNormalized.contains("audio_index")) {
               audioIndex = i;
-              hasAudioIndex = true;
+//              hasAudioIndex = true;
             } else if (gotUCW) {
               if (DEBUG || true) logger.debug("readFromSheet using predef unit/chapter/week ");
               if (i == unitIndex) {
@@ -392,7 +394,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               chapterIndex = i;
               predefinedTypeOrder.add(col);
               chapterName = col;
-            } else if (colNormalized.contains("week")) {
+            } else if (colNormalized.contains(WEEK)) {
               weekIndex = i;
               predefinedTypeOrder.add(col);
               weekName = col;
@@ -531,6 +533,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exercises;
   }
 
+  private boolean isMatchForEnglish(String colNormalized) {
+    return colNormalized.startsWith(WORD) || colNormalized.equalsIgnoreCase(ENGLISH);
+  }
 
   private Set<String> toSkip = new HashSet<>(Arrays.asList("Translation".toLowerCase(), "Transliteration".toLowerCase()));
 
@@ -592,8 +597,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
     Iterator<Cell> cellIterator = next.cellIterator();
     while (cellIterator.hasNext()) {
-      Cell next1 = cellIterator.next();
-      columns.add(next1.toString().trim());
+      columns.add(cellIterator.next().toString().trim());
     }
 
     return columns;
@@ -629,7 +633,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
     List<String> typeOrder = getTypeOrder();
     String firstType = typeOrder.size() > 0 ? typeOrder.get(0) : "";
-    String second = typeOrder.size() > 1 ? typeOrder.get(1) : "";
+    String second    = typeOrder.size() > 1 ? typeOrder.get(1) : "";
 
     try {
       Iterator<Row> iter = sheet.rowIterator();
@@ -645,7 +649,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-            if (colNormalized.startsWith(WORD)) {
+            if (isMatchForEnglish(colNormalized)) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
@@ -678,14 +682,14 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
             } else if (isSecondTypeMatch(colNormalized, second)) {
               chapterIndex = columns.indexOf(col);
               chapterName = col;
-            } else if (colNormalized.contains("week")) {
+            } else if (colNormalized.contains(WEEK)) {
               weekIndex = columns.indexOf(col);
               weekName = col;
             }
           }
 
           if (DEBUG && !first) {
-            logger.debug("columns word index " + colIndexOffset +
+            logger.debug("readFromSheetSkips columns word index " + colIndexOffset +
                 " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
                 " meaning " + meaningIndex +
                 " transliterationIndex " + transliterationIndex +
