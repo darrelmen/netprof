@@ -89,29 +89,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     navCollapse.addStyleName("topFiveMargin");
     navCollapse.getElement().setId("navCollapse1");
 
-    //DivWidget upperLower = new DivWidget();
-
-//    upperLower.add(navCollapse);
     add(navCollapse);
-    //  add(upperLower);
-
-//    NavCollapse navCollapse2 = new NavCollapse();
-    //   navCollapse2.addStyleName("topFiveMargin");
-    // navCollapse2.getElement().setId("navCollapse2");
-
-//    add(navCollapse2);
 
     navCollapse.add(this.lnav = getLNav());
     addChoicesForUser(lnav);
-/*
-    lnav.add(recnav =new Dropdown("Record"));
-    */
-
     Nav recnav = getRecNav();
     this.recnav = recnav;
     navCollapse.add(recnav);
-//    upperLower.add(navCollapse2);
-
     recordMenuVisible();
 
     Nav defectnav = getDefectNav();

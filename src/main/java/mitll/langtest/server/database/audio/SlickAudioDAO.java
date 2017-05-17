@@ -34,7 +34,6 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -56,13 +55,14 @@ import java.util.*;
 
 public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = LogManager.getLogger(SlickAudioDAO.class);
+  private static final String BEST_AUDIO = "bestAudio";
 
   private final AudioDAOWrapper dao;
   private final long now = System.currentTimeMillis();
   private final long before = now - (24 * 60 * 60 * 1000);
   private final boolean doCheckOnStartup;
   private int defaultResult;
-  private ServerProperties serverProps;
+  private final ServerProperties serverProps;
 
   public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
@@ -406,8 +406,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   public static class Pair {
-    private int exid;
-    private int userid;
+    private final int exid;
+    private final int userid;
 
     public Pair(int exid, int userid) {
       this.exid = exid;
@@ -418,9 +418,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       return exid;
     }
 
-    public int getUserid() {
+ /*   public int getUserid() {
       return userid;
-    }
+    }*/
 
     @Override
     public boolean equals(Object obj) {
@@ -433,11 +433,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       return exid + userid;
     }
   }
-
-/*  @Override
-  int getCountBothSpeeds(Set<Integer> userIds, Set<Integer> uniqueIDs) {
-    return dao.getCountBothSpeeds(userIds, uniqueIDs);
-  }*/
 
   /**
    * TODO : consider cache for mini users
@@ -519,12 +514,16 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       if (resultid == -1) {
         resultid = defaultResult;
       }
+      String audioRef = orig.getAudioRef();
+      if (audioRef.startsWith("config")) {
+        audioRef = removeConfigPrefix(audioRef);
+      }
       return new SlickAudio(
           orig.getUniqueID(),
           userid,
           orig.getExid(),
           new Timestamp(timestamp),
-          orig.getAudioRef(),
+          audioRef,
           audioType.toString(),
           orig.getDurationInMillis(),
           false,
@@ -536,6 +535,16 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           orig.getDnr(),
           resultid);
     }
+  }
+
+  @NotNull
+  private static String removeConfigPrefix(String audioRef) {
+    int bestAudio = audioRef.indexOf(BEST_AUDIO);
+    if (bestAudio == -1) logger.error("huh? expecting bestaudio in "+audioRef);
+    else {
+      audioRef = audioRef.substring(bestAudio);
+    }
+    return audioRef;
   }
 
   /**
@@ -563,17 +572,17 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   public void addBulk(List<SlickAudio> bulk)  { dao.addBulk(bulk);  }
-  public void addBulk2(List<SlickAudio> bulk) {
+/*  public void addBulk2(List<SlickAudio> bulk) {
     dao.addBulk2(bulk);
-  }
-  public int getNumRows() {
+  }*/
+/*  public int getNumRows() {
     return dao.getNumRows();
-  }
+  }*/
 
-  public int getDefaultResult() {
+/*  public int getDefaultResult() {
     // logger.info("\n\n\tdefault id is  " + defaultResult);
     return defaultResult;
-  }
+  }*/
 
   public void setDefaultResult(int defaultResult) {
     this.defaultResult = defaultResult;
@@ -677,7 +686,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
-  @Nullable
+/*  @Nullable
   private String getRegularSpeedFromARecorder(Collection<List<AudioAttribute>> audioByMatchingGender) {
     String nativeAudio = null;
     for (List<AudioAttribute> audioByRecorder : audioByMatchingGender) {
@@ -689,9 +698,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
     }
     return nativeAudio;
-  }
+  }*/
 
-  private String getRegularSpeed(List<AudioAttribute> audioByRecorder) {
+/*  private String getRegularSpeed(List<AudioAttribute> audioByRecorder) {
     String nativeAudio = null;
     for (AudioAttribute audioAttribute : audioByRecorder) {
       if (audioAttribute.isRegularSpeed()) {
@@ -700,8 +709,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
     }
     return nativeAudio;
-  }
-
+  }*/
+/*
   @Nullable
   private String getSlowSpeedFromARecorder(Collection<List<AudioAttribute>> audioByMatchingGender) {
     String nativeAudio = null;
@@ -714,9 +723,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
     }
     return nativeAudio;
-  }
+  }*/
 
-  private String getSlowSpeed(List<AudioAttribute> audioByRecorder) {
+/*  private String getSlowSpeed(List<AudioAttribute> audioByRecorder) {
     String nativeAudio = null;
     for (AudioAttribute audioAttribute : audioByRecorder) {
       if (audioAttribute.isRegularSpeed()) {
@@ -725,7 +734,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
     }
     return nativeAudio;
-  }
+  }*/
 
   @Nullable
   private MiniUser.Gender getGender(Map<Integer, MiniUser.Gender> userToGender, int userid) {

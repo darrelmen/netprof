@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static mitll.langtest.server.scoring.SmallVocabDecoder.REMOVE_ME;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -247,7 +249,18 @@ public class SLFFile {
     return "I=" + currentNode + " W=" + wordtoken + ";";
   }
 
+  /**
+   * Redundant with SmallVocabDecoder...
+   *
+   * @see
+   * @param token
+   * @return
+   */
   public String cleanToken(String token) {
-    return token.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}", "").toLowerCase();
+    return token
+        .replaceAll(REMOVE_ME, " ")
+        .replaceAll("\\p{Z}+", " ")
+        .replaceAll("\\p{P}", "")
+        .toLowerCase();
   }
 }

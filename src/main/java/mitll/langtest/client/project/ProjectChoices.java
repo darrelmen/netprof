@@ -20,7 +20,6 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -36,6 +35,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
+  private static final int MIN_HEIGHT = 105;
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
   private static final String NEW_PROJECT = "New Project";
@@ -55,7 +55,7 @@ public class ProjectChoices {
   /**
    * Tamas doesn't like scrolling -- try to prevent it on laptops
    */
-  private static final int ITEMS_IN_ROW = 5;
+ // private static final int ITEMS_IN_ROW = 5;
   protected static final String LOGIN = "Login";
   private static final int NO_USER_INITIAL = -2;
   private final UILifecycle uiLifecycle;
@@ -425,7 +425,8 @@ public class ProjectChoices {
     horiz.addStyleName("inlineFlex");
     horiz.setWidth("100%");
     if (isQC()) {
-      horiz.getElement().getStyle().setProperty("minHeight", "110px"); // so they wrap nicely
+      horiz.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT +
+          "px"); // so they wrap nicely
     }
 
     thumbnail.add(horiz);

@@ -79,6 +79,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
   public static final String DCODR = "dcodr";
+  public static final String UNK = "+UNK+";
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -227,7 +228,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return score info coming back from alignment/reco
    * @see ASR#scoreRepeat
    */
-  // JESS alignment and decoding
   private PretestScore scoreRepeatExercise(String testAudioDir,
                                            String testAudioFileNoSuffix,
                                            String sentence,
@@ -323,7 +323,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         // dcodr can't handle an equals in the file name... duh...
         String rawAudioPath = filePath.replaceAll("\\=", "") + ".raw";
         //rawAudioPath = rawAudioPath.replaceAll("\\=","");
-       // logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra");
+        // logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra");
         AudioConversion.wav2raw(filePath + ".wav", rawAudioPath);
 
         Object[] result = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
@@ -372,7 +372,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   /**
    * TODO : don't copy this method in both ASRScoring and ASRWebserviceScoring
-   *
+   * <p>
    * TODO : don't write images unless we really want them
    *
    * @param imageOutDir
@@ -410,7 +410,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       );
 */
 
-      int imageWidth  = imageOptions.getWidth();
+      int imageWidth = imageOptions.getWidth();
       int imageHeight = imageOptions.getHeight();
 
       boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
@@ -475,14 +475,22 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return the dictionary for dcodr
    * @see #runHydra
    */
-  private String createHydraDict(String transcript, String transliteration) {
+  @Override
+  public String createHydraDict(String transcript, String transliteration) {
     if (getLTS() == null) {
       logger.warn(this + " : createHydraDict : LTS is null???");
     }
 
     String dict
-          = "[";
-    dict += getPronunciations(transcript, transliteration, false);
+        = "[";
+    String pronunciations = getPronunciations(transcript, transliteration, false);
+
+    logger.info("createHydraDict" +
+        "\n\ttranscript     " + transcript +
+        "\n\tpronunciations " + pronunciations
+    );
+
+    dict += pronunciations;
     dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
     dict += "]";
     return dict;
@@ -601,9 +609,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                 }
               } else {
 //                logger.info("can't use transliteration");
-
                 if (!seen.contains(key)) {
-                  logger.warn("getPronunciations couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
+                  logger.warn("getPronunciations couldn't get letter to sound map from " + getLTS() + " for '" + word1 + "' in " + transcript);
                 }
 
                 seen.add(key);
@@ -611,6 +618,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                 if (process != null && process.length > 0) {
                   dict += getDefaultPronStringForWord(word, process, justPhones);
                 }
+                else {
+                  logger.info("using unk phone for " +word);
+                  dict += getUnkPron(word);
+                }
+
               }
             } else { // it's ok -use it
               for (String[] pron : process) {
@@ -641,11 +653,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   /**
    * last resort, if we can't even use the transliteration to get some kind of pronunciation
-   * @see #getPronunciations
+   *
    * @param word
    * @param apply
    * @param justPhones
    * @return
+   * @see #getPronunciations
    */
   private String getDefaultPronStringForWord(String word, String[][] apply, boolean justPhones) {
     for (String[] pc : apply) {
@@ -654,7 +667,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         return justPhones ? result + " " : word + "," + result + " sp;";
       }
     }
-    return justPhones ? "" : word + ",+UNK+ sp;"; //hopefully we never get here...
+    return justPhones ? "" : getUnkPron(word); //hopefully we never get here...
+  }
+
+  @NotNull
+  private String getUnkPron(String word) {
+    return word + "," + UNK + " sp;";
   }
 
   private String getPhones(String[] pc) {

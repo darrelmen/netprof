@@ -77,13 +77,10 @@ public class FileUploadHelper {
     String name = item.getFieldName();
     if (name != null) {
       if (name.toLowerCase().endsWith("projectid")) {
-        logger.info("-------------> got siteid <----------------\n\n");
+//        logger.info("-------------> got siteid <----------------\n\n");
         site.id = Integer.parseInt(item.getString().trim());
-        logger.info("------------->  siteid" + site.id +
-            "  <----------------\n\n");
+        logger.info("------------->  siteid " + site.id + "  <----------------");
         return true;
-        //  logger.info("User " + item.getString());
-        // site.creatorID = Long.parseLong(item.getString().trim());
       } else {
         logger.info("Got " + item);
       }

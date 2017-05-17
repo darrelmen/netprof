@@ -1244,6 +1244,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     if (!toAddAudioTo.isEmpty()) {
+      db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
       addAlignmentOutput(projectID, toAddAudioTo);
     } else {
       logger.info("getFullExercises all " + ids.size() + " exercises have audio");
@@ -1255,7 +1256,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   private void addAlignmentOutput(int projectID, Set<CommonExercise> toAddAudioTo) {
-    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
     Project project = db.getProject(projectID);
 
     if (project != null) {

@@ -229,7 +229,7 @@ public class WordTable {
    * @return
    */
   @NotNull
-  public DivWidget getPhoneDivBelowWord(AudioControl audioControl,
+   DivWidget getPhoneDivBelowWord(AudioControl audioControl,
                                         TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                         List<TranscriptSegment> value,
                                         boolean simpleLayout,
@@ -350,9 +350,8 @@ public class WordTable {
                                   AudioControl audioControl,
                                   TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                   boolean simpleLayout,
-                                  TranscriptSegment wordSegment, boolean isRTL) {
-    //int id = 0;
-
+                                  TranscriptSegment wordSegment,
+                                  boolean isRTL) {
     if (isRTL) {
       List<TranscriptSegment> copy = new ArrayList<>(phoneSegments);
       Collections.reverse(copy);
@@ -361,7 +360,9 @@ public class WordTable {
     for (TranscriptSegment phoneSegment : phoneSegments) {
       String phoneLabel = phoneSegment.getEvent();
       if (!shouldSkipPhone(phoneLabel)) {
-        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel);
+        float v = phoneSegment.getStart() * 100;
+        int vi = (int) v;
+        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel, vi);
         alignCenter(h);
         addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
         phoneMap.put(phoneSegment, h);

@@ -51,6 +51,9 @@ public interface ASR {
 	boolean validLTS(String foreignLanguagePhrase, String transliteration);
 	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
 	SmallVocabDecoder getSmallVocabDecoder();
+
+	String createHydraDict(String transcript, String transliteration);
+
 	String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
 	/**

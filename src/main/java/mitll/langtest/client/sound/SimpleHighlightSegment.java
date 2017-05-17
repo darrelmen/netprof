@@ -18,20 +18,27 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   private String background = null;
   private boolean highlighted = false;
   private boolean clickable = true;
-  DivWidget divParent;
+  private DivWidget divParent;
 
-  public SimpleHighlightSegment(@IsSafeHtml String html, Direction dir) {
+/*  public SimpleHighlightSegment(@IsSafeHtml String html, Direction dir) {
     super(html, dir);
     length = html.length();
-  }
+    getElement().setId(html);
+  }*/
 
   /**
    * @param content
    * @see mitll.langtest.client.scoring.WordTable#addPhonesBelowWord2
    */
-  public SimpleHighlightSegment(String content) {
+  public SimpleHighlightSegment(String content, int id) {
     super(content);
+    getElement().setId(content+"_s_"+id);
     this.length = content.length();
+  }
+
+  @Override
+  public String getID() {
+    return getElement().getId();
   }
 
   public int getLength() {

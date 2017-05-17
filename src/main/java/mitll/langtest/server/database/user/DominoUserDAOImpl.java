@@ -80,10 +80,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
   private static final String PRIMARY = "primary";
   private static final String DEFAULT_AFFILIATION = "";//"OTHER";
-  public static final String MALE = "male";
+  //public static final String MALE = "male";
   private static final String UID_F = "userId";
   private static final String PASS_F = "pass";
-  public static final String LOCALHOST = "127.0.0.1";
+  private static final String LOCALHOST = "127.0.0.1";
 
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
@@ -216,7 +216,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    *
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
-  public void ensureDefaultUsersLocal() {
+  private void ensureDefaultUsersLocal() {
     this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", User.Kind.QAQC);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", User.Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", "User", User.Kind.CONTENT_DEVELOPER);
@@ -507,7 +507,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     logger.info("loginUser '" + userId + "' pass num chars " + attemptedTxtPass.length() + " existing credentials " + encodedCurrPass);
 
-
     DBUser loggedInUser =
         delegate.loginUser(
             userId,
@@ -796,9 +795,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return user;
   }
 
+/*
   private boolean isValidEmailGrammar(String text) {
     return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
-  }
+  }*/
 
   /**
    * checks roles
@@ -846,7 +846,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return kindToUse;
   }
 
-  Set<String> unknownRoles = new HashSet<>();
+  private final Set<String> unknownRoles = new HashSet<>();
 
   @NotNull
   private User.Kind getKindForRole(String firstRole) {
@@ -1081,7 +1081,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return null;//convertOrNull(dao.getByReset(resetKey));
   }
 
-  public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {
+/*  public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {
     Map<Integer, User> idToUser = new HashMap<>();
     all
         .stream()
@@ -1091,7 +1091,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                 dbUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Female)
         .forEach(dbUser -> idToUser.put(dbUser.getDocumentDBID(), toUser(dbUser)));
     return idToUser;
-  }
+  }*/
 
   public boolean isMale(int userid) {
     return getByID(userid).isMale();

@@ -52,6 +52,7 @@ import java.util.*;
  */
 public class SmallVocabDecoder {
   private static final Logger logger = LogManager.getLogger(SmallVocabDecoder.class);
+  public static final String REMOVE_ME = "[\\u2022\\u2219\\u2191\\u2193;~/']";
   private HTKDictionary htkDictionary;
 
   public SmallVocabDecoder() {
@@ -193,30 +194,23 @@ public class SmallVocabDecoder {
    *
    * @param sentence
    * @return
-   * @see #getTokens(String)
-   * @see mitll.langtest.server.trie.ExerciseTrie#getExercises(String)
-   * @see ASRScoring#getScoresFromHydec
+   * @see #getTokens
+   * @see mitll.langtest.server.trie.ExerciseTrie#getExercises
    */
   public String getTrimmed(String sentence) {
-
-    sentence = sentence
-        .replaceAll("\\u2022", " ")
-        .replaceAll("\\u2219", " ")
-        .replaceAll("\\p{Z}+", " ")
-        .replaceAll(";", " ")
-        .replaceAll("~", " ")
-        .replaceAll("\\u2191", " ")
-        .replaceAll("\\u2193", " ")
-        .replaceAll("/", " ");
-
-
-    String trim = sentence
-        .replaceAll("'", "")
+    return  sentence
+        .replaceAll(REMOVE_ME, " ")
+     //   .replaceAll("", " ")
+        .replaceAll("\\p{Z}+", " ")  // normalize all whitespace
+       // .replaceAll(";", " ")
+       // .replaceAll("~", " ")
+      //  .replaceAll("\\u2191", " ")
+       // .replaceAll("\\u2193", " ")
+       // .replaceAll("/", " ")
+       // .replaceAll("'", "")
         .replaceAll("\\p{P}", " ")
-        .replaceAll("\\s+", " ").trim();
-
-
-    return trim;
+        //.replaceAll("\\s+", " ")
+        .trim();
   }
 
   /**

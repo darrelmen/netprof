@@ -37,6 +37,7 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.user.MiniUser;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -362,22 +363,19 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return matchTranscript(foreignLanguage, transcript);
   }*/
 
+  private boolean matchTranscript(String foreignLanguage) { return matchTranscript(foreignLanguage, this.transcript);  }
+
   /**
    * @param foreignLanguage
    * @param transcript
    * @return
    * @see mitll.langtest.server.database.exercise.AttachAudio#attachAudio(CommonExercise, int, Collection, Collection, Set)
    */
-  public boolean matchTranscript(String foreignLanguage, String transcript) {
+  private boolean matchTranscript(String foreignLanguage, String transcript) {
     return transcript == null ||
         foreignLanguage.isEmpty() ||
         transcript.isEmpty() ||
         removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
-  }
-
-  private boolean matchTranscript(String foreignLanguage) {
-    String transcript = this.transcript;
-    return matchTranscript(foreignLanguage, transcript);
   }
 
   private String removePunct(String t) {

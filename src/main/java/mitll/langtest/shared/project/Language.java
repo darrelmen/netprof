@@ -18,8 +18,8 @@ public enum Language implements IsSerializable {
   IRAQI(true),
   JAPANESE,
   LEVANTINE(true),
-  KOREAN,
-  MANDARIN,
+  KOREAN(32),
+  MANDARIN(32),
   MSA(true),
   PASHTO(true),
   PORTUGUESE,
@@ -34,6 +34,7 @@ public enum Language implements IsSerializable {
   UNKNOWN;  // TROUBLE
 
   private final boolean isRTL;
+  int fontSize = 26;
 
   Language() {
     this.isRTL = false;
@@ -41,6 +42,12 @@ public enum Language implements IsSerializable {
 
   Language(boolean isRTL) {
     this.isRTL = isRTL;
+  }
+  Language(boolean isRTL, int fontSize) {
+    this(isRTL); this.fontSize = fontSize;
+  }
+  Language( int fontSize) {
+    this(false); this.fontSize = fontSize;
   }
 
   public String toDisplay() {

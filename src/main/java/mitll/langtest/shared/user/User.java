@@ -584,23 +584,24 @@ public class User extends MiniUser {
   }*/
 
   public String toString() {
+    String email = getEmail();
     return "user " +
         "\n\tid     " + getID() +
         "\n\tuserid " + getUserID() +
         (first.isEmpty() ? "" : "\n\tfirst " + first) +
-        (last.isEmpty()  ? "" : "\n\tlast  " + last) +
-        "\n\tis a    " + getGender() +"/"+getRealGender() +
+        (last.isEmpty() ? "" : "\n\tlast  " + last) +
+        "\n\tis a   " + getGender() + "/" + getRealGender() +
         (getAge() < 99 && getAge() > 0 ? "\n\tage     " + getAge() : "") +
         (isAdmin() ? "\n\tadmin   " + isAdmin() : "") +
         (!isEnabled() ? "\n\tenabled   " + isEnabled() : "") +
 //        "\n\tdialect " + getDialect() +
 //        "\n\temailH " + getEmailHash() +
-        "\n\temail " + getEmail() +
+        (email.isEmpty() ? "" : "\n\temail " + email) +
         "\n\tpassH  " + getPasswordHash() +
         (getUserKind() == STUDENT ? "" : "\n\tkind   " + getUserKind()) +
         (getPermissions().isEmpty() ? "" :
             "\n\tperms   " + getPermissions()) +
-        (getDevice() == null || getDevice().isEmpty() ? "" : "\n\tdevice  " + getDevice()) +
+        (getDevice() == null || getDevice().isEmpty() ? "" : "\n\tdevice " + getDevice()) +
         (resetKey == null || resetKey.isEmpty() ? "" : "\n\treset  '" + resetKey + "'") +
         //" cdenable '" + cdKey + "'" +
         (startupInfo == null ? "" : "\n\tstartup  " + startupInfo)

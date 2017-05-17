@@ -381,6 +381,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
+   * TODO : replace config/language/bestAudio (E.g. farsi) with bestAudio
    * @param db
    * @param oldToNewUser
    * @param exToID
@@ -399,7 +400,7 @@ public class CopyToPostgres<T extends CommonShell> {
     int missing = 0;
     int skippedMissingUser = 0;
     Set<String> missingExIDs = new TreeSet<>();
-    Map<String, Integer> fileToID = new HashMap<>();
+    //Map<String, Integer> fileToID = new HashMap<>();
     for (AudioAttribute att : audioAttributes) {
       String oldexid = att.getOldexid();
       Integer id = exToID.get(oldexid);

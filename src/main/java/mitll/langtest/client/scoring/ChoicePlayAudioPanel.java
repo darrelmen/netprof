@@ -40,7 +40,6 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   private ExerciseController controller;
   private CommonExercise exercise;
   private boolean includeContext = false;
-  //  private int currentAudioID = -1;
   private AudioAttribute currentAudioAttr = null;
   private AudioChangeListener listener;
   private Set<Integer> allIDs = new HashSet<>();
@@ -238,7 +237,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void playAndRemember(int audioID, String audioRef, long durationInMillis, boolean isMale, boolean isReg) {
-    logger.info("playAndRemember " + audioID + " " +audioRef + " isMale " + isMale + " isReg " + isReg);
+    logger.info("playAndRemember " + audioID + " " +audioRef + " isMale " + isMale + " isReg " + isReg + " durationInMillis "+ durationInMillis);
     doPause();
     listener.audioChanged(audioID, durationInMillis);
 

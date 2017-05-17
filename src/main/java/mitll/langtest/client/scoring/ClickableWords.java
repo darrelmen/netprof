@@ -190,9 +190,9 @@ public class ClickableWords<T extends CommonExercise> {
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(value);
 
-    logger.info("getClickableWordsHighlight exercise " + exercise.getID() + " dir " + dir + " isfL " + isFL);
+    if (DEBUG) logger.info("getClickableWordsHighlight exercise " + exercise.getID() + " dir " + dir + " isfL " + isFL);
     if ((dir == HasDirection.Direction.RTL) && isFL) {
-      logger.info("exercise " + exercise.getID() + " is RTL ");
+      if (DEBUG)  logger.info("exercise " + exercise.getID() + " is RTL ");
       setDirection(horizontal);
     }
     int id = 0;
@@ -328,14 +328,13 @@ public class ClickableWords<T extends CommonExercise> {
                                               int id,
                                               boolean isSimple, boolean isFL) {
     final IHighlightSegment highlightSegmentDiv = isSimple ?
-        new SimpleHighlightSegment(html) :
+        new SimpleHighlightSegment(html,id) :
         new HighlightSegment(id, html, dir);
 
     InlineHTML highlightSegment = highlightSegmentDiv.getClickable();
     if (isFL) {
       if (dir == HasDirection.Direction.RTL) {
         highlightSegment.addStyleName("bigflfont");
-
       }
       else {
         highlightSegment.addStyleName("flfont");

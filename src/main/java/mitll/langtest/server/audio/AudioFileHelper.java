@@ -519,7 +519,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcAudioRef(int, Map, Integer)
+   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper
    * @param exercise
    * @param attribute
    * @param doDecode
@@ -1071,7 +1071,11 @@ public class AudioFileHelper implements AlignDecode {
 
     try {
       logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to decode '" + english + "'='" + foreignLanguage +"'");
-      return new PrecalcScores(serverProps, httpClient.sendAndReceiveAndClose(theFile));
+      String trim = new SLFFile().cleanToken(foreignLanguage).trim();
+      logger.info("getProxyScore dict " + asrScoring.createHydraDict(trim,""));
+      String json = httpClient.sendAndReceiveAndClose(theFile);
+      logger.info("getProxyScore response " + json);
+      return new PrecalcScores(serverProps, json);
     } catch (IOException e) {
       logger.error("checkForWebservice got " + e);
     }

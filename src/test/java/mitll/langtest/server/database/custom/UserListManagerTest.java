@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
  * @since 1/30/14.
  */
 public class UserListManagerTest {
-  private static final String CHANGED = "changed";
+  //private static final String CHANGED = "changed";
   private static final String ENGLISH = "english";
   private static final Logger logger = LogManager.getLogger(UserListManagerTest.class);
   private static DatabaseImpl database;

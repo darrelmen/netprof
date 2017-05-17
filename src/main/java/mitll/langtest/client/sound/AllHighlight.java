@@ -25,7 +25,6 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   //private String content;
 
   /**
-   *
    * @param bulk
    */
   public AllHighlight(Collection<IHighlightSegment> bulk) {
@@ -46,8 +45,7 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
 
     if (divParent != null) {
       divParent.add(this);
-    }
-    else {
+    } else {
       logger.warning("no parent for " + bulk);
     }
 //    ((Panel) parent).add(this);
@@ -59,7 +57,13 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
 //  }
 
   @Override
-  public void setBackground(String background) {}
+  public String getID() {
+    return set.isEmpty() ? "empty" : set.iterator().next().getID();
+  }
+
+  @Override
+  public void setBackground(String background) {
+  }
 
   @Override
   public void setBlue() {
@@ -116,8 +120,8 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchEventSegmentToClickable(Iterator, TranscriptSegment, List, AudioControl, TreeMap)
    * @param widget
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchEventSegmentToClickable(Iterator, TranscriptSegment, List, AudioControl, TreeMap)
    */
   public void setSouth(Widget widget) {
     south.clear();

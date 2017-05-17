@@ -1332,22 +1332,23 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
 
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
-    RefAudioGetter next = iterator.next();
+    if (iterator.hasNext()) {
+      RefAudioGetter next = iterator.next();
 
-    logger.info("getRefAudio asking next panel...");
-    next.getRefAudio(() -> {
-      if (iterator.hasNext()) {
-        logger.info("\tgetRefAudio panel complete...");
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            getRefAudio(iterator);
-          }
-        });
-      }
-      else {
-        logger.info("\tgetRefAudio all panels complete...");
-      }
-    });
+//    logger.info("getRefAudio asking next panel...");
+      next.getRefAudio(() -> {
+        if (iterator.hasNext()) {
+          //      logger.info("\tgetRefAudio panel complete...");
+          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            public void execute() {
+              getRefAudio(iterator);
+            }
+          });
+        } else {
+          logger.info("\tgetRefAudio all panels complete...");
+        }
+      });
+    }
   }
 
   private void setProgressBarScore(Collection<CommonShell> result) {

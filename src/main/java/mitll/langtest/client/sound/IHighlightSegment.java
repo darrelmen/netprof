@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 public interface IHighlightSegment {
   void setBackground(String background);
 
+  String getID();
   void setBlue();
   void clearBlue();
   boolean isHighlighted();

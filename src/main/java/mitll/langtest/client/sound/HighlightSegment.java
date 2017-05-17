@@ -20,31 +20,11 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   private String background = null;
   private boolean highlighted = false;
   private boolean clickable = true;
-  private final DivWidget north;
   private final DivWidget south;
   private final int id;
   private final String content;
   private final InlineHTML span;
   private DivWidget divParent;
-
-  /**
-   * @param id
-   * @param html
-   * @param dir
-   * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
-   */
-  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir) {
-    add(north = new DivWidget());
-    add(south = new DivWidget());
-    south.setWidth("100%");
-    south.addStyleName("floatLeft");
-    getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-    this.span = new InlineHTML(html, dir);
-    this.content = html;
-    north.add(span);
-    length = html.length();
-    this.id = id;
-  }
 
   /**
    * @param id
@@ -55,6 +35,27 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     this(id, content, HasDirection.Direction.LTR);
   }
 
+  /**
+   * @param id
+   * @param html
+   * @param dir
+   * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
+   */
+  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir) {
+    DivWidget north;
+    add(north = new DivWidget());
+    add(south = new DivWidget());
+    south.setWidth("100%");
+    south.addStyleName("floatLeft");
+    getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+    this.span = new InlineHTML(html, dir);
+    this.content = html;
+    north.add(span);
+    span.getElement().setId("highlight_"+id+"_"+html);
+    length = html.length();
+    this.id = id;
+  }
+
   public int getLength() {
     return length;
   }
@@ -62,6 +63,11 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   public void setBackground(String background) {
     this.background = background;
     getSpanStyle().setBackgroundColor(background);
+  }
+
+  @Override
+  public String getID() {
+    return span.getElement().getId();
   }
 
   @Override

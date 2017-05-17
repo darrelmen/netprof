@@ -52,8 +52,9 @@ import static mitll.langtest.client.scoring.ShowChoices.FL;
  */
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener,
     RefAudioGetter {
-  public static final String HALF_WIDTH = "50%";
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
+
+  private static final String HALF_WIDTH = "50%";
 
   private static final String EMAIL = "Email Item";
   private static final Set<String> toIgnore = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
@@ -71,9 +72,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final ListInterface<CommonShell, T> listContainer;
   private ChoicePlayAudioPanel playAudio;
 
+  /**
+   *
+   */
   private Map<Integer, AlignmentOutput> alignments;
 
-  private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>>> idToTypeToSegmentToWidget = new HashMap<>();
+  //private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>>> idToTypeToSegmentToWidget = new HashMap<>();
 
   private List<IHighlightSegment> altflClickables;
   /**
@@ -142,17 +146,20 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio(Iterator)
    * @param listener
+   * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio(Iterator)
    */
   @Override
   public void getRefAudio(RefAudioListener listener) {
-    if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
-      AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
+    AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
+    if (playAudio != null && currentAudioAttr != null) {
       int refID = currentAudioAttr.getUniqueID();
       AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
       int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
-      logger.info("getRefAudio asking for audio #" + refID);
+      logger.info("getRefAudio asking for" +
+          "\n\taudio #" + refID +
+          "\n\tspeed  " + currentAudioAttr.getSpeed() +
+          "\n\tisMale " + currentAudioAttr.getUser().isMale());
 //    logger.info("asking for " + contextRefID);
 
       Set<Integer> req = new HashSet<>();
@@ -162,13 +169,20 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       if (contextRefID != -1) {
         // logger.info("getRefAudio asking for context " + contextRefID);
+        logger.info("getRefAudio asking for context" +
+            "\n\taudio #" + contextRefID +
+            "\n\tspeed  " + contextAudioAttr.getSpeed() +
+            "\n\tisMale " + contextAudioAttr.getUser().isMale());
 
         if (addToRequest(contextAudioAttr, contextRefID)) req.add(contextRefID);
+      } else {
+        logger.warning("no context audio for " + exercise.getID());
       }
 
       if (req.isEmpty()) {
         registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
         listener.refAudioComplete();
+        cacheOthers(listener);
       } else {
         controller.getScoringService().getAlignments(
             controller.getProjectStartupInfo().getProjectid(),
@@ -186,6 +200,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               }
             });
       }
+    } else if (currentAudioAttr == null) {
+      logger.info("no current audio for " + exercise.getID());
     }
   }
 
@@ -199,7 +215,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         alignments.put(refID, alignmentOutput);
         return false;
       }
-    } else return false;
+    } else {
+      return false;
+    }
   }
 
   private void registerSegments(int refID,
@@ -208,8 +226,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                 AudioAttribute currentAudioAttr1) {
     if (refID != -1) {
       audioChanged(refID, currentAudioAttr.getDurationInMillis());
+    } else {
+      logger.warning("huh? register " + refID);
     }
-    else logger.warning("huh? register " + refID);
     if (contextRefID != -1) {
       contextAudioChanged(contextRefID, currentAudioAttr1.getDurationInMillis());
     }
@@ -225,7 +244,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     req.removeAll(alignments.keySet());
 
     if (!req.isEmpty()) {
-      //   logger.info("cacheOthers Asking for audio alignments for " + req + " knownAlignments " + knownAlignments.size());
+      logger.info("cacheOthers (" + exercise.getID()+ ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
@@ -258,8 +277,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   public void audioChanged(int id, long duration) {
     AlignmentOutput alignmentOutput = alignments.get(id);
     if (alignmentOutput != null) {
-      if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
-      matchSegmentsToClickables(id, duration, alignmentOutput, idToTypeToSegmentToWidget.get(id), this.flclickables, this.playAudio);
+      if (DEBUG ) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
+      matchSegmentsToClickables(id, duration, alignmentOutput, this.flclickables, this.playAudio);
+    } else {
+      logger.warning("audioChanged no alignment info for ex " +exercise.getID()+ " " + id + " dur " + duration);
     }
   }
 
@@ -267,24 +288,46 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param id
    * @param duration
    * @param alignmentOutput
-   * @param typeToSegmentToWidget
    * @param flclickables
    * @param playAudio
+   * @paramz typeToSegmentToWidget
+   * @see #audioChanged
    * @see #contextAudioChanged
    */
   private void matchSegmentsToClickables(int id,
                                          long duration,
                                          AlignmentOutput alignmentOutput,
-                                         Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
                                          List<IHighlightSegment> flclickables,
                                          ChoicePlayAudioPanel playAudio) {
+    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
+        getOrMakeTypeToSegment(id, duration, alignmentOutput, flclickables, playAudio);
+
+    setPlayListener(id, duration, typeToSegmentToWidget, playAudio);
+  }
+
+  private Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> getOrMakeTypeToSegment(int id,
+                                                                                                      long duration,
+                                                                                                      AlignmentOutput alignmentOutput,
+                                                                                                      List<IHighlightSegment> flclickables,
+                                                                                                      ChoicePlayAudioPanel playAudio) {
+/*    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = idToTypeToSegmentToWidget.get(id);
     if (typeToSegmentToWidget == null) {
       Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> netPronImageTypeTreeMapMap =
           matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio);
       idToTypeToSegmentToWidget.put(id, netPronImageTypeTreeMapMap);
       typeToSegmentToWidget = netPronImageTypeTreeMapMap;
-    }
+    } else {
+      if (DEBUG) logger.info("found segments for " + id + " words: " + typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT).keySet());
+    }*/
 
+    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
+        matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio);
+    return typeToSegmentToWidget;
+  }
+
+  private void setPlayListener(int id, long duration,
+                               Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
+                               ChoicePlayAudioPanel playAudio) {
     if (DEBUG) {
       logger.info("audioChanged for ex " + exercise.getID() +
           " audio id " + id + " : " +
@@ -294,7 +337,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (typeToSegmentToWidget == null) {
       logger.warning("audioChanged no type to segment for " + id + " and exercise " + exercise.getID());
     } else {
-      // if (DEBUG) logger.info("audioChanged segments now " + typeToSegmentToWidget.keySet());
+      if (DEBUG) {
+        TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
+        logger.info("audioChanged segments now for ex " + exercise.getID() +
+            " audio " + id + " dur " + duration +
+            "\n\twords: " + transcriptSegmentIHighlightSegmentTreeMap.keySet()+
+            "\n\tphone: " + typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT).keySet()
+        );
+
+      }
       playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
     }
   }
@@ -304,7 +355,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    *
    * @param audioID
    * @param alignmentOutput
-   * @see #matchSegmentsToClickables(int, long, AlignmentOutput, Map, List, ChoicePlayAudioPanel)
+   * @see #matchSegmentsToClickables
    */
   private Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> matchSegmentToWidgetForAudio(Integer audioID,
                                                                                                             long durationInMillis,
@@ -353,13 +404,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           for (TranscriptSegment word : wordSegments) {
             // if (!shouldIgnore(word)) {
             if (iterator.hasNext()) {
-              int segmentLength = word.getEvent().length();
+              // int segmentLength = word.getEvent().length();
               List<TranscriptSegment> phonesInWord = getSegs(phones, word);
+
               if (isRTL) { // phones should play right to left
                 Collections.reverse(phonesInWord);
               }
 
-              if (DEBUG) logger.info("matchSegmentToWidgetForAudio got segment " + word + " length " + segmentLength);
+              if (DEBUG)
+                logger.info("matchSegmentToWidgetForAudio got segment " + word);// + " length " + segmentLength);
               IHighlightSegment value1 =
                   matchEventSegmentToClickable(iterator, word, phonesInWord, audioControl, phoneMap);
 
@@ -403,9 +456,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     IHighlightSegment clickable = clickables.next();
     clickable = skipUnclickable(clickables, clickable);
     String segment = wordSegment.getEvent();
-
-    //    String content = clickable.getContent();
-    //boolean isMatch = content.equalsIgnoreCase(segment);
     if (DEBUG)
       logger.info("matchSegmentToWidgetForAudio compare :" +
           "\n\tsegment " + segment + //" length " + segmentLength +
@@ -1066,7 +1116,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (contextClickables == null) {
         logger.warning("huh? context not set for " + id);
       } else {
-        matchSegmentsToClickables(id, duration, alignmentOutput, idToTypeToSegmentToWidget.get(id), contextClickables, contextPlay);
+        matchSegmentsToClickables(id, duration, alignmentOutput, contextClickables, contextPlay);
       }
     }
   }
@@ -1157,9 +1207,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              AnnotationHelper annotationHelper,
                              boolean isRTL) {
     DivWidget contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning, clickables, !isFL, addRightMargin, isRTL);
-    logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
+   // logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
     if (isTranslit && isRTL) {
-      logger.info("- float right value " + value + " translit " + isTranslit + " is fl " + isFL);
+     // logger.info("- float right value " + value + " translit " + isTranslit + " is fl " + isFL);
       contentWidget.addStyleName("floatRight");
     }
     return getCommentBox(annotationHelper).getEntry(field, contentWidget, annotation, showInitially, isRTL);
