@@ -244,7 +244,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     req.removeAll(alignments.keySet());
 
     if (!req.isEmpty()) {
-      logger.info("cacheOthers (" + exercise.getID()+ ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
+      logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
@@ -277,10 +277,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   public void audioChanged(int id, long duration) {
     AlignmentOutput alignmentOutput = alignments.get(id);
     if (alignmentOutput != null) {
-      if (DEBUG ) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
+      if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
       matchSegmentsToClickables(id, duration, alignmentOutput, this.flclickables, this.playAudio);
     } else {
-      logger.warning("audioChanged no alignment info for ex " +exercise.getID()+ " " + id + " dur " + duration);
+      logger.warning("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
     }
   }
 
@@ -341,7 +341,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
         logger.info("audioChanged segments now for ex " + exercise.getID() +
             " audio " + id + " dur " + duration +
-            "\n\twords: " + transcriptSegmentIHighlightSegmentTreeMap.keySet()+
+            "\n\twords: " + transcriptSegmentIHighlightSegmentTreeMap.keySet() +
             "\n\tphone: " + typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT).keySet()
         );
 
@@ -740,13 +740,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
     dropdownContainer.getTriggerWidget().setCaret(false);
 
-    new UserListSupport(controller).addListOptions(dropdownContainer, exercise.getID());
+    UserListSupport userListSupport = new UserListSupport(controller);
+    userListSupport.addListOptions(dropdownContainer, exercise.getID());
 
     {
       NavLink share = new NavLink(EMAIL);
       dropdownContainer.add(share);
       share.setHref(getMailTo());
     }
+    userListSupport.addSendLinkWhatYouSee(dropdownContainer);
 
     dropdownContainer.add(getShowComments());
 
@@ -1207,9 +1209,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              AnnotationHelper annotationHelper,
                              boolean isRTL) {
     DivWidget contentWidget = clickableWords.getClickableWords(value, isFL, isTranslit, isMeaning, clickables, !isFL, addRightMargin, isRTL);
-   // logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
+    // logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
     if (isTranslit && isRTL) {
-     // logger.info("- float right value " + value + " translit " + isTranslit + " is fl " + isFL);
+      // logger.info("- float right value " + value + " translit " + isTranslit + " is fl " + isFL);
       contentWidget.addStyleName("floatRight");
     }
     return getCommentBox(annotationHelper).getEntry(field, contentWidget, annotation, showInitially, isRTL);

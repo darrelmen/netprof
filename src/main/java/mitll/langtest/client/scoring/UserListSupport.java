@@ -4,9 +4,11 @@ import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.DropdownSubmenu;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DropdownBase;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
@@ -18,6 +20,7 @@ import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -115,9 +118,10 @@ public class UserListSupport {
 
         boolean anyAdded = false;
         boolean anyToRemove = false;
+        int user = controller.getUser();
         for (final UserList ul : result) {
-
-          if (ul.getUserID() == controller.getUser()) {
+          boolean isMyList = ul.getUserID() == user;
+          if (isMyList) {
             knownNamesForDuplicateCheck.add(ul.getName().trim().toLowerCase());
             if (!ul.containsByID(id)) {
               anyAdded = true;
@@ -128,7 +132,7 @@ public class UserListSupport {
             }
           }
 
-          addSendLink(ul, emailList);
+          addSendLink(ul, emailList, isMyList);
         }
         if (!anyAdded) {
           addToList.add(new NavLink(ITEM_ALREADY_ADDED));
@@ -136,24 +140,19 @@ public class UserListSupport {
         if (!anyToRemove) {
           removeFromList.add(new NavLink(NOT_ON_ANY_LISTS));
         }
+     //   addSendLinkWhatYouSee(container);
       }
     });
   }
 
-  private void addSendLink(UserList ul,
-                           DropdownBase addToList
-                           //    ,Widget container
-  ) {
+  private void addSendLink(UserList ul, DropdownBase addToList, boolean isMyList) {
     final NavLink widget = getListLink(ul);
+    if (!isMyList) {
+      widget.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+    }
     addToList.add(widget);
     widget.setHref(getMailTo(ul.getID(), ul.getName()));
-
-    widget.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(addToList, "DropUp", ul.getID(), "sharing_" + ul.getID() + "/" + ul.getName());
-      }
-    });
+    widget.addClickHandler(event -> controller.logEvent(addToList, "DropUp", ul.getID(), "sharing_" + ul.getID() + "/" + ul.getName()));
   }
 
   @NotNull
@@ -171,6 +170,32 @@ public class UserListSupport {
         "Subject=Share netprof " + controller.getLanguage() +
         " list " + name +
         "&body=Link to " + name + " list : " + encode;
+  }
+
+  public void addSendLinkWhatYouSee(DropdownBase addToList) {
+    final NavLink widget = new NavLink("Email these items");
+    addToList.add(widget);
+    widget.setHref(getMailToThese());
+//    widget.addClickHandler(event -> controller.logEvent(addToList, "DropUp", ul.getID(), "sharing_" + ul.getID() + "/" + ul.getName()));
+  }
+
+  @NotNull
+  private String getMailToThese( ) {
+    String token = History.getToken();
+    SelectionState selectionState = new SelectionState(token,false);
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+
+    String s = trimURL(Window.Location.getHref()) +
+        "#" +
+        token +
+        SelectionState.SECTION_SEPARATOR + "project=" + projectStartupInfo.getProjectid();
+
+    return "mailto:" +
+        "?" +
+        "Subject=Share netprof " + controller.getLanguage() +
+        " items " +
+        "&body=Link to " + selectionState.getDescription(projectStartupInfo.getTypeOrder()) + " : "+
+        URL.encode(s);
   }
 
   private String trimURL(String url) {

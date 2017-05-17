@@ -576,7 +576,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           for (int i = 0; i < prons.size(); i++) {
             dict += getPronStringForWord(word, prons.apply(i), justPhones);
           }
-        } else {
+        } else {  // not in the dictionary, let's ask LTS
           if (getLTS() == null) {
             logger.warn("getPronunciations " + this + " " + languageProperty + " : LTS is null???");
           } else {
@@ -615,13 +615,19 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
                 seen.add(key);
 //                logger.info("attempting to fall back to default pronunciation");
-                if (process != null && process.length > 0) {
+
+                // THIS is going to be the "a" pron...
+           /*     if (process != null && process.length > 0) {
                   dict += getDefaultPronStringForWord(word, process, justPhones);
                 }
                 else {
                   logger.info("using unk phone for " +word);
                   dict += getUnkPron(word);
-                }
+                }*/
+
+
+                logger.info("using unk phone for " +word);
+                dict += getUnkPron(word);
 
               }
             } else { // it's ok -use it
