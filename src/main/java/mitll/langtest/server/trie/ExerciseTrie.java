@@ -170,7 +170,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    * @param isMandarin
    * @param hasClickableCharacters
    * @param exercise
-   * @see #addEntryForExercise(boolean, boolean, boolean, CommonExercise)
+   * @see #addEntriesForExercise
    */
   private void addForeign(boolean isMandarin, boolean hasClickableCharacters,
                           T exercise) {

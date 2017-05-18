@@ -58,7 +58,9 @@ import java.util.logging.Logger;
 public abstract class TypeAhead implements ITypeAhead {
   private Logger logger = Logger.getLogger("TypeAhead");
 
-
+  /**
+   * @see #makeTypeAhead
+   */
   private static final int WIDTH = 180 - 32;
   private static final int RIGHT_MARIGN_FOR_SEARCH = 10;
   private final TextBox typeAhead = new TextBox();
@@ -113,6 +115,7 @@ public abstract class TypeAhead implements ITypeAhead {
    */
   private void makeTypeAhead() {
     typeAhead.setWidth(WIDTH + "px");
+    typeAhead.setHeight(24 + "px");
     typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT);
     getTypeAhead().getElement().setId("TypeAhead");
 
