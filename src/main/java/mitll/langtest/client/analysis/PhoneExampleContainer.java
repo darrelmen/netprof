@@ -69,7 +69,6 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
   private static final String WORDS_USING = "Vocabulary with ";
 
-  //private static final int PLAY_WIDTH = WordContainer.PLAY_WIDTH;
   private static final int ITEM_WIDTH = 200;
   private final ShowTab learnTab;
   private String phone;
@@ -98,9 +97,9 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   }
 
   /**
+   * @param listOptions
    * @return
    * @see SetCompleteDisplay#getScoreHistory
-   * @param listOptions
    */
   public Panel getTableWithPager(ListOptions listOptions) {
     Panel tableWithPager = super.getTableWithPager(listOptions);
@@ -118,8 +117,11 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   void addItems(String phone, Collection<WordAndScore> sortedHistory, int maxExamples) {
     this.phone = phone;
     heading.setText(WORDS_USING + phone);
-    String subtext = sortedHistory == null ? "" : sortedHistory.size() > maxExamples ? "first " + maxExamples : "" + sortedHistory.size();
-    heading.setSubtext(subtext);
+    {
+      boolean onlyFirstFew = sortedHistory != null && sortedHistory.size() > maxExamples;
+      String subtext = sortedHistory == null ? "" : sortedHistory.size() > maxExamples ? "first " + maxExamples : "" + sortedHistory.size();
+      if (onlyFirstFew) heading.setSubtext(subtext);
+    }
     clear();
     if (sortedHistory != null) {
       // logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");

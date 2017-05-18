@@ -44,7 +44,6 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -267,7 +266,7 @@ public class NPFHelper implements RequiresResize {
    * @see #makeNPFExerciseList
    */
   PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
-    return new NPExerciseList<ListSectionWidget>(right, controller,
+    return new NPExerciseList(right, controller,
         listOptions) {
       @Override
       protected void onLastItem() {

@@ -330,7 +330,7 @@ public class SlickUserExerciseDAO
         slick.transliteration(),
         slick.projid(),
         slick.candecode(),
-        slick.candecodechecked().getTime());
+        slick.candecodechecked().getTime(), slick.iscontext());
 
     List<String> translations = new ArrayList<String>();
     if (!slick.foreignlanguage().isEmpty()) {

@@ -38,13 +38,15 @@ import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
+import java.util.Collection;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public abstract class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise> {
+public abstract class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   //private Logger logger = Logger.getLogger("NPExerciseList");
   protected NPExerciseList(Panel currentExerciseVPanel,
                            ExerciseController controller,
@@ -52,14 +54,30 @@ public abstract class NPExerciseList<V extends SectionWidget> extends HistoryExe
     super(currentExerciseVPanel, controller, listOptions);
   }
 
-  protected  NPExerciseList(Panel currentExerciseVPanel,
-                            ExerciseController controller,
-                            String instance) {
+  protected NPExerciseList(Panel currentExerciseVPanel,
+                           ExerciseController controller,
+                           String instance) {
     super(currentExerciseVPanel, controller, new ListOptions().setInstance(instance));
   }
 
   @Override
-  protected FacetContainer getSectionWidgetContainer() { return new SectionWidgetContainer<V>();  }
+  protected FacetContainer getSectionWidgetContainer() {
+    return new FacetContainer() {
+      @Override
+      public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
+      }
+
+      @Override
+      public String getHistoryToken() {
+        return null;
+      }
+
+      @Override
+      public int getNumSelections() {
+        return 0;
+      }
+    };
+  }
 
   /**
    * @return

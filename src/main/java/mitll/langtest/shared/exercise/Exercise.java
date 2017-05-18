@@ -74,6 +74,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private boolean isPredef;
   private boolean isOverride;
+  private boolean isContext;
 
   /**
    * TODO : why do we need to carry this around?
@@ -88,7 +89,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private String noAccentFL;
 
-  //private List<String> tokens = new ArrayList<>();
   // for serialization
   public Exercise() {
   }
@@ -120,6 +120,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.meaning = meaning;
     this.updateTime = updateTime;
     this.isPredef = true;
+    this.noAccentFL = noAccentFL;
     addContext(context, altcontext, contextTranslation);
   }
 
@@ -144,7 +145,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param altcontext
    * @param contextTranslation
    * @param noAccentFL
-   *@param projectid  @Deprecated - use related exercise join table
+   * @param projectid          @Deprecated - use related exercise join table
    * @see #addContext
    */
   @Deprecated
@@ -171,6 +172,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param projectid
    * @param candecode
    * @param lastChecked
+   * @param isContext
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#makeExercise
    */
   public Exercise(int exid,
@@ -184,7 +186,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String transliteration,
                   int projectid,
                   boolean candecode,
-                  long lastChecked) {
+                  long lastChecked, boolean isContext) {
     super(exid, projectid);
     this.oldid = oldid;
     this.creator = creator;
@@ -196,6 +198,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setAltFL(altFL);
     this.safeToDecode = candecode;
     safeToDecodeLastChecked = lastChecked;
+    this.isContext=isContext;
   }
 
   /**
@@ -228,7 +231,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   boolean candecode,
                   long lastChecked,
                   int numPhones) {
-    this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration, projectid, candecode, lastChecked);
+    this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration, projectid, candecode, lastChecked, false);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
@@ -317,8 +320,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise(Map, Map, CommonExercise)
    * @param exerciseAttributes
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise(Map, Map, CommonExercise)
    */
   @Override
   public void setAttributes(List<ExerciseAttribute> exerciseAttributes) {
@@ -601,9 +604,16 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.tokens = tokens;
   }*/
 
-  public void setPredef(boolean isPredef) { this.isPredef = isPredef;}
+  public void setPredef(boolean isPredef) {
+    this.isPredef = isPredef;
+  }
 
   public void setDominoID(int dominoID) {
     this.dominoID = dominoID;
+  }
+
+  @Override
+  public boolean isContext() {
+    return isContext;
   }
 }

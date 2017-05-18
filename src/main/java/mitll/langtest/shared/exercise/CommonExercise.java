@@ -101,4 +101,6 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   void setAttributes(List<ExerciseAttribute> exerciseAttributes);
 
   List<ExerciseAttribute> getAttributes();
+
+  boolean isContext();
 }

@@ -132,7 +132,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             1
         ) */
 
-        return new NPExerciseList<ListSectionWidget>(currentExercisePanel,
+        return new NPExerciseList(currentExercisePanel,
             outerLayout.getController(),
             new ListOptions()
                 .setInstance(instanceName)
@@ -146,9 +146,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
           protected FacetContainer getSectionWidgetContainer() {
             return new FacetContainer() {
               @Override
-              public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
-
-              }
+              public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {}
 
               @Override
               public String getHistoryToken() {
@@ -308,6 +306,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     }
 
     /**
+     * TODO : confirm we haven't broken this...
      * @param e
      * @return
      * @seex #ExercisePanel(T, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
@@ -324,10 +323,9 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
           getContentScroller(maybeRTLContent)
           : maybeRTLContent;
 
-      boolean exampleRecord = isExampleRecord();
+//      boolean exampleRecord = isExampleRecord();
 
-      Widget entry = getEntry(e, exampleRecord ? QCNPFExercise.CONTEXT : QCNPFExercise.FOREIGN_LANGUAGE,
-          contentWidget, isRTLContent(content));
+      Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, isRTLContent(content));
       entry.addStyleName("floatLeftAndClear");
 
       return entry;

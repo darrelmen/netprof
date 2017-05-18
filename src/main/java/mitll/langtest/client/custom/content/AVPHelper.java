@@ -40,7 +40,6 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.custom.UserList;
@@ -91,7 +90,7 @@ public class AVPHelper extends NPFHelper {
   @Override
   PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
     PagingExerciseList<CommonShell, CommonExercise> widgets =
-        new NPExerciseList<ListSectionWidget>(right,
+        new NPExerciseList(right,
             controller,
             listOptions.setIncorrectFirst(true)) {
           @Override

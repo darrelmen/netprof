@@ -22,7 +22,6 @@ import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.ListSectionWidget;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.services.ListService;
@@ -38,7 +37,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 2/14/17.
  */
-class EditableExerciseList extends NPExerciseList<ListSectionWidget> implements FeedbackExerciseList {
+class EditableExerciseList extends NPExerciseList implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
   private static final String ADD = "Add";
 

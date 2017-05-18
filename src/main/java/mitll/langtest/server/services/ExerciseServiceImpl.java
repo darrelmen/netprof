@@ -481,29 +481,36 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return makeExerciseListWrapper(request, copy);
   }
 
+  /**
+   * So first we search over vocab, then over context sentences
+   * @param exercisesForState
+   * @param prefix
+   * @return
+   */
   @NotNull
   private Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState, String prefix) {
     Collection<CommonExercise> originalSet = exercisesForState;
 
     // logger.info("original set" +originalSet.size());
     long then = System.currentTimeMillis();
-    ExerciseTrie<CommonExercise> trie = new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder(), true);
+    ExerciseTrie<CommonExercise> trie =
+        new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder(), true);
     long now = System.currentTimeMillis();
     if (now - then > 20)
       logger.info("took " + (now - then) + " millis to build trie for " + exercisesForState.size() + " exercises");
     exercisesForState = trie.getExercises(prefix);
 
     {
-      List<CommonExercise> contextSentences = new ArrayList<>();
+      //List<CommonExercise> contextSentences = new ArrayList<>();
       then = System.currentTimeMillis();
-      for (CommonExercise exercise : originalSet) contextSentences.addAll(exercise.getDirectlyRelated());
+      //for (CommonExercise exercise : originalSet) contextSentences.addAll(exercise.getDirectlyRelated());
 
       // logger.info("getExerciseListWrapperForPrefix made " + contextSentences.size() + " from " + originalSet.size());
 
-      trie = new ExerciseTrie<>(contextSentences, getLanguage(), getSmallVocabDecoder(), true);
+      trie = new ExerciseTrie<>(originalSet, getLanguage(), getSmallVocabDecoder(), false);
       now = System.currentTimeMillis();
       if (now - then > 20)
-        logger.info("took " + (now - then) + " millis to build trie for " + contextSentences.size() + " context exercises");
+        logger.info("took " + (now - then) + " millis to build trie for " + originalSet.size() + " context exercises");
       exercisesForState.addAll(trie.getExercises(prefix));
     }
     return exercisesForState;
@@ -809,9 +816,15 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       return byContext;
     }
 
+    /**
+     *
+     * @paramx byContext
+     */
+/*
     public void setByContext(List<T> byContext) {
       this.byContext = byContext;
     }
+*/
 
     public String toString() {
       return "by id " + byID.size() + "  by ex " + byExercise.size() + " by context " + byContext.size();

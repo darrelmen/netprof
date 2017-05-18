@@ -144,7 +144,7 @@ public class ReviewItemHelper extends NPFHelper {
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                String instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
-      return new NPExerciseList<ListSectionWidget>( currentExercisePanel,outer.getController(),
+      return new NPExerciseList( currentExercisePanel,outer.getController(),
           new ListOptions(instanceName)) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 

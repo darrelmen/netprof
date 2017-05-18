@@ -169,7 +169,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
     // add new items
     addNewExercises();
-
    // attachAudio();
   }
 
@@ -691,19 +690,4 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   public void updatePhones(int id,int count){}
-  /**
-   * Build the nested hierarchy represented in the section helper.
-   * So we can ask for things like all exercises in Chapter 1.
-   *
-   * @param exercises
-   */
-/*  private void populateSections(Collection<CommonExercise> exercises) {
-    for (CommonExercise ex : exercises) {
-      Collection<Pair> pairs = new ArrayList<>();
-      for (Map.Entry<String, String> pair : ex.getUnitToValue().entrySet()) {
-        pairs.add(getSectionHelper().addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
-      }
-      getSectionHelper().addAssociations(pairs);
-    }
-  }*/
 }
