@@ -424,9 +424,9 @@ public class Project implements PronunciationLookup {
     return audioToAlignment;
   }
 
-  public void setAudioToAlignment(Map<Integer, AlignmentOutput> audioToAlignment) {
-    this.audioToAlignment = audioToAlignment;
-  }
+//  public void setAudioToAlignment(Map<Integer, AlignmentOutput> audioToAlignment) {
+//    this.audioToAlignment = audioToAlignment;
+//  }
 
   public String toString() {
     return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;

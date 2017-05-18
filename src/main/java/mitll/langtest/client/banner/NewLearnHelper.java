@@ -13,7 +13,6 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashMap;
@@ -61,8 +60,12 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
       private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
-      public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
-        return new TwoColumnExercisePanel<>(e, controller, exerciseList, wrapper.getHistories().get(e.getID()), getChoices(), getPhoneChoices(), alignments);
+      public Panel getExercisePanel(CommonExercise e) {
+        return new TwoColumnExercisePanel<>(e, controller, exerciseList,
+            //wrapper.getHistories().get(e.getID()),
+
+
+            getChoices(), getPhoneChoices(), alignments);
       }
     };
   }

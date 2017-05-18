@@ -51,7 +51,6 @@ import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
@@ -297,13 +296,13 @@ public class NPFHelper implements RequiresResize {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
       private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
       @Override
-      public Panel getExercisePanel(CommonExercise e, ExerciseListWrapper<CommonExercise> wrapper) {
+      public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {
           return new TwoColumnExercisePanel<CommonExercise>(e,
               controller,
-              exerciseList, Collections.emptyList(),
+              exerciseList, //Collections.emptyList(),
               getChoices(), getPhoneChoices(), alignments);
         }
       }

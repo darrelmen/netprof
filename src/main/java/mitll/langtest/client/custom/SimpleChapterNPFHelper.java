@@ -47,7 +47,6 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.logging.Logger;
@@ -179,7 +178,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     final String instance = exerciseList.getInstance();
     return new ExercisePanelFactory<T, U>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(final U e, ExerciseListWrapper<CommonExercise> wrapper) {
+      public Panel getExercisePanel(final U e) {
         return new WaveformExercisePanel<T, U>(e, controller, exerciseList, true, instance) {
           @Override
           public void postAnswers(ExerciseController controller, HasID completedExercise) {

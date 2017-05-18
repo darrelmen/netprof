@@ -48,7 +48,6 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
 
 import java.util.logging.Logger;
 
@@ -118,7 +117,7 @@ public class ReviewItemHelper extends NPFHelper {
     protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> pagingExerciseList) {
       return new ExercisePanelFactory<CommonShell, CommonExercise>(getController(), pagingExerciseList) {
         @Override
-        public Panel getExercisePanel(CommonExercise exercise, ExerciseListWrapper<CommonExercise> wrapper) {
+        public Panel getExercisePanel(CommonExercise exercise) {
           CommonExercise userExercise = new Exercise(exercise);
 
           ReviewEditableExercise reviewEditableExercise =

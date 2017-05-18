@@ -405,7 +405,6 @@ public abstract class BaseResultDAO extends DAO {
   public void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest, String language) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest, language);
 
-
     //   getResultsForExIDInForUser();
     //   logger.debug("attachScoreHistory score history " + resultsForExercise);
     // int total = 0;

@@ -60,11 +60,11 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   /**
    * For AMAS
    */
-  private float classifierScore;
+ // private float classifierScore;
   /**
    * For AMAS
    */
-  private float userScore;
+ // private float userScore;
 
   private String path;
 
@@ -161,11 +161,11 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   }
 
   public boolean hasUserScore() {
-    return userScore > -1;
+    return false;//userScore > -1;
   }
 
   public float getUserScore() {
-    return userScore;
+    return 0;//userScore;
   }
 
   public boolean isMatch(HasID ex) {

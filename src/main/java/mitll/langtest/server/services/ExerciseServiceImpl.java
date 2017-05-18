@@ -247,7 +247,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           if (!basicExercises.isEmpty() && hasSearch) {
             // if the search term is in the fl, sort by fl
             sortByFL = basicExercises.iterator().next().getForeignLanguage().contains(searchTerm);
-                      logger.info("found search term " + searchTerm + " = " + sortByFL);
+            logger.info("found search term " + searchTerm + " = " + sortByFL);
           }
           sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL);
         }
@@ -483,6 +483,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * So first we search over vocab, then over context sentences
+   *
    * @param exercisesForState
    * @param prefix
    * @return
@@ -551,7 +552,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (exerciseShells1.isEmpty() && firstExercise != null) {
       logger.error("makeExerciseListWrapper huh? no exercises");
     }
-    ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);
+    ExerciseListWrapper<T> exerciseListWrapper =
+        new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);
 
     addScores(userID, exerciseShells1);
     logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper);
@@ -817,7 +819,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     /**
-     *
      * @paramx byContext
      */
 /*
@@ -825,7 +826,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       this.byContext = byContext;
     }
 */
-
     public String toString() {
       return "by id " + byID.size() + "  by ex " + byExercise.size() + " by context " + byContext.size();
     }
@@ -1244,18 +1244,21 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   /**
    * @param reqid
    * @param ids
-   * @param isFlashcardReq
    * @return
    * @see mitll.langtest.client.list.FacetExerciseList#getExercises(Collection)
    */
   @Override
-  public ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids, boolean isFlashcardReq) {
+  public ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids) {
     List<CommonExercise> exercises = new ArrayList<>();
 
     int userID = getUserIDFromSession();
     int projectID = getProjectID(userID);
 
+    long then = System.currentTimeMillis();
     Set<CommonExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
+    long now = System.currentTimeMillis();
+
+    if (now - then > 50) logger.info("took " + (now - then) + " to get " + exercises.size() + " exercises");
 
     if (ids.size() > toAddAudioTo.size()) {
       logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
@@ -1264,15 +1267,42 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     if (!toAddAudioTo.isEmpty()) {
+      then = System.currentTimeMillis();
       db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
+      now = System.currentTimeMillis();
+
+      if (now - then > 50)
+        logger.info("took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
+
+      then = System.currentTimeMillis();
       addAlignmentOutput(projectID, toAddAudioTo);
+      now = System.currentTimeMillis();
+      if (now - then > 50)
+        logger.info("took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
+
     } else {
       logger.info("getFullExercises all " + ids.size() + " exercises have audio");
     }
 
+    then = System.currentTimeMillis();
     addScores(userID, exercises);
+    now = System.currentTimeMillis();
+    if (now - then > 50) logger.info("took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
 
-    return new ExerciseListWrapper<>(reqid, exercises, null, getScoreHistories(ids, exercises, userID));
+    then = System.currentTimeMillis();
+    Map<Integer, List<CorrectAndScore>> scoreHistories = getScoreHistories(ids, exercises, userID);
+
+    for (CommonExercise exercise : exercises) {
+      List<CorrectAndScore> scoreTotal = scoreHistories.get(exercise.getID());
+      // if (scoreTotal == null) logger.error("huh? no history for " + exercise.getID());
+      exercise.getMutable().setScores(scoreTotal);
+    }
+
+    now = System.currentTimeMillis();
+    if (now - then > 50)
+      logger.info("took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
+
+    return new ExerciseListWrapper<>(reqid, exercises, null);//, scoreHistories);
   }
 
   private void addAlignmentOutput(int projectID, Set<CommonExercise> toAddAudioTo) {
@@ -1287,43 +1317,57 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
           AlignmentOutput alignmentOutput = audioAttribute.getAlignmentOutput();
           if (alignmentOutput == null) {
-            AlignmentOutput alignmentOutput1 = audioToAlignment.get(audioAttribute.getUniqueID());
+            synchronized (audioToAlignment) {
+              AlignmentOutput alignmentOutput1 = audioToAlignment.get(audioAttribute.getUniqueID());
 
-            if (alignmentOutput1 == null) {
-              idToAudio.put(audioAttribute.getUniqueID(), audioAttribute);
-            } else {
-              audioAttribute.setAlignmentOutput(alignmentOutput1);
+              if (alignmentOutput1 == null) {
+                idToAudio.put(audioAttribute.getUniqueID(), audioAttribute);
+              } else {  // not sure how this can happen
+                audioAttribute.setAlignmentOutput(alignmentOutput1);
+              }
             }
           }
         }
       }
-      if (!idToAudio.isEmpty()) logger.warn("getting " + idToAudio.size() + " alignment output from database");
 
-      Map<Integer, AlignmentOutput> alignments = getAlignments(projectID, idToAudio.keySet());
-      for (Map.Entry<Integer, AudioAttribute> pair : idToAudio.entrySet()) {
-        AlignmentOutput alignmentOutput = alignments.get(pair.getKey());
-        if (alignmentOutput == null) logger.warn("couldn't get alignment for " + pair.getValue());
-        else pair.getValue().setAlignmentOutput(alignmentOutput);
+      Map<Integer, AlignmentOutput> alignments = rememberAlignments(projectID, idToAudio);
+
+      synchronized (audioToAlignment) {
+        audioToAlignment.putAll(alignments);
       }
-      audioToAlignment.putAll(alignments);
     }
   }
 
-  public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) {
-    //Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
-//    logger.info("getAlignments asking for " + audioIDs);
-    Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-    //logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
-
-    return recalcAlignments(audioIDs, audioIDMap);
-    //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
-    //return idToAlignment;
+  private Map<Integer, AlignmentOutput> rememberAlignments(int projectID,
+                                                           Map<Integer, AudioAttribute> idToAudio) {
+    if (!idToAudio.isEmpty()) logger.warn("getting " + idToAudio.size() + " alignment outputs from database");
+    Map<Integer, AlignmentOutput> alignments = getAlignmentsFromDB(projectID, idToAudio.keySet());
+    addAlignmentToAudioAttribute(idToAudio, alignments);
+    return alignments;
   }
 
-//  @NotNull
-//  private Map<Integer, ISlimResult> getAudioIDMap(int id) {
-//    return getAudioIDMap(db.getRefResultDAO().getAllSlimForProject(id));
-//  }
+  private void addAlignmentToAudioAttribute(Map<Integer, AudioAttribute> idToAudio,
+                                            Map<Integer, AlignmentOutput> alignments) {
+    for (Map.Entry<Integer, AudioAttribute> pair : idToAudio.entrySet()) {
+      AlignmentOutput alignmentOutput = alignments.get(pair.getKey());
+      if (alignmentOutput == null) logger.warn("couldn't get alignment for " + pair.getValue());
+      else pair.getValue().setAlignmentOutput(alignmentOutput);
+    }
+  }
+
+  /**
+   * get alignment from db
+   *
+   * @param projid
+   * @param audioIDs
+   * @return
+   */
+  private Map<Integer, AlignmentOutput> getAlignmentsFromDB(int projid, Set<Integer> audioIDs) {
+//    logger.info("getAlignmentsFromDB asking for " + audioIDs);
+    Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
+    //logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
+    return parseJsonToGetAlignments(audioIDs, audioIDMap);
+  }
 
   @NotNull
   private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
@@ -1332,9 +1376,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return audioToResult;
   }
 
-  private Map<Integer, AlignmentOutput> recalcAlignments(
-      Collection<Integer> audioIDs,
-      Map<Integer, ISlimResult> audioToResult) {
+  private Map<Integer, AlignmentOutput> parseJsonToGetAlignments(Collection<Integer> audioIDs,
+                                                                 Map<Integer, ISlimResult> audioToResult) {
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
     for (Integer audioID : audioIDs) {
       // do we have alignment for this audio in the map
@@ -1344,7 +1387,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         cachedResult = db.getRefResultDAO().getResult(audioID);
       }
 
-      if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now
+      if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now?
       } else {
         getCachedAudioRef(idToAlignment, audioID, cachedResult);  // OK, let's translate the db info into the alignment output
       }
@@ -1363,7 +1406,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   @NotNull
   private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult) {
-    return new PrecalcScores(serverProps, cachedResult, usePhoneToDisplay || serverProps.usePhoneToDisplay());
+    return new PrecalcScores(serverProps, cachedResult,
+        usePhoneToDisplay || serverProps.usePhoneToDisplay());
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
@@ -1399,7 +1443,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
 
   @NotNull
-  private Set<CommonExercise> getCommonExercisesWithoutAudio(Collection<Integer> ids, List<CommonExercise> exercises, int projectID) {
+  private Set<CommonExercise> getCommonExercisesWithoutAudio(Collection<Integer> ids,
+                                                             List<CommonExercise> exercises,
+                                                             int projectID) {
     Set<CommonExercise> toAddAudioTo = new HashSet<>();
 
     for (int exid : ids) {
@@ -1415,8 +1461,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return toAddAudioTo;
   }
 
-  private Map<Integer, List<CorrectAndScore>> getScoreHistories(Collection<Integer> ids, List<CommonExercise> exercises, int userID) {
-    return (exercises.isEmpty()) ? Collections.emptyMap() : db.getResultDAO().getScoreHistories(userID, ids, getLanguage(exercises.get(0)));
+  private Map<Integer, List<CorrectAndScore>> getScoreHistories(Collection<Integer> ids,
+                                                                List<CommonExercise> exercises, int userID) {
+    return (exercises.isEmpty()) ? Collections.emptyMap() :
+        db.getResultDAO().getScoreHistories(userID, ids, getLanguage(exercises.get(0)));
   }
 
   private <T extends Shell> T getExercise(String exid, boolean isFlashcardReq) {

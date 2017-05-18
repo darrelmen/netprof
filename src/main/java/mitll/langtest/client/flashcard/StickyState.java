@@ -65,7 +65,7 @@ class StickyState {
 
   /**
    * @param e
-   * @see ExercisePanelFactory#getExercisePanel(Shell, mitll.langtest.shared.exercise.ExerciseListWrapper)
+   * @see ExercisePanelFactory#getExercisePanel(Shell)
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   void storeCurrent(Shell e) {

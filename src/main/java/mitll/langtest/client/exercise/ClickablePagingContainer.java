@@ -136,7 +136,6 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public Collection<Integer> getVisibleIDs() {
-    List<Integer> visible = new ArrayList<>();
 
     Range visibleRange = getVisibleRange();
 
@@ -149,6 +148,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
         int id = currentSelection == null ? getFirst().getID() : currentSelection.getID();
         logger.info("ClickablePagingContainer.getVisibleIDs : get current " + id);
         //ArrayList<Integer> integers = new ArrayList<>();
+        List<Integer> visible = new ArrayList<>();
         visible.add(id);
         return visible;
       }
@@ -158,20 +158,18 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   /**
-   *
    * @param visibleRange
    * @return
    * @see FacetExerciseList#makePagingContainer
    */
   protected Collection<Integer> getIdsForRange(Range visibleRange) {
+    int start = visibleRange.getStart();
+    int end   = Math.min(getList().size(), start + visibleRange.getLength());
+    // logger.info("ClickablePagingContainer.getVisibleIDs : get from " + start + " to " + end + " vs " + getList().size());
+
     List<Integer> visible = new ArrayList<>();
-    int start  = visibleRange.getStart();
-    int length = visibleRange.getLength();
-    int end = Math.min(getList().size(), start + length);
-   // logger.info("ClickablePagingContainer.getVisibleIDs : get from " + start + " to " + end + " vs " + getList().size());
     for (int i = start; i < end; i++) {
-      T at = getAt(i);
-      visible.add(at.getID());
+      visible.add(getAt(i).getID());
     }
     return visible;
   }

@@ -29,7 +29,6 @@ import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -61,7 +60,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   static final int CONTEXT_INDENT = 56;
 
-  private final List<CorrectAndScore> correctAndScores;
+  //private final List<CorrectAndScore> correctAndScores;
   private final T exercise;
   private final ExerciseController controller;
 
@@ -111,7 +110,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
                                 final ListInterface<CommonShell, T> listContainer,
-                                List<CorrectAndScore> correctAndScores,
+                               // List<CorrectAndScore> correctAndScores,
                                 ShowChoices choices,
                                 PhonesChoices phonesChoices,
                                 Map<Integer, AlignmentOutput> alignments) {
@@ -132,7 +131,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
     this.isRTL = clickableWords.isRTL(exercise);
-    this.correctAndScores = correctAndScores;
+   // this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
 
@@ -981,7 +980,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       @Override
       public void setBusy(boolean v) {
       }
-    }, controller, e, correctAndScores, listContainer);
+    }, controller,
+        e,
+        e.getScores(), listContainer);
   }
 
   @NotNull

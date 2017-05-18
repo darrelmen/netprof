@@ -37,8 +37,6 @@ import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.ShowChoices;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
 import org.jetbrains.annotations.NotNull;
 
@@ -78,11 +76,10 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
 
   /**
    * @param e
-   * @param wrapper
    * @return
    * @seex mitll.langtest.client.list.ExerciseList#makeExercisePanel
    */
-  public abstract Panel getExercisePanel(U e, ExerciseListWrapper<CommonExercise> wrapper);
+  public abstract Panel getExercisePanel(U e);
 
   @NotNull
   protected ShowChoices getChoices() {

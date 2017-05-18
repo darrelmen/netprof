@@ -134,7 +134,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @param endListener
    * @param instance
    * @param exerciseList
-   * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell, mitll.langtest.shared.exercise.ExerciseListWrapper)
+   * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
   FlashcardPanel(final T e,
                  final ExerciseController controller,

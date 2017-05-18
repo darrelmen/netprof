@@ -53,7 +53,6 @@ import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
-import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;

@@ -36,8 +36,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 
 public interface ExerciseServiceAsync {
   <T extends CommonShell> void getExerciseIds(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
@@ -46,5 +44,5 @@ public interface ExerciseServiceAsync {
 
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
 
-  void getFullExercises(int reqid, Collection<Integer> ids, boolean isFlashcardReq, AsyncCallback<ExerciseListWrapper<CommonExercise>> async);
+  void getFullExercises(int reqid, Collection<Integer> ids, AsyncCallback<ExerciseListWrapper<CommonExercise>> async);
 }

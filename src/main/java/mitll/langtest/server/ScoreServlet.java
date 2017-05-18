@@ -545,7 +545,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param response
    * @param jsonObject
-   * @see #doPost(HttpServletRequest, HttpServletResponse)
+   * @see #(HttpServletRequest, HttpServletResponse)
    */
   private void writeJsonToOutput(HttpServletResponse response, JSONObject jsonObject) {
     reply(response, jsonObject.toString());
@@ -886,9 +886,17 @@ public class ScoreServlet extends DatabaseServlet {
         fullJSONFormat != null);
   }
 
+  /**
+   * Find the project by using the language header.
+   * Or failing that, find the session user and use their current project.
+   * @param request
+   * @param projid
+   * @return
+   * @see #getJsonForAudio
+   */
   private int getProjidFromLanguage(HttpServletRequest request, int projid) {
     String language = request.getHeader("language");
-    logger.debug("getJsonForAudio got langauge from request " + language);
+    //logger.debug("getJsonForAudio got langauge from request " + language);
 
     if (language != null) {
       projid = getProjectID(language);
@@ -911,22 +919,27 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private int getExerciseIDFromText(HttpServletRequest request, int realExID, int projid) {
     String exerciseText = request.getHeader("english");
-    if (exerciseText != null && projid > 0) {
+    if (exerciseText == null) exerciseText = "";
+    if (projid > 0) {
       Project project1 = db.getProject(projid);
       String flText = request.getHeader(EXERCISE_TEXT);
+      if (flText == null) {
+        logger.error("getExerciseIDFromText expecting header " + EXERCISE_TEXT);
+        return -1;
+      }
+      else {
+        String decoded = new String(Base64.getDecoder().decode(flText.getBytes()));
 
-      byte[] de = Base64.getDecoder().decode(flText.getBytes());
-      String decoded = new String(de);
+        logger.info("getExerciseIDFromText request to decode " + exerciseText + " = " + decoded);
 
-      logger.info("request to decode " + exerciseText + " = "+decoded);
+        CommonExercise exercise = project1.getExerciseBySearchBoth(exerciseText, decoded);
 
-      CommonExercise exercise = project1.getExerciseBySearchBoth(exerciseText, decoded);
-
-      if (exercise != null) {
-        logger.info("getExerciseIDFromText for '" + exerciseText + "' found exercise id " + exercise.getID());
-        realExID = exercise.getID();
-      } else {
-        logger.warn("getExerciseIDFromText can't find exercise for '" + exerciseText + "' - using unknown exercise");
+        if (exercise != null) {
+          logger.info("getExerciseIDFromText for '" + exerciseText + "' '" +decoded+ "' found exercise id " + exercise.getID());
+          realExID = exercise.getID();
+        } else {
+          logger.warn("getExerciseIDFromText can't find exercise for '" + exerciseText + "'='" +flText+ "' - using unknown exercise");
+        }
       }
     }
     return realExID;

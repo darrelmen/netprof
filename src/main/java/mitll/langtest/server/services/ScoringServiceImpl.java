@@ -213,7 +213,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @Override
   public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) {
     //Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
-//    logger.info("getAlignments asking for " + audioIDs);
+//    logger.info("getAlignmentsFromDB asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
     //logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
 
@@ -247,7 +247,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now
         if (cachedResult != null && !cachedResult.isValid()) {
           boolean b = db.getRefResultDAO().removeByAudioID(audioID);
-          logger.error("getAlignments remove invalid ref result for audio id " + audioID + " = " + b);
+          logger.error("getAlignmentsFromDB remove invalid ref result for audio id " + audioID + " = " + b);
         }
 
         PretestScore pretestScore = recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
@@ -283,7 +283,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
 /*
       if (customOrPredefExercise != null) {
-        logger.info("getAlignments decoding " + audioID +
+        logger.info("getAlignmentsFromDB decoding " + audioID +
             (contextAudio ? " CONTEXT" : "") +
             " for exercise " + byID.getExid() + " : '" +
             customOrPredefExercise.getEnglish() + "' = '" + customOrPredefExercise.getForeignLanguage() + "'");
@@ -297,13 +297,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           !customOrPredefExercise.getDirectlyRelated().isEmpty()) {
         customOrPredefExercise = customOrPredefExercise.getDirectlyRelated().iterator().next();
 
-        //logger.info("getAlignments using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
+        //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
-      //logger.info("getAlignments decoding " + audioID + " for " + byID.getExid() + " got " + pretestScore);
+      //logger.info("getAlignmentsFromDB decoding " + audioID + " for " + byID.getExid() + " got " + pretestScore);
       return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession);
     } else {
-      logger.info("getAlignments can't find audio id " + audioID);
+      logger.info("getAlignmentsFromDB can't find audio id " + audioID);
       return null;
     }
   }

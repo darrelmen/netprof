@@ -45,8 +45,6 @@ import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -80,7 +78,7 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
     return new ExercisePanelFactory<AmasExerciseImpl, AmasExerciseImpl>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(AmasExerciseImpl e, ExerciseListWrapper<CommonExercise> wrapper) {
+      public Panel getExercisePanel(AmasExerciseImpl e) {
         if (child != null) {
           child.setVisible(true);
         }

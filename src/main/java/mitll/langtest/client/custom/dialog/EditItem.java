@@ -194,7 +194,7 @@ public class EditItem {
       private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
-      public Panel getExercisePanel(CommonExercise exercise, ExerciseListWrapper<CommonExercise> wrapper) {
+      public Panel getExercisePanel(CommonExercise exercise) {
         Panel panel = new ResizableSimple();
         panel.getElement().setId("EditItemPanel");
 
@@ -213,7 +213,9 @@ public class EditItem {
         } else {
           return new TwoColumnExercisePanel<>(exercise,
               controller,
-              exerciseList, Collections.emptyList(), getChoices(), getPhoneChoices(), alignments);
+              exerciseList,
+              //Collections.emptyList(),
+              getChoices(), getPhoneChoices(), alignments);
         }
 
         return panel;
