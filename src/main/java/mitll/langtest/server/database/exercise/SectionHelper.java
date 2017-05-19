@@ -125,7 +125,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       reorderTypes(types);
       // }
       //if (DEBUG)
-        logger.warn("getTypeOrder types " + types);
+//        logger.warn("getTypeOrder types " + types);
 
       return types;
     } else {
@@ -871,7 +871,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     if (seen.isEmpty()) logger.error("huh? no types to remember?");
 
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("rememberTypesInOrder type order " + predefinedTypeOrder +
           " root " + root.getName() +
           " children  " + root.getChildren().size() +

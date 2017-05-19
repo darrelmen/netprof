@@ -141,14 +141,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     loadAudio(path);
   }
 
-  public PlayAudioPanel setPlayLabel(String label) {
-    this.playLabel = label;
-    setText();
-    return this;
-  }
-
-  protected void setText() {
-    playButton.setText(playLabel);
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener) {
+    this(soundManager, playListener,"", null);
   }
 
   /**
@@ -163,6 +157,16 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
                         Widget optionalToTheRight) {
     this(soundManager, buttonTitle, optionalToTheRight, false);
     addPlayListener(playListener);
+  }
+
+  public PlayAudioPanel setPlayLabel(String label) {
+    this.playLabel = label;
+    setText();
+    return this;
+  }
+
+  protected void setText() {
+    playButton.setText(playLabel);
   }
 
   /**

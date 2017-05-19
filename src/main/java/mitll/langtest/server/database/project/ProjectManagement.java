@@ -151,9 +151,9 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     logger.info("populateProjects now project ids " + idToProject.keySet());
-    for (Project project : getProjects()) {
+/*    for (Project project : getProjects()) {
       logger.info("\tproject " + project);
-    }
+    }*/
 
     if (!idToProject.isEmpty()) {
      // logger.info("using exercise dao from first project " + exerciseDAO);
@@ -362,8 +362,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   private void setDependencies(ExerciseDAO exerciseDAO, int projid) {
     IAudioDAO audioDAO = db.getAudioDAO();
-    logger.info("setDependencies - project #" + projid  + " audio dao " + audioDAO);
-
+//    logger.info("setDependencies - project #" + projid  + " audio dao " + audioDAO);
     if (audioDAO == null) {
       logger.error("setDependencies no audio dao ", new Exception());
     }

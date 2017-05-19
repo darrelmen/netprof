@@ -647,14 +647,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
 
       if (!exercise.hasRefAudio()) {
-        logger.info("Attach audio to " + exercise.getID());
+  //      logger.info("Attach audio to " + exercise.getID());
         attachAudioToExercise(exercise,language);
       }
 
       AudioAttribute audioAttributePrefGender = exercise.getAudioAttributePrefGender(orDefault == MiniUser.Gender.Male, true);
 
       if (audioAttributePrefGender == null) {
-        logger.warn("no audio for " + exercise.getID());
+//        logger.warn("no audio for " + exercise.getID());
         return null;
       }
       else {

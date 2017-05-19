@@ -84,14 +84,11 @@ public class StudentAnalysis extends DivWidget {
         bottom.getElement().setId("StudentAnalysis_bottom");
 
         logger.info("onSuccess get users " + users.size());
-        logger.info("onSuccess bottom " + bottom.getElement().getId());
-        UserContainer userContainer = new UserContainer(controller, rightSide, bottom, showTab, selectedUserKey);
-        //DivWidget leftSide = getStudentContainer(userContainer.getTableWithPager(getUserInfos(users)));
-
-        DivWidget top = getTop(userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS), rightSide);
-
+//        logger.info("onSuccess bottom " + bottom.getElement().getId());
         clear();
-        add(top);
+
+        UserContainer userContainer = new UserContainer(controller, rightSide, bottom, showTab, selectedUserKey);
+        add(getTop(userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS), rightSide));
         add(bottom);
 
         //   logger.info("onSuccess added top and bottom " + top.getElement().getId());

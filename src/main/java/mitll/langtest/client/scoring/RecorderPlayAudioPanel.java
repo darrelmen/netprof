@@ -1,19 +1,15 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.IconSize;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
@@ -22,24 +18,27 @@ import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * Created by go22670 on 4/5/17.
- * @see SimpleRecordAudioPanel#makePlayAudioPanel
  *
+ * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
 class RecorderPlayAudioPanel extends PlayAudioPanel {
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
-  private static final String DOWNLOAD_AUDIO = "downloadAudio";
-  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+//  private static final String DOWNLOAD_AUDIO = "downloadAudio";
+//  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
    */
   private Image recordImage1;
   private Image recordImage2;
-  private IconAnchor download;
-  private Panel downloadContainer;
-  private int exid;
-  private ExerciseController controller;
+//  private IconAnchor download;
+//  private Panel downloadContainer;
+//  private int exid;
+//  private ExerciseController controller;
+
+  private  DownloadContainer downloadContainer;
+  //private DownloadContainer realDownloadContainer;
 
   /**
    * @param soundManager
@@ -47,9 +46,9 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
   RecorderPlayAudioPanel(SoundManagerAPI soundManager,
-                                final PostAudioRecordButton postAudioRecordButton1,
-                                CommonExercise exercise,
-                                ExerciseController exerciseController) {
+                         final Button postAudioRecordButton1,
+                         CommonExercise exercise,
+                         ExerciseController exerciseController) {
     super(soundManager, new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -64,19 +63,15 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
         },
         "",
         null);
-    this.exid = exercise.getID();
-    this.controller = exerciseController;
-    downloadContainer = addDownloadAudioWidget();
+//    this.exid = exercise.getID();
+//    this.controller = exerciseController;
+
+    downloadContainer = new DownloadContainer();
     getElement().setId("RecorderPlayAudioPanel");
   }
 
   private void configureButton(Button playButton) {
-    playButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        doClick();
-      }
-    });
-
+    playButton.addClickHandler(event -> doClick());
 //    logger.info("configureButton " + playButton.getElement().getId());
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
@@ -89,6 +84,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void showPlayButton() {
     playButton.setVisible(true);
   }
+
   void hidePlayButton() {
     playButton.setVisible(false);
   }
@@ -100,7 +96,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
   void showFirstRecord() {
     recordImage1.setVisible(true);
-    downloadContainer.setVisible(false);
+    downloadContainer.getDownloadContainer().setVisible(false);
   }
 
   void hideRecord() {
@@ -118,11 +114,11 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   }
 
   /**
-   * @param toAddTo
+   * @param ignoredDiv
    * @return
    * @see PlayAudioPanel#addButtons
    */
-  protected IconAnchor makePlayButton(DivWidget toAddTo) {
+  protected IconAnchor makePlayButton(DivWidget ignoredDiv) {
     Button playButton = new Button(playLabel);
     configureButton(playButton);
     return playButton;
@@ -133,7 +129,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @see SimpleRecordAudioPanel#scoreAudio
    */
   Panel getDownloadContainer() {
-    return downloadContainer;
+    return downloadContainer.getDownloadContainer();
   }
 
   /**
@@ -160,6 +156,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     return recordFeedback;
   }
 
+/*
   private DivWidget addDownloadAudioWidget() {
     DivWidget downloadContainer = new DivWidget();
 
@@ -174,28 +171,24 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
     return downloadContainer;
   }
+*/
 
   /**
    * @return
    */
-  private IconAnchor getDownloadIcon() {
+/*  private IconAnchor getDownloadIcon() {
     IconAnchor download = new IconAnchor();
     download.getElement().setId("Download_user_audio_link");
     download.setIcon(IconType.DOWNLOAD);
     download.setIconSize(IconSize.TWO_TIMES);
     addTooltip(download, DOWNLOAD_YOUR_RECORDING);
 
-    download.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(download, "DownloadUserAudio_Icon", exid,
-            "downloading audio file ");
-      }
-    });
+    download.addClickHandler(event -> controller.logEvent(download, "DownloadUserAudio_Icon", exid,
+        "downloading audio file "));
     return download;
-  }
+  }*/
 
-  private Tooltip addTooltip(Widget w, String tip) {
+/*  private Tooltip addTooltip(Widget w, String tip) {
     return new TooltipHelper().addTooltip(w, tip);
   }
 
@@ -213,5 +206,15 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
         "userID=" +
         user;
     download.setHref(href);
+  }*/
+
+  void setDownloadHref(String audioPathToUse,
+                       int id,
+                       int user) {
+    downloadContainer.setDownloadHref(audioPathToUse, id, user);
+  }
+
+  public DownloadContainer getRealDownloadContainer() {
+    return downloadContainer;
   }
 }

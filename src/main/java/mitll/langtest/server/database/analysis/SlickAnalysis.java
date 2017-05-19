@@ -147,7 +147,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   /**
-   * TODO : how will this work for users on multiple projects?
+   * For the current project id.
    *
    * @param userDAO
    * @param minRecordings
@@ -156,8 +156,21 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    */
   @Override
   public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
+    long then = System.currentTimeMillis();
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerf(projid, database.getServerProps().getMinAnalysisScore());
-    return getUserInfos(userDAO, getBest(perfForUser, minRecordings));
+    long now = System.currentTimeMillis();
+    if (now-then>100) logger.info("took " + (now-then)+  " to get " +perfForUser.size() + " perf infos for project #" + projid);
+    then=now;
+    Map<Integer, UserInfo> best = getBest(perfForUser, minRecordings);
+    now = System.currentTimeMillis();
+    if (now-then>100) logger.info("took " + (now-then)+  " to get best for " +perfForUser.size() + " for project #" + projid);
+
+    then=now;
+    List<UserInfo> userInfos = getUserInfos(userDAO, best);
+    now = System.currentTimeMillis();
+    if (now-then>100) logger.info("took " + (now-then)+  " to get user infos for " +userInfos.size() + " users for project #" + projid);
+
+    return userInfos;
   }
 
   private Map<Integer, UserInfo> getBest(Collection<SlickPerfResult> perfForUser, int minRecordings) {

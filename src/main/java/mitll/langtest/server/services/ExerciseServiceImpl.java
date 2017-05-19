@@ -193,9 +193,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         exercisesForSearch.setByExercise(getFirstFew(request, exercisesForSearch.getByExercise()));
       }
     }
-    logger.info("triple resp " + exercisesForSearch);
+//    logger.info("triple resp " + exercisesForSearch);
     exercisesForSearch.setByExercise(filterExercises(request, exercisesForSearch.getByExercise(), projectID));
-    logger.info("after triple resp " + exercisesForSearch);
+ //   logger.info("after triple resp " + exercisesForSearch);
 
     // TODO : I don't think we need this?
 /*        if (!isUserListReq) {
@@ -253,10 +253,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         }
 
         Set<Integer> unique = new HashSet<>();
-        logger.info("getSortedExercises adding " + exercises.getByID().size() + " by id exercises");
+//        logger.info("getSortedExercises adding " + exercises.getByID().size() + " by id exercises");
         commonExercises.addAll(exercises.getByID());
         exercises.getByID().forEach(e -> unique.add(e.getID()));
-        logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
+//        logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
 
         basicExercises
             .stream()

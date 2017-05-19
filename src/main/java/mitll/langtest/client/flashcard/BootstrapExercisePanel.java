@@ -53,7 +53,12 @@ import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.ClickableWords;
+import mitll.langtest.client.scoring.DownloadContainer;
+import mitll.langtest.client.scoring.ScoreFeedbackDiv;
 import mitll.langtest.client.scoring.WordScoresTable;
+import mitll.langtest.client.sound.CompressedAudio;
+import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -67,6 +72,7 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.ASRRecordAudioPanel.FIRST_STEP;
 import static mitll.langtest.client.scoring.ASRRecordAudioPanel.SECOND_STEP;
+import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
 
 /**
  * Created with IntelliJ IDEA.
@@ -85,8 +91,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   private Panel recoOutput;
 
   static final int CORRECT_DELAY = 600;
-  protected static final int DELAY_MILLIS_LONG = 3000;
-  // private static final int LONG_DELAY_MILLIS = 3500;
+  private static final int DELAY_MILLIS_LONG = 3000;
   public static final int HIDE_DELAY = 2500;
   static final int DELAY_MILLIS = 100;
 
@@ -114,6 +119,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
                          String instance,
                          ListInterface exerciseList) {
     super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
+    downloadContainer = new DownloadContainer();
   }
 
   /**
@@ -440,12 +446,13 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     final boolean hasRefAudio = path != null;
     boolean correct = result.isCorrect();
     final double score = result.getScore();
+    setDownloadHref(result.getPath());
 
     boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
 //    logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
 //        " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 
-   // String feedback = "";
+    // String feedback = "";
     if (badAudioRecording) {
       controller.logEvent(button, "Button", exercise.getID(), "bad recording");
       putBackText();
@@ -460,11 +467,16 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       String heard = result.getDecodeOutput();
 
       int oldID = exercise.getID();
+
+
       if (correct) {
         showCorrectFeedback(score, heard, result.getPretestScore());
+        playAudioPanel.startSong(CompressedAudio.getPath(path));
         controller.logEvent(button, "Button", oldID, "correct response - score " + round);
       } else {   // incorrect!!
-        /*feedback =*/ showIncorrectFeedback(result, score, hasRefAudio, heard);
+        /*feedback =*/
+        showIncorrectFeedback(result, score, hasRefAudio, heard);
+        playAudioPanel.startSong(CompressedAudio.getPath(path));
         controller.logEvent(button, "Button", oldID, "incorrect response - score " + round);
       }
     }
@@ -497,14 +509,38 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     showOtherText();
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
 
-    // if (showOnlyEnglish) {
-    //showHeard(heard);
-    //}
-
     boolean isRTL = new ClickableWords<>().isRTL(exercise);
 
     recoOutput.clear();
-    recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null, new HashMap<>(), isRTL));
+
+
+    // recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null, new HashMap<>(), isRTL));
+
+    PlayAudioPanel playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), new PlayListener() {
+      public void playStarted() {
+//          goodwaveExercisePanel.setBusy(true);
+        // TODO put back busy thing?
+        // postAudioRecordButton1.setEnabled(false);
+      }
+
+      public void playStopped() {
+        //  goodwaveExercisePanel.setBusy(false);
+        // postAudioRecordButton1.setEnabled(true);
+      }
+    });
+
+    ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, downloadContainer);
+    downloadContainer.getDownloadContainer().setVisible(true);
+
+    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL));
+  }
+
+  PlayAudioPanel playAudioPanel;
+  DownloadContainer downloadContainer;
+
+  private void setDownloadHref(String audioPath) {
+    String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, ".mp3") : audioPath;
+    downloadContainer.setDownloadHref(audioPathToUse, exercise.getID(), controller.getUser());
   }
 
   /**

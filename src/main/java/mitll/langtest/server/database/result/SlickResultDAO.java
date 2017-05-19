@@ -472,9 +472,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return relPrefix;
   }
 
-  public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
-    return dao.perf(projid, minScore);
-  }
+  public Collection<SlickPerfResult> getPerf(int projid, float minScore) {  return dao.perf(projid, minScore);  }
 
   /**
    * @param userid

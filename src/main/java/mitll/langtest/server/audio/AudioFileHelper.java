@@ -1387,7 +1387,7 @@ public class AudioFileHelper implements AlignDecode {
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
       File file = new File(dictFile);
-      logger.info("makeDict read " + file.getAbsolutePath());
+//      logger.info("makeDict read " + file.getAbsolutePath());
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val

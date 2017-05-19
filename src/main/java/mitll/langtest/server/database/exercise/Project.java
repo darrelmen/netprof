@@ -157,7 +157,7 @@ public class Project implements PronunciationLookup {
       String second = project.second();
       if (first != null && !first.isEmpty()) types.add(first);
       if (second != null && !second.isEmpty()) types.add(second);
-      logger.info("getTypeOrder type order " + types);
+//      logger.info("getTypeOrder type order " + types);
     }
 
     return types;

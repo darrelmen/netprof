@@ -77,8 +77,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise>//CommonShell & AudioRefExercise & AnnotationExercise & MutableAnnotationExercise>
-    extends HorizontalPanel {
+public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise>  extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
   private static final int CARD_HEIGHT = 362;//320;

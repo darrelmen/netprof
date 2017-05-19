@@ -72,9 +72,9 @@ public abstract class Analysis extends DAO {
    * can't we get them for the visible set?
    * or ask exercise service?
    *
-   * @deprecated  let's not use this map - super expensive to make, every time
+   * @deprecated let's not use this map - super expensive to make, every time
    */
- // final Map<Integer, String> exToRef;
+  // final Map<Integer, String> exToRef;
 
   /**
    * @param database
@@ -86,7 +86,7 @@ public abstract class Analysis extends DAO {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
     this.phoneDAO = phoneDAO;
- //   this.exToRef = exToRef;
+    //   this.exToRef = exToRef;
     //logger.info("Analysis : exToRef has " + exToRef.size());
   }
 
@@ -134,7 +134,8 @@ public abstract class Analysis extends DAO {
   @NotNull
   private List<UserInfo> getUserInfos(Map<Integer, UserInfo> best, IUserDAO userDAO) {
     List<UserInfo> userInfos = new ArrayList<>();
-
+    logger.info("getUserInfos for " + best.size());
+    long then = System.currentTimeMillis();
     for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
       Integer userid = pair.getKey();
 
@@ -142,7 +143,7 @@ public abstract class Analysis extends DAO {
       if (userChosenID == null) {
         logger.error("getUserInfos huh? no user for " + userid);
       } else {
-     //   String userID = user.getUserID();
+        //   String userID = user.getUserID();
         boolean isLL = database.getServerProps().getLincolnPeople().contains(userChosenID);
         if (!isLL) {
           UserInfo value = pair.getValue();
@@ -153,16 +154,16 @@ public abstract class Analysis extends DAO {
         }
       }
     }
+    long now = System.currentTimeMillis();
+
+    if (now - then > 100) {
+      logger.info("getUserInfos : took " + (now - then) + " to get " + best.size() + " user infos");
+    }
     return userInfos;
   }
 
   private void sortUsersByTime(List<UserInfo> userInfos) {
-    Collections.sort(userInfos, new Comparator<UserInfo>() {
-      @Override
-      public int compare(UserInfo o1, UserInfo o2) {
-        return -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
-      }
-    });
+    userInfos.sort((o1, o2) -> -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis()));
   }
 
 /*  private List<PhoneSession> chooseGran(Map<Long, List<PhoneSession>> granularityToSessions) {
@@ -221,10 +222,10 @@ public abstract class Analysis extends DAO {
   abstract public UserPerformance getPerformanceForUser(long id, int minRecordings);
 
   /**
-   * @see Analysis#getPerformanceForUser(long, int)
    * @param id
    * @param best
    * @return
+   * @see Analysis#getPerformanceForUser(long, int)
    */
   UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
@@ -259,9 +260,9 @@ public abstract class Analysis extends DAO {
 */
 
   /**
-   * @see SlickAnalysis#getWordScoresForUser(long, int)
    * @param best
    * @return
+   * @see SlickAnalysis#getWordScoresForUser(long, int)
    */
   List<WordScore> getWordScores(Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();

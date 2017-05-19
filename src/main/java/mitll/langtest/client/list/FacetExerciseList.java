@@ -62,14 +62,13 @@ import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import org.apache.xpath.operations.Div;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.FIRST_STEP;
-import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.SECOND_STEP;
+import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
+import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");

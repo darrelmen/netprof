@@ -77,7 +77,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Map<Integer, AlignmentOutput> alignments;
 
   //private Map<Integer, Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>>> idToTypeToSegmentToWidget = new HashMap<>();
-
   private List<IHighlightSegment> altflClickables;
   /**
    * @see #getFLEntry
@@ -110,7 +109,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
                                 final ListInterface<CommonShell, T> listContainer,
-                               // List<CorrectAndScore> correctAndScores,
+                                // List<CorrectAndScore> correctAndScores,
                                 ShowChoices choices,
                                 PhonesChoices phonesChoices,
                                 Map<Integer, AlignmentOutput> alignments) {
@@ -131,7 +130,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
     this.isRTL = clickableWords.isRTL(exercise);
-   // this.correctAndScores = correctAndScores;
+    // this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
 
@@ -151,57 +150,68 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @Override
   public void getRefAudio(RefAudioListener listener) {
     AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
-    if (playAudio != null && currentAudioAttr != null) {
-      int refID = currentAudioAttr.getUniqueID();
-      AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
-      int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
-      logger.info("getRefAudio asking for" +
-          "\n\taudio #" + refID +
-          "\n\tspeed  " + currentAudioAttr.getSpeed() +
-          "\n\tisMale " + currentAudioAttr.getUser().isMale());
-//    logger.info("asking for " + contextRefID);
+    // if (playAudio != null && currentAudioAttr != null) {
+    int refID = currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
 
-      Set<Integer> req = new HashSet<>();
-      if (refID != -1) {
-        if (addToRequest(currentAudioAttr, refID)) req.add(refID);
-      } else logger.warning("huh? how can audio id be -1??? " + currentAudioAttr);
+    AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
+    int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
 
-      if (contextRefID != -1) {
-        // logger.info("getRefAudio asking for context " + contextRefID);
+    //    logger.info("asking for " + contextRefID);
+
+    Set<Integer> req = new HashSet<>();
+    if (refID != -1) {
+      if (DEBUG) {
+        logger.info("getRefAudio asking for" +
+                "\n\texercise " + exercise.getID() +
+                "\n\taudio #" + refID //+
+            //    "\n\tspeed  " + currentAudioAttr.getSpeed() +
+            //    "\n\tisMale " + currentAudioAttr.getUser().isMale()
+        );
+      }
+      if (addToRequest(currentAudioAttr, refID)) req.add(refID);
+    } else
+      logger.warning("huh? how can audio id be -1??? " + currentAudioAttr);
+
+    if (contextRefID != -1) {
+      // logger.info("getRefAudio asking for context " + contextRefID);
+      if (DEBUG) {
         logger.info("getRefAudio asking for context" +
+            "\n\texercise " + exercise.getID() +
             "\n\taudio #" + contextRefID +
             "\n\tspeed  " + contextAudioAttr.getSpeed() +
-            "\n\tisMale " + contextAudioAttr.getUser().isMale());
-
-        if (addToRequest(contextAudioAttr, contextRefID)) req.add(contextRefID);
-      } else {
-        logger.warning("no context audio for " + exercise.getID());
+            "\n\tisMale " + contextAudioAttr.getUser().isMale()
+        );
       }
-
-      if (req.isEmpty()) {
-        registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
-        listener.refAudioComplete();
-        cacheOthers(listener);
-      } else {
-        controller.getScoringService().getAlignments(
-            controller.getProjectStartupInfo().getProjectid(),
-            req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
-              @Override
-              public void onFailure(Throwable caught) {
-
-              }
-
-              @Override
-              public void onSuccess(Map<Integer, AlignmentOutput> result) {
-                alignments.putAll(result);
-                registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
-                cacheOthers(listener);
-              }
-            });
-      }
-    } else if (currentAudioAttr == null) {
-      logger.info("no current audio for " + exercise.getID());
+      if (addToRequest(contextAudioAttr, contextRefID)) req.add(contextRefID);
+    } else {
+      logger.warning("no context audio for " + exercise.getID());
     }
+
+    if (req.isEmpty()) {
+      registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
+      listener.refAudioComplete();
+      cacheOthers(listener);
+    } else {
+      controller.getScoringService().getAlignments(
+          controller.getProjectStartupInfo().getProjectid(),
+          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(Map<Integer, AlignmentOutput> result) {
+              alignments.putAll(result);
+              registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
+              cacheOthers(listener);
+            }
+          });
+    }
+    // {
+    //   logger.info("no current audio for " + exercise.getID());
+    //  listener.refAudioComplete();
+    // }
   }
 
   private boolean addToRequest(AudioAttribute currentAudioAttr, int refID) {
@@ -522,7 +532,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return bulk;
   }
 
-  private boolean transcriptMatches(List<IHighlightSegment> clickables,
+/*  private boolean transcriptMatches(List<IHighlightSegment> clickables,
                                     List<TranscriptSegment> segments) {
     if (DEBUG_MATCH) logger.info("Check   " + clickables);
     if (DEBUG_MATCH) logger.info("Against " + segments);
@@ -580,11 +590,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
     }
     return allMatch;
-  }
+  }*/
 
   private boolean transcriptMatches2(List<IHighlightSegment> clickables,
                                      List<TranscriptSegment> segments) {
-    StringBuilder clickableSentence = new StringBuilder();
+    //StringBuilder clickableSentence = new StringBuilder();
 
     int i = 0;
     List<IHighlightSegment> compOrder = clickables;
@@ -592,10 +602,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       compOrder = new ArrayList<>(clickables);
       Collections.reverse(compOrder);
     }*/
+
+    int c = 0;
     for (IHighlightSegment clickable : compOrder) {
       if (clickable.isClickable()) {
         String fragment = removePunct(clickable.getContent().toLowerCase());
-        clickableSentence.append(fragment);
+        //  clickableSentence.append(fragment);
+        c++;
         // logger.info("clickable seg " + (i++) + " " + fragment);
       }
     }
@@ -605,12 +618,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       segSentence.append(removePunct(segment.getEvent().toLowerCase()));
     }
 
-    String cl = clickableSentence.toString();
-    String ss = segSentence.toString();
+    //String cl = clickableSentence.toString();
+    //String ss = segSentence.toString();
 
-    if (DEBUG_MATCH) logger.info("Clickable " + cl);
-    if (DEBUG_MATCH) logger.info("Segments  " + ss);
-    return cl.equals(ss);
+    //if (DEBUG_MATCH) logger.info("Clickable " + cl);
+    //if (DEBUG_MATCH) logger.info("Segments  " + ss);
+    return c == segments.size();
+    //return cl.equals(ss);
   }
 
   private String getWordEvent(TranscriptSegment word) {
@@ -757,22 +771,19 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private NavLink getShowComments() {
     NavLink widget = new NavLink("Show Comments");
-    widget.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        for (CommentBox box : comments) {
-          if (showingComments) {
-            box.hideButtons();
-          } else {
-            box.showButtons();
-          }
-        }
-        showingComments = !showingComments;
+    widget.addClickHandler(event -> {
+      for (CommentBox box : comments) {
         if (showingComments) {
-          widget.setText("Hide Comments");
+          box.hideButtons();
         } else {
-          widget.setText("Show Comments");
+          box.showButtons();
         }
+      }
+      showingComments = !showingComments;
+      if (showingComments) {
+        widget.setText("Hide Comments");
+      } else {
+        widget.setText("Show Comments");
       }
     });
     return widget;

@@ -17,16 +17,6 @@ import java.util.logging.Logger;
 public class WordScoresTable {
   private final Logger logger = Logger.getLogger("WordScoresTable");
 
-/*  private Panel addWordScoreTable(PretestScore result) {
-    Table wordTable = makeTable("Word", "Score", result.getWordScores(), true);
-
-    ScrollPanel child = new ScrollPanel(wordTable);
-    child.getElement().setId("TableScroller_Word");
-    child.setWidth("170px");
-    child.setHeight("200px");
-    return child;
-  }*/
-
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showCorrectFeedback(double, String, PretestScore)
    * @param result

@@ -289,7 +289,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projectManagement == null) {
       logger.info("populateProjects no project management yet...");
     } else {
-      logger.info("populateProjects --- ");
+//      logger.info("populateProjects --- ");
       projectManagement.populateProjects();
     }
     return this;
@@ -655,17 +655,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
       synchronized (this) {
         boolean isURL = serverProps.getLessonPlan().startsWith("http");
         boolean amas = isAmas();
-        int numExercises;
+       // int numExercises;
 
         if (amas) {
 //          logger.info("Got " + lessonPlanFile);
           // TODO : get media directory from properties
           // TODO : get install path directory from properties
-          numExercises = readAMASExercises(lessonPlanFile, "", "", isURL);
+          //numExercises =
+              readAMASExercises(lessonPlanFile, "", "", isURL);
         } else {
-          logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFile);
+        //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFile);
 
-          makeExerciseDAO(lessonPlanFile, isURL);
+          makeExerciseDAO(lessonPlanFile);
 
           if (!serverProps.useH2()) {
             //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
@@ -710,12 +711,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Here to support import from old individual sites for CopyToPostgres
    *
    * @param lessonPlanFile
-   * @param isURL          deprecated
    * @see #makeDAO(String)
    */
-  private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
-    logger.info("makeExerciseDAO - " + lessonPlanFile + " : use h2 = " + serverProps.useH2());
-
+  private void makeExerciseDAO(String lessonPlanFile) {
+//    logger.info("makeExerciseDAO - " + lessonPlanFile + " : use h2 = " + serverProps.useH2());
     /*if (isURL) {
       projectManagement.addSingleProject(new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS));
     } else*/
