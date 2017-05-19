@@ -833,6 +833,10 @@ public class ScoreServlet extends DatabaseServlet {
     int realExID = 0;
     try {
       realExID = Integer.parseInt(request.getHeader(EXERCISE));
+      if (realExID == -1) {
+        realExID = db.getUserExerciseDAO().getUnknownExercise().id();
+        logger.info("getJsonForAudio : using unknown exercise id " + realExID);
+      }
     } catch (NumberFormatException e) {
       logger.info("couldn't parse "+ request.getHeader(EXERCISE));
     }

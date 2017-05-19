@@ -53,6 +53,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Has everything associated with a project
@@ -152,9 +153,9 @@ public class Project implements PronunciationLookup {
     List<String> types = sectionHelper == null ? Collections.EMPTY_LIST : sectionHelper.getTypeOrder();
     if (project != null && (types == null || types.isEmpty())) {
       types = new ArrayList<>();
-      String first  = project.first();
+      String first = project.first();
       String second = project.second();
-      if (first != null && !first.isEmpty())   types.add(first);
+      if (first != null && !first.isEmpty()) types.add(first);
       if (second != null && !second.isEmpty()) types.add(second);
       logger.info("getTypeOrder type order " + types);
     }
@@ -283,47 +284,60 @@ public class Project implements PronunciationLookup {
 //    logger.info("getExerciseBySearchBoth looking for '" + english +
 //        "' and '" + fl +
 //        "' found ");
-    List<CommonExercise> exercisesInVocab = fullTrie.getExercises(english);
-    CommonExercise exercise = getFirstMatchingLength(english, fl, exercisesInVocab);
 
-    logger.info("getExerciseBySearchBoth looking for '" + english +
-        "' and '" + fl +
-        "' found " + exercise);
-
-    if (exercise == null && !english.isEmpty()) {
-      List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(english);
-      exercise = getFirstMatchingLength(english, fl, fullContextTrieExercises);
-      if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
-        exercise = exercise.getDirectlyRelated().iterator().next();
+    List<CommonExercise> exercises = fullTrie.getExercises(fl);
+    if (exercises.size() == 1) {
+      return exercises.iterator().next();
+    } else if (!exercises.isEmpty()) {
+      List<CommonExercise> collect = exercises.stream().filter(ex -> ex.getEnglish().equalsIgnoreCase(english)).collect(Collectors.toList());
+      if (collect.isEmpty()) {
+        return exercises.iterator().next();
+      } else {
+        return collect.iterator().next();
       }
-      logger.info("\tgetExerciseBySearchBoth context looking for '" + english + "' found " + exercise);
-    }
+    } else {
+      List<CommonExercise> exercisesInVocab = fullTrie.getExercises(english);
+      CommonExercise exercise = getFirstMatchingLength(english, fl, exercisesInVocab);
 
-    if (exercise == null) {
-      exercise = getMatchEither(english, fl, exercisesInVocab);
-      logger.info("\tgetExerciseBySearchBoth looking for '" + english + " and " +fl +
-          " found " + exercise);
-    }
-
-    if (exercise == null && !fl.isEmpty()) {
-      List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(fl);
-      logger.info("\tinitially context num = " + fullContextTrieExercises.size());
-      exercise = getMatchEither(english, fl, fullContextTrieExercises);
-      if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
-        exercise = exercise.getDirectlyRelated().iterator().next();
-      }
-      logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " or '" +fl+
+      logger.info("getExerciseBySearchBoth looking for '" + english +
+          "' and '" + fl +
           "' found " + exercise);
-      if (exercise == null && !fullContextTrieExercises.isEmpty()) {
-        exercise = fullContextTrieExercises.iterator().next();
+
+      if (exercise == null && !english.isEmpty()) {
+        List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(english);
+        exercise = getFirstMatchingLength(english, fl, fullContextTrieExercises);
         if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
           exercise = exercise.getDirectlyRelated().iterator().next();
         }
-        logger.info("\tnow returning " + exercise);
+        logger.info("\tgetExerciseBySearchBoth context looking for '" + english + "' found " + exercise);
       }
-    }
 
-    return exercise;
+      if (exercise == null) {
+        exercise = getMatchEither(english, fl, exercisesInVocab);
+        logger.info("\tgetExerciseBySearchBoth looking for '" + english + " and " + fl +
+            " found " + exercise);
+      }
+
+      if (exercise == null && !fl.isEmpty()) {
+        List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(fl);
+        logger.info("\tinitially context num = " + fullContextTrieExercises.size());
+        exercise = getMatchEither(english, fl, fullContextTrieExercises);
+        if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
+          exercise = exercise.getDirectlyRelated().iterator().next();
+        }
+        logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " or '" + fl +
+            "' found " + exercise);
+        if (exercise == null && !fullContextTrieExercises.isEmpty()) {
+          exercise = fullContextTrieExercises.iterator().next();
+          if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
+            exercise = exercise.getDirectlyRelated().iterator().next();
+          }
+          logger.info("\tnow returning " + exercise);
+        }
+      }
+
+      return exercise;
+    }
   }
 
   private CommonExercise getFirstMatchingLength(String english, String fl, List<CommonExercise> exercises1) {

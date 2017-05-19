@@ -1060,9 +1060,7 @@ public class AudioFileHelper implements AlignDecode {
     httpClient.addRequestProperty("request", "align");
 //    httpClient.addRequestProperty("exercise", "" + exid);
     httpClient.addRequestProperty("english", english);
-    byte[] encode = Base64.getEncoder().encode(foreignLanguage.getBytes());
-    String encoded = new String(encode);
-    httpClient.addRequestProperty(EXERCISE_TEXT, encoded);
+    httpClient.addRequestProperty(EXERCISE_TEXT, new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
     // USE THE LANGUAGE INSTEAD
     //  httpClient.addRequestProperty("projid", "-1");//  + projid);
     httpClient.addRequestProperty("language", getLanguage());
