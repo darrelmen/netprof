@@ -1440,7 +1440,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param project
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserToResults
-   * @see SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
+   * @see SlickPhoneDAO#getPhoneReport
    */
   @Nullable
   public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project) {

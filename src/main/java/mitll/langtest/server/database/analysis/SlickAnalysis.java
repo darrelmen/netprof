@@ -87,18 +87,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    */
   @Override
   public UserPerformance getPerformanceForUser(long userid, int minRecordings) {
-    Map<Integer, UserInfo> best = getBestForUser((int) userid, minRecordings);
-    return getUserPerformance(userid, best);
+    return getUserPerformance(userid, getBestForUser((int) userid, minRecordings));
   }
 
   /**
-   * @see #getPerformanceForUser(long, int)
-   * @see #getPhonesForUser(int, int)
-   * @see #getWordScoresForUser(long, int)
-   *
    * @param id
    * @param minRecordings
    * @return
+   * @see #getPerformanceForUser(long, int)
+   * @see #getPhonesForUser(int, int)
+   * @see #getWordScoresForUser(long, int)
    */
   private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings) {
     long then = System.currentTimeMillis();
@@ -111,7 +109,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       logger.warn("getBestForUser best for " + id + " in " + projid + " took " + diff);
     }
 
-    return getBest(perfForUser, minRecordings);
+    return getBest(perfForUser, minRecordings, true);
   }
 
   /**
@@ -159,22 +157,25 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerf(projid, database.getServerProps().getMinAnalysisScore());
     long now = System.currentTimeMillis();
-    if (now-then>100) logger.info("took " + (now-then)+  " to get " +perfForUser.size() + " perf infos for project #" + projid);
-    then=now;
-    Map<Integer, UserInfo> best = getBest(perfForUser, minRecordings);
+    if (now - then > 100)
+      logger.info("getUserInfo took " + (now - then) + " to get " + perfForUser.size() + " perf infos for project #" + projid);
+    then = now;
+    Map<Integer, UserInfo> best = getBest(perfForUser, minRecordings, false);
     now = System.currentTimeMillis();
-    if (now-then>100) logger.info("took " + (now-then)+  " to get best for " +perfForUser.size() + " for project #" + projid);
+    if (now - then > 100)
+      logger.info("getUserInfo took " + (now - then) + " to get best for " + perfForUser.size() + " for project #" + projid);
 
-    then=now;
+    then = now;
     List<UserInfo> userInfos = getUserInfos(userDAO, best);
     now = System.currentTimeMillis();
-    if (now-then>100) logger.info("took " + (now-then)+  " to get user infos for " +userInfos.size() + " users for project #" + projid);
+    if (now - then > 100)
+      logger.info("getUserInfo took " + (now - then) + " to get user infos for " + userInfos.size() + " users for project #" + projid);
 
     return userInfos;
   }
 
-  private Map<Integer, UserInfo> getBest(Collection<SlickPerfResult> perfForUser, int minRecordings) {
-    return getBestForQuery(minRecordings, getUserToResults(perfForUser));
+  private Map<Integer, UserInfo> getBest(Collection<SlickPerfResult> perfForUser, int minRecordings, boolean addNativeAudio) {
+    return getBestForQuery(minRecordings, getUserToResults(perfForUser, addNativeAudio));
   }
 
   /**
@@ -182,7 +183,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @throws SQLException
    * @see #getBest
    */
-  private Map<Integer, List<BestScore>> getUserToResults(Collection<SlickPerfResult> perfs) {
+  private Map<Integer, List<BestScore>> getUserToResults(Collection<SlickPerfResult> perfs, boolean addNativeAudio) {
     long then = System.currentTimeMillis();
 
     Map<Integer, List<BestScore>> userToBest = new HashMap<>();
@@ -195,6 +196,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     //Set<String> missingAudio = new TreeSet<>();
 
     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
+
+    logger.info("getUserToResults for " + perfs.size());
 
     int emptyCount = 0;
     for (SlickPerfResult perf : perfs) {
@@ -228,13 +231,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
       long time = timestamp.getTime();
 
-      String nativeAudio = database.getNativeAudio(userToGender, perf.userid(), exid, project);
-      if (nativeAudio == null) {
+      String nativeAudio =null;
+      if (addNativeAudio) {
+        nativeAudio = database.getNativeAudio(userToGender, perf.userid(), exid, project);
+        if (nativeAudio == null) {
 //        if (exid.startsWith("Custom")) {
 ////          logger.debug("missing audio for " + exid);
 //          missingAudio.add(exid);
 //        }
-        missing++;
+          missing++;
+        }
       }
 
       boolean isLegacy = path.startsWith(ANSWERS);
@@ -255,8 +261,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       long now = System.currentTimeMillis();
 
       logger.info("getUserToResults total " + count + " missing audio " + missing +
-          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " took " + (now-then) + " millis");//+ " exToRef " + exToRef.size());
-   //   if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
+          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " took " + (now - then) + " millis");//+ " exToRef " + exToRef.size());
+      //   if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
       if (emptyCount > 0) logger.info("missing score json childCount " + emptyCount + "/" + count);
     }
 

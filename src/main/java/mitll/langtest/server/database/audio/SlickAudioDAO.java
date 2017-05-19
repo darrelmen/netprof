@@ -642,7 +642,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     if (exercise != null) {
       MiniUser.Gender orDefault = getGender(userToGender, userid);
       if (orDefault == null) {
-        logger.error("getNativeAudio can't find user " + userid);
+//        logger.error("getNativeAudio can't find user " + userid);
         return null; // no user with this id?
       }
 
@@ -742,7 +742,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     if (orDefault == null) {
       User byID = userDAO.getByID(userid);
       if (byID == null) {
-        logger.warn("getNativeAudio huh? can't find " + userid);
+       // logger.warn("getNativeAudio huh? can't find " + userid);
       } else {
         userToGender.put(userid, byID.getRealGender());
       }
