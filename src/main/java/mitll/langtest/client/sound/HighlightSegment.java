@@ -24,7 +24,6 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   private final int id;
   private final String content;
   private final InlineHTML span;
-  //private DivWidget divParent;
 
   /**
    * @param id
@@ -46,7 +45,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     add(north = new DivWidget());
 
     add(south = new DivWidget());
-  
+
     south.addStyleName("floatLeft");
     south.getElement().getStyle().setClear(Style.Clear.BOTH);
 

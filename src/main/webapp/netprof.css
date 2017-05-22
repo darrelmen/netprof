@@ -1466,6 +1466,7 @@ document sections.*/
 
 .refined {
 }
+
 /*
 
 .sidebar {
@@ -1795,9 +1796,9 @@ h1, h2, h3, h4, h5, h6 {
     padding-right: 8px;
 }
 
-.playButton .btn  {
-     min-width: 15px;
- }
+.playButton .btn {
+    min-width: 15px;
+}
 
 .phoneWidth {
     width: 25px;
@@ -1817,7 +1818,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .mainBlock select {
-    width:auto;
+    width: auto;
 }
 
 /*
@@ -1846,3 +1847,13 @@ h1, h2, h3, h4, h5, h6 {
     position: fixed;
     top: auto;
 }
+
+.phoneContainer {}
+
+.phoneContainer .phoneColor {
+    background-color: #EEF3E2;
+}
+
+.phoneColor {
+     background-color: #EEF3E2;
+ }

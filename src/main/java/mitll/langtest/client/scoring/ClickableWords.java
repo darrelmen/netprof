@@ -43,6 +43,7 @@ public class ClickableWords<T extends CommonExercise> {
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private ListInterface listContainer;
   private WordBoundsFactory factory = new WordBoundsFactory();
+  int fontSize;
 
   private static final boolean DEBUG = false;
 
@@ -53,12 +54,14 @@ public class ClickableWords<T extends CommonExercise> {
    * @param listContainer
    * @param exercise
    * @param language
+   * @param fontSize
    */
-   ClickableWords(ListInterface listContainer, T exercise, String language) {
+  ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN);// || language.equals(KOREAN) || isJapanese;
+    this.fontSize = fontSize;
   }
 
   /**
@@ -72,12 +75,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @see TwoColumnExercisePanel#getEntry
    */
   DivWidget getClickableWords(String value,
-//                              boolean isFL,
-                              //                            boolean isTranslit,
-                              //                          boolean isMeaning,
-
                               TwoColumnExercisePanel.FieldType fieldType,
-
                               List<IHighlightSegment> clickables,
                               boolean isSimple,
                               boolean addRightMargin,
@@ -96,11 +94,9 @@ public class ClickableWords<T extends CommonExercise> {
 
   @NotNull
   private DivWidget getClickableDiv(List<String> tokens, boolean isSimple,
-                                    //boolean isMeaning,
                                     boolean addRightMargin,
                                     HasDirection.Direction dir,
                                     List<IHighlightSegment> clickables,
-//                                    boolean isFL
                                     TwoColumnExercisePanel.FieldType fieldType
 
   ) {
@@ -126,7 +122,6 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   /**
-   *
    * @param segmentsForTokens
    * @param addRightMargin
    * @param isRTL
@@ -166,12 +161,12 @@ public class ClickableWords<T extends CommonExercise> {
    *
    * @param value
    * @param highlight
-   * @paramx isFL
-   * @paramx isTranslit
-   * @paramx isMeaning
    * @param clickables
    * @param isSimple
    * @return
+   * @paramx isFL
+   * @paramx isTranslit
+   * @paramx isMeaning
    * @see TwoColumnExercisePanel#getContext
    */
   DivWidget getClickableWordsHighlight(String value,
@@ -218,7 +213,7 @@ public class ClickableWords<T extends CommonExercise> {
     int id = 0;
     for (String token : tokens) {
       boolean isMatch = toFind != null && isMatch(token, toFind);
-      IHighlightSegment clickable = makeClickableText( dir, token, isMatch, id++, isSimple, fieldType);
+      IHighlightSegment clickable = makeClickableText(dir, token, isMatch, id++, isSimple, fieldType);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
       w.addStyleName("rightFiveMargin");
@@ -340,15 +335,14 @@ public class ClickableWords<T extends CommonExercise> {
    * @see #getClickableWords
    * @see #getClickableWordsHighlight
    */
-  private IHighlightSegment makeClickableText(//boolean isMeaning,
-                                              HasDirection.Direction dir,
-                                              final String html,
-                                              boolean isContextMatch,
-                                              int id,
-                                              boolean isSimple,
-                                              //boolean isFL
+  private IHighlightSegment makeClickableText(
+      HasDirection.Direction dir,
+      final String html,
+      boolean isContextMatch,
+      int id,
+      boolean isSimple,
 
-                                              TwoColumnExercisePanel.FieldType fieldType) {
+      TwoColumnExercisePanel.FieldType fieldType) {
     final IHighlightSegment highlightSegmentDiv = isSimple ?
         new SimpleHighlightSegment(html, id) :
         new HighlightSegment(id, html, dir);
@@ -359,6 +353,9 @@ public class ClickableWords<T extends CommonExercise> {
         highlightSegment.addStyleName("bigflfont");
       } else {
         highlightSegment.addStyleName("flfont");
+        if (fontSize != 24) {
+          highlightSegment.getElement().getStyle().setFontSize(fontSize, Style.Unit.PX);
+        }
       }
     } else {
       highlightSegment.addStyleName("Instruction-data-with-wrap-keep-word");

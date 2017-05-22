@@ -34,7 +34,7 @@ public enum Language implements IsSerializable {
   UNKNOWN;  // TROUBLE
 
   private final boolean isRTL;
-  int fontSize = 26;
+  private int fontSize = 24;
 
   Language() {
     this.isRTL = false;
@@ -56,5 +56,9 @@ public enum Language implements IsSerializable {
 
   public boolean isRTL() {
     return isRTL;
+  }
+
+  public int getFontSize() {
+    return fontSize;
   }
 }

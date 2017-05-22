@@ -57,8 +57,9 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class WordTable {
+  private static final int PHONE_PADDING = 3;
   private final Logger logger = Logger.getLogger("WordTable");
-  public static final int PHONE_WIDTH = 25;
+  private static final int PHONE_WIDTH = 25;
 
   private static final String TR = "tr";
   private static final String TD = "td";
@@ -73,7 +74,6 @@ public class WordTable {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
     builder.append("<table>");
-    // builder.append("<table cellspacing='5'>");
 
     builder.append("<thead>");
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
@@ -229,13 +229,14 @@ public class WordTable {
    * @return
    */
   @NotNull
-   DivWidget getPhoneDivBelowWord(AudioControl audioControl,
-                                        TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                        List<TranscriptSegment> value,
-                                        boolean simpleLayout,
-                                        TranscriptSegment wordSegment, boolean isRTL) {
+  DivWidget getPhoneDivBelowWord(AudioControl audioControl,
+                                 TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                                 List<TranscriptSegment> value,
+                                 boolean simpleLayout,
+                                 TranscriptSegment wordSegment, boolean isRTL) {
     DivWidget phones = new DivWidget();
     phones.addStyleName("inlineFlex");
+    phones.addStyleName("phoneContainer");
     addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment, isRTL);
     return phones;
   }
@@ -343,9 +344,9 @@ public class WordTable {
    * @param simpleLayout
    * @param wordSegment
    * @param isRTL
-   * @see #getDivWord
+   * @see #getPhoneDivBelowWord(AudioControl, TreeMap, List, boolean, TranscriptSegment, boolean)
    */
-  public void addPhonesBelowWord2(List<TranscriptSegment> phoneSegments,
+  private void addPhonesBelowWord2(List<TranscriptSegment> phoneSegments,
                                   DivWidget scoreRow,
                                   AudioControl audioControl,
                                   TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
@@ -357,7 +358,9 @@ public class WordTable {
       Collections.reverse(copy);
       phoneSegments = copy;
     }
-    for (TranscriptSegment phoneSegment : phoneSegments) {
+    Iterator<TranscriptSegment> iterator = phoneSegments.iterator();
+    while (iterator.hasNext()) {
+      TranscriptSegment phoneSegment = iterator.next();
       String phoneLabel = phoneSegment.getEvent();
       if (!shouldSkipPhone(phoneLabel)) {
         float v = phoneSegment.getStart() * 100;
@@ -366,10 +369,15 @@ public class WordTable {
         alignCenter(h);
         addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
         phoneMap.put(phoneSegment, h);
+
         if (simpleLayout) {
-          h.getElement().getStyle().setPaddingRight(5, Style.Unit.PX);
-          h.setBackground(SimpleColumnChart.MAX);
-        } else {
+          if (iterator.hasNext()) {
+            h.getElement().getStyle().setPaddingRight(PHONE_PADDING, Style.Unit.PX);
+          }
+          h.addStyleName("phoneColor");
+         // h.setBackground(SimpleColumnChart.MAX);
+        }
+        else {
           setColorClickable(phoneSegment, h);
           h.addStyleName("phoneWidth");
         }

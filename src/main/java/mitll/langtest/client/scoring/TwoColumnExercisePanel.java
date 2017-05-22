@@ -124,7 +124,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     this.alignments = alignments;
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
-    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage());
+    int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
+    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(),fontSize);
     this.isRTL = clickableWords.isRTL(exercise);
     // this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
@@ -1108,7 +1109,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String translitSentence = e.getTransliteration();
     if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
       return getEntry(e, QCNPFExercise.TRANSLITERATION, translitSentence, FieldType.TRANSLIT,
-          showInitially, new ArrayList<>(), true, annotationHelper, true);
+          showInitially, new ArrayList<>(), true, annotationHelper, false);
     }
     return null;
   }
