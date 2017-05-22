@@ -48,7 +48,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private final Logger logger = Logger.getLogger("NewBanner");
 
   public static final String SHOW = "showStorage";
-  //  private static final String LEARN = "Learn";
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
@@ -61,7 +60,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private HandlerRegistration handlerRegistration;
   private final Map<String, NavLink> nameToLink = new HashMap<>();
   private Dropdown userDrop;
- // private Dropdown viewMenu;
 
   private final List<Widget> choices = new ArrayList<>();
 
@@ -119,7 +117,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     setCogVisible(userManager.hasUser());
 
-
     addHistoryListener();
   }
 
@@ -176,37 +173,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     return lnav;
   }
 
-
-/*
-  @NotNull
-  private ShowChoices getChoices() {
-    ShowChoices choices = ShowChoices.FL;
-    String show = controller.getStorage().getValue(SHOW);
-    if (show != null) {
-      try {
-        choices = ShowChoices.valueOf(show);
-      } catch (IllegalArgumentException ee) {
-      }
-    }
-    return choices;
-  }
-*/
-
-/*  @NotNull
-  private PhonesChoices getPhonesDisplay() {
-    PhonesChoices choices = PhonesChoices.SHOW;
-    String show = controller.getStorage().getValue(SHOW_PHONES);
-    if (show != null && !show.isEmpty()) {
-      try {
-        choices = PhonesChoices.valueOf(show);
-     //   logger.info("getPhonesDisplay got " + choices);
-      } catch (IllegalArgumentException ee) {
-        logger.warning("getPhonesDisplay got " + ee);
-      }
-    }
-    return choices;
-  }*/
-
   private Nav lnav;
   private Dropdown cog;
 
@@ -218,141 +184,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
     addUserMenu(userManager, userMenu, rnav);
 
-    //rnav.add(viewMenu = getRealViewMenu());
-
     cog = new Dropdown("");
     cog.setIcon(IconType.COG);
     userMenu.getCogMenuChoices2().forEach(lt -> cog.add(lt.getLink()));
     rnav.add(cog);
 
-
     getInfoMenu(userMenu, rnav);
     return rnav;
   }
-
-/*  @NotNull
-  private Dropdown getRealViewMenu() {
-    Dropdown view = new Dropdown("View");
-    view.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        phoneChoice.setText(getPhoneMenuTitle());
-      }
-    });
-    view.setIcon(IconType.REORDER);
-    NavLink download = new NavLink("Download");
-    download.setIcon(IconType.DOWNLOAD_ALT);
-    view.add(download);
-
-    download.addClickHandler(event -> LangTest.EVENT_BUS.fireEvent(new DownloadEvent()));
-
-    DropdownSubmenu showChoices = getViewMenu();
-    view.add(showChoices);
-    return view;
-  }*/
-
-  /*private NavLink phoneChoice;
-
-  @NotNull
-  private DropdownSubmenu getViewMenu() {
-    DropdownSubmenu showChoices = new DropdownSubmenu("Show");
-    flTextChoices(showChoices);
-
-    phoneChoice = new NavLink(getPhoneMenuTitle());
-
-    Scheduler.get().scheduleDeferred(() -> {
-    //  logger.info("show phones " + getPhonesDisplay());
-      phoneChoice.setText(getPhoneMenuTitle());
-    });
-
-    showChoices.add(phoneChoice);
-    phoneChoice.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        if (getPhonesDisplay() == PhonesChoices.SHOW) {
-         // phoneChoice.setText("Hide Sounds");
-          storePhoneChoices(PhonesChoices.HIDE.toString());
-          phoneChoice.setIcon(null);
-        } else {
-         // phoneChoice.setText("Show Sounds");
-          phoneChoice.setIcon(CHECK);
-          storePhoneChoices(PhonesChoices.SHOW.toString());
-        }
-        fireShowEvent();
-      }
-    });
-
-    return showChoices;
-  }
-
-  @NotNull
-  private String getPhoneMenuTitle() {
-    return "Show Sounds";//(getPhonesDisplay() == PhonesChoices.SHOW ? "Hide" : "Show") + " Sounds";
-  }
-
-  private void flTextChoices(DropdownSubmenu showChoices) {
-    NavLink altflChoice = new NavLink("Alternate text");
-    NavLink primary = new NavLink("Primary text");
-    NavLink both = new NavLink("Both Primary and Alternate");
-
-    ShowChoices choices = getChoices();
-     switch (choices) {
-      case BOTH:
-        both.setIcon(CHECK);
-        break;
-      case FL:
-        primary.setIcon(CHECK);
-        break;
-      case ALTFL:
-        altflChoice.setIcon(CHECK);
-        break;
-    }
-    altflChoice.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        storeShowChoices(ShowChoices.ALTFL.toString());
-        fireShowEvent();
-        altflChoice.setIcon(CHECK);
-        both.setIcon(null);
-        primary.setIcon(null);
-      }
-    });
-    showChoices.add(primary);
-    showChoices.add(altflChoice);
-    primary.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        storeShowChoices(ShowChoices.FL.toString());
-        fireShowEvent();
-        altflChoice.setIcon(null);
-        both.setIcon(null);
-        primary.setIcon(CHECK);
-      }
-    });
-    showChoices.add(both);
-    both.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        storeShowChoices(ShowChoices.BOTH.toString());
-        fireShowEvent();
-        altflChoice.setIcon(null);
-        both.setIcon(CHECK);
-        primary.setIcon(null);
-      }
-    });
-  }
-
-  private void storeShowChoices(String toStore) {
-    controller.getStorage().storeValue(SHOW, toStore);
-  }
-
-  private void storePhoneChoices(String toStore) {
-    controller.getStorage().storeValue(SHOW_PHONES, toStore);
-  }
-
-  private void fireShowEvent() {
-    LangTest.EVENT_BUS.fireEvent(new ShowEvent());
-  }*/
 
   private void addSubtitle(Nav rnav) {
     rnav.add(subtitle = new Label());
@@ -423,7 +262,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     boolean first = true;
     boolean hasProject = hasProjectChoice();
 
-    logger.info("addChoicesForUser has project " + hasProject);
+   // logger.info("addChoicesForUser has project " + hasProject);
     for (VIEWS choice : Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS, VIEWS.LISTS)) {
       NavLink choice1 = getChoice(nav, choice.toString());
       if (first) {
@@ -431,15 +270,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
       }
       first = false;
       choices.add(choice1);
-
       viewToLink.put(choice, choice1);
     }
   }
 
   @NotNull
   private NavLink getChoice(ComplexWidget nav, String instanceName) {
-    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
-
+//    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
     NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
     //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
@@ -575,7 +412,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   private void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
-    //viewMenu.setVisible(show);
   }
 
   private NavLink getContactUs() {

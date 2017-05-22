@@ -197,7 +197,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
 
-    logger.info("getUserToResults for " + perfs.size());
+    logger.info("getUserToResults for " + perfs.size() + " results");
 
     int emptyCount = 0;
     for (SlickPerfResult perf : perfs) {

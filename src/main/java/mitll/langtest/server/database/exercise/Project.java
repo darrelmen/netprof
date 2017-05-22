@@ -287,13 +287,25 @@ public class Project implements PronunciationLookup {
 
     List<CommonExercise> exercises = fullTrie.getExercises(fl);
     if (exercises.size() == 1) {
-      return exercises.iterator().next();
+      CommonExercise next = exercises.iterator().next();
+      logger.info("getExerciseBySearchBoth found only #" + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
+      return next;
     } else if (!exercises.isEmpty()) {
-      List<CommonExercise> collect = exercises.stream().filter(ex -> ex.getEnglish().equalsIgnoreCase(english)).collect(Collectors.toList());
+      List<CommonExercise> collect = english.isEmpty() ?
+          exercises.stream().filter(ex -> ex.getForeignLanguage().equalsIgnoreCase(fl)).collect(Collectors.toList()) :
+          exercises.stream().filter(ex -> ex.getEnglish().equalsIgnoreCase(english)).collect(Collectors.toList());
+
       if (collect.isEmpty()) {
-        return exercises.iterator().next();
+        CommonExercise next = exercises.iterator().next();
+        logger.info("getExerciseBySearchBoth returning near match only #" + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage() + " for " + english + " " + fl);
+        return next;
       } else {
-        return collect.iterator().next();
+        CommonExercise next = collect.iterator().next();
+
+        logger.info("getExerciseBySearchBoth returning first of " + collect.size() +
+            " match #" + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage() + " for " + english + " " + fl);
+
+        return next;
       }
     } else {
       List<CommonExercise> exercisesInVocab = fullTrie.getExercises(english);
