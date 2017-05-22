@@ -297,7 +297,7 @@ public class Project implements PronunciationLookup {
 
       if (collect.isEmpty()) {
         CommonExercise next = exercises.iterator().next();
-        logger.info("getExerciseBySearchBoth returning near match only #" + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage() + " for " + english + " " + fl);
+        logger.info("getExerciseBySearchBoth returning near match only #" + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage() + " for '" + english + "' '" + fl+"'");
         return next;
       } else {
         CommonExercise next = collect.iterator().next();

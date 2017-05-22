@@ -32,7 +32,9 @@
 
 package mitll.langtest.server.database.postgres;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.IAnalysis;
@@ -339,8 +341,30 @@ public class ProjectTest extends BaseTest {
     int english = andPopulate.getProjectDAO().getByName("portuguese");
     Project project = andPopulate.getProject(english);
     project.getSectionHelper().report();;
-   // logger.info("project " + project.getAudioFileHelper().isHydraAvailableCheckNow());
+    // logger.info("project " + project.getAudioFileHelper().isHydraAvailableCheckNow());
     andPopulate.close();
+  }
+
+  @Test
+  public void testDecode() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    int english = andPopulate.getProjectDAO().getByName("spanish");
+    Project project = andPopulate.getProject(english);
+    AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+
+    audioFileHelper.runHydra("De acuerdo " +
+        "al " +
+        "decano " +
+        "tenemos " +
+        "59 " +
+        "minutos.");
+
+     andPopulate.close();
+  }
+
+  AudioFileHelper getAudioFileHelper(DatabaseImpl russian) {
+    ServerProperties serverProps = russian.getServerProps();
+    return new AudioFileHelper(new PathHelper("war", null), serverProps, russian, null, null);
   }
 
   @Test

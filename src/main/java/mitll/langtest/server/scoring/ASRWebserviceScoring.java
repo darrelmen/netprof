@@ -78,8 +78,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final Logger logger = LogManager.getLogger(ASRWebserviceScoring.class);
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
-  public static final String DCODR = "dcodr";
-  public static final String UNK = "+UNK+";
+  private static final String DCODR = "dcodr";
+  private static final String UNK = "+UNK+";
+  private static final String SEMI = ";";
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -100,7 +101,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * Used in possible trimming
    */
   private static final boolean INCLUDE_SELF_SIL_LINK = false;
-  private final HTTPClient httpClient;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
@@ -139,7 +139,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
     }
 
-    this.httpClient = getDcodr();
+    //HTTPClient httpClient = getDcodr();
   }
 
   private int getWebservicePort() {
@@ -485,10 +485,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         = "[";
     String pronunciations = getPronunciations(transcript, transliteration, false);
 
-    logger.info("createHydraDict" +
+/*    logger.info("createHydraDict" +
         "\n\ttranscript     " + transcript +
         "\n\tpronunciations " + pronunciations
-    );
+    );*/
 
     dict += pronunciations;
     dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
@@ -509,11 +509,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     //  String[] translitTokens = transliteration.toLowerCase().split(" ");
     String[] transcriptTokens = transcript.split(" ");
     //  boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
-    int index = 0;
 
     int total = 0;
     for (String word : transcriptTokens) {
-      //String trim = word.trim();
       if (htkDictionary.contains(word)) {
         scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
 
@@ -561,8 +559,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   public String getPronunciations(String transcript, String transliteration, boolean justPhones) {
     String dict = "";
     String[] translitTokens = transliteration.toLowerCase().split(" ");
-    String[] transcriptTokens = transcript.split(" ");
-    boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
+
+    //String[] transcriptTokens = transcript.split(" ");
+    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript);
+
+    int numTokens = transcriptTokens.size();
+    boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((numTokens == translitTokens.length) || (numTokens == 1));
     int index = 0;
     for (String word : transcriptTokens) {
       String trim = word.trim();
@@ -590,7 +592,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                   logger.warn("getPronunciations (transliteration) couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
                 }
 
-                String[][] translitprocess = (transcriptTokens.length == 1) ?
+                String[][] translitprocess = (numTokens == 1) ?
                     getLTS().process(StringUtils.join(translitTokens, "")) :
                     getLTS().process(translitTokens[index]);
 
@@ -626,7 +628,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                 }*/
 
 
-                logger.info("using unk phone for " +word);
+                logger.info("using unk phone for " + word);
                 dict += getUnkPron(word);
 
               }
@@ -654,7 +656,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   private String getPronStringForWord(String word, String[] apply, boolean justPhones) {
     String s = listToSpaceSepSequence(apply);
-    return justPhones ? s + " " : word + "," + s + " sp" + ";";
+    return justPhones ? s + " " : word + "," + s + " sp" + SEMI;
   }
 
   /**
@@ -670,7 +672,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     for (String[] pc : apply) {
       String result = getPhones(pc);
       if (result.length() > 0) {
-        return justPhones ? result + " " : word + "," + result + " sp;";
+        return justPhones ? result + " " : word + "," + result + " sp" + SEMI;
       }
     }
     return justPhones ? "" : getUnkPron(word); //hopefully we never get here...
@@ -678,7 +680,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   @NotNull
   private String getUnkPron(String word) {
-    return word + "," + UNK + " sp;";
+    return word + "," + UNK + " sp" + SEMI;
   }
 
   private String getPhones(String[] pc) {
@@ -706,15 +708,17 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private Object[] runHydra(String audioPath,
-                            String transcript,
-                            String transliteration,
-                            Collection<String> lmSentences,
-                            String tmpDir,
-                            boolean decode,
-                            int end) {
+  public Object[] runHydra(String audioPath,
+                           String transcript,
+                           String transliteration,
+                           Collection<String> lmSentences,
+                           String tmpDir,
+                           boolean decode,
+                           int end) {
     // reference trans
+//    logger.info("transcript " + transcript);
     String cleaned = slfFile.cleanToken(transcript).trim();
+//    logger.info("cleaned    " + cleaned);
     if (isMandarin) {
       cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + svDecoderHelper.getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
     }
@@ -732,8 +736,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       cleaned = slfFile.cleanToken(slfOut[1]);
     }
 
-    String sep = ";";
-    String cleanedTranscript = getCleanedTranscript(cleaned, sep);
+    // String cleanedTranscript = getCleanedTranscript(cleaned, SEMI);
 
     String hydraInput =
         tmpDir + "/:" +
@@ -741,7 +744,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             hydraDict + ":" +
             smallLM + ":" +
             "xxx,0," + end + "," +
-            "[<s>" + cleanedTranscript + "</s>]";
+            "[<s>" + getCleanedTranscript(cleaned, SEMI) + "</s>]";
 
     long then = System.currentTimeMillis();
 
@@ -767,7 +770,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         return null;
       }
       // TODO makes this a tuple3 type
-      String[] split = results[0].split(sep);
+      String[] split = results[0].split(SEMI);
       Scores scores = new Scores(split);
       // clean up tmp directory if above score threshold
       logger.debug(languageProperty + " : Took " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +

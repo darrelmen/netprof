@@ -1354,6 +1354,13 @@ public class AudioFileHelper implements AlignDecode {
     asrScoring = webserviceScoring;
   }
 
+  public void runHydra(String transcript) {
+    ArrayList<String> lmSentences = new ArrayList<>();
+
+    lmSentences.add(transcript);
+    webserviceScoring.runHydra("",transcript,"", lmSentences,"",true,1000);
+  }
+
   @Nullable
   private HTKDictionary readDictionary(Project project, String installPath) {
     HTKDictionary htkDictionary = null;

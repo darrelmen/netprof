@@ -72,18 +72,17 @@ import java.util.logging.Logger;
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
-  public static final int PHONE_CONTAINER_MIN_WIDTH = 220;
+  private static final int PHONE_CONTAINER_MIN_WIDTH = 220;
+  private static final int TABLE_WIDTH = 235;
+
   private static final int MAX_EXAMPLES = 25;
 
-  private static final int TABLE_WIDTH = 295;
   private static final int SCORE_COL_WIDTH = 60;
   private static final String SOUND = "Sound";
-  //  private static final String SCORE = "Initial";
   private static final String COUNT_COL_HEADER = "#";
-  private static final String CURR = "Avg. Score";//"Curr.";
-  //private static final String DIFF_COL_HEADER = "+/-";
+  private static final String CURR = "Avg. Score";
   private static final int COUNT_COL_WIDTH = 45;
-  private static final String TOOLTIP = "Click to see examples and scores over time";//"Click on an item to review.";
+  private static final String TOOLTIP = "Click to see examples and scores over time";
   private static final int SOUND_WIDTH = 75;
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;

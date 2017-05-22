@@ -65,6 +65,7 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
+  public static final String EXAMPLES_OF_SOUND = "Examples of sound";
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
 
   private static final String WORDS_USING = "Vocabulary with ";
@@ -73,7 +74,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   private final ShowTab learnTab;
   private String phone;
   private final boolean isSpanish;
-  private final TextHeader header = new TextHeader("Examples of sound");
+  private final TextHeader header = new TextHeader(EXAMPLES_OF_SOUND);
   private final Heading heading;
 
   /**

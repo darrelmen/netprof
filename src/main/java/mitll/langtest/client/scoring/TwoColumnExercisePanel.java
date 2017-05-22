@@ -60,7 +60,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   static final int CONTEXT_INDENT = 56;
 
-  //private final List<CorrectAndScore> correctAndScores;
   private final T exercise;
   private final ExerciseController controller;
 
@@ -109,7 +108,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
                                 final ListInterface<CommonShell, T> listContainer,
-                                // List<CorrectAndScore> correctAndScores,
                                 ShowChoices choices,
                                 PhonesChoices phonesChoices,
                                 Map<Integer, AlignmentOutput> alignments) {
@@ -150,13 +148,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @Override
   public void getRefAudio(RefAudioListener listener) {
     AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
-    // if (playAudio != null && currentAudioAttr != null) {
     int refID = currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
 
     AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
     int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
-
-    //    logger.info("asking for " + contextRefID);
 
     Set<Integer> req = new HashSet<>();
     if (refID != -1) {

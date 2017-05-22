@@ -53,6 +53,7 @@ import java.util.*;
 public class SmallVocabDecoder {
   private static final Logger logger = LogManager.getLogger(SmallVocabDecoder.class);
   public static final String REMOVE_ME = "[\\u2022\\u2219\\u2191\\u2193;~/']";
+  public static final char FULL_WIDTH_ZERO = '\uFF10';
   private HTKDictionary htkDictionary;
 
   public SmallVocabDecoder() {
@@ -60,7 +61,7 @@ public class SmallVocabDecoder {
 
   /**
    * @param htkDictionary
-   * @see ASRScoring#makeDecoder
+   * @see ASRWebserviceScoring#makeDecoder
    */
   public SmallVocabDecoder(HTKDictionary htkDictionary) {
     this.htkDictionary = htkDictionary;
@@ -74,7 +75,7 @@ public class SmallVocabDecoder {
    *
    * @param background sentences
    * @return most frequent vocabulary words
-   * @see ASRScoring#getUsedTokens
+   * @see ASRWebserviceScoring#getUsedTokens
    */
   List<String> getVocab(Collection<String> background, int vocabSizeLimit) {
     return getSimpleVocab(background, vocabSizeLimit);
@@ -88,15 +89,12 @@ public class SmallVocabDecoder {
   String toFull(String s) {
     StringBuilder builder = new StringBuilder();
 
-    char fullWidthZero = '\uFF10';
-
     final CharacterIterator it = new StringCharacterIterator(s);
     for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
       if (c >= '0' && c <= '9') {
         int offset = c - '0';
-        int full = fullWidthZero + offset;
-        Character character = Character.valueOf((char) full);
-        builder.append(character.toString());
+        int full = FULL_WIDTH_ZERO + offset;
+        builder.append(Character.valueOf((char) full).toString());
       } else {
         builder.append(c);
       }
@@ -108,7 +106,7 @@ public class SmallVocabDecoder {
    * @param sentences
    * @param vocabSizeLimit
    * @return
-   * @see ASRScoring#getUniqueTokensInLM
+   * @see ASRWebserviceScoring#getUniqueTokensInLM
    */
   List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // childCount the tokens
@@ -155,10 +153,11 @@ public class SmallVocabDecoder {
   public Collection<String> getTokensAllLanguages(boolean isMandarin, String fl) {
     return isMandarin ? getMandarinTokens(fl) : getTokens(fl);
   }
+
   /**
    * @param sentence
    * @return
-   * @see Scoring#getSegmented
+   * @see ASRWebserviceScoring#getSegmented
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
   public List<String> getTokens(String sentence) {
@@ -189,7 +188,7 @@ public class SmallVocabDecoder {
    * Tries to remove junky characters from the sentence so hydec won't choke on them.
    * <p>
    * Also removes the chinese unicode bullet character, like in Bill Gates.
-   *
+   * <p>
    * TODO : really slow - why not smarter?
    *
    * @param sentence
@@ -198,16 +197,16 @@ public class SmallVocabDecoder {
    * @see mitll.langtest.server.trie.ExerciseTrie#getExercises
    */
   public String getTrimmed(String sentence) {
-    return  sentence
+    return sentence
         .replaceAll(REMOVE_ME, " ")
-     //   .replaceAll("", " ")
+        //   .replaceAll("", " ")
         .replaceAll("\\p{Z}+", " ")  // normalize all whitespace
-       // .replaceAll(";", " ")
-       // .replaceAll("~", " ")
-      //  .replaceAll("\\u2191", " ")
-       // .replaceAll("\\u2193", " ")
-       // .replaceAll("/", " ")
-       // .replaceAll("'", "")
+        // .replaceAll(";", " ")
+        // .replaceAll("~", " ")
+        //  .replaceAll("\\u2191", " ")
+        // .replaceAll("\\u2193", " ")
+        // .replaceAll("/", " ")
+        // .replaceAll("'", "")
         .replaceAll("\\p{P}", " ")
         //.replaceAll("\\s+", " ")
         .trim();

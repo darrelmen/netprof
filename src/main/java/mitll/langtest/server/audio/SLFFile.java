@@ -32,8 +32,11 @@
 
 package mitll.langtest.server.audio;
 
+import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -51,7 +54,8 @@ import static mitll.langtest.server.scoring.SmallVocabDecoder.REMOVE_ME;
  * See <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node288_ct.html">SLF File Documentation</a>
  */
 public class SLFFile {
-  //private static final Logger logger = LogManager.getLogger(SLFFile.class);
+  private static final Logger logger = LogManager.getLogger(SLFFile.class);
+
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
   private static final String ENCODING = "UTF8";
 
@@ -168,6 +172,7 @@ public class SLFFile {
     SmallVocabDecoder svd = new SmallVocabDecoder();
     int ctr = 0;
     for (String sentence : sentencesToUse) {
+//      logger.info("createSimpleSLFFile sentence " + sentence);
       Collection<String> tokens = svd.getTokens(sentence);
 
       int prevNode = 0;  // points to initial node
@@ -181,7 +186,7 @@ public class SLFFile {
 //      logger.info("tokens " + tokens);
       for (String token : tokens) {
         boolean onLast = ++c == tokens.size();
-        //      logger.info("onLast " + onLast + " c " + c + " " + token + " tokens " + tokens.size());
+//        logger.info("createSimpleSLFFile onLast " + onLast + " c " + c + " '" + token + "' tokens length = " + tokens.size());
         String cleanedToken = cleanToken(token);
 
         if (!cleanedToken.isEmpty()) {
@@ -252,9 +257,9 @@ public class SLFFile {
   /**
    * Redundant with SmallVocabDecoder...
    *
-   * @see
    * @param token
    * @return
+   * @see
    */
   public String cleanToken(String token) {
     return token
