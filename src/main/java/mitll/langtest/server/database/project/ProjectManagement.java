@@ -70,7 +70,7 @@ public class ProjectManagement implements IProjectManagement {
    * JUST FOR TESTING
    */
   private static final boolean DEBUG_ONE_PROJECT = true;
-  private static final String ONE_TO_LOAD = "spanish";
+  private static final String ONE_TO_LOAD = "mandarin";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;

@@ -197,6 +197,7 @@ public class CommentBox extends PopupContainerFactory {
 
   private Button commentButton;
   private Button clearButton;
+  private Widget theContent;
 
   public void showButtons() {
     commentButton.setVisible(true);
@@ -221,6 +222,8 @@ public class CommentBox extends PopupContainerFactory {
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
   public DivWidget getEntry(String field, Widget content, ExerciseAnnotation annotation, boolean showInitially, boolean isRTL) {
+    this.theContent = content;
+
     field = fixAudioField(field);
     final HidePopupTextBox commentEntryText = getCommentBox(field);
 
@@ -371,6 +374,10 @@ public class CommentBox extends PopupContainerFactory {
       }
     });
     return clear;
+  }
+
+  public Widget getTheContent() {
+    return theContent;
   }
 
   private class MyPopup extends DecoratedPopupPanel {

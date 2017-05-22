@@ -1,7 +1,6 @@
 package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -18,7 +17,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   private String background = null;
   private boolean highlighted = false;
   private boolean clickable = true;
-  private DivWidget divParent;
+//  private DivWidget divParent;
 
 /*  public SimpleHighlightSegment(@IsSafeHtml String html, Direction dir) {
     super(html, dir);
@@ -95,6 +94,16 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   }
 
   @Override
+  public void clearSouth() {
+
+  }
+
+  @Override
+  public DivWidget getNorth() {
+    return null;
+  }
+/*
+  @Override
   public DivWidget getDivParent() {
     logger.info("getDivParent from " + this);
     return divParent;
@@ -104,7 +113,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   public void setDivParent(DivWidget horizontal) {
     logger.info("setParent on " + this);
     this.divParent = horizontal;
-  }
+  }*/
 
   public String toString() {
     return "seg '" + getHTML() + "' " + getLength() + " long";

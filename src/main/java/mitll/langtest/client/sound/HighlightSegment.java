@@ -20,11 +20,11 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   private String background = null;
   private boolean highlighted = false;
   private boolean clickable = true;
-  private final DivWidget south;
+  private final DivWidget north, south;
   private final int id;
   private final String content;
   private final InlineHTML span;
-  private DivWidget divParent;
+  //private DivWidget divParent;
 
   /**
    * @param id
@@ -44,14 +44,22 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir) {
     DivWidget north;
     add(north = new DivWidget());
+
     add(south = new DivWidget());
-    south.setWidth("100%");
+  
     south.addStyleName("floatLeft");
+    south.getElement().getStyle().setClear(Style.Clear.BOTH);
+
+    south.getElement().setId("Highlight_South_" + id);
+
     getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
     this.span = new InlineHTML(html, dir);
     this.content = html;
     north.add(span);
-    span.getElement().setId("highlight_"+id+"_"+html);
+    north.getElement().setId("Highlight_North_" + id);
+    north.addStyleName("floatLeft");
+    this.north = north;
+    span.getElement().setId("highlight_" + id + "_" + html);
     length = html.length();
     this.id = id;
   }
@@ -120,11 +128,22 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     south.add(widget);
   }
 
-  /**
-   * @see AllHighlight#AllHighlight
-   * @return
-   */
   @Override
+  public void clearSouth() {
+    //  logger.info("clearSouth...");
+    remove(south);
+  }
+
+  @Override
+  public DivWidget getNorth() {
+    return north;
+  }
+
+  /**
+   * @return
+   * @see AllHighlight#AllHighlight
+   */
+/*  @Override
   public DivWidget getDivParent() {
     logger.info("getDivParent " + this);
     if (this.divParent == null) logger.warning("getDivParent huh??? parent is null for " + this);
@@ -136,9 +155,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     logger.info("setDivParent " + this);
     if (horizontal == null) logger.warning("setDivParent huh??? parent is null for " + this);
     this.divParent = horizontal;
-  }
-
+  }*/
   public String toString() {
-    return "id " +id+  " '" + content + "' (" + getLength() + ")";
+    return "id " + id + " '" + content + "' (" + getLength() + ")";
   }
 }
