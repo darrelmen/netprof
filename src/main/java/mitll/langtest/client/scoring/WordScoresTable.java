@@ -25,7 +25,7 @@ public class WordScoresTable {
    * @param isRTL
    * @return
    */
-  public Widget getStyledWordTable(PretestScore result,
+/*  public Widget getStyledWordTable(PretestScore result,
                                    AudioControl audioControl,
                                    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
                                    boolean isRTL) {
@@ -34,7 +34,7 @@ public class WordScoresTable {
     table2.addStyleName("leftFiveMargin");
     table2.addStyleName("floatLeftAndClear");
     return table2;
-  }
+  }*/
 
   /**
    * TODO : don't sort!

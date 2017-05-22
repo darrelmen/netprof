@@ -106,10 +106,12 @@ public class ScoreFeedbackDiv {
       scoreFeedbackDiv.add(progressBar);
 
       Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
-      scoreFeedbackDiv.add(new WordScoresTable()
-          .getStyledWordTable(pretestScore, playAudioPanel, typeToSegmentToWidget, isRTL));
+      scoreFeedbackDiv.add(new WordTable()
+          .getDivWord(pretestScore.getTypeToSegments(), playAudioPanel, typeToSegmentToWidget, isRTL));
       SegmentHighlightAudioControl listener = new SegmentHighlightAudioControl(typeToSegmentToWidget);
       playAudioPanel.setListener(listener);
+      // so it will play on drill tab...
+      playAudioPanel.setEnabled(true);
 
       wordTableContainer.add(scoreFeedbackDiv);
       logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());

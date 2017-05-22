@@ -125,7 +125,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
     int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
-    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(),fontSize);
+    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), fontSize);
     this.isRTL = clickableWords.isRTL(exercise);
     // this.correctAndScores = correctAndScores;
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
@@ -238,7 +238,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void cacheOthers(RefAudioListener listener) {
-    Set<Integer> req = new HashSet<>(playAudio.getAllAudioIDs());
+    Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
 
     if (contextPlay != null) {
       req.addAll(contextPlay.getAllAudioIDs());
@@ -515,9 +515,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String lcSegment = removePunct(segment.toLowerCase());
     String fragment1 = removePunct(clickable.getContent().toLowerCase());
 
-    logger.info("matchSegmentToWidgetForAudio compare :" +
-        "\n\tsegment " + lcSegment + //" length " + segmentLength +
-        "\n\tvs      " + fragment1);
+    if (DEBUG)
+      logger.info("matchSegmentToWidgetForAudio compare :" +
+          "\n\tsegment " + lcSegment + //" length " + segmentLength +
+          "\n\tvs      " + fragment1);
 
     if (lcSegment.equalsIgnoreCase(fragment1)) {
       if (phonesChoices == PhonesChoices.SHOW) {
@@ -679,27 +680,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     //return cl.equals(ss);
   }
 
-/*
-  private String getWordEvent(TranscriptSegment word) {
-    return removePunct(word.getEvent().toLowerCase());
-  }
-*/
-
+  /**
+   * Remove arabic question mark...
+   * exclamation point
+   * chinese fill with comma
+   * ideographic comma
+   * right double quote
+   *
+   * @param t
+   * @return
+   */
   protected String removePunct(String t) {
     return t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("[\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
+        .replaceAll("[\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013\\u061F\\uFF0C\\u201D]", "");
   }
-
-/*  private TranscriptSegment skipSils(Iterator<TranscriptSegment> iterator, TranscriptSegment word) {
-    TranscriptSegment val = word;
-    while (shouldIgnore(word) && iterator.hasNext()) {
-      logger.warning("skipSils before " + val);
-      val = iterator.next();
-      logger.warning("skipSils now    " + val);
-    }
-    return val;
-  }*/
 
   @NotNull
   private IHighlightSegment skipUnclickable(Iterator<IHighlightSegment> iterator, IHighlightSegment clickable) {

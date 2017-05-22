@@ -44,13 +44,6 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     DivWidget north;
     add(north = new DivWidget());
 
-    add(south = new DivWidget());
-
-    south.addStyleName("floatLeft");
-    south.getElement().getStyle().setClear(Style.Clear.BOTH);
-
-    south.getElement().setId("Highlight_South_" + id);
-
     getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
     this.span = new InlineHTML(html, dir);
     this.content = html;
@@ -59,6 +52,16 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     north.addStyleName("floatLeft");
     this.north = north;
     span.getElement().setId("highlight_" + id + "_" + html);
+
+    add(south = new DivWidget());
+
+    if (dir == HasDirection.Direction.LTR) {
+      south.addStyleName("floatLeft");
+    }
+
+    south.getElement().getStyle().setClear(Style.Clear.BOTH);
+    south.getElement().setId("Highlight_South_" + id);
+
     length = html.length();
     this.id = id;
   }

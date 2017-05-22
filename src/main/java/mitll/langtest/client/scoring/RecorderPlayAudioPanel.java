@@ -24,21 +24,13 @@ import mitll.langtest.shared.exercise.CommonExercise;
 class RecorderPlayAudioPanel extends PlayAudioPanel {
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
-//  private static final String DOWNLOAD_AUDIO = "downloadAudio";
-//  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
    */
   private Image recordImage1;
   private Image recordImage2;
-//  private IconAnchor download;
-//  private Panel downloadContainer;
-//  private int exid;
-//  private ExerciseController controller;
-
   private  DownloadContainer downloadContainer;
-  //private DownloadContainer realDownloadContainer;
 
   /**
    * @param soundManager
@@ -63,8 +55,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
         },
         "",
         null);
-//    this.exid = exercise.getID();
-//    this.controller = exerciseController;
 
     downloadContainer = new DownloadContainer();
     getElement().setId("RecorderPlayAudioPanel");
@@ -155,58 +145,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordFeedback.add(waitCursor);
     return recordFeedback;
   }
-
-/*
-  private DivWidget addDownloadAudioWidget() {
-    DivWidget downloadContainer = new DivWidget();
-
-    downloadContainer.getElement().setId("downloadContainer");
-
-    downloadContainer.add(download = getDownloadIcon());
-    downloadContainer.setVisible(false);
-
-    downloadContainer.addStyleName("leftFiveMargin");
-    downloadContainer.addStyleName("rightFiveMargin");
-    downloadContainer.addStyleName("topFiveMargin");
-
-    return downloadContainer;
-  }
-*/
-
-  /**
-   * @return
-   */
-/*  private IconAnchor getDownloadIcon() {
-    IconAnchor download = new IconAnchor();
-    download.getElement().setId("Download_user_audio_link");
-    download.setIcon(IconType.DOWNLOAD);
-    download.setIconSize(IconSize.TWO_TIMES);
-    addTooltip(download, DOWNLOAD_YOUR_RECORDING);
-
-    download.addClickHandler(event -> controller.logEvent(download, "DownloadUserAudio_Icon", exid,
-        "downloading audio file "));
-    return download;
-  }*/
-
-/*  private Tooltip addTooltip(Widget w, String tip) {
-    return new TooltipHelper().addTooltip(w, tip);
-  }
-
-  void setDownloadHref(String audioPathToUse,
-                       int id,
-                       int user) {
-    downloadContainer.setVisible(true);
-    String href = DOWNLOAD_AUDIO +
-        "?file=" +
-        audioPathToUse +
-        "&" +
-        "exerciseID=" +
-        id +
-        "&" +
-        "userID=" +
-        user;
-    download.setHref(href);
-  }*/
 
   void setDownloadHref(String audioPathToUse,
                        int id,

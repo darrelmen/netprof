@@ -30,15 +30,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   public static final String OGG = ".ogg";
-  /**
-   * @see #scoreAudio
-   */
-/*
-  private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
-
-  public static final int FIRST_STEP = 35;
-  public static final int SECOND_STEP = 75;
-*/
 
   /**
    * TODO : limit connection here...
@@ -59,7 +50,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    *
    */
   private DivWidget scoreFeedback;
-  // private ProgressBar progressBar;
   private boolean hasScoreHistory = false;
   private ListInterface<CommonShell, T> listContainer;
   private boolean isRTL;
@@ -229,52 +219,15 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     PretestScore pretestScore = result.getPretestScore();
     scoreFeedback.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL));
     useResult(pretestScore, false, result.getPath());
+
+    // Gotta remember the score on the exercise now...
+
+    CorrectAndScore hydecScore = new CorrectAndScore(pretestScore.getHydecScore(),  result.getPath());
+    hydecScore.setScores(pretestScore.getTypeToSegments());
+    hydecScore.setJson(pretestScore.getJson());
+
+    exercise.getScores().add(hydecScore);
   }
-
- /* @NotNull
-  private DivWidget getWordTableContainer(PretestScore pretestScore, boolean isRTL) {
-    DivWidget wordTableContainer = new DivWidget();
-    wordTableContainer.getElement().setId("wordTableContainer");
-    wordTableContainer.addStyleName("inlineFlex");
-    wordTableContainer.addStyleName("floatLeft");
-
-    wordTableContainer.add(getPlayButtonDiv());
-
-    if (pretestScore.getHydecScore() > 0) {
-      DivWidget scoreFeedbackDiv = new DivWidget();
-      scoreFeedbackDiv.add(progressBar);
-
-      Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
-      scoreFeedbackDiv.add(new WordScoresTable()
-          .getStyledWordTable(pretestScore, playAudioPanel, typeToSegmentToWidget, isRTL));
-      SegmentHighlightAudioControl listener = new SegmentHighlightAudioControl(typeToSegmentToWidget);
-      playAudioPanel.setListener(listener);
-
-      wordTableContainer.add(scoreFeedbackDiv);
-      logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
-    } else {
-      Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
-      w.addStyleName("leftFiveMargin");
-      wordTableContainer.add(w);
-    }
-
-    Panel downloadContainer = playAudioPanel.getDownloadContainer();
-    downloadContainer.addStyleName("topFiveMargin");
-    wordTableContainer.add(downloadContainer);
-
-    return wordTableContainer;
-  }
-
-  @NotNull
-  private DivWidget getPlayButtonDiv() {
-    DivWidget divForPlay = new DivWidget();
-
-    Widget playButton = playAudioPanel.getPlayButton();
-    playButton.addStyleName("topFiveMargin");
-
-    divForPlay.add(playButton);
-    return divForPlay;
-  }*/
 
   @Override
   public void startRecording() {

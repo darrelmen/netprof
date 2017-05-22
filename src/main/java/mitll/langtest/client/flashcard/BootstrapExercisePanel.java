@@ -55,7 +55,6 @@ import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.ClickableWords;
 import mitll.langtest.client.scoring.DownloadContainer;
 import mitll.langtest.client.scoring.ScoreFeedbackDiv;
-import mitll.langtest.client.scoring.WordScoresTable;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
@@ -66,7 +65,6 @@ import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 

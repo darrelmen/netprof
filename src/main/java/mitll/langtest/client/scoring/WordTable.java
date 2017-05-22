@@ -45,6 +45,7 @@ import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SimpleHighlightSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -160,7 +161,7 @@ public class WordTable {
    * @param audioControl
    * @param isRTL
    * @return
-   * @see WordScoresTable#getStyledWordTable
+   * @see ScoreFeedbackDiv#getWordTableContainer
    */
   Widget getDivWord(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime,
                     AudioControl audioControl,
@@ -169,6 +170,7 @@ public class WordTable {
     DivWidget table = new DivWidget();
     table.addStyleName("topFiveMargin");
     table.addStyleName("leftFiveMargin");
+    table.addStyleName("floatLeftAndClear");
 
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
 
@@ -200,6 +202,7 @@ public class WordTable {
         alignCenter(header);
         header.addStyleName("floatLeft");
         header.setWidth("100%");
+        header.getNorth().setWidth("100%");
 
         words.put(word, header);
         addClickHandler(audioControl, word, header.getClickable());
