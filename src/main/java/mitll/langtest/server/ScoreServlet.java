@@ -934,9 +934,9 @@ public class ScoreServlet extends DatabaseServlet {
       else {
         String decoded = new String(Base64.getDecoder().decode(flText.getBytes()));
 
-        logger.info("getExerciseIDFromText request to decode " + exerciseText + " = " + decoded);
+        logger.info("getExerciseIDFromText request to decode '" + exerciseText + "' = '" + decoded +"'");
 
-        CommonExercise exercise = project1.getExerciseBySearchBoth(exerciseText, decoded);
+        CommonExercise exercise = project1.getExerciseBySearchBoth(exerciseText.trim(), decoded.trim());
 
         if (exercise != null) {
           logger.info("getExerciseIDFromText for '" + exerciseText + "' '" +decoded+ "' found exercise id " + exercise.getID());

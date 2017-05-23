@@ -281,29 +281,34 @@ public class Project implements PronunciationLookup {
   }
 
   public CommonExercise getExerciseBySearchBoth(String english, String fl) {
-//    logger.info("getExerciseBySearchBoth looking for '" + english +
-//        "' and '" + fl +
-//        "' found ");
-
     List<CommonExercise> exercises = fullTrie.getExercises(fl);
     if (exercises.size() == 1) {
       CommonExercise next = exercises.iterator().next();
-      logger.info("getExerciseBySearchBoth found only #" + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
+      logger.info("getExerciseBySearchBoth found only #" + next.getID() + " '" + next.getEnglish() + "' '" + next.getForeignLanguage() + "' for search '" + english + "' '" + fl + "'");
       return next;
     } else if (!exercises.isEmpty()) {
-      List<CommonExercise> collect = english.isEmpty() ?
-          exercises.stream().filter(ex -> ex.getForeignLanguage().equalsIgnoreCase(fl)).collect(Collectors.toList()) :
-          exercises.stream().filter(ex -> ex.getEnglish().equalsIgnoreCase(english)).collect(Collectors.toList());
+      List<CommonExercise> collect1 = exercises.stream().filter(ex -> ex.getForeignLanguage().equalsIgnoreCase(fl)).collect(Collectors.toList());
+      logger.info("getExerciseBySearchBoth found on fl match " + collect1.size() + " for '" + english + "' '" + fl + "'");
 
-      if (collect.isEmpty()) {
+      if (collect1.isEmpty()) {
+        collect1 = exercises.stream().filter(ex -> ex.getEnglish().equalsIgnoreCase(english)).collect(Collectors.toList());
+        logger.info("\tgetExerciseBySearchBoth found on english match " + collect1.size() + " for '" + english + "' '" + fl + "'");
+      }
+
+      if (collect1.isEmpty()) {
         CommonExercise next = exercises.iterator().next();
-        logger.info("getExerciseBySearchBoth returning near match only #" + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage() + " for '" + english + "' '" + fl+"'");
+        logger.info("getExerciseBySearchBoth returning near match only #" + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage() + " for '" + english + "' '" + fl + "'");
         return next;
       } else {
-        CommonExercise next = collect.iterator().next();
+        CommonExercise next = collect1.iterator().next();
 
-        logger.info("getExerciseBySearchBoth returning first of " + collect.size() +
-            " match #" + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage() + " for " + english + " " + fl);
+        logger.info("getExerciseBySearchBoth returning first of " + collect1.size() +
+            " match" +
+            "\n\t#       " + next.getID() +
+            "\n\tenglish " + next.getEnglish() +
+            "\n\tfl      " + next.getForeignLanguage() +
+            "\n\tfor     " + english +
+            "\n\tfl      " + fl);
 
         return next;
       }
