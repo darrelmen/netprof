@@ -27,8 +27,8 @@ import java.util.logging.Logger;
  */
 public class ScoreFeedbackDiv {
   private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
+
   private ProgressBar progressBar;
-  //private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
   /**
    * @see #scoreAudio
    */
@@ -59,7 +59,7 @@ public class ScoreFeedbackDiv {
   }
 
 
-  public void showScore(double score) {
+   void showScore(double score) {
     double percent = score / 100d;
     progressBar.setPercent(100 * percent);
     progressBar.setText("" + Math.round(score));

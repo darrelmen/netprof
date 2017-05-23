@@ -105,16 +105,12 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       col.add(historyHoriz);
     }
 
-    add(col);//scoreFeedback = new DivWidget());
+    add(col);
 
     recordFeedback = makePlayAudioPanel().getRecordFeedback(getWaitCursor());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
     scoreFeedback.add(recordFeedback);
-
-/*    progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
-    styleTheProgressBar(progressBar);
-    addTooltip(progressBar, "Overall Score");*/
 
     this.scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel.getRealDownloadContainer());
     scoreFeedback.getElement().setId("scoreFeedbackRow");
@@ -124,20 +120,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     return waitCursorHelper.getWaitCursor();
   }
 
-  /**
-   * Add score feedback to the right of the play button.
-   *
-   * @return
-   * @seex mitll.langtest.client.scoring.AudioPanel#addWidgets
-   */
-/*  private Widget styleTheProgressBar(ProgressBar progressBar) {
-    Style style = progressBar.getElement().getStyle();
-    style.setMarginTop(5, Style.Unit.PX);
-    style.setMarginLeft(5, Style.Unit.PX);
-    style.setMarginBottom(0, Style.Unit.PX);
-    progressBar.setVisible(false);
-    return progressBar;
-  }*/
   private void addMiniScoreListener(MiniScoreListener l) {
     this.miniScoreListener = l;
   }
@@ -277,9 +259,11 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     setDownloadHref();
     scoreAudio(result, isRTL);
 
-    waitCursorHelper.cancelTimer();
-    waitCursorHelper.setWhite();
-    waitCursorHelper.show();
+//    waitCursorHelper.cancelTimer();
+//    waitCursorHelper.setWhite();
+//    waitCursorHelper.show();
+
+    waitCursorHelper.showFinished();
   }
 
   @Override
@@ -293,7 +277,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     playAudioPanel.setEnabled(isValid);
 
     waitCursorHelper.showFinished();
-    waitCursorHelper.hide();
+//    waitCursorHelper.hide();
   }
 
   @Override

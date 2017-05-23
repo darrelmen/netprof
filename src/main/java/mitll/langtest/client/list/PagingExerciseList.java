@@ -352,7 +352,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   void showEmptySelection() {
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-        showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
+        if (typeAhead != null) {
+          showPopup("No items match the selection and search.",
+              "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
+        }
         showEmptyExercise();
       }
     });

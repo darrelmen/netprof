@@ -657,7 +657,7 @@ public class UserListManager implements IUserListManager {
   private <T extends CommonShell> UserList<T> getCommonUserList(Collection<String> typeOrder, UserList<T> userList, List<T> copy) {
     userList.setReview(true);
 
-    new ExerciseSorter(typeOrder).getSorted(copy, false, false);
+    new ExerciseSorter(typeOrder).getSorted(copy, false, false, "");
 
     userList.setExercises(copy);
     markState(copy);

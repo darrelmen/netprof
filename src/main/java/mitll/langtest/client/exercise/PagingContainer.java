@@ -194,10 +194,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                //if (o1.getID() == NEW_EXERCISE_ID) return +1;
-                //else if (o2.getID() == NEW_EXERCISE_ID) return -1;
-                //else
-                return sorter.simpleCompare(o1, o2, isRecorder, isEnglish);
+                return sorter.simpleCompare(o1, o2, isRecorder, isEnglish, "");
               }
             }
             return -1;

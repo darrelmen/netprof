@@ -378,7 +378,6 @@ public class WordTable {
             h.getElement().getStyle().setPaddingRight(PHONE_PADDING, Style.Unit.PX);
           }
           h.addStyleName("phoneColor");
-         // h.setBackground(SimpleColumnChart.MAX);
         }
         else {
           setColorClickable(phoneSegment, h);

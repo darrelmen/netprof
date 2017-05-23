@@ -123,7 +123,7 @@ public class AudioExport {
                                  boolean isDefectList,
                                  AudioExportOptions options) throws Exception {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
-    new ExerciseSorter(typeOrder).sortByEnglish(copy);
+    new ExerciseSorter(typeOrder).sortByEnglish(copy, "");
     writeToStream(copy, audioDAO, prefix, typeOrder, language1, out, false,
         isDefectList, options);
   }
@@ -143,7 +143,7 @@ public class AudioExport {
                                    String audioDirectory,
                                    String language) throws Exception {
     List<CommonExercise> copy = new ArrayList<>(exercisesForSelectionState);
-    new ExerciseSorter(sectionHelper.getTypeOrder()).sortByEnglish(copy);
+    new ExerciseSorter(sectionHelper.getTypeOrder()).sortByEnglish(copy, "");
     writeToStreamJustOneAudio(copy, audioDirectory, out, language);
   }
 
@@ -157,7 +157,7 @@ public class AudioExport {
                                                   Collection<CommonExercise> exercisesForSelectionState,
                                                   boolean isEnglish) {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
-    new ExerciseSorter(typeOrder).getSorted(copy, false, isEnglish);
+    new ExerciseSorter(typeOrder).getSorted(copy, false, isEnglish, "");
     return copy;
   }
 

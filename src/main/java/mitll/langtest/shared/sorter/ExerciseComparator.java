@@ -46,14 +46,13 @@ import org.jetbrains.annotations.NotNull;
 public class ExerciseComparator {
   private static final String A_SPACE = "a ";
 
-  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean sortByFL) {
+  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean sortByFL, String searchTerm) {
     if (recordedLast) {
       Integer x = getRecordedOrder(o1, o2);
       if (x != null) return x;
     }
 
-    // items in same chapter alphabetical by tooltip
-    return sortByFL ? compareByFL(o1, o2) : compareByEnglish(o1, o2);
+    return sortByFL ? compareByFL(o1, o2, searchTerm) : compareByEnglish(o1, o2, searchTerm);
   }
 
   private Integer getRecordedOrder(CommonShell o1, CommonShell o2) {
@@ -65,42 +64,7 @@ public class ExerciseComparator {
     return null;
   }
 
-/*  public int compare(CommonExercise o1, CommonExercise o2, boolean recordedLast) {
-    if (recordedLast) {
-      Integer x = getRecordedOrder(o1, o2);
-      if (x != null) return x;
-    }
-
-    // compare first by hierarchical order - unit, then chapter, etc.
-    int i = getTypeOrder(o1, o2);
-
-    // items in same chapter alphabetical by tooltip
-    return (i == 0) ? compareByEnglish(o1, o2) : i;
-  }*/
-
-/*  private int getTypeOrder(CommonExercise o1, CommonExercise o2) {
-    int i = 0;
-    for (String type : typeOrder) {
-      String type1 = o1.getUnitToValue().get(type);
-      String type2 = o2.getUnitToValue().get(type);
-      boolean t1Null = type1 == null;
-      boolean t2Null = type2 == null;
-      if (t1Null) {
-        i = t2Null ? 0 : +1;
-      } else if (t2Null) {
-        i = -1;
-      } else {
-        i = type1.compareTo(type2);
-      }
-
-      if (i != 0) {
-        break;
-      }
-    }
-    return i;
-  }*/
-
-  protected <T extends CommonShell> int compareByEnglish(T o1, T o2) {
+  protected <T extends CommonShell> int compareByEnglish(T o1, T o2, String searchTerm) {
     String english1 = o1.getEnglish();
     String english2 = o2.getEnglish();
     if (english1.isEmpty() && !english2.isEmpty()) {
@@ -108,9 +72,17 @@ public class ExerciseComparator {
     } else if (!english1.isEmpty() && english2.isEmpty()) {
       return +1;
     } else if (english1.isEmpty() && english2.isEmpty()) {
-      return compareByFL(o1, o2);
+      return compareByFL(o1, o2, searchTerm);
+    } else if (english1.equalsIgnoreCase(searchTerm) && !english2.equalsIgnoreCase(searchTerm)) {
+      return -1;
+    } else if (!english1.equalsIgnoreCase(searchTerm) && english2.equalsIgnoreCase(searchTerm)) {
+      return +1;
     } else {
-      return compareStrings(english1, english2);
+      int i = compareStrings(english1, english2);
+      if (i == 0) {
+        i = compareByFL(o1,o2,searchTerm);
+      }
+      return i;
     }
   }
 
@@ -141,16 +113,23 @@ public class ExerciseComparator {
     return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
   }
 
-  private <T extends CommonShell> int compareByFL(T o1, T o2) {
-    return dropPunct(o1.getForeignLanguage()).compareTo(dropPunct(o2.getForeignLanguage()));
+  private <T extends CommonShell> int compareByFL(T o1, T o2, String searchTerm) {
+    String fl1 = o1.getForeignLanguage();
+    String fl2 = o2.getForeignLanguage();
+    if (fl1.equalsIgnoreCase(searchTerm) && !fl2.equalsIgnoreCase(searchTerm)) {
+      return -1;
+    } else if (!fl1.equalsIgnoreCase(searchTerm) && fl2.equalsIgnoreCase(searchTerm)) {
+      return +1;
+    } else {
+      return dropPunct(fl1).compareTo(dropPunct(fl2));
+    }
   }
 
   @NotNull
   private String dropPunct(String t) {
     if (t.isEmpty()) {
       return t;
-    }
-    else {
+    } else {
       return (t.startsWith("\"") || t.startsWith("\\'") || t.startsWith("-") || t.startsWith("\\u007E")) ? t.substring(1) : t;
     }
   }

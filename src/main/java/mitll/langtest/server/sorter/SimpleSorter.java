@@ -32,13 +32,10 @@
 
 package mitll.langtest.server.sorter;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioExport;
-import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,14 +62,15 @@ public class SimpleSorter extends ExerciseComparator {
    * @param toSort
    * @param recordedLast
    * @param sortByFL
+   * @param searchTerm
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    */
-  public void getSorted(List<? extends CommonShell> toSort, final boolean recordedLast, boolean sortByFL) {
+  public void getSorted(List<? extends CommonShell> toSort, final boolean recordedLast, boolean sortByFL, String searchTerm) {
     if (typeOrder.isEmpty()) {
-      sortByEnglish(toSort);
+      sortByEnglish(toSort, searchTerm);
     } else {
-      Collections.sort(toSort, (Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, sortByFL));
+      Collections.sort(toSort, (Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, sortByFL, searchTerm));
     }
   }
 
@@ -81,9 +79,10 @@ public class SimpleSorter extends ExerciseComparator {
    * NOTE:  be careful to use collation order when it's not "english-foreign language"
    *
    * @param exerciseShells
-   * @see AudioExport#writeZipJustOneAudio(OutputStream, SectionHelper, Collection, String, String)
+   * @param searchTerm
+   * @see AudioExport#writeZipJustOneAudio
    */
-  public <T extends CommonShell> void sortByEnglish(List<T> exerciseShells) {
-    Collections.sort(exerciseShells, this::compareByEnglish);
+  public <T extends CommonShell> void sortByEnglish(List<T> exerciseShells, String searchTerm) {
+    Collections.sort(exerciseShells, (o1, o2) -> compareByEnglish(o1, o2, searchTerm));
   }
 }

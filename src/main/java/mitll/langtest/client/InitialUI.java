@@ -646,7 +646,7 @@ public class InitialUI implements UILifecycle {
     if (lifecycleSupport.getProjectStartupInfo() == null) {
       addProjectChoices(0, null);
     } else {
-      logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+   //   logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     }

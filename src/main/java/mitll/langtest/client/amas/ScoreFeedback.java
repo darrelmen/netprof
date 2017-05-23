@@ -74,7 +74,7 @@ class ScoreFeedback {
    * Initially made with a placeholder.
    *
    * @return
-   * @see mitll.langtest.client.flashcard.TextResponse#addWidgets
+   * @see mitll.langtest.client.amas.TextResponse#addWidgets
    */
   public FluidRow getScoreFeedbackRow(int height, ExerciseController controller) {
     this.controller = controller;
@@ -112,6 +112,7 @@ class ScoreFeedback {
   }
 
   public void hideWaiting() {
+
     feedbackImage.setBaseIcon(useWhite ? MyCustomIconType.white : MyCustomIconType.gray);
   }
 
@@ -133,7 +134,7 @@ class ScoreFeedback {
    * @param controller
    * @paramx width
    */
-  public void showCRTFeedback(/*, int width*/ExerciseController controller) {
+  public void showCRTFeedback(ExerciseController controller) {
     this.controller = controller;
   }
 

@@ -469,19 +469,13 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
       if (correct) {
         showCorrectFeedback(score, heard, result.getPretestScore());
-        playAudioPanel.startSong(CompressedAudio.getPath(path));
         controller.logEvent(button, "Button", oldID, "correct response - score " + round);
       } else {   // incorrect!!
-        /*feedback =*/
         showIncorrectFeedback(result, score, hasRefAudio, heard);
-        playAudioPanel.startSong(CompressedAudio.getPath(path));
         controller.logEvent(button, "Button", oldID, "incorrect response - score " + round);
       }
+      playAudioPanel.startSong(CompressedAudio.getPath(result.getPath()));
     }
-/*    if (!badAudioRecording && (correct || !hasRefAudio)) {
-      //logger.info("\treceivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
-      //  nextAfterDelay(correct, feedback);
-    }*/
   }
 
   private void clearFeedback() {

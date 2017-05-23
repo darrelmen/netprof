@@ -23,28 +23,22 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
 
   private DivWidget north;
   private DivWidget south;
-  //private String content;
 
   /**
    * @param bulk
    */
   public AllHighlight(Collection<IHighlightSegment> bulk) {
-    logger.info("making all highlight for " + bulk);
-
+    //logger.info("making all highlight for " + bulk);
     getElement().setId("AllHighlight_" + bulk.size());
-    //setWidth("100%");
     addStyleName("floatLeft");
+    getElement().getStyle().setMarginRight(3, Style.Unit.PX);
 
     this.set = bulk;
 
     add(north = new DivWidget());
-   // north.setWidth("100%");
     north.addStyleName("floatLeft");
     north.getElement().setId("north_bulk_" + bulk.size());
 
-    //  DivWidget divParent = set.iterator().next().getDivParent();
-    //Widget parent = getParent();
-    //   addAll();
     for (IHighlightSegment seg : set) {
       Widget w = seg.asWidget();
       w.removeFromParent();
@@ -54,22 +48,8 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     add(south = new DivWidget());
     south.getElement().setId("south_bulk_" + bulk.size());
     south.addStyleName("floatLeft");
-    //south.setWidth("100%");
     south.getElement().getStyle().setClear(Style.Clear.BOTH);
-
-
-/*    if (divParent != null) {
-      divParent.add(this);
-    } else {
-      logger.warning("no parent for " + bulk);
-    }*/
-//    ((Panel) parent).add(this);
   }
-
-//  public void addAll() {
-//    north.clear();
-//    for (IHighlightSegment seg : set) north.add(seg.asWidget());
-//  }
 
   @Override
   public String getID() {
@@ -152,20 +132,6 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   public DivWidget getNorth() {
     return north;
   }
-
-/*
-
-  @Override
-  public DivWidget getDivParent() {
-    return null;
-  }
-
-  @Override
-  public void setDivParent(DivWidget horizontal) {
-    throw new IllegalArgumentException("don't call me");
-  }
-*/
-
   public String toString() {
     return set.size() + " segments " + getLength() + " long : " + getContent();
   }

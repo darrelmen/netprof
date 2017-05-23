@@ -450,7 +450,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
       typeOrder = projectStartupInfo.getTypeOrder();
-      logger.info("getTypeOrder type order " + typeOrder);
+  //    logger.info("getTypeOrder type order " + typeOrder);
       this.rootNodesInOrder = new ArrayList<>(typeOrder);
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
@@ -1405,7 +1405,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
             }
           });
         } else {
-          logger.info("\tgetRefAudio all panels complete...");
+          //logger.info("\tgetRefAudio all panels complete...");
         }
       });
     }
