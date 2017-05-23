@@ -739,7 +739,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   void clearExerciseContainer() {
-    logger.info("clearing container --- >");
+   // logger.info("clearing container --- >");
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //    logger.info("call stack "+ exceptionAsString);
     innerContainer.clear();
@@ -749,7 +749,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Compare with google response for this state.
    */
   void showEmptyExercise() {
-    logger.info("showEmptyExercise --- ");
+  //  logger.info("showEmptyExercise --- ");
     createdPanel = new SimplePanel(new Heading(3, EMPTY_SEARCH));
     createdPanel.getElement().setId(EMPTY_PANEL);
     //innerContainer.add(createdPanel);

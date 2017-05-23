@@ -505,10 +505,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
     recoOutput.clear();
 
-
-    // recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null, new HashMap<>(), isRTL));
-
-    PlayAudioPanel playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), new PlayListener() {
+   // recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null, new HashMap<>(), isRTL));
+    playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), new PlayListener() {
       public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
         // TODO put back busy thing?
@@ -527,8 +525,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL));
   }
 
-  PlayAudioPanel playAudioPanel;
-  DownloadContainer downloadContainer;
+  private PlayAudioPanel playAudioPanel;
+  private DownloadContainer downloadContainer;
 
   private void setDownloadHref(String audioPath) {
     String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, ".mp3") : audioPath;

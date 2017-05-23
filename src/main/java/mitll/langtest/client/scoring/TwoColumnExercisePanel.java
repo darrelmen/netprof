@@ -50,6 +50,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   private static final String HALF_WIDTH = "50%";
+  private static final String LEFT_WIDTH = "60%";
+  private static final String RIGHT_WIDTH = "40%";
 
   private static final String EMAIL = "Email Item";
   private static final Set<String> toIgnore = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
@@ -735,7 +737,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (isValid(english)) {
       DivWidget lr = getHorizDiv();
       lr.addStyleName("floatLeft");
-      lr.setWidth(HALF_WIDTH);
+      lr.setWidth(RIGHT_WIDTH);
 
       lr.add(getEnglishWidget(e, english));
       lr.add(getItemWidget(e));
@@ -877,7 +879,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
 
     flContainer.add(fieldContainer);
-    flContainer.setWidth(HALF_WIDTH);
+    flContainer.setWidth(LEFT_WIDTH);
 
     rowWidget.add(flContainer);
     return recordPanel;
@@ -948,14 +950,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     boolean same = contextEx.getForeignLanguage().equals(contextTranslation);
     if (!same) {
       if (context != null && !contextTranslation.isEmpty()) {
-        context.setWidth(HALF_WIDTH);
+        context.setWidth(LEFT_WIDTH);
       }
 
       Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation, annotationHelper);
 
       if (contextTransWidget != null) {
         contextTransWidget.addStyleName("rightsidecolor");
-        contextTransWidget.setWidth(HALF_WIDTH);
+        contextTransWidget.setWidth(RIGHT_WIDTH);
         rowWidget.add(contextTransWidget);
       }
     }

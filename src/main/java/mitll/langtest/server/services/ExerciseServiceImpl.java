@@ -267,7 +267,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
             .filter(e -> !unique.contains(e.getID()))
             .forEach(commonExercises::add);
 
-        basicExercises.forEach(e -> unique.add(e.getID()));
+        commonExercises.forEach(e -> unique.add(e.getID()));
 
         // last come context matches
         {
@@ -280,7 +280,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
             }
             sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL, searchTerm);
           }
-          logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises");
+          logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises, "+unique.size() + " unique");
 
           contextExercises
               .stream()

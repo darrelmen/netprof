@@ -527,8 +527,8 @@ public class ProjectManagement implements IProjectManagement {
         if (project == null && !idToProject.isEmpty()) {
           Project firstProject = getFirstProject();
           logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-                  ") returning first " + firstProject,
-              new IllegalArgumentException());
+                  ") returning first " + firstProject);//,
+              //new IllegalArgumentException());
           return firstProject;
         }
       }
