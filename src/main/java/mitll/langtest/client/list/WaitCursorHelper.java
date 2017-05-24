@@ -56,7 +56,7 @@ public class WaitCursorHelper {
     waitTimer = new Timer() {
       @Override
       public void run() {
-//      logger.info("timer expired...");
+        logger.info("scheduleWaitTimer timer expired...");
         waitCursor.setUrl(animated);
         show();
       }

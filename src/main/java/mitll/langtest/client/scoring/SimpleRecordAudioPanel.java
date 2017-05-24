@@ -107,17 +107,13 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     add(col);
 
-    recordFeedback = makePlayAudioPanel().getRecordFeedback(getWaitCursor());
+    recordFeedback = makePlayAudioPanel().getRecordFeedback(waitCursorHelper.getWaitCursor());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
     scoreFeedback.add(recordFeedback);
 
     this.scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel.getRealDownloadContainer());
     scoreFeedback.getElement().setId("scoreFeedbackRow");
-  }
-
-  private Widget getWaitCursor() {
-    return waitCursorHelper.getWaitCursor();
   }
 
   private void addMiniScoreListener(MiniScoreListener l) {
@@ -135,7 +131,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   private RecorderPlayAudioPanel makePlayAudioPanel() {
     waitCursorHelper = new WaitCursorHelper();
-    waitCursorHelper.hide();
+    waitCursorHelper.showFinished();
 
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller);
     postAudioRecordButton.addStyleName("leftFiveMargin");
@@ -172,10 +168,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     historyPanel.showChart();
     historyPanel.setWidth("50%");
     return historyPanel;
-  }
-
-  private Tooltip addTooltip(Widget w, String tip) {
-    return new TooltipHelper().addTooltip(w, tip);
   }
 
   /**
@@ -221,7 +213,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     goodwaveExercisePanel.setBusy(true);
     playAudioPanel.showFirstRecord();
 
-    waitCursorHelper.hide();
+    waitCursorHelper.showFinished();
 
     clearScoreFeedback();
     scoreHistory.setVisible(false);
@@ -239,7 +231,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     goodwaveExercisePanel.setBusy(false);
     playAudioPanel.hideRecord();
 
-    waitCursorHelper.show();
+    waitCursorHelper.scheduleWaitTimer();
     scoreHistory.setVisible(true);
   }
 
