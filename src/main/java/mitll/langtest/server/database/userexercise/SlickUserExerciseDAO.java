@@ -272,9 +272,9 @@ public class SlickUserExerciseDAO
       logger.warn("getUnitToValue no types for exercise " + slick);
     }
 
-    Iterator<String> iterator = typeOrder.iterator();
-    String first = iterator.next();
-    String second = iterator.hasNext() ? iterator.next() : "";
+    Iterator<String> iterator = typeOrder != null ? typeOrder.iterator() : null;
+    String first = iterator != null && iterator.hasNext() ? iterator.next() : "";
+    String second = iterator != null && iterator.hasNext() ? iterator.next() : "";
     unitToValue.put(first, slick.unit());
     if (!second.isEmpty()) {
       unitToValue.put(second, slick.lesson());
@@ -527,7 +527,7 @@ public class SlickUserExerciseDAO
     List<Pair> pairs = new ArrayList<>();
     Iterator<String> iterator = typeOrder.iterator();
 
-    String first  = iterator.hasNext() ? iterator.next() : "Unit";
+    String first = iterator.hasNext() ? iterator.next() : "Unit";
     String second = iterator.hasNext() ? iterator.next() : "";
     boolean firstEmpty = slick.unit().isEmpty();
 
@@ -568,7 +568,9 @@ public class SlickUserExerciseDAO
     return dao.insert(UserExercise);
   }
 
-  public void addBulk(List<SlickExercise> bulk) {  dao.addBulk(bulk);  }
+  public void addBulk(List<SlickExercise> bulk) {
+    dao.addBulk(bulk);
+  }
 
   public int getNumRows() {
     return dao.getNumRows();
@@ -1021,18 +1023,19 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercisesAndAttributes(int, int, SlickUserExerciseDAO, Collection, Collection)
    * @param projectid
    * @return
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercisesAndAttributes(int, int, SlickUserExerciseDAO, Collection, Collection)
    */
   public Map<String, Integer> getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
     List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(projectid);
     for (SlickExercise exercise : allPredefByProject) {
       Integer before = oldToNew.put(exercise.exid(), exercise.id());
-      if (before != null) logger.warn("huh? already saw an exercise with id " + exercise.exid() + " replace with " + exercise);
+      if (before != null)
+        logger.warn("huh? already saw an exercise with id " + exercise.exid() + " replace with " + exercise);
     }
-    logger.info("getOldToNew found for project #" + projectid + " " + allPredefByProject.size() +  " exercises, " + oldToNew.size() + " old->new");
+    logger.info("getOldToNew found for project #" + projectid + " " + allPredefByProject.size() + " exercises, " + oldToNew.size() + " old->new");
 //    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
     return oldToNew;
   }

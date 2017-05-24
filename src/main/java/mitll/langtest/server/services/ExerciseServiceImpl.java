@@ -64,6 +64,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Collator;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceServlet implements ExerciseService<T> {
@@ -93,10 +94,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     FilterResponse typeToValues = getSectionHelper().getTypeToValues(request);
 
     int userListID = request.getUserListID();
-    UserList<CommonShell> next = db.getUserListManager().getSimpleUserListByID(userListID);
+    UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
 
     if (next != null) {  // echo it back
-      logger.info("\tgetTypeToValues " + request + " include list " + next);
+      //logger.info("\tgetTypeToValues " + request + " include list " + next);
       typeToValues.getTypesToInclude().add(LISTS);
       Set<MatchInfo> value = new HashSet<>();
       value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
@@ -195,7 +196,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 //    logger.info("triple resp " + exercisesForSearch);
     exercisesForSearch.setByExercise(filterExercises(request, exercisesForSearch.getByExercise(), projectID));
- //   logger.info("after triple resp " + exercisesForSearch);
+    //   logger.info("after triple resp " + exercisesForSearch);
 
     // TODO : I don't think we need this?
 /*        if (!isUserListReq) {
@@ -257,7 +258,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         logger.info("getSortedExercises adding " + exercises.getByID().size() + " by id exercises");
 
         // 1) first add any exact by id matches - should only be one
-        if (exercises.getByID().size() > 1) logger.error("expecting only 0 or 1 matches for by id " + exercises.getByID().size());
+        if (exercises.getByID().size() > 1)
+          logger.error("expecting only 0 or 1 matches for by id " + exercises.getByID().size());
         commonExercises.addAll(exercises.getByID());
         exercises.getByID().forEach(e -> unique.add(e.getID()));
         logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
@@ -280,7 +282,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
             }
             sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL, searchTerm);
           }
-          logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises, "+unique.size() + " unique");
+          logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises, " + unique.size() + " unique");
 
           contextExercises
               .stream()
@@ -457,7 +459,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.debug("getExerciseListWrapperForPrefix" +
           "\n\tuserID   " + userID +
           "\n\tprefix   '" + prefix + "'" +
-          "\n\tactivity " + request.getActivityType());
+          (request.getActivityType() != ActivityType.UNSET ? "" : "\n\tactivity " + request.getActivityType()));
     }
 
     int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
@@ -505,18 +507,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.info("took " + (now - then) + " millis to build trie for " + exercisesForState.size() + " exercises");
     exercisesForState = trie.getExercises(prefix);
 
+    Set<Integer> unique = new HashSet<>();
+    exercisesForState.forEach(e -> unique.add(e.getID()));
+
     {
-      //List<CommonExercise> contextSentences = new ArrayList<>();
       then = System.currentTimeMillis();
-      //for (CommonExercise exercise : originalSet) contextSentences.addAll(exercise.getDirectlyRelated());
-
-      // logger.info("getExerciseListWrapperForPrefix made " + contextSentences.size() + " from " + originalSet.size());
-
       trie = new ExerciseTrie<>(originalSet, getLanguage(), getSmallVocabDecoder(), false);
       now = System.currentTimeMillis();
       if (now - then > 20)
         logger.info("took " + (now - then) + " millis to build trie for " + originalSet.size() + " context exercises");
-      exercisesForState.addAll(trie.getExercises(prefix));
+      exercisesForState.addAll(trie.getExercises(prefix).stream().filter(e -> !unique.contains(e.getID())).collect(Collectors.toList()));
     }
     return exercisesForState;
   }
@@ -541,7 +541,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     int userID = request.getUserID();
 
     if (firstExercise != null) {
-      addAnnotationsAndAudio(userID, firstExercise, request.isIncorrectFirstOrder());
+      addAnnotationsAndAudio(userID, firstExercise, request.isIncorrectFirstOrder(), request.isQC());
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
     }
@@ -597,10 +597,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param userID
    * @param firstExercise
    * @param isFlashcardReq if true, filter for only recordings made during avp
+   * @param isQC
    * @seex LoadTesting#getExercise(String, long, boolean)
    * @see #makeExerciseListWrapper
    */
-  private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isFlashcardReq) {
+  private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isFlashcardReq, boolean isQC) {
     long then = System.currentTimeMillis();
 
     addAnnotations(firstExercise); // todo do this in a better way
@@ -624,13 +625,15 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
     then = now;
 
-    User userWhere = db.getUserDAO().getUserWhere(userID);
-    if (userWhere != null && userWhere.getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
+    if (isQC) {
+      //User userWhere = db.getUserDAO().getUserWhere(userID);
+      //if (userWhere != null && userWhere.getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
       addPlayedMarkings(userID, firstExercise);
       now = System.currentTimeMillis();
       if (now - then > SLOW_MILLIS) {
         logger.debug("addAnnotationsAndAudio : (" + getLanguage() + ") took " + (now - then) + " millis to add played markings to exercise " + oldID);
       }
+      //}
     }
 
     then = now;
@@ -650,7 +653,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * @param byID
-   * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean)
    */
   private void addAnnotations(CommonExercise byID) {
     getUserListManager().addAnnotations(byID);
@@ -658,7 +661,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * @param firstExercise
-   * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean)
    */
   private void attachAudio(CommonExercise firstExercise) {
     db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise));
@@ -675,7 +678,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    *
    * @param userID
    * @param firstExercise
-   * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean)
    */
   private void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     db.getEventDAO().addPlayedMarkings(userID, firstExercise);
@@ -1205,7 +1208,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           //+"\n\tcontext" + byID.getDirectlyRelated()
       );
       then2 = System.currentTimeMillis();
-      addAnnotationsAndAudio(userID, byID, isFlashcardReq);
+      addAnnotationsAndAudio(userID, byID, isFlashcardReq, false);
       now = System.currentTimeMillis();
       if (now - then2 > WARN_DUR) {
         logger.debug("getAnnotatedExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to " +
@@ -1270,7 +1273,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (ids.size() > toAddAudioTo.size()) {
       logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
     } else {
-      logger.info("getFullExercises getting " + ids.size() + " exercises");
+//      logger.info("getFullExercises getting " + ids.size() + " exercises");
     }
 
     if (!toAddAudioTo.isEmpty()) {
@@ -1347,7 +1350,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   private Map<Integer, AlignmentOutput> rememberAlignments(int projectID,
                                                            Map<Integer, AudioAttribute> idToAudio) {
-    if (!idToAudio.isEmpty()) logger.warn("getting " + idToAudio.size() + " alignment outputs from database");
+    if (!idToAudio.isEmpty() && idToAudio.size() > 50)
+      logger.info("getting " + idToAudio.size() + " alignment outputs from database");
+
     Map<Integer, AlignmentOutput> alignments = getAlignmentsFromDB(projectID, idToAudio.keySet());
     addAlignmentToAudioAttribute(idToAudio, alignments);
     return alignments;

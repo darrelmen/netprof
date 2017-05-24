@@ -47,6 +47,10 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -88,6 +92,11 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
         return new NPExerciseList(currentExercisePanel, controller,
             new ListOptions().setInstance(instanceName)) {
           private CheckBox filterOnly, uninspectedOnly;
+
+          @Override
+          protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+            return super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected).setQC(true);
+          }
 
           @Override
           protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {

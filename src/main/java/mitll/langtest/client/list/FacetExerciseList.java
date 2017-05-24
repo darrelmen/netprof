@@ -99,6 +99,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private static final String ANY = "Any";
   private static final String MENU_ITEM = "menuItem";
   private final ProgressBar progressBar;
+  private final DivWidget pagerAndSortRow;
 
   private List<String> typeOrder;
   private final Panel sectionPanel;
@@ -155,7 +156,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     listHeader.getElement().setId("listHeader");
     listHeader.add(breadRow);
 
-    listHeader.add(getPagerAndSort(controller));
+    listHeader.add(pagerAndSortRow = getPagerAndSort(controller));
 
     // addPrevNextPage(footer);
     finished = true;
@@ -174,6 +175,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     });
   }
 
+  /**
+   *
+   * @param controller
+   * @return
+   */
   @NotNull
   private DivWidget getPagerAndSort(ExerciseController controller) {
     DivWidget pagerAndSort = new DivWidget();
@@ -1222,6 +1228,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     next.setVisible(false);*/
     pageSizeContainer.setVisible(false);
     sortBox.setVisible(false);
+    pagerAndSortRow.setVisible(false);
   }
 
   private void showPrevNext() {
@@ -1232,7 +1239,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     pageSizeContainer.setVisible(true);
     sortBox.setVisible(true);
     progressBar.setVisible(true);
-
+    pagerAndSortRow.setVisible(true);
 /*
     enablePrevNext();
 */

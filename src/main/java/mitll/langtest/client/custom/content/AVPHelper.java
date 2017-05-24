@@ -54,6 +54,7 @@ import mitll.langtest.shared.exercise.CommonShell;
  * @since 10/8/13
  * Time: 5:58 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated  remove me
  */
 public class AVPHelper extends NPFHelper {
   private UserList ul;

@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
@@ -48,7 +49,10 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -56,6 +60,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/26/2014.
+ * @see ListManager#ListManager(ExerciseController, HasWidgets)
  */
 public class ReviewItemHelper extends NPFHelper {
   private final Logger logger = Logger.getLogger("ReviewItemHelper");
@@ -66,7 +71,6 @@ public class ReviewItemHelper extends NPFHelper {
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
 
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
- // private final ReloadableContainer predefinedContent;
 
   /**
    * @param controller
@@ -75,8 +79,6 @@ public class ReviewItemHelper extends NPFHelper {
    */
   public ReviewItemHelper(final ExerciseController controller) {
     super(controller, true, false);
-   // this.predefinedContent = predefinedContent;
-   // if (predefinedContent == null) logger.warning("huh? predefinedContent is null");
   }
 
   /**
@@ -143,9 +145,14 @@ public class ReviewItemHelper extends NPFHelper {
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                String instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
-      return new NPExerciseList( currentExercisePanel,outer.getController(),
+      return new NPExerciseList(currentExercisePanel, outer.getController(),
           new ListOptions(instanceName)) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
+
+        @Override
+        protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+          return super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected).setQC(true);
+        }
 
         /**
          * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken

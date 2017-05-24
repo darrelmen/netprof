@@ -84,7 +84,8 @@ public class NPFHelper implements RequiresResize {
   /**
    * @param controller
    * @param showQC
-   * @see mitll.langtest.client.custom.Navigation#Navigation
+   * @see AVPHelper#AVPHelper(ExerciseController)
+   * @see ReviewItemHelper#ReviewItemHelper(ExerciseController)
    * @see ListManager#ListManager
    */
   public NPFHelper(ExerciseController controller,
@@ -300,9 +301,9 @@ public class NPFHelper implements RequiresResize {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {
-          return new TwoColumnExercisePanel<CommonExercise>(e,
+          return new TwoColumnExercisePanel<>(e,
               controller,
-              exerciseList, //Collections.emptyList(),
+              exerciseList,
               getChoices(), getPhoneChoices(), alignments);
         }
       }

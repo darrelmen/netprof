@@ -65,12 +65,13 @@ import java.util.logging.Logger;
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T, U>, ProvidesResize {
-  public static final String EMPTY_SEARCH = "<b>Your search or selection did not match any items.</b>";
   private final Logger logger = Logger.getLogger("ExerciseList");
 
+  private static final String EMPTY_SEARCH = "<b>Your search or selection did not match any items.</b>" +
+      "<p>Try clearing one of your selections or changing the search.</p>";
+
   private static final int LIST_HEIGHT = 450;
- // private static final int MIN_WIDTH = 300;
-  /**
+   /**
    * @see #showEmptyExercise
    */
   private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
@@ -751,6 +752,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   void showEmptyExercise() {
   //  logger.info("showEmptyExercise --- ");
     createdPanel = new SimplePanel(new Heading(3, EMPTY_SEARCH));
+    createdPanel.addStyleName("leftFiveMargin");
     createdPanel.getElement().setId(EMPTY_PANEL);
     //innerContainer.add(createdPanel);
     innerContainer.setWidget(createdPanel);

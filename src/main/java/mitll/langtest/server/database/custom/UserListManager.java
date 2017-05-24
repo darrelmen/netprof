@@ -88,7 +88,7 @@ public class UserListManager implements IUserListManager {
   private static final String ATTENTION = "AttentionLL";
   private static final String ITEMS_TO_REVIEW = "Possible defects to fix";
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private final IUserDAO userDAO;
   private final IReviewedDAO reviewedDAO, secondStateDAO;
@@ -341,7 +341,7 @@ public class UserListManager implements IUserListManager {
                                   int projid) {
     User userWhere = userDAO.getUserWhere(userid);
     if (userWhere == null) {
-      logger.error("huh? no user with id " + userid);
+      logger.error("createUserList huh? no user with id " + userid);
       return null;
     } else {
       logger.info("found\n\t" + userListDAO.getAllByUser(userid, projid));
@@ -396,7 +396,7 @@ public class UserListManager implements IUserListManager {
 
     if (listsICreated) {
       listsForUser = userListDAO.getAllByUser(userid, projid);
-      logger.info("found " + listsForUser.size() + " created by " + userid);
+//      logger.info("found " + listsForUser.size() + " created by " + userid);
       for (UserList<CommonShell> userList : listsForUser) {
         if (userList.isFavorite()) {
           favorite = userList;
@@ -409,7 +409,7 @@ public class UserListManager implements IUserListManager {
 
     if (visitedLists) {
       Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid);
-      logger.info("found " + listsForUser1.size() + " visited by " + userid);
+  //    logger.info("found " + listsForUser1.size() + " visited by " + userid);
 
       for (UserList<CommonShell> userList : listsForUser1) {
         if (!ids.contains(userList.getID())) {

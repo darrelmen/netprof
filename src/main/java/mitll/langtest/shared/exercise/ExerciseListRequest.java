@@ -69,6 +69,7 @@ public class ExerciseListRequest implements IsSerializable {
   private boolean onlyForUser = false;
   private boolean addFirst = true;
   private int limit = -1;
+  private boolean QC = false;
 
   public ExerciseListRequest() {
   }
@@ -253,9 +254,9 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#populateExerciseMap
    * @param onlyForUser
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisPlot#populateExerciseMap
    */
   public ExerciseListRequest setOnlyForUser(boolean onlyForUser) {
     this.onlyForUser = onlyForUser;
@@ -263,22 +264,23 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getLimitedMatches(ExerciseListRequest, List)
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getLimitedMatches(ExerciseListRequest, List)
    */
   public int getLimit() {
     return limit;
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.SearchTypeahead#getTypeaheadUsing
    * @param limit
    * @return
+   * @see mitll.langtest.client.custom.dialog.SearchTypeahead#getTypeaheadUsing
    */
   public ExerciseListRequest setLimit(int limit) {
     this.limit = limit;
     return this;
   }
+
   public boolean isAddFirst() {
     return addFirst;
   }
@@ -288,14 +290,23 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  public boolean isQC() {
+    return QC;
+  }
+
+  public ExerciseListRequest setQC(boolean QC) {
+    this.QC = QC;
+    return this;
+  }
+
   /**
    * @return
    */
   public String toString() {
     return
-        "req #"+getReqID()+ " "+
-        (limit == -1 ? "" : "limit                  '" + limit + "'") +
-            (prefix.isEmpty() ? "" : "prefix                  '" + prefix + "'") +
+        "req #" + getReqID() + " " +
+            (limit == -1 ? "" : "limit                  '" + limit + "'") +
+            (prefix.isEmpty() ? "" : "\n\tprefix                  '" + prefix + "'") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection           " + getTypeToSelection()) +
             "\n\tuser list id        " + userListID +
             "\n\tuser                " + userID +
@@ -307,7 +318,8 @@ public class ExerciseListRequest implements IsSerializable {
             (onlyDefaultAudio ? "\n\tonlyDefaultAudio     " : "") +
             (onlyForUser ? "\n\tonlyForUser     " : "") +
             (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
-            (onlyUninspected ? "\n\tonly uninspected    " : "")
+            (onlyUninspected ? "\n\tonly uninspected    " : "") +
+            (QC ? "\n\tqc request    " : "")
         ;
   }
 }
