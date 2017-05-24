@@ -97,6 +97,10 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     return 4;
   }
 
+  public Panel getTableWithPager() {
+    return getTableWithPager(new ListOptions());
+  }
+
   /**
    * @param listOptions
    * @return

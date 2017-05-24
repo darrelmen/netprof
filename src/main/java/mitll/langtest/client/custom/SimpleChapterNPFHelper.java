@@ -120,8 +120,8 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   @Override
   public void showContent(Panel listContent, String instanceName) {
     listContent.add(doNPF(instanceName));
-    listContent.addStyleName("userListBackground");
-    listContent.getElement().getStyle().setMarginRight(RIGHT_SIDE_MARGIN, Style.Unit.PX);
+   // listContent.addStyleName("userListBackground");
+   // listContent.getElement().getStyle().setMarginRight(RIGHT_SIDE_MARGIN, Style.Unit.PX);
   }
 
   private final FlexListLayout<T, U> flexListLayout;

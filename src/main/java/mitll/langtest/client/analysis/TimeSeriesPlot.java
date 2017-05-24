@@ -53,6 +53,7 @@ import java.util.logging.Logger;
  */
 class TimeSeriesPlot extends DivWidget {
   private final Logger logger = Logger.getLogger("TimeSeriesPlot");
+
   static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
@@ -97,7 +98,6 @@ class TimeSeriesPlot extends DivWidget {
   String getAvgTooltip(ToolTipData toolTipData, String seriesName1) {
     String dateToShow = getDateToShow(toolTipData);
     PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
-
   //  String countInfo = (session.getCount() < 10) ? "<br/>n = " + session.getCount() : "";
     String countInfo =  "<br/>n = " + session.getCount();
 
@@ -176,6 +176,8 @@ class TimeSeriesPlot extends DivWidget {
     timeToSession.clear();
     if (!phoneSessions.isEmpty()) {
       PhoneSession lastSession = getLastSession(phoneSessions);
+
+      logger.info("setPhoneSessions num sessions " + phoneSessions.size());
       for (PhoneSession session : phoneSessions) {
         long bin = getSessionTime(lastSession, session);
         timeToSession.put(bin, session);

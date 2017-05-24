@@ -48,6 +48,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -57,14 +59,13 @@ import java.util.logging.Logger;
 public class StudentAnalysis extends DivWidget {
   private final Logger logger = Logger.getLogger("StudentAnalysis");
 
-  private static final int LEFT_MARGIN = MemoryItemContainer.TABLE_WIDTH + 53;
+ // private static final int LEFT_MARGIN = MemoryItemContainer.TABLE_WIDTH + 53;
   private static final String STUDENTS = "Students";
   private static final String OR_MORE_RECORDINGS = "5 or more recordings";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
   public StudentAnalysis(final ExerciseController controller, final ShowTab showTab) {
     //logger.info("StudentAnalysis got here " + appTitle);
-
     getElement().setId("StudentAnalysis");
 
     final String selectedUserKey = getRememberedSelectedUser(controller);
@@ -83,14 +84,13 @@ public class StudentAnalysis extends DivWidget {
         bottom.addStyleName("floatLeft");
         bottom.getElement().setId("StudentAnalysis_bottom");
 
-        logger.info("onSuccess get users " + users.size());
+//        logger.info("onSuccess get users " + users.size());
 //        logger.info("onSuccess bottom " + bottom.getElement().getId());
         clear();
 
         UserContainer userContainer = new UserContainer(controller, rightSide, bottom, showTab, selectedUserKey);
         add(getTop(userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS), rightSide));
         add(bottom);
-
         //   logger.info("onSuccess added top and bottom " + top.getElement().getId());
         //   logger.info("onSuccess added top and bottom " + bottom.getElement().getId());
 
@@ -98,31 +98,38 @@ public class StudentAnalysis extends DivWidget {
     });
   }
 
+  /**
+   * TODO : use common key storage
+   * @param controller
+   * @return
+   */
   @NotNull
   private String getRememberedSelectedUser(ExerciseController controller) {
-    String appTitle = controller.getProps().getAppTitle();
-    return getSelectedUserKey(controller, appTitle);
+    return getSelectedUserKey(controller, controller.getProps().getAppTitle());
   }
 
   @NotNull
   private DivWidget getRightSide() {
     DivWidget rightSide = new DivWidget();
     rightSide.getElement().setId("rightSide");
-    rightSide.getElement().getStyle().setMarginLeft(LEFT_MARGIN, Style.Unit.PX);
+    rightSide.setWidth("100%");
     return rightSide;
   }
 
   private DivWidget getTop(DivWidget leftSide, DivWidget rightSide) {
     DivWidget top = new DivWidget();
+    top.addStyleName("inlineFlex");
+    top.setWidth("100%");
+   // top.getElement().getStyle().setMarginRight(70, Style.Unit.PX );
+
     top.getElement().setId("top");
-    //top.addStyleName("inlineBlockStyleOnly");
     top.add(leftSide);
     top.add(rightSide);
     return top;
   }
 
   private String getSelectedUserKey(ExerciseController controller, String appTitle) {
-    return getStoragePrefix(controller, appTitle) + "selectedUser";
+    return getStoragePrefix(controller, appTitle) + SELECTED_USER;
   }
 
   private String getStoragePrefix(ExerciseController controller, String appTitle) {

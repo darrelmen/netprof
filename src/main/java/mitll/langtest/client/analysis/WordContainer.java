@@ -104,7 +104,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
    *
    * @param controller
    * @param plot
-   * @see AnalysisTab#getWordScores
+   * @see AnalysisTab#getWordContainer(List, ExerciseController, AnalysisPlot, ShowTab, Heading)
    */
   WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
     super(controller, plot);
@@ -137,7 +137,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
     tableWithPager.getElement().setId("WordContainerScoreHistory");
     int tableHistoryWidth = isNarrow() ? TABLE_HISTORY_WIDTH_NARROW : TABLE_HISTORY_WIDTH;
 
-    tableWithPager.setWidth(tableHistoryWidth + "px");
+   // tableWithPager.setWidth(tableHistoryWidth + "px");
     tableWithPager.addStyleName("floatLeftAndClear");
 
     this.sortedHistory = sortedHistory;

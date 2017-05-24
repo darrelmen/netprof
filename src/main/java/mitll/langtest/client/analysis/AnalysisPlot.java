@@ -34,6 +34,7 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -145,9 +146,13 @@ public class AnalysisPlot extends TimeSeriesPlot {
     int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
 
     getElement().getStyle().setProperty("minHeight", minHeight, Style.Unit.PX);
-    getElement().getStyle().setMargin(10, Style.Unit.PX);
+    getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
+    getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+   // getElement().getStyle().setMarginRight(10, Style.Unit.PX);
     addStyleName("cardBorderShadow");
 
+   // setWidth("100%");
     this.service = GWT.create(AnalysisService.class);
     this.userid = userid;
     populateGranToLabel();
@@ -156,11 +161,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
     getPerformanceForUser(this.service, userid, userChosenID, minRecordings);
 
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        populateExerciseMap(service, userid);
-      }
-    });
+    Scheduler.get().scheduleDeferred(() -> populateExerciseMap(service, userid));
   }
 
   private void populateGranToLabel() {
@@ -178,8 +179,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
                                      int userid,
                                      final String userChosenID,
                                      int minRecordings) {
-
-    logger.info("getPerformanceForUser " + userid + " : " + userChosenID);
+//    logger.info("getPerformanceForUser " + userid + " : " + userChosenID);
 
     service.getPerformanceForUser(userid, minRecordings, new AsyncCallback<UserPerformance>() {
       @Override
@@ -252,12 +252,12 @@ public class AnalysisPlot extends TimeSeriesPlot {
     clear();
 
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-    float percentAvg = userPerformance.getRawAverage() * 100;
-    int rawTotal = rawBestScores.size();
 
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
+      float percentAvg = userPerformance.getRawAverage() * 100;
+      int rawTotal = rawBestScores.size();
       String subtitle = "Score and average :" + rawTotal + " items, avg " + (int) percentAvg + " %";
       String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
       chart = getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance);
@@ -415,7 +415,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
    */
   private void setVisibility(long start, long end) {
   //  logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
-
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);

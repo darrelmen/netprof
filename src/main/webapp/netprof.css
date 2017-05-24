@@ -1447,9 +1447,10 @@ document sections.*/
     /*
     width: 750px;
     */
-    /*
-    margin-left:220px;
-    */
+
+    margin-left:10px;
+    margin-right:155px;
+
     zoom: 1;
 }
 

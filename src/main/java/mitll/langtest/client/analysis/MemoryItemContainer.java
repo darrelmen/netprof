@@ -80,7 +80,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private static final int SIGNED_UP = 95;
   private static final String SIGNED_UP1 = "Started";
   private static final int STUDENT_WIDTH = 300;
-  private static final String storageKey = "selectedUser";
+  public static final String SELECTED_USER = "selectedUser";
   private int idWidth = ID_WIDTH;
 
   private final String todayYear;
@@ -145,7 +145,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   private String getSelectedUserKey(ExerciseController controller, String appTitle) {
-    return getStoragePrefix(controller, appTitle) + storageKey;
+    return getStoragePrefix(controller, appTitle) + SELECTED_USER;
   }
 
   private String getStoragePrefix(ExerciseController controller, String appTitle) {
@@ -199,11 +199,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<T> users) {
-    logger.info("getTableWithPager" + users.size());
+   // logger.info("getTableWithPager" + users.size());
 
     Panel tableWithPager = getTableWithPager(new ListOptions());
 
-    logger.info("getTableWithPager tableWithPager ");
+   // logger.info("getTableWithPager tableWithPager ");
 
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");

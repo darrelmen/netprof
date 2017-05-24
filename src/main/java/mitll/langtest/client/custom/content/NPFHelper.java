@@ -146,7 +146,7 @@ public class NPFHelper implements RequiresResize {
                                boolean loadExercises,
                                HasID toSelect) {
     listContent.add(doNPF(ul, instanceName, loadExercises, toSelect));
-    listContent.addStyleName("userListBackground");
+    //listContent.addStyleName("userListBackground");
   }
 
   /**

@@ -97,6 +97,7 @@ public class AnalysisTab extends DivWidget {
                      String userChosenID) {
     getElement().setId("AnalysisTab");
 
+    setWidth("100%");
     this.controller = controller;
     Icon playFeedback = new Icon(IconType.PLAY);
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid, userChosenID, minRecordings,
@@ -114,7 +115,7 @@ public class AnalysisTab extends DivWidget {
     add(timeControls);
     add(analysisPlot);
 
-   // Panel bottom = new HorizontalPanel();
+    // Panel bottom = new HorizontalPanel();
     DivWidget bottom = new DivWidget();
     bottom.addStyleName("inlineFlex");
     bottom.getElement().setId("bottom");
@@ -123,7 +124,7 @@ public class AnalysisTab extends DivWidget {
     if (overallBottom != null) { // are we in student or teacher view
       overallBottom.clear();
       overallBottom.add(bottom); // teacher
-    //  isNarrow = true;
+      //  isNarrow = true;
     } else {
       add(bottom); // student
     }
@@ -286,7 +287,7 @@ public class AnalysisTab extends DivWidget {
 
     DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", new Heading(3, WORDS, SUBTITLE));
     wordsContainer.addStyleName("cardBorderShadow");
-    wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
+    //   wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
 
     lowerHalf.add(wordsContainer);
 
@@ -310,8 +311,9 @@ public class AnalysisTab extends DivWidget {
     soundsDiv.getElement().getStyle().setProperty("minHeight", 325, Style.Unit.PX);
     soundsDiv.addStyleName("cardBorderShadow");
     soundsDiv.addStyleName("floatRight");
-    soundsDiv.addStyleName("inlineFlex");
-    soundsDiv.getElement().getStyle().setMargin(10, Style.Unit.PX);
+  //  soundsDiv.addStyleName("inlineFlex");
+    //soundsDiv.getElement().getStyle().setMargin(10, Style.Unit.PX);
+    soundsDiv.addStyleName("leftFiveMargin");
     return soundsDiv;
   }
 
@@ -333,6 +335,8 @@ public class AnalysisTab extends DivWidget {
                               final int minRecordings) {
     final PhoneExampleContainer exampleContainer =
         new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
+
+
     final PhonePlot phonePlot = new PhonePlot();
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot);
     analysisPlot.addListener(phoneContainer);
@@ -350,8 +354,7 @@ public class AnalysisTab extends DivWidget {
         lowerHalf.add(getSoundsContainer(phones));
 
         // #2 - word examples
-        Panel examples = exampleContainer.getTableWithPager(new ListOptions());
-        lowerHalf.add(getWordExamples(examples));
+        lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));
 
         // #3 - phone plot
         phonePlot.addStyleName("topMargin");
@@ -376,6 +379,8 @@ public class AnalysisTab extends DivWidget {
   private DivWidget getWordExamples(Panel examples) {
     DivWidget wordExamples = getWordContainerDiv(examples, "WordExamples", exampleHeader);
     wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    wordExamples.getElement().getStyle().setProperty("minHeight", 325, Style.Unit.PX);
+
     return wordExamples;
   }
 }

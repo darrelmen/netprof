@@ -40,6 +40,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -48,7 +49,8 @@ import java.util.List;
  * @since 10/19/15.
  */
 class PhonePlot extends TimeSeriesPlot {
-  //  private final Logger logger = Logger.getLogger("PhonePlot");
+  private final Logger logger = Logger.getLogger("PhonePlot");
+
   private static final String PRONUNCIATION_SCORE = " trend";
   private static final int CHART_HEIGHT = 315;
   private static final int NARROW_WIDTH = 330;
@@ -59,17 +61,20 @@ class PhonePlot extends TimeSeriesPlot {
   }
 
   /**
-   * @see PhoneContainer#showExamplesForSelectedSound
    * @param rawBestScores
    * @param userChosenID
+   * @see PhoneContainer#showExamplesForSelectedSound
    */
   void showErrorBarData(List<PhoneSession> rawBestScores, String userChosenID) {
     clear();
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
-      Chart chart = getErrorBarChart("<b>" + userChosenID + "</b>" + PRONUNCIATION_SCORE,
-          "Average score and range", "Range", rawBestScores);
+      Chart chart = getErrorBarChart(
+          "<b>" + userChosenID + "</b>" + PRONUNCIATION_SCORE,
+          "Average score and range",
+          "Range",
+          rawBestScores);
       add(chart);
     }
     setPhoneSessions(rawBestScores);
@@ -84,7 +89,16 @@ class PhonePlot extends TimeSeriesPlot {
    */
   private Chart getErrorBarChart(String title, String subtitle, String seriesName,
                                  List<PhoneSession> rawBestScores) {
-    Chart chart = getErrorBarChart(title, subtitle);
+    long center = -1;
+
+    if (rawBestScores.size() == 1) {
+      PhoneSession next = rawBestScores.iterator().next();
+      logger.info("getErrorBarChart Got " + next);
+
+      center = next.getMiddle();
+    }
+
+    Chart chart = getErrorBarChart(title, subtitle,center);
 
     configureWidth(chart);
 
@@ -96,33 +110,33 @@ class PhonePlot extends TimeSeriesPlot {
 
     addErrorBarSeries(rawBestScores, chart, seriesName, false);
     addMeans(rawBestScores, chart, AVERAGE, false);
+
     return chart;
   }
 
-  private Chart getErrorBarChart(String title, String subtitle) {
+  private Chart getErrorBarChart(String title, String subtitle, long center) {
     Chart chart = getErrorBarChart(title);
-    configureErrorBarChart(chart, subtitle);
+    configureErrorBarChart(chart, subtitle, center);
     return chart;
   }
 
   private Chart getErrorBarChart(String title) {
     return new Chart()
         .setZoomType(BaseChart.ZoomType.X)
-            // .setType(Series.Type.ERRORBAR)
         .setChartTitleText(title)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
         .setOption("/legend/enabled", false)
         .setScatterPlotOptions(new ScatterPlotOptions()
             .setMarker(new Marker()
-                    .setRadius(5)
-                    .setHoverState(new Marker()
-                            .setEnabled(true)
-                            .setLineColor(new Color(100, 100, 100))
-                    )
+                .setRadius(5)
+                .setHoverState(new Marker()
+                    .setEnabled(true)
+                    .setLineColor(new Color(100, 100, 100))
+                )
             )
             .setHoverStateMarker(new Marker()
-                    .setEnabled(false)
+                .setEnabled(false)
             ))
         .setToolTip(getErrorBarToolTip());
   }
@@ -132,23 +146,33 @@ class PhonePlot extends TimeSeriesPlot {
    * @param title
    * @see #getErrorBarChart
    */
-  private void configureErrorBarChart(Chart chart, String title) {
+  private void configureErrorBarChart(Chart chart, String title, long center) {
     chart.getYAxis()
         .setAxisTitleText(title)
         .setMin(-1)
         .setMax(100);
 
-    chart.getXAxis().setType(Axis.Type.DATE_TIME);
+    chart.getXAxis()
+        //   .setStartOnTick(true)
+        // .setEndOnTick(true)
+        .setType(Axis.Type.DATE_TIME);
+
+    if (center > 0) {
+      long start = center - 24 * 60 * 60 * 1000;
+      long end = center + 24 * 60 * 60 * 1000;
+      chart.getXAxis().setExtremes(start, end);
+    }
+
 
     chart.setHeight(CHART_HEIGHT + "px");
   }
 
   /**
-   * @see #getErrorBarChart(String, String, String, List)
    * @param chart
+   * @see #getErrorBarChart(String, String, String, List)
    */
   private void configureWidth(Chart chart) {
-    int narrowWidth =(Window.getClientWidth() < WordContainer.NARROW_THRESHOLD) ? NARROW_WIDTH_REALLY : NARROW_WIDTH;
+    int narrowWidth = (Window.getClientWidth() < WordContainer.NARROW_THRESHOLD) ? NARROW_WIDTH_REALLY : NARROW_WIDTH;
     chart.setWidth(narrowWidth);
   }
 }

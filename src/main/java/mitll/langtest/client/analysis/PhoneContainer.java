@@ -218,14 +218,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     // logger.info("getFiltered " + first + "/" + debugFormat(first) + " - " + debugFormat(last));
     return first == 0 ? value.getSessions() : getFiltered(value.getSessions(), first, last);
   }
-
-//  private String shortFormat(long first) {
-//    return superShortFormat.format(new Date(first));
-//  }
+/*
 
   private String debugFormat(long first) {
     return debugShortFormat.format(new Date(first));
   }
+*/
 
   /**
    * TODO : this doesn't work properly - should do any sessions that overlap with the window
@@ -259,34 +257,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         (session.getEnd() >= first && session.getEnd() <= last) ||    // end inside window
         (session.getStart() < first && session.getEnd() > last);      // session starts before and ends after window
   }
-
-  /**
-   * @param orig
-   * @param first
-   * @param last
-   * @return
-   * @see #clickOnPhone(String)
-   */
-/*  private List<WordAndScore> getFilteredWords(Collection<WordAndScore> orig, long first, long last) {
-    if (first > last) {
-      // throw new IllegalArgumentException("getFilteredWords " + orig.size() + " first after last?");
-      logger.warning("getFilteredWords " + orig.size() + " first after last?");
-    }
-    //  logger.info("getFilteredWords From " + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
-
-    List<WordAndScore> filtered = new ArrayList<>();
-    for (WordAndScore session : orig) {
-      //  String window = shortFormat(session.getStart()) + " - " + shortFormat(session.getEnd());
-      if (session.getTimestamp() > first && session.getTimestamp() <= last) {
-        filtered.add(session);
-        //  logger.info("included " + window);
-      }
-      //else {
-      // logger.info("Exclude " +window);
-      // }
-    }
-    return filtered;
-  }*/
 
   /**
    * @param sortedHistory
@@ -368,34 +338,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return columnSortHandler;
   }
 
-  /*private ColumnSortEvent.ListHandler<PhoneAndStats> getScoreSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
-                                                                    List<PhoneAndStats> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
-    columnSortHandler.setComparator(scoreCol,
-        new Comparator<PhoneAndStats>() {
-          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            if (o1 != null) {
-              if (o2 == null) {
-                logger.warning("------- o2 is null?");
-                return -1;
-              } else {
-                int a1 = o1.getInitial();
-                int a2 = o2.getInitial();
-                return compIntThenPhone(o1, o2, a1, a2);
-              }
-            } else {
-              logger.warning("------- o1 is null?");
-              return -1;
-            }
-          }
-        });
-    return columnSortHandler;
-  }*/
-
   private int compIntThenPhone(PhoneAndStats o1, PhoneAndStats o2, int a1, int a2) {
     int i = Integer.valueOf(a1).compareTo(a2);
     return (i == 0) ? compPhones(o1, o2) : i;
@@ -465,36 +407,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return columnSortHandler;
   }
 
-  /*private ColumnSortEvent.ListHandler<PhoneAndStats> getDiffSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
-                                                                   List<PhoneAndStats> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
-    columnSortHandler.setComparator(scoreCol,
-        new Comparator<PhoneAndStats>() {
-          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            if (o1 != null) {
-              if (o2 == null) {
-                logger.warning("------- o2 is null?");
-                return -1;
-              } else {
-                int a1 = o1.getDiff();
-                int a2 = o2.getDiff();
-                return compIntThenPhone(o1, o2, a1, a2);
-              }
-            } else {
-              logger.warning("------- o1 is null?");
-
-              return -1;
-            }
-          }
-        });
-    return columnSortHandler;
-  }
-*/
-
   private void addReview() {
     Column<PhoneAndStats, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
@@ -519,28 +431,11 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     table.addColumnSortHandler(countSorter);
     countColumn.setSortable(true);
 
-/*
-    Column<PhoneAndStats, SafeHtml> scoreColumn = getScoreColumn();
-    table.setColumnWidth(scoreColumn, SCORE_COL_WIDTH, Style.Unit.PX);
-    table.addColumn(scoreColumn, SCORE);
-    scoreColumn.setSortable(true);
-    table.addColumnSortHandler(getScoreSorter(scoreColumn, getList()));
-*/
-
     Column<PhoneAndStats, SafeHtml> currentCol = getCurrentCol();
     table.setColumnWidth(currentCol, SCORE_COL_WIDTH, Style.Unit.PX);
     table.addColumn(currentCol, CURR);
     currentCol.setSortable(true);
     table.addColumnSortHandler(getCurrSorter(currentCol, getList()));
-
-/*
-    Column<PhoneAndStats, SafeHtml> diffCol = getDiff();
-    table.setColumnWidth(diffCol, SCORE_COL_WIDTH, Style.Unit.PX);
-    table.addColumn(diffCol, DIFF_COL_HEADER);
-    diffCol.setSortable(true);
-    table.addColumnSortHandler(getDiffSorter(diffCol, getList()));
-*/
-
     table.setWidth("100%", true);
 
     new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.RIGHT);
@@ -597,23 +492,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
- /* private Column<PhoneAndStats, SafeHtml> getScoreColumn() {
-    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkForClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(PhoneAndStats shell) {
-        int score = shell.getInitial();
-        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(score)).toSafeHtml();
-      }
-    };
-  }
-*/
-
   private Column<PhoneAndStats, SafeHtml> getCurrentCol() {
     return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -629,23 +507,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     };
   }
 
-  /* private Column<PhoneAndStats, SafeHtml> getDiff() {
-     return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
-       @Override
-       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
-         super.onBrowserEvent(context, elem, object, event);
-         checkForClick(object, event);
-       }
-
-       @Override
-       public SafeHtml getValue(PhoneAndStats shell) {
-         return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getDiff())).toSafeHtml();
-       }
-     };
-   }
- */
   private String getScoreMarkup(int score) {
-    return "<span " + "style='" + "margin-left:10px;" + "'" + ">" + score + "</span>";
+    return "<span style='margin-left:10px;'>" + score + "</span>";
   }
 
   private Column<PhoneAndStats, SafeHtml> getCountColumn() {
