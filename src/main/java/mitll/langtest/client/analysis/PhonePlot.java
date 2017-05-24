@@ -89,16 +89,18 @@ class PhonePlot extends TimeSeriesPlot {
    */
   private Chart getErrorBarChart(String title, String subtitle, String seriesName,
                                  List<PhoneSession> rawBestScores) {
-    long center = -1;
+    long start = -1;
+    long end = -1;
 
     if (rawBestScores.size() == 1) {
       PhoneSession next = rawBestScores.iterator().next();
       logger.info("getErrorBarChart Got " + next);
 
-      center = next.getMiddle();
+      start = next.getStart();
+      end = next.getEnd();
     }
 
-    Chart chart = getErrorBarChart(title, subtitle,center);
+    Chart chart = getErrorBarChart(title, subtitle, start, end);
 
     configureWidth(chart);
 
@@ -114,9 +116,9 @@ class PhonePlot extends TimeSeriesPlot {
     return chart;
   }
 
-  private Chart getErrorBarChart(String title, String subtitle, long center) {
+  private Chart getErrorBarChart(String title, String subtitle, long start, long end) {
     Chart chart = getErrorBarChart(title);
-    configureErrorBarChart(chart, subtitle, center);
+    configureErrorBarChart(chart, subtitle, start, end);
     return chart;
   }
 
@@ -146,7 +148,7 @@ class PhonePlot extends TimeSeriesPlot {
    * @param title
    * @see #getErrorBarChart
    */
-  private void configureErrorBarChart(Chart chart, String title, long center) {
+  private void configureErrorBarChart(Chart chart, String title, long start, long end) {
     chart.getYAxis()
         .setAxisTitleText(title)
         .setMin(-1)
@@ -157,12 +159,11 @@ class PhonePlot extends TimeSeriesPlot {
         // .setEndOnTick(true)
         .setType(Axis.Type.DATE_TIME);
 
-    if (center > 0) {
-      long start = center - 24 * 60 * 60 * 1000;
-      long end = center + 24 * 60 * 60 * 1000;
+    if (end > 0) {
+      start = end - 24 * 60 * 60 * 1000;
+      end = end + 24 * 60 * 60 * 1000;
       chart.getXAxis().setExtremes(start, end);
     }
-
 
     chart.setHeight(CHART_HEIGHT + "px");
   }

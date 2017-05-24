@@ -149,10 +149,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
     getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
     getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-   // getElement().getStyle().setMarginRight(10, Style.Unit.PX);
+    // getElement().getStyle().setMarginRight(10, Style.Unit.PX);
     addStyleName("cardBorderShadow");
 
-   // setWidth("100%");
+    // setWidth("100%");
     this.service = GWT.create(AnalysisService.class);
     this.userid = userid;
     populateGranToLabel();
@@ -414,7 +414,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @see #gotExtremes(AxisSetExtremesEvent)
    */
   private void setVisibility(long start, long end) {
-  //  logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
+    //  logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);
@@ -444,14 +444,14 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
         String label = granToLabel.get(gran);
         String seriesInfo = gran + "/" + label;
-     //   logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
+        //   logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
 
         if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
           oneSet = true;
           errorSeries = granToError.get(gran);
           averageSeries = granToAverage.get(gran);
           setPhoneSessions(granularityToSessions.get(gran));
-       //   logger.info("setVisibility 1 chose " + seriesInfo + " : " + size);// + " visible " + series.isVisible());
+          //   logger.info("setVisibility 1 chose " + seriesInfo + " : " + size);// + " visible " + series.isVisible());
         }
         //else {
         //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
@@ -812,7 +812,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
       this.lastTime = timeAndScore.getTimestamp();
 
       if (!toGet.isEmpty()) {
-       // logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
+        // logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
         service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -846,8 +846,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
     this.timeHorizon = timeHorizon;
     Long x = goToLast(timeHorizon);
-    if (x != null) return x;
-    else return 0;
+    return (x != null) ? x : 0;
   }
 
   /**
@@ -963,15 +962,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
     this.timeWidgets = timeWidgets;
   }
 
-  public interface TimeChangeListener {
-    /**
-     * @param from
-     * @param to
-     * @see WordContainer#timeChanged(long, long)
-     */
-    void timeChanged(long from, long to);
-  }
-
   private final Set<TimeChangeListener> listeners = new HashSet<>();
 
   public void addListener(TimeChangeListener listener) {
@@ -985,5 +975,14 @@ public class AnalysisPlot extends TimeSeriesPlot {
    */
   private void timeChanged(long from, long to) {
     for (TimeChangeListener listener : listeners) listener.timeChanged(from, to);
+  }
+
+  public interface TimeChangeListener {
+    /**
+     * @param from
+     * @param to
+     * @see WordContainer#timeChanged
+     */
+    void timeChanged(long from, long to);
   }
 }

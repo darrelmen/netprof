@@ -404,7 +404,13 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
 
       SortedSet<WordScore> wordScores = byTime.subSet(new WordScore(from), new WordScore(to));
       List<WordScore> filtered = new ArrayList<>(wordScores);
-      Collections.sort(filtered); // put sort back to by score first
+      filtered.sort(new Comparator<WordScore>() {
+        @Override
+        public int compare(WordScore o1, WordScore o2) {
+          return -1*Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
+        }
+      });
+      //Collections.sort(filtered); // put sort back to by score first
       addItems(filtered);
     }
   }

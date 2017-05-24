@@ -73,7 +73,6 @@ public class AnalysisTab extends DivWidget {
   private static final String WORDS_USING_SOUND = "Words using Sound";
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "scores > 20";
-  //private boolean isNarrow = false;
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
   enum TIME_HORIZON {WEEK, MONTH, ALL}
@@ -235,12 +234,7 @@ public class AnalysisTab extends DivWidget {
   }
 
   private ClickHandler getClickHandler(final TIME_HORIZON month) {
-    return new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        analysisPlot.setTimeHorizon(month);
-      }
-    };
+    return event -> analysisPlot.setTimeHorizon(month);
   }
 
   private Button getAllChoice() {
