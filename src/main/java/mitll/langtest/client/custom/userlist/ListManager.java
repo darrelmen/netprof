@@ -629,15 +629,13 @@ public class ListManager implements RequiresResize {
       public void onSuccess(Void result) {
         ul.setName(editableHeading.getText());
         container.remove(editableHeading);
-        HTML nameHeading = getNameHeading(ul, container);
-        container.add(nameHeading);
+        container.add(getNameHeading(ul, container));
       }
     });
   }
 
   private Panel getListInfo(UserList ul) {
     String subtext = ul.getDescription() + " " + ul.getClassMarker();
-
     Heading widgets = new Heading(1, "", subtext);    // TODO : better color for subtext h1->small
 
     styleListInfo(widgets);
@@ -939,8 +937,7 @@ public class ListManager implements RequiresResize {
     container.getContent().clear();
     DivWidget inner = new DivWidget();
     DivWidget upper = new DivWidget();
-    String width = IMPORT_WIDTH +
-        "px";
+    String width = IMPORT_WIDTH +        "px";
     upper.setWidth(width);
     final TextArea w = new TextArea();
     w.setWidth(width);

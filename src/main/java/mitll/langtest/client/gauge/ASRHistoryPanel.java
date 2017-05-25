@@ -68,7 +68,6 @@ import java.util.logging.Logger;
  */
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   private final Logger logger = Logger.getLogger("ASRHistoryPanel");
-  //private Logger logger = Logger.getLogger("ASRHistoryPanel");
   private static final int NUM_TO_SHOW = 2;
 
   /**

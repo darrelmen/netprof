@@ -174,7 +174,6 @@ public class ResultTypeAhead {
       return "";
     } else {
       TextBox widget = (TextBox) textSuggest.getWidget();
-      //    logger.info("checking " + widget.getElement().getExID() + " " + widget.getSafeText() +" " + widget.getValue());
       return widget.getValue();
     }
   }

@@ -30,7 +30,7 @@ public class ScoreFeedbackDiv {
 
   private ProgressBar progressBar;
   /**
-   * @see #scoreAudio
+   * @see #getWordTableContainer
    */
   private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
 

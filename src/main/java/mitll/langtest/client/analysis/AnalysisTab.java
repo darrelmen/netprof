@@ -96,6 +96,7 @@ public class AnalysisTab extends DivWidget {
                      String userChosenID) {
     getElement().setId("AnalysisTab");
 
+    getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
     this.controller = controller;
     Icon playFeedback = new Icon(IconType.PLAY);

@@ -80,7 +80,7 @@ public class ResultManager extends PagerTable {
   private static final String YES = "Yes";
   private static final String NO = "No";
 
-  private static final int PAGE_SIZE = 8;
+  private static final int PAGE_SIZE = 7;
   private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";
@@ -118,7 +118,6 @@ public class ResultManager extends PagerTable {
 
 //  private Map<String, Typeahead> typeToSuggest = new HashMap<String, Typeahead>();
 //  private Typeahead userIDSuggest, textSuggest;
-
  // ResultTypeAhead resultTypeAhead;
   /**
    * @param nameForAnswer
@@ -150,8 +149,8 @@ public class ResultManager extends PagerTable {
     dialogBox.setGlassEnabled(true);
 
     int left = (Window.getClientWidth()) / 200;
-    int top = (Window.getClientHeight()) / 200;
-    dialogBox.setPopupPosition(left, top);
+    //int top = (Window.getClientHeight()) / 200;
+    dialogBox.setPopupPosition(left, 55);
 
     final Panel dialogVPanel = new VerticalPanel();
     dialogVPanel.setWidth("100%");
@@ -181,11 +180,7 @@ public class ResultManager extends PagerTable {
     closeButton.getElement().setId("closeButtonLessTopMargin");
     eventRegistration.register(closeButton, "N/A", "Close recordings dialog");
     // Add a handler to send the name to the server
-    closeButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-      }
-    });
+    closeButton.addClickHandler(event -> dialogBox.hide());
     return closeButton;
   }
 
@@ -208,7 +203,6 @@ public class ResultManager extends PagerTable {
     ResultTypeAhead resultTypeAhead = new ResultTypeAhead(typeOrder, cellTable, resultServiceAsync);
     Widget table = getAsyncTable(numResults, getDownloadAnchor(),resultTypeAhead);
     table.setWidth("100%");
-
 
     dialogVPanel.add(resultTypeAhead.getSearchBoxes());
     dialogVPanel.add(table);

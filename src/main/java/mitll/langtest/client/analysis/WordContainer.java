@@ -83,8 +83,8 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   private static final int SIGNED_UP = 95;
   private static final String SIGNED_UP1 = "Date";
 
-  private static final int TABLE_HISTORY_WIDTH = 490; //380
-  private static final int TABLE_HISTORY_WIDTH_NARROW = 500;//360; //380
+ // private static final int TABLE_HISTORY_WIDTH = 490; //380
+ // private static final int TABLE_HISTORY_WIDTH_NARROW = 500;//360; //380
   private final ExerciseComparator sorter;
   private final ShowTab learnTab;
   private final Heading heading;
@@ -114,6 +114,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
     this.learnTab = learnTab;
     this.heading = w;
 
+
     Date now = new Date();
     todaysDate = format.format(now);
     todayYear = todaysDate.substring(todaysDate.length() - 2);
@@ -135,8 +136,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   public Panel getTableWithPager(List<WordScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager(new ListOptions());
     tableWithPager.getElement().setId("WordContainerScoreHistory");
-    int tableHistoryWidth = isNarrow() ? TABLE_HISTORY_WIDTH_NARROW : TABLE_HISTORY_WIDTH;
-
+    //int tableHistoryWidth = isNarrow() ? TABLE_HISTORY_WIDTH_NARROW : TABLE_HISTORY_WIDTH;
    // tableWithPager.setWidth(tableHistoryWidth + "px");
     tableWithPager.addStyleName("floatLeftAndClear");
 

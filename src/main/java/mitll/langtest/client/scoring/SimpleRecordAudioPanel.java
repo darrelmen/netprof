@@ -1,9 +1,7 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
@@ -44,28 +42,28 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   private String audioPath;
 
-  ExerciseController controller;
-  T exercise;
+  private final ExerciseController controller;
+  private final T exercise;
   /**
    *
    */
   private DivWidget scoreFeedback;
   private boolean hasScoreHistory = false;
-  private ListInterface<CommonShell, T> listContainer;
-  private boolean isRTL;
+  private final ListInterface<CommonShell, T> listContainer;
+  private final boolean isRTL;
   private ScoreFeedbackDiv scoreFeedbackDiv;
 
   /**
    * @param controller
    * @param exercise
-   * @param history
+   * @paramx history
    * @param listContainer
    * @see TwoColumnExercisePanel#getRecordPanel
    */
   SimpleRecordAudioPanel(BusyPanel goodwaveExercisePanel,
                          ExerciseController controller,
                          T exercise,
-                         List<CorrectAndScore> history,
+
                          ListInterface<CommonShell, T> listContainer) {
     this.controller = controller;
     this.goodwaveExercisePanel = goodwaveExercisePanel;
@@ -76,8 +74,9 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     this.isRTL = new ClickableWords<>().isRTL(exercise);
     setWidth("100%");
     addWidgets();
-    showRecordingHistory(history);
-    hasScoreHistory = history != null && !history.isEmpty();
+    List<CorrectAndScore> scores = exercise.getScores();
+    showRecordingHistory(scores);
+    hasScoreHistory = scores != null && !scores.isEmpty();
     setVisible(hasScoreHistory);
   }
 
@@ -91,7 +90,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @seex #AudioPanel
    * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel(BusyPanel, ExerciseController, CommonExercise, List, ListInterface)
    */
-  protected void addWidgets() {
+  private void addWidgets() {
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
     {
@@ -162,7 +161,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see #addWidgets
    */
   @NotNull
-  public ASRHistoryPanel getScoreHistory() {
+  private ASRHistoryPanel getScoreHistory() {
     ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID());
     addMiniScoreListener(historyPanel);
     historyPanel.showChart();
@@ -298,24 +297,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-/*  private void showScore(double score) {
-    double percent = score / 100d;
-    progressBar.setPercent(100 * percent);
-    progressBar.setText("" + Math.round(score));
-    progressBar.setColor(
-        score > SECOND_STEP ?
-            ProgressBarBase.Color.SUCCESS :
-            score > FIRST_STEP ?
-                ProgressBarBase.Color.WARNING :
-                ProgressBarBase.Color.DANGER);
-
-    progressBar.setVisible(true);
-  }
-
-  private void hideScore() {
-    progressBar.setVisible(false);
-  }*/
-
   @Nullable
   private String getReadyToPlayAudio(String path) {
     //logger.info("getReadyToPlayAudio : get ready to play " +path);
@@ -341,6 +322,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       }
       setVisible(hasScoreHistory);
     }
+    else logger.warning("scores is null?");
     miniScoreListener.showChart();
   }
 }

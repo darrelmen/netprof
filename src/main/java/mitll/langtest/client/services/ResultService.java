@@ -61,7 +61,7 @@ public interface ResultService extends RemoteService {
   int getNumResults();
 
   /**
-   * @see ResultManager#createProvider(int, CellTable)
+   * @see ResultManager#createProvider
    * @param start
    * @param end
    * @param sortInfo

@@ -72,14 +72,16 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
                                    Map<String, String> unitToValue,
                                    String flText,
                                    int req) {
-    int userIDFromSession = getUserIDFromSession();
-    List<MonitorResult> results = getResults(unitToValue, userIDFromSession, flText);
+    //  int userIDFromSession = getUserIDFromSession();
+    List<MonitorResult> results = getResults(unitToValue, -1, flText);
     if (!results.isEmpty()) {
       Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
       try {
         Collections.sort(results, comparator);
       } catch (Exception e) {
-        logger.error("Doing " + sortInfo + " " + unitToValue + " " + userIDFromSession + " " + flText + " " + start + "-" + end +
+        logger.error("Doing " + sortInfo + " " + unitToValue +
+            //" " + userIDFromSession +
+            " " + flText + " " + start + "-" + end +
             " Got " + e, e);
       }
     }
@@ -132,20 +134,14 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       return monitorResultsByID;
     }
 
-
     Collection<MonitorResult> results = getMonitorResults();
-
-    Trie<MonitorResult> trie;
 
     // filter on unit->value
     if (!unitToValue.isEmpty()) {
       for (String type : db.getTypeOrder(projectID)) {
         if (unitToValue.containsKey(type)) {
-
-          // logger.debug("getResults making trie for " + type);
           // make trie from results
-          trie = new Trie<>();
-
+          Trie<MonitorResult> trie = new Trie<>();
           trie.startMakingNodes();
           for (MonitorResult result : results) {
             String s = result.getUnitToValue().get(type);
@@ -160,18 +156,16 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       }
     }
 
-    boolean filterByUser = userid > -1;
-    if (filterByUser) { // asking for userid
+    if (userid > -1) { // asking for userid
       // make trie from results
       results = filterByUser(userid, results);
     }
 
     // must be asking for text
-    boolean filterByText = flText != null && !flText.isEmpty();
-    if (filterByText) { // asking for text
-      trie = new Trie<>();
+    if (flText != null && !flText.isEmpty()) { // asking for text
+      Trie<MonitorResult> trie = new Trie<>();
       trie.startMakingNodes();
-      logger.debug("filter text searching over " + results.size() + " for " + filterByText);
+      logger.debug("getResults filter text searching over " + results.size() + " for " + flText);
       for (MonitorResult result : results) {
         String foreignText = result.getForeignText();
         if (foreignText != null) {

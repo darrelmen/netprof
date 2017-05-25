@@ -49,7 +49,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     RefAudioGetter {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
-  private static final String HALF_WIDTH = "50%";
+ // private static final String HALF_WIDTH = "50%";
   private static final String LEFT_WIDTH = "60%";
   private static final String RIGHT_WIDTH = "40%";
 
@@ -73,7 +73,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   /**
    *
    */
-  private Map<Integer, AlignmentOutput> alignments;
+  private final Map<Integer, AlignmentOutput> alignments;
 
   private List<IHighlightSegment> altflClickables;
   /**
@@ -81,8 +81,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private List<IHighlightSegment> flclickables;
   private List<IHighlightSegment> contextClickables, altContextClickables;
-  private ShowChoices choices;
-  private PhonesChoices phonesChoices;
+  private final ShowChoices choices;
+  private final PhonesChoices phonesChoices;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MATCH = false;
@@ -216,7 +216,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (alignmentOutput == null) {
         return true;
       } else {
-       // logger.info("addToRequest remember " + refID + " " + alignmentOutput);
+        // logger.info("addToRequest remember " + refID + " " + alignmentOutput);
         alignments.put(refID, alignmentOutput);
         return false;
       }
@@ -249,7 +249,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     req.removeAll(alignments.keySet());
 
     if (!req.isEmpty()) {
-     // logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
+      // logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
@@ -671,7 +671,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   *  Go from full width numbers to normal width
+   * Go from full width numbers to normal width
+   *
    * @param s
    * @return
    */
@@ -700,8 +701,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private boolean shouldIgnore(TranscriptSegment seg) {
-    boolean contains = toIgnore.contains(seg.getEvent());
-    return contains;
+    return toIgnore.contains(seg.getEvent());
   }
 
   private HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
@@ -831,7 +831,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return widget;
   }
 
-  DivWidget flClickableRow;
+  private DivWidget flClickableRow;
 
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget) {
@@ -1036,6 +1036,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private SimpleRecordAudioPanel<T> getRecordPanel(T e) {
+    logger.info("exercise " + e.getID() + " " + e.getScores().size() + " scores");
     return new SimpleRecordAudioPanel<T>(new BusyPanel() {
       @Override
       public boolean isBusy() {
@@ -1047,7 +1048,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
     }, controller,
         e,
-        e.getScores(), listContainer);
+        listContainer);
   }
 
   @NotNull

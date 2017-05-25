@@ -206,7 +206,6 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
   void addScores(Collection<CorrectAndScore> scores) {
-    //scoreListener.addScore(score);
     for (CorrectAndScore score : scores) {
       miniScoreListener.addScore(score);
     }
