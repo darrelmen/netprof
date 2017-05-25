@@ -430,9 +430,9 @@ public class RestUserManagement {
   }
 
   private String resetPassword(String user, String email, String requestURL) {
-    logger.warn("resetPassword for " + user);
-    String emailH = Md5Hash.getHash(email);
-    Integer validUserAndEmail = db.getUserDAO().getIDForUserAndEmail(user, emailH);
+    logger.warn("resetPassword for " + user + " and " + email);
+    //String emailH = Md5Hash.getHash(email);
+    Integer validUserAndEmail = db.getUserDAO().getIDForUserAndEmail(user, email);
 
     if (validUserAndEmail != null) {
       if (getEmailHelper().resetPassword(user, email, requestURL)) {

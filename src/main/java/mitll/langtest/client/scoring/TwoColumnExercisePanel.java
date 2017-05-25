@@ -75,12 +75,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private final Map<Integer, AlignmentOutput> alignments;
 
-  private List<IHighlightSegment> altflClickables;
+  private List<IHighlightSegment> altflClickables = null;
   /**
    * @see #getFLEntry
    */
-  private List<IHighlightSegment> flclickables;
+  private List<IHighlightSegment> flclickables = null;
   private List<IHighlightSegment> contextClickables, altContextClickables;
+
+  private DivWidget flClickableRow, altFLClickableRow;
+
   private final ShowChoices choices;
   private final PhonesChoices phonesChoices;
 
@@ -254,7 +257,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     Set<Integer> req = getReqAudio();
 
     if (!req.isEmpty()) {
-    //  logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
+      //  logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
@@ -297,7 +300,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     AlignmentOutput alignmentOutput = alignments.get(id);
     if (alignmentOutput != null) {
       if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
-      matchSegmentsToClickables(id, duration, alignmentOutput, this.flclickables, this.playAudio, flClickableRow);
+      List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
+      DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
+      matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
     } else {
       logger.warning("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
     }
@@ -318,7 +323,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                          long duration,
                                          AlignmentOutput alignmentOutput,
                                          List<IHighlightSegment> flclickables,
-                                         ChoicePlayAudioPanel playAudio, DivWidget clickableRow) {
+                                         ChoicePlayAudioPanel playAudio,
+                                         DivWidget clickableRow) {
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
         matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio, clickableRow);
     setPlayListener(id, duration, typeToSegmentToWidget, playAudio);
@@ -867,7 +873,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return widget;
   }
 
-  private DivWidget flClickableRow;
 
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget) {
@@ -1106,10 +1111,31 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String altFL = e.getAltFL().trim();
     if (!altFL.isEmpty() && !altFL.equals("N/A") && !e.getForeignLanguage().trim().equals(altFL)) {
       altflClickables = new ArrayList<>();
-      Widget entry = getEntry(e, QCNPFExercise.ALTFL, altFL, FieldType.FL,
-          showInitially, altflClickables, phonesChoices == HIDE, annotationHelper, isRTL);
-      if (addTopMargin) entry.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-      return entry;
+//      Widget entry = getEntry(e, QCNPFExercise.ALTFL, altFL, FieldType.FL,
+//          showInitially, altflClickables, phonesChoices == HIDE, annotationHelper, isRTL);
+
+      DivWidget contentWidget = clickableWords.getClickableWords(altFL,
+          FieldType.FL,
+          altflClickables, false, phonesChoices == HIDE, isRTL);
+
+      altFLClickableRow = contentWidget;
+
+      DivWidget flEntry = getCommentEntry(QCNPFExercise.ALTFL, e.getAnnotation(QCNPFExercise.ALTFL), false,
+          showInitially, annotationHelper, isRTL, contentWidget);
+
+      if (addTopMargin){
+        contentWidget.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+      }
+      //return entry;
+
+      if (!isRTL) {
+        flEntry.addStyleName("floatLeft");
+      } else {
+        clickableWords.setDirection(flEntry);
+      }
+      flEntry.setWidth("100%");
+      return flEntry;
+
     } else return null;
   }
 
@@ -1182,7 +1208,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       if (choices == BOTH || choices == ALTFL) {
         if (!altFL1.isEmpty() && !context.equals(altFL1)) {
-          col.add(getAltContext(altFL, altFL1, annotationHelper));
+          Widget altContext = getAltContext(altFL, altFL1, annotationHelper);
+          if (choices == BOTH) altContext.addStyleName("topFiveMargin");
+          col.add(altContext);
         }
       }
 
