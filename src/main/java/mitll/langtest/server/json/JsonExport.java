@@ -75,7 +75,7 @@ public class JsonExport {
 
   private final Map<String, Integer> phoneToCount;
   private final ISection<CommonExercise> sectionHelper;
-  private final Collection<Long> preferredVoices;
+  private final Collection<Integer> preferredVoices;
   private final boolean isEnglish;
 
   /**
@@ -87,7 +87,7 @@ public class JsonExport {
    */
   public JsonExport(Map<String, Integer> phoneToCount,
                     ISection<CommonExercise> sectionHelper,
-                    Collection<Long> preferredVoices,
+                    Collection<Integer> preferredVoices,
                     boolean isEnglish) {
     this.phoneToCount = phoneToCount;
     this.sectionHelper = sectionHelper;
@@ -96,8 +96,8 @@ public class JsonExport {
   }
 
   /**
-   * @paramx json
    * @return
+   * @paramx json
    * @seex JSONExerciseDAO#readExercises
    */
   public List<CommonExercise> getExercises(String json) {
@@ -320,8 +320,9 @@ public class JsonExport {
 
   /**
    * Add male & female context sentence audio and ref audio
-   *
+   * <p>
    * Used to consider checking for MP3 versions.
+   *
    * @param exercise
    * @param ex
    * @param <T>
@@ -345,6 +346,7 @@ public class JsonExport {
 
   /**
    * TODO : add json array of context sentences - be careful to maintain backward compatibility
+   *
    * @param exercise
    * @param addMeaning
    * @return
@@ -360,11 +362,10 @@ public class JsonExport {
     boolean hasContext = !exercise.getDirectlyRelated().isEmpty();
     if (hasContext) {
       CommonExercise next = exercise.getDirectlyRelated().iterator().next();
-      ex.put(CT,  next.getForeignLanguage());
+      ex.put(CT, next.getForeignLanguage());
       ex.put(CTR, next.getEnglish());
-    }
-    else {
-      ex.put(CT,  "");
+    } else {
+      ex.put(CT, "");
       ex.put(CTR, "");
     }
 
@@ -373,6 +374,7 @@ public class JsonExport {
 
   /**
    * TODO : consider making context sentences a subobject analogous to domino export json
+   *
    * @param jsonObject
    * @param types
    * @return
@@ -387,7 +389,7 @@ public class JsonExport {
         jsonObject.getString(FL),
         jsonObject.getString(MN),
         jsonObject.getString(TL),
-        -1,-1, "");
+        -1, -1, "");
 
     try {
       for (String type : types) {
@@ -413,46 +415,48 @@ public class JsonExport {
    * @param ex
    * @see #getJsonForExercise
    */
-  private void addLatestRefs(Collection<Long> preferredVoices, AudioRefExercise exercise, JSONObject ex) {
+  private void addLatestRefs(Collection<Integer> preferredVoices, AudioRefExercise exercise, JSONObject ex) {
     String mr = null, ms = null, fr = null, fs = null;
     long mrt = 0, mst = 0, frt = 0, fst = 0;
     AudioAttribute mra = null, msa = null, fra = null, fsa = null;
 
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
       long timestamp = audioAttribute.getTimestamp();
-      if (audioAttribute.isMale()) {
-        if (audioAttribute.isRegularSpeed()) {
-          if (timestamp >= mrt) {
-            if (mra == null || !preferredVoices.contains(mra.getUserid())) {
-              mrt = timestamp;
-              mr = audioAttribute.getAudioRef();
-              mra = audioAttribute;
+      if (!audioAttribute.isContextAudio()) {
+        if (audioAttribute.isMale()) {
+          if (audioAttribute.isRegularSpeed()) {
+            if (timestamp >= mrt) {
+              if (mra == null || !preferredVoices.contains(mra.getUserid())) {
+                mrt = timestamp;
+                mr = audioAttribute.getAudioRef();
+                mra = audioAttribute;
+              }
+            }
+          } else if (audioAttribute.isSlow()) {
+            if (timestamp >= mst) {
+              if (msa == null || !preferredVoices.contains(msa.getUserid())) {
+                mst = timestamp;
+                ms = audioAttribute.getAudioRef();
+                msa = audioAttribute;
+              }
             }
           }
-        } else if (audioAttribute.isSlow()) {
-          if (timestamp >= mst) {
-            if (msa == null || !preferredVoices.contains(msa.getUserid())) {
-              mst = timestamp;
-              ms = audioAttribute.getAudioRef();
-              msa = audioAttribute;
+        } else {
+          if (audioAttribute.isRegularSpeed()) {
+            if (timestamp >= frt) {
+              if (fra == null || !preferredVoices.contains(fra.getUserid())) {
+                frt = timestamp;
+                fr = audioAttribute.getAudioRef();
+                fra = audioAttribute;
+              }
             }
-          }
-        }
-      } else {
-        if (audioAttribute.isRegularSpeed()) {
-          if (timestamp >= frt) {
-            if (fra == null || !preferredVoices.contains(fra.getUserid())) {
-              frt = timestamp;
-              fr = audioAttribute.getAudioRef();
-              fra = audioAttribute;
-            }
-          }
-        } else if (audioAttribute.isSlow()) {
-          if (timestamp >= fst) {
-            if (fsa == null || !preferredVoices.contains(fsa.getUserid())) {
-              fst = timestamp;
-              fs = audioAttribute.getAudioRef();
-              fsa = audioAttribute;
+          } else if (audioAttribute.isSlow()) {
+            if (timestamp >= fst) {
+              if (fsa == null || !preferredVoices.contains(fsa.getUserid())) {
+                fst = timestamp;
+                fs = audioAttribute.getAudioRef();
+                fsa = audioAttribute;
+              }
             }
           }
         }

@@ -47,7 +47,7 @@ import java.util.Map;
  * @since 1/5/16.
  */
 public interface AudioAttributeExercise extends AudioRefExercise {
-  String getRefAudioWithPrefs(Collection<Long> preferredVoices);
+  String getRefAudioWithPrefs(Collection<Integer> preferredVoices);
 
   /**
    * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
@@ -84,8 +84,8 @@ public interface AudioAttributeExercise extends AudioRefExercise {
   /**
    * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
    * @param isMale
-   * @param includeContext
-   * @return
+   * @param preferredUsers
+   *@param includeContext  @return
    */
-  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredUsers, boolean includeContext);
+  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Integer> preferredUsers, boolean includeContext);
 }

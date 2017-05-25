@@ -180,7 +180,11 @@ public class ServerProperties {
 
   // just for automated testing
   private boolean quietAudioOK;
-  private final Set<Long> preferredVoices = new HashSet<Long>();
+
+  /**
+   * @deprecated  - need preferred voices per project...
+   */
+  private final Set<Integer> preferredVoices = new HashSet<>();
   private EmailList emailList;
   private String fontFamily;
   private String fontFaceURL;
@@ -555,7 +559,7 @@ public class ServerProperties {
     if (property != null) {
       for (String userid : property.split(",")) {
         try {
-          preferredVoices.add(Long.parseLong(userid));
+          preferredVoices.add(Integer.parseInt(userid));
           logger.info("preferredVoices pref users " + preferredVoices);
         } catch (NumberFormatException e) {
           logger.error("couldn't parse userid " + userid);
@@ -623,7 +627,8 @@ public class ServerProperties {
     return quietAudioOK;
   }
 
-  public Set<Long> getPreferredVoices() {
+  @Deprecated
+  public Set<Integer> getPreferredVoices() {
     return preferredVoices;
   }
 

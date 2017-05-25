@@ -82,7 +82,7 @@ public class AudioExercise extends ExerciseShell {
    * @return
    * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
    */
-  public String getRefAudioWithPrefs(Collection<Long> prefs) {
+  public String getRefAudioWithPrefs(Collection<Integer> prefs) {
     AudioAttribute audio = getRegularSpeedWithPrefs(prefs);
     return audio != null ? audio.getAudioRef() : null;
   }
@@ -95,7 +95,7 @@ public class AudioExercise extends ExerciseShell {
     return getAudio(SPEED, REGULAR);
   }
 
-  public AudioAttribute getRegularSpeedWithPrefs(Collection<Long> prefs) {
+  public AudioAttribute getRegularSpeedWithPrefs(Collection<Integer> prefs) {
     return getAudioPreferUsers(SPEED, REGULAR, prefs);
   }
 
@@ -161,12 +161,12 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
-  AudioAttribute getAudioPreferUsers(String name, String value, Collection<Long> prefs) {
+  private AudioAttribute getAudioPreferUsers(String name, String value, Collection<Integer> prefs) {
     AudioAttribute candidate = null;
     // long latest = 0;
     for (AudioAttribute audio : getAudioAttributes()) {
       if (audio.matches(name, value)) {
-        if (prefs.contains((long) audio.getUser().getID())) {
+        if (prefs.contains(audio.getUser().getID())) {
           return audio;
         } else {
 
@@ -186,10 +186,10 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
    * @param isMale
    * @param isRegular
    * @return
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
    */
   public AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular) {
     Collection<AudioAttribute> collect = getAudioPrefGender(isMale);
@@ -200,9 +200,9 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay(CommonExercise)
    * @param isMale
    * @return
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay(CommonExercise)
    */
   public AudioAttribute getAudioAttrPrefGender(boolean isMale) {
     Collection<AudioAttribute> audioPrefGender = getAudioPrefGender(isMale);
@@ -426,7 +426,7 @@ public class AudioExercise extends ExerciseShell {
    * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
    */
   public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale,
-                                                                Collection<Long> preferredVoices,
+                                                                Collection<Integer> preferredVoices,
                                                                 boolean includeContext) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale, includeContext);
     //logger.info("\tgetMostRecentAudio userToAudio " + userToAudio + "\n\tpref" + preferredVoices + "\n\tinclude "+includeContext);
@@ -451,14 +451,14 @@ public class AudioExercise extends ExerciseShell {
           long timestamp1 = audioAttribute.getTimestamp();
           if (reg && slow && bothTimestamp < timestamp1) {
             //  System.out.println("\t\tlatest is " + new Date(timestamp1));
-            if (bothLatest == null || !preferredVoices.contains((long) bothLatest.getID())) {
+            if (bothLatest == null || !preferredVoices.contains(bothLatest.getID())) {
               bothTimestamp = timestamp1;
               //           logger.info("\t\t\tlatest is " + new Date(bothTimestamp));
               bothLatest = user;
             }
           }
           if (timestamp <= timestamp1) {
-            if (latest == null || !preferredVoices.contains((long) latest.getID())) {
+            if (latest == null || !preferredVoices.contains(latest.getID())) {
               timestamp = timestamp1;
               latest = user;
             }

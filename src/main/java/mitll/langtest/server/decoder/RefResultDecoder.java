@@ -65,11 +65,11 @@ public class RefResultDecoder {
   private static final Logger logger = LogManager.getLogger(RefResultDecoder.class);
 
   //  private static final boolean DO_REF_DECODE = true;
-  private static final boolean DO_TRIM = false;
+ // private static final boolean DO_TRIM = false;
   // private static final int SLEEP_BETWEEN_DECODES = 2000;
-  private static final boolean DO_CALC_DNR = true;
+//  private static final boolean DO_CALC_DNR = true;
   //private static final boolean ENSURE_OGG = false;
-  public static final int MAX_SPEW = 50;
+  private static final int MAX_SPEW = 50;
   //private static final int SLEEP_BETWEEN_DECODES = 2000;
 
   private final DatabaseImpl db;
@@ -84,7 +84,7 @@ public class RefResultDecoder {
 
   private final BlockingQueue<DecodeTask> queue = new LinkedBlockingQueue<>();
   private Thread consumer = null;
-  int defaultUser;
+  private final int defaultUser;
 
   /**
    * @param db
@@ -304,7 +304,7 @@ public class RefResultDecoder {
    * @param relativeConfigDir
    * @param exToAudio
    */
-  private void calcDNROnAudio(String language,
+/*  private void calcDNROnAudio(String language,
                               Collection<CommonExercise> exercises, String relativeConfigDir, Map<Integer, List<AudioAttribute>> exToAudio) {
     if (DO_CALC_DNR) {
       String installPath = pathHelper.getInstallPath();
@@ -327,7 +327,7 @@ public class RefResultDecoder {
         List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
         if (audioAttributes != null) {
 //					logger.warn("hmm - audio recorded for " + )
-          boolean didAll = db.getAudioDAO().attachAudio(exercise, /*installPath, relativeConfigDir,*/ audioAttributes, language);
+          boolean didAll = db.getAudioDAO().attachAudio(exercise, *//*installPath, relativeConfigDir,*//* audioAttributes, language);
           attrc += audioAttributes.size();
           //        if (!didAll) {
           //         failed.add(exercise.getID());
@@ -347,13 +347,13 @@ public class RefResultDecoder {
         }
       }
     }
-  }
+  }*/
 
   /**
    * @param exercises
-   * @param exToAudio
+   * @paramx exToAudio
    */
-  private void trimRef(Collection<CommonExercise> exercises, Map<Integer, List<AudioAttribute>> exToAudio) {
+  /*private void trimRef(Collection<CommonExercise> exercises, Map<Integer, List<AudioAttribute>> exToAudio) {
     if (DO_TRIM) {
 //      String installPath = pathHelper.getInstallPath();
       int numResults = db.getRefResultDAO().getNumResults();
@@ -374,7 +374,7 @@ public class RefResultDecoder {
       int femaleAudio = 0;
       int defaultAudio = 0;
 //      Set<String> failed = new TreeSet<>();
-      Set<Long> preferredVoices = serverProps.getPreferredVoices();
+      Set<Integer> preferredVoices = serverProps.getPreferredVoices();
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
@@ -426,8 +426,13 @@ public class RefResultDecoder {
 //        logger.warn("failed to attach audio to " + failed.size() + " exercises : " + failed);
 //      }
     }
-  }
+  }*/
 
+  /**
+   * @see Project#ensureAudio
+   * @param language
+   * @param exercises
+   */
   public void ensure(String language,
                      Collection<CommonExercise> exercises) {
 //      String installPath = pathHelper.getInstallPath();
@@ -448,7 +453,7 @@ public class RefResultDecoder {
     int femaleAudio = 0;
     int defaultAudio = 0;
 
-    Set<Long> preferredVoices = serverProps.getPreferredVoices();
+    Set<Integer> preferredVoices = serverProps.getPreferredVoices();
     for (CommonExercise exercise : exercises) {
       if (stopDecode) return;
 
@@ -559,7 +564,7 @@ public class RefResultDecoder {
 
   }*/
 
-  private int setDNROnAudio(String installPath, IAudioDAO audioDAO, List<AudioAttribute> audioAttributes) {
+/*  private int setDNROnAudio(String installPath, IAudioDAO audioDAO, List<AudioAttribute> audioAttributes) {
     int c = 0;
 
     for (AudioAttribute audio : audioAttributes) {
@@ -582,7 +587,7 @@ public class RefResultDecoder {
       }
     }
     return c;
-  }
+  }*/
 
   /*private void recalcStudentAudio() {
     IResultDAO resultDAO = db.getResultDAO();
@@ -771,7 +776,7 @@ public class RefResultDecoder {
       stats.attrc += audioAttributes.size();
     }*/
 
-    Set<Long> preferredVoices = Collections.emptySet();//.getPreferredVoices();
+    Set<Integer> preferredVoices = Collections.emptySet();//.getPreferredVoices();
     Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices, false);
     Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, false);
 
@@ -817,7 +822,7 @@ public class RefResultDecoder {
     return added;
   }
 
-  int spew = 0;
+  private int spew = 0;
 
 /*  private void runMissingInfo(final Collection<CommonExercise> exercises) {
     new Thread(new Runnable() {
@@ -844,13 +849,13 @@ public class RefResultDecoder {
     int femaleAudio = 0;
     int defaultAudio = 0;
 
-    public void add(Stats other) {
-      count += other.count;
-      attrc += other.attrc;
-      maleAudio += other.maleAudio;
-      femaleAudio += other.femaleAudio;
-      defaultAudio += other.defaultAudio;
-    }
+//    public void add(Stats other) {
+//      count += other.count;
+//      attrc += other.attrc;
+//      maleAudio += other.maleAudio;
+//      femaleAudio += other.femaleAudio;
+//      defaultAudio += other.defaultAudio;
+//    }
   }
 
   /**
@@ -896,9 +901,9 @@ public class RefResultDecoder {
   }
 
   private static class DecodeTask {
-    String language;
-    CommonExercise exercise;
-    List<AudioAttribute> toDecode;
+    final String language;
+    final CommonExercise exercise;
+    final List<AudioAttribute> toDecode;
 
     public DecodeTask(String language, CommonExercise exercise, List<AudioAttribute> toDecode) {
       this.language = language;
@@ -988,13 +993,13 @@ public class RefResultDecoder {
   }
 
   /**
-   * @param audioAttributes
+   * @paramx audioAttributes
    * @param title
    * @param exid
    * @return
    * @see #trimRef
    */
-  private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, int exid, String comment,
+/*  private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, int exid, String comment,
                       String language) {
     int count = 0;
     int trimmed = 0;
@@ -1038,9 +1043,9 @@ public class RefResultDecoder {
     }
 
     return new Info(trimmed, count, changed);
-  }
+  }*/
 
-  private static class Info {
+/*  private static class Info {
     final int trimmed;
     final int count;
     final int changed;
@@ -1050,12 +1055,12 @@ public class RefResultDecoder {
       this.count = count;
       this.changed = changed;
     }
-  }
+  }*/
 
-  private String getFile(AudioAttribute attribute) {
+/*  private String getFile(AudioAttribute attribute) {
     String[] bestAudios = attribute.getAudioRef().split(File.separator);
     return bestAudios[bestAudios.length - 1];
-  }
+  }*/
 
   public void setStopDecode(boolean stopDecode) {
     this.stopDecode = stopDecode;

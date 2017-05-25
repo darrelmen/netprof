@@ -837,6 +837,9 @@ public class ScoreServlet extends DatabaseServlet {
         realExID = db.getUserExerciseDAO().getUnknownExercise().id();
         logger.info("getJsonForAudio : using unknown exercise id " + realExID);
       }
+      else {
+        logger.info("getJsonForAudio got exercise id "+ realExID);
+      }
     } catch (NumberFormatException e) {
       logger.info("couldn't parse "+ request.getHeader(EXERCISE));
     }
@@ -928,8 +931,8 @@ public class ScoreServlet extends DatabaseServlet {
       Project project1 = db.getProject(projid);
       String flText = request.getHeader(EXERCISE_TEXT);
       if (flText == null) {
-        logger.error("getExerciseIDFromText expecting header " + EXERCISE_TEXT);
-        return -1;
+        logger.info("getExerciseIDFromText no optional header " + EXERCISE_TEXT);
+        return realExID;
       }
       else {
         String decoded = new String(Base64.getDecoder().decode(flText.getBytes()));

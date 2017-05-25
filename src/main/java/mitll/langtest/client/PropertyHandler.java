@@ -56,11 +56,11 @@ public class PropertyHandler {
   public static final String CPW_TOKEN = "CPWtoken";
   public static final String CPW_TOKEN2 = "CPW-token";
 
-  private static final String TALKS_TO_DOMINO = "talksToDomino";
-  private static final String PRACTICE_CONTEXT = "practiceContext";
+ // private static final String TALKS_TO_DOMINO = "talksToDomino";
+//  private static final String PRACTICE_CONTEXT = "practiceContext";
   private static final String FONT_FAMILY = "fontFamily";
 
-  private static final String RTL = "rtl";
+//  private static final String RTL = "rtl";
   private static final String IS_AMAS = "isAMAS";
 
   /**
@@ -72,8 +72,8 @@ public class PropertyHandler {
 
   // property file property names
 
-  @Deprecated
-  private static final String GRADING_PROP = "grading";
+ // @Deprecated
+ // private static final String GRADING_PROP = "grading";
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
   private static final String RELEASE_DATE = "releaseDate";
@@ -85,28 +85,28 @@ public class PropertyHandler {
   private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
   private static final String NAME_FOR_RECORDER = "nameForRecorder";
-  private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
+ // private static final String NUM_GRADES_TO_COLLECT = "numGradesToCollect";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String DIALOG = "dialog";
 
-  private static final String LANGUAGE = "language";
-  @Deprecated private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
+ // private static final String LANGUAGE = "language";
+ // @Deprecated private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
 
   // URL parameters that can override above parameters
-  private static final String GRADING = GRADING_PROP;
+ // private static final String GRADING = GRADING_PROP;
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
   // private static final String ADMIN_PARAM = "admin";
-  @Deprecated private static final String ANALYSIS = "analysis";
-  @Deprecated
-  private static final String TURK_PARAM = "turk";
-  @Deprecated
-  private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
+//  @Deprecated private static final String ANALYSIS = "analysis";
+ // @Deprecated
+ // private static final String TURK_PARAM = "turk";
+//  @Deprecated
+//  private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
-  @Deprecated private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
-  private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
+//  @Deprecated private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
+  //private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
   private static final String SHOW_SPECTROGRAM2 = "showSpectrogram";
@@ -130,8 +130,8 @@ public class PropertyHandler {
   private static final String HELP = "help";
   private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
 
-  private boolean analysis = false;
-  private boolean canPracticeContext = false;
+ // private boolean analysis = false;
+ // private boolean canPracticeContext = false;
   private boolean isAMAS;
   private boolean usePhoneToDisplay;
 
@@ -142,7 +142,7 @@ public class PropertyHandler {
   private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
 
   private String fontFamily = "";
-  private String modelDir;
+  //private String modelDir;
   private int afterStopDelayMillis = DEFAULT_AFTER_STOP_DELAY_MILLIS;
   private String dominoURL = DOMINO_SERVER_DEFAULT, helpMessage = HELP_DEFAULT;
 
@@ -164,7 +164,7 @@ public class PropertyHandler {
   }
 
   @Deprecated
-  public Set<Long> getPreferredVoices() {
+  public Set<Integer> getPreferredVoices() {
     return preferredVoices;
   }
 
@@ -180,9 +180,11 @@ public class PropertyHandler {
     return true;
   }
 
+/*
   boolean talksToDomino() {
     return talksToDomino;
   }
+*/
 
   /**
    * Typically 50 or 100 milliseconds.
@@ -207,15 +209,11 @@ public class PropertyHandler {
     this.fontFamily = fontFamily;
   }
 
-  public String getModelDir() {
-    return modelDir;
-  }
-
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
-  private boolean showContext = true;
-  private final Set<Long> preferredVoices = new HashSet<>();
+//  private boolean showContext = true;
+  private final Set<Integer> preferredVoices = new HashSet<>();
 
   /**
    * @see #checkParams
@@ -226,7 +224,7 @@ public class PropertyHandler {
 
   private final Map<String, String> props;
 
-  private boolean grading = false;
+  //private boolean grading = false;
   private boolean bkgColorForRef = false;
 
   /**
@@ -237,24 +235,19 @@ public class PropertyHandler {
 
   //private boolean showWelcome = false;// default value
   private boolean logClientMessages = false;
-  @Deprecated
-  private int numGradesToCollect = NUM_GRADES_TO_COLLECT_DEFAULT;
+ // @Deprecated
+ // private int numGradesToCollect = NUM_GRADES_TO_COLLECT_DEFAULT;
   private String nameForItem = "Item";
   private String nameForAnswer = "Recording";
   private String nameForRecorder = "Speaker";
-  private String language = "";
+  //private String language = "";
   private String dialog = "";
 
   private String releaseDate;
-  @Deprecated
-  private String turkID = "";
-
   private int recordTimeout = DEFAULT_TIMEOUT;
 
   private String splashTitle = null;
   private String appTitle = null;
-
-  private boolean rightAlignContent;
 
   private boolean showFlashcardAnswer = true;
   private boolean allowPlusInURL;
@@ -264,7 +257,7 @@ public class PropertyHandler {
   public static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
-  private boolean talksToDomino = false;
+  //private boolean talksToDomino = false;
 
   /**
    * @param props
@@ -284,9 +277,10 @@ public class PropertyHandler {
       String key = kv.getKey();
       String value = kv.getValue();
 
-      if (key.equals(GRADING_PROP)) grading = getBoolean(value);
+      //if (key.equals(GRADING_PROP)) grading = getBoolean(value);
 
-      else if (key.equals(APP_TITLE)) appTitle = value;
+      //else
+        if (key.equals(APP_TITLE)) appTitle = value;
       else if (key.equals(RELEASE_DATE)) releaseDate = value;
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
@@ -295,14 +289,15 @@ public class PropertyHandler {
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
-      else if (key.equals(NUM_GRADES_TO_COLLECT))
-        numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
+ //     else if (key.equals(NUM_GRADES_TO_COLLECT))
+ //       numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
-      else if (key.equals(LANGUAGE)) language = value;
+      //else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
-      else if (key.equals(RIGHT_ALIGN_CONTENT) || key.equals(RTL)) {
-        rightAlignContent = getBoolean(value);
-      } else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
+ //     else if (key.equals(RIGHT_ALIGN_CONTENT) || key.equals(RTL)) {
+ //       rightAlignContent = getBoolean(value);
+  //    }
+     // else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
       else if (key.equals("showSpectrogram")) spectrogram = getBoolean(value);
@@ -313,12 +308,11 @@ public class PropertyHandler {
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
         //   else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
-      else if (key.equals(TALKS_TO_DOMINO)) talksToDomino = getBoolean(value);
-      else if (key.equals(PRACTICE_CONTEXT)) canPracticeContext = getBoolean(value);
+  //    else if (key.equals(TALKS_TO_DOMINO)) talksToDomino = getBoolean(value);
+   //   else if (key.equals(PRACTICE_CONTEXT)) canPracticeContext = getBoolean(value);
       else if (key.equals(FONT_FAMILY)) fontFamily = value;
       else if (key.equals(DOMINO_SERVER)) dominoURL = value;
       else if (key.equals(HELP)) helpMessage = value;
-      else if (key.equals("scoringModel")) modelDir = value;
       else if (key.equals("afterStopDelayMillis")) {
         afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
       }
@@ -332,7 +326,7 @@ public class PropertyHandler {
     }
 
     if (appTitle == null) {
-      appTitle = language + getAppTitleSuffix();
+      appTitle = getAppTitleSuffix();
     }
 
     if (isAMAS()) {
@@ -370,7 +364,7 @@ public class PropertyHandler {
 @Deprecated private void getPreferredVoices(String value) {
     for (String userid : value.split(",")) {
       try {
-        preferredVoices.add(Long.parseLong(userid));
+        preferredVoices.add(Integer.parseInt(userid));
         //  logger.info("pref users " + preferredVoices);
       } catch (NumberFormatException e) {
         logger.warning("couldn't parse userid " + userid);
@@ -431,14 +425,14 @@ public class PropertyHandler {
     } else {
       this.exercise_title = DEFAULT_EXERCISE;
     }
-
+/*
     {
       String isGrading = Window.Location.getParameter(GRADING);
       boolean grading = this.isGrading() || (isGrading != null && !isGrading.equals("false"));
       setGrading(grading);
-    }
+    }*/
     // get audio repeats
-    numGradesToCollect = getInt(Window.Location.getParameter(NUM_GRADES_TO_COLLECT_PARAM), numGradesToCollect, NUM_GRADES_TO_COLLECT);
+//    numGradesToCollect = getInt(Window.Location.getParameter(NUM_GRADES_TO_COLLECT_PARAM), numGradesToCollect, NUM_GRADES_TO_COLLECT);
     if (bkgColorForRefParam != null) {
       bkgColorForRef = !bkgColorForRefParam.equals("false");
     }
@@ -451,7 +445,7 @@ public class PropertyHandler {
 //    if (adminParam != null) {
 //      adminView = !adminParam.equals("false");
 //    }
-    String p = Window.Location.getParameter(ANALYSIS);
+/*    String p = Window.Location.getParameter(ANALYSIS);
     if (p != null) {
       analysis = !p.equals("false");
     }
@@ -459,12 +453,7 @@ public class PropertyHandler {
     p = Window.Location.getParameter("context");
     if (p != null) {
       canPracticeContext = !p.equals("false");
-    }
-
-    String turkParam = Window.Location.getParameter(TURK_PARAM);
-    if (turkParam != null) {
-      turkID = turkParam;
-    }
+    }*/
 
 /*
     String resetPasswordID = Window.Location.getParameter(RP);
@@ -497,9 +486,11 @@ public class PropertyHandler {
     }
 */
 
+
     if (Window.Location.getParameter(CLICK_AND_HOLD) != null) {
       clickAndHold = !Window.Location.getParameter(CLICK_AND_HOLD).equals("false");
     }
+
 
     if (Window.Location.getParameter(SHOW_SPECTROGRAM) != null) {
       spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM).equals("false");
@@ -539,7 +530,7 @@ public class PropertyHandler {
    * @see mitll.langtest.client.LangTest#recordingModeSelect()
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
-  @Deprecated
+/*  @Deprecated
   private boolean isGrading() {
     return grading;
   }
@@ -547,7 +538,7 @@ public class PropertyHandler {
   @Deprecated
   private void setGrading(boolean v) {
     this.grading = v;
-  }
+  }*/
 
   public boolean isBkgColorForRef() {
     return bkgColorForRef;
@@ -569,21 +560,6 @@ public class PropertyHandler {
   @Deprecated
   public boolean isDemoMode() {
     return demoMode;
-  }
-
-/*
-  public boolean isAdminView() {
-    return false;//adminView;
-  }
-*/
-
-  public boolean canPracticeContext() {
-    return canPracticeContext;
-  }
-
-  @Deprecated
-  public String getTurkID() {
-    return turkID;
   }
 
   public String getReleaseDate() {
@@ -614,27 +590,6 @@ public class PropertyHandler {
     return !dialog.isEmpty();
   }
 
-  public String getLanguage() {
-    return language;
-  }
-
-  public String getSplash() {
-    return splashTitle;
-  }
-
-  /**
-   * Not sure if we want have a property - normally we just look at the text.
-   * @return
-   * @see LangTest#isRightAlignContent()
-   */
-  public boolean isRightAlignContent() {
-    return rightAlignContent;
-  }
-
-  public boolean showFlashcardAnswer() {
-    return showFlashcardAnswer;
-  }
-
   public boolean shouldAllowPlusInURL() {
     return allowPlusInURL;
   }
@@ -657,10 +612,6 @@ public class PropertyHandler {
 
   public boolean isQuietAudioOK() {
     return quietAudioOK;
-  }
-
-  public boolean showContextButton() {
-    return showContext;
   }
 
   private static boolean knownChoice(String choice) {

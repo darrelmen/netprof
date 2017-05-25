@@ -130,7 +130,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
 
   private void addChoices(SplitDropdownButton playButton, boolean includeContext) {
-    Collection<Long> preferredVoices = Collections.emptyList();
+    Collection<Integer> preferredVoices = Collections.emptyList();
     boolean isMale = isMale();
     boolean isFemale = !isMale();
     boolean isReg = controller.getStorage().isTrue(IS_REG);

@@ -115,7 +115,11 @@ public class ExcelExport {
     Row headerRow = sheet.createRow(rownum++);
 
     boolean english = addHeaderRow(language, typeOrder, headerRow, isDefectList);
-    Set<Long> preferredVoices = props.getPreferredVoices();
+
+    /**
+     * Deal with per-project voices...
+     */
+    Set<Integer> preferredVoices = props.getPreferredVoices();
 
     for (CommonExercise exercise : copy) {
       Row row = sheet.createRow(rownum++);
@@ -164,7 +168,7 @@ public class ExcelExport {
     return wb;
   }
 
-  private void addDefects(boolean english, Set<Long> preferredVoices, CommonExercise exercise, Row row, int j) {
+  private void addDefects(boolean english, Set<Integer> preferredVoices, CommonExercise exercise, Row row, int j) {
     //        logger.debug("annos for " + exercise.getID() + "\tfields : " + exercise.getFieldToAnnotation());
     ExerciseAnnotation annotation = exercise.getAnnotation("english");
     row.createCell(j++).setCellValue(annotation == null || annotation.isCorrect() ? "" : annotation.getComment());

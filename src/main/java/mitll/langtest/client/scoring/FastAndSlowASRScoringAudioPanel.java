@@ -116,7 +116,7 @@ SpeedStorage speedStorage;
       return rightSide;
     } else {
       // add gender choices
-      Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
+      Set<Integer> preferredVoices = controller.getProps().getPreferredVoices();
       Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices, false);
       Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, false);
       Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
