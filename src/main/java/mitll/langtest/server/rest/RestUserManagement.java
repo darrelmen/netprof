@@ -172,15 +172,13 @@ public class RestUserManagement {
       return true;
     } else
       */
-      if (queryString.startsWith(FORGOT_USERNAME)) {
+    if (queryString.startsWith(FORGOT_USERNAME)) {
       String[] split1 = getParams(queryString);
       if (split1.length != 1) {
         toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
       } else {
         String first = split1[0];
-        String emailFromDevice = getArg(first);
-        boolean valid = forgotUsername(emailFromDevice);
-        toReturn.put(VALID, valid);
+        toReturn.put(VALID, forgotUsername(getArg(first)));
       }
       return true;
     } else if (queryString.startsWith(RESET_PASS)) {
@@ -287,13 +285,12 @@ public class RestUserManagement {
     tryToLogin(toReturn, freeTextPassword, request, securityManager, projid, user);//, passwordH);
   }
 */
-
   public void tryToLogin(JSONObject toReturn,
-                          String freeTextPassword,
-                          HttpServletRequest request,
-                          IUserSecurityManager securityManager,
-                          int projid,
-                          String user//,
+                         String freeTextPassword,
+                         HttpServletRequest request,
+                         IUserSecurityManager securityManager,
+                         int projid,
+                         String user//,
 //                          String passwordH
   ) {
     IUserDAO userDAO = db.getUserDAO();
@@ -325,11 +322,10 @@ public class RestUserManagement {
       toReturn.put("loginResult", loginResult.getResultType().name());
 
       if (loginResult.getResultType() == Success) {
-        db.rememberProject(userid,projid);
-        toReturn.put(PASSWORD_CORRECT,  "TRUE");
-      }
-      else {
-        toReturn.put(PASSWORD_CORRECT,  FALSE);
+        db.rememberProject(userid, projid);
+        toReturn.put(PASSWORD_CORRECT, "TRUE");
+      } else {
+        toReturn.put(PASSWORD_CORRECT, FALSE);
       }
     }
   }
@@ -417,8 +413,14 @@ public class RestUserManagement {
         "</html>";
   }
 
+  /**
+   * If there's a valid user with that email - send them an email.
+   * @param email
+   * @return
+   */
   private boolean forgotUsername(String email) {
-    String valid = db.getUserDAO().isValidEmail(Md5Hash.getHash(email));
+   // String hash = Md5Hash.getHash(email);
+    String valid = db.getUserDAO().isValidEmail(email);
     if (valid != null) {
       getEmailHelper().getUserNameEmailDevice(email, valid);
       return true;

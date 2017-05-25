@@ -67,7 +67,6 @@ public class WaitCursorHelper {
   public void hide() {
     waitCursor.setVisible(false);
   }
-
   public void show() {
     waitCursor.setVisible(true);
   }

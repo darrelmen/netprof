@@ -49,12 +49,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     RefAudioGetter {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
- // private static final String HALF_WIDTH = "50%";
+  // private static final String HALF_WIDTH = "50%";
   private static final String LEFT_WIDTH = "60%";
   private static final String RIGHT_WIDTH = "40%";
 
   private static final String EMAIL = "Email Item";
-  private static final Set<String> toIgnore = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
+  private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
 
   static final int CONTEXT_INDENT = 56;
   private static final char FULL_WIDTH_ZERO = '\uFF10';
@@ -129,17 +129,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
     clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), fontSize);
     this.isRTL = clickableWords.isRTL(exercise);
-    // this.correctAndScores = correctAndScores;
+
     commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
     add(getItemContent(commonExercise));
 
-    addMouseOverHandler(event -> getRefAudio(() -> {
-    }));
+/*    addMouseOverHandler(event -> getRefAudio(() -> {
+    }));*/
 /*    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         getRefAudio(controller);
       }
     });*/
+    getRefAudio();
   }
 
   /**
@@ -210,6 +211,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     // }
   }
 
+  public int getRefAudio() {
+    AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
+    return currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
+  }
+
+  public int getContextRefAudio() {
+    AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
+    return contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
+  }
+
   private boolean addToRequest(AudioAttribute currentAudioAttr, int refID) {
     if (!alignments.containsKey(refID)) {
       AlignmentOutput alignmentOutput = currentAudioAttr.getAlignmentOutput();
@@ -240,16 +251,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void cacheOthers(RefAudioListener listener) {
-    Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
-
-    if (contextPlay != null) {
-      req.addAll(contextPlay.getAllAudioIDs());
-    }
-
-    req.removeAll(alignments.keySet());
+    Set<Integer> req = getReqAudio();
 
     if (!req.isEmpty()) {
-      // logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
+    //  logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
@@ -269,6 +274,17 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     } else {
       listener.refAudioComplete();
     }
+  }
+
+  public Set<Integer> getReqAudio() {
+    Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
+
+    if (contextPlay != null) {
+      req.addAll(contextPlay.getAllAudioIDs());
+    }
+    req.removeAll(alignments.keySet());
+
+    return req;
   }
 
   /**
@@ -664,7 +680,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       StringBuilder builder2 = new StringBuilder();
       for (TranscriptSegment segment : segments) {
 
-          builder2.append(segment.getEvent()).append(" ");
+        builder2.append(segment.getEvent()).append(" ");
 
       }
       logger.info("align    : " + builder2);
@@ -721,7 +737,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private boolean shouldIgnore(TranscriptSegment seg) {
-    return toIgnore.contains(seg.getEvent());
+    return TO_IGNORE.contains(seg.getEvent());
   }
 
   private HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
@@ -1056,7 +1072,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private SimpleRecordAudioPanel<T> getRecordPanel(T e) {
-    logger.info("exercise " + e.getID() + " " + e.getScores().size() + " scores");
+    //  logger.info("exercise " + e.getID() + " " + e.getScores().size() + " scores");
     return new SimpleRecordAudioPanel<T>(new BusyPanel() {
       @Override
       public boolean isBusy() {
@@ -1066,9 +1082,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       @Override
       public void setBusy(boolean v) {
       }
-    }, controller,
-        e,
-        listContainer);
+    }, controller, e, listContainer);
   }
 
   @NotNull

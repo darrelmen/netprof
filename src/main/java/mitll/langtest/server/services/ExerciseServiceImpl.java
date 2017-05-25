@@ -234,7 +234,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                   int userID) {
     List<CommonExercise> commonExercises = exercises.getByExercise();
     if (request.isIncorrectFirstOrder()) {
-      logger.info("getSortedExercises adding isIncorrectFirstOrder " + exercises.getByExercise().size() + " basicExercises");
+      if (DEBUG)
+        logger.info("getSortedExercises adding isIncorrectFirstOrder " + exercises.getByExercise().size() + " basicExercises");
       commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getCollator(), getLanguage());
     } else {
       if (predefExercises) {
@@ -255,14 +256,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         }
 
         Set<Integer> unique = new HashSet<>();
-        logger.info("getSortedExercises adding " + exercises.getByID().size() + " by id exercises");
+        if (DEBUG) logger.info("getSortedExercises adding " + exercises.getByID().size() + " by id exercises");
 
         // 1) first add any exact by id matches - should only be one
         if (exercises.getByID().size() > 1)
           logger.error("expecting only 0 or 1 matches for by id " + exercises.getByID().size());
         commonExercises.addAll(exercises.getByID());
         exercises.getByID().forEach(e -> unique.add(e.getID()));
-        logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
+        if (DEBUG) logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
 
         basicExercises
             .stream()
@@ -278,11 +279,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
             if (!contextExercises.isEmpty() && hasSearch) {
               // if the search term is in the fl, sort by fl
               sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
-              logger.info("getSortedExercises found search term " + searchTerm + " = " + sortByFL);
+              if (DEBUG) logger.info("getSortedExercises found search term " + searchTerm + " = " + sortByFL);
             }
             sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL, searchTerm);
           }
-          logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises, " + unique.size() + " unique");
+          if (DEBUG)
+            logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises, " + unique.size() + " unique");
 
           contextExercises
               .stream()
@@ -1304,7 +1306,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     for (CommonExercise exercise : exercises) {
       List<CorrectAndScore> scoreTotal = scoreHistories.get(exercise.getID());
-      if (scoreTotal == null) logger.error("huh? no history for " + exercise.getID());
+      if (scoreTotal == null) {
+        //logger.error("huh? no history for " + exercise.getID());
+      }
       else {
         exercise.getMutable().setScores(scoreTotal);
       }
@@ -1325,20 +1329,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       Map<Integer, AudioAttribute> idToAudio = new HashMap<>();
 
       for (CommonExercise exercise : toAddAudioTo) {
-        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+        setAlignmentInfo(audioToAlignment, idToAudio, exercise);
+        for (CommonExercise context:exercise.getDirectlyRelated()) {
+          setAlignmentInfo(audioToAlignment, idToAudio, context);
 
-          AlignmentOutput alignmentOutput = audioAttribute.getAlignmentOutput();
-          if (alignmentOutput == null) {
-            synchronized (audioToAlignment) {
-              AlignmentOutput alignmentOutput1 = audioToAlignment.get(audioAttribute.getUniqueID());
-
-              if (alignmentOutput1 == null) {
-                idToAudio.put(audioAttribute.getUniqueID(), audioAttribute);
-              } else {  // not sure how this can happen
-                audioAttribute.setAlignmentOutput(alignmentOutput1);
-              }
-            }
-          }
         }
       }
 
@@ -1346,6 +1340,26 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
       synchronized (audioToAlignment) {
         audioToAlignment.putAll(alignments);
+      }
+    }
+  }
+
+  private void setAlignmentInfo(Map<Integer, AlignmentOutput> audioToAlignment,
+                                Map<Integer, AudioAttribute> idToAudio,
+                                CommonExercise exercise) {
+    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+
+      AlignmentOutput alignmentOutput = audioAttribute.getAlignmentOutput();
+      if (alignmentOutput == null) {
+        synchronized (audioToAlignment) {
+          AlignmentOutput alignmentOutput1 = audioToAlignment.get(audioAttribute.getUniqueID());
+
+          if (alignmentOutput1 == null) {
+            idToAudio.put(audioAttribute.getUniqueID(), audioAttribute);
+          } else {  // not sure how this can happen
+            audioAttribute.setAlignmentOutput(alignmentOutput1);
+          }
+        }
       }
     }
   }

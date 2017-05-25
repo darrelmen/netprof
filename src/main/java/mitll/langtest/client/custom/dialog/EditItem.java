@@ -214,7 +214,6 @@ public class EditItem {
           return new TwoColumnExercisePanel<>(exercise,
               controller,
               exerciseList,
-              //Collections.emptyList(),
               getChoices(), getPhoneChoices(), alignments);
         }
 

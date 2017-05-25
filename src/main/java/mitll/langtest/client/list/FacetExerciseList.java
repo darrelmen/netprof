@@ -204,7 +204,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return pagerAndSort;
   }
 
-
   private void styleProgressBarContainer(ProgressBar progressBar) {
     Style style = progressBar.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
@@ -1303,9 +1302,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
-  private void gotFullExercises(int reqID,
-                                //   ExerciseListWrapper<CommonExercise> result,
-                                List<CommonExercise> toShow) {
+  private void gotFullExercises(int reqID, List<CommonExercise> toShow) {
     if (toShow.isEmpty()) {
       //showEmptyExercise();
       hidePrevNext();
@@ -1395,20 +1392,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    *
    * @param iterator
    */
-
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {
       RefAudioGetter next = iterator.next();
-
 //    logger.info("getRefAudio asking next panel...");
       next.getRefAudio(() -> {
         if (iterator.hasNext()) {
           //      logger.info("\tgetRefAudio panel complete...");
-          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            public void execute() {
-              getRefAudio(iterator);
-            }
-          });
+          Scheduler.get().scheduleDeferred(() -> getRefAudio(iterator));
         } else {
           //logger.info("\tgetRefAudio all panels complete...");
         }

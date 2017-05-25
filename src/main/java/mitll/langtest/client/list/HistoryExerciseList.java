@@ -409,11 +409,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     String value = event.getValue();
     SelectionState selectionState = getSelectionState(value);
 
-    if (selectionState.getProject() != controller.getProjectStartupInfo().getProjectid()) {
+   // if (selectionState.getProject() != controller.getProjectStartupInfo().getProjectid()) {
       //controller.
       // TODO : change the project --- ... and come back and call code below.
-      logger.info("project from state " + selectionState.getProject() + " != " + controller.getProjectStartupInfo().getProjectid());
-    }
+   //   logger.info("project from state " + selectionState.getProject() + " != " + controller.getProjectStartupInfo().getProjectid());
+   // }
 
     if (DEBUG_ON_VALUE_CHANGE)
       logger.info("onValueChange got " + value + " sel " + selectionState + " " + selectionState.getInfo());
@@ -514,7 +514,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     ExerciseListRequest request =
         getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
 
-    logger.info("loadExercisesUsingPrefix got " + typeToSection + " prefix " + prefix + " and made " + request);
+  //  logger.info("loadExercisesUsingPrefix got " + typeToSection + " prefix " + prefix + " and made " + request);
 
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {
       try {
@@ -568,8 +568,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                               ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
     if (DEBUG) {
-      logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID);
-      logger.info("getExerciseIDs for '" + request);
+      logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID + " for " + request);
     }
     service.getExerciseIds(
         request,

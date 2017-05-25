@@ -427,6 +427,7 @@ public class ClickableWords<T extends CommonExercise> {
   protected String removePunct(String t) {
     return t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
+        .replaceAll("\\u00ED","i")
         .replaceAll("[\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
   }
 }

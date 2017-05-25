@@ -131,7 +131,7 @@ public abstract class BaseAudioDAO extends DAO {
   abstract Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid);
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises(int, Collection, boolean)
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    * @param exercises
    * @param language
    */
@@ -171,8 +171,8 @@ public abstract class BaseAudioDAO extends DAO {
                                CommonExercise exercise) {
     int id = exercise.getID();
     List<AudioAttribute> audioAttributes;
-    for (CommonExercise de : exercise.getDirectlyRelated()) {
-      int contextID = de.getID();
+    for (CommonExercise contextSentence : exercise.getDirectlyRelated()) {
+      int contextID = contextSentence.getID();
       audioAttributes = audioAttributesForExercises.get(contextID);
 
       List<AudioAttribute> collect1 = exercise.getAudioAttributes()
@@ -186,12 +186,12 @@ public abstract class BaseAudioDAO extends DAO {
       } else {
         if (DEBUG_ATTACH)
           logger.info("addContextAudio for " + id + " and " + contextID + " found " + collect1.size() + " to attach e.g. " + collect1.iterator().next().getTranscript());
-        attachAudio(de, collect1, language);
+        attachAudio(contextSentence, collect1, language);
       }
 
       if (audioAttributes != null) { // not sure when this would be true...
         logger.info("addContextAudio found context audio for context exercise " +contextID + " " + audioAttributes.size());
-        boolean attachedAll = attachAudio(de, audioAttributes, language);
+        boolean attachedAll = attachAudio(contextSentence, audioAttributes, language);
       } else {
         if (DEBUG_ATTACH)
           logger.info("addContextAudio no audio found for context parent exercise " + id + " and context " + contextID);

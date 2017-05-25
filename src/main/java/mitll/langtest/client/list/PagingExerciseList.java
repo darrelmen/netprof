@@ -36,7 +36,8 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.*;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -199,7 +200,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void goToFirst(String searchIfAny, int exerciseID) {
     if (listOptions.isShowFirstNotCompleted()) {
-       logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny +"'");
+      logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny + "'");
       loadFirstExercise(searchIfAny);
     } else {
       super.goToFirst(searchIfAny, exerciseID);
@@ -286,14 +287,34 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   public void searchBoxEntry(String text) {
     if (listOptions.isShowTypeAhead()) {
-     // logger.info("searchBoxEntry type ahead '" + text + "'");
-
+      // logger.info("searchBoxEntry type ahead '" + text + "'");
       // why would this be a bad idea?
       setTypeAheadText(text);
       gotTypeAheadEvent(text, true);
     }
   }
 
+  private com.google.gwt.user.client.Timer fireTimer = null;
+
+  private void scheduleTimer() {
+    cancelTimer();
+    fireTimer = new Timer() {
+      @Override
+      public void run() {
+        logger.info("scheduleTimer timer expired...");
+        pushNewItem(currentText, -1);
+      }
+    };
+    fireTimer.schedule(100);
+  }
+
+  private void cancelTimer() {
+    if (fireTimer != null) {
+      fireTimer.cancel();
+    }
+  }
+
+  private  String currentText = "";
 
   private Stack<Long> pendingRequests = new Stack<>();
 
@@ -302,28 +323,34 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
+//    currentText = text;
+  //  scheduleTimer();
     pushNewItem(text, -1);
-    //loadExercises(getHistoryTokenFromUIState(text, -1), text, false, false, false, false);
   }
 
   public String getTypeAheadText() {
-  //  if (typeAhead == null) logger.warning("type ahead is null?");
+    //  if (typeAhead == null) logger.warning("type ahead is null?");
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
   /**
    * @param t
-   * @see HistoryExerciseList#restoreUIState(SelectionState)
+   * @see HistoryExerciseList#restoreUIState
    */
   void setTypeAheadText(String t) {
+    if (typeAhead != null) {
+      logger.info("setTypeAheadText Set type ahead to '" + t + "'");
+      typeAhead.setText(t);
+    }
+
     if (pendingRequests.isEmpty()) {
       if (typeAhead != null) {
-       // logger.info("setTypeAheadText Set type ahead to '" + t + "'");
+         logger.info("setTypeAheadText Set type ahead to '" + t + "'");
         typeAhead.setText(t);
       }
     } else {
       popRequest();
-      // logger.info("setTypeAheadText pendingRequests now" + pendingRequests);
+       logger.info("setTypeAheadText pendingRequests now" + pendingRequests);
     }
   }
 
@@ -347,7 +374,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see SimpleSelectExerciseList#gotEmptyExerciseList
+   * @see FacetExerciseList#gotEmptyExerciseList
    */
   void showEmptySelection() {
     Scheduler.get().scheduleDeferred(new Command() {
@@ -397,7 +424,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       Shuffler.shuffle(ts);
     }
     clear();
-  //  int c = 0;
+    //  int c = 0;
     for (T es : result) {
       addExercise(es);
 /*      if (c++ < 10) {
