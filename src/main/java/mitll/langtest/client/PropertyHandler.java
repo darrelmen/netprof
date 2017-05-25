@@ -305,7 +305,7 @@ public class PropertyHandler {
         //    else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
       else if (key.equals(DIALOG)) dialog = value;
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
-      else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
+     // else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
         //   else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
   //    else if (key.equals(TALKS_TO_DOMINO)) talksToDomino = getBoolean(value);
