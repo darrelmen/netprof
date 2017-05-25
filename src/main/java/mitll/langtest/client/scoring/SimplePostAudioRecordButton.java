@@ -70,8 +70,8 @@ import java.util.logging.Logger;
 public abstract class SimplePostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private Logger logger = Logger.getLogger("SimplePostAudioRecordButton");
 
-  private static final String RELEASE_TO_STOP = "Release";// to stop";
-  //private boolean validAudio = false;
+  private static final String RELEASE_TO_STOP = "Release";
+
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private int reqid = 0;
   private final ExerciseController controller;
@@ -88,7 +88,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param service     to post the audio to
    * @param textToAlign to align the audio to
    */
-  public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
+  protected SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
                                      String textToAlign, String transliteration) {
     this(controller, service, textToAlign, transliteration, "item");
   }

@@ -52,7 +52,15 @@ import java.util.*;
  */
 public class SmallVocabDecoder {
   private static final Logger logger = LogManager.getLogger(SmallVocabDecoder.class);
-  public static final String REMOVE_ME = "[\\u2022\\u2219\\u2191\\u2193;~/']";
+
+  /**
+   * @see #getTrimmed(String)
+   *
+   * @see mitll.langtest.server.audio.SLFFile#cleanToken(String)
+   *
+   * remove latin capital letter i with dot above - 0130
+   */
+  public static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
   public static final char FULL_WIDTH_ZERO = '\uFF10';
   private HTKDictionary htkDictionary;
 
@@ -157,7 +165,7 @@ public class SmallVocabDecoder {
   /**
    * @param sentence
    * @return
-   * @see ASRWebserviceScoring#getSegmented
+   * @see ASRWebserviceScoring#getPronunciations(String, String, boolean)
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
   public List<String> getTokens(String sentence) {

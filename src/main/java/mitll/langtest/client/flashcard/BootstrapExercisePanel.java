@@ -81,10 +81,13 @@ import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
  * Time: 3:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotationExercise>// Shell & AudioRefExercise & AnnotationExercise & ScoredExercise & MutableAnnotationExercise>
+public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotationExercise>
     extends FlashcardPanel<T>
     implements AudioAnswerListener {
   private Logger logger;
+
+  private static final double FIRST_STEP_PCT = ((double)FIRST_STEP) / 100d;
+  private static final double SECOND_STEP_PCT = ((double)SECOND_STEP) / 100d;
 
   private Panel recoOutput;
 
@@ -399,8 +402,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 //                    ProgressBarBase.Color.DANGER);
 
     scoreFeedback.setColor(
-        score > FIRST_STEP / 100 ?
-            ProgressBarBase.Color.SUCCESS : score > SECOND_STEP / 100 ?
+        score > FIRST_STEP_PCT ?
+            ProgressBarBase.Color.SUCCESS : score > SECOND_STEP_PCT ?
             ProgressBarBase.Color.WARNING :
             ProgressBarBase.Color.DANGER);
 
@@ -460,17 +463,18 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       }
       initRecordButton();
       clearFeedback();
+      recoOutput.clear();
     } else {
       long round = Math.round(score * 100f);
       String heard = result.getDecodeOutput();
 
       int oldID = exercise.getID();
 
-
       if (correct) {
         showCorrectFeedback(score, heard, result.getPretestScore());
         controller.logEvent(button, "Button", oldID, "correct response - score " + round);
       } else {   // incorrect!!
+      //  logger.info("show incorrect feedback for " + heard + " score " + score);
         showIncorrectFeedback(result, score, hasRefAudio, heard);
         controller.logEvent(button, "Button", oldID, "incorrect response - score " + round);
       }
@@ -501,11 +505,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     showOtherText();
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
 
-    boolean isRTL = new ClickableWords<>().isRTL(exercise);
+    showRecoOutput(pretestScore);
+  }
 
+  private void showRecoOutput(PretestScore pretestScore) {
     recoOutput.clear();
 
-   // recoOutput.add(new WordScoresTable().getStyledWordTable(pretestScore, null, new HashMap<>(), isRTL));
     playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), new PlayListener() {
       public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -521,8 +526,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
     ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, downloadContainer);
     downloadContainer.getDownloadContainer().setVisible(true);
-
-    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL));
+    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, new ClickableWords<>().isRTL(exercise)));
   }
 
   private PlayAudioPanel playAudioPanel;
@@ -542,7 +546,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param hasRefAudio
    * @see #receivedAudioAnswer
    */
-  private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio, String heard) {
+  private void showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio, String heard) {
     if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(false, score);
       //  showHeard(heard);
@@ -550,14 +554,14 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     showOtherText();
     //  logger.info("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
 
-    String correctPrompt = getCorrectDisplay();
+    //String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
       if (controlState.isAudioFeedbackOn()) {
         String path = getRefAudioToPlay();
         if (path == null) {
           playIncorrect(); // this should never happen
-        } else if (isTimerNotRunning()) {
-          playRefAndGoToNext(path, 0, false);
+        } else {
+          playRef();
         }
       } else {
         playIncorrect();
@@ -566,6 +570,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     } else {
       tryAgain();
     }
+
+    showRecoOutput(result.getPretestScore());
 
 /*    if (controller.getProps().isDemoMode()) {
       correctPrompt = "Heard: " + result.getDecodeOutput() + "<p>" + correctPrompt;
@@ -576,7 +582,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       }
     }*/
 
-    return correctPrompt;
+   // return correctPrompt;
   }
 
 
@@ -628,7 +634,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param delay
    * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
    */
-  private void goToNextAfter(int delay) {
+/*  private void goToNextAfter(int delay) {
     loadNextOnTimer(delay);
   }
 
@@ -636,7 +642,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     String refSentence = exercise.getForeignLanguage();
     String translit = exercise.getTransliteration().length() > 0 ? "<br/>(" + exercise.getTransliteration() + ")" : "";
     return refSentence + translit;
-  }
+  }*/
 
   /**
    * TODO : whole thing is bogus - we shouldn't just flash the answer up and then move on

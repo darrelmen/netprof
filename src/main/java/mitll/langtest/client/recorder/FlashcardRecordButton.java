@@ -44,6 +44,8 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
 
+import java.util.logging.Logger;
+
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
  * <p/>
@@ -61,8 +63,13 @@ import mitll.langtest.client.flashcard.MyCustomIconType;
  * To change this template use File | Settings | File Templates.
  */
 public class FlashcardRecordButton extends RecordButton {
+
+  private final Logger logger = Logger.getLogger("FlashcardRecordButton");
+
   private static final String PROMPT2 = "Click/space and hold to record";
-  private static final String SPACE_BAR = PROMPT2;//"space bar";
+  private static final String SPACE_BAR = PROMPT2;
+
+
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
   private static final String PROMPT = "Click and hold to record";
   private static final int WIDTH_FOR_BUTTON = 360;
@@ -110,7 +117,6 @@ public class FlashcardRecordButton extends RecordButton {
     getElement().setId("FlashcardRecordButton_" + instance);
 
     tooltip = new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
-
 //    logger.info("FlashcardRecordButton : using " + getElement().getExID());
   }
 
@@ -222,6 +228,7 @@ public class FlashcardRecordButton extends RecordButton {
    * @see #checkKeyDown(com.google.gwt.dom.client.NativeEvent)
    */
   private void warnNotASpace() {
+    logger.warning("warnNotASpace --- ");
     showPopup(NO_SPACE_WARNING);
   }
 

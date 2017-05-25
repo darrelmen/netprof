@@ -83,13 +83,13 @@ public class ScoreFeedbackDiv {
    * @return
    * @seex mitll.langtest.client.scoring.AudioPanel#addWidgets
    */
-  private Widget styleTheProgressBar(ProgressBar progressBar) {
+  private void styleTheProgressBar(ProgressBar progressBar) {
     Style style = progressBar.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
     style.setMarginLeft(5, Style.Unit.PX);
     style.setMarginBottom(0, Style.Unit.PX);
     progressBar.setVisible(false);
-    return progressBar;
+   // return progressBar;
   }
 
   @NotNull
@@ -114,7 +114,7 @@ public class ScoreFeedbackDiv {
       playAudioPanel.setEnabled(true);
 
       wordTableContainer.add(scoreFeedbackDiv);
-      logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
+   //   logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
     } else {
       Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
       w.addStyleName("leftFiveMargin");

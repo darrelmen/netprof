@@ -180,8 +180,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
                                  int i) {
     Panel hp = new DivWidget();
     hp.addStyleName("inlineFlex");
-    //hp.setWidth("100%");
-    Anchor audioWidget = getAudioWidget(scoreAndPath, title);
+     Anchor audioWidget = getAudioWidget(scoreAndPath, title);
     DivWidget audioContainer = new DivWidget();
     audioContainer.add(audioWidget);
 

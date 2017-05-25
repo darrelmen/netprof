@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.audio;
 
-import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import org.apache.logging.log4j.LogManager;

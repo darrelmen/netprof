@@ -127,10 +127,9 @@ public class WordTable {
    * @see mitll.langtest.client.gauge.ASRHistoryPanel#makeColoredTable
    */
   public String makeColoredTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
-    Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
 
-    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
+    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : getWordToPhones(netPronImageTypeToEndTime).entrySet()) {
       builder.append(getColoredSpanForSegment(pair));
     }
 
@@ -350,12 +349,12 @@ public class WordTable {
    * @see #getPhoneDivBelowWord(AudioControl, TreeMap, List, boolean, TranscriptSegment, boolean)
    */
   private void addPhonesBelowWord2(List<TranscriptSegment> phoneSegments,
-                                  DivWidget scoreRow,
-                                  AudioControl audioControl,
-                                  TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                  boolean simpleLayout,
-                                  TranscriptSegment wordSegment,
-                                  boolean isRTL) {
+                                   DivWidget scoreRow,
+                                   AudioControl audioControl,
+                                   TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                                   boolean simpleLayout,
+                                   TranscriptSegment wordSegment,
+                                   boolean isRTL) {
     if (isRTL) {
       List<TranscriptSegment> copy = new ArrayList<>(phoneSegments);
       Collections.reverse(copy);
@@ -378,8 +377,7 @@ public class WordTable {
             h.getElement().getStyle().setPaddingRight(PHONE_PADDING, Style.Unit.PX);
           }
           h.addStyleName("phoneColor");
-        }
-        else {
+        } else {
           setColorClickable(phoneSegment, h);
           h.addStyleName("phoneWidth");
         }
@@ -407,11 +405,6 @@ public class WordTable {
     });
   }
 
-  @NotNull
-  private HTML getScore(TranscriptSegment word) {
-    return new HTML("" + getPercent(word.getScore()));
-  }
-
   private void setColor(TranscriptSegment phone, UIObject h) {
     h.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(phone.getScore()));
   }
@@ -422,6 +415,11 @@ public class WordTable {
 
   private void alignCenter(UIObject header) {
     header.addStyleName("center");
+  }
+
+  @NotNull
+  private HTML getScore(TranscriptSegment word) {
+    return new HTML("" + getPercent(word.getScore()));
   }
 
   private int getPercent(Float aFloat) {
@@ -464,8 +462,9 @@ public class WordTable {
     return wordToPhones;
   }
 
+
   private boolean shouldSkipPhone(String event) {
-    return event.equals("sil") || event.equals("<s>") || event.equals("</s>");
+    return event.equalsIgnoreCase("sil") || event.equals("<s>") || event.equals("</s>");
   }
 
   private boolean shouldSkipWord(String wordLabel) {
