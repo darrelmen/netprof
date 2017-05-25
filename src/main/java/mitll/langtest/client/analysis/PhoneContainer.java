@@ -80,7 +80,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private static final int SCORE_COL_WIDTH = 60;
   private static final String SOUND = "Sound";
   private static final String COUNT_COL_HEADER = "#";
-  private static final String CURR = "Avg. Score";
+  private static final String CURR = "Average";//"Avg. Score";
   private static final int COUNT_COL_WIDTH = 45;
   private static final String TOOLTIP = "Click to see examples and scores over time";
   private static final int SOUND_WIDTH = 75;

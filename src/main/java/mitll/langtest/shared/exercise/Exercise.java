@@ -60,7 +60,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   @Deprecated
   protected String oldid = "";
   private transient Collection<String> refSentences = new ArrayList<String>();
-  private List<CorrectAndScore> scores;
+  private List<CorrectAndScore> scores = new ArrayList<>();
 
   private transient List<String> firstPron = new ArrayList<>();
   private long updateTime = 0;
@@ -198,7 +198,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setAltFL(altFL);
     this.safeToDecode = candecode;
     safeToDecodeLastChecked = lastChecked;
-    this.isContext=isContext;
+    this.isContext = isContext;
   }
 
   /**
@@ -259,9 +259,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     for (CommonExercise contextEx : exercise.getDirectlyRelated()) {
       addContextExercise(contextEx);
     }
-//    for (CommonExercise contextEx : exercise.getMentions()) {
-//      addMentionedContext(contextEx);
-//    }
     copyAudio(exercise);
     this.creator = exercise.getCreator();
   }
@@ -374,29 +371,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.scores = scores;
   }
 
-/*
-  public float getAvgScore() {
-    return avgScore;
-  }
-*/
-
-  /**
-   * @param avgScore
-   * @see ResultDAO#attachScoreHistory
-   */
-/*
-  public void setAvgScore(float avgScore) {
-    this.avgScore = avgScore;
-  }
-*/
-
-  /**
-   * @paramx bagOfPhones
-   * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
-   */
-//  @Override
-//  public void setBagOfPhones(Set<String> bagOfPhones) {
-//  }
   @Override
   public List<String> getFirstPron() {
     return firstPron;
@@ -431,12 +405,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     directlyRelated.add(contextExercise);
   }
 
-/*
-  public void addMentionedContext(CommonExercise exercise) {
-    mentions.add(exercise);
-  }
-*/
-
   public boolean hasContext() {
     return !getDirectlyRelated().isEmpty();
   }
@@ -457,12 +425,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public Collection<CommonExercise> getDirectlyRelated() {
     return directlyRelated;
   }
-
-/*
-  public Collection<CommonExercise> getMentions() {
-    return mentions;
-  }
-*/
 
   /**
    * @return

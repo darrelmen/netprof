@@ -204,6 +204,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   @Override
   public void startRecording() {
+    logger.info("startRecording...");
     setVisible(true);
 
     playAudioPanel.setEnabled(false);
@@ -225,6 +226,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   @Override
   public void stopRecording() {
+    logger.info("stopRecording...");
+
     playAudioPanel.setEnabled(true);
 
     goodwaveExercisePanel.setBusy(false);

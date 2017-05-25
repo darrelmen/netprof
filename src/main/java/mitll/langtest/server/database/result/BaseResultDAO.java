@@ -300,6 +300,15 @@ public abstract class BaseResultDAO extends DAO {
     }
   }
 
+  /**
+   * @param userid
+   * @param allIds
+   * @param idToEx
+   * @param sorter
+   * @param language
+   * @return
+   * @see mitll.langtest.server.database.JsonSupport#getJsonScoreHistory(int, Map, ExerciseSorter)
+   */
   public Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
                                                                                  List<Integer> allIds,
                                                                                  Map<Integer, CommonExercise> idToEx,
@@ -405,20 +414,11 @@ public abstract class BaseResultDAO extends DAO {
   public void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest, String language) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest, language);
 
-    //   getResultsForExIDInForUser();
-    //   logger.debug("attachScoreHistory score history " + resultsForExercise);
-    // int total = 0;
-    //  float scoreTotal = 0f;
-  /*  for (CorrectAndScore r : resultsForExercise) {
-      float pronScore = r.getScore();
-      if (pronScore > 0) { // overkill?
-        total++;
-        scoreTotal += pronScore;
-      }
-    }*/
-    MutableExercise mutable = firstExercise.getMutable();
-    mutable.setScores(resultsForExercise);
-    //   mutable.setAvgScore(total == 0 ? 0f : scoreTotal / total);
+    if (resultsForExercise == null)
+      logger.warn("huh? no score history for " + firstExercise.getID() + " for " + userID);
+    else {
+      firstExercise.getMutable().setScores(resultsForExercise);
+    }
   }
 
   public Map<Integer, List<CorrectAndScore>> getScoreHistories(int userid, Collection<Integer> exercises, String language) {

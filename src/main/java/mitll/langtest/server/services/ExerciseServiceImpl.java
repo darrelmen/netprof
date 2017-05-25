@@ -1304,8 +1304,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     for (CommonExercise exercise : exercises) {
       List<CorrectAndScore> scoreTotal = scoreHistories.get(exercise.getID());
-      // if (scoreTotal == null) logger.error("huh? no history for " + exercise.getID());
-      exercise.getMutable().setScores(scoreTotal);
+      if (scoreTotal == null) logger.error("huh? no history for " + exercise.getID());
+      else {
+        exercise.getMutable().setScores(scoreTotal);
+      }
     }
 
     now = System.currentTimeMillis();

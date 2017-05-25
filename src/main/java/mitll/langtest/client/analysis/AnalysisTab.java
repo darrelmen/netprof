@@ -48,7 +48,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.PhoneReport;
@@ -109,18 +108,16 @@ public class AnalysisTab extends DivWidget {
     analysisPlot.setTimeWidgets(timeWidgets);
 
     playFeedback.addStyleName("leftFiveMargin");
-    // timeControls.add(playFeedback);
     playFeedback.setVisible(false);
 
     add(timeControls);
     add(analysisPlot);
 
-    // Panel bottom = new HorizontalPanel();
     DivWidget bottom = new DivWidget();
-    bottom.addStyleName("inlineFlex");
+    //bottom.addStyleName("inlineFlex");
     bottom.getElement().setId("bottom");
     bottom.addStyleName("floatLeftAndClear");
-
+    bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
     if (overallBottom != null) { // are we in student or teacher view
       overallBottom.clear();
       overallBottom.add(bottom); // teacher
@@ -134,7 +131,7 @@ public class AnalysisTab extends DivWidget {
 
   /**
    * @return
-   * @see #AnalysisTab(LangTestDatabaseAsync, ExerciseController, int, ShowTab, String, int, DivWidget)
+   * @see #AnalysisTab
    */
   private Panel getTimeWindowStepper() {
     Panel stepper = getStepperContainer();
@@ -306,7 +303,7 @@ public class AnalysisTab extends DivWidget {
     soundsDiv.getElement().getStyle().setProperty("minHeight", 325, Style.Unit.PX);
     soundsDiv.addStyleName("cardBorderShadow");
     soundsDiv.addStyleName("floatRight");
-  //  soundsDiv.addStyleName("inlineFlex");
+    //  soundsDiv.addStyleName("inlineFlex");
     //soundsDiv.getElement().getStyle().setMargin(10, Style.Unit.PX);
     soundsDiv.addStyleName("leftFiveMargin");
     return soundsDiv;

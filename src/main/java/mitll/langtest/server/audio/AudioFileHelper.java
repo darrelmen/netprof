@@ -186,7 +186,6 @@ public class AudioFileHelper implements AlignDecode {
         Set<Integer> unsafe = new HashSet<>();
 
         for (CommonExercise exercise : exercises) {
-
           boolean validForeignPhrase = isValidForeignPhrase(now, safe, unsafe, exercise);
           //        boolean validForeignPhrase = isInDictOrLTS(exercise);
           if (!validForeignPhrase) {
@@ -201,13 +200,12 @@ public class AudioFileHelper implements AlignDecode {
             countPhones(exercise.getMutable());
           }
 
-          // check context sentences?  why?
+          // check context sentences
           for (CommonExercise context : exercise.getDirectlyRelated()) {
             boolean validForeignPhrase2 = isValidForeignPhrase(now, safe, unsafe, context);
             if (context.isSafeToDecode() != validForeignPhrase2) {
               context.getMutable().setSafeToDecode(validForeignPhrase2);
             }
-            //  context.getMutable().setSafeToDecode(validForeignPhrase2);//isInDictOrLTS(context));
           }
         }
 
@@ -225,9 +223,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private boolean isValidForeignPhrase(long now, Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise) {
-    boolean tooLongAgo = isStale(now, exercise);
     boolean validForeignPhrase = exercise.isSafeToDecode();
-    if (tooLongAgo) {
+    if (isStale(now, exercise)) {
       validForeignPhrase = isInDictOrLTS(exercise);
       Set<Integer> toAddTo = validForeignPhrase ? safe : unsafe;
       toAddTo.add(exercise.getID());
@@ -252,7 +249,6 @@ public class AudioFileHelper implements AlignDecode {
    */
   private <T extends CommonShell & MutableExercise> void countPhones(T exercise) {
     ASR.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
-    // exercise.setBagOfPhones(bagOfPhones.getPhoneSet());
     List<String> firstPron = bagOfPhones.getFirstPron();
     exercise.setFirstPron(firstPron);
     for (String phone : firstPron) {

@@ -1330,12 +1330,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #gotFullExercises
    */
   private void showExercises(Collection<CommonExercise> result, int reqID) {
-    //ExerciseListWrapper<CommonExercise> wrapper) {
     if (numToShow == 1) { // drill/avp/flashcard
       showDrill(result);
     } else {
       DivWidget exerciseContainer = new DivWidget();
-      // int reqID = wrapper.getReqID();
       List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
 
       if (isStale(reqID)) {
@@ -1436,8 +1434,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void showScore(int num, int denom) {
     double score = (float) num / (float) denom;
     double percent = 100 * score;
-
-    // logger.info("showScore percent is " + percent);
     progressBar.setPercent(num == 0 ? 10 : percent);
     boolean allDone = num == denom;
 

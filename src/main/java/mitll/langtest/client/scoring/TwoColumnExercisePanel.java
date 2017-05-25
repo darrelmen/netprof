@@ -650,7 +650,27 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         c++;
       }
     }
-    return c == segments.size();
+    boolean b = c == segments.size();
+    if (!b) {
+      logger.info("clickables " + c + " segments " + segments.size());
+      StringBuilder builder = new StringBuilder();
+      for (IHighlightSegment clickable : compOrder) {
+        if (clickable.isClickable()) {
+          builder.append(clickable.getContent()).append(" ");
+        }
+      }
+      logger.info("clickable : " + builder);
+
+      StringBuilder builder2 = new StringBuilder();
+      for (TranscriptSegment segment : segments) {
+
+          builder2.append(segment.getEvent()).append(" ");
+
+      }
+      logger.info("align    : " + builder2);
+
+    }
+    return b;
   }
 
   /**
@@ -667,7 +687,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private String removePunct(String t) {
     return fromFull(t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("['%\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
+        .replaceAll("['%\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
   }
 
   /**
