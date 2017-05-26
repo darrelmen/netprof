@@ -392,9 +392,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
         List<TranscriptSegment> phones = alignmentOutput.getTypeToSegments().get(NetPronImageType.PHONE_TRANSCRIPT);
 
-        if (transcriptMatches2(flclickables, wordSegments)) {
-          doOneToOneMatch(phones,
-              audioControl, phoneMap, segmentToWord, iterator, wordSegments);
+        if (transcriptMatches(flclickables, wordSegments)) {
+          doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, iterator, wordSegments);
         } else {
           if (DEBUG_MATCH) logger.warning("matchSegmentToWidgetForAudio no match for" +
               "\n\tsegments " + wordSegments +
@@ -626,14 +625,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                                             String lcSegment) {
     Collection<IHighlightSegment> bulk = new ArrayList<>();
 
-    if (DEBUG_MATCH) logger.info("\tmatchSegmentToWidgetForAudio (2) compare :" +
+    if (DEBUG_MATCH) logger.info("\tgetMatchingSegments (2) compare :" +
         "\n\tsegment " + lcSegment +
         "\n\tvs      " + clickable);
 
     while (!lcSegment.isEmpty()) {
-      String fragment = clickable.getContent().toLowerCase();
+      String fragment = removePunct(clickable.getContent().toLowerCase());
 
-      if (DEBUG_MATCH) logger.info("\tmatchSegmentToWidgetForAudio compare :" +
+      if (DEBUG_MATCH) logger.info("\tgetMatchingSegments compare :" +
           "\n\tsegment     " + lcSegment +
           "\n\tvs fragment " + fragment);
 
@@ -641,7 +640,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (segmentHasFragment) {
         bulk.add(clickable);
         lcSegment = lcSegment.substring(fragment.length());
-        if (DEBUG_MATCH) logger.info("\tmatchSegmentToWidgetForAudio segment now " + lcSegment);
+        if (DEBUG_MATCH) logger.info("\tgetMatchingSegments segment now " + lcSegment);
 
         if (!clickables.hasNext() || lcSegment.isEmpty()) {
           break;
@@ -649,25 +648,25 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         clickable = clickables.next();
         clickable = skipUnclickable(clickables, clickable);
       } else {
-        if (DEBUG_MATCH) logger.info("\tmatchSegmentToWidgetForAudio compare : segment '" + lcSegment +
+        if (DEBUG_MATCH) logger.info("\tgetMatchingSegments compare : segment '" + lcSegment +
             "' vs fragment '" + fragment + "'");
         break;
       }
     }
 
     if (!lcSegment.isEmpty()) {
-      logger.warning("matchSegmentToWidgetForAudio couldn't match all of segment - this left over = " + lcSegment);
+      logger.warning("getMatchingSegments couldn't match all of segment - this left over = " + lcSegment);
     }
     return bulk;
   }
 
-  private boolean transcriptMatches2(List<IHighlightSegment> clickables,
-                                     List<TranscriptSegment> segments) {
+  private boolean transcriptMatches(List<IHighlightSegment> clickables,
+                                    List<TranscriptSegment> segments) {
     int i = 0;
-    List<IHighlightSegment> compOrder = clickables;
+    //List<IHighlightSegment> compOrder = clickables;
 
     int c = 0;
-    for (IHighlightSegment clickable : compOrder) {
+    for (IHighlightSegment clickable : clickables) {
       if (clickable.isClickable()) {
         c++;
       }
@@ -676,7 +675,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (!b) {
       logger.info("clickables " + c + " segments " + segments.size());
       StringBuilder builder = new StringBuilder();
-      for (IHighlightSegment clickable : compOrder) {
+      for (IHighlightSegment clickable : clickables) {
         if (clickable.isClickable()) {
           builder.append(clickable.getContent()).append(" ");
         }
@@ -701,7 +700,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * chinese fill with comma
    * ideographic comma
    * right double quote
-   *
+   * double quote
    * @param t
    * @return
    * @see #doOneToManyMatch
@@ -709,7 +708,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private String removePunct(String t) {
     return fromFull(t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("['%\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
+        .replaceAll("['%\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
   }
 
   /**
@@ -1123,7 +1122,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       DivWidget flEntry = getCommentEntry(QCNPFExercise.ALTFL, e.getAnnotation(QCNPFExercise.ALTFL), false,
           showInitially, annotationHelper, isRTL, contentWidget);
 
-      if (addTopMargin){
+      if (addTopMargin) {
         contentWidget.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
       }
       //return entry;

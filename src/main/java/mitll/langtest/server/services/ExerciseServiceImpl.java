@@ -1270,10 +1270,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Set<CommonExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
     long now = System.currentTimeMillis();
 
-    if (now - then > 50) logger.info("took " + (now - then) + " to get " + exercises.size() + " exercises");
+    if (now - then > 50) logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises");
 
     if (ids.size() > toAddAudioTo.size()) {
-      logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
+//      logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
     } else {
 //      logger.info("getFullExercises getting " + ids.size() + " exercises");
     }
@@ -1284,22 +1284,22 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       now = System.currentTimeMillis();
 
       if (now - then > 50)
-        logger.info("took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
+        logger.info("getFullExercises took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
 
       then = System.currentTimeMillis();
       addAlignmentOutput(projectID, toAddAudioTo);
       now = System.currentTimeMillis();
       if (now - then > 50)
-        logger.info("took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
+        logger.info("getFullExercises took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
 
     } else {
-      logger.info("getFullExercises all " + ids.size() + " exercises have audio");
+     // logger.info("getFullExercises all " + ids.size() + " exercises have audio");
     }
 
     then = System.currentTimeMillis();
     addScores(userID, exercises);
     now = System.currentTimeMillis();
-    if (now - then > 50) logger.info("took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
+    if (now - then > 50) logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
 
     then = System.currentTimeMillis();
     Map<Integer, List<CorrectAndScore>> scoreHistories = getScoreHistories(ids, exercises, userID);
@@ -1316,7 +1316,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     now = System.currentTimeMillis();
     if (now - then > 50)
-      logger.info("took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
+      logger.info("getFullExercises took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
 
     return new ExerciseListWrapper<>(reqid, exercises, null);//, scoreHistories);
   }

@@ -386,7 +386,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @param value
    * @param includeLabel
    * @return
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getEntry
    * @see mitll.langtest.client.qc.QCNPFExercise#getEntry
    */
   protected Panel getContentWidget(String label, String value, boolean includeLabel) {

@@ -226,10 +226,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   }
 
   public void onValueChange(ValueChangeEvent<String> event) {
-    String token = event.getValue();
+/*    String token = event.getValue();
     SelectionState selectionState = new SelectionState(token, false);
     String instance1 = selectionState.getInstance();
-      logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");
+      logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");*/
     //showSection(instance1);
   }
 

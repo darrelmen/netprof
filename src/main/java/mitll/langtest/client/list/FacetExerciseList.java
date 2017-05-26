@@ -972,7 +972,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     List<Pair> pairs = getPairs(typeToSelection);
-    logger.info("getTypeToValues request " + pairs + " list " + userListID);
+   // logger.info("getTypeToValues request " + pairs + " list " + userListID);
+
     controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs, userListID),
         new AsyncCallback<FilterResponse>() {
           @Override
@@ -987,7 +988,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           public void onSuccess(FilterResponse response) {
             //Map<String, Set<MatchInfo>> result = response.getTypeToValues();
             //   logger.info("getTypeToValues for " + pairs + " got " + result.size());
-
             //if (response.getUserListID() != -1) {
             //}
             changeSelection(response.getTypesToInclude(), typeToSelection);

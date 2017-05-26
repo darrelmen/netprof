@@ -43,7 +43,7 @@ public class ClickableWords<T extends CommonExercise> {
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private ListInterface listContainer;
   private WordBoundsFactory factory = new WordBoundsFactory();
-  int fontSize;
+  private int fontSize;
 
   private static final boolean DEBUG = false;
 
@@ -106,17 +106,14 @@ public class ClickableWords<T extends CommonExercise> {
     return getClickableDivFromSegments(segmentsForTokens, addRightMargin, dir == HasDirection.Direction.RTL);
   }
 
-  private List<IHighlightSegment> getSegmentsForTokens(//boolean isMeaning,
-                                                       boolean isSimple, List<String> tokens,
-                                                       HasDirection.Direction dir,// boolean isFL
-
-                                                       TwoColumnExercisePanel.FieldType fieldType
-  ) {
+  private List<IHighlightSegment> getSegmentsForTokens(boolean isSimple, List<String> tokens, HasDirection.Direction dir,
+                                                       TwoColumnExercisePanel.FieldType fieldType) {
     List<IHighlightSegment> segments = new ArrayList<>();
     int id = 0;
     for (String token : tokens) {
-      IHighlightSegment segment = makeClickableText(dir, token, false, id++, isSimple, fieldType);
-      segments.add(segment);
+//      logger.info("getSegmentsForTokens token '" +token+
+//          "'");
+      segments.add(makeClickableText(dir, token, false, id++, isSimple, fieldType));
     }
     return segments;
   }
@@ -128,7 +125,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @return a clickable row
    */
   @NotNull
-  public DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean addRightMargin, boolean isRTL) {
+  private DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean addRightMargin, boolean isRTL) {
     DivWidget horizontal = new DivWidget();
     horizontal.getElement().setId(CLICKABLE_ROW);
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
@@ -212,13 +209,16 @@ public class ClickableWords<T extends CommonExercise> {
     }
     int id = 0;
     for (String token : tokens) {
+      if (DEBUG || true) logger.info("getClickableWordsHighlight token '" + toFind + "' and '" + token + "'");
+
       boolean isMatch = toFind != null && isMatch(token, toFind);
       IHighlightSegment clickable = makeClickableText(dir, token, isMatch, id++, isSimple, fieldType);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
       w.addStyleName("rightFiveMargin");
       horizontal.add(w);
-      //  match++;
+
+
       if (isMatch) {
         if (DEBUG) logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "'");
         toFind = iterator.hasNext() ? iterator.next() : null;
@@ -306,11 +306,6 @@ public class ClickableWords<T extends CommonExercise> {
       tokens = tokens.stream().filter(p -> !removePunct(p).isEmpty()).collect(Collectors.toList());
     }
 
-/*    if (isRTL(exercise) && flLine) {
-//      logger.info("Reversing tokens " + tokens);
-      Collections.reverse(tokens);
-  //    logger.info("Reversing tokens now " + tokens);
-    }*/
     return tokens;
   }
 
@@ -341,7 +336,6 @@ public class ClickableWords<T extends CommonExercise> {
       boolean isContextMatch,
       int id,
       boolean isSimple,
-
       TwoColumnExercisePanel.FieldType fieldType) {
     final IHighlightSegment highlightSegmentDiv = isSimple ?
         new SimpleHighlightSegment(html, id) :
@@ -375,7 +369,7 @@ public class ClickableWords<T extends CommonExercise> {
       highlightSegmentDiv.setClickable(false);
     } else {
       highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-      highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(html)));
+      highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct(html))));
       highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
       highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
     }
@@ -427,7 +421,7 @@ public class ClickableWords<T extends CommonExercise> {
   protected String removePunct(String t) {
     return t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("\\u00ED","i")
-        .replaceAll("[\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
+        .replaceAll("\\u00ED", "i")
+        .replaceAll("[\\0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
   }
 }

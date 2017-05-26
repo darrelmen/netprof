@@ -451,6 +451,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   protected void restoreUIState(SelectionState selectionState) {
     restoreListBoxState(selectionState);
+
     if (DEBUG_ON_VALUE_CHANGE) {
       logger.info("HistoryExerciseList.restoreUIState : selectionState '" + selectionState +
           "' search from token '" + selectionState.getSearch() +
@@ -473,7 +474,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   /**
    * When we get a history token push, select the exercise type, section, and optionally item.
    *
-   * @see #gotTypeAheadEvent(String, boolean)
+   * @see #gotTypeAheadEvent
    * @see #simpleLoadExercises
    */
   protected void loadExercises(String selectionState,
@@ -483,7 +484,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                                boolean onlyWithAudioAnno,
                                boolean onlyUnrecorded,
                                boolean onlyDefaultUser,
-                               boolean onlyUninspected, int exerciseID) {
+                               boolean onlyUninspected,
+                               int exerciseID) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
     logger.info("HistoryExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());

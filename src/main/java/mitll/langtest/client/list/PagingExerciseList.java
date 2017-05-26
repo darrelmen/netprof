@@ -270,7 +270,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       typeAhead = new TypeAhead(column, waitCursorHelper, SEARCH, true) {
         @Override
         public void gotTypeAheadEntry(String text) {
-          gotTypeAheadEvent(text, false);
+//          gotTypeAheadEvent(text, false);
+          pushNewItem(text, -1);
+
           controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
         }
       };
@@ -289,11 +291,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     if (listOptions.isShowTypeAhead()) {
       // logger.info("searchBoxEntry type ahead '" + text + "'");
       // why would this be a bad idea?
-      setTypeAheadText(text);
-      gotTypeAheadEvent(text, true);
+      //setTypeAheadText(text);
+      alwaysSetTypeAhead(text);
+      pushNewItem(text, -1);
+
+      //gotTypeAheadEvent(text, true);
     }
   }
-
+/*
   private com.google.gwt.user.client.Timer fireTimer = null;
 
   private void scheduleTimer() {
@@ -312,46 +317,91 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     if (fireTimer != null) {
       fireTimer.cancel();
     }
-  }
+  }*/
 
-  private  String currentText = "";
+//  private String currentText = "";
 
-  private Stack<Long> pendingRequests = new Stack<>();
+//  private Stack<Long> pendingRequests = new Stack<>();
 
-  private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
-    logger.info("gotTypeAheadEvent got type ahead '" + text + "' set text '" + setTypeAheadText + "'");// + "' at " + new Date(keypressTimestamp));
+  // Map<String, Set<Long>> textToWhen = new HashMap<>();
+
+  /*private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
+    // logger.info("gotTypeAheadEvent got type ahead '" + text + "' set text '" + setTypeAheadText + "'");// + "' at " + new Date(keypressTimestamp));
     if (!setTypeAheadText) {
-      pendingRequests.add(System.currentTimeMillis());
+      long now = System.currentTimeMillis();
+      //pendingRequests.add(now);
+      Set<Long> longs = textToWhen.get(text);
+      if (longs == null) textToWhen.put(text, longs = new HashSet<>());
+      longs.add(now);
     }
 //    currentText = text;
-  //  scheduleTimer();
+    //  scheduleTimer();
     pushNewItem(text, -1);
-  }
+  }*/
 
   public String getTypeAheadText() {
     //  if (typeAhead == null) logger.warning("type ahead is null?");
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
+  private void alwaysSetTypeAhead(String t) {
+    if (typeAhead != null && typeAhead.getText().isEmpty()) {
+      logger.info("setTypeAheadText Set type ahead to '" + t + "'");
+      typeAhead.setText(t);
+    }
+  }
+
   /**
    * @param t
    * @see HistoryExerciseList#restoreUIState
    */
-  void setTypeAheadText(String t) {
-    if (typeAhead != null) {
+  protected void setTypeAheadText(String t) {
+/*    if (typeAhead != null) {
+      Set<Long> history = textToWhen.get(t);
+      long now = System.currentTimeMillis();
+      if (history == null) {
+        //logger.info("setTypeAheadText Set type ahead to '" + t + "'");
+        String current = typeAhead.getText();
+        if (current.equals(t)) {
+        } else {
+          logger.info("\n\nsetTypeAheadText Set type ahead to '" + t + "' vs '" + current +
+              "' , text->when " + textToWhen.size());
+          typeAhead.setText(t);
+        }
+      } else if (now - aLong > TEN_SECONDS) {
+        String current = typeAhead.getText();
+        if (current.equals(t)) {
+        } else {
+          logger.info("\n\nsetTypeAheadText Set type ahead to '" + t + "' since old, now " + textToWhen.size());
+          typeAhead.setText(t);
+        }
+        textToWhen.remove(t);
+      } else {
+        // logger.fine("setTypeAheadText NOT SETTING '" + t + "' since new");
+        textToWhen.remove(t);
+        if (textToWhen.size() > 2) {
+          logger.fine("setTypeAheadText NOT SETTING '" + t + "' since new, now " + textToWhen.size());
+        }
+      }
+    }*/
+
+
+    if (typeAhead != null && typeAhead.getText().isEmpty()) {
       logger.info("setTypeAheadText Set type ahead to '" + t + "'");
       typeAhead.setText(t);
+    } else if (typeAhead != null && !typeAhead.getText().equals(t)) {
+      logger.warning("setTypeAheadText not setting text from  '" + typeAhead.getText() + "' to '" + t + "'");
     }
 
-    if (pendingRequests.isEmpty()) {
+/*    if (pendingRequests.isEmpty()) {
       if (typeAhead != null) {
-         logger.info("setTypeAheadText Set type ahead to '" + t + "'");
+        logger.info("setTypeAheadText Set type ahead to '" + t + "'");
         typeAhead.setText(t);
       }
     } else {
       popRequest();
-       logger.info("setTypeAheadText pendingRequests now" + pendingRequests);
-    }
+      logger.info("setTypeAheadText pendingRequests now" + pendingRequests);
+    }*/
   }
 
   /**
@@ -359,13 +409,13 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see HistoryExerciseList#ignoreStaleRequest(ExerciseListWrapper)
    */
   void popRequest() {
-    if (!pendingRequests.isEmpty()) {
+    /*if (!pendingRequests.isEmpty()) {
       pendingRequests.pop();
       List<Long> toRemove = new ArrayList<>();
       long now = System.currentTimeMillis();
       for (Long pending : pendingRequests) if (pending < now - TEN_SECONDS) toRemove.add(pending);
       pendingRequests.removeAll(toRemove);
-    }
+    }*/
   }
 
   @Override
