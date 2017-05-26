@@ -318,7 +318,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @param hasBeenPlayed
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addPlayedMarkings
+   * @see EventDAO#addPlayedMarkings
    */
   public void setHasBeenPlayed(boolean hasBeenPlayed) {
     this.hasBeenPlayed = hasBeenPlayed;
@@ -345,23 +345,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    */
   public boolean hasMatchingTranscript(String foreignLanguage) {
     try {
-//      String before = foreignLanguage;
-//      String fixedAgainst = StringUtils.stripAccents(before);
-//      if (!before.equals(fixedAgainst)) {
-//        logger.info("attachAudio before '" + before +
-//            "' after '" + fixedAgainst +
-//            "'");
-//      }
       return matchTranscript(foreignLanguage);
     } catch (Exception e) {
       return true;
     }
   }
-
-/*  private boolean matchTranscript(String foreignLanguage) {
-    String transcript = this.transcript;
-    return matchTranscript(foreignLanguage, transcript);
-  }*/
 
   private boolean matchTranscript(String foreignLanguage) { return matchTranscript(foreignLanguage, this.transcript);  }
 
