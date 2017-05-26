@@ -209,7 +209,7 @@ public class ClickableWords<T extends CommonExercise> {
     }
     int id = 0;
     for (String token : tokens) {
-      if (DEBUG || true) logger.info("getClickableWordsHighlight token '" + toFind + "' and '" + token + "'");
+      if (DEBUG) logger.info("getClickableWordsHighlight token '" + toFind + "' and '" + token + "'");
 
       boolean isMatch = toFind != null && isMatch(token, toFind);
       IHighlightSegment clickable = makeClickableText(dir, token, isMatch, id++, isSimple, fieldType);

@@ -75,13 +75,14 @@ import static mitll.langtest.shared.user.User.Kind.*;
  */
 public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(DominoUserDAOImpl.class);
+
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
   private static final String PRIMARY = "primary";
-  private static final String DEFAULT_AFFILIATION = "";//"OTHER";
-  //public static final String MALE = "male";
-  private static final String UID_F = "userId";
+  private static final String DEFAULT_AFFILIATION = "";
+
+  private static final String UID_F  = "userId";
   private static final String PASS_F = "pass";
   private static final String LOCALHOST = "127.0.0.1";
 

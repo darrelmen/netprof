@@ -907,18 +907,29 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @param userid
    * @param typeToSection
+   * @param projid
    * @return
    * @paramx collator
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public JSONObject getJsonScoreHistory(int userid,
                                         Map<String, Collection<String>> typeToSection,
-                                        ExerciseSorter sorter) {
-    return getJsonSupport(userid).getJsonScoreHistory(userid, typeToSection, sorter);
+                                        ExerciseSorter sorter,
+                                        int projid) {
+
+    if (projid == -1) {
+      projid = projectForUser(userid);
+    }
+    return getJsonSupport(projid).getJsonScoreHistory(userid, typeToSection, sorter);
   }
 
-  private JsonSupport getJsonSupport(int userid) {
-    return getJsonSupportForProject(projectForUser(userid));
+  /**
+   *
+   * @param projid
+   * @return
+   */
+  private JsonSupport getJsonSupport(int projid) {
+    return getJsonSupportForProject(projid);
   }
 
   private int projectForUser(int userid) {
@@ -959,7 +970,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
   public JSONObject getJsonPhoneReport(int userid, int projid, Map<String, Collection<String>> typeToValues) {
-    return getJsonSupport((int) userid).getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
+    if (projid == -1) {
+      projid = projectForUser(userid);
+    }
+    return getJsonSupport(projid).getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
   }
 
   /**

@@ -170,8 +170,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       downloadHelper.showDialog();
     });
 
+    // should be better for change visibility...
     LangTest.EVENT_BUS.addHandler(ShowEvent.TYPE, authenticationEvent -> {
-      reloadWithCurrent();
+      //reloadWithCurrent();
+      askServerForExercise(-1);
     });
   }
 
@@ -1186,24 +1188,19 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       //   logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();
     } else {
-      if (numToShow == 1 && itemID > 0) {
-        visibleIDs = new ArrayList<>();
-        visibleIDs.add(itemID);
-        logger.info("askServerForExercises ask for single -- " + itemID);
-      }
-
+      visibleIDs = setVisibleForDrill(itemID, visibleIDs);
       getExercises(visibleIDs);
     }
   }
 
-//  private boolean isStaleReq(ExerciseListWrapper<?> req) {
-//    return !isCurrentReq(req);
-//  }
-//
-//  private boolean isCurrentReq(ExerciseListWrapper<?> req) {
-//    int reqID = req.getReqID();
-//    return isCurrent(reqID);
-//  }
+  private Collection<Integer> setVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
+    if (numToShow == 1 && itemID > 0) {
+      visibleIDs = new ArrayList<>();
+      visibleIDs.add(itemID);
+      logger.info("askServerForExercises ask for single -- " + itemID);
+    }
+    return visibleIDs;
+  }
 
   private boolean isCurrent(int reqID) {
     return reqID == -1 || reqID == freqid - 1;

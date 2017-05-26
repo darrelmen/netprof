@@ -339,16 +339,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pushNewItem(text, -1);
   }*/
 
+  private void alwaysSetTypeAhead(String t) {
+    if (getTypeAheadText().isEmpty()) {
+      logger.info("alwaysSetTypeAhead Set type ahead to '" + t + "'");
+      typeAhead.setText(t);
+    }
+  }
+
   public String getTypeAheadText() {
     //  if (typeAhead == null) logger.warning("type ahead is null?");
     return typeAhead != null ? typeAhead.getText() : "";
-  }
-
-  private void alwaysSetTypeAhead(String t) {
-    if (typeAhead != null && typeAhead.getText().isEmpty()) {
-      logger.info("setTypeAheadText Set type ahead to '" + t + "'");
-      typeAhead.setText(t);
-    }
   }
 
   /**
@@ -386,11 +386,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     }*/
 
 
-    if (typeAhead != null && typeAhead.getText().isEmpty()) {
-      logger.info("setTypeAheadText Set type ahead to '" + t + "'");
+    String typeAheadText = getTypeAheadText();
+    if (typeAheadText.isEmpty()) {
+      logger.info("setTypeAheadText set type ahead to '" + t + "'");
       typeAhead.setText(t);
-    } else if (typeAhead != null && !typeAhead.getText().equals(t)) {
-      logger.warning("setTypeAheadText not setting text from  '" + typeAhead.getText() + "' to '" + t + "'");
+    } else if (typeAheadText.equals(t)) {
+      logger.warning("setTypeAheadText not setting text from  '" + typeAheadText + "' to '" + t + "'");
     }
 
 /*    if (pendingRequests.isEmpty()) {

@@ -152,52 +152,18 @@ public class ScoreServlet extends DatabaseServlet {
 
     if (projid == -1) {
       projid = request.getIntHeader("projid");
-
-//      if (projid == -1) {
-//        //language = request.getHeader("language");
-//        if (language != null) {
-//          projid = getProjectID(language);
-//        }
-//      }
-      logger.warn("OK - look for project id from url header " + projid);
-   /*   String[] projids = queryString.split("projid=");
-      if (projids.length > 1) {
-        projid = getIntValue(projids[1]);
-      } else {
-        try {
-          //  String params = request.getReader().readLine();
-
-          // NO - what are you thinking??????
-
-          String params = IOUtils.toString(request.getReader());
-          if (params != null && !params.isEmpty()) {
-            String[] projids2 = params.split("projid=");
-            projid = getIntValue(projids2[1]);
-
-            logger.info("doGet Got projid " + projid);
-
-            String[] passParam = params.split("pass=");
-
-            if (passParam.length > 1) {
-              passwordFromBody = passParam[1].split("&")[0];
-              logger.info("doGet Got " + passwordFromBody.length());
-            }
-          }
-        } catch (IOException e) {
-          logger.error("got " + e, e);
-        }
-      }*/
+      logger.warn("doGet got project id from url header " + projid);
     }
 
     getDatabase();
     String language = projid == -1 ? "unknownLanguage" : getLanguage(projid);
     if (!queryString.contains(NESTED_CHAPTERS) || true) { // quiet output for polling from status webapp
       String pathInfo = request.getPathInfo();
-      logger.debug("ScoreServlet.doGet (" + language +
-          "):" +
+      logger.debug("ScoreServlet.doGet (" + language + "):" +
           "\n\tRequest '" + queryString + "'" +
           "\n\tpath " + pathInfo +
-          " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+          "\n\turi " + request.getRequestURI() +
+          "\n\turl" + request.getRequestURL() + "  " + request.getServletPath());
     }
 
     long then = System.currentTimeMillis();
@@ -256,7 +222,7 @@ public class ScoreServlet extends DatabaseServlet {
         toReturn = getChapterHistory(queryString, toReturn, projid);
       } else if (matchesRequest(queryString, PROJECTS)) {
         queryString = removePrefix(queryString, PROJECTS);
-        jsonString = getProjects(queryString);
+        jsonString = getProjects();
 //      } else if (matchesRequest(queryString, REF_INFO)) {
 //        logger.warn("\n\n\n someone made this request " + REF_INFO);
 //        queryString = removePrefix(queryString, REF_INFO);
@@ -462,10 +428,13 @@ public class ScoreServlet extends DatabaseServlet {
     return toReturn;
   }
 
-  private String getProjects(String queryString) {
+  private String getProjects() {
     Collection<Project> productionProjects = db.getProjectManagement().getProductionProjects();
+/*
     logger.info("getProjects got " + productionProjects.size() + " projects");
     for (Project project : productionProjects) logger.info(" project " + project);
+*/
+
     return new ProjectExport().toJSON(productionProjects);
   }
 
@@ -477,6 +446,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JSONObject getChapterHistory(String queryString, JSONObject toReturn, int projectid) {
+    logger.info("getChapterHistory for project " + projectid);
     String[] split1 = queryString.split("&");
     if (split1.length < 2) {
       toReturn.put(ERROR, "expecting at least two query parameters");
@@ -487,7 +457,7 @@ public class ScoreServlet extends DatabaseServlet {
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {
         int l = Integer.parseInt(userAndSelection.getUser());
-        toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter(projectid));
+        toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter(projectid), projectid);
       } catch (NumberFormatException e) {
         toReturn.put(ERROR, "User id should be a number");
       }
@@ -836,14 +806,13 @@ public class ScoreServlet extends DatabaseServlet {
       if (realExID == -1) {
         realExID = db.getUserExerciseDAO().getUnknownExercise().id();
         logger.info("getJsonForAudio : using unknown exercise id " + realExID);
-      }
-      else {
-        logger.info("getJsonForAudio got exercise id "+ realExID);
+      } else {
+        logger.info("getJsonForAudio got exercise id " + realExID);
       }
     } catch (NumberFormatException e) {
-      logger.info("couldn't parse "+ request.getHeader(EXERCISE));
+      logger.info("couldn't parse " + request.getHeader(EXERCISE));
     }
-    int reqid  = getReqID(request);
+    int reqid = getReqID(request);
     int projid = getProject(request);
 
     logger.debug("getJsonForAudio got projid from session " + projid);
@@ -896,6 +865,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * Find the project by using the language header.
    * Or failing that, find the session user and use their current project.
+   *
    * @param request
    * @param projid
    * @return
@@ -933,19 +903,18 @@ public class ScoreServlet extends DatabaseServlet {
       if (flText == null) {
         logger.info("getExerciseIDFromText no optional header " + EXERCISE_TEXT);
         return realExID;
-      }
-      else {
+      } else {
         String decoded = new String(Base64.getDecoder().decode(flText.getBytes()));
 
-        logger.info("getExerciseIDFromText request to decode '" + exerciseText + "' = '" + decoded +"'");
+        logger.info("getExerciseIDFromText request to decode '" + exerciseText + "' = '" + decoded + "'");
 
         CommonExercise exercise = project1.getExerciseBySearchBoth(exerciseText.trim(), decoded.trim());
 
         if (exercise != null) {
-          logger.info("getExerciseIDFromText for '" + exerciseText + "' '" +decoded+ "' found exercise id " + exercise.getID());
+          logger.info("getExerciseIDFromText for '" + exerciseText + "' '" + decoded + "' found exercise id " + exercise.getID());
           realExID = exercise.getID();
         } else {
-          logger.warn("getExerciseIDFromText can't find exercise for '" + exerciseText + "'='" +flText+ "' - using unknown exercise");
+          logger.warn("getExerciseIDFromText can't find exercise for '" + exerciseText + "'='" + flText + "' - using unknown exercise");
         }
       }
     }

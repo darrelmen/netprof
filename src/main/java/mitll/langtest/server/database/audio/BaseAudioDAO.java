@@ -407,7 +407,7 @@ public abstract class BaseAudioDAO extends DAO {
             "' vs exercise '" + exerciseText +
             "'");
       }
-      
+
       return false;
     }
   }

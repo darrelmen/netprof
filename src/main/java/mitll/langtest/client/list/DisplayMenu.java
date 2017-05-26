@@ -22,6 +22,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 5/18/17.
  */
 public class DisplayMenu {
+  public static final String SHOW_SOUNDS = "Show Sounds";
   private final Logger logger = Logger.getLogger("DisplayMenu");
 
   private static final String SHOW_PHONES = "showPhones";
@@ -62,13 +63,7 @@ public class DisplayMenu {
     DropdownSubmenu showChoices = new DropdownSubmenu("Show");
     flTextChoices(showChoices);
 
-    phoneChoice = new NavLink(getPhoneMenuTitle());
-
-    Scheduler.get().scheduleDeferred(() -> {
-      //  logger.info("show phones " + getPhonesDisplay());
-      phoneChoice.setText(getPhoneMenuTitle());
-    });
-
+    phoneChoice = new NavLink(SHOW_SOUNDS);
     if (getPhonesDisplay() == PhonesChoices.SHOW) {
       phoneChoice.setIcon(CHECK);
     }
@@ -93,10 +88,10 @@ public class DisplayMenu {
     return showChoices;
   }
 
-  @NotNull
-  private String getPhoneMenuTitle() {
-    return "Show Sounds";//(getPhonesDisplay() == PhonesChoices.SHOW ? "Hide" : "Show") + " Sounds";
-  }
+//  @NotNull
+//  private String getPhoneMenuTitle() {
+//    return SHOW_SOUNDS;
+//  }
 
   private void flTextChoices(DropdownSubmenu showChoices) {
     NavLink altflChoice = new NavLink("Alternate text");

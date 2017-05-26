@@ -39,7 +39,6 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
@@ -50,7 +49,6 @@ import org.apache.logging.log4j.Logger;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class BaseResultDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseResultDAO.class);

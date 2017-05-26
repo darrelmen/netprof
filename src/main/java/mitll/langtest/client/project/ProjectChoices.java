@@ -35,9 +35,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
-  private static final int MIN_HEIGHT = 105;
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
+  private static final int MIN_HEIGHT = 110;
   private static final String NEW_PROJECT = "New Project";
 
   private static final int LANGUAGE_SIZE = 3;
@@ -52,10 +52,6 @@ public class ProjectChoices {
    */
   private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
 
-  /**
-   * Tamas doesn't like scrolling -- try to prevent it on laptops
-   */
- // private static final int ITEMS_IN_ROW = 5;
   protected static final String LOGIN = "Login";
   private static final int NO_USER_INITIAL = -2;
   private final UILifecycle uiLifecycle;
@@ -112,7 +108,6 @@ public class ProjectChoices {
         }
 
         public void onSuccess(StartupInfo startupInfo) {
-//          logger.info("got " +startupInfo);
           contentRow.add(showProjectChoices(getVisibleProjects(startupInfo.getProjects()), level));
         }
       });

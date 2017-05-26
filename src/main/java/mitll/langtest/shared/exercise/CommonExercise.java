@@ -70,10 +70,6 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
 
   Collection<CommonExercise> getDirectlyRelated();
 
-  /*
-  Collection<CommonExercise> getMentions();
-*/
-
   boolean isSafeToDecode();
 
   /**

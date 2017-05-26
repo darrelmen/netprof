@@ -61,9 +61,19 @@ import java.util.stream.Collectors;
 public class Project implements PronunciationLookup {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
+  /**
+   * @see #getWebserviceIP
+   */
   private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
-  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+  /**
+   * @see #getWebserviceIP
+   */
   private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
+
+  /**
+   * @see #getWebservicePort
+   */
+  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
 
   private SlickProject project;
   private ExerciseDAO<CommonExercise> exerciseDAO;
