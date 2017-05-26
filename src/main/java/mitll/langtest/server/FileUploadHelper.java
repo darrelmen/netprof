@@ -3,6 +3,7 @@ package mitll.langtest.server;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
+import mitll.langtest.server.database.exercise.DominoExerciseDAO;
 import mitll.langtest.server.database.exercise.ExcelImport;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
@@ -13,6 +14,7 @@ import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,8 +32,11 @@ public class FileUploadHelper {
   private DatabaseServices db;
   private Map<Integer, Collection<CommonExercise>> idToExercises = new HashMap<>();
 
-  public FileUploadHelper(DatabaseServices db) {
+  DominoExerciseDAO dominoExerciseDAO;
+
+  public FileUploadHelper(DatabaseServices db, DominoExerciseDAO dominoExerciseDAO) {
     this.db = db;
+    this.dominoExerciseDAO = dominoExerciseDAO;
   }
 
   public Site gotFile(HttpServletRequest request) {
@@ -121,9 +126,7 @@ public class FileUploadHelper {
 
   private void readExercises(Site site, FileItem item) throws IOException {
     logger.info("got upload " + item);
-    String fileName = item.getName();
-    InputStream inputStream = item.getInputStream();
-    readExercisesPopulateSite(site, fileName, inputStream);
+    readExercisesPopulateSite(site, item.getName(), item.getInputStream());
   }
 
   private void readExercisesPopulateSite(Site site, String fileName, InputStream inputStream) {
@@ -133,30 +136,72 @@ public class FileUploadHelper {
 //      FileExerciseDAO fileImporter = new FileExerciseDAO("", "", false, "", "");  //TODO fully support this
 //      exercises = fileImporter.readExercises(inputStream);
 //      importer = fileImporter;
+      readJSON(site, fileName, inputStream);
     } else {
-      Project project = db.getProject(site.id);
-      List<String> types = new ArrayList<>();
-      String first = project.getProject().first();
-      String second = project.getProject().second();
-      if (!first.isEmpty()) types.add(first);
-      if (!second.isEmpty()) types.add(second);
-      ExcelImport excelImport = new ExcelImport(fileName, db.getServerProps(), db.getUserListManager(), false) {
-        @Override
-        public List<String> getTypeOrder() {
-          return types;
-        }
-      };
-      exercises = excelImport.readExercises(inputStream);
-      // importer = excelImport;
-      String s = "Read " + exercises.size();
-      logger.info("got " + s);
-      if (exercises.isEmpty()) {
-
-      } else {
-        idToExercises.put(site.id, exercises);
-        site.setNum(exercises.size());
-      }
+      readExcel(site, fileName, inputStream);
     }
+  }
+
+  private void readExcel(Site site, String fileName, InputStream inputStream) {
+    int id = site.id;
+
+    List<String> types = getTypes(db.getProject(id));
+
+    ExcelImport excelImport = new ExcelImport(fileName, db.getServerProps(), db.getUserListManager(), false) {
+      @Override
+      public List<String> getTypeOrder() {
+        return types;
+      }
+    };
+
+    List<CommonExercise> exercises = excelImport.readExercises(inputStream);
+
+    rememberExercises(site, id, exercises);
+  }
+
+  private void readJSON(Site site, String fileName, InputStream inputStream) {
+    int id = site.id;
+
+    Project project = db.getProject(id);
+//    List<String> types = getTypes(project);
+
+    DominoExerciseDAO.Info info = dominoExerciseDAO.readExercises(null, inputStream, project.getID(), db.getUserDAO().getImportUser());
+
+    // todo remember the info.
+
+//    ExcelImport excelImport = new ExcelImport(fileName, db.getServerProps(), db.getUserListManager(), false) {
+//      @Override
+//      public List<String> getTypeOrder() {
+//        return types;
+//      }
+//    };
+
+//    List<CommonExercise> exercises = excelImport.readExercises(inputStream);
+
+    logger.info("Got " +info);
+    rememberExercises(site, id, info.getExercises());
+  }
+
+  private void rememberExercises(Site site, int id, List<CommonExercise> exercises) {
+    logger.info("Read " + exercises.size());
+    if (exercises.isEmpty()) {
+
+    } else {
+      idToExercises.put(id, exercises);
+      site.setNum(exercises.size());
+
+      logger.info("Site " + id + " : " + idToExercises.get(id).size());
+    }
+  }
+
+  @NotNull
+  private List<String> getTypes(Project project) {
+    List<String> types = new ArrayList<>();
+    String first = project.getProject().first();
+    String second = project.getProject().second();
+    if (!first.isEmpty()) types.add(first);
+    if (!second.isEmpty()) types.add(second);
+    return types;
   }
 
   /**

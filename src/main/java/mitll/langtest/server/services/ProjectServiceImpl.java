@@ -151,10 +151,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       toImport.forEach(ex -> dominoToEx.put(ex.getDominoID(), ex));
 
       int importUser = getUserIDFromSession();
-      logger.info("import user = " + importUser);
+      logger.info("addPending import user = " + importUser);
       if (importUser == -1) {
-        logger.info("\t import user now = " + importUser);
-        importUser = ((DominoUserDAOImpl) db.getUserDAO()).getImportUser();
+        logger.info("\t addPending import user now = " + importUser);
+        importUser = db.getUserDAO().getImportUser();
       }
 
       SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
@@ -163,6 +163,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       List<CommonExercise> updateEx = new ArrayList<>();
 
       Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
+
+      logger.info("found " + legacyToEx.size() + " current exercises for " + projectid);
       {
         Set<Integer> current = legacyToEx.keySet();
 

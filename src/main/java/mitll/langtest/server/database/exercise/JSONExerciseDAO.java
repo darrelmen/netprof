@@ -100,6 +100,5 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
 
   @Override
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
-
   }
 }

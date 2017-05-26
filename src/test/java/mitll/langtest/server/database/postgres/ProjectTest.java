@@ -272,9 +272,11 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testReadDominoJSON() {
-    DatabaseImpl database = getAndPopulate();
-    DominoExerciseDAO dominoExerciseDAO = database.getDominoExerciseDAO();
-    dominoExerciseDAO.readExercises("SAMPLE-NO-EXAM.json", Arrays.asList("Unit", "Chapter"));
+    DominoExerciseDAO dominoExerciseDAO = getAndPopulate().getDominoExerciseDAO();
+    DominoExerciseDAO.Info info = dominoExerciseDAO.readExercises("SAMPLE-NO-EXAM.json",null,
+         -1, 1);
+
+    logger.info("Got " + info);
   }
 
   @Test
@@ -340,7 +342,8 @@ public class ProjectTest extends BaseTest {
     DatabaseImpl andPopulate = getAndPopulate();
     int english = andPopulate.getProjectDAO().getByName("portuguese");
     Project project = andPopulate.getProject(english);
-    project.getSectionHelper().report();;
+    project.getSectionHelper().report();
+    ;
     // logger.info("project " + project.getAudioFileHelper().isHydraAvailableCheckNow());
     andPopulate.close();
   }
@@ -359,7 +362,7 @@ public class ProjectTest extends BaseTest {
         "59 " +
         "minutos.");
 
-     andPopulate.close();
+    andPopulate.close();
   }
 
   AudioFileHelper getAudioFileHelper(DatabaseImpl russian) {

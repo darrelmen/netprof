@@ -50,7 +50,7 @@ public class FileUploader extends BasicDialog {
 
     ControlGroup widgets = addControlGroupEntrySimple(
         fieldset,
-        "Upload file (excel or JSON)",
+        "Upload file (JSON)",
         upload);
     widgets.setWidth("366px");
 

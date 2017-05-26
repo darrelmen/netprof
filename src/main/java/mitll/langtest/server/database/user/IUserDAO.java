@@ -218,6 +218,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   int getDefaultUser();
 
+  int getImportUser();
   /**
    * @param toUpdate
    * @see UserServiceImpl#addUser

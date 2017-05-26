@@ -469,14 +469,12 @@ public class ProjectChoices {
 
   @NotNull
   private DivWidget getEditButtonContainer(SlimProject projectForLang) {
-    com.github.gwtbootstrap.client.ui.Button editButton = getEditButton(projectForLang);
-    return getButtonContainer(editButton);
+    return getButtonContainer(getEditButton(projectForLang));
   }
 
   @NotNull
   private DivWidget getImportButtonContainer(SlimProject projectForLang) {
-    com.github.gwtbootstrap.client.ui.Button editButton = getImportButton(projectForLang);
-    return getButtonContainer(editButton);
+    return getButtonContainer(getImportButton(projectForLang));
   }
 
   @NotNull
@@ -537,8 +535,7 @@ public class ProjectChoices {
   }
 
   private void showImportDialog(SlimProject projectForLang) {
-    // logger.info("projectForLang " + projectForLang);
-    //new FileUploader().getForm(projectForLang.getID());
+
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
@@ -566,9 +563,7 @@ public class ProjectChoices {
   }
 
   private void showDeleteDialog(SlimProject projectForLang) {
-    // logger.info("projectForLang " + projectForLang);
-    //new FileUploader().getForm(projectForLang.getID());
-    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+      DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
         logger.info("delete project!");

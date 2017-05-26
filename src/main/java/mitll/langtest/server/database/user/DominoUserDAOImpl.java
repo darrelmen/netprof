@@ -1217,4 +1217,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       return clientUserDetail1 != null;
     }
   }
+
+//  public int getImportUser() {
+//    return dominoImportUser.getDocumentDBID();
+//  }
 }

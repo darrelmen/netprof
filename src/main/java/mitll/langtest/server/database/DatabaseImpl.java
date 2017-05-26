@@ -190,7 +190,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private RecordWordAndPhone recordWordAndPhone;
 
   private IUserSecurityManager userSecurityManager;
-  DominoExerciseDAO dominoExerciseDAO;
+  private DominoExerciseDAO dominoExerciseDAO;
 
   /**
    * JUST FOR TESTING
@@ -363,10 +363,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
-
     dominoExerciseDAO = new DominoExerciseDAO(dominoUserDAO.getSerializer());
-//    long now = System.currentTimeMillis();
-//    if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
 
   /**
@@ -375,7 +372,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   private DBConnection getDbConnection() {
     DBConnection dbConnection = new DBConnection(serverProps.getDBConfig());
-    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
+//    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
     return dbConnection;
   }
 

@@ -45,7 +45,7 @@ public class DisplayMenu {
     view.setWidth("60px");
    // view.getTriggerWidget().setCaret(false);
 
-    view.addClickHandler(event -> phoneChoice.setText(getPhoneMenuTitle()));
+   // view.addClickHandler(event -> phoneChoice.setText(SHOW_SOUNDS));
   //  view.setIcon(IconType.REORDER);
     NavLink download = new NavLink("Download");
     download.setIcon(IconType.DOWNLOAD_ALT);

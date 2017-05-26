@@ -1,13 +1,19 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.hlt.domino.server.util.Mongo;
+import mitll.hlt.domino.shared.model.SimpleHeadDocumentRevision;
+import mitll.hlt.domino.shared.model.document.*;
 import mitll.hlt.domino.shared.model.metadata.Language;
 import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
+import mitll.hlt.domino.shared.model.user.UserDescriptor;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import scala.tools.cmd.gen.AnyVals;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -15,62 +21,214 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
+import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Vocabulary;
 
 /**
  * Created by go22670 on 5/2/17.
  */
 public class DominoExerciseDAO {
   private static final Logger logger = LogManager.getLogger(DominoExerciseDAO.class);
-  JSONSerializer ser;
+  private JSONSerializer ser;
 
+  /**
+   * @param serializer
+   */
   public DominoExerciseDAO(JSONSerializer serializer) {
     this.ser = serializer;
   }
 
-  public List<CommonExercise> readExercises(String file, List<String> typeOrder) {
+  public static class Info {
+    private Date createTime;
+    private Date modifiedTime;
+    private List<CommonExercise> exercises;
+
+    private String language;
+    private mitll.langtest.shared.project.Language lang;
+
+    private int dominoID;
+
+    public Info(Date exportTime, Date updateTime,
+                List<CommonExercise> exercises,
+                String language,
+                mitll.langtest.shared.project.Language lang,
+                int dominoID) {
+      this.createTime = exportTime;
+      this.modifiedTime = updateTime;
+      this.exercises = exercises;
+      this.language = language;
+      this.lang = lang;
+      this.dominoID = dominoID;
+    }
+
+    public Date getExportTime() {
+      return createTime;
+    }
+
+    public List<CommonExercise> getExercises() {
+      return exercises;
+    }
+
+    public String getLanguage() {
+      return language;
+    }
+
+    public mitll.langtest.shared.project.Language getLang() {
+      return lang;
+    }
+
+    public int getDominoID() {
+      return dominoID;
+    }
+
+    public Date getModifiedTime() {
+      return modifiedTime;
+    }
+
+    public String toString() {
+      return "lang " + lang + " " + lang + " " + getDominoID() + " " + getExportTime() + " num " + getExercises().size();
+    }
+  }
+
+  public Info readExercises(String file, InputStream inputStream, int projid, int importUser) {
     List<CommonExercise> exercises = new ArrayList<>();
     try {
       //JsonParser parser = Json.createParser(new FileReader(file));
-      JsonReader reader = Json.createReader(new FileReader(file));
+      JsonReader reader = file == null ?
+          Json.createReader(inputStream) :
+          Json.createReader(new FileReader(file));
       JsonObject readObj = (JsonObject) reader.read();
 
       // JSONSerializer ser = Mongo.makeSerializer();
-      Date theTime = ser.dateFormat().parse(readObj.getString("exportTime")).get();
+      // Date theTime = ser.dateFormat().parse(readObj.getString("exportTime")).get();
 
-      logger.info("got time " + theTime);
+//      logger.info("got time " + theTime);
 
       JsonObject langObj = readObj.getJsonObject("language");
-      Language l = ser.deserialize(Language.class, langObj.toString());
-      logger.info("got l " + l);
+      Language dominoLang = ser.deserialize(Language.class, langObj.toString());
+      //logger.info("got Language " + dominoLang);
 
       JsonObject projObj = readObj.getJsonObject("project");
-      logger.info("got projObj " + projObj);
+      // logger.info("got projObj " + projObj);
       ProjectDescriptor pd = ser.deserialize(ProjectDescriptor.class, projObj.toString());
-      //  assertThat(pd, notNullValue());
-      //  assertThat(pd.getName(), is(expProj.getName()));
-      //  assertThat(pd.getContent().getSkill(), is(MetadataTypes.SkillType.Vocabulary));
+      UserDescriptor creator1 = pd.getCreator();
+      int creator = creator1 != null ? creator1.getDocumentDBID() : importUser;
+      logger.info("got " + pd);
+
+      String languageName = pd.getContent().getLanguageName();
+
+      mitll.langtest.shared.project.Language lang = mitll.langtest.shared.project.Language.UNKNOWN;
+      try {
+        lang = mitll.langtest.shared.project.Language.valueOf(languageName);
+        logger.info("Got " + languageName + " " + lang);
+      } catch (IllegalArgumentException e) {
+
+      }
+
+      if (pd.getContent().getSkill() != Vocabulary) {
+        logger.error("huh? skill type is " + pd.getContent().getSkill());
+      }
 
       JsonArray docArr = readObj.getJsonArray("documents");
-      //assertThat(docArr, hasSize(9));
+      //Set<String> unique = new HashSet<>();
       docArr.forEach(docObj -> {
-        logger.info("Got " + docObj);
-        //   SimpleHeadDocumentRevision shDoc = ser.deserialize(SimpleHeadDocumentRevision.class, docObj.toString());
-        //assertThat(shDoc, notNullValue());
-        //assertThat(docIds.contains(shDoc.getId()), is(true));
-        //assertThat(shDoc.getDocument() instanceof VocabularyItem, is(true));
+        logger.info("Got json " + docObj);
+        SimpleHeadDocumentRevision shDoc = ser.deserialize(SimpleHeadDocumentRevision.class, docObj.toString());
+        Date createDate = shDoc.getCreateDate();
+
+        IDocument document = shDoc.getDocument();
+
+        VocabularyItem vocabularyItem = (VocabularyItem) document;
+
+
+        Exercise ex = getExercise(projid, "" + shDoc.getId(), vocabularyItem, creator);
+
+        logger.info("Got old id " + shDoc.getId() + " " + ex.getDominoID());
+
+        ex.setUpdateTime(createDate.getTime());
+
+        List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
+        for (IMetadataField field : metadataFields) {
+
+          String name = field.getName();
+          if (name.startsWith("v-") && !name.equals("v-np-id")) {
+            name = name.substring(2);
+            ex.addUnitToValue(name, field.getDisplayValue());
+          }
+        }
+//        logger.info("Got " + ex.getUnitToValue());
+
+        addContextSentences(projid, creator, shDoc, vocabularyItem, ex);
+
+        //      logger.info("Got " + ex);
+        //    logger.info("Got " + ex.getDirectlyRelated());
+        exercises.add(ex);
       });
+      return new Info(pd.getCreateTime(), pd.getUpdateTime(), exercises, languageName, lang, pd.getId());
 
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-    return exercises;
+    return null;
   }
 
-  private CommonExercise toExercise(JsonObject jsonObject, List<String> typeOrder) {
+  private void addContextSentences(int projid, int creator, SimpleHeadDocumentRevision shDoc, VocabularyItem vocabularyItem, Exercise ex) {
+    IDocumentComposite samples = vocabularyItem.getSamples();
+    for (IDocumentComponent comp : samples.getComponents()) {
+      SampleSentence sample = (SampleSentence) comp;
+
+      String oldid = shDoc.getId() + "_" + sample.getNum();
+
+      logger.info("context import id " + oldid);
+
+      Exercise context = getExercise(projid, oldid, creator,
+          sample.getSentenceVal(), sample.getAlternateFormVal(), sample.getTransliterationVal(), sample.getTranslationVal());
+
+      ex.getDirectlyRelated().add(context);
+    }
+  }
+
+  @NotNull
+  private Exercise getExercise(int projid,
+                               String oldid,//SimpleHeadDocumentRevision shDoc,
+                               VocabularyItem vocabularyItem,
+                               int creatorID) {
+    String termVal = vocabularyItem.getTermVal();
+    String alternateFormVal = vocabularyItem.getAlternateFormVal();
+    String transliterationVal = vocabularyItem.getTransliterationVal();
+    String meaning = vocabularyItem.getMeaningVal();
+
+    // String oldid = "" + shDoc.getId();
+
+    return getExercise(projid, oldid, creatorID, termVal, alternateFormVal, transliterationVal, meaning);
+  }
+
+  @NotNull
+  private Exercise getExercise(int projid, String oldid, int creatorID,
+                               String termVal,
+                               String alternateFormVal,
+                               String transliterationVal,
+                               String meaning) {
+    return new Exercise(-1,
+        oldid,
+        creatorID,
+        meaning,
+        termVal,
+        StringUtils.stripAccents(termVal),
+        alternateFormVal,
+        meaning,
+        transliterationVal,
+        projid,
+        false,
+        0,
+        false
+    );
+  }
+
+  /*private CommonExercise toExercise(JsonObject jsonObject, List<String> typeOrder) {
     JsonObject metadata = jsonObject.getJsonObject("metadata");
     JsonObject content = jsonObject.getJsonObject("content");
     String updateTime = jsonObject.getString("updateTime");
@@ -95,7 +253,7 @@ public class DominoExerciseDAO {
     String contextTranslation = noMarkup(content.getString("context_trans"));
 
     Exercise exercise = null;
-/*    Exercise exercise = new Exercise(
+*//*    Exercise exercise = new Exercise(
         npDID,
         english,
         fl,
@@ -104,19 +262,19 @@ public class DominoExerciseDAO {
         context,
         contextTranslation,
         dominoID);
-    exercise.setUpdateTime(updateMillis);*/
-   // if (!isLegacy) logger.info("NOT LEGACY " + exercise);
+    exercise.setUpdateTime(updateMillis);*//*
+    // if (!isLegacy) logger.info("NOT LEGACY " + exercise);
 
-/*    for (String type : typeOrder) {
+*//*    for (String type : typeOrder) {
       try {
         exercise.addUnitToValue(type, noMarkup(content.getString(type.toLowerCase())));
       } catch (Exception e) {
         logger.error("couldn't find unit/chapter '" + type + "' in content - see typeOrder property");
       }
-    }*/
+    }*//*
 
     return exercise;
-  }
+  }*/
 
   private String noMarkup(String source) {
     return source.replaceAll("\\<.*?>", "");

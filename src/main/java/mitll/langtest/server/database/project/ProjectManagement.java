@@ -100,7 +100,7 @@ public class ProjectManagement implements IProjectManagement {
     this.serverProps = properties;
     this.logAndNotify = logAndNotify;
     this.db = db;
-    fileUploadHelper = new FileUploadHelper(db);
+    fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
   }
 
@@ -112,6 +112,10 @@ public class ProjectManagement implements IProjectManagement {
     populateProjects(pathHelper, serverProps, logAndNotify, db);
   }
 
+  /**
+   * @see DatabaseImpl#rememberProject
+   * @param id
+   */
   public void rememberProject(int id) {
     SlickProject found = null;
     for (SlickProject slickProject : projectDAO.getAll()) {
@@ -123,7 +127,6 @@ public class ProjectManagement implements IProjectManagement {
     if (found != null) {
       rememberProject(pathHelper, serverProps, logAndNotify, found, db);
     }
-
   }
 
   /**
