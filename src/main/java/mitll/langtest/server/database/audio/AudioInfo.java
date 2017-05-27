@@ -1,6 +1,8 @@
 package mitll.langtest.server.database.audio;
 
+import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.npdata.dao.SlickAudio;
 
 /**
  * Created by go22670 on 1/23/17.
@@ -37,6 +39,19 @@ public class AudioInfo {
     this.transcript = transcript;
     this.dnr = dnr;
     this.resultID = resultID;
+  }
+
+  public AudioInfo(SlickAudio slickAudio, int projid, int exid) {
+    this(slickAudio.userid(),
+        exid,
+        projid,
+        AudioType.valueOf(slickAudio.audiotype()),
+        slickAudio.audioref(),
+        slickAudio.modified().getTime(),
+        slickAudio.duration(),
+        slickAudio.transcript(),
+        slickAudio.dnr(),
+        slickAudio.resultid());
   }
 
   public int getUserid() {

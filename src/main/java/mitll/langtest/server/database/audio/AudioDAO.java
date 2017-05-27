@@ -43,6 +43,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.npdata.dao.SlickAudio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -239,6 +240,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<>();
+  }
+
+  @Override
+  public List<SlickAudio> getAll(int projid) {
+    return null;
   }
 
   @Override
@@ -888,6 +894,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public AudioAttribute getByID(int audioID) {
     return null;
+  }
+
+  @Override
+  public void addBulk(List<SlickAudio> copies) {
+
   }
 
   /**

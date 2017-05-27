@@ -211,10 +211,11 @@ public class SlickUserExerciseDAO
     String secondType = unitToValue.getOrDefault(second, "");
     if (secondType.isEmpty()) secondType  = unitToValue.getOrDefault(second.toLowerCase(), "");
 
-    logger.info("toSlick for " + shared.getID() +
-        " : " +first +
-        " = '" + firstType + "' " +
-        "" + second + " = '" + secondType + "'");
+//    logger.info("toSlick for " + shared.getID() +
+//        " : " +first +
+//        " = '" + firstType + "' " +
+//        "" + second + " = '" + secondType + "'");
+
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),

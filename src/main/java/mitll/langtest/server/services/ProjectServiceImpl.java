@@ -34,17 +34,21 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
+import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.SlimProject;
+import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickProject;
@@ -130,7 +134,28 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
   @Override
   public boolean create(ProjectInfo newProject) {
+    if (newProject.getModelsDir().isEmpty()) {
+      setDefaultsIfMissing(newProject);
+    }
     return new CreateProject().createProject(db, db, newProject);
+  }
+
+  private void setDefaultsIfMissing(ProjectInfo newProject) {
+    Project max = null;
+    try {
+      max = db.getProjectManagement().getProductionProjects().stream()
+          .filter(project -> project.getLanguage().equals(newProject.getLanguage()) && project.getModelsDir() != null)
+          .max((p1, p2) -> Long.compare(p1.getProject().modified().getTime(), p2.getProject().modified().getTime()))
+          .get();
+
+      newProject.setModelsDir(max.getModelsDir());
+
+      if (newProject.getPort() == -1) {
+        newProject.setPort(max.getWebservicePort());
+      }
+    } catch (Exception e) {
+      logger.info("Got " + e);
+    }
   }
 
   @Override
@@ -199,7 +224,59 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       logger.info("addPending updating  " + updateEx.size() + " exercises");
       doUpdate(projectid, importUser, slickUEDAO, updateEx, typeOrder2);
 
+      copyAudio(projectid, newEx);
+
       db.configureProject(db.getProject(projectid), true);
+    }
+  }
+
+  private void copyAudio(int projectid, List<CommonExercise> newEx) {
+    try {
+      String language = db.getProject(projectid).getLanguage();
+      Project max = db.getProjectManagement().getProductionProjects().stream()
+          .filter(project -> project.getLanguage().equals(language) && project.getID() != projectid)
+          .max(Comparator.comparingLong(p -> p.getProject().modified().getTime()))
+          .get();
+      Collection<SlickAudio> audioAttributesByProjectThatHaveBeenChecked = db.getAudioDAO().getAll(max.getID());
+      Map<String, List<SlickAudio>> transcriptToAudio = new HashMap<>();
+
+      for (SlickAudio audioAttribute : audioAttributesByProjectThatHaveBeenChecked) {
+        List<SlickAudio> audioAttributes = transcriptToAudio.get(audioAttribute.transcript());
+        if (audioAttributes == null) audioAttributes = new ArrayList<>();
+        audioAttributes.add(audioAttribute);
+      }
+
+      List<SlickAudio> copies = new ArrayList<>();
+      for (CommonExercise ex : newEx) {
+        if (transcriptToAudio.get(ex.getForeignLanguage()) != null) {
+          List<SlickAudio> audioAttributes = transcriptToAudio.get(ex.getForeignLanguage());
+          for (SlickAudio audio : audioAttributes) {
+            copies.add(//new AudioInfo(audio, projectid, ex.getID()));
+
+                new SlickAudio(
+                    -1,
+                    audio.userid(),
+                    ex.getID(),
+                    audio.modified(),
+                    audio.audioref(),
+                    audio.audiotype(),
+                    audio.duration(),
+                    audio.defect(),
+                    audio.transcript(),
+                    projectid,
+                    audio.exists(),
+                    audio.lastcheck(),
+                    audio.actualpath(),
+                    audio.dnr(),
+                    audio.resultid()
+                ));
+          }
+        }
+      }
+      logger.info("copying " + copies.size() + " audio from " + newEx.size() + " from project " + max);
+      db.getAudioDAO().addBulk(copies);
+    } catch (Exception e) {
+      logger.info("Got " + e);
     }
   }
 

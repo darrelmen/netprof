@@ -56,6 +56,7 @@ public interface IAudioDAO extends IDAO {
   Map<Integer, List<AudioAttribute>> getExToAudio(int projectid);
 
   Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid);
+  List<SlickAudio> getAll(int projid);
 
   /**
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
@@ -130,4 +131,6 @@ public interface IAudioDAO extends IDAO {
   Map<String,Integer> getPairs(int projid);
 
   AudioAttribute getByID(int audioID);
+
+  void addBulk(List<SlickAudio> copies);
 }

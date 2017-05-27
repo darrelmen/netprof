@@ -35,6 +35,7 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -90,11 +91,20 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   @Override
   public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid) {
-    List<SlickAudio> all = dao.getAll(projid);
+    List<SlickAudio> all = getAll(projid);
     logger.info("getAudioAttributesByProjectThatHaveBeenChecked " + projid + " found " + all.size() + " that has been checked to exist.");
     return toAudioAttribute(all);
   }
 
+  public List<SlickAudio> getAll(int projid) {
+    return dao.getAll(projid);
+  }
+
+  /**
+   * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable(int, AudioType, CommonExercise, int, AudioAnswer)
+   * @param info
+   * @return
+   */
   @Override
   public AudioAttribute addOrUpdate(AudioInfo info) {
     MiniUser miniUser = userDAO.getMiniUser(info.getUserid());

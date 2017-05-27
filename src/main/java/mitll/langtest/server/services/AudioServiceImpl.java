@@ -519,21 +519,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-  /*
-  private AudioFileHelper getAudioFileHelper() {
-    if (serverProps.isAMAS()) {
-      return audioFileHelper;
-    } else {
-      Project project = getProject();
-      if (project == null) {
-        logger.warn("getAudioFileHelper no current project???");
-        return null;
-      }
-      return project.getAudioFileHelper();
-    }
-  }
-*/
-
   /**
    * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
    * Also returns the audio file duration -- so we can deal with the difference in length between mp3 and wav

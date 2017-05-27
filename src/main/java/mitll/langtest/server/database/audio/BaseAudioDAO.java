@@ -129,7 +129,7 @@ public abstract class BaseAudioDAO extends DAO {
     return exToAudio;
   }
 
-  abstract Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid);
+  public abstract Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid);
 
   /**
    * @param exercises
