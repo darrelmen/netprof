@@ -47,10 +47,7 @@ public class ExerciseCopy {
     }
     Map<String, List<Exercise>> idToCandidateOverride = new HashMap<>();
     List<Exercise> exercises = addUserExercises(db, oldToNewUser, projectid, typeOrder, idToCandidateOverride);
-    {
-      int importUser = ((DominoUserDAOImpl) db.getUserDAO()).getImportUser();
-      addExercises(importUser, projectid, idToFL, slickUEDAO, db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID), typeOrder, idToCandidateOverride);
-    }
+    addExercises(db.getUserDAO().getImportUser(), projectid, idToFL, slickUEDAO, db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID), typeOrder, idToCandidateOverride);
 
     exToInt = slickUEDAO.getOldToNew(projectid);
     reallyAddingUserExercises(projectid, typeOrder, slickUEDAO, exToInt, exercises);
@@ -95,7 +92,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    */
-  private void addExercises(int importUser,
+  public void addExercises(int importUser,
                             int projectid,
                             Map<Integer, String> idToFL,
                             SlickUserExerciseDAO slickUEDAO,
@@ -170,7 +167,6 @@ public class ExerciseCopy {
       logger.error("addContextExercises : huh? type order is empty...?");
     }
 
-    //int missingIDs = 0;
     Set<String> missing = new HashSet<>();
 
     for (CommonExercise ex : exercises) {
@@ -219,7 +215,7 @@ public class ExerciseCopy {
     List<SlickExercise> bulk = new ArrayList<>();
     logger.info("addPredefExercises copying " + exercises.size() + " exercises");
     if (typeOrder == null || typeOrder.isEmpty()) {
-      logger.error("huh? no type order?");
+      logger.error("addPredefExercises huh? no type order?");
     }
     long now = System.currentTimeMillis();
 

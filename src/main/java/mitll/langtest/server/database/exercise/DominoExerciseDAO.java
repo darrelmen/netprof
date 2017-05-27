@@ -15,10 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import scala.tools.cmd.gen.AnyVals;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import javax.json.*;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
@@ -135,34 +132,8 @@ public class DominoExerciseDAO {
       JsonArray docArr = readObj.getJsonArray("documents");
       //Set<String> unique = new HashSet<>();
       docArr.forEach(docObj -> {
-        logger.info("Got json " + docObj);
-        SimpleHeadDocumentRevision shDoc = ser.deserialize(SimpleHeadDocumentRevision.class, docObj.toString());
-        Date createDate = shDoc.getCreateDate();
-
-        IDocument document = shDoc.getDocument();
-
-        VocabularyItem vocabularyItem = (VocabularyItem) document;
-
-
-        Exercise ex = getExercise(projid, "" + shDoc.getId(), vocabularyItem, creator);
-
-        logger.info("Got old id " + shDoc.getId() + " " + ex.getDominoID());
-
-        ex.setUpdateTime(createDate.getTime());
-
-        List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
-        for (IMetadataField field : metadataFields) {
-
-          String name = field.getName();
-          if (name.startsWith("v-") && !name.equals("v-np-id")) {
-            name = name.substring(2);
-            ex.addUnitToValue(name, field.getDisplayValue());
-          }
-        }
-//        logger.info("Got " + ex.getUnitToValue());
-
-        addContextSentences(projid, creator, shDoc, vocabularyItem, ex);
-
+  //      logger.info("Got json " + docObj);
+        Exercise ex = getExercise(projid, creator, docObj);
         //      logger.info("Got " + ex);
         //    logger.info("Got " + ex.getDirectlyRelated());
         exercises.add(ex);
@@ -175,25 +146,49 @@ public class DominoExerciseDAO {
     return null;
   }
 
+  @NotNull
+  private Exercise getExercise(int projid, int creator, JsonValue docObj) {
+    SimpleHeadDocumentRevision shDoc = ser.deserialize(SimpleHeadDocumentRevision.class, docObj.toString());
+    Date createDate = shDoc.getCreateDate();
+    IDocument document = shDoc.getDocument();
+    VocabularyItem vocabularyItem = (VocabularyItem) document;
+    Exercise ex = getExercise(projid, shDoc.getId(), vocabularyItem, creator);
+
+//        logger.info("Got old id " + shDoc.getId() + " " + ex.getDominoID());
+    ex.setUpdateTime(createDate.getTime());
+
+    List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
+    for (IMetadataField field : metadataFields) {
+      String name = field.getName();
+      if (name.startsWith("v-") && !name.equals("v-np-id")) {
+        name = name.substring(2);
+        ex.addUnitToValue(name, field.getDisplayValue());
+      }
+    }
+//        logger.info("Got " + ex.getUnitToValue());
+    addContextSentences(projid, creator, shDoc, vocabularyItem, ex);
+    return ex;
+  }
+
   private void addContextSentences(int projid, int creator, SimpleHeadDocumentRevision shDoc, VocabularyItem vocabularyItem, Exercise ex) {
     IDocumentComposite samples = vocabularyItem.getSamples();
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
 
-      String oldid = shDoc.getId() + "_" + sample.getNum();
+      int compid = shDoc.getId() * 10 + sample.getNum();
 
-      logger.info("context import id " + oldid);
+      logger.info("context import id " + compid);
 
-      Exercise context = getExercise(projid, oldid, creator,
+      Exercise context = getExercise(projid, compid, creator,
           sample.getSentenceVal(), sample.getAlternateFormVal(), sample.getTransliterationVal(), sample.getTranslationVal());
-
+      context.setUnitToValue(ex.getUnitToValue());
       ex.getDirectlyRelated().add(context);
     }
   }
 
   @NotNull
   private Exercise getExercise(int projid,
-                               String oldid,//SimpleHeadDocumentRevision shDoc,
+                               int oldid,
                                VocabularyItem vocabularyItem,
                                int creatorID) {
     String termVal = vocabularyItem.getTermVal();
@@ -201,31 +196,34 @@ public class DominoExerciseDAO {
     String transliterationVal = vocabularyItem.getTransliterationVal();
     String meaning = vocabularyItem.getMeaningVal();
 
-    // String oldid = "" + shDoc.getId();
 
     return getExercise(projid, oldid, creatorID, termVal, alternateFormVal, transliterationVal, meaning);
   }
 
   @NotNull
-  private Exercise getExercise(int projid, String oldid, int creatorID,
+  private Exercise getExercise(int projid,
+                               int oldid, int creatorID,
                                String termVal,
                                String alternateFormVal,
                                String transliterationVal,
                                String meaning) {
-    return new Exercise(-1,
-        oldid,
+    Exercise exercise = new Exercise(-1,
+        "" + oldid,
         creatorID,
         meaning,
         termVal,
         StringUtils.stripAccents(termVal),
         alternateFormVal,
-        meaning,
+        "",
         transliterationVal,
         projid,
         false,
         0,
         false
     );
+    exercise.setPredef(true);
+    exercise.setDominoID(oldid);
+    return exercise;
   }
 
   /*private CommonExercise toExercise(JsonObject jsonObject, List<String> typeOrder) {

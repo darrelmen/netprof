@@ -111,7 +111,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   List<CommonExercise> readExercises() {
     try {
       List<String> typeOrder = getTypeOrderFromProject();
-      //getSectionHelper().reorderTypes(typeOrder);
       setRootTypes(typeOrder);
 
       int projid = project.id();
@@ -121,8 +120,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       //userExerciseDAO.useExToPhones(exerciseToPhoneForProject);
 
       logger.info("readExercises" +
-          "\n\tread " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
-          "\n\tfor " + projid +
+          "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+          "\n\tfor        " + projid +
           "\n\ttype order " + typeOrder);
 
       Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
@@ -152,7 +151,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               getSectionHelper(),
               exerciseToPhoneForProject, fullProject, allByProject, exToAttrs
           ));
-      logger.info("project " + project + " idToContext " + idToContext.size());
+      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
 
       attachContextExercises(allNonContextExercises, userExerciseDAO.getAllRelated(projid), idToContext);
 

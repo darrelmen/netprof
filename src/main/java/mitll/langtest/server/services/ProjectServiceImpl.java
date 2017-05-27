@@ -139,8 +139,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   /**
-   * @see mitll.langtest.client.project.ProjectChoices#showImportDialog(SlimProject)
    * @param projectid
+   * @see mitll.langtest.client.project.ProjectChoices#showImportDialog(SlimProject)
    */
   @Override
   public void addPending(int projectid) {
@@ -164,7 +164,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
       Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
 
-      logger.info("found " + legacyToEx.size() + " current exercises for " + projectid);
+      logger.info("addPending found " + legacyToEx.size() + " current exercises for " + projectid);
       {
         Set<Integer> current = legacyToEx.keySet();
 
@@ -181,19 +181,22 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         }
       }
 
-      logger.info("addPending importing " + newEx.size() + " exercises");
-      logger.info("addPending updating  " + updateEx.size() + " exercises");
-
       //  Collection<String> typeOrder = db.getTypeOrder(projectid);
       Collection<String> typeOrder2 = db.getProject(projectid).getTypeOrder();
 
       //  logger.info("typeorder for " +projectid + " is " + typeOrder);
-      logger.info("typeorder for " + projectid + " is " + typeOrder2);
+      logger.info("addPending typeorder for " + projectid + " is " + typeOrder2);
 
-      new ExerciseCopy().addPredefExercises(projectid, slickUEDAO, importUser, newEx, typeOrder2, new HashMap<>());
+      // new ExerciseCopy().addPredefExercises(projectid, slickUEDAO, importUser, newEx, typeOrder2, new HashMap<>());
+      logger.info("addPending importing " + newEx.size() + " exercises");
+      new ExerciseCopy().addExercises(importUser,
+          projectid,
+          new HashMap<>(),
+          slickUEDAO, newEx, typeOrder2, new HashMap<>());
 
       // now update...
       // update the exercises...
+      logger.info("addPending updating  " + updateEx.size() + " exercises");
       doUpdate(projectid, importUser, slickUEDAO, updateEx, typeOrder2);
 
       db.configureProject(db.getProject(projectid), true);
@@ -291,7 +294,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     logger.info("now " + newJoins.size() + " and remove " + removeJoins.size());
     slickUEDAO.addBulkAttributeJoins(newJoins);
     slickUEDAO.removeBulkAttributeJoins(removeJoins);
-    if (failed > 0) logger.warn("\n\n\n\nsomehow failed to update " + failed + " out of " + updateEx.size() + " exercises");
+    if (failed > 0)
+      logger.warn("\n\n\n\nsomehow failed to update " + failed + " out of " + updateEx.size() + " exercises");
   }
 
   private boolean getWasRetired(Project currentProject) {

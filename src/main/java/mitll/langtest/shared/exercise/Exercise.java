@@ -85,7 +85,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private int dominoID = -1;
 
-  private transient List<ExerciseAttribute> attributes;
+  private transient List<ExerciseAttribute> attributes = new ArrayList<>();
 
   private String noAccentFL;
 

@@ -403,14 +403,14 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
 
       if (DEBUG) {
-        logger.info("children of " + node.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
+        logger.info("getTypeToMatchPairs children of " + node.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
       }
 
       if (childMatches == null || childMatches.isEmpty()) {  // couldn't find matching value
         return typeToMatch;
       } else {
         iterator.remove();
-        if (DEBUG) logger.info("path now " + pairs);
+        if (DEBUG) logger.info("getTypeToMatchPairs path now " + pairs);
 
         if (pairs.isEmpty()) {
           for (SectionNode childMatch : childMatches) {
@@ -431,7 +431,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       typeToMatch.put(type, matches);
       Map<String, MatchInfo> matchesForType = typeToMatchInfo.get(type);
       if (matchesForType == null) {
-        logger.warn("no known type " + type);
+        logger.warn("getTypeToMatchPairs no known type " + type);
       } else {
         matches.putAll(matchesForType);
       }
@@ -896,10 +896,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     logger.info("rememberTypesInOrder type->childCount " + typeToCount);
   }
 
-  private void makeRoot() {
-    root = new SectionNode("root", "root");
-    //  logger.info("NEW ROOT " + root, new Exception());
-  }
+  private void makeRoot() {  root = new SectionNode("root", "root");  }
 
   private int spew = 0;
 

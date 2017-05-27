@@ -277,7 +277,6 @@ public class ProjectChoices {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(NEW_PROJECT);
 
     DivWidget right = new DivWidget();
-//    right.addStyleName("floatRight");
     right.add(w);
 
     w.addStyleName("floatLeft");

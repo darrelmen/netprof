@@ -196,8 +196,8 @@ public class SlickUserExerciseDAO
         logger.error("toSlick type order is empty? (" + spew + " )");
       return null;
     }
-    Iterator<String> iterator = typeOrder.iterator();//getTypeOrder().iterator();
-    String first = iterator.hasNext() ? iterator.next() : "";
+    Iterator<String> iterator = typeOrder.iterator();
+    String first  = iterator.hasNext() ? iterator.next() : "";
     String second = iterator.hasNext() ? iterator.next() : "";
 
     int creator = shared.getCreator();
@@ -206,10 +206,15 @@ public class SlickUserExerciseDAO
     long updateTime = shared.getUpdateTime();
     if (updateTime == 0) updateTime = lastModified;
 
-    String orDefault = unitToValue.getOrDefault(first, "");
-    String orDefault1 = unitToValue.getOrDefault(second, "");
+    String firstType  = unitToValue.getOrDefault(first, "");
+    if (firstType.isEmpty()) firstType  = unitToValue.getOrDefault(first.toLowerCase(), "");
+    String secondType = unitToValue.getOrDefault(second, "");
+    if (secondType.isEmpty()) secondType  = unitToValue.getOrDefault(second.toLowerCase(), "");
 
-    //logger.info("toSlick for " + shared.getID() + " : first = '" + orDefault + "' " + second + " = '" + orDefault1 + "'");
+    logger.info("toSlick for " + shared.getID() +
+        " : " +first +
+        " = '" + firstType + "' " +
+        "" + second + " = '" + secondType + "'");
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),
@@ -220,8 +225,8 @@ public class SlickUserExerciseDAO
         shared.getAltFL(),
         shared.getTransliteration(),
         isOverride,
-        orDefault,
-        orDefault1,
+        firstType,
+        secondType,
         projectID,//shared.getProjectID(),  // project id fk
         shared.isPredefined(),
         isContext,
@@ -611,7 +616,6 @@ public class SlickUserExerciseDAO
                                             Project lookup,
                                             Map<Integer, ExerciseAttribute> allByProject,
                                             Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs,
-                                            // Collection<String> attrTypes,
                                             boolean addTypesToSection) {
     List<List<Pair>> allPairs = new ArrayList<>();
 
@@ -638,7 +642,7 @@ public class SlickUserExerciseDAO
     }
 
     if (addTypesToSection) {
-//      logger.info("getExercises type order " + typeOrder);
+      logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allPairs);
     }
     //  logger.info("getExercises created " + copy.size() + " exercises");
@@ -831,11 +835,9 @@ public class SlickUserExerciseDAO
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs
   ) {
     int projectid = lookup.getID();
-    //  Collection<String> attributeTypes = getAttributeTypes(projectid);
-
     List<SlickExercise> allContextPredefByProject = dao.getAllContextByProject(projectid);
 
-    logger.info("For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
+    logger.info("getContextByProject For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
 
     return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
         exerciseToPhoneForProject, lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);

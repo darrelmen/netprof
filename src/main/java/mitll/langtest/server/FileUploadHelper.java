@@ -212,7 +212,7 @@ public class FileUploadHelper {
    * @paramx siteDeployer
    * @see LangTestDatabaseImpl#service
    */
-  public void doSiteResponse(HttpServletResponse response, Site site) throws IOException {
+   void doSiteResponse(HttpServletResponse response, Site site) throws IOException {
     response.setContentType("text/plain");
     if (!site.isValid()) {
       response.getWriter().write("Name in use or invalid.");
@@ -221,6 +221,11 @@ public class FileUploadHelper {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
+   * @param projid
+   * @return
+   */
   public Collection<CommonExercise> getExercises(int projid) {
     return idToExercises.get(projid);
   }
