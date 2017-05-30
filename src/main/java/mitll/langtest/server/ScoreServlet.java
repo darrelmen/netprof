@@ -150,6 +150,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
     }
 
+    // ok can't figure it out from language, check header.
     if (projid == -1) {
       projid = request.getIntHeader("projid");
       logger.warn("doGet got project id from url header " + projid);
@@ -247,7 +248,7 @@ public class ScoreServlet extends DatabaseServlet {
         if (split1.length < 2) {
           toReturn.put(ERROR, "expecting at least two query parameters");
         } else {
-          toReturn = getPhoneReport(toReturn, split1);
+          toReturn = getPhoneReport(toReturn, split1, projid);
         }
       } else {
         toReturn.put(ERROR, "unknown req " + queryString);
@@ -403,10 +404,11 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param toReturn
    * @param split1
+   * @param projid
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getPhoneReport(JSONObject toReturn, String[] split1) {
+  private JSONObject getPhoneReport(JSONObject toReturn, String[] split1, int projid) {
     UserAndSelection userAndSelection = new UserAndSelection(split1).invoke();
     String user = userAndSelection.getUser();
     Map<String, Collection<String>> selection = userAndSelection.getSelection();
@@ -416,7 +418,8 @@ public class ScoreServlet extends DatabaseServlet {
       long then = System.currentTimeMillis();
       int userid = Integer.parseInt(user);
 
-      toReturn = db.getJsonPhoneReport(userid, getMostRecentProjectByUser(userid), selection);
+      int projectID = projid != -1 ? projid : getMostRecentProjectByUser(userid);
+      toReturn = db.getJsonPhoneReport(userid, projectID, selection);
       long now = System.currentTimeMillis();
       if (now - then > 250) {
         logger.debug("getPhoneReport : user " + user + " selection " + selection +
@@ -434,7 +437,6 @@ public class ScoreServlet extends DatabaseServlet {
     logger.info("getProjects got " + productionProjects.size() + " projects");
     for (Project project : productionProjects) logger.info(" project " + project);
 */
-
     return new ProjectExport().toJSON(productionProjects);
   }
 

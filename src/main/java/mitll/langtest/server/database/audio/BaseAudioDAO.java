@@ -76,7 +76,6 @@ public abstract class BaseAudioDAO extends DAO {
   private static final boolean DEBUG_ATTACH = false;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
-
   BaseAudioDAO(Database database, IUserDAO userDAO) {
     super(database);
     this.userDAO = userDAO;
