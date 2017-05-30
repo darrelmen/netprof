@@ -35,9 +35,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
+  public static final int NORMAL_MIN_HEIGHT = 67;
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
-  private static final int MIN_HEIGHT = 110;
+  private static final int MIN_HEIGHT = 125;
   private static final String NEW_PROJECT = "New Project";
 
   private static final int LANGUAGE_SIZE = 3;
@@ -130,7 +131,7 @@ public class ProjectChoices {
             permissions.contains(User.Permission.QUALITY_CONTROL) ||
             permissions.contains(User.Permission.DEVELOP_CONTENT);
 
-    logger.info("Examining  " + projects.size() + " projects, can record = " + canRecord);
+    logger.info("Examining  " + projects.size() + " projects, can record = " + canRecord + " permissions " + permissions);
 
     for (SlimProject project : projects) {
       if (project.getStatus() == ProjectStatus.PRODUCTION) {
@@ -257,6 +258,7 @@ public class ProjectChoices {
 
     DivWidget right = new DivWidget();
     right.addStyleName("floatRight");
+   // right.addStyleName("inlineFlex");
     header.add(right);
     if (isQC()) {
       getCreateNewButton(right);
@@ -265,9 +267,7 @@ public class ProjectChoices {
     if (controller.getUserState().isAdmin()) {
       getEnsureAllAudioButton(right);
       right.addStyleName("topFiveMargin");
-
       getRecalcRefAudioButton(right);
-
     }
 
     return header;
@@ -290,11 +290,14 @@ public class ProjectChoices {
     });
   }
 
+  /**
+   * @see #getHeader(List, int)
+   * @param header
+   */
   private void getEnsureAllAudioButton(DivWidget header) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Check Audio");
 
     DivWidget right = new DivWidget();
-    //  right.addStyleName("floatRight");
     right.add(w);
     w.addStyleName("topFiveMargin");
 
@@ -416,54 +419,77 @@ public class ProjectChoices {
     }
 
     DivWidget horiz = new DivWidget();
-    horiz.addStyleName("inlineFlex");
-    horiz.setWidth("100%");
-    if (isQC()) {
-      horiz.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT +
-          "px"); // so they wrap nicely
-    }
+//    horiz.addStyleName("inlineFlex");
+//    horiz.setWidth("100%");
+//    if (isQC()) {
+//      horiz.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT + "px"); // so they wrap nicely
+//    }
+
+
+//    if (isQC()) {
+    horiz.getElement().getStyle().setProperty("minHeight", (isQC() ? MIN_HEIGHT : NORMAL_MIN_HEIGHT) + "px"); // so they wrap nicely
+    //  }
+
 
     thumbnail.add(horiz);
     {
-      Heading label = new Heading(LANGUAGE_SIZE, name);
-      label.setWidth("100%");
-      label.getElement().getStyle().setLineHeight(25, Style.Unit.PX);
-
-      if (projectForLang.hasChildren()) {
-        label.setSubtext(projectForLang.getChildren().size() + " courses");
-      } else if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
-        label.setSubtext(projectForLang.getStatus().name());
-      }
-
-      label.addStyleName("floatLeft");
+      boolean hasChildren = projectForLang.hasChildren();
 
       DivWidget container = new DivWidget();
-      container.add(label);
+      container.add(getLabel(name, projectForLang, hasChildren));
       container.setWidth("100%");
       container.addStyleName("floatLeft");
 
-
-      if (isQC() && !projectForLang.hasChildren()) {
-        addQCButtons(projectForLang, container);
+      if (isQC() && !hasChildren) {
+        container.add(getQCButtons(projectForLang));
       }
 
       horiz.add(container);
+//      thumbnail.add(container);
     }
 
     return thumbnail;
   }
 
-  private void addQCButtons(SlimProject projectForLang, DivWidget container) {
+  @NotNull
+  private Heading getLabel(String name, SlimProject projectForLang, boolean hasChildren) {
+    Heading label = new Heading(LANGUAGE_SIZE, name);
+    label.addStyleName("floatLeft");
+    Widget subtitle = label.getWidget(0);
+    subtitle.addStyleName("floatLeft");
+    subtitle.setWidth("100%");
+    subtitle.addStyleName("topFiveMargin");
+    label.setWidth("100%");
+    label.getElement().getStyle().setLineHeight(25, Style.Unit.PX);
+
+    if (hasChildren) {
+      List<SlimProject> visibleProjects = getVisibleProjects(projectForLang.getChildren());
+      String suffix = (visibleProjects.size() == 1) ? " course" : " courses";
+      label.setSubtext(visibleProjects.size() + suffix);
+    } else if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
+      label.setSubtext(projectForLang.getStatus().name());
+    }
+
+    label.addStyleName("floatLeft");
+    return label;
+  }
+
+  private DivWidget getQCButtons(SlimProject projectForLang) {
     DivWidget horiz2 = new DivWidget();
     horiz2.addStyleName("inlineFlex");
     horiz2.add(getEditButtonContainer(projectForLang));
+
     DivWidget importButtonContainer = getImportButtonContainer(projectForLang);
     importButtonContainer.addStyleName("leftFiveMargin");
     horiz2.add(importButtonContainer);
+
     Button deleteButton = getDeleteButton(projectForLang);
     deleteButton.addStyleName("leftFiveMargin");
     horiz2.add(getButtonContainer(deleteButton));
-    container.add(horiz2);
+
+    return horiz2;
+
+//    container.add(horiz2);
   }
 
   @NotNull
@@ -562,7 +588,7 @@ public class ProjectChoices {
   }
 
   private void showDeleteDialog(SlimProject projectForLang) {
-      DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
         logger.info("delete project!");
@@ -610,7 +636,7 @@ public class ProjectChoices {
       logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");
       projectCrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
       uiLifecycle.clearContent();
-      contentRow.add(showProjectChoices(children, nest));
+      contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     }
   }
 

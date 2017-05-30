@@ -45,10 +45,8 @@ import static mitll.langtest.client.scoring.ShowChoices.*;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener,
-    RefAudioGetter {
+public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
-
   // private static final String HALF_WIDTH = "50%";
   private static final String LEFT_WIDTH = "60%";
   private static final String RIGHT_WIDTH = "40%";
@@ -498,7 +496,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (clickablesIterator.hasNext()) logger.info("matchSegmentToWidgetForAudio tokens left over ");
     while (clickablesIterator.hasNext()) {
       IHighlightSegment next = clickablesIterator.next();
-      if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio adding left over " + next);
+      if (DEBUG_MATCH || true) logger.info("matchSegmentToWidgetForAudio adding left over " + next);
       Widget w = next.asWidget();
       w.addStyleName("floatLeft");
       clickableRow.add(w);
@@ -673,14 +671,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
     boolean b = c == segments.size();
     if (!b) {
-      logger.info("clickables " + c + " segments " + segments.size());
+      if (DEBUG) logger.info("clickables " + c + " segments " + segments.size());
       StringBuilder builder = new StringBuilder();
       for (IHighlightSegment clickable : clickables) {
         if (clickable.isClickable()) {
           builder.append(clickable.getContent()).append(" ");
         }
       }
-      logger.info("clickable : " + builder);
+      if (DEBUG) logger.info("clickable : " + builder);
 
       StringBuilder builder2 = new StringBuilder();
       for (TranscriptSegment segment : segments) {
@@ -688,7 +686,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         builder2.append(segment.getEvent()).append(" ");
 
       }
-      logger.info("align    : " + builder2);
+      if (DEBUG)  logger.info("align    : " + builder2);
 
     }
     return b;

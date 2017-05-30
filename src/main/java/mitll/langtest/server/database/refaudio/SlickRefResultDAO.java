@@ -208,8 +208,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    * @see DBExerciseDAO#readExercises
    */
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
-    Collection<SlickRefResultJson> jsonResults = getJsonResultsForProject(projid);
-    return new ExerciseToPhone().getExerciseToPhoneForProject(jsonResults);
+    return new ExerciseToPhone().getExerciseToPhoneForProject(getJsonResultsForProject(projid));
   }
 
   @Override

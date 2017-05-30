@@ -137,7 +137,10 @@ public class InitialUI implements UILifecycle {
         breadcrumbs = getBreadcrumbs(), controller);
   }
 
-  public INavigation getNavigation() { return navigation; }
+  public INavigation getNavigation() {
+    return navigation;
+  }
+
   /**
    * @see LangTest#showLogin()
    * @see LangTest#populateRootPanel()
@@ -216,7 +219,6 @@ public class InitialUI implements UILifecycle {
     //  if (b) logger.info("content is RTL!");
     return b;
   }*/
-
   public void logout() {
     lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
     breadcrumbs.clear();
@@ -375,15 +377,15 @@ public class InitialUI implements UILifecycle {
         addProjectCrumb(crumbs, project);
         break;
       } else {
-       // logger.fine("getBreadcrumbs skipping project " + project);
+        // logger.fine("getBreadcrumbs skipping project " + project);
       }
     }
   }
 
   /**
-   * @see #addBreadcrumbLevels
    * @param project
    * @return
+   * @see #addBreadcrumbLevels
    */
   @NotNull
   private NavLink getLangBreadcrumb(SlimProject project) {
@@ -412,7 +414,7 @@ public class InitialUI implements UILifecycle {
       @Override
       public void onClick(ClickEvent clickEvent) {
         logger.info("choose project again for " + project.getName());
-         chooseProjectAgain();
+        chooseProjectAgain();
       }
     });
     crumbs.add(lang);
@@ -446,7 +448,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void makeNavigation() {
-    navigation = new NewContentChooser(controller,banner);
+    navigation = new NewContentChooser(controller, banner);
     banner.setNavigation(navigation);
   }
 
@@ -646,7 +648,7 @@ public class InitialUI implements UILifecycle {
     if (lifecycleSupport.getProjectStartupInfo() == null) {
       addProjectChoices(0, null);
     } else {
-   //   logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+      //   logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     }
@@ -679,7 +681,9 @@ public class InitialUI implements UILifecycle {
    *
    * @see #addProjectChoices
    */
-  private void addBreadcrumbs() {    addCrumbs(breadcrumbs);  }
+  private void addBreadcrumbs() {
+    addCrumbs(breadcrumbs);
+  }
 
   @Override
   @NotNull
@@ -691,8 +695,8 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see ProjectChoices#gotClickOnFlag
    * @param parent
+   * @see ProjectChoices#gotClickOnFlag
    */
   @Override
   public void clickOnParentCrumb(SlimProject parent) {

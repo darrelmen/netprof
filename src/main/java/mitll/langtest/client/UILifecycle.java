@@ -47,8 +47,6 @@ public interface UILifecycle {
    */
   void populateRootPanel();
 
-//  boolean isRTL();
-
   int getHeightOfTopRows();
 
   /**
