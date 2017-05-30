@@ -319,6 +319,7 @@ public class ExerciseListRequest implements IsSerializable {
             (onlyForUser ? "\n\tonlyForUser     " : "") +
             (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
             (onlyUninspected ? "\n\tonly uninspected    " : "") +
+            (addFirst ? "\n\tadd first ex    " : "\n\tdon't add first") +
             (QC ? "\n\tqc request    " : "")
         ;
   }

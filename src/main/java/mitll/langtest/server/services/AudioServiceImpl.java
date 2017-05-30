@@ -47,6 +47,7 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -181,8 +182,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
 //    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
     int user = audioContext.getUserid();
+
     if (addToAudioTable && audioAnswer.isValid()) {
-      audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), commonExercise, exerciseID, audioAnswer));
+      User byID = db.getUserDAO().getByID(user);
+
+      MiniUser.Gender realGender = byID == null ? MiniUser.Gender.Unspecified : byID.getRealGender();
+      audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), commonExercise, exerciseID, audioAnswer, realGender));
     } //else {
     // So Wade has observed that this really messes up the ASR -- silence doesn't appear as silence after you multiply
     // the signal.  Also, the user doesn't get feedback that their mic gain is too high/too low or that they
@@ -429,6 +434,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param exercise1   for which exercise - how could this be null?
    * @param exerciseID  perhaps sometimes we want to override the exercise id?
    * @param audioAnswer holds the path of the temporary recorded file
+   * @param realGender
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see #writeAudioFile
    */
@@ -436,7 +442,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                          AudioType audioType,
                                          CommonExercise exercise1,
                                          int exerciseID,
-                                         AudioAnswer audioAnswer) {
+                                         AudioAnswer audioAnswer,
+                                         MiniUser.Gender realGender) {
     boolean noExistingExercise = exercise1 == null;
     int idToUse = noExistingExercise ? exerciseID : exercise1.getID();
     int projid = noExistingExercise ? -1 : exercise1.getProjectID();
@@ -464,7 +471,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     AudioAttribute audioAttribute = null;
     try {
       AudioInfo info = new AudioInfo(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
-          audioAnswer.getDurationInMillis(), audioTranscript, (float) audioAnswer.getDynamicRange(), audioAnswer.getResultID());
+          audioAnswer.getDurationInMillis(), audioTranscript, (float) audioAnswer.getDynamicRange(), audioAnswer.getResultID(),
+          realGender);
 
       audioAttribute = db.getAudioDAO().addOrUpdate(info);
 

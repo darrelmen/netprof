@@ -417,6 +417,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return false;
   }
 
+  protected ExerciseListRequest getRequest() {
+    ExerciseListRequest request = super.getRequest();
+    request.setAddFirst(false);
+    return request;
+  }
+
   public void showList(int newUserListID) {
     Map<String, String> candidate = new HashMap<>(typeToSelection);
     candidate.put(LISTS, "" + newUserListID);
@@ -563,7 +569,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         .setOnlyWithAudioAnno(onlyWithAudioAnno)
         .setOnlyUnrecordedByMe(onlyUnrecorded)
         .setOnlyDefaultAudio(onlyDefaultUser)
-        .setOnlyUninspected(onlyUninspected);
+        .setOnlyUninspected(onlyUninspected)
+        .setAddFirst(false);
 
     //logger.info("Type->sel " + typeToSection);
     if (typeToSection.containsKey(LISTS)) {

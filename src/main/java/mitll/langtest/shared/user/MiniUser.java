@@ -108,9 +108,6 @@ public class MiniUser implements HasID, Comparable<HasID> {
     return new Long(id).hashCode();
   }
 
-  public int getGender() {
-    return isMale ? 0 : 1;
-  }
 
   public int getID() {
     return id;
@@ -160,8 +157,13 @@ public class MiniUser implements HasID, Comparable<HasID> {
     this.last = last;
   }
 
-  public String getOldID() {return "";}
-  public boolean isMale() {  return isMale;  }
+  public String getOldID() {
+    return "";
+  }
+
+  public boolean isMale() {
+    return isMale;
+  }
 
   public void setMale(boolean male) {
     isMale = male;
@@ -171,7 +173,28 @@ public class MiniUser implements HasID, Comparable<HasID> {
     this.age = age;
   }
 
-  public Gender getRealGender() {   return realGender;  }
+  public int getGender() {
+    return isMale ? 0 : 1;
+  }
+
+  public Gender getRealGender() {
+    return realGender;
+  }
+
+  public int getRealGenderInt() {
+    int gender;
+    switch (realGender) {
+      case Male:
+        gender = 0;
+        break;
+      case Female:
+        gender = 1;
+        break;
+      default:
+        gender = 2;
+    }
+    return gender;
+  }
 
   public void setRealGender(Gender realGender) {
     this.realGender = realGender;

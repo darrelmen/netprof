@@ -313,8 +313,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
   private void copyMatchingAudio(int projectid, List<SlickAudio> copies, int id, List<SlickAudio> audioAttributes) {
     for (SlickAudio audio : audioAttributes) {
-
-      copies.add(//new AudioInfo(audio, projectid, ex.getID()));
+      copies.add(
           new SlickAudio(
               -1,
               audio.userid(),
@@ -330,7 +329,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
               audio.lastcheck(),
               audio.actualpath(),
               audio.dnr(),
-              audio.resultid()
+              audio.resultid(),
+              audio.gender()
           ));
     }
   }

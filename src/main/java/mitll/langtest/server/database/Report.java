@@ -1359,7 +1359,7 @@ public class Report {
       for (AudioAttribute audioAttribute : audioAttributes) {
         if (getFile(audioAttribute).equals(getFile(result))) {
           long userid = result.getUserid();
-          if (audioAttribute.getUser().getID() == userid) {
+          if (audioAttribute.getUserid() == userid) {
             skip = true;
             break;
           }

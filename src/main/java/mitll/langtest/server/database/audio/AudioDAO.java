@@ -590,7 +590,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
           user, transcript,
           audioRef,
           dnr,
-          -1);
+          -1,
+          user.getRealGender());
       audioAttr.setOldexid(exid);
 
       if (user == null) {
@@ -880,11 +881,6 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language) {
     return null;
   }
-
-//  @Override
-//  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise) {
-//    return null;
-//  }
 
   @Override
   public Map<String, Integer> getPairs(int projid) {

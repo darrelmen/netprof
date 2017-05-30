@@ -120,6 +120,11 @@ public class JsonScoring {
     return jsonForScore;
   }
 
+  /**
+   * @see #getAnswer
+   * @param id
+   * @return
+   */
   private int getMostRecentProjectByUser(int id) {
     return db.getUserProjectDAO().mostRecentByUser(id);
   }

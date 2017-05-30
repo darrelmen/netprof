@@ -144,7 +144,8 @@ public abstract class BaseAudioDAO extends DAO {
     for (CommonExercise exercise : exercises) {
       for (CommonExercise de : exercise.getDirectlyRelated()) {
         exerciseIDs.add(de.getID());
-        if (DEBUG_ATTACH) logger.info("attachAudioToExercises For " + exercise.getID() + " adding " + de.getID());
+        if (DEBUG_ATTACH)
+          logger.info("attachAudioToExercises For exercise #" + exercise.getID() + " adding context ex " + de.getID());
       }
     }
 
@@ -307,10 +308,12 @@ public abstract class BaseAudioDAO extends DAO {
         } else {
 //          logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getOldID());
           if (doDebug)
-            logger.info("attachAudio attach audio " + attr.getUniqueID() + " " + (attr.isMale() ? "male" : "female") + " userid " + attr.getUser().getUserID() +
-                " type " + attr.getAudioType() +
-                " to exercise " + firstExercise.getID() +
-                " transcript  '" + attr.getTranscript() + "'");
+            logger.info("attachAudio attach audio " + attr.getUniqueID() +
+                "\n\t" + (attr.isMale() ? "male" : "female") +
+                "\n\tuserid " + attr.getUser().getUserID() +
+                "\n\ttype " + attr.getAudioType() +
+                "\n\tto exercise " + firstExercise.getID() +
+                "\n\ttranscript  '" + attr.getTranscript() + "'");
         }
       }
       //}
@@ -372,11 +375,28 @@ public abstract class BaseAudioDAO extends DAO {
                                         AudioAttribute attr,
                                         String language) {
     Collection<CommonExercise> directlyRelated = firstExercise.getDirectlyRelated();
-    String exerciseText = attr.isContextAudio() && !directlyRelated.isEmpty() ?
+    boolean isContext = attr.isContextAudio();
+    String exerciseText = isContext && !directlyRelated.isEmpty() ?
         directlyRelated.iterator().next().getForeignLanguage() :
         firstExercise.getForeignLanguage();
-    if (attr.hasMatchingTranscript(exerciseText)) {
+
+    boolean b = attr.matchTranscript(StringUtils.stripAccents(exerciseText),
+        StringUtils.stripAccents(attr.getTranscript()));
+    if (b) {
+      // add to both if context???
       firstExercise.getMutableAudio().addAudio(attr);
+
+      if (isContext) {
+        for (CommonExercise dir : directlyRelated) {
+          boolean isMatch = attr.matchTranscript(StringUtils.stripAccents(dir.getForeignLanguage()),
+              StringUtils.stripAccents(attr.getTranscript()));
+          if (isMatch) {
+            firstExercise.getMutableAudio().addAudio(attr);
+            break;
+          }
+        }
+      }
+
       String audioRef = attr.getAudioRef();
       if (audioRef == null)
         logger.error("attachAudioAndFixPath huh? no audio ref for " + attr + " under " + firstExercise);
@@ -399,7 +419,10 @@ public abstract class BaseAudioDAO extends DAO {
       }
       return true;
     } else {
-      boolean doDebug = firstExercise.getID() == 25921 || firstExercise.getID() == 30219 || DEBUG_ATTACH;
+      boolean doDebug =
+//          firstExercise.getID() == 25921 || firstExercise.getID() == 30219 ||
+//              firstExercise.getID() == 36738 ||
+              DEBUG_ATTACH;
 
       if (doDebug) {
         logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getOldID() + " since transcript has changed. Audio '" +
@@ -632,6 +655,7 @@ public abstract class BaseAudioDAO extends DAO {
                                              int userid, String audioRef, int exerciseID, long timestamp,
                                              AudioType audioType, long durationInMillis, String transcript, float dnr) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
+    MiniUser.Gender realGender = miniUser.getRealGender();
 
     return new AudioAttribute(i, userid,
         exerciseID, // id
@@ -641,7 +665,7 @@ public abstract class BaseAudioDAO extends DAO {
         miniUser, transcript,
         audioRef,
         dnr,
-        -1);
+        -1, realGender);
   }
 
   /**
@@ -699,14 +723,11 @@ public abstract class BaseAudioDAO extends DAO {
     if (timestamp == 0) timestamp = System.currentTimeMillis();
     float dnr = new AudioCheck(database.getServerProps()).getDNR(new File(attr.getActualPath()));
     addOrUpdateUser(new AudioInfo(userid, attr.getExid(), projid, attr.getAudioType(), attr.getAudioRef(), timestamp,
-        (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr, attr.getResultid())
+        (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr, attr.getResultid(), attr.getRealGender())
     );
   }
 
-  abstract void addOrUpdateUser(/*int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
-                                int durationInMillis, String transcript, float dnr*/
-                                AudioInfo info
-  );
+  abstract void addOrUpdateUser(AudioInfo info);
 
   abstract int markDefect(int userid, int exerciseID, AudioType audioType);
 
@@ -746,10 +767,11 @@ public abstract class BaseAudioDAO extends DAO {
 
   boolean isNoAccentMatch(String transcript, String exerciseFL) {
     if (exerciseFL == null) return false;
+
     String before = trimWhitespace(exerciseFL);
-    String trimmed = trimWhitespace(transcript);
     String noAccents = StringUtils.stripAccents(before);
-    //String transcript = audio.getTranscript();
+
+    String trimmed = trimWhitespace(transcript);
     String noAccentsTranscript = trimmed == null ? null : StringUtils.stripAccents(trimmed);
 
     return matchTranscript(before, trimmed) ||

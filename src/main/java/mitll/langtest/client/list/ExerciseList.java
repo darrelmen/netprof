@@ -162,11 +162,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   public boolean getExercises(long userID) {
     if (DEBUG) logger.info("ExerciseList.getExercises for user " + userID + " instance " + getInstance());
     ExerciseListRequest request = getRequest();
+
+    logger.info("request is " +request);
+
     service.getExerciseIds(request, new SetExercisesCallback("", "", -1, request));
     return true;
   }
 
-  private ExerciseListRequest getRequest() {
+  protected ExerciseListRequest getRequest() {
     return new ExerciseListRequest(incrRequest(), getUser())
         .setActivityType(getActivityType())
         .setIncorrectFirstOrder(listOptions.isIncorrectFirst());
@@ -181,6 +184,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
    */
   public void reload() {
+    logger.info("reload -- ");
     getExercises(getUser());
   }
 

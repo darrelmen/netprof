@@ -644,12 +644,16 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   }
 
   private boolean isGenericDefault(AudioAttribute audioAttribute) {
-    MiniUser user = audioAttribute.getUser();
-    return isDefaultNoGenderUser(user);
+    return isDefaultNoGenderUser(audioAttribute.getUserid());
   }
 
-  private boolean isDefaultNoGenderUser(MiniUser user) {
-    return user.getID() == BaseUserDAO.DEFAULT_USER_ID;
+  /**
+   * TODO: this is probably not right...
+   * @param userID
+   * @return
+   */
+  private boolean isDefaultNoGenderUser(int userID) {
+    return userID == BaseUserDAO.DEFAULT_USER_ID;
   }
 
   private Button makeGroupButton(ButtonGroup buttonGroup, String title) {

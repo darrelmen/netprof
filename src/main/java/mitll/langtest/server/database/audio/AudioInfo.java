@@ -1,8 +1,7 @@
 package mitll.langtest.server.database.audio;
 
-import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.npdata.dao.SlickAudio;
+import mitll.langtest.shared.user.MiniUser;
 
 /**
  * Created by go22670 on 1/23/17.
@@ -18,6 +17,7 @@ public class AudioInfo {
   private long durationInMillis;
   private String transcript;
   private float dnr;
+  private int gender;
 
   public AudioInfo(int userid,
                    int exerciseID,
@@ -28,7 +28,8 @@ public class AudioInfo {
                    long durationInMillis,
                    String transcript,
                    float dnr,
-                   int resultID) {
+                   int resultID,
+                   MiniUser.Gender realGender) {
     this.userid = userid;
     this.exerciseID = exerciseID;
     this.projid = projid;
@@ -39,9 +40,23 @@ public class AudioInfo {
     this.transcript = transcript;
     this.dnr = dnr;
     this.resultID = resultID;
+
+    int gender;
+    switch (realGender) {
+      case Male:
+        gender = 0;
+        break;
+      case Female:
+        gender = 1;
+        break;
+      default:
+        gender = 2;
+    }
+
+    this.gender = gender;
   }
 
-  public AudioInfo(SlickAudio slickAudio, int projid, int exid) {
+/*  public AudioInfo(SlickAudio slickAudio, int projid, int exid) {
     this(slickAudio.userid(),
         exid,
         projid,
@@ -52,7 +67,7 @@ public class AudioInfo {
         slickAudio.transcript(),
         slickAudio.dnr(),
         slickAudio.resultid());
-  }
+  }*/
 
   public int getUserid() {
     return userid;
@@ -92,5 +107,9 @@ public class AudioInfo {
 
   public float getDnr() {
     return dnr;
+  }
+
+  public int getGender() {
+    return gender;
   }
 }

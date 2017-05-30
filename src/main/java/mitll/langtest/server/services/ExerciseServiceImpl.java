@@ -1270,7 +1270,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Set<CommonExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
     long now = System.currentTimeMillis();
 
-    if (now - then > 50) logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises");
+    if (now - then > 50)
+      logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises");
 
     if (ids.size() > toAddAudioTo.size()) {
 //      logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
@@ -1293,13 +1294,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         logger.info("getFullExercises took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
 
     } else {
-     // logger.info("getFullExercises all " + ids.size() + " exercises have audio");
+      // logger.info("getFullExercises all " + ids.size() + " exercises have audio");
     }
 
     then = System.currentTimeMillis();
     addScores(userID, exercises);
     now = System.currentTimeMillis();
-    if (now - then > 50) logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
+    if (now - then > 50)
+      logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
 
     then = System.currentTimeMillis();
     Map<Integer, List<CorrectAndScore>> scoreHistories = getScoreHistories(ids, exercises, userID);
@@ -1308,8 +1310,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       List<CorrectAndScore> scoreTotal = scoreHistories.get(exercise.getID());
       if (scoreTotal == null) {
         //logger.error("huh? no history for " + exercise.getID());
-      }
-      else {
+      } else {
         exercise.getMutable().setScores(scoreTotal);
       }
     }
@@ -1330,7 +1331,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
       for (CommonExercise exercise : toAddAudioTo) {
         setAlignmentInfo(audioToAlignment, idToAudio, exercise);
-        for (CommonExercise context:exercise.getDirectlyRelated()) {
+        for (CommonExercise context : exercise.getDirectlyRelated()) {
           setAlignmentInfo(audioToAlignment, idToAudio, context);
 
         }
@@ -1484,6 +1485,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         toAddAudioTo.add(byID);
         logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
       }
+//      else if (exid == 36738) {
+//        for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
+//          logger.info("audio " + audioAttribute);
+//        }
+//      }
       exercises.add(byID);
     }
     return toAddAudioTo;

@@ -603,6 +603,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #pushNewSectionHistoryToken
    */
   protected void noSectionsGetExercises(long userID, int exerciseID) {
+    logger.info("noSectionsGetExercises " +userID);
     super.getExercises(userID);
   }
 

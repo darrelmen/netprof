@@ -64,7 +64,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   static final String SEARCH = "Search";
-  private static final int TEN_SECONDS = 10 * 60 * 1000;
+  //private static final int TEN_SECONDS = 10 * 60 * 1000;
   protected final WaitCursorHelper waitCursorHelper;
 
   protected ClickablePagingContainer<T> pagingContainer;

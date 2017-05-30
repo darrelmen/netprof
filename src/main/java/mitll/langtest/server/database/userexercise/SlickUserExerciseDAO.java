@@ -248,14 +248,13 @@ public class SlickUserExerciseDAO
   private Exercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = getUnitToValue(slick);
 
-    String noAccentFL = StringUtils.stripAccents(slick.foreignlanguage());
     Exercise userExercise = new Exercise(
         slick.id(),
         slick.exid(),
         slick.userid(),
         slick.english(),
         slick.foreignlanguage(),
-        noAccentFL,
+        StringUtils.stripAccents(slick.foreignlanguage()),
         slick.altfl(),
         slick.transliteration(),
         slick.isoverride(),
