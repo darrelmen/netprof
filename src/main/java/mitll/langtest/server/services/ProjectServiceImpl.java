@@ -207,13 +207,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         }
       }
 
-      //  Collection<String> typeOrder = db.getTypeOrder(projectid);
       Collection<String> typeOrder2 = db.getProject(projectid).getTypeOrder();
 
       //  logger.info("typeorder for " +projectid + " is " + typeOrder);
       logger.info("addPending typeorder for " + projectid + " is " + typeOrder2);
 
-      // new ExerciseCopy().addPredefExercises(projectid, slickUEDAO, importUser, newEx, typeOrder2, new HashMap<>());
       logger.info("addPending importing " + newEx.size() + " exercises");
       new ExerciseCopy().addExercises(importUser,
           projectid,
@@ -227,23 +225,33 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
       Map<String, Integer> exToInt = slickUEDAO.getOldToNew(projectid);
 
-      copyAudio(projectid, newEx, exToInt);
+      copyAudio(projectid, newEx, exToInt, slickUEDAO);
 
       db.configureProject(db.getProject(projectid), true);
     }
   }
 
-  private void copyAudio(int projectid, List<CommonExercise> newEx, Map<String, Integer> exToInt) {
+  private void copyAudio(int projectid, List<CommonExercise> newEx, Map<String, Integer> exToInt, SlickUserExerciseDAO slickUEDAO) {
     try {
       String language = db.getProject(projectid).getLanguage();
-      Project max = db.getProjectManagement().getProductionProjects().stream()
-          .filter(project -> project.getLanguage().equals(language) && project.getID() != projectid)
-          .max(Comparator.comparingLong(p -> p.getProject().modified().getTime()))
-          .get();
-      Collection<SlickAudio> audioAttributesByProjectThatHaveBeenChecked = db.getAudioDAO().getAll(max.getID());
+      List<Project> matches = db.getProjectManagement().getProductionProjects().stream()
+          .filter(project -> project.getLanguage().equals(language) && project.getID() != projectid).collect(Collectors.toList());
+
+      int maxID = -1;
+      int maxRows = 0;
+      Project maxProject = null;
+      for (Project project : matches) {
+        int num = slickUEDAO.getNumRows();
+        if (num > maxRows) {
+          maxRows = num;
+          maxProject = project;
+          maxID = project.getID();
+        }
+      }
+      Collection<SlickAudio> audioAttributesByProjectThatHaveBeenChecked = maxID == -1 ? Collections.EMPTY_LIST : db.getAudioDAO().getAll(maxID);
       Map<String, List<SlickAudio>> transcriptToAudio = new HashMap<>();
 
-      logger.info("found " + audioAttributesByProjectThatHaveBeenChecked.size() + " audio entries for " + max.getID());
+      logger.info("copyAudio found " + audioAttributesByProjectThatHaveBeenChecked.size() + " audio entries for " + maxID);
       for (SlickAudio audioAttribute : audioAttributesByProjectThatHaveBeenChecked) {
         List<SlickAudio> audioAttributes = transcriptToAudio.get(audioAttribute.transcript());
         if (audioAttributes == null) {
@@ -254,7 +262,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       }
 
       List<SlickAudio> copies = getSlickAudios(projectid, newEx, exToInt, transcriptToAudio);
-      logger.info("CopyAudio : copying " + copies.size() + " audio from " + newEx.size() + " from project " + max.getID() + " " + max.getProject().name());
+      if (maxProject != null) {
+        logger.info("CopyAudio : copying " + copies.size() + " audio from " + newEx.size() + " from project " + maxID + " " + maxProject.getProject().name());
+      }
       db.getAudioDAO().addBulk(copies);
     } catch (Exception e) {
       logger.info("Got " + e);
@@ -267,15 +277,14 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     int nomatch = 0;
     List<SlickAudio> copies = new ArrayList<>();
     for (CommonExercise ex : newEx) {
-     // int id = ex.getID();
+      // int id = ex.getID();
 
       String oldID = ex.getOldID();
       Integer id = exToInt.get(oldID);
 
       if (id == null) {
-        logger.error("huh? can't find " +oldID+  " in " + exToInt.size());
-      }
-      else {
+        logger.error("huh? can't find " + oldID + " in " + exToInt.size());
+      } else {
         if (transcriptToAudio.get(ex.getForeignLanguage()) != null) {
           List<SlickAudio> audioAttributes = transcriptToAudio.get(ex.getForeignLanguage());
           if (audioAttributes != null) {
