@@ -54,6 +54,7 @@ import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -224,13 +225,15 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       logger.info("addPending updating  " + updateEx.size() + " exercises");
       doUpdate(projectid, importUser, slickUEDAO, updateEx, typeOrder2);
 
-      copyAudio(projectid, newEx);
+      Map<String, Integer> exToInt = slickUEDAO.getOldToNew(projectid);
+
+      copyAudio(projectid, newEx, exToInt);
 
       db.configureProject(db.getProject(projectid), true);
     }
   }
 
-  private void copyAudio(int projectid, List<CommonExercise> newEx) {
+  private void copyAudio(int projectid, List<CommonExercise> newEx, Map<String, Integer> exToInt) {
     try {
       String language = db.getProject(projectid).getLanguage();
       Project max = db.getProjectManagement().getProductionProjects().stream()
@@ -240,43 +243,86 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       Collection<SlickAudio> audioAttributesByProjectThatHaveBeenChecked = db.getAudioDAO().getAll(max.getID());
       Map<String, List<SlickAudio>> transcriptToAudio = new HashMap<>();
 
+      logger.info("found " + audioAttributesByProjectThatHaveBeenChecked.size() + " audio entries for " + max.getID());
       for (SlickAudio audioAttribute : audioAttributesByProjectThatHaveBeenChecked) {
         List<SlickAudio> audioAttributes = transcriptToAudio.get(audioAttribute.transcript());
-        if (audioAttributes == null) audioAttributes = new ArrayList<>();
+        if (audioAttributes == null) {
+          audioAttributes = new ArrayList<>();
+          transcriptToAudio.put(audioAttribute.transcript(), audioAttributes);
+        }
         audioAttributes.add(audioAttribute);
       }
 
-      List<SlickAudio> copies = new ArrayList<>();
-      for (CommonExercise ex : newEx) {
-        if (transcriptToAudio.get(ex.getForeignLanguage()) != null) {
-          List<SlickAudio> audioAttributes = transcriptToAudio.get(ex.getForeignLanguage());
-          for (SlickAudio audio : audioAttributes) {
-            copies.add(//new AudioInfo(audio, projectid, ex.getID()));
-
-                new SlickAudio(
-                    -1,
-                    audio.userid(),
-                    ex.getID(),
-                    audio.modified(),
-                    audio.audioref(),
-                    audio.audiotype(),
-                    audio.duration(),
-                    audio.defect(),
-                    audio.transcript(),
-                    projectid,
-                    audio.exists(),
-                    audio.lastcheck(),
-                    audio.actualpath(),
-                    audio.dnr(),
-                    audio.resultid()
-                ));
-          }
-        }
-      }
-      logger.info("copying " + copies.size() + " audio from " + newEx.size() + " from project " + max);
+      List<SlickAudio> copies = getSlickAudios(projectid, newEx, exToInt, transcriptToAudio);
+      logger.info("CopyAudio : copying " + copies.size() + " audio from " + newEx.size() + " from project " + max.getID() + " " + max.getProject().name());
       db.getAudioDAO().addBulk(copies);
     } catch (Exception e) {
       logger.info("Got " + e);
+    }
+  }
+
+  @NotNull
+  private List<SlickAudio> getSlickAudios(int projectid, List<CommonExercise> newEx, Map<String, Integer> exToInt, Map<String, List<SlickAudio>> transcriptToAudio) {
+    int match = 0;
+    int nomatch = 0;
+    List<SlickAudio> copies = new ArrayList<>();
+    for (CommonExercise ex : newEx) {
+     // int id = ex.getID();
+
+      String oldID = ex.getOldID();
+      Integer id = exToInt.get(oldID);
+
+      if (id == null) {
+        logger.error("huh? can't find " +oldID+  " in " + exToInt.size());
+      }
+      else {
+        if (transcriptToAudio.get(ex.getForeignLanguage()) != null) {
+          List<SlickAudio> audioAttributes = transcriptToAudio.get(ex.getForeignLanguage());
+          if (audioAttributes != null) {
+            copyMatchingAudio(projectid, copies, id, audioAttributes);
+            match++;
+          } else {
+            nomatch++;
+          }
+        }
+        // for some reason, we attach the context audio to the parent exercise... might want to fix that later
+        for (CommonExercise context : ex.getDirectlyRelated()) {
+          List<SlickAudio> audioAttributes = transcriptToAudio.get(context.getForeignLanguage());
+          if (audioAttributes != null) {
+            copyMatchingAudio(projectid, copies, id, audioAttributes);
+            match++;
+          } else {
+            nomatch++;
+          }
+        }
+      }
+
+    }
+    logger.info("getSlickAudio  : match " + match + " no match " + nomatch);
+    return copies;
+  }
+
+  private void copyMatchingAudio(int projectid, List<SlickAudio> copies, int id, List<SlickAudio> audioAttributes) {
+    for (SlickAudio audio : audioAttributes) {
+
+      copies.add(//new AudioInfo(audio, projectid, ex.getID()));
+          new SlickAudio(
+              -1,
+              audio.userid(),
+              id,
+              audio.modified(),
+              audio.audioref(),
+              audio.audiotype(),
+              audio.duration(),
+              audio.defect(),
+              audio.transcript(),
+              projectid,
+              audio.exists(),
+              audio.lastcheck(),
+              audio.actualpath(),
+              audio.dnr(),
+              audio.resultid()
+          ));
     }
   }
 

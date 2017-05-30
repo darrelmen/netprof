@@ -56,9 +56,11 @@ public class ExerciseCopy {
     return exToInt;
   }
 
-  private void reallyAddingUserExercises(int projectid, Collection<String> typeOrder,
+  private void reallyAddingUserExercises(int projectid,
+                                         Collection<String> typeOrder,
                                          SlickUserExerciseDAO slickUEDAO,
-                                         Map<String, Integer> exToInt, List<Exercise> exercises) {
+                                         Map<String, Integer> exToInt,
+                                         List<Exercise> exercises) {
     List<SlickExercise> bulk = new ArrayList<>();
 
     for (Exercise userCandidate : exercises) {

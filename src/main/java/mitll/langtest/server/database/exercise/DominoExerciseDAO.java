@@ -174,10 +174,9 @@ public class DominoExerciseDAO {
     IDocumentComposite samples = vocabularyItem.getSamples();
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
-
       int compid = shDoc.getId() * 10 + sample.getNum();
 
-      logger.info("context import id " + compid);
+//      logger.info("context import id " + compid);
 
       Exercise context = getExercise(projid, compid, creator,
           sample.getSentenceVal(), sample.getAlternateFormVal(), sample.getTransliterationVal(), sample.getTranslationVal());
