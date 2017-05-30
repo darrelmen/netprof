@@ -33,7 +33,6 @@
 package mitll.langtest.server.rest;
 
 import mitll.hlt.domino.server.util.ServletUtil;
-import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -157,7 +156,6 @@ public class RestUserManagement {
                        HttpServletResponse response,
                        String queryString,
                        JSONObject toReturn,
-                       IUserSecurityManager securityManager,
                        int projid,
                        String passwordFromBody) {
 /*    if (queryString.startsWith(HAS_USER)) {
@@ -522,7 +520,7 @@ public class RestUserManagement {
                       String device,
                       JSONObject jsonObject) {
     String user = request.getHeader(USER);
-    // String project = request.getHeader("projid");
+
     //  String passwordH = request.getHeader(PASSWORD_H);
 /*
     String freeTextPassword = request.getHeader(FREE_TEXT_PASSWORD);
@@ -531,19 +529,20 @@ public class RestUserManagement {
     }
     */
 
-    // first check if user exists already with this password -- if so go ahead and log them in.
-    //  User existingUser = db.getUserDAO().getStrictUserWithPass(user, passwordH);
     User existingUser = db.getUserDAO().getUserByID(user);
 
     logger.info("addUser user " + user +
         //" pass " + passwordH +
         " match " + existingUser);
-
-    int projid = -1; // TODO : figure out which project a user is in right now
+    int projid = -1;
+    try {
+      String project = request.getHeader("projid");
+      projid = Integer.parseInt(project); // TODO : figure out which project a user is in right now
+    } catch (NumberFormatException e) {
+      logger.error("Got " +e,e);
+    }
 
     if (existingUser == null) {
-      //User checkExisting = db.getUserDAO().getUserByID(user);
-
       User checkExisting = existingUser;// kinda stupid but here we are
 
       if (checkExisting == null) { // OK, nobody with matching user and password
@@ -565,16 +564,25 @@ public class RestUserManagement {
             int age1 = Integer.parseInt(age);
             boolean male = gender.equalsIgnoreCase("male");
 
-            SignUpUser user2 = new SignUpUser(user, "",
+            SignUpUser user2 = new SignUpUser(user,
+                "",
 //                passwordH,
-                emailH, email,
+                emailH,
+                email,
                 User.Kind.CONTENT_DEVELOPER,
-                male, male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
-                age1, dialect, deviceType, device, "", "", appURL, "OTHER");
+                male,
+                male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
+                age1,
+                dialect,
+                deviceType,
+                device,
+                "",
+                "",
+                appURL,
+                "OTHER");
 //            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
 //                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
             user1 = getUserManagement().addUser(user2);
-
           } catch (NumberFormatException e) {
             logger.warn("couldn't parse age " + age);
             jsonObject.put(ERROR, "bad age");
@@ -584,7 +592,9 @@ public class RestUserManagement {
               "",
               //            passwordH,
               emailH, email,
-              User.Kind.CONTENT_DEVELOPER, true, MiniUser.Gender.Unspecified, 89, dialect, deviceType, device, "", "", appURL, "OTHER");
+              User.Kind.CONTENT_DEVELOPER,
+              true,
+              MiniUser.Gender.Unspecified, 89, dialect, deviceType, device, "", "", appURL, "OTHER");
           user1 = getUserManagement().addUser(user2);
         }
 
@@ -619,7 +629,7 @@ public class RestUserManagement {
     try {
       userid = Integer.parseInt(user);
     } catch (NumberFormatException e) {
-      logger.warn("couldn't parse event userid " + user);
+      logger.warn("getUserFromParamWarnIfBad couldn't parse event userid " + user);
       userid = -1;
     }
     return userid;

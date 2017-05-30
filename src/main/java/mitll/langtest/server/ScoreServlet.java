@@ -214,7 +214,6 @@ public class ScoreServlet extends DatabaseServlet {
           response,
           queryString,
           toReturn,
-          securityManager,
           projid,
           passwordFromBody)) {
         logger.info("doGet " + language + " handled user command");// for " + queryString);
@@ -617,6 +616,13 @@ public class ScoreServlet extends DatabaseServlet {
     );
   }
 
+  /**
+   * @see #doPost(HttpServletRequest, HttpServletResponse)
+   * @param requestType
+   * @param deviceType
+   * @param device
+   * @param jsonObject
+   */
   private void gotUnknown(String requestType, String deviceType, String device, JSONObject jsonObject) {
     jsonObject.put(ERROR, "unknown req " + requestType);
     logger.warn("doPost unknown request " + requestType + " device " + deviceType + "/" + device);
@@ -635,7 +641,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   private Request getRequest(String requestType) {
     for (Request request : Request.values()) {
-      if (requestType.startsWith(request.toString().toLowerCase())) return request;
+      if (requestType.toLowerCase().startsWith(request.toString().toLowerCase())) return request;
     }
     return Request.UNKNOWN;
   }

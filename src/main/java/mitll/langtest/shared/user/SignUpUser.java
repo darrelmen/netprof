@@ -189,7 +189,6 @@ public class SignUpUser implements IsSerializable {
   public MiniUser.Gender getRealGender() {
     return realGender;
   }
-
 //  public void setRealGender(MiniUser.Gender realGender) {
 //    this.realGender = realGender;
 //  }

@@ -83,22 +83,14 @@ public class UserManagement {
   }
 
   /**
-   * For now, only teachers get pending requests...
+   *
    *
    * @param user
    * @return
    * @see #addUser(HttpServletRequest, SignUpUser)
    * @see mitll.langtest.server.rest.RestUserManagement#addUser(HttpServletRequest, String, String, String, JSONObject)
    */
-  public User addUser(SignUpUser user) {
-    User user1 = userDAO.addUser(user);
-
-  /*  if (user1 != null) {
-      ifTeacherAddPermissions(user1);
-    }
-*/
-    return user1;
-  }
+  public User addUser(SignUpUser user) {    return userDAO.addUser(user);  }
 
   /**
    * @param request

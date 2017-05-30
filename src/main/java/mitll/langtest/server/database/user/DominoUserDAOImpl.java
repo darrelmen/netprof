@@ -279,7 +279,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see #addAndGet(ClientUserDetail, String)
    */
   private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user,
-                                                   //String freeTextPassword,
                                                    String url,
                                                    boolean sendEmail) {
 //    logger.info("adding user " + user);
@@ -287,7 +286,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         sendEmail ? user : adminUser,
         user,
         url);
-    //logger.info("addUserToMongo Got back " + clientUserDetailSResult);
 
     return clientUserDetailSResult;
   }
@@ -311,8 +309,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param last
    * @param url
    * @return
-   * @paramx freeTextPassword
-   * @paramx passwordH
+
    * @see #addShellUser
    * @see #addUserAndGetID
    * @see UserManagement#addUser
@@ -521,38 +518,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
     return loggedInUser == null ? null : toUser(loggedInUser);
   }
-
-  /**
-   * TODOx : don't use password hash - use free text instead
-   * <p>
-   * TODO : (somewhere else) allow admin masquerade login - e.g. gvidaver/steve - with gvidaver's password logs you in as steve
-   *
-   * @param id
-   * @param encodedPassword
-   * @return
-   * @seex mitll.langtest.server.database.copy.UserCopy#copyUsers
-   * @see mitll.langtest.server.rest.RestUserManagement#gotHasUser
-   */
-//  @Override
-//  public User getStrictUserWithPass(String id, String encodedPassword) {
-//    return getUserIfMatch(getUserByID(id), id, encodedPassword);
-//  }
-
-  /**
-   * @param user
-   * @param id
-   * @param encodedPassword
-   * @return
-   * @see #getStrictUserWithPass
-   */
-/*  private User getUserIfMatch(User user, String id, String encodedPassword) {
-    if (user != null) {
-      return getUserIfMatchPass(user, id, encodedPassword);
-    } else {
-      logger.info("getUserIfMatch '" + id + "' is an unknown user");
-      return null;
-    }
-  }*/
 
   /**
    * @param user
