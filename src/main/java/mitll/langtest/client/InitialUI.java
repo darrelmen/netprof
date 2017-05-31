@@ -410,6 +410,8 @@ public class InitialUI implements UILifecycle {
    */
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
+      logger.info("chooseProjectAgain user --- "+userManager.getUser() + " " + userManager.getUserID());
+
       userService.forgetProject(new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable throwable) {
@@ -429,6 +431,9 @@ public class InitialUI implements UILifecycle {
 
       clearContent();
       addProjectChoices(0, null);
+    }
+    else {
+      logger.info("no user --- ");
     }
   }
 

@@ -413,11 +413,12 @@ public class RestUserManagement {
 
   /**
    * If there's a valid user with that email - send them an email.
+   *
    * @param email
    * @return
    */
   private boolean forgotUsername(String email) {
-   // String hash = Md5Hash.getHash(email);
+    // String hash = Md5Hash.getHash(email);
     String valid = db.getUserDAO().isValidEmail(email);
     if (valid != null) {
       getEmailHelper().getUserNameEmailDevice(email, valid);
@@ -539,7 +540,7 @@ public class RestUserManagement {
       String project = request.getHeader("projid");
       projid = Integer.parseInt(project); // TODO : figure out which project a user is in right now
     } catch (NumberFormatException e) {
-      logger.error("Got " +e,e);
+      logger.error("Got " + e, e);
     }
 
     if (existingUser == null) {
@@ -565,8 +566,7 @@ public class RestUserManagement {
             boolean male = gender.equalsIgnoreCase("male");
 
             SignUpUser user2 = new SignUpUser(user,
-                "",
-//                passwordH,
+                //                passwordH,
                 emailH,
                 email,
                 User.Kind.CONTENT_DEVELOPER,
@@ -588,13 +588,17 @@ public class RestUserManagement {
             jsonObject.put(ERROR, "bad age");
           }
         } else {
+          // String gender = request.getHeader(GENDER);
+          String first = request.getHeader("first");
+          String last = request.getHeader("last");
+          String affiliation = request.getHeader("affiliation");
+
+          boolean isMale = gender == null ? false : gender.equalsIgnoreCase("male");
           SignUpUser user2 = new SignUpUser(user,
-              "",
-              //            passwordH,
               emailH, email,
-              User.Kind.CONTENT_DEVELOPER,
-              true,
-              MiniUser.Gender.Unspecified, 89, dialect, deviceType, device, "", "", appURL, "OTHER");
+              User.Kind.STUDENT,
+              isMale,
+              isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, "", deviceType, device, first, last, appURL, affiliation);
           user1 = getUserManagement().addUser(user2);
         }
 

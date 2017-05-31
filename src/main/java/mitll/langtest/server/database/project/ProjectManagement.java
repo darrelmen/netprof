@@ -64,7 +64,6 @@ import java.util.stream.Collectors;
 public class ProjectManagement implements IProjectManagement {
   private static final Logger logger = LogManager.getLogger(ProjectManagement.class);
 
-
   /**
    * JUST FOR TESTING
    */
@@ -113,8 +112,8 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * @see DatabaseImpl#rememberProject
    * @param id
+   * @see DatabaseImpl#rememberProject
    */
   public void rememberProject(int id) {
     SlickProject found = null;
@@ -162,7 +161,7 @@ public class ProjectManagement implements IProjectManagement {
     }*/
 
     if (!idToProject.isEmpty()) {
-     // logger.info("using exercise dao from first project " + exerciseDAO);
+      // logger.info("using exercise dao from first project " + exerciseDAO);
       db.getUserExerciseDAO().setExerciseDAO(getFirstProject().getExerciseDAO());
     }
 
@@ -381,19 +380,6 @@ public class ProjectManagement implements IProjectManagement {
         db);
   }
 
-  /**
-   * TODO : add mechanism to trigger reload of exercises for a NetProf project from a domino project
-   */
-  //@Override
-/*  private void doReload() {
-    for (Project project : getProjects()) {
-      if (project.getExerciseDAO() == null) {
-        setExerciseDAO(project);
-        configureProject(*//*installPath,*//* project);
-        logger.info("\tpopulateProjects : " + project + " : " + project.getAudioFileHelper());
-      }
-    }
-  }*/
   private void logMemory() {
     int MB = (1024 * 1024);
     Runtime rt = Runtime.getRuntime();
@@ -516,8 +502,7 @@ public class ProjectManagement implements IProjectManagement {
   public Project getProject(int projectid) {
     if (projectid == -1 && !idToProject.isEmpty()) {
       return getFirstProject();
-    }
-    else {
+    } else {
       Project project = idToProject.get(projectid);
 
       if (project == null) {
@@ -530,8 +515,8 @@ public class ProjectManagement implements IProjectManagement {
         if (project == null && !idToProject.isEmpty()) {
           Project firstProject = getFirstProject();
           logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-                  ") returning first " + firstProject);//,
-              //new IllegalArgumentException());
+              ") returning first " + firstProject);//,
+          //new IllegalArgumentException());
           return firstProject;
         }
       }
@@ -617,7 +602,7 @@ public class ProjectManagement implements IProjectManagement {
 
         String language = project1.language();
 
-        for (String type:typeOrder) {
+        for (String type : typeOrder) {
           if (type.isEmpty()) logger.error("huh? type order has blank?? " + type);
         }
 
@@ -658,22 +643,22 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * For now, not adding difficulty or sound as properties - sort by difficulty though.
    *
-   * @param project
+   * @paramx project
    * @return
    */
   @NotNull
+/*
   private List<String> getTypeOrder(Project project) {
     return project.getTypeOrder();
   }
+*/
 
   private boolean hasModel(SlickProject project1) {
     return getModel(project1) != null;
   }
-
   private String getModel(SlickProject project1) {
     return project1.getProp(ServerProperties.MODELS_DIR);
   }
-
 
   /**
    * TODO : consider moving this into user service?
@@ -757,7 +742,9 @@ public class ProjectManagement implements IProjectManagement {
 
   private int getPort(SlickProject project) {
     try {
-      return Integer.parseInt(project.getProp(ServerProperties.WEBSERVICE_HOST_PORT));
+      String prop = project.getProp(ServerProperties.WEBSERVICE_HOST_PORT);
+      if (prop == null) return -1;
+      else return Integer.parseInt(prop);
     } catch (NumberFormatException e) {
       logger.error("for " + project + " got " + e);
       return -1;
@@ -768,6 +755,4 @@ public class ProjectManagement implements IProjectManagement {
   public FileUploadHelper getFileUploadHelper() {
     return fileUploadHelper;
   }
-
-
 }

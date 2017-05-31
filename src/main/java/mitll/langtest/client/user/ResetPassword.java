@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  * @since 10/2/14.
  */
 public class ResetPassword extends UserDialog {
-  private final Logger logger = Logger.getLogger("ResetPassword");
+  //private final Logger logger = Logger.getLogger("ResetPassword");
 
   private static final int MIN_PASSWORD = 8; // Consistent with Domino minimums
 
@@ -123,8 +123,6 @@ public class ResetPassword extends UserDialog {
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
 
-    // FormField useridField = addControlFormFieldWithPlaceholder(fieldset, false, 4, 35, "User ID");
-
     final TextBox user = new TextBox();
     user.setMaxLength(35);
     user.setPlaceholder("User ID");
@@ -133,8 +131,6 @@ public class ResetPassword extends UserDialog {
     FormField useridField = getSimpleFormField(fieldset, user, 4);
 
     final FormField firstPassword = getPasswordField(fieldset, PASSWORD);
-    // final BasicDialog.FormField secondPassword = ;
-    //   addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
     Button changePasswordButton =
         getChangePasswordButton(
@@ -148,7 +144,6 @@ public class ResetPassword extends UserDialog {
     right.add(rightDiv);
 
     setFocusOn((pendingUserID == null || pendingUserID.isEmpty()) ? useridField.getWidget() : firstPassword.getWidget());
-    //   setFocusOn(useridField.getWidget());
     return container;
   }
 
@@ -210,11 +205,6 @@ public class ResetPassword extends UserDialog {
     } else {
       changePassword.setEnabled(false);
       enterKeyButtonHelper.removeKeyHandler();
-
-//      String hashNewPassword = Md5Hash.getHash(newPassword);
-      // newPassword = rot13(newPassword);
-
-      //    service.changePFor(token, newPassword, new AsyncCallback<Boolean>() {
       service.changePasswordWithToken(userIDForm.getSafeText(), token, newPassword, new AsyncCallback<User>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -228,7 +218,6 @@ public class ResetPassword extends UserDialog {
             markErrorBlur(changePassword, "Password has already been changed?");
             changePassword.setEnabled(true);
           } else {
-
             markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.LEFT);
             reloadPageInThreeSeconds(result);
           }
@@ -251,13 +240,5 @@ public class ResetPassword extends UserDialog {
     String newURL = trimURL(Window.Location.getHref());
     userManager.rememberUser(user);
     Window.Location.replace(newURL);
-
-    //    Timer t = new Timer() {
-//      @Override
-//      public void run() {
-//        Window.Location.reload();
-//      }
-//    };
-//    t.schedule(1000);
   }
 }

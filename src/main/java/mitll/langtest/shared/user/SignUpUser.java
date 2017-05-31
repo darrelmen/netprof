@@ -38,7 +38,7 @@ public class SignUpUser implements IsSerializable {
   private String userID;
 
   // private String freeTextPassword;
-  private String passwordH;
+  //private String passwordH;
   private String emailH;
   private String email;
   private User.Kind kind;
@@ -73,7 +73,6 @@ public class SignUpUser implements IsSerializable {
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   public SignUpUser(String userID,
-                    String passwordH,
                     String emailH,
                     String email,
                     User.Kind kind,
@@ -89,7 +88,7 @@ public class SignUpUser implements IsSerializable {
                     String last, String url,
                     String affiliation) {
     this.userID = userID;
-    this.passwordH = passwordH;
+   // this.passwordH = passwordH;
     // this.freeTextPassword = freeTextPassword;
     this.emailH = emailH;
     this.email = email;
@@ -110,9 +109,11 @@ public class SignUpUser implements IsSerializable {
     return userID;
   }
 
+/*
   public String getPasswordH() {
     return passwordH;
   }
+*/
 
   /**
    * @return

@@ -56,6 +56,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   private final UILifecycle lifecycle;
   private ComplexWidget recnav, defectnav;
+
+  private Nav lnav;
+  private Dropdown cog;
+
   private INavigation navigation;
   private HandlerRegistration handlerRegistration;
   private final Map<String, NavLink> nameToLink = new HashMap<>();
@@ -73,7 +77,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   public NewBanner(UserManager userManager, UILifecycle lifecycle, UserMenu userMenu, Breadcrumbs breadcrumbs,
                    ExerciseController controller) {
     setPosition(NavbarPosition.TOP);
-
     setInverse(true);
 
     this.controller = controller;
@@ -84,7 +87,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 //        addWidgets(userManager, userMenu, breadcrumbs);
 //      }
 //    });
-
     addWidgets(userManager, userMenu, breadcrumbs);
   }
 
@@ -173,8 +175,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     return lnav;
   }
 
-  private Nav lnav;
-  private Dropdown cog;
 
   @NotNull
   private Nav getRightSideChoices(UserManager userManager, UserMenu userMenu) {
@@ -260,7 +260,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
    */
   private void addChoicesForUser(ComplexWidget nav) {
     boolean first = true;
-    boolean hasProject = hasProjectChoice();
+   // boolean hasProject = hasProjectChoice();
 
    // logger.info("addChoicesForUser has project " + hasProject);
     for (VIEWS choice : Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS, VIEWS.LISTS)) {
@@ -289,7 +289,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   public void showLearn() {
     gotClickOnChoice(VIEWS.LEARN.toString(), viewToLink.get(VIEWS.LEARN));
   }
-
   public void showDrill() {
     gotClickOnChoice(VIEWS.DRILL.toString(), viewToLink.get(VIEWS.DRILL));
   }
@@ -356,12 +355,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   @Override
   public void setBrowserInfo(String v) {
-
   }
 
   @Override
   public void setVisibleAdmin(boolean visibleAdmin) {
-
   }
 
   @Override
@@ -412,6 +409,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   private void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
+    recnav.setVisible(show);
+    defectnav.setVisible(show);
   }
 
   private NavLink getContactUs() {
@@ -442,6 +441,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     emailAnchor.addStyleName("rightTwentyMargin");
     emailAnchor.getElement().setAttribute("download", "");
     emailAnchor.getElement().getStyle().setColor("#90B3CF");
+
     return emailAnchor;
   }
 }

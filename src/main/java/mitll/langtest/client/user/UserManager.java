@@ -192,7 +192,9 @@ public class UserManager {
     }
   }
 
-  public boolean hasUser() { return getUserID() != null; }
+  public boolean hasUser() {
+    return getUserID() != null;
+  }
 
   private String getUserFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -236,7 +238,8 @@ public class UserManager {
       localStorageIfSupported.removeItem(getUserIDCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
       localStorageIfSupported.removeItem(getUserPendingID());
-      //  logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
+
+      logger.info("clearUser : removed user id = " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
@@ -249,8 +252,8 @@ public class UserManager {
    * @see UserDialog#storeUser
    */
   void storeUser(User user) {
-//    logger.info("storeUser : user now " + user);
     if (Storage.isLocalStorageSupported()) {
+      logger.info("storeUser : user now " + user);
       rememberUser(user);
       gotNewUser(user);
     } else {  // not sure what we could possibly do here...
@@ -259,7 +262,11 @@ public class UserManager {
     }
   }
 
-   void rememberUser(User user) {
+  /**
+   * @see #storeUser
+   * @param user
+   */
+  void rememberUser(User user) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     userChosenID = user.getUserID();
     localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
