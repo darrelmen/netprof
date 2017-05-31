@@ -594,8 +594,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-    logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
-
+    //logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
     } else {
@@ -634,13 +633,13 @@ public class ProjectManagement implements IProjectManagement {
             sectionHelper.getTypeToDistinct(),
             sectionHelper.getRootTypes(), sectionHelper.getParentToChildTypes());
 
-        logger.info("setStartupInfo : For " + userWhere +
-            "\n\t " + typeOrder +
-            "\n\tSet startup info " + startupInfo);
+        logger.info("setStartupInfo : For" +
+            "\n\tUser      " + userWhere +
+            "\n\tprojid    " + projid +
+            "\n\ttypeOrder " + typeOrder +
+            "\n\tstartup   " + startupInfo);
 
         userWhere.setStartupInfo(startupInfo);
-
-//        logger.info("setStartupInfo - got here");
       }
     }
   }

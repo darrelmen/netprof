@@ -74,6 +74,9 @@ public class UserManager {
   private String userChosenID = "";
 
   private final String appTitle;
+  /**
+   * @see #gotNewUser
+   */
   private User current;
 
   /**
@@ -102,10 +105,8 @@ public class UserManager {
     final int user = getUser();
     if (user != NO_USER_SET) {
       //logger.info("UserManager.login : current user : " + user);
-      //console("UserManager.login : current user : " + user);
       if (current == null) {
-        getPermissionsAndSetUser(
-            /*getUserChosenFromStorage()*/);//, getPassFromStorage());
+        getPermissionsAndSetUser();
       } else {
         logger.info("user " + user + " and full info " + current);
       }
@@ -113,27 +114,6 @@ public class UserManager {
       userNotification.showLogin();
     }
   }
-
-  /**
-   * @see #login
-   */
-//  private void getPermissionsAndSetUser() {
-//    getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
-//  }
-/*  private void console(String message) {
-    int ieVersion = BrowserCheck.getIEVersion();
-    if (ieVersion == -1 || ieVersion > 9) {
-     // consoleLog(message);
-      logger.info(message);
-    }
-  }*/
-/*
-  private native static void consoleLog(String message) */
-/*-{
-      console.log("UserManager:" + message);
-  }-*//*
-;
-*/
 
   /**
    * instead have call to get permissions for a user.
@@ -153,26 +133,28 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-        if (DEBUG) {
-          logger.info("UserManager.getPermissionsAndSetUser : onSuccess " +
-              //user +
-              " : " + result);
-        }
-        if (result == null ||
-            !result.isEnabled() ||
-            !result.isValid() ||
-            ((result.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
-                result.getPermissions().contains(User.Permission.DEVELOP_CONTENT)) &&
-                result.getRealGender() == MiniUser.Gender.Unspecified)
-            ) {
-          clearUser();
-          userNotification.showLogin();
-        } else {
-          setPendingUserStorage(result.getUserID());
-          gotNewUser(result);
-        }
+        gotSessionUser(result);
       }
     });
+  }
+
+  private void gotSessionUser(User result) {
+    if (DEBUG) {
+      logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + result);
+    }
+    if (result == null ||
+        !result.isEnabled() ||
+        !result.isValid() ||
+        ((result.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
+            result.getPermissions().contains(User.Permission.DEVELOP_CONTENT)) &&
+            result.getRealGender() == MiniUser.Gender.Unspecified)
+        ) {
+      clearUser();
+      userNotification.showLogin();
+    } else {
+      setPendingUserStorage(result.getUserID());
+      gotNewUser(result);
+    }
   }
 
   /**
@@ -212,71 +194,18 @@ public class UserManager {
 
   public boolean hasUser() { return getUserID() != null; }
 
-/*
-  public int getUserPasswordHash() {
-    if (Storage.isLocalStorageSupported()) {
-      String sid = getPassFromStorage();
-      return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
-    } else {
-      return (int) userID;
-    }
-  }
-*/
-
-  /**
-   * @return
-   * @see mitll.langtest.client.LangTest#checkLogin();
-   */
-/*  public boolean isUserExpired() {
-    String sid = getUserFromStorage();
-    //   logger.info("sid from storage "+ sid);
-    return (
-        sid == null ||
-            sid.equals(NO_USER_SET_STRING)) ||
-        checkUserExpired(sid);
-  }*/
   private String getUserFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     String userIDCookie = getUserIDCookie();
     return localStorageIfSupported != null ? localStorageIfSupported.getItem(userIDCookie) : NO_USER_SET_STRING;
   }
 
-/*
-  private String getPassFromStorage() {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    return localStorageIfSupported != null ? localStorageIfSupported.getItem(getPassCookie()) : NO_USER_SET_STRING;
-  }
-*/
-
- /*
-  private String getUserChosenFromStorage() {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    String userChosenID = getUserChosenID();
-    return localStorageIfSupported != null ? localStorageIfSupported.getItem(userChosenID) : NO_USER_SET_STRING;
-  }
-  */
-
-  public void setPendingUserStorage(String pendingID) {
+  void setPendingUserStorage(String pendingID) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(getUserPendingID(), pendingID);
     }
   }
-
-  /**
-   * @param sid
-   * @return
-   * @seex #isUserExpired()
-   */
-/*  private boolean checkUserExpired(String sid) {
-    boolean expired = false;
-    if (userExpired(sid)) {
-      logger.info("user expired " + sid);
-      clearUser();
-      expired = true;
-    }
-    return expired;
-  }*/
 
   /**
    * Need these to be prefixed by app title so if we switch webapps, we don't get weird user ids
@@ -298,53 +227,6 @@ public class UserManager {
     return appTitle + ":" + USER_PENDING_ID;
   }
 
-/*
-  private String getExpires() {
-    return appTitle + ":" + "expires";
-  }
-*/
-
-  /**
-   * @param sid
-   * @see #getUser()
-   */
-/*
-  private boolean userExpired(String sid) {
-    String expires = getExpiresCookie();
-    if (expires == null) {
-      logger.info("userExpired : checkExpiration : no expires item?");
-    } else {
-      try {
-        long expirationDate = Long.parseLong(expires);
-
-        long farthestPossibleTime = getUserSessionEnd();
-        if (farthestPossibleTime < expirationDate) {  // OR log them out?
-          // we switched user modes...
-          rememberUserSessionEnd(farthestPossibleTime);
-          expirationDate = Long.parseLong(getExpiresCookie());
-        }
-
-        if (expirationDate < System.currentTimeMillis()) {
-          logger.info("userExpired : checkExpiration : " + sid + " has expired : " + new Date(expirationDate));
-          return true;
-        }
-      } catch (NumberFormatException e) {
-        e.printStackTrace();
-      }
-    }
-    return false;
-  }
-*/
-
-  /**
-   * @return
-   * @see #userExpired(String)
-   */
-/*  private String getExpiresCookie() {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    return localStorageIfSupported.getItem(getExpires());
-  }*/
-
   /**
    * @see mitll.langtest.client.InitialUI#resetState()
    */
@@ -352,7 +234,6 @@ public class UserManager {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.removeItem(getUserIDCookie());
-      // localStorageIfSupported.removeItem(getPassCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
       localStorageIfSupported.removeItem(getUserPendingID());
       //  logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
@@ -378,17 +259,11 @@ public class UserManager {
     }
   }
 
-  public void rememberUser(User user) {
-    // final long DURATION = getUserSessionDuration();
-    //long futureMoment = getUserSessionEnd(DURATION);
-
+   void rememberUser(User user) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     userChosenID = user.getUserID();
     localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
-    //  localStorageIfSupported.setItem(getPassCookie(), passwordHash);
     localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
-    //  rememberUserSessionEnd(localStorageIfSupported, futureMoment);
-    // localStorageIfSupported.setItem(getLoginType(), "" + userType);
     //logger.info("storeUser : user now " + user.getID() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
   }
 
@@ -399,6 +274,7 @@ public class UserManager {
    *
    * @param result
    * @see #storeUser
+   * @see #gotSessionUser
    */
   private void gotNewUser(User result) {
     if (DEBUG) logger.info("UserManager.gotNewUser " + result);
@@ -407,56 +283,8 @@ public class UserManager {
       // logger.info("\tgotNewUser current user " + current);
       userNotification.gotUser(result);
     }
-    //console("getPermissionsAndSetUser.onSuccess : " + user);
   }
 
-
-  /**
-   * @paramx futureMoment
-   * @see #userExpired(String)
-   */
-/*  private void rememberUserSessionEnd(long futureMoment) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
-    }
-  }*/
-
-  /**
-   * @paramx localStorageIfSupported
-   * @paramx futureMoment
-   * @see #storeUser
-   * @seex #rememberUserSessionEnd(long)
-   */
-/*
-  private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
-    localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
-  }
-*/
-
-/*
-  private long getUserSessionEnd() {
-    return getUserSessionEnd(getUserSessionDuration());
-  }
-*/
-
-/*
-  private long getUserSessionEnd(long offset) {
-    return System.currentTimeMillis() + offset;
-  }
-*/
-
-  /**
-   * If we have lots of students moving through stations quickly, we want to auto logout once a day, once an hour?
-   * <p>
-   * Egyptian should never time out -- for anonymous students
-   *
-   * @return one year for anonymous
-   */
-/*  private long getUserSessionDuration() {
-    long mult =*//* loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 :*//* 4;
-    return EXPIRATION_HOURS * mult;
-  }*/
   public boolean isMale() {
     return current.isMale();
   }

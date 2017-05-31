@@ -87,14 +87,11 @@ public class RecordButton extends Button {
   private RecordingListener recordingListener;
   private final PropertyHandler propertyHandler;
   private Timer afterStopTimer = null;
-  //private int afterStopDelayMillis;// = 50;
 
   public interface RecordingListener {
     void startRecording();
-
     void flip(boolean first);
-
-    void stopRecording(long duration);
+    boolean stopRecording(long duration);
   }
 
   /**
@@ -115,8 +112,6 @@ public class RecordButton extends Button {
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
     setIcon(IconType.MICROPHONE);
-    //   this.afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
-
     setupRecordButton();
     getElement().setId("record_button");
   }
@@ -281,9 +276,9 @@ public class RecordButton extends Button {
    * @see #startOrStopRecording()
    */
   protected void stop(long duration) {
-//    long now = System.currentTimeMillis();
-    // long duration2 = now - started;
-    // logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+    long now = System.currentTimeMillis();
+     long duration2 = now - started;
+    logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
     showStopped();
     recordingListener.stopRecording(duration);
   }

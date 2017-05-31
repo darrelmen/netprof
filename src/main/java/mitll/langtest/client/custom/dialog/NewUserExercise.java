@@ -44,7 +44,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
@@ -400,7 +399,7 @@ abstract class NewUserExercise extends BasicDialog {
       long uniqueID = originalList.getID();
       controller.logEvent(box, "TextBox", "UserList_" + uniqueID, prefix + box.getValue());
     } catch (Exception e) {
-      e.printStackTrace();
+      //e.printStackTrace();
     }
   }
 
@@ -888,10 +887,10 @@ abstract class NewUserExercise extends BasicDialog {
               RecordButton.STOP1,
               audioType) {
             @Override
-            public void stopRecording(long duration) {
+            public boolean stopRecording(long duration) {
               otherRAP.setEnabled(true);
               showStop();
-              super.stopRecording(duration);
+              return super.stopRecording(duration);
             }
 
             @Override

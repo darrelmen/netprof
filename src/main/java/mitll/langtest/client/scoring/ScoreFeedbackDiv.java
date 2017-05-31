@@ -26,6 +26,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 5/19/17.
  */
 public class ScoreFeedbackDiv {
+  public static final String OVERALL_SCORE = "Overall Score";
   private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
 
   private ProgressBar progressBar;
@@ -37,20 +38,20 @@ public class ScoreFeedbackDiv {
   public static final int FIRST_STEP = 35;
   public static final int SECOND_STEP = 75;
 
-  PlayAudioPanel playAudioPanel;
-  DownloadContainer downloadContainer;
+  private PlayAudioPanel playAudioPanel;
+  private DownloadContainer downloadContainer;
 
   /**
-   * @see SimpleRecordAudioPanel#addWidgets
    * @param playAudioPanel
    * @param downloadContainer
+   * @see SimpleRecordAudioPanel#addWidgets
    */
   public ScoreFeedbackDiv(PlayAudioPanel playAudioPanel,
                           DownloadContainer downloadContainer) {
     progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
     styleTheProgressBar(progressBar);
-    addTooltip(progressBar, "Overall Score");
-    this.playAudioPanel =  playAudioPanel;
+    addTooltip(progressBar, OVERALL_SCORE);
+    this.playAudioPanel = playAudioPanel;
     this.downloadContainer = downloadContainer;
   }
 
@@ -58,8 +59,7 @@ public class ScoreFeedbackDiv {
     return new TooltipHelper().addTooltip(w, tip);
   }
 
-
-   void showScore(double score) {
+  void showScore(double score) {
     double percent = score / 100d;
     progressBar.setPercent(100 * percent);
     progressBar.setText("" + Math.round(score));
@@ -73,7 +73,7 @@ public class ScoreFeedbackDiv {
     progressBar.setVisible(true);
   }
 
-  public void hideScore() {
+  void hideScore() {
     progressBar.setVisible(false);
   }
 
@@ -89,7 +89,6 @@ public class ScoreFeedbackDiv {
     style.setMarginLeft(5, Style.Unit.PX);
     style.setMarginBottom(0, Style.Unit.PX);
     progressBar.setVisible(false);
-   // return progressBar;
   }
 
   @NotNull
@@ -114,7 +113,7 @@ public class ScoreFeedbackDiv {
       playAudioPanel.setEnabled(true);
 
       wordTableContainer.add(scoreFeedbackDiv);
-   //   logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
+      //   logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
     } else {
       Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
       w.addStyleName("leftFiveMargin");
@@ -128,9 +127,7 @@ public class ScoreFeedbackDiv {
     return wordTableContainer;
   }
 
-  public void setDownloadHref(String audioPathToUse,
-                       int id,
-                       int user) {
+  public void setDownloadHref(String audioPathToUse, int id, int user) {
     downloadContainer.setDownloadHref(audioPathToUse, id, user);
   }
 

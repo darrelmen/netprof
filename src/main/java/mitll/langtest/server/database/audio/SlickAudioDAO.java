@@ -633,7 +633,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         if (list == null) {
           logger.error("setAudioDAO configuration error - can't get files from media directory " + mediaDir);
         } else if (list.length > 0) { // only on pnetprof (behind firewall), znetprof has no audio, might have a directory.
-          logger.debug("setAudioDAO validating files under " + file.getAbsolutePath());
+          //logger.debug("setAudioDAO validating files under " + file.getAbsolutePath());
           if (validateAll ||
               (serverProps.doAudioChecksInProduction() &&
                   (serverProps.doAudioFileExistsCheck() || !foundFiles))) {

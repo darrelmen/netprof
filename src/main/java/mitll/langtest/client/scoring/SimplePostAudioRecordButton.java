@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
+ * Just for dialog support -- {@link mitll.langtest.client.contextPractice.DialogWindow}
  * This binds a record button with the act of posting recorded audio to the server.
  * <p/>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -131,13 +132,14 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param duration
    * @see RecordButton#stop(long)
    */
-  public void stopRecording(long duration) {
+  public boolean stopRecording(long duration) {
     controller.stopRecording(new WavCallback() {
       @Override
       public void getBase64EncodedWavFile(String bytes) {
         postAudioFile(bytes);
       }
     });
+    return true;
   }
 
   private void postAudioFile(String base64EncodedWavFile) {

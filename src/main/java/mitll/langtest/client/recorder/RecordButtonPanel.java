@@ -118,7 +118,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   private void layoutRecordButton(Widget button) {
     SimplePanel recordButtonContainer = new SimplePanel(button);
     recordButtonContainer.setWidth("75px");
-     Panel hp = new HorizontalPanel();
+    Panel hp = new HorizontalPanel();
     hp.add(recordButtonContainer);
     this.panel = hp;
     panel.getElement().setId("recordButtonPanel");
@@ -166,8 +166,9 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    *
    * @param duration
    * @see #RecordButtonPanel
+   * @return true if valid duration
    */
-  public void stopRecording(long duration) {
+  public boolean stopRecording(long duration) {
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
 
@@ -179,9 +180,11 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
           postAudioFile(getPanel(), 1, bytes);
         }
       });
+      return true;
     } else {
       initRecordButton();
       showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt(), recordButton);
+      return false;
     }
   }
 
@@ -290,9 +293,9 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   }
 
   /**
-   * @see mitll.langtest.client.amas.PressAndHoldExercisePanel#getAnswerWidget
    * @param result
    * @param outer
+   * @see mitll.langtest.client.amas.PressAndHoldExercisePanel#getAnswerWidget
    */
   protected abstract void receivedAudioAnswer(AudioAnswer result, final Panel outer);
 

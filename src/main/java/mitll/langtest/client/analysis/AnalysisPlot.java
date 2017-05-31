@@ -558,7 +558,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
               return getTooltip(toolTipData, exerciseID, commonShell);
             } catch (Exception e) {
               logger.warning(e.getMessage());
-              e.printStackTrace();
+             // e.printStackTrace();
               return "";
             }
           }
@@ -774,7 +774,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
       showSeriesByVisible();
 
     } catch (Exception e) {
-      e.printStackTrace();
+      //e.printStackTrace();
       logger.warning("Got " + e);
     }
   }

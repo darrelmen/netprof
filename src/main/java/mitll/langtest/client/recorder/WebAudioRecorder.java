@@ -36,6 +36,8 @@ import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.WavCallback;
 
+import java.util.logging.Logger;
+
 /**
  * Tries to do initWebaudio, and if no response has been received in 5 seconds, tries again.
  *
@@ -45,7 +47,7 @@ import mitll.langtest.client.WavCallback;
  * @since 5/27/2014.
  */
 class WebAudioRecorder {
-//  private final Logger logger = Logger.getLogger("WebAudioRecorder");
+  private final Logger logger = Logger.getLogger("WebAudioRecorder");
   private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
@@ -53,7 +55,7 @@ class WebAudioRecorder {
   private static boolean gotResponse = false;
   private Timer theTimer = null;
 
-  int attempts = 10*60/DELAY_MILLIS;
+  private int attempts = 10*60/DELAY_MILLIS;
 
   /**
    *
@@ -166,6 +168,8 @@ class WebAudioRecorder {
     if (encoded.length() < 100) {
       console("getBase64 (short audio?) bytes = '" + encoded + "'");
     }
+    console("getBase64   bytes = '" + encoded.length() + "'");
+
 /*    if (getAllZero()) {
       logger.info("Seems like the mic is not plugged in?");
     }*/
@@ -181,8 +185,10 @@ class WebAudioRecorder {
    * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
    */
   private static WavCallback wavCallback = null;
+
   public void stopRecording(WavCallback wavCallback) {
     WebAudioRecorder.wavCallback = wavCallback;
+    logger.info("got stopRecording ");
     stopRecording();
   }
 }

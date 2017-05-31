@@ -20,43 +20,46 @@ public class WaitCursorHelper {
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private static final int delayMillis = 700;
 
-  /**
-   * @seex #addTypeAhead
-   * @seex #scheduleWaitTimer
-   * @seex #showFinishedGettingExercises
-   */
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
 
+  /**
+   * @see TypeAhead#TypeAhead
+   * @return
+   */
   public Widget getWaitCursor() {
     return waitCursor;
   }
 
   public void showFinished() {
+   // logger.info("showFinished --- " + this);
     cancelTimer();
     hideWaitCursor();
   }
 
-  public void cancelTimer() {
+  private void cancelTimer() {
     if (waitTimer != null) {
+     // logger.info("cancelTimer --- " + this);
       waitTimer.cancel();
     }
+    //else {
+    //  logger.info("cancelTimer waitTimer is null " +this);
+   // }
   }
 
   private void hideWaitCursor() {
-    setWhite();
+    waitCursor.setUrl(white);
     hide();
   }
 
-  public void setWhite() {
-    waitCursor.setUrl(white);
-  }
-
   public void scheduleWaitTimer() {
+  //  WaitCursorHelper outer = this;
+   // logger.info("scheduleWaitTimer --- " + outer);
     cancelTimer();
+
     waitTimer = new Timer() {
       @Override
       public void run() {
-        logger.info("scheduleWaitTimer timer expired...");
+     //   logger.info("scheduleWaitTimer timer expired..." + outer);
         waitCursor.setUrl(animated);
         show();
       }

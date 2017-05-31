@@ -60,9 +60,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
 
   private IconAnchor waiting;
 
-/*  private IconAnchor correctIcon;
-  private IconAnchor incorrect;*/
-
   /**
    * @param exercisePanel
    * @param controller
@@ -75,7 +72,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
                                     int exerciseID,
                                     int index) {
     super(controller, exerciseID, index, true, AudioType.PRACTICE, "Record");
-   // this.instance = instance;
     this.exercisePanel = exercisePanel;
   }
 
@@ -87,15 +83,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     waiting     = new IconAnchor();
     waiting.setBaseIcon(MyCustomIconType.waiting);
     hideWaiting();
-
- /*   correctIcon = new IconAnchor();
-    incorrect   = new IconAnchor();
-
-    correctIcon.setBaseIcon(MyCustomIconType.correct);
-    correctIcon.setVisible(false);
-
-    incorrect.setBaseIcon(MyCustomIconType.incorrect);
-    incorrect.setVisible(false);*/
   }
 
   private void hideWaiting() {
@@ -113,16 +100,12 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     hp.getElement().setId("flashcardButtonContainer");
     hp.add(recordButton1);
     hp.add(waiting);
-/*    hp.add(correctIcon);
-    hp.add(incorrect);*/
     return hp;
   }
 
   @Override
   public void initRecordButton() {
     super.initRecordButton();
-/*    correctIcon.setVisible(false);
-    incorrect.setVisible(false);*/
     hideWaiting();
   }
 
@@ -145,37 +128,21 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
     hideWaiting();
     showRecord();
-
-//    hideRecordButton();
-  //  showCorrectIcons(result);
     exercisePanel.receivedAudioAnswer(result);
   }
-/*
-  private void showCorrectIcons(AudioAnswer result) {
-    if (result.isCorrect()) {
-      correctIcon.setVisible(true);
-    } else {
-      incorrect.setVisible(true);
-    }
-  }*/
-
- /* @Override
-  protected void hideRecordButton() {
-    recordButton.setVisible(false);
-    hideWaiting();
-  }*/
 
   @Override
   public void flip(boolean first) {
   }
 
   @Override
-  public void stopRecording(long duration) {
-    super.stopRecording(duration);
-    if (duration > MIN_DURATION) {
+  public boolean stopRecording(long duration) {
+    boolean b = super.stopRecording(duration);
+    if (b) {
       hideRecord();
       showWaiting();
     }
+    return b;
   }
 
   private void hideRecord() {

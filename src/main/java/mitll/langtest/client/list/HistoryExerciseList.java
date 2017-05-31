@@ -409,11 +409,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     String value = event.getValue();
     SelectionState selectionState = getSelectionState(value);
 
-   // if (selectionState.getProject() != controller.getProjectStartupInfo().getProjectid()) {
+    if (selectionState.getProject() != controller.getProjectStartupInfo().getProjectid()) {
       //controller.
       // TODO : change the project --- ... and come back and call code below.
-   //   logger.info("project from state " + selectionState.getProject() + " != " + controller.getProjectStartupInfo().getProjectid());
-   // }
+      logger.info("project from state " + selectionState.getProject() + " != " + controller.getProjectStartupInfo().getProjectid());
+    }
 
     if (DEBUG_ON_VALUE_CHANGE)
       logger.info("onValueChange got " + value + " sel " + selectionState + " " + selectionState.getInfo());
@@ -590,7 +590,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param token
    * @return object representing type=value pairs from history token
    * @see PagingExerciseList#loadExercises
-   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @see #onValueChange
    */
   protected SelectionState getSelectionState(String token) {
     return new SelectionState(token, !allowPlusInURL);

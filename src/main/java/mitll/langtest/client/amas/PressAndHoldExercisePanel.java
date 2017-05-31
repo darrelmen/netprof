@@ -62,6 +62,7 @@ import java.util.logging.Logger;
  * @since 3/6/13
  * Time: 3:07 PM
  * To change this template use File | Settings | File Templates.
+* @deprecated
  */
 class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerListener {
   private final Logger logger = Logger.getLogger("PressAndHoldExercisePanel");
@@ -304,11 +305,12 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
       }
 
       @Override
-      public void stopRecording(long duration) {
+      public boolean stopRecording(long duration) {
         scoreFeedback.setWaiting();
-        super.stopRecording(duration);
+        boolean valid = super.stopRecording(duration);
         recordButton.setVisible(true);
         recordButton.setEnabled(false);
+        return valid;
       }
     };
   }

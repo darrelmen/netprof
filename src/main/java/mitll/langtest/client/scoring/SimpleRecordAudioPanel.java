@@ -2,6 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
@@ -224,26 +225,33 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     scoreFeedback.add(recordFeedback);
   }
 
+  /**
+   * @see FeedbackPostAudioRecordButton#stopRecording
+   */
   @Override
   public void stopRecording() {
-    logger.info("stopRecording...");
+  //  logger.info("stopRecording...");
 
     playAudioPanel.setEnabled(true);
 
     goodwaveExercisePanel.setBusy(false);
     playAudioPanel.hideRecord();
 
-    waitCursorHelper.scheduleWaitTimer();
     scoreHistory.setVisible(true);
+
+    waitCursorHelper.scheduleWaitTimer();
   }
 
-  @Override
-  public void postAudioFile() {
-    waitCursorHelper.scheduleWaitTimer();
+  public void gotShortDurationRecording() {
+    waitCursorHelper.showFinished();
+    playAudioPanel.hideRecord();
   }
 
   @Override
   public void useResult(AudioAnswer result) {
+//    logger.info("useResult " + result);
+
+    waitCursorHelper.showFinished();
     setVisible(true);
     hasScoreHistory = true;
 
@@ -252,27 +260,21 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     audioPath = result.getPath();
     setDownloadHref();
     scoreAudio(result, isRTL);
-
-//    waitCursorHelper.cancelTimer();
-//    waitCursorHelper.setWhite();
-//    waitCursorHelper.show();
-
-    waitCursorHelper.showFinished();
   }
 
   @Override
   public void useInvalidResult(boolean isValid) {
+  //  logger.info("useInvalidResult " + isValid);
+
+    waitCursorHelper.showFinished();
     setVisible(hasScoreHistory);
 
-//    logger.info("useInvalidResult " + isValid);
 
     if (!isValid) playAudioPanel.hidePlayButton();
     else playAudioPanel.showPlayButton();
-    playAudioPanel.setEnabled(isValid);
 
-    waitCursorHelper.showFinished();
-//    waitCursorHelper.hide();
-  }
+    playAudioPanel.setEnabled(isValid);
+ }
 
   @Override
   public void flip(boolean first) {
@@ -301,7 +303,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   }
 
   @Nullable
-  private String getReadyToPlayAudio(String path) {
+  private void getReadyToPlayAudio(String path) {
     //logger.info("getReadyToPlayAudio : get ready to play " +path);
     path = CompressedAudio.getPath(path);
     if (path != null) {
@@ -311,7 +313,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       //logger.info("getReadyToPlayAudio startSong ready to play " +path);
       playAudioPanel.startSong(path);
     }
-    return path;
+   // return path;
   }
 
   /**

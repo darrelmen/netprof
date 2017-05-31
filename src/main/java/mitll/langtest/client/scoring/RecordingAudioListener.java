@@ -9,8 +9,8 @@ public interface RecordingAudioListener {
   void startRecording();
   void stopRecording();
 
-  void postAudioFile();
-
+//  void postAudioFile();
+  void gotShortDurationRecording();
   void useResult(AudioAnswer result);
   void useInvalidResult(boolean isValid);
 

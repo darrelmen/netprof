@@ -343,15 +343,17 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
     }
 
     @Override
-    public void stopRecording(long duration) {
+    public boolean stopRecording(long duration) {
       controller.logEvent(this, "RecordButton", getExerciseID(), "stopRecording");
 
       playAudioPanel.setEnabled(true);
       goodwaveExercisePanel.setBusy(false);
-      super.stopRecording(duration);
+      boolean b = super.stopRecording(duration);
 
       recordImage1.setVisible(false);
       recordImage2.setVisible(false);
+
+      return b;
     }
 
     @Override

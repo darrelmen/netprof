@@ -36,13 +36,15 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.user.client.*;
-import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PopupHelper;
-import mitll.langtest.client.exercise.*;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.*;
 
@@ -289,13 +291,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   public void searchBoxEntry(String text) {
     if (listOptions.isShowTypeAhead()) {
-      // logger.info("searchBoxEntry type ahead '" + text + "'");
+      logger.info("searchBoxEntry type ahead '" + text + "'");
       // why would this be a bad idea?
       //setTypeAheadText(text);
       alwaysSetTypeAhead(text);
       pushNewItem(text, -1);
 
       //gotTypeAheadEvent(text, true);
+    }
+    else {
+      logger.warning("skipping searchBoxEntry ");
     }
   }
 /*
@@ -340,10 +345,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }*/
 
   private void alwaysSetTypeAhead(String t) {
-    if (getTypeAheadText().isEmpty()) {
+    //if (getTypeAheadText().isEmpty()) {
       logger.info("alwaysSetTypeAhead Set type ahead to '" + t + "'");
       typeAhead.setText(t);
-    }
+    //}
   }
 
   public String getTypeAheadText() {

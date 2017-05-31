@@ -38,7 +38,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PopupHelper;
-import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.recorder.RecordButton;
@@ -63,7 +62,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
   public static final int MIN_DURATION = 150;
-  //private static final int BUTTON_WIDTH = 93; // was 68
 
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
@@ -128,13 +126,21 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param duration
    * @see RecordButton#stop
    */
-  public void stopRecording(long duration) {
+  public boolean stopRecording(long duration) {
     if (duration > MIN_DURATION) {
+    //  logger.info("stopRecording duration " + duration + " > " + MIN_DURATION);
       controller.stopRecording(this::postAudioFile);
+      return true;
     } else {
       showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt());
       hideWaveform();
+      gotShortDurationRecording();
+      //logger.info("stopRecording duration " + duration + " < " + MIN_DURATION);
+      return false;
     }
+  }
+
+  protected void gotShortDurationRecording() {
   }
 
   protected void hideWaveform() {
@@ -144,7 +150,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param base64EncodedWavFile
    * @see RecordingListener#stopRecording
    */
-  protected void postAudioFile(String base64EncodedWavFile) {
+  private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
 
@@ -291,6 +297,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     new PopupHelper().showPopup(toShow, getOuter(), 3000);
   }
 
+  /**
+   * @see #onPostSuccess
+   * @param result
+   */
   public abstract void useResult(AudioAnswer result);
 
   public boolean hasValidAudio() {

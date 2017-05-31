@@ -893,7 +893,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       typeToDistinct.put(p.getKey(), new TreeSet<>(p.getValue().values()));
     }
 
-    logger.info("rememberTypesInOrder type->childCount " + typeToCount);
+    if (DEBUG) logger.info("rememberTypesInOrder type->childCount " + typeToCount);
   }
 
   private void makeRoot() {  root = new SectionNode("root", "root");  }

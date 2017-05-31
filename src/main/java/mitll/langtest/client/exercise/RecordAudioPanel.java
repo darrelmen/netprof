@@ -343,11 +343,12 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     }
 
     @Override
-    public void stopRecording(long duration) {
+    public boolean stopRecording(long duration) {
       //  now = System.currentTimeMillis();
       // logger.info("stopRecording " + now + " diff " + (now-then) + " millis");
-      super.stopRecording(duration);
+      boolean b = super.stopRecording(duration);
       showStop();
+      return b;
     }
 
     @Override

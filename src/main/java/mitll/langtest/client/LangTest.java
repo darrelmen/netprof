@@ -397,7 +397,6 @@ public class LangTest implements
   }
 
   private void logMessageOnServer(String message) {
-    //new Exception().printStackTrace();
     service.logMessage(message,
         new AsyncCallback<Void>() {
           @Override

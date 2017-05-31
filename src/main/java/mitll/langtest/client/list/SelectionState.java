@@ -49,9 +49,9 @@ import java.util.logging.Logger;
 public class SelectionState {
   private final Logger logger = Logger.getLogger("SelectionState");
 
-  public static final String ITEM = "item";
-  public static final String SEARCH = "search";
-  public static final String PROJECT = "project";
+  private static final String ITEM = "item";
+  private static final String SEARCH = "search";
+  private static final String PROJECT = "project";
 
   public static final String SECTION_SEPARATOR = "###";
 
@@ -264,7 +264,7 @@ public class SelectionState {
     return s.substring(0, Math.max(0, s.length() - 2));
   }
 
-  public void setProject(int project) {
+  private void setProject(int project) {
     this.project = project;
   }
 
@@ -276,6 +276,7 @@ public class SelectionState {
     return "parseToken : instance " + instance + " : " +
         "search " + search + ", " +
         "item " + item + ", " +
+        "project " + project + ", " +
         "unit->chapter " + getTypeToSection() +
         " onlyWithAudioDefects="+isOnlyWithAudioDefects();
   }

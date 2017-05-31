@@ -38,8 +38,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.History;
@@ -207,18 +205,6 @@ public class InitialUI implements UILifecycle {
     return userManager.getUserID() == null ? "" : ("" + userManager.getUserID());
   }
 
-  /**
-   * NO NO NO don't do this
-   *
-   * @return
-   */
-/*  @Deprecated
-  @Override
-  public boolean isRTL() {
-    boolean b = controller.getProps().isRightAlignContent();//navigation != null && navigation.isRTL();
-    //  if (b) logger.info("content is RTL!");
-    return b;
-  }*/
   public void logout() {
     lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
     breadcrumbs.clear();
@@ -373,6 +359,10 @@ public class InitialUI implements UILifecycle {
       if (project.hasChildren() && project.hasChild(currentProject)) {
         crumbs.add(getLangBreadcrumb(project));
         addProjectCrumb(crumbs, project.getChild(currentProject));
+/*        for (int i = 0; i < crumbs.getWidgetCount(); i++) {
+          logger.info("breadcrumb has " + crumbs.getWidget(i));
+        }*/
+        break;
       } else if (project.getID() == currentProject) {
         addProjectCrumb(crumbs, project);
         break;
@@ -390,14 +380,12 @@ public class InitialUI implements UILifecycle {
   @NotNull
   private NavLink getLangBreadcrumb(SlimProject project) {
     NavLink lang = new NavLink(project.getLanguage());
-    lang.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        clearStartupInfo();
-        clearContent();
-        removeUntilCrumb(1);
-        choices.showProject(project);
-      }
+    lang.addClickHandler(clickEvent -> {
+    //  logger.info("getLangBreadcrumb got click on " + project.getName());
+      clearStartupInfo();
+      clearContent();
+      removeUntilCrumb(1);
+      choices.showProject(project);
     });
     return lang;
   }
@@ -410,12 +398,9 @@ public class InitialUI implements UILifecycle {
    */
   private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     NavLink lang = new NavLink(project.getName());
-    lang.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        logger.info("choose project again for " + project.getName());
-        chooseProjectAgain();
-      }
+    lang.addClickHandler(clickEvent -> {
+ //     logger.info("addProjectCrumb choose project again for " + project.getName());
+      chooseProjectAgain();
     });
     crumbs.add(lang);
   }
@@ -569,19 +554,6 @@ public class InitialUI implements UILifecycle {
     RootPanel.get().add(verticalContainer);
     banner.setCogVisible(false);
   }
-/*
-  private void trimURL() {
-    Window.Location.replace(trimURL(Window.Location.getHref()));
-  }
-*/
-
-/*
-  private String trimURL(String url) {
-    if (url.contains("127.0.0.1")) {
-      return "http://127.0.0.1:8888/LangTest.html?gwt.codesvr=127.0.0.1:9997";
-    } else return url.split("\\?")[0].split("\\#")[0];
-  }
-*/
 
   private void clearPadding(Container verticalContainer) {
     verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
@@ -673,7 +645,7 @@ public class InitialUI implements UILifecycle {
   private void addProjectChoices(int level, SlimProject parent) {
     clearContent();
     addBreadcrumbs();
-    choices.showProjectChoices(level, parent);
+    choices.showProjectChoices(parent, level);
   }
 
   /**
@@ -685,10 +657,16 @@ public class InitialUI implements UILifecycle {
     addCrumbs(breadcrumbs);
   }
 
+  /**
+   * @see ProjectChoices#gotClickOnFlag
+   * @param name
+   * @return
+   */
   @Override
   @NotNull
   public NavLink makeBreadcrumb(String name) {
     NavLink projectCrumb = new NavLink(name);
+   // logger.info("makeBreadcrumb add " + name);
     breadcrumbs.add(projectCrumb);
     breadcrumbs.setVisible(true);
     return projectCrumb;
@@ -704,19 +682,26 @@ public class InitialUI implements UILifecycle {
     addProjectChoices(1, parent);
   }
 
-  private void removeLastCrumb() {
-    int widgetCount = breadcrumbs.getWidgetCount();
-    breadcrumbs.remove(widgetCount - 1);
+  /**
+   * @see #clickOnParentCrumb(SlimProject)
+   */
+  public void removeLastCrumb() {
+    //logger.info("removeLastCrumb has " +breadcrumbs.getWidgetCount());
+    breadcrumbs.remove(breadcrumbs.getWidgetCount() - 1);
   }
 
+  /**
+   * @see #getLangBreadcrumb
+   * @param count
+   */
   private void removeUntilCrumb(int count) {
     int widgetCount = breadcrumbs.getWidgetCount();
     int initial = widgetCount - 1;
-    logger.info("removeUntilCrumb crumbs " + widgetCount + " remove to " + count + " initial " + initial);
+    //logger.info("removeUntilCrumb crumbs " + widgetCount + " remove to " + count + " initial " + initial);
 
-    for (int i = initial; i > count; i--) {
+    for (int i = initial; i >= count; i--) {
       boolean remove = breadcrumbs.remove(i);
-      logger.info("removeUntilCrumb remove at " + i + "  " + remove);
+     // logger.info("removeUntilCrumb remove at " + i + "  " + remove);
     }
   }
 

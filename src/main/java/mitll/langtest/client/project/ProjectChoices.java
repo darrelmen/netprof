@@ -8,8 +8,6 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.*;
@@ -21,6 +19,7 @@ import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserNotification;
+import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
@@ -94,11 +93,11 @@ public class ProjectChoices {
   /**
    * Overkill?
    *
-   * @param level
    * @param parent
+   * @param level
    * @see InitialUI#addProjectChoices
    */
-  public void showProjectChoices(int level, SlimProject parent) {
+  public void showProjectChoices(SlimProject parent, int level) {
     if (parent != null) {
       contentRow.add(showProjectChoices(getVisibleProjects(parent.getChildren()), level));
     } else {
@@ -130,8 +129,7 @@ public class ProjectChoices {
         permissions.contains(User.Permission.RECORD_AUDIO) ||
             permissions.contains(User.Permission.QUALITY_CONTROL) ||
             permissions.contains(User.Permission.DEVELOP_CONTENT);
-
-    logger.info("Examining  " + projects.size() + " projects, can record = " + canRecord + " permissions " + permissions);
+    //  logger.info("Examining  " + projects.size() + " projects, can record = " + canRecord + " permissions " + permissions);
 
     for (SlimProject project : projects) {
       if (project.getStatus() == ProjectStatus.PRODUCTION) {
@@ -158,6 +156,8 @@ public class ProjectChoices {
    * @param result
    * @param nest
    * @see InitialUI#addProjectChoices
+   * @see #gotClickOnFlag(String, SlimProject, int, int)
+   * @see #showProject(SlimProject)
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
     // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
@@ -178,31 +178,10 @@ public class ProjectChoices {
    */
   private void addFlags(List<SlimProject> result, int nest, Container flags) {
     Thumbnails current = new Thumbnails();
-    //Panel current = new DivWidget();
     flags.add(current);
 
     List<SlimProject> languages = new ArrayList<>(result);
-//    logger.info("addProjectChoices " + languages.size() + " languages");
     sortLanguages(nest, languages);
-
-/*    int size = languages.size();
-    //  logger.info("addProjectChoices " + size + "-------- nest " + nest);
-    int total = 0;
-    for (int i = 0; i < size; i += ITEMS_IN_ROW) {
-      int max = i + ITEMS_IN_ROW;
-      if (max > size) max = size;
-
-      for (int j = i; j < max; j++) {
-        SlimProject project = languages.get(j);
-        String language = capitalize(project.getLanguage());
-        current.add(getLangIcon(language, project, nest));
-        total++;
-      }
-
-      if (total < size) {
-        flags.add(current = new Thumbnails());
-      }
-    }*/
 
     for (SlimProject project : languages) {
       current.add(getLangIcon(capitalize(project.getLanguage()), project, nest));
@@ -211,8 +190,7 @@ public class ProjectChoices {
 
   @NotNull
   private String capitalize(String language) {
-    language = language.substring(0, 1).toUpperCase() + language.substring(1);
-    return language;
+    return language.substring(0, 1).toUpperCase() + language.substring(1);
   }
 
   private void sortLanguages(final int nest, List<SlimProject> languages) {
@@ -238,10 +216,8 @@ public class ProjectChoices {
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
-    String text = PLEASE_SELECT_A_LANGUAGE;
-    if (nest == 1) {
-      text = PLEASE_SELECT_A_COURSE;
-    }
+    String text = (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
+
     if (result.isEmpty()) {
       text = NO_LANGUAGES_LOADED_YET;
     }
@@ -258,7 +234,7 @@ public class ProjectChoices {
 
     DivWidget right = new DivWidget();
     right.addStyleName("floatRight");
-   // right.addStyleName("inlineFlex");
+    // right.addStyleName("inlineFlex");
     header.add(right);
     if (isQC()) {
       getCreateNewButton(right);
@@ -291,8 +267,8 @@ public class ProjectChoices {
   }
 
   /**
-   * @see #getHeader(List, int)
    * @param header
+   * @see #getHeader(List, int)
    */
   private void getEnsureAllAudioButton(DivWidget header) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Check Audio");
@@ -380,12 +356,8 @@ public class ProjectChoices {
    * @see #showProjectChoices
    */
   private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
-//    logger.info("project " + projectForLang);
-//    logger.info("lang " + lang);
-//    logger.info("nest " + nest);
     String lang1 =
         nest == 0 &&
-            //   lang.equalsIgnoreCase(projectForLang.getName()) &&
             projectForLang.hasChildren() ? lang : projectForLang.getName();
     return getImageAnchor(capitalize(lang1), projectForLang);
   }
@@ -400,48 +372,31 @@ public class ProjectChoices {
    * @see #getLangIcon
    */
   private Panel getImageAnchor(String name, SlimProject projectForLang) {
-    int nest = 1;
     Thumbnail thumbnail = new Thumbnail();
-    // widgets.setWidth("100%");
     thumbnail.setWidth("195px");
     thumbnail.setSize(2);
     final int projid = projectForLang.getID();
 
     {
       PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
-      button.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent clickEvent) {
-          gotClickOnFlag(name, projectForLang, projid, nest);
-        }
-      });
+      button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
       thumbnail.add(button);
     }
 
     DivWidget horiz = new DivWidget();
-//    horiz.addStyleName("inlineFlex");
-//    horiz.setWidth("100%");
-//    if (isQC()) {
-//      horiz.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT + "px"); // so they wrap nicely
-//    }
-
-
-//    if (isQC()) {
     horiz.getElement().getStyle().setProperty("minHeight", (isQC() ? MIN_HEIGHT : NORMAL_MIN_HEIGHT) + "px"); // so they wrap nicely
-    //  }
-
-
     thumbnail.add(horiz);
     {
       boolean hasChildren = projectForLang.hasChildren();
 
       DivWidget container = new DivWidget();
-      container.add(getLabel(name, projectForLang, hasChildren));
+      Heading label;
+      container.add(label = getLabel(name, projectForLang, hasChildren));
       container.setWidth("100%");
       container.addStyleName("floatLeft");
 
       if (isQC() && !hasChildren) {
-        container.add(getQCButtons(projectForLang));
+        container.add(getQCButtons(projectForLang, label));
       }
 
       horiz.add(container);
@@ -474,7 +429,7 @@ public class ProjectChoices {
     return label;
   }
 
-  private DivWidget getQCButtons(SlimProject projectForLang) {
+  private DivWidget getQCButtons(SlimProject projectForLang, Heading label) {
     DivWidget horiz2 = new DivWidget();
     horiz2.addStyleName("inlineFlex");
     horiz2.add(getEditButtonContainer(projectForLang));
@@ -483,12 +438,11 @@ public class ProjectChoices {
     importButtonContainer.addStyleName("leftFiveMargin");
     horiz2.add(importButtonContainer);
 
-    Button deleteButton = getDeleteButton(projectForLang);
+    Button deleteButton = getDeleteButton(projectForLang, label);
     deleteButton.addStyleName("leftFiveMargin");
     horiz2.add(getButtonContainer(deleteButton));
 
     return horiz2;
-
 //    container.add(horiz2);
   }
 
@@ -530,16 +484,16 @@ public class ProjectChoices {
   }
 
   @NotNull
-  private com.github.gwtbootstrap.client.ui.Button getDeleteButton(SlimProject projectForLang) {
+  private com.github.gwtbootstrap.client.ui.Button getDeleteButton(SlimProject projectForLang, Heading label) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.ERASER);
     w.setType(ButtonType.DANGER);
-    w.addClickHandler(event -> showDeleteDialog(projectForLang));
+    w.addClickHandler(event -> showDeleteDialog(projectForLang, label));
     return w;
   }
 
   private void showEditDialog(SlimProject projectForLang) {
-    logger.info("projectForLang " + projectForLang);
+    //logger.info("projectForLang " + projectForLang);
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
 
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
@@ -587,15 +541,14 @@ public class ProjectChoices {
         550);
   }
 
-  private void showDeleteDialog(SlimProject projectForLang) {
+  private void showDeleteDialog(SlimProject projectForLang, Heading label) {
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
-        logger.info("delete project!");
+        label.setSubtext("Deleting... please wait.");
         projectServiceAsync.delete(projectForLang.getID(), new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
-
           }
 
           @Override
@@ -603,7 +556,6 @@ public class ProjectChoices {
             uiLifecycle.startOver();
           }
         });
-        // projectEditForm.updateProject();
       }
 
       @Override
@@ -619,21 +571,30 @@ public class ProjectChoices {
   }
 
   private boolean isQC() {
-    boolean admin = controller.getUserState().isAdmin();
-    return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || admin;
+    UserState userState = controller.getUserState();
+    return userState.hasPermission(User.Permission.QUALITY_CONTROL) || userState.isAdmin();
   }
 
+  /**
+   * @param name
+   * @param projectForLang
+   * @param projid
+   * @param nest
+   * @see #getImageAnchor
+   */
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
-    NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
     List<SlimProject> children = projectForLang.getChildren();
 //    logger.info("gotClickOnFlag project " + projid + " has " + children);
 
     if (children.size() < 2) {
       logger.info("onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
+      // uiLifecycle.removeLastCrumb();
+      uiLifecycle.makeBreadcrumb(name);
       setProjectForUser(projid);
-    } else {
+    } else { // at this point, the breadcrumb should be empty?
       logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");
+      NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
       projectCrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
       uiLifecycle.clearContent();
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
@@ -677,8 +638,7 @@ public class ProjectChoices {
    * @see #setProjectForUser
    */
   private void reallySetTheProject(int projectid) {
-    logger.info("setProjectForUser set project for " + projectid);
-
+    //logger.info("setProjectForUser set project for " + projectid);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override

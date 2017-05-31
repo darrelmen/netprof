@@ -302,7 +302,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
       matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
     } else {
-      logger.warning("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
+      if (DEBUG)  logger.info("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
     }
   }
 
@@ -493,10 +493,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
     }
 
-    if (clickablesIterator.hasNext()) logger.info("matchSegmentToWidgetForAudio tokens left over ");
+    if (DEBUG_MATCH) {
+      if (clickablesIterator.hasNext()) logger.info("matchSegmentToWidgetForAudio tokens left over ");
+    }
+
     while (clickablesIterator.hasNext()) {
       IHighlightSegment next = clickablesIterator.next();
-      if (DEBUG_MATCH || true) logger.info("matchSegmentToWidgetForAudio adding left over " + next);
+      if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio adding left over " + next);
       Widget w = next.asWidget();
       w.addStyleName("floatLeft");
       clickableRow.add(w);

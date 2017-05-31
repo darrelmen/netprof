@@ -84,7 +84,7 @@ class TimeSeriesPlot extends DivWidget {
         return getErrorBarToolTip(toolTipData, seriesName1);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      //e.printStackTrace();
       return "error " + e.getMessage();
     }
   }

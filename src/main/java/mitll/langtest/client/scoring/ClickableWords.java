@@ -16,6 +16,8 @@ import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SimpleHighlightSegment;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -47,6 +49,9 @@ public class ClickableWords<T extends CommonExercise> {
 
   private static final boolean DEBUG = false;
 
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
+   */
   public ClickableWords() {
   }
 
@@ -60,7 +65,7 @@ public class ClickableWords<T extends CommonExercise> {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
-    this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN);// || language.equals(KOREAN) || isJapanese;
+    this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
     this.fontSize = fontSize;
   }
 

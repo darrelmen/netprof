@@ -59,8 +59,14 @@ public interface UILifecycle {
 
   void showInitialState();
 
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#gotClickOnFlag
+   * @param name
+   * @return
+   */
   @NotNull
   NavLink makeBreadcrumb(String name);
+  void removeLastCrumb();
 
   void clickOnParentCrumb(SlimProject parent);
 
