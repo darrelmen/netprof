@@ -115,12 +115,13 @@ public class ScoreServlet extends DatabaseServlet {
 
   public enum Request {EVENT, HASUSER, ADDUSER, ROUNDTRIP, DECODE, ALIGN, RECORD, WRITEFILE, UNKNOWN}
 
-  private JSONObject nestedChapters;
-  private JSONObject nestedChaptersEverything;
-  private long whenCached = -1;
-  private long whenCachedEverything = -1;
+  private Map<Integer, JSONObject> projectToNestedChaptersEverything = new HashMap<>();
+  private Map<Integer, Long> projectToWhenCachedEverything = new HashMap<>();
 
-  //  private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
+  private Map<Integer, JSONObject> projectToNestedChapters = new HashMap<>();
+  private Map<Integer, Long> projectToWhenCached = new HashMap<>();
+
+
   private JsonScoring jsonScoring;
 
   /**
@@ -162,9 +163,10 @@ public class ScoreServlet extends DatabaseServlet {
       String pathInfo = request.getPathInfo();
       logger.debug("ScoreServlet.doGet (" + language + "):" +
           "\n\tRequest '" + queryString + "'" +
-          "\n\tpath " + pathInfo +
-          "\n\turi " + request.getRequestURI() +
-          "\n\turl" + request.getRequestURL() + "  " + request.getServletPath());
+          "\n\tprojid " + projid +
+          "\n\tpath   " + pathInfo +
+          "\n\turi    " + request.getRequestURI() +
+          "\n\turl    " + request.getRequestURL() + "  " + request.getServletPath());
     }
 
     long then = System.currentTimeMillis();
@@ -185,10 +187,13 @@ public class ScoreServlet extends DatabaseServlet {
           boolean dontRemove = removeExercisesWithMissingAudio.equals("false");
           if (shouldRemoveExercisesWithNoAudio || dontRemove) {
             if (dontRemove) {
+              JSONObject nestedChaptersEverything = projectToNestedChaptersEverything.get(projid);
+              Long whenCachedEverything = projectToWhenCachedEverything.get(projid);
               if (nestedChaptersEverything == null ||
                   (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
                 nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio, projid);
-                whenCachedEverything = System.currentTimeMillis();
+                projectToNestedChaptersEverything.put(projid, nestedChaptersEverything);
+                projectToWhenCachedEverything.put(projid, System.currentTimeMillis());
               }
               toReturn = nestedChaptersEverything;
             } else {
@@ -198,16 +203,18 @@ public class ScoreServlet extends DatabaseServlet {
             toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
           }
         } else {
+          JSONObject nestedChapters = projectToNestedChapters.get(projid);
+          Long whenCached = projectToWhenCached.get(projid);
+
           if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
             nestedChapters = getJsonNestedChapters(true, projid);
-            whenCached = System.currentTimeMillis();
+            projectToNestedChapters.put(projid, nestedChapters);
+            projectToWhenCached.put(projid, System.currentTimeMillis());
           }
           toReturn = nestedChapters;
         }
       } else if (matchesRequest(queryString, "hasUser")) {
-
-        logger.info("got doGet " + queryString);
-
+        logger.info("got doGet hasUser " + queryString);
         checkUserAndLogin(request, toReturn);
       } else if (userManagement.doGet(
           request,
@@ -216,7 +223,7 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn,
           projid,
           passwordFromBody)) {
-        logger.info("doGet " + language + " handled user command");// for " + queryString);
+        logger.info("doGet " + language + " handled user command");
       } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
         queryString = removePrefix(queryString, CHAPTER_HISTORY);
         toReturn = getChapterHistory(queryString, toReturn, projid);
@@ -617,11 +624,11 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doPost(HttpServletRequest, HttpServletResponse)
    * @param requestType
    * @param deviceType
    * @param device
    * @param jsonObject
+   * @see #doPost(HttpServletRequest, HttpServletResponse)
    */
   private void gotUnknown(String requestType, String deviceType, String device, JSONObject jsonObject) {
     jsonObject.put(ERROR, "unknown req " + requestType);
