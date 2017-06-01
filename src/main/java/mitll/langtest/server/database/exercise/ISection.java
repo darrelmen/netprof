@@ -1,7 +1,6 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;

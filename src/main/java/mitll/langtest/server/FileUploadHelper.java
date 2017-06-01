@@ -1,11 +1,9 @@
 package mitll.langtest.server;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.DominoExerciseDAO;
 import mitll.langtest.server.database.exercise.ExcelImport;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.fileupload.FileItem;
@@ -27,19 +25,24 @@ import java.util.*;
  */
 public class FileUploadHelper {
   private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(FileUploadHelper.class);
-  private static final int MAX_FILE_SIZE = 10000000;
+  private static final int MAX_FILE_SIZE = 52428800;
   private static final String UPLOAD_FORM_NAME = "upload";
-  private DatabaseServices db;
-  private Map<Integer, Collection<CommonExercise>> idToExercises = new HashMap<>();
+  private final DatabaseServices db;
+  private final Map<Integer, Collection<CommonExercise>> idToExercises = new HashMap<>();
 
-  DominoExerciseDAO dominoExerciseDAO;
+  private final DominoExerciseDAO dominoExerciseDAO;
 
   public FileUploadHelper(DatabaseServices db, DominoExerciseDAO dominoExerciseDAO) {
     this.db = db;
     this.dominoExerciseDAO = dominoExerciseDAO;
   }
 
-  public Site gotFile(HttpServletRequest request) {
+  /**
+   * @see LangTestDatabaseImpl#service
+   * @param request
+   * @return
+   */
+  Site gotFile(HttpServletRequest request) {
     //logger.info("Getting site given config dir " + configDir);
     FileItemFactory factory = new DiskFileItemFactory();
     ServletFileUpload upload = new ServletFileUpload(factory);
@@ -77,35 +80,34 @@ public class FileUploadHelper {
     }
   }
 
-  private boolean readFormItemAndStoreInSite(Site site, FileItem item) {
-    logger.info("from http request, got " + item);
+  private void readFormItemAndStoreInSite(Site site, FileItem item) {
+    //logger.info("from http request, got " + item);
     String name = item.getFieldName();
     if (name != null) {
       if (name.toLowerCase().endsWith("projectid")) {
 //        logger.info("-------------> got siteid <----------------\n\n");
         site.id = Integer.parseInt(item.getString().trim());
-        logger.info("------------->  siteid " + site.id + "  <----------------");
-        return true;
+      //  logger.info("------------->  siteid " + site.id + "  <----------------");
+       // return true;
       } else {
         logger.info("Got " + item);
       }
     }
-    return false;
+//    return false;
   }
 
   public class Site implements IsSerializable {
     private int id;
     private int num = 0;
-
     private boolean valid = false;
 
-    public long getId() {
-      return id;
-    }
+//    public long getId() {
+//      return id;
+//    }
 
-    public void setId(int id) {
-      this.id = id;
-    }
+//    public void setId(int id) {
+//      this.id = id;
+//    }
 
     public boolean isValid() {
       return valid;
@@ -129,14 +131,15 @@ public class FileUploadHelper {
     readExercisesPopulateSite(site, item.getName(), item.getInputStream());
   }
 
+  /**
+   * Technically we can still load excel, but it's turned off in the UI.
+   * @param site
+   * @param fileName
+   * @param inputStream
+   */
   private void readExercisesPopulateSite(Site site, String fileName, InputStream inputStream) {
-    List<CommonExercise> exercises;
-    //   ExerciseDAO importer;
     if (fileName.endsWith(".json")) {
-//      FileExerciseDAO fileImporter = new FileExerciseDAO("", "", false, "", "");  //TODO fully support this
-//      exercises = fileImporter.readExercises(inputStream);
-//      importer = fileImporter;
-      readJSON(site, fileName, inputStream);
+      readJSON(site, inputStream);
     } else {
       readExcel(site, fileName, inputStream);
     }
@@ -146,7 +149,6 @@ public class FileUploadHelper {
     int id = site.id;
 
     List<String> types = getTypes(db.getProject(id));
-
     ExcelImport excelImport = new ExcelImport(fileName, db.getServerProps(), db.getUserListManager(), false) {
       @Override
       public List<String> getTypeOrder() {
@@ -154,31 +156,14 @@ public class FileUploadHelper {
       }
     };
 
-    List<CommonExercise> exercises = excelImport.readExercises(inputStream);
-
-    rememberExercises(site, id, exercises);
+    rememberExercises(site, id, excelImport.readExercises(inputStream));
   }
 
-  private void readJSON(Site site, String fileName, InputStream inputStream) {
+  private void readJSON(Site site, InputStream inputStream) {
     int id = site.id;
-
     Project project = db.getProject(id);
-//    List<String> types = getTypes(project);
-
     DominoExerciseDAO.Info info = dominoExerciseDAO.readExercises(null, inputStream, project.getID(), db.getUserDAO().getImportUser());
-
-    // todo remember the info.
-
-//    ExcelImport excelImport = new ExcelImport(fileName, db.getServerProps(), db.getUserListManager(), false) {
-//      @Override
-//      public List<String> getTypeOrder() {
-//        return types;
-//      }
-//    };
-
-//    List<CommonExercise> exercises = excelImport.readExercises(inputStream);
-
-    logger.info("Got " +info);
+//    logger.info("Got " +info);
     rememberExercises(site, id, info.getExercises());
   }
 
@@ -230,7 +215,7 @@ public class FileUploadHelper {
     return idToExercises.get(projid);
   }
 
-  public void forgetExercises(int projid) {
-    idToExercises.remove(projid);
-  }
+//  public void forgetExercises(int projid) {
+//    idToExercises.remove(projid);
+//  }
 }

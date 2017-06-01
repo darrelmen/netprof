@@ -53,9 +53,9 @@ class DominoReader {
     //  logger.info("got language " + npLang);
     boolean isLTR = language.get("direction").equals("LTR");
     String systemFontNames = language.getString("systemFontNames");
-    serverProps.setFontFamily(systemFontNames);
+  //  serverProps.setFontFamily(systemFontNames);
     String fontFaceURL = language.getString("fontFaceURL");
-    serverProps.setFontFaceURL(fontFaceURL);
+  //  serverProps.setFontFaceURL(fontFaceURL);
     serverProps.setRTL(!isLTR);
   }
 }

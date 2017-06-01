@@ -92,23 +92,23 @@ public class ServerProperties {
   private static final String USE_H_2 = "useH2";
   private static final String USE_POSTGRE_SQL = "usePostgreSQL";
   //private static final String TYPE_ORDER = "typeOrder";
-  @Deprecated
-  private static final String FONT_FAMILY = "fontFamily";
+  //@Deprecated
+  //private static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   public static final String MODELS_DIR = "MODELS_DIR";
   private static final String DB_CONFIG = "dbConfig";
   private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES = "postgres";
 
-  public static final String CONFIG = "config";
-  public static final String CONFIG_JSON = "config.json";
+  //public static final String CONFIG = "config";
+  //public static final String CONFIG_JSON = "config.json";
 
   private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
   private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
   private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
   private static final String APPLICATION_CONF = "/opt/netprof/config/application.conf";
-  public static final String RELEASE_DATE = "releaseDate";
+  private static final String RELEASE_DATE = "releaseDate";
 
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
@@ -149,7 +149,7 @@ public class ServerProperties {
   private static final String DO_TRIM = "dotrim";
 
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
-  private static final String ADD_MISSING_INFO = "addMissingInfo";
+  //private static final String ADD_MISSING_INFO = "addMissingInfo";
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
@@ -468,7 +468,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode
+   * @seex mitll.langtest.server.decoder.RefResultDecoder#doRefDecode
    */
   public boolean shouldTrimAudio() {
     return getDefaultFalse(DO_TRIM);
@@ -573,11 +573,11 @@ public class ServerProperties {
     String lessonPlan = getLessonPlan();
     if (lessonPlan != null && lessonPlan.startsWith("http")) props.setProperty("talksToDomino", TRUE);
 
-    if (getFontFamily() != null) {
+/*    if (getFontFamily() != null) {
       props.setProperty(FONT_FAMILY, getFontFamily());
       logger.info(FONT_FAMILY +
           "=" + getFontFamily() + " : " + props.getProperty(FONT_FAMILY));
-    }
+    }*/
   }
 
   private void setReleaseDate(String dateFromManifest) {
@@ -708,9 +708,9 @@ public class ServerProperties {
     return getDefaultFalse(USE_PHONE_TO_DISPLAY);
   }
 
-  public boolean addMissingInfo() {
-    return getDefaultFalse(ADD_MISSING_INFO);
-  }
+//  public boolean addMissingInfo() {
+//    return getDefaultFalse(ADD_MISSING_INFO);
+//  }
 
   // EMAIL ------------------------
 
@@ -821,6 +821,7 @@ public class ServerProperties {
     props.setProperty("rtl", isRTL ? "true" : "false");
   }
 
+/*
   public void setFontFamily(String fontNames) {
     this.fontFamily = fontNames;
     props.setProperty(FONT_FAMILY, fontNames);
@@ -837,6 +838,7 @@ public class ServerProperties {
   public String getFontFaceURL() {
     return fontFaceURL;
   }
+*/
 
   /**
    * Something like : "https://domino-devel/dominoNP/attach/"

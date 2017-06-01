@@ -54,9 +54,9 @@ import java.io.*;
 public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = LogManager.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
-  protected DatabaseImpl db = null;
-  protected ServerProperties serverProps;
-  protected PathHelper pathHelper;
+  DatabaseImpl db = null;
+  ServerProperties serverProps;
+  PathHelper pathHelper;
   IUserSecurityManager securityManager;
 
   /**
@@ -137,7 +137,7 @@ public class DatabaseServlet extends HttpServlet {
    * @see #getProject
    * @return
    */
-  protected DatabaseImpl getDatabase() {
+  DatabaseImpl getDatabase() {
     if (db == null) {
       Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
       if (databaseReference != null) {

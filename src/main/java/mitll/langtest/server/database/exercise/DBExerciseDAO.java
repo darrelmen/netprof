@@ -50,9 +50,9 @@ import java.util.stream.Collectors;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
-  private SlickUserExerciseDAO userExerciseDAO;
-  private SlickProject project;
-  private Project fullProject;
+  private final SlickUserExerciseDAO userExerciseDAO;
+  private final SlickProject project;
+  private final Project fullProject;
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO

@@ -65,27 +65,27 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   private final ISection<CommonExercise> sectionHelper = new SectionHelper<>();
 
-  protected final String language;
-  protected final ServerProperties serverProps;
+  final String language;
+  final ServerProperties serverProps;
   private final IUserListManager userListManager;
   private final boolean addDefects;
 
   private List<CommonExercise> exercises = null;
-  protected AddRemoveDAO addRemoveDAO;
+   AddRemoveDAO addRemoveDAO;
   /**
    * @see #addNewExercises
    * @see #addOverlays
    * @see #setDependencies
    */
-  protected IUserExerciseDAO userExerciseDAO;
+   IUserExerciseDAO userExerciseDAO;
   /**
    * TODO : what's the story here?
-   * @see #attachAudio
+   * @seex #attachAudio
    *
    */
-  private AttachAudio attachAudio;
+  //private AttachAudio attachAudio;
   private IAudioDAO audioDAO;
-  private final int id;
+  //private final int id;
 
   /**
    * @param serverProps
@@ -103,7 +103,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     this.userListManager = userListManager;
     this.language = language;
     this.addDefects = addDefects;
-    this.id = id;
+    //this.id = id;
 //    logger.debug("\n\n\nlanguage is " + language);
   }
 
@@ -172,65 +172,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    // attachAudio();
   }
 
-  /**
-   * Is this kosher to do - exToAudio
-   * Worry about if the audio transcript doesn't match the exercise transcript
-   *
-   * @see #setAudioDAO
-   * @see #afterReadingExercises
-   */
- /* private void attachAudio() {
-    Set<Integer> transcriptChanged = new HashSet<>();
 
-    logger.info("attachAudio afterReadingExercises trying to attach audio to " + exercises.size() + " with project id " + id);
-
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(id);
-
-    attachAudio.attachAllAudio(exercises, exToAudio, transcriptChanged);
-
-    //consistencyCheck();
-
-    if (!transcriptChanged.isEmpty()) {
-      logger.info("attachAudio afterReadingExercises : found " + transcriptChanged.size() + " changed transcripts in set of " + exercises.size() + " items");
-    }
-  }*/
-
- /* private void attachAllAudio(Set<Integer> transcriptChanged) {
-    int c = 0;
-
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(id);
-
-    attachAudio.setExToAudio(exToAudio, getMultiPronWords(exercises));
-
-    Set<String> allTranscripts = new HashSet<>();
-    for (List<AudioAttribute> audioAttributes : exToAudio.values()) {
-      for (AudioAttribute audioAttribute : audioAttributes) {
-        allTranscripts.add(audioAttribute.getTranscript().toLowerCase());
-      }
-    }
-    for (CommonExercise ex : exercises) {
-      attachAudio.attachAudio(ex, transcriptChanged);
-
-      Collection<AudioAttribute> audioAttributes = ex.getAudioAttributes();
-      for (AudioAttribute audioAttribute : audioAttributes) {
-        allTranscripts.remove(audioAttribute.getTranscript().toLowerCase());
-      }
-
- *//*     if (i < 25) {
-        if (c++ < 25) {
-          logger.warn(language + " (" + exercises.size() +
-              ") -----------> adding old school audio for " + ex.getID() + " : " + serverProps.getLessonPlan());
-        }
-        String refAudioIndex = ex.getRefAudioIndex();
-        if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
-          attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
-        }
-      }*//*
-    }
-
-    logger.info("attachAudio found " + allTranscripts.size() + " orphan audio cuts - ");// + allTranscripts);
-  }
-*/
   /**
    * @return
    * @see DatabaseImpl#getSectionHelper(int)
@@ -251,7 +193,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param projectID
    * @see #setDependencies
    */
-  protected void setAudioDAO(IAudioDAO audioDAO, int projectID) {
+  void setAudioDAO(IAudioDAO audioDAO, int projectID) {
     this.audioDAO = audioDAO;
     if (!serverProps.isLaptop()) {
       logger.info("setAudioDAO makeSureAudioIsThere " + projectID);
@@ -275,86 +217,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     int listSize = exercises.size();
     int mapSize = idToExercise.size();
     if (listSize != mapSize) {
-      logger.warn(listSize + " but id->ex " + mapSize);
+      logger.warn("populateIdToExercise exercises num = " +listSize + " but id->ex " + mapSize);
     }
   }
 
-  /**
-   * So the story is we get the user exercises out of the database on demand.
-   * <p>
-   * We need to join with the audio table entries every time - why? worried about recording happening concurrently?
-   * <p>
-   * TODO : also, this a lot of work just to get the one ref audio recording.
-   *
-   * @param all
-   * @seex DatabaseImpl#getExerciseIDToRefAudio
-   */
-/*  public void attachAudio(Collection<CommonExercise> all) {
-    int projectid = all.isEmpty() ? -1 : all.iterator().next().getProjectID();
-    logger.info("attachAudio (" + projectid +
-        ")" +
-        " attach audio to " + all.size() + " exercises");
-
-    attachAudio.setExToAudio(audioDAO.getExToAudio(projectid), attachAudio.getMultiPronWords(all));
-    int user = 0;
-    int examined = 0;
-
-    Collection<Integer> transcriptChanged = new HashSet<>();
-
-    // latchy...
-    for (CommonExercise ex : all) {
-      if (!ex.hasRefAudio()) {
-        attachAudio.attachAudio(ex, transcriptChanged);
-        examined++;
-        if (!ex.hasRefAudio()) user++;
-      }
-    }
-    if (user > 0) {
-      logger.info("attachAudio out of " + exercises.size() + //" " + missing +
-          " are missing ref audio, out of " + examined +
-          " user exercises missing = " + user);
-    }
-
-    if (!transcriptChanged.isEmpty()) {
-      logger.info("attachAudio : found " + transcriptChanged.size() + " changed transcripts in set of " +
-          exercises.size() + " items");
-    }
-  }*/
-
-  /**
-   * Get set of fl words have multiple english equivalents.
-   * <p>
-   * Not sure why we have to recalc it all the time.
-   * <p>
-   * So perhaps if french "livre" appears as livre-book, livre-magazine you wouldn't want to
-   * use the audio for the first occurence if you don't have it for the second occurence.
-   *
-   * @param all
-   * @return
-   */
-/*  public Set<String> getMultiPronWords(Collection<CommonExercise> all) {
-    Map<String, String> seen = new HashMap<>();
-    Set<String> multiPron = new HashSet<>();
-
-    long then = System.currentTimeMillis();
-    for (CommonExercise ex : all) {
-      String foreignLanguage = ex.getForeignLanguage();
-      String english = seen.get(foreignLanguage);
-      String english1 = ex.getEnglish();
-      if (english != null && !english.equals(english1)) {
-        multiPron.add(foreignLanguage);
-//        logger.info("getMultiPronWords before " + foreignLanguage + " eng " + english + " vs " + english1);
-      }
-      seen.put(foreignLanguage, english1);
-    }
-
-    long now = System.currentTimeMillis();
-
-    if (now - then > 100) logger.info("took " + (now - then) + " to get " + multiPron.size() +
-        "  multi def words ");
-
-    return multiPron;
-  }*/
 
   /**
    * TODO : better to use a filter

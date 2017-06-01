@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Created by go22670 on 2/3/17.
  */
-public class JsonConfigReader {
+class JsonConfigReader {
   private static final String AFFLIATIONS = "affliations";
   private static final String ABBREVIATION = "abbreviation";
   private static final String DISPLAY_NAME = "displayName";

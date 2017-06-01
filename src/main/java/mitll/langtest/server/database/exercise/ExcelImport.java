@@ -83,15 +83,15 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private static final String MEANING = "meaning";
   private static final String ID = "id";
   private static final String WORD = "word";
-  public static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
-  public static final String UNIT = "unit";
-  public static final String BOOK = "book";
-  public static final String CHAPTER = "chapter";
-  public static final String LESSON = "lesson";
-  public static final String OTHER = "Other";
-  public static final String EN_TRANSLATION = "EN Translation";
-  public static final String ENGLISH = "English";
-  public static final String WEEK = "week";
+  private static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
+  private static final String UNIT = "unit";
+  private static final String BOOK = "book";
+  private static final String CHAPTER = "chapter";
+  private static final String LESSON = "lesson";
+  private static final String OTHER = "Other";
+  private static final String EN_TRANSLATION = "EN Translation";
+  private static final String ENGLISH = "English";
+  private static final String WEEK = "week";
 
   private final List<String> errors = new ArrayList<String>();
   private final String file;
@@ -537,7 +537,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return colNormalized.startsWith(WORD) || colNormalized.equalsIgnoreCase(ENGLISH);
   }
 
-  private Set<String> toSkip = new HashSet<>(Arrays.asList("Translation".toLowerCase(), "Transliteration".toLowerCase()));
+  private final Set<String> toSkip = new HashSet<>(Arrays.asList("Translation".toLowerCase(), "Transliteration".toLowerCase()));
 
   private void addColToHeaderForProperty(Map<Integer, String> colToHeader, String col, int i) {
     String s = language.toLowerCase();

@@ -57,7 +57,7 @@ import java.util.*;
 public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
   private static final Logger logger = LogManager.getLogger(AMASJSONURLExerciseDAO.class);
 
-  public static final String ENGLISH = "english";
+  //public static final String ENGLISH = "english";
   private static final String ATT_LST = "att-lst";
 
   private final Map<String, AmasExerciseImpl> idToExercise = new HashMap<>();

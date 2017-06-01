@@ -1,6 +1,5 @@
 package mitll.langtest.server.database.exercise;
 
-import mitll.hlt.domino.server.util.Mongo;
 import mitll.hlt.domino.shared.model.SimpleHeadDocumentRevision;
 import mitll.hlt.domino.shared.model.document.*;
 import mitll.hlt.domino.shared.model.metadata.Language;
@@ -13,14 +12,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.tools.cmd.gen.AnyVals;
 
 import javax.json.*;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
-import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Vocabulary;
 
@@ -29,7 +28,7 @@ import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Voc
  */
 public class DominoExerciseDAO {
   private static final Logger logger = LogManager.getLogger(DominoExerciseDAO.class);
-  private JSONSerializer ser;
+  private final JSONSerializer ser;
 
   /**
    * @param serializer
@@ -39,14 +38,14 @@ public class DominoExerciseDAO {
   }
 
   public static class Info {
-    private Date createTime;
-    private Date modifiedTime;
-    private List<CommonExercise> exercises;
+    private final Date createTime;
+    private final Date modifiedTime;
+    private final List<CommonExercise> exercises;
 
-    private String language;
-    private mitll.langtest.shared.project.Language lang;
+    private final String language;
+    private final mitll.langtest.shared.project.Language lang;
 
-    private int dominoID;
+    private final int dominoID;
 
     public Info(Date exportTime, Date updateTime,
                 List<CommonExercise> exercises,

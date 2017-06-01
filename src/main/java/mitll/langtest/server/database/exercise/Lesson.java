@@ -45,9 +45,9 @@ import java.util.*;
  * Time: 7:14 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Lesson<T extends Shell> {
+class Lesson<T extends Shell> {
   private final List<T> exerciseList = new ArrayList<>();
-  private String unit;
+  private final String unit;
 
   /**
    * @see SectionHelper#addUnitNameEntry(Shell, String, Map)

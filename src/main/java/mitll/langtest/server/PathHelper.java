@@ -58,7 +58,7 @@ public class PathHelper {
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
   private static final String IMAGE_OUTDIR = "imageOutdir";
-  public static final String ANSWER = "answer_";
+  private static final String ANSWER = "answer_";
 
   private String realContextPathTest;
   private final ServletContext context;

@@ -73,14 +73,14 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
   //private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
-  public static final String USERS = "users";
-  public static final String RESULTS = "results";
-  public static final String EVENTS = "events";
-  public static final String REQUEST = "request";
-  public static final String MALE = "male=";
-  public static final String REGULAR = "regular=";
-  public static final String CONTEXT = "context=";
-  public static final String ALLCONTEXT = "allcontext";
+  private static final String USERS = "users";
+  private static final String RESULTS = "results";
+  private static final String EVENTS = "events";
+  private static final String REQUEST = "request";
+  private static final String MALE = "male=";
+  private static final String REGULAR = "regular=";
+  private static final String CONTEXT = "context=";
+  private static final String ALLCONTEXT = "allcontext";
 
   /**
    * This is getting complicated.

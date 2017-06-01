@@ -115,11 +115,11 @@ public class ScoreServlet extends DatabaseServlet {
 
   public enum Request {EVENT, HASUSER, ADDUSER, ROUNDTRIP, DECODE, ALIGN, RECORD, WRITEFILE, UNKNOWN}
 
-  private Map<Integer, JSONObject> projectToNestedChaptersEverything = new HashMap<>();
-  private Map<Integer, Long> projectToWhenCachedEverything = new HashMap<>();
+  private final Map<Integer, JSONObject> projectToNestedChaptersEverything = new HashMap<>();
+  private final Map<Integer, Long> projectToWhenCachedEverything = new HashMap<>();
 
-  private Map<Integer, JSONObject> projectToNestedChapters = new HashMap<>();
-  private Map<Integer, Long> projectToWhenCached = new HashMap<>();
+  private final Map<Integer, JSONObject> projectToNestedChapters = new HashMap<>();
+  private final Map<Integer, Long> projectToWhenCached = new HashMap<>();
 
 
   private JsonScoring jsonScoring;
