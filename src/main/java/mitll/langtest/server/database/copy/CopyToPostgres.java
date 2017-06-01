@@ -321,12 +321,12 @@ public class CopyToPostgres<T extends CommonShell> {
 
   @NotNull
   private Map<Integer, Integer> copyWordsAndGetIDMap(DatabaseImpl db, Map<Integer, Integer> oldToNewResult) {
-    logger.info("oldToNewResult " + oldToNewResult.size());
+    logger.info("copyWordsAndGetIDMap oldToNewResult " + oldToNewResult.size());
     SlickWordDAO slickWordDAO = (SlickWordDAO) db.getWordDAO();
     copyWord(db, oldToNewResult, slickWordDAO);
 
     Map<Integer, Integer> oldToNewWordID = slickWordDAO.getOldToNew();
-    logger.info("old to new word id  " + oldToNewWordID.size());
+    logger.info("copyWordsAndGetIDMap old to new word id  " + oldToNewWordID.size());
     return oldToNewWordID;
   }
 
@@ -559,13 +559,12 @@ public class CopyToPostgres<T extends CommonShell> {
       int oldID = join.userlistid;
       Integer userListID = oldToNewUserList.get(oldID);
       if (userListID == null) {
-        logger.error("UserListManager join can't find user list " + oldID + " in " + oldToNewUserList.size());
+        logger.error("copyUserExerciseListJoin UserListManager join can't find user list " + oldID + " in " + oldToNewUserList.size());
       } else {
-
         String exerciseID = join.exerciseID;
         Integer id = exToInt.get(exerciseID);
 //        CommonExercise customOrPredefExercise = null;
-        if (id == null) logger.error("Can't find " + exerciseID);
+        if (id == null) logger.error("copyUserExerciseListJoin Can't find exercise " + exerciseID + " in " + exToInt.size() + " ex->int map");
         else {
           //customOrPredefExercise = db.getCustomOrPredefExercise(projectid, id);
           slickUserListExerciseJoinDAO.addPair(userListID, id);

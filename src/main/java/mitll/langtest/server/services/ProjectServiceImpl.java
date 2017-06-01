@@ -32,17 +32,14 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
-import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -63,7 +60,6 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
-
 
   @Override
   public List<ProjectInfo> getAll() {
@@ -121,13 +117,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    */
   @Override
   public boolean update(ProjectInfo info) {
-    Project currentProject = db.getProject(info.getID());
-    boolean wasRetired = getWasRetired(currentProject);
-
+    //Project currentProject = db.getProject(info.getID());
+    //boolean wasRetired = getWasRetired(currentProject);
     // logger.info("update " +info);
     boolean update = getProjectDAO().update(getUserIDFromSession(), info);
-    if (update && wasRetired) {
-      db.configureProject(db.getProject(info.getID()), false);
+    if (update/* && wasRetired*/) {
+      db.configureProject(db.getProject(info.getID()), true);
     }
     db.getProjectManagement().refreshProjects();
     return update;
@@ -142,11 +137,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   private void setDefaultsIfMissing(ProjectInfo newProject) {
-    Project max = null;
     try {
-      max = db.getProjectManagement().getProductionProjects().stream()
+      Project max = db.getProjectManagement().getProductionProjects().stream()
           .filter(project -> project.getLanguage().equals(newProject.getLanguage()) && project.getModelsDir() != null)
-          .max((p1, p2) -> Long.compare(p1.getProject().modified().getTime(), p2.getProject().modified().getTime()))
+          .max(Comparator.comparingLong(p -> p.getProject().modified().getTime()))
           .get();
 
       newProject.setModelsDir(max.getModelsDir());

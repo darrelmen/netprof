@@ -105,6 +105,12 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return !dao.byID(projid).isEmpty();
   }
 
+  /**
+   * @see mitll.langtest.server.services.ProjectServiceImpl#update
+   * @param userid
+   * @param projectInfo
+   * @return
+   */
   @Override
   public boolean update(int userid, ProjectInfo projectInfo) {
     int projid = projectInfo.getID();
@@ -114,7 +120,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     Timestamp created = new Timestamp(projectInfo.getCreated());
     Timestamp now     = new Timestamp(System.currentTimeMillis());
 
-    //logger.info("update" + projectInfo);
     SlickProject changed = new SlickProject(projid,
         userid,
         created,
@@ -131,12 +136,10 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         project.dominoid(),
         projectInfo.getDisplayOrder()
     );
-   // logger.info("changed" + changed);
-
     boolean didChange = dao.update(changed) > 0;
 
     if (!didChange) {
-      logger.error("didn't update " + projectInfo + " for current " + currentProject);
+      logger.error("update : didn't update " + projectInfo + " for current " + currentProject);
     }
 
     addOrUpdate(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());

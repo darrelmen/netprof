@@ -19,31 +19,32 @@ import mitll.langtest.client.user.UserDialog;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.SlimProject;
 
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 1/17/17.
  */
-class ProjectEditForm extends UserDialog {
-  public static final String HYDRA_PORT = "Hydra Port";
-  public static final String LANGUAGE_MODEL = "Language Model";
+public class ProjectEditForm extends UserDialog {
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
-  private static final int MIN_LENGTH_USER_ID = 4;
-  static final int USER_ID_MAX_LENGTH = 5;
+  private static final String HYDRA_PORT = "Hydra Port";
+  private static final String LANGUAGE_MODEL = "Language Model";
 
-  // private final EventRegistration eventRegistration;
+  private static final int MIN_LENGTH_USER_ID = 4;
+  private static final int USER_ID_MAX_LENGTH = 5;
+
   private final LifecycleSupport lifecycleSupport;
   private ListBox statusBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
-  private AudioServiceAsync audioServiceAsync;
-  private ScoringServiceAsync scoringServiceAsync;
+  private final AudioServiceAsync audioServiceAsync;
+  private final ScoringServiceAsync scoringServiceAsync;
 
   private HTML feedback;
   private FormField hydraPort, nameField, unit, chapter;
-  ListBox language;
+  private ListBox language;
   private FormField model;
 
   /**
@@ -63,8 +64,7 @@ class ProjectEditForm extends UserDialog {
    * @param info
    * @param isNew
    * @return
-   * @see ProjectContainer#gotClickOnItem
-   * @see ProjectChoices#getEditButton
+   * @see ProjectChoices#showEditDialog
    */
   Widget getForm(ProjectInfo info, boolean isNew) {
     this.info = info;
@@ -166,7 +166,7 @@ class ProjectEditForm extends UserDialog {
     });
   }
 
-  DivWidget getHDiv(Widget left) {
+  private DivWidget getHDiv(Widget left) {
     DivWidget hdiv = new DivWidget();
     hdiv.addStyleName("inlineFlex");
     hdiv.add(left);

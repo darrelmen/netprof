@@ -696,12 +696,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
+   * Remove arabic comma
    * Remove arabic question mark...
    * exclamation point
    * chinese fill with comma
    * ideographic comma
    * right double quote
    * double quote
+   *
    * @param t
    * @return
    * @see #doOneToManyMatch
@@ -709,7 +711,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private String removePunct(String t) {
     return fromFull(t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("['%\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
+        .replaceAll("['%\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
   }
 
   /**

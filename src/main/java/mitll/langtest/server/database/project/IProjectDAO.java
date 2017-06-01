@@ -50,14 +50,15 @@ public interface IProjectDAO extends IDAO {
 
   /**
    * @return
-   * @see ProjectManagement#populateProjects
    * @seex LangTestDatabaseImpl#getNestedProjectInfo
+   * @see ProjectManagement#populateProjects
    */
   Collection<SlickProject> getAll();
 
   void addProperty(int projid, String key, String value, String propertyType, String parent);
 
   int getByName(String name);
+
   int getByLanguage(String language);
 
   SlickProject mostRecentByUser(int user);
@@ -70,5 +71,5 @@ public interface IProjectDAO extends IDAO {
 
   boolean exists(int projid);
 
-  boolean update(int userid,ProjectInfo projectInfo);
+  boolean update(int userid, ProjectInfo projectInfo);
 }

@@ -712,18 +712,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   private void makeExerciseDAO(String lessonPlanFile) {
 //    logger.info("makeExerciseDAO - " + lessonPlanFile + " : use h2 = " + serverProps.useH2());
-    /*if (isURL) {
-      projectManagement.addSingleProject(new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS));
-    } else*/
-    if (!serverProps.useH2()) {
-//      projectManagement.setExerciseDAOs();
-/*
-    } else if (lessonPlanFile.endsWith(".json")) {
-      logger.info("got " + lessonPlanFile);
-      JSONExerciseDAO jsonExerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
-      projectManagement.addSingleProject(jsonExerciseDAO);
-      */
-    } else {
+    if (serverProps.useH2()) {
       logger.info("makeExerciseDAO reading from excel sheet " + lessonPlanFile);
       projectManagement.addSingleProject(new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS));
     }

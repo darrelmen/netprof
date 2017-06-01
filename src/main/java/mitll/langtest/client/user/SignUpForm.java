@@ -80,8 +80,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String USERNAME = "Username";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
   private static final String VALID_EMAIL = "Please enter a valid email address.";
-  //  private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
-  private static final String SIGN_UP_WIDTH = "266px";
+   private static final String SIGN_UP_WIDTH = "266px";
   private static final int USERNAME_WIDTH = 25;
   private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";

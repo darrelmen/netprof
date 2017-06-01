@@ -249,17 +249,6 @@ public abstract class Analysis extends DAO {
   }
 
   /**
-   * @paramx id
-   * @paramx projid
-   * @paramx minRecordings
-   * @return
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#getWordScores
-   */
-/*
-  public abstract List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings);
-*/
-
-  /**
    * @param best
    * @return
    * @see SlickAnalysis#getWordScoresForUser(long, int)

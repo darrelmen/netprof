@@ -127,19 +127,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     fileToDuration = CacheBuilder.newBuilder().maximumSize(100000).build();
 
     this.project = project;
-    String ip = getWebserviceIP();
     int port = getWebservicePort();
 
     if (port != -1) {
       setAvailable();
+
+      String ip = getWebserviceIP();
       if (!available) {
         logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port);
       } else {
         logger.info("\n\nASRWebserviceScoring CAN talk to " + ip + ":" + port);
       }
     }
-
-    //HTTPClient httpClient = getDcodr();
   }
 
   private int getWebservicePort() {

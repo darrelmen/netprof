@@ -344,8 +344,7 @@ public class ProjectManagement implements IProjectManagement {
     Map<Integer, SlickProject> idToSlickProject = getIdToProjectMap();
 
     for (Project project : idToProject.values()) {
-      SlickProject project1 = project.getProject();
-      SlickProject update = idToSlickProject.get(project1.id());
+      SlickProject update = idToSlickProject.get(project.getProject().id());
       //logger.info("refreshProjects Was " + project.getProject() + " " + project.isNoModel());
       project.setProject(update);
       //logger.info("refreshProjects Now " + project.getProject() + " " + project.isNoModel());
