@@ -581,8 +581,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     signUp.setEnabled(false);
 
     SignUpUser newUser = new SignUpUser(user,
-        //rot13(freeTextPassword),
-        //Md5Hash.getHash(signUpPassword.getSafeText()),
         Md5Hash.getHash(email),
         email,
         selectedRole, //always student
@@ -624,7 +622,6 @@ public class SignUpForm extends UserDialog implements SignUp {
           @Override
           public void onSuccess(LoginResult result) {
             signUp.setEnabled(true);
-
             handleAddUserResponse(result, user);
           }
         });

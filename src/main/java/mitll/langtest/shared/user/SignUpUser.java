@@ -37,8 +37,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class SignUpUser implements IsSerializable {
   private String userID;
 
-  // private String freeTextPassword;
-  //private String passwordH;
   private String emailH;
   private String email;
   private User.Kind kind;
@@ -69,7 +67,7 @@ public class SignUpUser implements IsSerializable {
    * @param first
    * @param last
    * @param url
-   * @paramx passwordH
+
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   public SignUpUser(String userID,
@@ -88,8 +86,7 @@ public class SignUpUser implements IsSerializable {
                     String last, String url,
                     String affiliation) {
     this.userID = userID;
-   // this.passwordH = passwordH;
-    // this.freeTextPassword = freeTextPassword;
+
     this.emailH = emailH;
     this.email = email;
     this.kind = kind;
@@ -109,11 +106,6 @@ public class SignUpUser implements IsSerializable {
     return userID;
   }
 
-/*
-  public String getPasswordH() {
-    return passwordH;
-  }
-*/
 
   /**
    * @return
@@ -183,6 +175,10 @@ public class SignUpUser implements IsSerializable {
     return url;
   }
 
+  /**
+   * @see mitll.langtest.server.database.user.BaseUserDAO#addUserAndGetID(SignUpUser)
+   * @return
+   */
   public String getAffiliation() {
     return affiliation;
   }
@@ -190,7 +186,5 @@ public class SignUpUser implements IsSerializable {
   public MiniUser.Gender getRealGender() {
     return realGender;
   }
-//  public void setRealGender(MiniUser.Gender realGender) {
-//    this.realGender = realGender;
-//  }
+
 }

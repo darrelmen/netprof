@@ -41,7 +41,6 @@ public class JsonConfigReader {
       JsonArray config = parse.getAsJsonArray(CONFIG);
 
       for (JsonElement elem : config) {
-
         JsonObject asJsonObject = elem.getAsJsonObject();
         if (asJsonObject.has(AFFLIATIONS)) {
           JsonElement affiliations1 = asJsonObject.get(AFFLIATIONS);

@@ -532,13 +532,13 @@ public class RestUserManagement {
 
     User existingUser = db.getUserDAO().getUserByID(user);
 
-    logger.info("addUser user " + user +
-        //" pass " + passwordH +
-        " match " + existingUser);
+    logger.info("addUser user " + user + " match " + existingUser);
     int projid = -1;
     try {
       String project = request.getHeader("projid");
-      projid = Integer.parseInt(project); // TODO : figure out which project a user is in right now
+      if (project != null) {
+        projid = Integer.parseInt(project); // TODO : figure out which project a user is in right now
+      }
     } catch (NumberFormatException e) {
       logger.error("Got " + e, e);
     }
@@ -559,7 +559,7 @@ public class RestUserManagement {
             " age " + age + " dialect " + dialect);
 
         User user1 = null;
-        String appURL = serverProps.getAppURL();
+        //String appURL = serverProps.getAppURL();
         if (age != null && gender != null && dialect != null) {
           try {
             int age1 = Integer.parseInt(age);
@@ -578,7 +578,7 @@ public class RestUserManagement {
                 device,
                 "",
                 "",
-                appURL,
+                serverProps.getAppURL(),
                 "OTHER");
 //            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
 //                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
@@ -588,18 +588,7 @@ public class RestUserManagement {
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          // String gender = request.getHeader(GENDER);
-          String first = request.getHeader("first");
-          String last = request.getHeader("last");
-          String affiliation = request.getHeader("affiliation");
-
-          boolean isMale = gender == null ? false : gender.equalsIgnoreCase("male");
-          SignUpUser user2 = new SignUpUser(user,
-              emailH, email,
-              User.Kind.STUDENT,
-              isMale,
-              isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, "", deviceType, device, first, last, appURL, affiliation);
-          user1 = getUserManagement().addUser(user2);
+          user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
         }
 
         if (user1 == null) { // how could this happen?
@@ -622,6 +611,28 @@ public class RestUserManagement {
         jsonObject.put(USERID, existingUser.getID());
       }
     }
+  }
+
+  private User addUserFromIPAD(HttpServletRequest request,
+                               String deviceType, String device,
+                               String user, String gender, String emailH, String email) {
+    User user1;
+    String appURL = request.getRequestURL().toString().replaceAll(request.getServletPath(), "");
+
+    logger.info("AppURL " + appURL);
+    // String gender = request.getHeader(GENDER);
+    String first = request.getHeader("first");
+    String last = request.getHeader("last");
+    String affiliation = request.getHeader("affiliation");
+
+    boolean isMale = gender == null ? false : gender.equalsIgnoreCase("male");
+    SignUpUser user2 = new SignUpUser(user,
+        emailH, email,
+        User.Kind.STUDENT,
+        isMale,
+        isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, "", deviceType, device, first, last, appURL, affiliation);
+    user1 = getUserManagement().addUser(user2);
+    return user1;
   }
 
   private UserManagement getUserManagement() {

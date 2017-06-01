@@ -186,7 +186,7 @@ public abstract class BaseUserDAO extends DAO {
    */
   private int addUserAndGetID(SignUpUser user) {
     return addUser(user.getAge(),
-        user.getRealGender(),// ? MALE : FEMALE,
+        user.getRealGender(),
         0,
         user.getIp(),
         "",
@@ -196,8 +196,6 @@ public abstract class BaseUserDAO extends DAO {
         true,
         Collections.emptyList(),
         user.getKind(),
-        // user.getFreeTextPassword(),
-        // user.getPasswordH(),
 
         user.getEmailH(),
         user.getEmail(),
@@ -292,8 +290,7 @@ public abstract class BaseUserDAO extends DAO {
    * @param last
    * @param url
    * @return
-   * @paramx freeTextPassword
-   * @paramx passwordH
+
    * @see #addShellUser
    * @see #addUserAndGetID
    */
@@ -309,8 +306,7 @@ public abstract class BaseUserDAO extends DAO {
                        Collection<User.Permission> permissions,
                        User.Kind kind,
 
-                       //   @Deprecated  String freeTextPassword,
-                       //  String passwordH,
+
                        String emailH,
                        String email,
                        String device,

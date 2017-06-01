@@ -16,7 +16,7 @@ public class Affiliation implements HasID {
   }
 
   /**
-   * @see mitll.langtest.server.ServerProperties#getAffiliations(File)
+   * @see mitll.langtest.server.JsonConfigReader#getAffiliations
    * @param id
    * @param abb
    * @param disp
@@ -26,11 +26,6 @@ public class Affiliation implements HasID {
     this.abb = abb;
     this.disp = disp;
   }
-/*
-  @Override
-  public String getOldID() {
-    return null;
-  }*/
 
   @Override
   public int getID() {
@@ -42,10 +37,7 @@ public class Affiliation implements HasID {
     return Integer.compare(id, o.getID());
   }
 
-  public String getAbb() {
-    return abb;
-  }
-
+  public String getAbb() {   return abb;  }
   public String getDisp() {
     return disp;
   }

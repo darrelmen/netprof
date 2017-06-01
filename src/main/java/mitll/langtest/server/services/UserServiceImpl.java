@@ -34,6 +34,7 @@ package mitll.langtest.server.services;
 
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
@@ -91,7 +92,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     logger.info("sub " + subject);*/
 
-//      logger.info("loginUser : userid " + userId);// + " password '" + attemptedHashedPassword + "'");
       return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session);
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -188,7 +188,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   @Override
   public LoginResult addUser(SignUpUser user, String url) {
-    UserManagement userManagement = db.getUserManagement();
     User userByID = getUserByID(user.getUserID());
 
     if (userByID != null) {
@@ -205,7 +204,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         return new LoginResult(userByID, LoginResult.ResultType.Updated);
       }
     } else {
-      User newUser = userManagement.addUser(getThreadLocalRequest(), user);
+      User newUser = db.getUserManagement().addUser(getThreadLocalRequest(), user);
 
       if (newUser == null) {
         logger.error("addUser somehow couldn't add " + user.getUserID());
@@ -226,7 +225,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @return
-   * @see UserTable#showDialog
+   * @see UserTable#showUsers(UserServiceAsync)
    */
   public List<User> getUsers() {
     return db.getUserManagement().getUsers();
@@ -248,24 +247,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see mitll.langtest.client.user.SendResetPassword#onChangePassword
    */
   public boolean resetPassword(String user) {
-    //String baseURL = getBaseURL();
-    // logger.warn("resetPassword for " + user + " " + baseURL);
-    // Use Domino call to do reset password
     return db.getUserDAO().forgotPassword(user, getBaseURL());
   }
-
-  /**
-   * @param token
-   * @param emailR - email encoded by rot13
-   * @param url    - remove me???
-   * @return
-   * @seex mitll.langtest.client.InitialUI#handleCDToken
-   * @deprecated don't do this anymore - just in domino
-   */
-/*  public String enableCDUser(String token, String emailR, String url) {
-    logger.info("enabling token " + token + " for email " + emailR + " and url " + url);
-    return getEmailHelper().enableCDUser(token, emailR, url, getProject().getLanguage());
-  }*/
 
   /**
    * @param userId
@@ -298,7 +281,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return ServletUtil.get().getBaseURL(getThreadLocalRequest());
   }
 
-
   /**
    * TODOx: consider stronger passwords like in domino.
    *
@@ -318,15 +300,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     return (db.getUserDAO().changePasswordWithCurrent(userIDFromSession, currentHashedPassword, newHashedPassword, getBaseURL()));
   }
-
-/*  @Override
-  public void changeEnabledFor(int userid, boolean enabled) {
-    User userWhere = db.getUserDAO().getUserWhere(userid);
-    if (userWhere == null) logger.error("couldn't find " + userid);
-    else {
-      db.getUserDAO().changeEnabled(userid, enabled);
-    }
-  }*/
 
   /**
    * @param emailH
@@ -377,12 +350,4 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public User getUser(int id) {
     return db.getUserDAO().getByID(id);
   }
-
-  /**
-   * @param toUpdate
-   * @param changingUser
-   */
-/*  public void update(User toUpdate, int changingUser) {
-    db.getUserDAO().update(toUpdate);
-  }*/
 }
