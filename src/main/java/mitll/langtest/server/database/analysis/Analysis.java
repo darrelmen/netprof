@@ -43,6 +43,7 @@ import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -139,16 +140,20 @@ public abstract class Analysis extends DAO {
     for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
       Integer userid = pair.getKey();
 
-      String userChosenID = userDAO.getUserChosenID(userid);
-      if (userChosenID == null) {
+      //String userChosenID = userDAO.getUserChosenID(userid);
+      MiniUser miniUser = userDAO.getMiniUser(userid);
+      if (miniUser == null) {
         logger.error("getUserInfos huh? no user for " + userid);
       } else {
         //   String userID = user.getUserID();
+        String userChosenID = miniUser.getUserID();
         boolean isLL = database.getServerProps().getLincolnPeople().contains(userChosenID);
         if (!isLL) {
           UserInfo value = pair.getValue();
           value.setId(userid); // necessary?
           value.setUserID(userChosenID);
+          value.setFirst(miniUser.getFirst());
+          value.setLast(miniUser.getLast());
 
           userInfos.add(pair.getValue());
         }
@@ -237,9 +242,9 @@ public abstract class Analysis extends DAO {
       UserInfo next = values.iterator().next();
       if (DEBUG) logger.debug("getUserPerformance results for " + values.size() + "  first  " + next);
       List<BestScore> resultsForQuery = next.getBestScores();
-      if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + resultsForQuery.size());
 
-      UserPerformance userPerformance = new UserPerformance(id, resultsForQuery);
+      if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + resultsForQuery.size());
+      UserPerformance userPerformance = new UserPerformance(id, resultsForQuery, next.getFirst(), next.getLast());
       List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
       logger.debug("getUserPerformance found " + rawBestScores.size() + " scores");
       userPerformance.setGranularityToSessions(

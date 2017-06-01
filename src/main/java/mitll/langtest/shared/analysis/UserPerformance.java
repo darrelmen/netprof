@@ -54,6 +54,8 @@ public class UserPerformance implements Serializable {
   private Map<Long, List<PhoneSession>> granularityToSessions;
 
   private long userID;
+  private String first = "";
+  private String last = "";
 
   public UserPerformance() {
   }
@@ -69,11 +71,13 @@ public class UserPerformance implements Serializable {
   /**
    * @param userID
    * @param resultsForQuery
-   * @see Analysis#getPerformanceForUser(long, int)
+   * @see Analysis#getUserPerformance(long, Map)
    */
-  public UserPerformance(long userID, List<BestScore> resultsForQuery) {
+  public UserPerformance(long userID, List<BestScore> resultsForQuery, String first, String last) {
     this(userID);
     setRawBestScores(resultsForQuery);
+    this.first = first;
+    this.last = last;
   }
 
   /**
@@ -187,5 +191,13 @@ public class UserPerformance implements Serializable {
    */
   public void setGranularityToSessions(Map<Long, List<PhoneSession>> granularityToSessions) {
     this.granularityToSessions = granularityToSessions;
+  }
+
+  public String getFirst() {
+    return first;
+  }
+
+  public String getLast() {
+    return last;
   }
 }

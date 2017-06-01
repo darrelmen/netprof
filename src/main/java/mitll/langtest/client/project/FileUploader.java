@@ -14,7 +14,7 @@ import mitll.langtest.client.user.BasicDialog;
 /**
  * Created by go22670 on 4/26/17.
  */
-public class FileUploader extends BasicDialog {
+ class FileUploader extends BasicDialog {
   /**
    * Make a form panel
    *
@@ -35,7 +35,12 @@ public class FileUploader extends BasicDialog {
 
   private HTML feedback;
 
-  public Widget getForm(int projectid) {
+  /**
+   * @see ProjectChoices#showImportDialog
+   * @param projectid
+   * @return
+   */
+   Widget getForm(int projectid) {
     final FormPanel form = makeFormPanel();
     Fieldset fieldset = new Fieldset();
     form.add(fieldset);
@@ -56,11 +61,10 @@ public class FileUploader extends BasicDialog {
 
     // Add a 'submit' button.
     final com.github.gwtbootstrap.client.ui.Button submit = new com.github.gwtbootstrap.client.ui.Button("Submit");
-    submit.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        submit.setEnabled(false);
-        form.submit();
-      }
+    submit.addClickHandler(event -> {
+      submit.setEnabled(false);
+      form.submit();
+      feedback.setHTML("Please wait...");
     });
     fieldset.add(submit);
 
@@ -70,29 +74,24 @@ public class FileUploader extends BasicDialog {
     fieldset.add(feedback);
 
     // Add an event handler to the form.
-    form.addSubmitHandler(new FormPanel.SubmitHandler() {
-      public void onSubmit(FormPanel.SubmitEvent event) {
-        // This event is fired just before the form is submitted. We can take
-        // this opportunity to perform validation.
-        // checkForEmptyFormFields(event, siteName, languageBox, upload);
-        if (upload.getFilename().isEmpty()) {
-          markError(widgets, upload, upload, "Try Again", "Please select a file.");
-          event.cancel();
-          submit.setEnabled(true);
-        }
+    form.addSubmitHandler(event -> {
+      // This event is fired just before the form is submitted. We can take
+      // this opportunity to perform validation.
+      // checkForEmptyFormFields(event, siteName, languageBox, upload);
+      if (upload.getFilename().isEmpty()) {
+        markError(widgets, upload, upload, "Try Again", "Please select a file.");
+        event.cancel();
+        submit.setEnabled(true);
       }
     });
 
-    form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-      public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-        // When the form submission is successfully completed, this event is
-        // fired. Assuming the service returned a response of type text/html,
-        // we can get the result text here (see the FormPanel documentation for
-        // further explanation).
-        submit.setEnabled(true);
-        String results = event.getResults();
-        feedback.setHTML(results);
-      }
+    form.addSubmitCompleteHandler(event -> {
+      // When the form submission is successfully completed, this event is
+      // fired. Assuming the service returned a response of type text/html,
+      // we can get the result text here (see the FormPanel documentation for
+      // further explanation).
+      submit.setEnabled(true);
+      feedback.setHTML(event.getResults());
     });
 
     return form;

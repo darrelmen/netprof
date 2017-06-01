@@ -49,7 +49,7 @@ import java.util.Map;
  * @since 10/29/15.
  */
 public class UserInfo implements HasID {
- // private int start;
+
   private int finalScores;
   private int current;
   private int num;
@@ -57,6 +57,8 @@ public class UserInfo implements HasID {
   private long startTime;
   private int id;
   private String userID;
+  private String first;
+  private String last;
 
   public UserInfo() {
   }
@@ -197,5 +199,21 @@ public class UserInfo implements HasID {
   public String toString() {
     //MiniUser user = getUser();
     return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent() + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
+  }
+
+  public void setFirst(String first) {
+    this.first = first;
+  }
+
+  public String getFirst() {
+    return first;
+  }
+
+  public void setLast(String last) {
+    this.last = last;
+  }
+
+  public String getLast() {
+    return last;
   }
 }

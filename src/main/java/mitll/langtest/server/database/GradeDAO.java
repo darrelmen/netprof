@@ -52,7 +52,7 @@ import java.util.*;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
- * @Deprecated
+ * @deprecated
  */
 public class GradeDAO extends DAO {
   private static final String SELECT_PREFIX = "SELECT id, exerciseID, resultID, grade, grader, gradeType, gradeIndex from grades";

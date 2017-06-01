@@ -136,9 +136,17 @@ public class WordTable {
     return builder.toString();
   }
 
+  /**
+   * Somehow unknown model is getting out.
+   * @param pair
+   * @return
+   */
   private String getColoredSpanForSegment(Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
     TranscriptSegment word = pair.getKey();
-    return getColoredSpan(word.getEvent(), word.getScore());
+
+    String event = word.getEvent();
+    if (event.equals("UNKNOWNMODEL")) event = "Low score";
+    return getColoredSpan(event, word.getScore());
   }
 
   public String getColoredSpan(String event, float score) {

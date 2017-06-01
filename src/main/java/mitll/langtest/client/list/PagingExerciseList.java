@@ -298,8 +298,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       pushNewItem(text, -1);
 
       //gotTypeAheadEvent(text, true);
-    }
-    else {
+    } else {
       logger.warning("skipping searchBoxEntry ");
     }
   }
@@ -346,8 +345,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   private void alwaysSetTypeAhead(String t) {
     //if (getTypeAheadText().isEmpty()) {
-      logger.info("alwaysSetTypeAhead Set type ahead to '" + t + "'");
-      typeAhead.setText(t);
+    logger.info("alwaysSetTypeAhead Set type ahead to '" + t + "'");
+    typeAhead.setText(t);
     //}
   }
 
@@ -394,7 +393,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     String typeAheadText = getTypeAheadText();
     if (typeAheadText.isEmpty()) {
       logger.info("setTypeAheadText set type ahead to '" + t + "'");
-      typeAhead.setText(t);
+      if (typeAhead != null) {
+        typeAhead.setText(t);
+      }
     } else if (typeAheadText.equals(t)) {
       logger.warning("setTypeAheadText not setting text from  '" + typeAheadText + "' to '" + t + "'");
     }

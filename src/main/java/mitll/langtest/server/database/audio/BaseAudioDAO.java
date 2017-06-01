@@ -68,7 +68,7 @@ public abstract class BaseAudioDAO extends DAO {
   public static final String MALE_CONTEXT = "maleContext";
   public static final String FEMALE_CONTEXT = "femaleContext";
   private static final String TRANSLITERATION = "transliteration";
-  private static final int WARN_DURATION = 5;
+  private static final int WARN_DURATION = 25;
 
   protected final IUserDAO userDAO;
   private final int netProfDurLength;

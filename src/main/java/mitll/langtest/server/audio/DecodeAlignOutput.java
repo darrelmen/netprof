@@ -54,8 +54,8 @@ public class DecodeAlignOutput {
   private boolean isCorrect;
 
   /**
-   * @see AudioFileHelper#decodeOneAttribute
    * @param alignmentScore
+   * @see AudioFileHelper#decodeOneAttribute
    */
   DecodeAlignOutput(PretestScore alignmentScore, boolean isDecode) {
     this(
@@ -66,10 +66,6 @@ public class DecodeAlignOutput {
         alignmentScore);
   }
 
-//  private static String getJson(PretestScore alignmentScore) {
-//    return new ScoreToJSON().getJsonObject(alignmentScore).toString();
-//  }
-
   DecodeAlignOutput(AudioAnswer decodeAnswer, boolean isDecode) {
     PretestScore pretestScore = decodeAnswer.getPretestScore();
     this.score = (float) decodeAnswer.getScore();
@@ -79,12 +75,11 @@ public class DecodeAlignOutput {
     this.isCorrect = decodeAnswer.isCorrect();
   }
 
-  DecodeAlignOutput(float score,
-                    String json,
-                    long processDurInMillis,
-                    boolean isCorrect,
-                    PretestScore pretestScore) {
-    //this(score,json,numPhones(pretestScore),processDurInMillis,isCorrect);
+  private DecodeAlignOutput(float score,
+                            String json,
+                            long processDurInMillis,
+                            boolean isCorrect,
+                            PretestScore pretestScore) {
     this.score = score;
     this.json = json;
     this.numPhones = numPhones(pretestScore);
@@ -93,8 +88,8 @@ public class DecodeAlignOutput {
   }
 
   public DecodeAlignOutput(float score, String json,
-                    long processDurInMillis, boolean isCorrect,
-                    int numPhones) {
+                           long processDurInMillis, boolean isCorrect,
+                           int numPhones) {
     this.score = score;
     this.json = json;
     this.numPhones = numPhones;
@@ -141,7 +136,10 @@ public class DecodeAlignOutput {
     return (int) processDurInMillis;
   }
 
-  public boolean isValid() { return json != null; }
+  public boolean isValid() {
+    return json != null;
+  }
+
   public boolean isCorrect() {
     return isCorrect;
   }

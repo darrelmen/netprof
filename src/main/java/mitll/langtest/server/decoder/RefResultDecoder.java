@@ -843,11 +843,11 @@ public class RefResultDecoder {
   }
 
   private static class Stats {
-    int count = 0;
-    int attrc = 0;
-    int maleAudio = 0;
-    int femaleAudio = 0;
-    int defaultAudio = 0;
+    final int count = 0;
+    final int attrc = 0;
+    final int maleAudio = 0;
+    final int femaleAudio = 0;
+    final int defaultAudio = 0;
 
 //    public void add(Stats other) {
 //      count += other.count;

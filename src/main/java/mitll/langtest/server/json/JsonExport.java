@@ -168,7 +168,7 @@ public class JsonExport {
    * @return
    * @see #addJSONExerciseExport(JSONObject, Collection)
    */
-  protected <T extends CommonExercise> JSONArray getExercisesAsJson(Collection<T> exercises) {
+  private <T extends CommonExercise> JSONArray getExercisesAsJson(Collection<T> exercises) {
     JSONArray jsonArray = new JSONArray();
     Collection<T> sortedByID = getSortedByID(exercises);
 

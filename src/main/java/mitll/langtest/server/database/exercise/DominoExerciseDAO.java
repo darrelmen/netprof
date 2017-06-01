@@ -6,6 +6,7 @@ import mitll.hlt.domino.shared.model.metadata.Language;
 import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
 import mitll.hlt.domino.shared.model.user.UserDescriptor;
 import mitll.hlt.json.JSONSerializer;
+import mitll.langtest.server.FileUploadHelper;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import org.apache.commons.lang3.StringUtils;
@@ -60,7 +61,7 @@ public class DominoExerciseDAO {
       this.dominoID = dominoID;
     }
 
-    public Date getExportTime() {
+    Date getExportTime() {
       return createTime;
     }
 
@@ -76,7 +77,7 @@ public class DominoExerciseDAO {
       return lang;
     }
 
-    public int getDominoID() {
+    int getDominoID() {
       return dominoID;
     }
 
@@ -89,56 +90,41 @@ public class DominoExerciseDAO {
     }
   }
 
+  /**
+   * TODO : use domino language object
+   *
+   * @param file
+   * @param inputStream
+   * @param projid
+   * @param importUser
+   * @return
+   * @see mitll.langtest.server.FileUploadHelper#readJSON
+   */
   public Info readExercises(String file, InputStream inputStream, int projid, int importUser) {
-    List<CommonExercise> exercises = new ArrayList<>();
     try {
-      //JsonParser parser = Json.createParser(new FileReader(file));
       JsonReader reader = file == null ?
           Json.createReader(inputStream) :
           Json.createReader(new FileReader(file));
       JsonObject readObj = (JsonObject) reader.read();
 
-      // JSONSerializer ser = Mongo.makeSerializer();
-      // Date theTime = ser.dateFormat().parse(readObj.getString("exportTime")).get();
-
-//      logger.info("got time " + theTime);
-
-      JsonObject langObj = readObj.getJsonObject("language");
-      Language dominoLang = ser.deserialize(Language.class, langObj.toString());
+//      JsonObject langObj = readObj.getJsonObject("language");
+//      Language dominoLang = ser.deserialize(Language.class, langObj.toString());
       //logger.info("got Language " + dominoLang);
 
       JsonObject projObj = readObj.getJsonObject("project");
-      // logger.info("got projObj " + projObj);
       ProjectDescriptor pd = ser.deserialize(ProjectDescriptor.class, projObj.toString());
-      UserDescriptor creator1 = pd.getCreator();
-      int creator = creator1 != null ? creator1.getDocumentDBID() : importUser;
-      logger.info("got " + pd);
+      logger.info("got ProjectDescriptor " + pd);
 
       String languageName = pd.getContent().getLanguageName();
-
-      mitll.langtest.shared.project.Language lang = mitll.langtest.shared.project.Language.UNKNOWN;
-      try {
-        lang = mitll.langtest.shared.project.Language.valueOf(languageName);
-        logger.info("Got " + languageName + " " + lang);
-      } catch (IllegalArgumentException e) {
-
-      }
 
       if (pd.getContent().getSkill() != Vocabulary) {
         logger.error("huh? skill type is " + pd.getContent().getSkill());
       }
 
-      JsonArray docArr = readObj.getJsonArray("documents");
-      //Set<String> unique = new HashSet<>();
-      docArr.forEach(docObj -> {
-  //      logger.info("Got json " + docObj);
-        Exercise ex = getExercise(projid, creator, docObj);
-        //      logger.info("Got " + ex);
-        //    logger.info("Got " + ex.getDirectlyRelated());
-        exercises.add(ex);
-      });
-      return new Info(pd.getCreateTime(), pd.getUpdateTime(), exercises, languageName, lang, pd.getId());
+      List<CommonExercise> exercises =
+          getCommonExercises(projid, getCreator(importUser, pd), readObj.getJsonArray("documents"));
 
+      return new Info(pd.getCreateTime(), pd.getUpdateTime(), exercises, languageName, getLanguage(languageName), pd.getId());
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
@@ -146,15 +132,34 @@ public class DominoExerciseDAO {
   }
 
   @NotNull
+  private List<CommonExercise> getCommonExercises(int projid, int creator, JsonArray docArr) {
+    List<CommonExercise> exercises = new ArrayList<>();
+    docArr.forEach(docObj -> exercises.add(getExercise(projid, creator, docObj)));
+    return exercises;
+  }
+
+  private int getCreator(int importUser, ProjectDescriptor pd) {
+    UserDescriptor creator1 = pd.getCreator();
+    return creator1 != null ? creator1.getDocumentDBID() : importUser;
+  }
+
+  @NotNull
+  private mitll.langtest.shared.project.Language getLanguage(String languageName) {
+    mitll.langtest.shared.project.Language lang = mitll.langtest.shared.project.Language.UNKNOWN;
+    try {
+      lang = mitll.langtest.shared.project.Language.valueOf(languageName);
+//        logger.info("Got " + languageName + " " + lang);
+    } catch (IllegalArgumentException e) {
+    }
+    return lang;
+  }
+
+  @NotNull
   private Exercise getExercise(int projid, int creator, JsonValue docObj) {
     SimpleHeadDocumentRevision shDoc = ser.deserialize(SimpleHeadDocumentRevision.class, docObj.toString());
-    Date createDate = shDoc.getCreateDate();
-    IDocument document = shDoc.getDocument();
-    VocabularyItem vocabularyItem = (VocabularyItem) document;
+    VocabularyItem vocabularyItem = (VocabularyItem) shDoc.getDocument();
     Exercise ex = getExercise(projid, shDoc.getId(), vocabularyItem, creator);
-
-//        logger.info("Got old id " + shDoc.getId() + " " + ex.getDominoID());
-    ex.setUpdateTime(createDate.getTime());
+    ex.setUpdateTime(shDoc.getCreateDate().getTime());
 
     List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
     for (IMetadataField field : metadataFields) {
@@ -174,7 +179,6 @@ public class DominoExerciseDAO {
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
       int compid = shDoc.getId() * 10 + sample.getNum();
-
 //      logger.info("context import id " + compid);
 
       Exercise context = getExercise(projid, compid, creator,

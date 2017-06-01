@@ -96,12 +96,11 @@ public class MailSupport {
    * @param message
    * @param linkText
    * @param ccEmails
-   * @see EmailHelper#sendApprovalEmail(String, String, String, String, String, String, MailSupport)
    * @see EmailHelper#sendEmail
    */
   void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message,
                         String linkText, Collection<String> ccEmails) {
-    List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
+    List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<>();
     if (toAddresses.isEmpty()) {
       toAddresses.add(to);
     }

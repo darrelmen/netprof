@@ -56,36 +56,24 @@ import static mitll.langtest.server.rest.RestUserManagement.RESET_PASSWORD_FROM_
 public class EmailHelper {
   private static final Logger logger = LogManager.getLogger(EmailHelper.class);
 
-  //@Deprecated  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
   /**
    *
    */
   private static final String CLOSING = "Regards, Administrator";
-  //@Deprecated  private static final String GORDON = "Gordon";
 
   private static final String RP = RESET_PASSWORD_FROM_EMAIL;//"rp";
- // private static final String CD = "cd";
- // private static final String ER = "er";
-
   private static final String PASSWORD_RESET = "Password Reset";
   private static final String RESET_PASSWORD = "Reset Password";
-  // private static final String REPLY_TO = "admin@" + NP_SERVER;
   private static final String YOUR_USER_NAME = "Your user name";
   private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
-  private static final String HELP_EMAIL = "<a href='mailto:" + NETPROF_HELP_DLIFLC_EDU + "'>NetProF Help</a>";
-
-  /*
-  private static final String USER_CONF_FIRST_LINE = "You are now a user of NetProF.<br/>";
-  private static final String USER_CONF_SECOND_LINE =
-      "If you have any questions, see the user manual or email " + HELP_EMAIL + ".";
-      */
+  //private static final String HELP_EMAIL = "<a href='mailto:" + NETPROF_HELP_DLIFLC_EDU + "'>NetProF Help</a>";
 
   private static final String INVALID_PASSWORD_RESET = "Invalid password reset";
 
   private final IUserDAO userDAO;
-  private static final String HEX_CHARACTERS = "0123456789abcdef";
-  private static final String HEX_CHARACTERS_UC = HEX_CHARACTERS.toUpperCase();
+  //private static final String HEX_CHARACTERS = "0123456789abcdef";
+  //private static final String HEX_CHARACTERS_UC = HEX_CHARACTERS.toUpperCase();
 
   private final MailSupport mailSupport;
   private final ServerProperties serverProperties;
@@ -117,35 +105,6 @@ public class EmailHelper {
   private String getHash(String toHash) {
     return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
   }
-
-  /**
-   * Convert a byte array to a hexadecimal string.
-   *
-   * @param bytes The bytes to format.
-   * @param uppercase When <code>true</code> creates uppercase hex characters
-   *            instead of lowercase (the default).
-   * @return A hexadecimal representation of the specified bytes.
-   */
-  public static String toHexString(byte[] bytes, boolean uppercase)
-  {
-    if (bytes == null)
-    {
-      return null;
-    }
-
-    int numBytes = bytes.length;
-    StringBuilder str = new StringBuilder(numBytes * 2);
-
-    String table = (uppercase ? HEX_CHARACTERS_UC : HEX_CHARACTERS);
-
-    for (byte aByte : bytes) {
-      str.append(table.charAt(aByte >>> 4 & 0x0f));
-      str.append(table.charAt(aByte & 0x0f));
-    }
-
-    return str.toString();
-  }
-
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername
@@ -198,7 +157,7 @@ public class EmailHelper {
    * @param url
    * @return true if there's a user with this email
    * @see mitll.langtest.server.rest.RestUserManagement#resetPassword
-   * @see mitll.langtest.server.services.UserServiceImpl#resetPassword
+   * @seex mitll.langtest.server.services.UserServiceImpl#resetPassword
    */
   public boolean resetPassword(String user, String email, String url) {
     logger.debug("resetPassword for " + user + " url " + url);
@@ -213,10 +172,6 @@ public class EmailHelper {
       logger.debug("resetPassword for " + user + " sending reset password email.");
       String toHash = user + "_" + System.currentTimeMillis();
       String hash = getHash(toHash);
-
-      //      if (!userDAO.updateKey(validUserAndEmail, true, hash)) {
-//        logger.error("huh? couldn't add the reset password key to user id = " + validUserAndEmail);
-//      }
 
       String message = "Hi " + user + ",<br/><br/>" +
           "Click the link below to reset your password." +
@@ -277,245 +232,6 @@ public class EmailHelper {
         ccEmails);
   }
 
-  /**
-   * We're going to do user management in domino.
-   *
-   * @paramx token
-   * @param language
-   * @return
-   * @seex mitll.langtest.client.LangTest#handleCDToken
-   * @see mitll.langtest.server.services.UserServiceImpl#enableCDUser(String, String, String)
-   */
-/*  @Deprecated
-  public String enableCDUser(String token, String emailR, String url, String language) {
-    User userWhereEnabledReq = userDAO.getUserWithEnabledKey(token);
-    Integer userID;
-    if (userWhereEnabledReq == null) {
-      logger.debug("enableCDUser user id null for token " + token + " email " + emailR + " url " + url);
-      userID = null;
-    } else {
-      userID = userWhereEnabledReq.getID();
-      logger.debug("enableCDUser user id '" + userID + "' for " + token + " vs " + userWhereEnabledReq.getID());
-    }
-
-    String email = rot13(emailR);
-
-    if (userID == null) {
-      return null;
-    } else {
-      boolean b = userDAO.enableUser(userID);
-      String userID1 = null;
-      if (b) {
-        userDAO.clearKey(userID, false);
-
-        User userWhere = userDAO.getUserWhere(userID);
-        url = trimURL(url);
-
-        logger.debug("Sending enable CD User email for " + userID + " and " + userWhere);
-        userID1 = userWhere.getUserID();
-        sendUserApproval(url, email, userID1, language);
-
-        // send ack to everyone, so they don't ahve to
-        String subject = "Content Developer approved for " + userID1;
-
-        List<String> approvers = serverProperties.getApprovers();
-        List<String> emails = serverProperties.getApproverEmails();
-
-        for (int i = 0; i < approvers.size(); i++) {
-          String tamas = approvers.get(i);
-          String approvalEmailAddress = emails.get(i);
-
-          String message = getApprovalAck(userID1, tamas, language);
-          mailSupport.sendEmail(NP_SERVER,
-              approvalEmailAddress,
-              MY_EMAIL,
-              subject,
-              message
-          );
-        }
-        mailSupport.sendEmail(NP_SERVER,
-            MY_EMAIL,
-            MY_EMAIL,
-            subject,
-            getApprovalAck(userID1, GORDON, language)
-        );
-      } else {
-        logger.debug("NOT sending enable CD User email for " + userID);
-      }
-      return (b ? userID1 : null);
-    }
-  }*/
-
-/*
-  private String getApprovalAck(String userID1, String tamas, String language) {
-    return "Hi " +
-        tamas + ",<br/><br/>" +
-        "User '" + userID1 +
-        "' is now an active content developer for " + language +
-        "." + "<br/><br/>" +
-        CLOSING;
-  }
-*/
-
-  /**
-   * @param url
-   * @param email
-   * @param userID1
-   * @param language
-   * @seex #enableCDEmail(String, String, mitll.langtest.shared.user.User)
-   * @see #enableCDUser(String, String, String, String)
-   */
-/*  private void sendUserApproval(String url, String email, String userID1, String language) {
-    String message = "Hi " + userID1 + ",<br/>" +
-        "You have been approved to be a content developer for " + language + "." +
-        "<br/>Click on the link below to log in." +
-        "<br/><br/>" +
-        CLOSING;
-
-    sendEmail(url, // baseURL
-        email, // destination email
-        "Account approved", // subject
-        message,
-        "Click here to return to the site." // link text
-    );
-  }*/
-
-  /**
-   * User needs to be approved before account is activated.
-   *
-   * @param url
-   * @param email
-   * @param user
-   * @param mailSupport
-   * @param language
-   * @see mitll.langtest.server.services.UserServiceImpl#addUser
-   * @seex mitll.langtest.client.user.UserPassLogin#gotSignUp
-   */
-/*
-  @Deprecated
-  public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport, String language) {
-    url = trimURL(url);
-    String userID1 = user.getUserID();
-    String toHash = userID1 + "_" + System.currentTimeMillis();
-    String hash = getHash(toHash);
-    if (!userDAO.updateKey(user.getID(), false, hash)) {
-      logger.error("huh? couldn't add the CD update key to " + user);
-    }
-    List<String> approvers = serverProperties.getApprovers();
-    List<String> emails = serverProperties.getApproverEmails();
-    for (int i = 0; i < approvers.size(); i++) {
-      String message = getEmailApproval(userID1, approvers.get(i), email, language);
-      sendApprovalEmail(url, email, userID1, hash, message, emails.get(i), mailSupport, language);
-    }
-  }
-*/
-
-/*
-  private void sendApprovalEmail(String url, String email, String userID1, String hash, String message,
-                                 String approvalEmailAddress, MailSupport mailSupport, String language) {
-    String baseURL = url + "?" +
-        CD +
-        "=" + hash + "&" +  // content developer token
-        ER +
-        "=" + rot13(email);
-
-    mailSupport.sendEmail(NP_SERVER,
-        baseURL, // email encoding
-        approvalEmailAddress,
-        serverProperties.getApprovalEmailAddress(),
-        "Content Developer approval for " + userID1 + " for " + language,
-        message,
-        "Click to approve", // link text
-        Collections.singleton(EmailList.RAY_BUDD));
-  }
-
-  private String getEmailApproval(String userID1, String tamas, String email, String language) {
-    return "Hi " +
-        tamas + ",<br/><br/>" +
-        "User <b>" + userID1 +
-        "</b> with email <b>" + email + "</b><br/>" +
-        " would like to be a content developer for " + language +
-        "." + "<br/>" +
-
-        "Click the link to allow them." +
-        "<br/><br/>" +
-        CLOSING;
-  }
-*/
-
-  /**
-   * So the first part in the url is the desired role, the second is the lookup key for the invitation
-   *
-   * @param url
-   * @param email
-   * @param inviter
-   * @param atRole
-   * @param inviteKey
-   * @param mailSupport
-   */
-/*  public void sendInviteEmail(String url,
-                               String email,
-                               User inviter,
-                               User.Kind atRole,
-                              // int inviteID,
-                               String inviteKey,
-                               MailSupport mailSupport) {
-    url = trimURL(url);
-    String hash = getHash(atRole.toString());
-
-    String baseURL = url + "?" +
-        "k" +
-        "=" + hash + "&" +  // content developer token
-        "i" +
-        "=" + inviteKey;//getHash(email + "_" + inviteID);
-
-    String message = getInvitation(inviter.getFullName());
-
-    mailSupport.sendEmail(NP_SERVER,
-        baseURL, // email encoding
-        email,
-        NETPROF_HELP_DLIFLC_EDU,
-        "Invitation to NetProF from " + inviter.getFullName(),
-        message,
-        "Click to sign up", // link text
-        Collections.singleton(EmailList.GORDON_VIDAVER));
-  }*/
-
-/*  private String getInvitation(String inviterFullName) {
-    return "Hi," +
-        //tamas + "," +
-        "<br/><br/>" +
-        inviterFullName + " has kindly invited you to use " +"NetProF"+"."+
-        "<br/><br/>" +
-        "Click the link to sign up." +
-        "<br/><br/>" +
-        CLOSING;
-  }*/
-
-  /**
-   * @paramx email
-   * @paramx userID1
-   * @paramx firstName
-   * @paramx mailSupport
-   */
-/*  public void sendConfirmationEmail(String email, String userID1, String firstName, MailSupport mailSupport) {
-    mailSupport.sendEmail(NP_SERVER, email, NETPROF_HELP_DLIFLC_EDU, "Welcome to NetProF", getUserConfirmationEmail(userID1, firstName));
-  }*/
-
-  /*private String getUserConfirmationEmail(String userID1, String firstName) {
-    return "Hi " +
-        firstName + ",<br/><br/>" +
-        "Your user id is " + userID1 + ".<br/>" +
-        USER_CONF_FIRST_LINE +
-        USER_CONF_SECOND_LINE +
-        "<br/><br/>" +
-        CLOSING;
-  }*/
-
-  private String getHelpEmail() {
-    return HELP_EMAIL;
-  }
-
   private String trimURL(String url) {
     if (url.contains("127.0.0.1")) { // just for testing
       return "http://127.0.0.1:8888/LangTest.html?gwt.codesvr=127.0.0.1:9997";
@@ -523,45 +239,4 @@ public class EmailHelper {
       return url.split("\\?")[0].split("\\#")[0];
     }
   }
-/*
-
-  private String rot13(String val) {
-    StringBuilder builder = new StringBuilder();
-    for (char c : val.toCharArray()) {
-      if (c >= 'a' && c <= 'm') c += 13;
-      else if (c >= 'A' && c <= 'M') c += 13;
-      else if (c >= 'n' && c <= 'z') c -= 13;
-      else if (c >= 'N' && c <= 'Z') c -= 13;
-      builder.append(c);
-    }
-    return builder.toString();
-  }
-*/
-
-  /**
-   * @see mitll.langtest.server.services.UserServiceImpl#changePassword(int, String, String)
-   * @param userWhereResetKey
-   */
-/*  public void sendChangedPassword(User userWhereResetKey) {
-    String email = userWhereResetKey.getEmail();
-    if (email != null && !email.isEmpty()) {
-      String first = userWhereResetKey.getFirst();
-      String userID = userWhereResetKey.getUserID();
-      String greeting = first.isEmpty() ? userID :
-          first;
-      String message = "Hi " + greeting + ",<br/>" +
-          "Your password for your NetProF account" + (first.isEmpty() ? "" : " " + userID) +
-          " has changed. If this is in error, please contact the help email at " + getHelpEmail() + "." +
-          "<br/>Click on the link below to log in." +
-          "<br/><br/>" +
-          CLOSING;
-
-      sendEmail(NP_SERVER, // baseURL
-          email, // destination email
-          "Password Changed for " + userID, // subject
-          message,
-          "Click here to return to the site." // link text
-      );
-    }
-  }*/
 }

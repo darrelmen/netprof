@@ -98,7 +98,7 @@ public abstract class TypeAhead implements ITypeAhead {
 
   @Override
   public void setText(String text) {
-    typeAhead.setText(text);
+    if (typeAhead != null) typeAhead.setText(text);
   }
 
   /**

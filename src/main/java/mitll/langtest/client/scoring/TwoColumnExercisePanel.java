@@ -127,12 +127,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     this.alignments = alignments;
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
-    int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
-    clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), fontSize);
-    this.isRTL = clickableWords.isRTL(exercise);
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
-    commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
-    add(getItemContent(commonExercise));
+    if (projectStartupInfo != null) {
+      int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
+      clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), fontSize);
+      this.isRTL = clickableWords.isRTL(exercise);
+
+      commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
+      add(getItemContent(commonExercise));
 
 /*    addMouseOverHandler(event -> getRefAudio(() -> {
     }));*/
@@ -141,7 +144,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         getRefAudio(controller);
       }
     });*/
-    getRefAudio();
+      getRefAudio();
+    }
+    else {
+      clickableWords = null;
+      commonExerciseUnitChapterItemHelper = null;
+    }
   }
 
   /**
@@ -696,6 +704,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
+   * Remove arabic full stop
    * Remove arabic comma
    * Remove arabic question mark...
    * exclamation point
@@ -711,7 +720,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private String removePunct(String t) {
     return fromFull(t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("['%\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
+        .replaceAll("['%\\06D4\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
   }
 
   /**

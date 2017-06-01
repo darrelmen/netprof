@@ -44,24 +44,21 @@ import java.util.*;
  */
 public class EmailList {
   // MIT LL
-  static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
+  private static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
   private static final String DOUG_JONES = "daj@ll.mit.edu";
-  static final String RAY_BUDD = "Raymond.Budd@ll.mit.edu";
+  private static final String RAY_BUDD = "Raymond.Budd@ll.mit.edu";
 
   // DLI -
   private static final String GRIMMER = "michael.grimmer1@dliflc.edu";
   private static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
   private static final String TAMAS_2 = "tamas.marius@dliflc.edu";
-  private static final String SANDY   = "sandra.wagner@dliflc.edu";
+  private static final String SANDY = "sandra.wagner@dliflc.edu";
 
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String TEST_EMAIL = "testEmail";
   private static final String EMAIL_ADDRESS = "emailAddress";
-  private static final String APPROVAL_EMAIL = "approvalEmail";
 
   private static final String DEFAULT_EMAIL = GORDON_VIDAVER;
-  private static final String APPROVERS = "approvers";
-  private static final String APPROVER_EMAILS = "approverEmails";
   private static final String ADMINS = "admins";
 
   private static final List<String> DLI_APPROVERS = Arrays.asList(
@@ -100,8 +97,6 @@ public class EmailList {
    * Fix for https://gh.ll.mit.edu/DLI-LTEA/Development/issues/500
    */
   private List<String> reportEmails = Arrays.asList(TAMAS_1, TAMAS_2, GORDON_VIDAVER, DOUG_JONES, RAY_BUDD, GRIMMER);
-  private List<String> approvers = DLI_APPROVERS;
-  private List<String> approverEmails = DLI_EMAILS;
   private Set<String> admins = ADMINLIST;
 
   private final Properties props;
@@ -109,13 +104,7 @@ public class EmailList {
   public EmailList(Properties props) {
     this.props = props;
 
-    String property = props.getProperty(APPROVERS);
-    if (property != null) approvers = Arrays.asList(property.split(","));
-
-    property = props.getProperty(APPROVER_EMAILS);
-    if (property != null) approverEmails = Arrays.asList(property.split(","));
-
-    property = props.getProperty(ADMINS);
+    String property = props.getProperty(ADMINS);
     if (property != null) admins = new HashSet<>(Arrays.asList(property.split(",")));
 
     property = props.getProperty(REPORT_EMAILS);
@@ -125,26 +114,6 @@ public class EmailList {
     }
   }
 
-  public boolean isDebugEMail() {
-    return getDefaultFalse(DEBUG_EMAIL);
-  }
-
-  public boolean isTestEmail() {
-    return getDefaultFalse(TEST_EMAIL);
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.server.mail.EmailHelper#addContentDeveloper
-   * @see EmailHelper#enableCDUser(String, String, String, String)
-   */
-  public List<String> getApprovers() {
-    return approvers;
-  }
-
-  public List<String> getApproverEmails() {
-    return approverEmails;
-  }
 
   /**
    * @return
@@ -162,8 +131,12 @@ public class EmailList {
     return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
   }
 
-  public String getApprovalEmailAddress() {
-    return props.getProperty(APPROVAL_EMAIL, DEFAULT_EMAIL);
+  public boolean isDebugEMail() {
+    return getDefaultFalse(DEBUG_EMAIL);
+  }
+
+  public boolean isTestEmail() {
+    return getDefaultFalse(TEST_EMAIL);
   }
 
   private boolean getDefaultFalse(String param) {

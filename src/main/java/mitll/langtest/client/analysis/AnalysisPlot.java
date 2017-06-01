@@ -259,7 +259,12 @@ public class AnalysisPlot extends TimeSeriesPlot {
       float percentAvg = userPerformance.getRawAverage() * 100;
       int rawTotal = rawBestScores.size();
       String subtitle = "Score and average :" + rawTotal + " items, avg " + (int) percentAvg + " %";
-      String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
+      String first = userPerformance.getFirst();
+      String last = userPerformance.getLast();
+      String name = (first == null || first.isEmpty()) && (last == null || last.isEmpty()) ? "" : " (" +
+          first + " " + last +
+          ")";
+      String title = "<b>" + userChosenID + " " + name + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
       chart = getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance);
       add(chart);
     }
@@ -558,7 +563,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
               return getTooltip(toolTipData, exerciseID, commonShell);
             } catch (Exception e) {
               logger.warning(e.getMessage());
-             // e.printStackTrace();
+              // e.printStackTrace();
               return "";
             }
           }

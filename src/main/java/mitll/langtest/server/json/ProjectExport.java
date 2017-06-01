@@ -10,6 +10,7 @@ import java.util.Collection;
 
 /**
  * Created by go22670 on 1/20/17.
+ * For the new iOS.
  */
 public class ProjectExport {
   private static final Logger logger = LogManager.getLogger(ProjectExport.class);

@@ -35,6 +35,7 @@ import java.util.logging.Logger;
  */
 public class ProjectChoices {
   public static final int NORMAL_MIN_HEIGHT = 67;
+  public static final String IMPORT_DATA_INTO = "Import data into ";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
   private static final int MIN_HEIGHT = 125;
@@ -514,7 +515,6 @@ public class ProjectChoices {
   }
 
   private void showImportDialog(SlimProject projectForLang) {
-
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
@@ -535,7 +535,7 @@ public class ProjectChoices {
     };
 
     new DialogHelper(true).show(
-        "Import data into " + projectForLang.getName(),
+        IMPORT_DATA_INTO + projectForLang.getName(),
         new FileUploader().getForm(projectForLang.getID()),
         listener,
         550);

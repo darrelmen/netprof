@@ -40,11 +40,11 @@ import mitll.langtest.shared.exercise.CommonExercise;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/2/14.
+ * @deprecated why do we have
  */
 public interface LoadTesting {
-  CommonExercise getRandomExercise();
+/*  CommonExercise getRandomExercise();
   CommonExercise getExercise(String id, long userID, boolean isFlashcardReq);
-
   CommonExercise getFirstExercise();
-  void addToAudioTable(int user, CommonExercise exercise1, AudioAnswer audioAnswer);
+  void addToAudioTable(int user, CommonExercise exercise1, AudioAnswer audioAnswer);*/
 }

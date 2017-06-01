@@ -75,8 +75,7 @@ public class ExerciseCopy {
         } else {
           logger.warn("reallyAddingUserExercises Collision - user exercise with same old id " + oldID + " as predef " + byExID);
         }
-      }
-      else {
+      } else {
         bulk.add(slickUEDAO.toSlick(userCandidate, projectid, typeOrder));
       }
     }
@@ -85,7 +84,6 @@ public class ExerciseCopy {
   }
 
   /**
-   * @see #copyUserAndPredefExercises
    * @param importUser
    * @param projectid
    * @param idToFL
@@ -93,14 +91,15 @@ public class ExerciseCopy {
    * @param exercises
    * @param typeOrder
    * @param idToCandidateOverride
+   * @see #copyUserAndPredefExercises
    */
   public void addExercises(int importUser,
-                            int projectid,
-                            Map<Integer, String> idToFL,
-                            SlickUserExerciseDAO slickUEDAO,
-                            Collection<CommonExercise> exercises,
-                            Collection<String> typeOrder,
-                            Map<String, List<Exercise>> idToCandidateOverride) {
+                           int projectid,
+                           Map<Integer, String> idToFL,
+                           SlickUserExerciseDAO slickUEDAO,
+                           Collection<CommonExercise> exercises,
+                           Collection<String> typeOrder,
+                           Map<String, List<Exercise>> idToCandidateOverride) {
     Map<String, Integer> exToInt;
     logger.info("copyUserAndPredefExercises found " + exercises.size() + " old exercises and  " + idToCandidateOverride.size() + " overrides");
 
@@ -185,6 +184,7 @@ public class ExerciseCopy {
           int contextid =
               slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true, typeOrder));
           pairs.add(new SlickRelatedExercise(-1, id, contextid, projectid, now));
+          logger.info("map " + id + " -> " + contextid + " ( " + ex.getDirectlyRelated().size());
           ct++;
           if (ct % 400 == 0) logger.debug("addContextExercises inserted " + ct + " context exercises");
         }
@@ -224,7 +224,7 @@ public class ExerciseCopy {
     Map<ExerciseAttribute, Integer> attrToID = new HashMap<>();
     Map<String, List<Integer>> exToJoins = new HashMap<>();
 
-    int replacements =0;
+    int replacements = 0;
     int converted = 0;
     for (CommonExercise ex : exercises) {
       String oldID = ex.getOldID();

@@ -168,14 +168,14 @@ public class FileUploadHelper {
   }
 
   private void rememberExercises(Site site, int id, List<CommonExercise> exercises) {
-    logger.info("Read " + exercises.size());
+    logger.info("rememberExercises Read " + exercises.size());
     if (exercises.isEmpty()) {
-
+      logger.warn("rememberExercises Read zero? " + exercises.size());
     } else {
       idToExercises.put(id, exercises);
       site.setNum(exercises.size());
 
-      logger.info("Site " + id + " : " + idToExercises.get(id).size());
+      logger.info("rememberExercises Site " + id + " : " + idToExercises.get(id).size());
     }
   }
 
