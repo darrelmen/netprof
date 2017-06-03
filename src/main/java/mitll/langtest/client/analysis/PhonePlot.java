@@ -49,7 +49,7 @@ import java.util.logging.Logger;
  * @since 10/19/15.
  */
 class PhonePlot extends TimeSeriesPlot {
-  private final Logger logger = Logger.getLogger("PhonePlot");
+  //private final Logger logger = Logger.getLogger("PhonePlot");
 
   private static final String PRONUNCIATION_SCORE = " trend";
   private static final int CHART_HEIGHT = 315;
@@ -94,8 +94,7 @@ class PhonePlot extends TimeSeriesPlot {
 
     if (rawBestScores.size() == 1) {
       PhoneSession next = rawBestScores.iterator().next();
-      logger.info("getErrorBarChart Got " + next);
-
+ //     logger.info("getErrorBarChart Got " + next);
       start = next.getStart();
       end = next.getEnd();
     }
@@ -155,8 +154,6 @@ class PhonePlot extends TimeSeriesPlot {
         .setMax(100);
 
     chart.getXAxis()
-        //   .setStartOnTick(true)
-        // .setEndOnTick(true)
         .setType(Axis.Type.DATE_TIME);
 
     if (end > 0) {

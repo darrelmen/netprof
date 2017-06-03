@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by go22670 on 2/22/17.
@@ -184,7 +186,7 @@ public class ExerciseCopy {
           int contextid =
               slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true, typeOrder));
           pairs.add(new SlickRelatedExercise(-1, id, contextid, projectid, now));
-          logger.info("map " + id + " -> " + contextid + " ( " + ex.getDirectlyRelated().size());
+//          logger.info("map " + id + " -> " + contextid + " ( " + ex.getDirectlyRelated().size());
           ct++;
           if (ct % 400 == 0) logger.debug("addContextExercises inserted " + ct + " context exercises");
         }
@@ -386,5 +388,50 @@ public class ExerciseCopy {
       logger.error("Got " + e, e);
     }
     return userExercises;
+  }
+
+  public static void main(String[] arg) {
+    Pattern pattern;
+    Matcher matcher;
+
+    String HTML_TAG_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
+    String anti = "^<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
+
+    pattern = Pattern.compile(HTML_TAG_PATTERN);
+
+    String toMatch = "<img src=\"https://goo.gl/images/FkkqBQ\"><b>distraído</b>";
+    String toMatch2 = "<img src=\"https://goo.gl/images/FkkqBQ\">";
+    String toMatch3 = "<b>distraído</b>";
+
+    List<String> strings = Arrays.asList(toMatch, toMatch2, toMatch3);
+
+    int i = 0;
+    for (String t:strings) {
+      matcher = pattern.matcher(t);
+
+      while (matcher.find()) {
+        logger.info(i + " : I found the text" +
+                " \"" +matcher.group()+
+                "\" starting at " + matcher.start()+
+                "index " +
+                " and ending at index " + matcher.end()+
+                ".");
+      }
+
+      i++;
+
+      boolean matches = matcher.matches();
+
+      logger.info("got  " + t + " = " + matches);
+      String[] split = t.split(HTML_TAG_PATTERN);
+      for (String s:split) {
+        logger.info("\tgot  " + t + " = " + s);
+      }
+      String[] split2 = t.split(anti);
+      for (String s:split2) {
+        logger.info("\t2 got  " + t + " = " + s);
+      }
+
+    }
   }
 }

@@ -122,6 +122,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     addStyleName("floatLeftAndClear");
     setWidth("100%");
 
+//    logger.info("Eng " +commonExercise.getEnglish());
+//    logger.info("fl " +commonExercise.getForeignLanguage());
+
     this.choices = choices;
     this.phonesChoices = phonesChoices;
     this.alignments = alignments;
@@ -136,14 +139,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(commonExercise));
-
-/*    addMouseOverHandler(event -> getRefAudio(() -> {
-    }));*/
-/*    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        getRefAudio(controller);
-      }
-    });*/
+      
       getRefAudio();
     }
     else {

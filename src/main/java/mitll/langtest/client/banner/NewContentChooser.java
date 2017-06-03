@@ -78,20 +78,16 @@ public class NewContentChooser implements INavigation {
           divWidget.add(listManager.showLists());
           break;
         case ITEMS:
-          // RecorderNPFHelper recorderNPFHelper = new RecorderNPFHelper(controller, true, null);
-          logger.info("showRecord  - recorderNPFHelper");
           clear();
           new RecorderNPFHelper(controller, true, null).showNPF(divWidget, ITEMS.toString());
           break;
         case CONTEXT:
           clear();
-          RecorderNPFHelper recorderNPFHelper = new RecorderNPFHelper(controller, false, null);
-          recorderNPFHelper.showNPF(divWidget, CONTEXT.toString());
+          new RecorderNPFHelper(controller, false, null).showNPF(divWidget, CONTEXT.toString());
           break;
         case DEFECTS:
           clear();
-          MarkDefectsChapterNPFHelper markDefectsHelper = new MarkDefectsChapterNPFHelper(controller, null);
-          markDefectsHelper.showNPF(divWidget, DEFECTS.toString());
+          new MarkDefectsChapterNPFHelper(controller, null).showNPF(divWidget, DEFECTS.toString());
           break;
         case FIX:
           clear();

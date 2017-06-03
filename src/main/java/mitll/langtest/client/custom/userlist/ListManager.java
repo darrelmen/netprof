@@ -404,7 +404,8 @@ public class ListManager implements RequiresResize {
 
         logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists.size() + " in " + (now - then) + " millis");
         new UserListCallback(outer, contentPanel, child,
-            new ScrollPanel(), REVIEW, false, false, userManager, false, -1).onSuccess(reviewLists);
+            new ScrollPanel(),
+            REVIEW, false, false, userManager, false, -1).onSuccess(reviewLists);
       }
     });
   }

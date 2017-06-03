@@ -763,12 +763,11 @@ public class AnalysisPlot extends TimeSeriesPlot {
       Number min = axisSetExtremesEvent.getMin();
       Number max = axisSetExtremesEvent.getMax();
 
-      logger.info("gotExtremes got min " + min + " max " + max);
+  //    logger.info("gotExtremes got min " + min + " max " + max);
       if (min != null && min.longValue() > 0) {
         long start = min.longValue();
         long end = max.longValue();
-
-        logger.info("gotExtremes now min " + min + " max " + max);
+    //    logger.info("gotExtremes now min " + min + " max " + max);
         setVisibility(start, end);
         timeChanged(start, end);
       } else {

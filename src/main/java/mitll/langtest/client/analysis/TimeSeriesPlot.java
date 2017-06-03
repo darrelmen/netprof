@@ -176,11 +176,9 @@ class TimeSeriesPlot extends DivWidget {
     timeToSession.clear();
     if (!phoneSessions.isEmpty()) {
       PhoneSession lastSession = getLastSession(phoneSessions);
-
-      logger.info("setPhoneSessions num sessions " + phoneSessions.size());
+     // logger.info("setPhoneSessions num sessions " + phoneSessions.size());
       for (PhoneSession session : phoneSessions) {
-        long bin = getSessionTime(lastSession, session);
-        timeToSession.put(bin, session);
+        timeToSession.put(getSessionTime(lastSession, session), session);
       }
     }
   }

@@ -34,19 +34,18 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/8/17.
  */
 public class UserMenu {
- private final Logger logger = Logger.getLogger("UserMenu");
-
-  public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
+  private final Logger logger = Logger.getLogger("UserMenu");
+ // public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
 
   private static final String ABOUT_NET_PRO_F = "About NetProF";
 
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
 
-  protected static final String LOGIN = "Login";
-  private static final int NO_USER_INITIAL = -2;
+ // protected static final String LOGIN = "Login";
+//  private static final int NO_USER_INITIAL = -2;
   private final UserManager userManager;
 
-  protected long lastUser = NO_USER_INITIAL;
+  //protected long lastUser = NO_USER_INITIAL;
 
   private final LifecycleSupport lifecycleSupport;
   private final ExerciseController controller;
@@ -56,15 +55,15 @@ public class UserMenu {
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
 
-  protected Panel headerRow;
-  protected Panel contentRow;
+  //protected Panel headerRow;
+  //protected Panel contentRow;
   private static final String LOG_OUT = "Sign Out";
   private final UILifecycle uiLifecycle;
 
   /**
    * @param langTest
    * @param userManager
-   * @see LangTest#onModuleLoad2()
+   * @see InitialUI#InitialUI(LangTest, UserManager)
    */
   public UserMenu(LangTest langTest,
                   UserManager userManager,
@@ -78,7 +77,7 @@ public class UserMenu {
 
     getUserMenuChoices();
   }
-
+/*
   List<LinkAndTitle> getCogMenuChoices() {
     List<LinkAndTitle> choices = new ArrayList<>();
     choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
@@ -95,7 +94,8 @@ public class UserMenu {
 
     choices.add(getLogOut());
     return choices;
-  }
+  }*/
+
   List<LinkAndTitle> getCogMenuChoices2() {
     List<LinkAndTitle> choices = new ArrayList<>();
     choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
@@ -134,26 +134,13 @@ public class UserMenu {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           new UserTable(props, userManager.isAdmin()).showUsers(userService);
         }
       });
     }
   }
-/*
-  private class ManageUsersClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-        public void onSuccess() {
-          new UserTable(props, userManager.isAdmin()).showUsers(userService);
-        }
-      });
-    }
-  }
-*/
 
   private class EventsClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
@@ -190,8 +177,9 @@ public class UserMenu {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
-          new DownloadHelper(null).downloadContext();
+          new DownloadHelper().downloadContext();
         }
       });
     }
@@ -218,20 +206,7 @@ public class UserMenu {
       });
     }
   }
-/*
-  private class MonitoringClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
 
-        public void onSuccess() {
-          new MonitoringManager(props).showResults();
-        }
-      });
-    }
-  }*/
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       uiLifecycle.logout();
@@ -288,11 +263,10 @@ public class UserMenu {
   }
 
   @NotNull
-  private String getMailTo( ) {
+  private String getMailTo() {
     return "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
         //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20NetProF";
   }
-
 }

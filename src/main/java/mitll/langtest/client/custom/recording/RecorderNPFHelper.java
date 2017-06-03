@@ -103,9 +103,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
-
       final FlexListLayout outerLayout = this;
-
       protected void styleTopRow(Panel twoRows, Panel topRow) {
         twoRows.add(topRow);
       }
@@ -121,17 +119,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
-  /*      return new HistoryExerciseList(outerLayout.getController(),
-            topRow,
-            currentExercisePanel,
-            new ListOptions()
-                .setInstance(instanceName)
-                .setShowFirstNotCompleted(true),
-            listHeader,
-            footer,
-            1
-        ) */
-
         return new NPExerciseList(currentExercisePanel,
             outerLayout.getController(),
             new ListOptions()
@@ -139,7 +126,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
                 .setShowFirstNotCompleted(true)
         )
         {
-        //  private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
           private CheckBox filterOnly;
 
           @Override
@@ -169,14 +155,8 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
             // row 2
             filterOnly = new CheckBox(SHOW_ONLY_UNRECORDED);
-            filterOnly.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                pushNewSectionHistoryToken();
-              }
-            });
+            filterOnly.addClickHandler(event -> pushNewSectionHistoryToken());
             filterOnly.addStyleName("leftFiveMargin");
-
             add(filterOnly);
 
             // row 3
@@ -184,7 +164,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             setOnlyExamples(!doNormalRecording);
 
             addEventHandler(instanceName);
-          //  return tableWithPager;
           }
 
           @Override

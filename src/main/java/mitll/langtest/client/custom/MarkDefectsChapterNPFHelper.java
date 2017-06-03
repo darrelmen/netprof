@@ -60,14 +60,13 @@ import java.util.Map;
  */
 public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
 //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
-
   private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
   private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
 
   /**
    * @param controller
    * @param learnHelper
-   * @see Navigation#Navigation
+   * @see
    */
   public MarkDefectsChapterNPFHelper(ExerciseController controller, SimpleChapterNPFHelper learnHelper) {
     super(controller, learnHelper);
@@ -83,13 +82,23 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
+      protected void styleTopRow(Panel twoRows, Panel topRow) {
+        twoRows.add(topRow);
+      }
+
+      protected void styleBottomRow(Panel bottomRow) {
+        bottomRow.setWidth("100%");
+        bottomRow.addStyleName("inlineFlex");
+      }
+
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName,
                                                                                  DivWidget listHeader, DivWidget footer) {
 //        logger.info("instance is " + instanceName);
-        return new NPExerciseList(currentExercisePanel, controller,
+        return new NPExerciseList(currentExercisePanel,
+            controller,
             new ListOptions().setInstance(instanceName)) {
           private CheckBox filterOnly, uninspectedOnly;
 

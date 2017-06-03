@@ -43,6 +43,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.npdata.dao.DBConnection;
 import net.liftweb.util.AU;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -76,6 +77,11 @@ public abstract class BaseAudioDAO extends DAO {
   private static final boolean DEBUG_ATTACH = false;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
+  /**
+   * @see SlickAudioDAO#SlickAudioDAO(Database, DBConnection, IUserDAO)
+   * @param database
+   * @param userDAO
+   */
   BaseAudioDAO(Database database, IUserDAO userDAO) {
     super(database);
     this.userDAO = userDAO;
@@ -90,17 +96,16 @@ public abstract class BaseAudioDAO extends DAO {
    * @seex ExerciseDAO#setAudioDAO
    * @see AudioExport#attachAudio(Collection, IAudioDAO, String)
    * @see DatabaseImpl#attachAllAudio
-   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#attachAudio
+   * @seex mitll.langtest.server.database.exercise.BaseExerciseDAO#attachAudio
    */
   public Map<Integer, List<AudioAttribute>> getExToAudio(int projid) {
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
 
-    logger.info("getExToAudio - for project #" + projid);
+    //logger.info("getExToAudio - for project #" + projid);
     Collection<AudioAttribute> attributesByProject = getAudioAttributesByProjectThatHaveBeenChecked(projid);
-    //  logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
-
+      logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
     for (AudioAttribute audio : attributesByProject) {
       Integer exid = audio.getExid();
       List<AudioAttribute> audioAttributes = exToAudio.get(exid);

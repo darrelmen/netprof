@@ -57,12 +57,12 @@ import java.util.logging.Logger;
 public class DownloadHelper {
   private final Logger logger = Logger.getLogger("DownloadHelper");
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
-  private final HistoryExerciseList exerciseList;
+  private HistoryExerciseList exerciseList;
 
   private SelectionState selectionState;
   private Collection<String> typeOrder;
-  //private Heading selectionStatus;
 
+  public DownloadHelper() {}
   public DownloadHelper(HistoryExerciseList exerciseList) {
     this.exerciseList = exerciseList;
     selectionState = exerciseList.getSelectionState();
@@ -76,12 +76,7 @@ public class DownloadHelper {
     Button download = new Button("Download", IconType.DOWNLOAD);
     download.setType(ButtonType.PRIMARY);
     selectionState = exerciseList.getSelectionState();
-    download.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        showDialog();
-      }
-    });
+    download.addClickHandler(clickEvent -> showDialog());
 
     return download;
   }
