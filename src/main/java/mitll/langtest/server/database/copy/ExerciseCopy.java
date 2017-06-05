@@ -1,7 +1,6 @@
 package mitll.langtest.server.database.copy;
 
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -17,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by go22670 on 2/22/17.
@@ -39,7 +36,8 @@ public class ExerciseCopy {
                                                   Map<Integer, Integer> oldToNewUser,
                                                   int projectid,
                                                   Map<Integer, String> idToFL,
-                                                  Collection<String> typeOrder) {
+                                                  Collection<String> typeOrder,
+                                                  Map<String, Integer> parentToChild) {
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
     Map<String, Integer> exToInt;
 
@@ -49,7 +47,10 @@ public class ExerciseCopy {
     }
     Map<String, List<Exercise>> idToCandidateOverride = new HashMap<>();
     List<Exercise> exercises = addUserExercises(db, oldToNewUser, projectid, typeOrder, idToCandidateOverride);
-    addExercises(db.getUserDAO().getImportUser(), projectid, idToFL, slickUEDAO, db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID), typeOrder, idToCandidateOverride);
+
+    parentToChild.putAll(addExercises(
+        db.getUserDAO().getImportUser(), projectid, idToFL, slickUEDAO,
+        db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID), typeOrder, idToCandidateOverride));
 
     exToInt = slickUEDAO.getOldToNew(projectid);
     reallyAddingUserExercises(projectid, typeOrder, slickUEDAO, exToInt, exercises);
@@ -95,13 +96,13 @@ public class ExerciseCopy {
    * @param idToCandidateOverride
    * @see #copyUserAndPredefExercises
    */
-  public void addExercises(int importUser,
-                           int projectid,
-                           Map<Integer, String> idToFL,
-                           SlickUserExerciseDAO slickUEDAO,
-                           Collection<CommonExercise> exercises,
-                           Collection<String> typeOrder,
-                           Map<String, List<Exercise>> idToCandidateOverride) {
+  public Map<String, Integer> addExercises(int importUser,
+                                           int projectid,
+                                           Map<Integer, String> idToFL,
+                                           SlickUserExerciseDAO slickUEDAO,
+                                           Collection<CommonExercise> exercises,
+                                           Collection<String> typeOrder,
+                                           Map<String, List<Exercise>> idToCandidateOverride) {
     Map<String, Integer> exToInt;
     logger.info("copyUserAndPredefExercises found " + exercises.size() + " old exercises and  " + idToCandidateOverride.size() + " overrides");
 
@@ -110,7 +111,7 @@ public class ExerciseCopy {
     idToFL.putAll(slickUEDAO.getIDToFL(projectid));
 
     logger.info("copyUserAndPredefExercises old->new for project #" + projectid + " : " + exercises.size() + " exercises, " + exToInt.size());
-    addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder);
+    return addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder);
   }
 
   private Map<String, Integer> addExercisesAndAttributes(int importUser,
@@ -154,12 +155,12 @@ public class ExerciseCopy {
    * @param typeOrder
    * @see #copyUserAndPredefExercises
    */
-  private void addContextExercises(int projectid,
-                                   SlickUserExerciseDAO slickUEDAO,
-                                   Map<String, Integer> exToInt,
-                                   int importUser,
-                                   Collection<CommonExercise> exercises,
-                                   Collection<String> typeOrder) {
+  private Map<String, Integer> addContextExercises(int projectid,
+                                                   SlickUserExerciseDAO slickUEDAO,
+                                                   Map<String, Integer> exToInt,
+                                                   int importUser,
+                                                   Collection<CommonExercise> exercises,
+                                                   Collection<String> typeOrder) {
     int n = 0;
     int ct = 0;
     List<SlickRelatedExercise> pairs = new ArrayList<>();
@@ -172,13 +173,14 @@ public class ExerciseCopy {
 
     Set<String> missing = new HashSet<>();
 
+    Map<String, Integer> parentToChild = new HashMap<>();
+
     for (CommonExercise ex : exercises) {
       String oldID = ex.getOldID();
       if (oldID == null) logger.error("addContextExercises : huh? old id is null for " + ex);
       Integer id = exToInt.get(oldID);
       if (id == null) {
         logger.error("addContextExercises can't find " + oldID + " in map of " + exToInt.size());
-        //missingIDs++;
         missing.add(oldID);
       } else {
         for (CommonExercise context : ex.getDirectlyRelated()) {
@@ -186,6 +188,7 @@ public class ExerciseCopy {
           int contextid =
               slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true, typeOrder));
           pairs.add(new SlickRelatedExercise(-1, id, contextid, projectid, now));
+          parentToChild.put(oldID, contextid);
 //          logger.info("map " + id + " -> " + contextid + " ( " + ex.getDirectlyRelated().size());
           ct++;
           if (ct % 400 == 0) logger.debug("addContextExercises inserted " + ct + " context exercises");
@@ -197,8 +200,9 @@ public class ExerciseCopy {
     if (!missing.isEmpty()) logger.error("huh? couldn't find " + missing.size() + " exercises : " + missing);
 
     slickUEDAO.addBulkRelated(pairs);
-
     logger.info("addContextExercises imported " + n + " predef exercises and " + ct + " context exercises");
+
+    return parentToChild;
   }
 
   /**
@@ -388,50 +392,5 @@ public class ExerciseCopy {
       logger.error("Got " + e, e);
     }
     return userExercises;
-  }
-
-  public static void main(String[] arg) {
-    Pattern pattern;
-    Matcher matcher;
-
-    String HTML_TAG_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
-    String anti = "^<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
-
-    pattern = Pattern.compile(HTML_TAG_PATTERN);
-
-    String toMatch = "<img src=\"https://goo.gl/images/FkkqBQ\"><b>distraído</b>";
-    String toMatch2 = "<img src=\"https://goo.gl/images/FkkqBQ\">";
-    String toMatch3 = "<b>distraído</b>";
-
-    List<String> strings = Arrays.asList(toMatch, toMatch2, toMatch3);
-
-    int i = 0;
-    for (String t:strings) {
-      matcher = pattern.matcher(t);
-
-      while (matcher.find()) {
-        logger.info(i + " : I found the text" +
-                " \"" +matcher.group()+
-                "\" starting at " + matcher.start()+
-                "index " +
-                " and ending at index " + matcher.end()+
-                ".");
-      }
-
-      i++;
-
-      boolean matches = matcher.matches();
-
-      logger.info("got  " + t + " = " + matches);
-      String[] split = t.split(HTML_TAG_PATTERN);
-      for (String s:split) {
-        logger.info("\tgot  " + t + " = " + s);
-      }
-      String[] split2 = t.split(anti);
-      for (String s:split2) {
-        logger.info("\t2 got  " + t + " = " + s);
-      }
-
-    }
   }
 }

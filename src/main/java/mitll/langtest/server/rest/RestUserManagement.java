@@ -180,6 +180,7 @@ public class RestUserManagement {
       }
       return true;
     } else if (queryString.startsWith(RESET_PASS)) {
+      logger.warn("\n\n\n calling reset RESET_PASS? ");
       String[] split1 = getParams(queryString);
       if (split1.length != 2) {
         toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
@@ -194,6 +195,8 @@ public class RestUserManagement {
       }
       return true;
     } else if (queryString.startsWith(RESET_PASSWORD_FROM_EMAIL)) {
+
+      logger.warn("\n\n\n calling reset password? ");
       String[] split1 = getParams(queryString);
       if (split1.length != 1) {
         toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);

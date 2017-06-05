@@ -54,6 +54,7 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import org.apache.logging.log4j.LogManager;
@@ -409,7 +410,7 @@ public class UserListManager implements IUserListManager {
 
     if (visitedLists) {
       Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid);
-  //    logger.info("found " + listsForUser1.size() + " visited by " + userid);
+      //    logger.info("found " + listsForUser1.size() + " visited by " + userid);
 
       for (UserList<CommonShell> userList : listsForUser1) {
         if (!ids.contains(userList.getID())) {
@@ -679,7 +680,7 @@ public class UserListManager implements IUserListManager {
   private User getQCUser() {
     List<User.Permission> permissions = new ArrayList<User.Permission>();
     permissions.add(User.Permission.QUALITY_CONTROL);
-    return new User(-1, 89, 0, 0, "", "", false, permissions);
+    return new User(-1, 89, 0, MiniUser.Gender.Unspecified, 0, "", "", false, permissions);
   }
 
   /**

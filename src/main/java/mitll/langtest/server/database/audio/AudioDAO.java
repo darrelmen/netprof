@@ -214,16 +214,6 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }*/
 
   /**
-   * @see DatabaseImpl#makeDAO(String, String, String)
-   * @param exerciseDAO
-   */
-/*
-  void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
-    this.exerciseDAO = exerciseDAO;
-  }
-*/
-
-  /**
    * Pulls the list of audio recordings out of the database.
    *
    * @param projid here ignored, since in old world there are no project ids
@@ -234,8 +224,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid) {
     try {
-      String sql = SELECT_ALL + " WHERE " + DEFECT + "=false";
-      return getResultsSQL(sql);
+      return getResultsSQL( SELECT_ALL + " WHERE " + DEFECT + "=false");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }

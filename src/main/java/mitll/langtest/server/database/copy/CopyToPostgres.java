@@ -252,34 +252,33 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param cc      country code
    * @param optName null OK
    * @param isDev
-   * @see #copyOneConfigCommand
    * @seex PostgresTest#testCopy
+   * @see #copyOneConfigCommand
    */
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
-    logger.info("copyOneConfig project is  type order is " + typeOrder + " for import project id " +DatabaseImpl.IMPORT_PROJECT_ID);
+    logger.info("copyOneConfig project is  type order is " + typeOrder + " for import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev, typeOrder);  // TODO : course?
 
-    logger.info("copyOneConfig project is " + projectID + " type order is " + typeOrder + " for import project id " +DatabaseImpl.IMPORT_PROJECT_ID);
+    logger.info("copyOneConfig project is " + projectID + " type order is " + typeOrder + " for import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     // first add the user table
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
     // check once if we've added it before
-    // TODO : how to drop previous data?
     if (slickUEDAO.isProjectEmpty(projectID)) {
       ResultDAO resultDAO = new ResultDAO(db);
-
       Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO, optName);
 
       Map<Integer, String> idToFL = new HashMap<>();
 
       logger.info("copyOneConfig type order  " + typeOrder);
 
-    if (typeOrder.isEmpty()) logger.error("huh? type order is empty????\\n\n\n");
-      Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder);
+      if (typeOrder.isEmpty()) logger.error("huh? type order is empty????\\n\n\n");
+      Map<String, Integer> parentExToChild = new HashMap<>();
+      Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder, parentExToChild);
 
       SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
       copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL);
@@ -287,8 +286,8 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
       // add the audio table
-      Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, projectID);
-      logger.info("pathToAudioID num = " + pathToAudioID.size());
+      Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID);
+      // logger.info("pathToAudioID num = " + pathToAudioID.size());
 
       // copy ref results
       copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
@@ -362,8 +361,9 @@ public class CopyToPostgres<T extends CommonShell> {
                                                                   int projectID,
                                                                   Map<Integer, Integer> oldToNewUser,
                                                                   Map<Integer, String> idToFL,
-                                                                  Collection<String> typeOrder) {
-    Map<String, Integer> exToID = new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder);
+                                                                  Collection<String> typeOrder,
+                                                                  Map<String, Integer> parentToChild) {
+    Map<String, Integer> exToID = new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder, parentToChild);
 
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
     copyUserExerciseList(db, oldToNewUser, slickUserListDAO, projectID);
@@ -382,6 +382,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   /**
    * TODO : replace config/language/bestAudio (E.g. farsi) with bestAudio
+   *
    * @param db
    * @param oldToNewUser
    * @param exToID
@@ -391,6 +392,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private Map<String, Integer> copyAudio(DatabaseImpl db,
                                          Map<Integer, Integer> oldToNewUser,
                                          Map<String, Integer> exToID,
+                                         Map<String, Integer> parentExToChild,
                                          int projid) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
@@ -400,45 +402,57 @@ public class CopyToPostgres<T extends CommonShell> {
     int missing = 0;
     int skippedMissingUser = 0;
     Set<String> missingExIDs = new TreeSet<>();
-    //Map<String, Integer> fileToID = new HashMap<>();
+
     for (AudioAttribute att : audioAttributes) {
       String oldexid = att.getOldexid();
-      Integer id = exToID.get(oldexid);
+      Integer id = getModernIDForExercise(exToID, parentExToChild, att, oldexid);
       if (id != null) {
-        // fileToID.put(att.getAudioRef(),att.getExid());
-        att.setExid(id);
+        att.setExid(id); // set the exercise id reference - either to a normal exercise or to a context exercise
         SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser, projid);
+
         if (slickAudio != null) {
-          // logger.info(slickAudio.toString());
           bulk.add(slickAudio);
-        } else skippedMissingUser++;
+        } else {
+          skippedMissingUser++;
+        }
       } else {
         missingExIDs.add(oldexid);
-        if (missing < WARN_MISSING_THRESHOLD) logger.warn("missing ex for " + att + " : " + oldexid);
+        if (missing < WARN_MISSING_THRESHOLD) logger.warn("copyAudio missing ex for " + att + " : " + oldexid);
         missing++;
       }
     }
+
     long then = System.currentTimeMillis();
-    logger.debug("copyAudio add bulk : " + bulk.size() + " audio... " + skippedMissingUser + " were skipped due to missing user");
+    logger.debug("copyAudio start    adding bulk : " + bulk.size() + " audio... " + skippedMissingUser + " were skipped due to missing user");
     slickAudioDAO.addBulk(bulk);
     logger.debug("copyAudio finished adding bulk : " + bulk.size() + " audio...");
 
     long now = System.currentTimeMillis();
 
     if (missing > 0) {
-      logger.warn("had " + missing + "/" + audioAttributes.size() + " audio att due to missing ex fk : (" + missingExIDs.size() +
+      logger.warn("copyAudio had " + missing + "/" + audioAttributes.size() + " audio att due to missing ex fk : (" + missingExIDs.size() +
           ") : " +
           "" + missingExIDs);
     }
 
     Map<String, Integer> pairs = slickAudioDAO.getPairs(projid);
-
-//    Collection<AudioAttribute> audioAttributesByProject = slickAudioDAO.getAudioAttributesByProjectThatHaveBeenChecked(projid);
-    logger.info("copyAudio took " + (now - then) + " for project " + projid+
-        " , postgres audio count = " + pairs.size());
-
+    logger.info("copyAudio took " + (now - then) + " for project " + projid + " , postgres audio count = " + pairs.size());
 
     return pairs;
+  }
+
+  private Integer getModernIDForExercise(Map<String, Integer> exToID, Map<String, Integer> parentExToChild, AudioAttribute att, String oldexid) {
+    Integer id = exToID.get(oldexid);
+    if (att.isContextAudio()) {
+//      logger.info("copyAudio att " + att.getUniqueID() + " for ex  " + oldexid + " is context " + att.getAudioRef());
+      Integer childID = parentExToChild.get(oldexid);
+      if (childID == null) {
+        logger.error("copyAudio huh? no child for " + oldexid);
+      } else {
+        id = childID;
+      }
+    }
+    return id;
   }
 
   /**
@@ -564,7 +578,8 @@ public class CopyToPostgres<T extends CommonShell> {
         String exerciseID = join.exerciseID;
         Integer id = exToInt.get(exerciseID);
 //        CommonExercise customOrPredefExercise = null;
-        if (id == null) logger.error("copyUserExerciseListJoin Can't find exercise " + exerciseID + " in " + exToInt.size() + " ex->int map");
+        if (id == null)
+          logger.error("copyUserExerciseListJoin Can't find exercise " + exerciseID + " in " + exToInt.size() + " ex->int map");
         else {
           //customOrPredefExercise = db.getCustomOrPredefExercise(projectid, id);
           slickUserListExerciseJoinDAO.addPair(userListID, id);
@@ -821,7 +836,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
           if (bestAudios.length == 2) {
             String bestAudio = bestAudios[1];
-            bestAudio = "bestAudio"+bestAudio;
+            bestAudio = "bestAudio" + bestAudio;
             audioID = pathToAudioID.get(bestAudio);
             if (audioID == null) logger.warn("can't find '" + bestAudio + "'");
           }

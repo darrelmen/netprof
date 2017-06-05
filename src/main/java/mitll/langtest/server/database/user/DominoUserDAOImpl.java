@@ -82,7 +82,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final String PRIMARY = "primary";
   private static final String DEFAULT_AFFILIATION = "";
 
-  private static final String UID_F  = "userId";
+  private static final String UID_F = "userId";
   private static final String PASS_F = "pass";
   private static final String LOCALHOST = "127.0.0.1";
 
@@ -309,7 +309,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param last
    * @param url
    * @return
-
    * @see #addShellUser
    * @see #addUserAndGetID
    * @see UserManagement#addUser
@@ -730,6 +729,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         dominoUser.getDocumentDBID(),
         99,//dominoUser.age(),
         gender.equals(mitll.hlt.domino.shared.model.user.User.Gender.Male) ? 0 : 1,
+        gender.equals(mitll.hlt.domino.shared.model.user.User.Gender.Male) ? MiniUser.Gender.Male : MiniUser.Gender.Female,
         0,
         "",
         "",
@@ -747,11 +747,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         creationTime,
         dominoUser.getAffiliation());
 
-    try {
-      user.setRealGender(User.Gender.valueOf(gender.name()));
-    } catch (IllegalArgumentException e) {
-      logger.error("couldn't parse gender " + gender.name());
-    }
+//    try {
+//      MiniUser.Gender realGender = getRealGender(gender);
+//      user.setRealGender(realGender);
+//    } catch (IllegalArgumentException e) {
+//      logger.error("couldn't parse gender " + gender.name());
+//    }
 
     user.setFirst(dominoUser.getFirstName());
     user.setLast(dominoUser.getLastName());
@@ -760,6 +761,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 //    logger.info("\ttoUser return " + user);
     return user;
   }
+//
+//  @NotNull
+//  private MiniUser.Gender getRealGender(mitll.hlt.domino.shared.model.user.User.Gender gender) {
+//    return MiniUser.Gender.valueOf(gender.name());
+//  }
 
 /*
   private boolean isValidEmailGrammar(String text) {
@@ -1009,6 +1015,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         dominoUser.getDocumentDBID(),
         0,  // age
         isMale(dominoUser),
+        MiniUser.Gender.valueOf(dominoUser.getGender().name()),
         dominoUser.getUserId(),
         admin);
 
@@ -1028,9 +1035,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return miniUser;
   }
 
-  private boolean isMale(DBUser dominoUser) {
-    return dominoUser.getGender() == DMALE;
-  }
+  private boolean isMale(DBUser dominoUser) { return dominoUser.getGender() == DMALE;  }
 
   /**
    * TODO: Reset password works differently now...?
@@ -1046,18 +1051,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     logger.warn("no reset key! " + resetKey);
     return null;//convertOrNull(dao.getByReset(resetKey));
   }
-
-/*  public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {
-    Map<Integer, User> idToUser = new HashMap<>();
-    all
-        .stream()
-        .filter(dbUser ->
-            getMale ?
-                dbUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male :
-                dbUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Female)
-        .forEach(dbUser -> idToUser.put(dbUser.getDocumentDBID(), toUser(dbUser)));
-    return idToUser;
-  }*/
 
   public boolean isMale(int userid) {
     return getByID(userid).isMale();

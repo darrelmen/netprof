@@ -258,7 +258,8 @@ public class SLFFile {
    *
    * @param token
    * @return
-   * @see
+   * @see #createSimpleSLFFile(Collection, boolean, boolean, boolean)
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra(String, String, String, Collection, String, boolean, int)
    */
   public String cleanToken(String token) {
     return token

@@ -488,9 +488,8 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public Map<Integer, MiniUser> getMiniUsers() {
-    List<User> users = getUsers();
     Map<Integer, MiniUser> mini = new HashMap<>();
-    for (User user : users) mini.put(user.getID(), new MiniUser(user));
+    for (User user : getUsers()) mini.put(user.getID(), new MiniUser(user));
     return mini;
   }
 
@@ -638,9 +637,13 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
       if (admins.contains(userID)) userKind1 = User.Kind.ADMIN;
       String resetKey = rs.getString(RESET_PASSWORD_KEY);
+      int anInt = rs.getInt(GENDER);
+      MiniUser.Gender realGender = anInt == 0 ? MiniUser.Gender.Male : MiniUser.Gender.Female;
+
       User newUser = new User(id, //id
           rs.getInt(AGE), // age
-          rs.getInt(GENDER), //gender
+          anInt, //gender
+          realGender,
           rs.getInt(EXPERIENCE), // exp
           rs.getString(IPADDR), // ip
           password, // password
@@ -660,7 +663,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           //  "",
           rs.getTimestamp(TIMESTAMP).getTime(), "OTHER");
 
-      newUser.setRealGender(newUser.getGender() == 0 ? MiniUser.Gender.Male: MiniUser.Gender.Female);
       users.add(newUser);
 
       if (newUser.getUserID() == null) {

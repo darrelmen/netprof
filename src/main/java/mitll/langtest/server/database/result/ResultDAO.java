@@ -522,7 +522,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
         }
         realAudioType = type == null ? AudioType.UNSET : AudioType.valueOf(type.toUpperCase());
       } catch (IllegalArgumentException e) {
-        logger.warn("unknown audio type '" + type + "' at " + uniqueID);
+        logger.warn("getResultsForQuery unknown audio type '" + type + "' at " + uniqueID);
       }
 
       // NOTE : exercise id is not set - no backwards compatibility
@@ -549,7 +549,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     finish(connection, statement, rs);
     long now = System.currentTimeMillis();
     long diff = now - then;
-    if (diff > 100) logger.warn("took " + diff + " to get " + results.size() + " results");
+    if (diff > 100) logger.warn("getResultsForQuery took " + diff + " to get " + results.size() + " results");
     return results;
   }
 

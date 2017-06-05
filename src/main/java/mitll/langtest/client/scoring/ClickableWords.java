@@ -116,8 +116,6 @@ public class ClickableWords<T extends CommonExercise> {
     List<IHighlightSegment> segments = new ArrayList<>();
     int id = 0;
     for (String token : tokens) {
-//      logger.info("getSegmentsForTokens token '" +token+
-//          "'");
       segments.add(makeClickableText(dir, token, false, id++, isSimple, fieldType));
     }
     return segments;
@@ -138,7 +136,7 @@ public class ClickableWords<T extends CommonExercise> {
     if (isRTL) {
       setDirection(horizontal);
     }
-    int i = 0;
+   // int i = 0;
     for (IHighlightSegment segment : segmentsForTokens) {
       horizontal.add(segment.asWidget());
       // logger.info("adding token " + (i++) + " " + segment);
@@ -223,7 +221,6 @@ public class ClickableWords<T extends CommonExercise> {
       w.addStyleName("rightFiveMargin");
       horizontal.add(w);
 
-
       if (isMatch) {
         if (DEBUG) logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "'");
         toFind = iterator.hasNext() ? iterator.next() : null;
@@ -292,11 +289,12 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   /**
-   * Will reverse order of tokens if it's an RTL exercise...
    *
    * @param value
    * @param isChineseCharacter
    * @return
+   * @see #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean, boolean)
+   * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
    */
   @NotNull
   private List<String> getTokens(String value, boolean isChineseCharacter) {

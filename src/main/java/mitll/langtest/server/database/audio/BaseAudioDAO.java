@@ -787,6 +787,12 @@ public abstract class BaseAudioDAO extends DAO {
                                                              Map<Integer, String> exToTranscript,
                                                              int projid);
 
+  /**
+   * @see #getCountForGender
+   * @param transcript
+   * @param exerciseFL
+   * @return
+   */
   boolean isNoAccentMatch(String transcript, String exerciseFL) {
     if (exerciseFL == null) return false;
 
@@ -814,4 +820,10 @@ public abstract class BaseAudioDAO extends DAO {
   private String removePunct(String t) {
     return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
   }
+
+//  public static void main (String [] arg) {
+//    String f = "لا تهكل هم الامتحان انا رح ساعدك بالمراجعة الليلة.";
+//
+//    String s = "ما تهكل هم الامتحان انا رح ساعدك بالمراجعة الليلة.";
+//  }
 }

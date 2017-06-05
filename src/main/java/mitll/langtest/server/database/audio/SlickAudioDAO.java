@@ -518,6 +518,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   private int c = 0;
+  Set<MiniUser> warned = new HashSet<>();
 
   /**
    * @param orig
@@ -550,7 +551,20 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       if (audioRef.startsWith("config")) {
         audioRef = removeConfigPrefix(audioRef);
       }
-      MiniUser.Gender realGender = orig.getUser().getRealGender();
+
+      MiniUser user = orig.getUser();
+      MiniUser.Gender realGender = user.getRealGender();
+      int gender = realGender == Male ? 0 : realGender == MiniUser.Gender.Female ? 1 : 2;
+
+      if (gender == 2) {
+        if (!warned.contains(user)) {
+          logger.warn("getSlickAudio user " + user);
+          logger.warn("gender " + realGender);
+          logger.warn("gender " + gender);
+          warned.add(user);
+        }
+      }
+
       return new SlickAudio(
           orig.getUniqueID(),
           userid,
@@ -567,7 +581,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           "",
           orig.getDnr(),
           resultid,
-          realGender == Male ? 0 : realGender == MiniUser.Gender.Female ? 1 : 2); // unspecified is 2
+          gender); // unspecified is 2
     }
   }
 

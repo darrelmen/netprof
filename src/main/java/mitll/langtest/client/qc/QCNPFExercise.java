@@ -124,9 +124,12 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   private static final int DEFAULT_MALE_ID = -2;
   private static final int DEFAULT_FEMALE_ID = -3;
   private static final String MALE = "Male";
-  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, true, MALE, false);
+  /**
+   * TODO : why ?
+   */
+  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, true, MiniUser.Gender.Male, MALE, false);
   private static final String FEMALE = "Female";
-  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, false, FEMALE, false);
+  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, false, MiniUser.Gender.Female, FEMALE, false);
 
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
@@ -145,7 +148,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
   public QCNPFExercise(T e, ExerciseController controller,
-                       ListInterface<CommonShell,T> listContainer,
+                       ListInterface<CommonShell, T> listContainer,
                        String instance) {
     super(e, controller, listContainer, new ExerciseOptions(instance));
     this.listContainer = listContainer;
@@ -156,7 +159,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     if (audioWasPlayed == null) {
       initAudioWasPlayed();
     }
-   // return null;
+    // return null;
   }
 
   private void initAudioWasPlayed() {
@@ -190,7 +193,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                              final ListInterface<CommonShell,T> listContainer,
+                                                              final ListInterface<CommonShell, T> listContainer,
                                                               boolean addKeyHandler, boolean includeListButtons) {
     NavigationHelper<CommonShell> navHelper = new NavigationHelper<CommonShell>(exercise, controller,
         new PostAnswerProvider() {
@@ -418,8 +421,8 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     if (!e.hasRefAudio()) {
       return addNoRefAudio(e);
     } else {
-      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true,false);
-      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false,false);
+      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true, false);
+      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false, false);
 
       List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
       List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
@@ -649,6 +652,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
 
   /**
    * TODO: this is probably not right...
+   *
    * @param userID
    * @return
    */

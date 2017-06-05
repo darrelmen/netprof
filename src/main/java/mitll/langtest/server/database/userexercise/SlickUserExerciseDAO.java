@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
@@ -240,6 +241,8 @@ public class SlickUserExerciseDAO
 
   private final Timestamp never = new Timestamp(0);
 
+  VocabFactory factory = new VocabFactory();
+
   /**
    * @param slick
    * @return
@@ -263,7 +266,8 @@ public class SlickUserExerciseDAO
         slick.projid(),
         slick.candecode(),
         slick.candecodechecked().getTime(),
-        slick.numphones());
+        slick.numphones(),
+        factory.getTokens(slick.foreignlanguage()));
 //    logger.info("fromSlick created " + userExercise);
     return userExercise;
   }

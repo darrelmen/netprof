@@ -49,13 +49,14 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     this.content = html;
     north.add(span);
     north.getElement().setId("Highlight_North_" + id);
-    north.addStyleName("floatLeft");
+    boolean isLTR = dir == HasDirection.Direction.LTR;
+    north.addStyleName(isLTR ? "floatLeft" : "floatRight");
     this.north = north;
     span.getElement().setId("highlight_" + id + "_" + html);
 
     add(south = new DivWidget());
 
-    if (dir == HasDirection.Direction.LTR) {
+    if (isLTR) {
       south.addStyleName("floatLeft");
     }
 

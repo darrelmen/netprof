@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.userlist.UserListDAO;
@@ -521,6 +522,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return exercises;
   }
 
+  private VocabFactory factory = new VocabFactory();
+
   private Exercise getUserExercise(ResultSet rs, List<String> typeOrder) throws SQLException {
     Map<String, String> unitToValue = getUnitToValue(rs, typeOrder);
 
@@ -541,7 +544,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         unitToValue,
         date.getTime(),
         -1, false,
-        System.currentTimeMillis(), -1);
+        System.currentTimeMillis(), -1,
+        factory.getTokens(foreignLanguage));
   }
 
   //  private Map<String, List<AudioAttribute>> exToAudio;

@@ -475,8 +475,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               current.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWordAll, audioControl, phoneMap));
               segmentToWord.put(wordSegment, current); // only one for now...
               clickableRow.add(current.asWidget());
-              current.asWidget().addStyleName("floatLeft");
 
+              if (!isRTL) {
+                current.asWidget().addStyleName("floatLeft");
+              }
 
               clickablesIterator.next(); // OK, we've done this clickable
             }
@@ -490,7 +492,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           }
         } else {
           // logger.warning("doOneToManyMatch no match for " + wordSegment);
-          value1.asWidget().addStyleName("floatLeft");
+
+          if (!isRTL) {
+            value1.asWidget().addStyleName("floatLeft");
+          }
           segmentToWord.put(wordSegment, value1);
           clickableRow.add(value1.asWidget());
         }
@@ -505,7 +510,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       IHighlightSegment next = clickablesIterator.next();
       if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio adding left over " + next);
       Widget w = next.asWidget();
-      w.addStyleName("floatLeft");
+      if (!isRTL) w.addStyleName("floatLeft");
       clickableRow.add(w);
     }
   }
@@ -953,10 +958,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     DivWidget flEntry = getCommentEntry(FOREIGN_LANGUAGE, e.getAnnotation(FOREIGN_LANGUAGE), false,
         showInitially, annotationHelper, isRTL, contentWidget);
 
-    if (!isRTL) {
-      flEntry.addStyleName("floatLeft");
-    } else {
+    if (isRTL) {
       clickableWords.setDirection(flEntry);
+    } else {
+      flEntry.addStyleName("floatLeft");
     }
     flEntry.setWidth("100%");
     return flEntry;
@@ -1118,8 +1123,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String altFL = e.getAltFL().trim();
     if (!altFL.isEmpty() && !altFL.equals("N/A") && !e.getForeignLanguage().trim().equals(altFL)) {
       altflClickables = new ArrayList<>();
-//      Widget entry = getEntry(e, QCNPFExercise.ALTFL, altFL, FieldType.FL,
-//          showInitially, altflClickables, phonesChoices == HIDE, annotationHelper, isRTL);
 
       DivWidget contentWidget = clickableWords.getClickableWords(altFL,
           FieldType.FL,
@@ -1133,8 +1136,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (addTopMargin) {
         contentWidget.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
       }
-      //return entry;
-
       if (!isRTL) {
         flEntry.addStyleName("floatLeft");
       } else {
@@ -1184,7 +1185,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.add(getSpacer());
       hp.add(getContextPlay(contextExercise));
 
-      // String noAccentFL = contextExercise.getNoAccentFL();
       DivWidget contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
           FieldType.FL, contextClickables = new ArrayList<>(), false);
 

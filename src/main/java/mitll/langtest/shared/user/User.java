@@ -261,9 +261,9 @@ public class User extends MiniUser {
    * @param permissions
    * @see mitll.langtest.server.database.custom.UserListManager#getQCUser()
    */
-  public User(int id, int age, int gender, int experience, String ipaddr, String password,
+  public User(int id, int age, int gender, Gender realGender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
-    this(id, age, gender, experience, ipaddr, password, NOT_SET, NOT_SET, NOT_SET, enabled, false, permissions,
+    this(id, age, gender, realGender, experience, ipaddr, password, NOT_SET, NOT_SET, NOT_SET, enabled, false, permissions,
         STUDENT,
         "",
         "", "", //"",
@@ -274,6 +274,7 @@ public class User extends MiniUser {
     this(copy.getID(),
         copy.getAge(),
         copy.getGender(),
+        copy.getRealGender(),
         copy.getExperience(),
         copy.getIpaddr(),
         copy.getPasswordHash(),
@@ -316,6 +317,7 @@ public class User extends MiniUser {
   public User(int id,
               int age,
               int gender,
+              Gender realGender,
               int experience,
               String ipaddr,
               String passwordH,
@@ -330,7 +332,7 @@ public class User extends MiniUser {
               //String cdEnableKey,
               long timestamp,//, boolean isActive
               String affiliation) {
-    super(id, age, gender == 0, userID, isAdmin);
+    super(id, age, gender == 0, realGender, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
     if (passwordH == null) passwordH = "";

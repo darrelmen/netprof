@@ -89,6 +89,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private String noAccentFL;
 
+  private List<VocabToken> tokens;
+
   // for serialization
   public Exercise() {
   }
@@ -230,13 +232,16 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int projectid,
                   boolean candecode,
                   long lastChecked,
-                  int numPhones) {
-    this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration, projectid, candecode, lastChecked, false);
+                  int numPhones,
+                  List<VocabToken> tokens) {
+    this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration,
+        projectid, candecode, lastChecked, false);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
     this.safeToDecode = candecode;
     this.numPhones = numPhones;
+    this.tokens = tokens;
   }
 
   /**
@@ -558,14 +563,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.numPhones = numPhones;
   }
 
-/*  public List<String> getTokens() {
-    return tokens;
-  }
-
-  public void setTokens(List<String> tokens) {
-    this.tokens = tokens;
-  }*/
-
   public void setPredef(boolean isPredef) {
     this.isPredef = isPredef;
   }
@@ -578,4 +575,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public boolean isContext() {
     return isContext;
   }
+
+  public List<VocabToken> getTokens() {  return tokens;  }
 }

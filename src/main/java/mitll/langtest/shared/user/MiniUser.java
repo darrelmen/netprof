@@ -58,6 +58,16 @@ public class MiniUser implements HasID, Comparable<HasID> {
   public MiniUser() {
   } // for serialization
 
+  public MiniUser(int id, int age, boolean isMale,  String userID, boolean isAdmin) {
+    this.id = id;
+    this.age = age;
+    this.isMale = isMale;
+    this.realGender = isMale?Gender.Male:Gender.Female;
+
+    this.userID = userID;
+    this.isAdmin = isAdmin;
+  }
+
   /**
    * @param id
    * @param age
@@ -65,10 +75,11 @@ public class MiniUser implements HasID, Comparable<HasID> {
    * @param userID
    * @param isAdmin
    */
-  public MiniUser(int id, int age, boolean isMale, String userID, boolean isAdmin) {
+  public MiniUser(int id, int age, boolean isMale, Gender realGender, String userID, boolean isAdmin) {
     this.id = id;
     this.age = age;
     this.isMale = isMale;
+    this.realGender = realGender;
 
     this.userID = userID;
     this.isAdmin = isAdmin;
@@ -90,7 +101,7 @@ public class MiniUser implements HasID, Comparable<HasID> {
    * @see UserDAO#getMiniUsers()
    */
   public MiniUser(User user) {
-    this(user.getID(), user.getAge(), user.isMale(), new String(user.getUserID()), user.isAdmin());
+    this(user.getID(), user.getAge(), user.isMale(), user.getRealGender(), new String(user.getUserID()), user.isAdmin());
   }
 
   @Override
