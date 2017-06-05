@@ -69,7 +69,7 @@ class CheckLTS {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
     if (htkDictionary == null || (htkDictionary.isEmpty() && hasModel)) {
-      logger.warn("\n ---->>>>> dict is empty?");
+      logger.warn("CheckLTS : dict is empty? lts = " +lts);
     }
     String language = languageProperty != null ? languageProperty : "";
     this.languageProperty = language;
@@ -89,9 +89,9 @@ class CheckLTS {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @see Scoring#getBagOfPhones
    */
-  public ASR.PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
+  ASR.PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
     return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
   }
 

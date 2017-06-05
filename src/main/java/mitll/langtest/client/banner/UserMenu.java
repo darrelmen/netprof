@@ -8,7 +8,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.*;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.domino.user.ChangePasswordView;
@@ -35,17 +34,11 @@ import java.util.logging.Logger;
  */
 public class UserMenu {
   private final Logger logger = Logger.getLogger("UserMenu");
- // public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
 
   private static final String ABOUT_NET_PRO_F = "About NetProF";
-
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
 
- // protected static final String LOGIN = "Login";
-//  private static final int NO_USER_INITIAL = -2;
   private final UserManager userManager;
-
-  //protected long lastUser = NO_USER_INITIAL;
 
   private final LifecycleSupport lifecycleSupport;
   private final ExerciseController controller;
@@ -55,8 +48,6 @@ public class UserMenu {
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
 
-  //protected Panel headerRow;
-  //protected Panel contentRow;
   private static final String LOG_OUT = "Sign Out";
   private final UILifecycle uiLifecycle;
 
@@ -196,7 +187,6 @@ public class UserMenu {
 
         public void onSuccess() {
           ResultManager resultManager = new ResultManager(
-              // resultService,
               props.getNameForAnswer(),
               lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
               outer,
@@ -234,12 +224,9 @@ public class UserMenu {
           String versionInfo = LangTest.VERSION_INFO;
           String releaseDate = props.getReleaseDate();
           String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
-          //String model = props.getModelDir().replaceAll("models.", "");
           values = java.util.Arrays.asList(
-              //   props.getLanguage(),
               versionInfo,
               releaseDate,
-              //  model,
               recordingInfo
           );
         } catch (Exception e) {

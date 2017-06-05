@@ -32,7 +32,7 @@
 
 package mitll.langtest.server;
 
-import mitll.langtest.server.audio.AudioExport;
+import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
@@ -80,6 +80,9 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String MALE = "male=";
   private static final String REGULAR = "regular=";
   private static final String CONTEXT = "context=";
+  /**
+   * @see #getAudioExportOptions
+   */
   private static final String ALLCONTEXT = "allcontext";
 
   /**
@@ -172,13 +175,18 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
-  private AudioExport.AudioExportOptions getAudioExportOptions(String[] splitArgs) {
-    AudioExport.AudioExportOptions options = new AudioExport.AudioExportOptions();
+  private AudioExportOptions getAudioExportOptions(String[] splitArgs) {
+    AudioExportOptions options = new AudioExportOptions();
     for (String arg : splitArgs) {
+      logger.info("getAudioExportOptions arg " + arg);
+
       if (arg.startsWith(MALE)) options.setJustMale(isTrue(arg));
       else if (arg.startsWith(REGULAR)) options.setJustRegularSpeed(isTrue(arg));
       else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
       else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
+      else {
+        logger.error("huh? got unexpected arg" + arg);
+      }
     }
     return options;
   }
@@ -204,7 +212,7 @@ public class DownloadServlet extends DatabaseServlet {
     }
 
     Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
-    AudioExport.AudioExportOptions audioExportOptions = getAudioExportOptions(split1);
+    AudioExportOptions audioExportOptions = getAudioExportOptions(split1);
 
     audioExportOptions.setSkip(typeToSection.isEmpty() && !audioExportOptions.isAllContext());
     String zipFileName = getZipFileName(db, typeToSection, projid, language, audioExportOptions);
@@ -223,7 +231,7 @@ public class DownloadServlet extends DatabaseServlet {
   private void writeZip(HttpServletResponse response,
                         Map<String, Collection<String>> typeToSection,
                         int projectid,
-                        AudioExport.AudioExportOptions options) {
+                        AudioExportOptions options) {
     try {
       getDatabase().writeZip(response.getOutputStream(), typeToSection, projectid, options);
     } catch (Exception e) {
@@ -236,7 +244,7 @@ public class DownloadServlet extends DatabaseServlet {
                                 Map<String, Collection<String>> typeToSection,
                                 int projectid, String language,
 
-                                AudioExport.AudioExportOptions audioExportOptions) {
+                                AudioExportOptions audioExportOptions) {
     String name = getBaseName(db, typeToSection, projectid, language, audioExportOptions);
     name += ".zip";
     return name;
@@ -244,7 +252,7 @@ public class DownloadServlet extends DatabaseServlet {
 
   private String getBaseName(DatabaseImpl db, Map<String, Collection<String>> typeToSection,
                              int projectid, String language,
-                             AudioExport.AudioExportOptions audioExportOptions) {
+                             AudioExportOptions audioExportOptions) {
     String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection, projectid);
     name = name.replaceAll("\\,", "_");
 
@@ -418,7 +426,7 @@ public class DownloadServlet extends DatabaseServlet {
                              DatabaseImpl db,
                              String listid,
                              int projectid,
-                             AudioExport.AudioExportOptions options) {
+                             AudioExportOptions options) {
     Integer id = null;
     try {
       id = Integer.parseInt(listid);

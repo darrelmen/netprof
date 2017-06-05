@@ -37,6 +37,7 @@ import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioExport;
+import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
@@ -175,7 +176,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private mitll.langtest.server.database.user.UserManagement userManagement = null;
 
   /**
-   * @see #writeUserListAudio(OutputStream, int, int, AudioExport.AudioExportOptions)
+   * @see #writeUserListAudio(OutputStream, int, int, AudioExportOptions)
    */
   // private final String configDir;
   /**
@@ -1494,7 +1495,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void writeZip(OutputStream out,
                        Map<String, Collection<String>> typeToSection,
                        int projectid,
-                       AudioExport.AudioExportOptions options) throws Exception {
+                       AudioExportOptions options) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises(projectid) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
@@ -1562,7 +1563,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public String writeUserListAudio(OutputStream out,
                                    int listid,
                                    int projectid,
-                                   AudioExport.AudioExportOptions options) throws Exception {
+                                   AudioExportOptions options) throws Exception {
     String language = getLanguage(projectid);
     if (listid == -1) return language + "_Unknown";
 

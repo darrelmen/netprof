@@ -41,6 +41,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
+ *
+ * JUST FOR AUTO CRT.
+ *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -58,19 +61,10 @@ public class InDictFilter {
   /**
    * @param phrases
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases(java.util.Collection)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases
    */
   public Collection<String> getValidPhrases(Collection<String> phrases) {
     return getValidSentences(phrases);
-  }
-
-  /**
-   * @param phrase
-   * @return
-   * @see #isValid(String)
-   */
-  private boolean isPhraseInDict(String phrase) {
-    return audioFileHelper.checkLTSOnForeignPhrase(phrase, "");
   }
 
   /**
@@ -134,5 +128,14 @@ public class InDictFilter {
    */
   private boolean isValid(String token) {
     return /*checkToken(token) &&*/ isPhraseInDict(token);
+  }
+
+  /**
+   * @param phrase
+   * @return
+   * @see #isValid
+   */
+  private boolean isPhraseInDict(String phrase) {
+    return audioFileHelper.checkLTSOnForeignPhrase(phrase, "");
   }
 }

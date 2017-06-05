@@ -139,7 +139,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(commonExercise));
-      
+
       getRefAudio();
     }
     else {

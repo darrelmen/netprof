@@ -430,6 +430,13 @@ public abstract class Scoring {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSOnForeignPhrase
+   * @see mitll.langtest.server.audio.AudioFileHelper#isInDictOrLTS
+   * @param fl
+   * @param transliteration
+   * @return
+   */
   public boolean validLTS(String fl, String transliteration) {
     if (fl.isEmpty()) return false;
     Set<String> strings = checkLTS(fl, transliteration);

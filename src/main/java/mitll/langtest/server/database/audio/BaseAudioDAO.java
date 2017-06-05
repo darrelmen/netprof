@@ -35,19 +35,20 @@ package mitll.langtest.server.database.audio;
 import com.google.common.base.CharMatcher;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioExport;
+import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.DBConnection;
-import net.liftweb.util.AU;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.analysis.ar.ArabicNormalizer;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -78,9 +79,9 @@ public abstract class BaseAudioDAO extends DAO {
   private static final boolean DEBUG_ATTACH_PATH = false;
 
   /**
-   * @see SlickAudioDAO#SlickAudioDAO(Database, DBConnection, IUserDAO)
    * @param database
    * @param userDAO
+   * @see SlickAudioDAO#SlickAudioDAO(Database, DBConnection, IUserDAO)
    */
   BaseAudioDAO(Database database, IUserDAO userDAO) {
     super(database);
@@ -94,9 +95,9 @@ public abstract class BaseAudioDAO extends DAO {
    * @param projid
    * @return
    * @seex ExerciseDAO#setAudioDAO
+   * @seex mitll.langtest.server.database.exercise.BaseExerciseDAO#attachAudio
    * @see AudioExport#attachAudio(Collection, IAudioDAO, String)
    * @see DatabaseImpl#attachAllAudio
-   * @seex mitll.langtest.server.database.exercise.BaseExerciseDAO#attachAudio
    */
   public Map<Integer, List<AudioAttribute>> getExToAudio(int projid) {
     long then = System.currentTimeMillis();
@@ -105,7 +106,7 @@ public abstract class BaseAudioDAO extends DAO {
 
     //logger.info("getExToAudio - for project #" + projid);
     Collection<AudioAttribute> attributesByProject = getAudioAttributesByProjectThatHaveBeenChecked(projid);
-      logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
+    logger.info("getExToAudio - for " + projid + " got " + attributesByProject.size());
     for (AudioAttribute audio : attributesByProject) {
       Integer exid = audio.getExid();
       List<AudioAttribute> audioAttributes = exToAudio.get(exid);
@@ -222,7 +223,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param firstExercise
    * @param language
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
-   * @see DatabaseImpl#writeUserListAudio(OutputStream, int, int, AudioExport.AudioExportOptions)
+   * @see DatabaseImpl#writeUserListAudio(OutputStream, int, int, AudioExportOptions)
    */
   public int attachAudioToExercise(CommonExercise firstExercise, String language) {
     long then = System.currentTimeMillis();
@@ -361,6 +362,8 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
+   * TODO : Why does this have to be so complicated???
+   *
    * So this happens on the znetProf side where we don't have access to the actual file
    * We have confidence the file is there b/c we check it's existence every 24 hours, or on every startup of the
    * pnetProf instance.
@@ -384,17 +387,13 @@ public abstract class BaseAudioDAO extends DAO {
         directlyRelated.iterator().next().getForeignLanguage() :
         firstExercise.getForeignLanguage();
 
-    boolean b = attr.matchTranscript(StringUtils.stripAccents(exerciseText),
-        StringUtils.stripAccents(attr.getTranscript()));
-    if (b) {
+    if (isMatchExToAudio(attr, exerciseText)) {
       // add to both if context???
       firstExercise.getMutableAudio().addAudio(attr);
 
       if (isContext) {
         for (CommonExercise dir : directlyRelated) {
-          boolean isMatch = attr.matchTranscript(StringUtils.stripAccents(dir.getForeignLanguage()),
-              StringUtils.stripAccents(attr.getTranscript()));
-          if (isMatch) {
+          if (isMatchExToAudio(attr, dir)) {
             firstExercise.getMutableAudio().addAudio(attr);
             break;
           }
@@ -426,7 +425,7 @@ public abstract class BaseAudioDAO extends DAO {
       boolean doDebug =
 //          firstExercise.getID() == 25921 || firstExercise.getID() == 30219 ||
 //              firstExercise.getID() == 36738 ||
-              DEBUG_ATTACH;
+          DEBUG_ATTACH;
 
       if (doDebug) {
         logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getOldID() + " since transcript has changed. Audio '" +
@@ -437,6 +436,29 @@ public abstract class BaseAudioDAO extends DAO {
 
       return false;
     }
+  }
+
+  private boolean isMatchExToAudio(AudioAttribute attr, CommonExercise dir) {
+    return isMatchExToAudio(attr, dir.getForeignLanguage());
+  }
+
+  private boolean isMatchExToAudio(AudioAttribute attr, String foreignLanguage) {
+    String transcript = attr.getTranscript();
+
+    String normFL = normArabic(foreignLanguage, normalizer);
+    String normTranscript = normArabic(transcript, normalizer);
+
+    return attr.matchTranscript(
+        StringUtils.stripAccents(normFL),
+        StringUtils.stripAccents(normTranscript));
+  }
+
+  private ArabicNormalizer normalizer = new ArabicNormalizer();
+
+  private String normArabic(String f, ArabicNormalizer normalizer) {
+    char[] s2 = f.toCharArray();
+    normalizer.normalize(s2, f.length());
+    return new String(s2);
   }
 
   abstract Collection<AudioAttribute> getAudioAttributesForExercise(int exid);
@@ -764,10 +786,6 @@ public abstract class BaseAudioDAO extends DAO {
                                                              String slowSpeed,
                                                              Map<Integer, String> exToTranscript,
                                                              int projid);
-
-/*
-  abstract int getCountBothSpeeds(Set<Integer> userIds, Set<Integer> uniqueIDs);
-*/
 
   boolean isNoAccentMatch(String transcript, String exerciseFL) {
     if (exerciseFL == null) return false;

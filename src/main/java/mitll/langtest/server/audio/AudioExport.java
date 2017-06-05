@@ -253,93 +253,6 @@ public class AudioExport {
     return language1 + "_" + name;
   }
 
-  public static class AudioExportOptions {
-    private boolean justMale = false;
-    private boolean justRegularSpeed = true;
-    private boolean justContext = false;
-    private boolean allContext = false;
-    private boolean isUserList = false;
-    boolean skip = false;
-
-    public AudioExportOptions() {
-    }
-
-/*
-    public AudioExportOptions(boolean justMale, boolean justRegularSpeed, boolean justContext, boolean isUserList) {
-      this.justContext = justContext;
-      this.justRegularSpeed = justRegularSpeed;
-      this.justMale = justMale;
-      this.isUserList = isUserList;
-    }
-*/
-
-/*
-    public boolean isJustMale() {
-      return justMale;
-    }
-*/
-
-    public void setJustMale(boolean justMale) {
-      this.justMale = justMale;
-    }
-
-/*
-    public boolean isJustRegularSpeed() {
-      return justRegularSpeed;
-    }
-*/
-
-    public void setJustRegularSpeed(boolean justRegularSpeed) {
-      this.justRegularSpeed = justRegularSpeed;
-    }
-
-    public boolean isJustContext() {
-      return justContext;
-    }
-
-    public void setSkip(boolean skip) {
-      this.skip = skip;
-    }
-
-    public void setJustContext(boolean justContext) {
-      this.justContext = justContext;
-    }
-
-    public void setAllContext(boolean justContext) {
-      this.allContext = justContext;
-    }
-
-    boolean isUserList() {
-      return isUserList;
-    }
-
-    public void setUserList(boolean userList) {
-      this.isUserList = userList;
-    }
-
-    public String toString() {
-      return "options " +
-          getInfo() + " " +
-          (isUserList ? "user list" : "predef");
-    }
-
-    public String getInfo() {
-      if (isAllContext()) {
-        return "";
-      } else {
-        return skip || isUserList ?
-            "" :
-            "_" + (justMale ? "male" : "female") + "_" +
-                (justRegularSpeed ? "regular" : "slow") + "_" +
-                (justContext ? "context" : "vocab");
-      }
-    }
-
-    public boolean isAllContext() {
-      return allContext;
-    }
-  }
-
   /**
    * @see #writeToStream
    * @param language1
@@ -412,12 +325,12 @@ public class AudioExport {
     // attach audio
     int numAttach = attachAudio(toWrite, audioDAO, language);
 
-    boolean justContext = options.justContext || options.isAllContext();
+    boolean justContext = options.isJustContext() || options.isAllContext();
     if (!justContext) {
       populateGenderToCount(toWrite, maleToCount, femaleToCount);
     }
     // find the male and female with most recordings for this exercise
-    MiniUser male = justContext ? null : getMaxUser(maleToCount);
+    MiniUser male   = justContext ? null : getMaxUser(maleToCount);
     MiniUser female = justContext ? null : getMaxUser(femaleToCount);
 
     AudioConversion audioConversion = new AudioConversion(props);
@@ -425,6 +338,7 @@ public class AudioExport {
     int numMissing = 0;
     Set<String> names = new HashSet<>();
 
+    logger.info("writeFolderContents " + toWrite.size() + " exercises, justContext = " + justContext);
     for (CommonExercise ex : toWrite) {
       boolean someAudio = false;
 
@@ -432,16 +346,19 @@ public class AudioExport {
       if (justContext) {
         someAudio = someAudio ||
             copyContextAudioBothGenders(zOut, overallName, isEnglish, countryCode,
-                audioConversion, names, ex, options.justMale, language);
+                audioConversion, names, ex, options.isJustMale(), language);
         if (options.isAllContext()) {
           someAudio = someAudio || copyContextAudioBothGenders(zOut, overallName, isEnglish, countryCode,
-              audioConversion, names, ex, !options.justMale, language);
+              audioConversion, names, ex, !options.isJustMale(), language);
+        }
+        if (!someAudio && numMissing < 20) {
+          logger.warn("writeFolder : no context audio for " + ex.getID() + " in " + ex.getAudioAttributes().size());
         }
         // if (someAudio) logger.info("found context for " + ex.getID());
 
       } else {
-        MiniUser majorityUser = options.justMale ? male : female;
-        String speed = options.justRegularSpeed ? AudioAttribute.REGULAR : AudioAttribute.SLOW;
+        MiniUser majorityUser = options.isJustMale() ? male : female;
+        String speed = options.isJustRegularSpeed() ? AudioAttribute.REGULAR : AudioAttribute.SLOW;
 
         if (options.isUserList()) {
           AudioAttribute audioAttribute = getLatest(ex, true);
@@ -459,7 +376,7 @@ public class AudioExport {
             logger.info("no female audio for " + ex.getID());
           }
         } else {
-          AudioAttribute recording = getAudioAttribute(majorityUser, ex, options.justMale, speed);
+          AudioAttribute recording = getAudioAttribute(majorityUser, ex, options.isJustMale(), speed);
           if (recording != null) {
             // logger.debug("found " + recording + " by " + recording.getUser());
             copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, ex, speed, recording, language);
@@ -481,8 +398,11 @@ public class AudioExport {
       logger.debug("writeFolderContents : " +
           "took " + diff + " millis " +
           "to export " + toWrite.size() + " items, " +
-          "num attached " + numAttach +
+          "num with audio attached " + numAttach +
           " missing audio " + numMissing);
+    }
+    if (numMissing == numAttach) {
+      logger.error("\nwriteFolderContents huh? no audio attached : " +numMissing);
     }
   }
 

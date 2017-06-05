@@ -345,25 +345,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
-   * Check to see if the audio transcript matches the vocabulary item.
-   * Don't worry about punctuation or case.
-   *
-   * @param foreignLanguage
-   * @return
-   */
-/*  public boolean hasMatchingTranscript(String foreignLanguage) {
-    try {
-      return matchTranscript(foreignLanguage);
-    } catch (Exception e) {
-      return true;
-    }
-  }*/
-
-/*  private boolean matchTranscript(String foreignLanguage) {
-    return matchTranscript(foreignLanguage, this.transcript);
-  }*/
-
-  /**
    * @param foreignLanguage
    * @param transcript
    * @return
@@ -373,7 +354,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return transcript == null ||
         foreignLanguage.isEmpty() ||
         transcript.isEmpty() ||
-        removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
+        removePunct(transcript)
+            .toLowerCase()
+            .equals(removePunct(foreignLanguage)
+                .toLowerCase());
   }
 
   private String removePunct(String t) {
