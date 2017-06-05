@@ -47,6 +47,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
+import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -256,6 +257,34 @@ public class ProjectTest extends BaseTest {
   }
 
   @Test
+  public void testSearch() {
+    DatabaseImpl database = getAndPopulate();
+    // IAudioDAO audioDAO = database.getAudioDAO();
+
+    Project project = database.getProject(2);
+
+    ExerciseTrie<CommonExercise> fullTrie = project.getFullTrie();
+
+    List<String> supuesto = Arrays.asList("definitiva", "en def", "la de", "la def", "ll ", "ll t","ll th","ll thi", "all ","at ","at a","at al","at a ", "all thing","all c", "all co", "thi", "thin", "thing", "things","things ", "things c","things con"," to a", "to allow");
+   // List<String> supuesto = Arrays.asList("at a", "at al");
+
+    for (String test : supuesto) {
+      try {
+        List<CommonExercise> exercises = fullTrie.getExercises(test);
+        // logger.info(test + " : "  + exercises);
+
+        if (exercises.isEmpty()) logger.error("no match for " + test);
+        for (CommonExercise exercise : exercises) {
+          logger.info(test + " : '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish()+"'");
+        }
+      } catch (Exception e) {
+        logger.error("got " + e,e);
+      }
+    }
+
+  }
+
+  @Test
   public void testAnalysis() {
     DatabaseImpl database = getAndPopulate();
     int projectid = 3;
@@ -273,8 +302,8 @@ public class ProjectTest extends BaseTest {
   @Test
   public void testReadDominoJSON() {
     DominoExerciseDAO dominoExerciseDAO = getAndPopulate().getDominoExerciseDAO();
-    DominoExerciseDAO.Info info = dominoExerciseDAO.readExercises("SAMPLE-NO-EXAM.json",null,
-         -1, 1);
+    DominoExerciseDAO.Info info = dominoExerciseDAO.readExercises("SAMPLE-NO-EXAM.json", null,
+        -1, 1);
 
     logger.info("Got " + info);
   }

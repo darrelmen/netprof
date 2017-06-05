@@ -55,6 +55,7 @@ public class Trie<T> {
   private static final Logger logger = LogManager.getLogger(Trie.class);
 
   private static final boolean SPLIT_ON_CHARACTERS = true;
+  public static final boolean SPACES_ARE_OK = true;
   private final TrieNode<T> root;
   private Map<String, String> tempCache;
   private boolean convertToUpper = true;
@@ -125,7 +126,8 @@ public class Trie<T> {
   private boolean addEntryToTrie(TextEntityValue<T> textEntityDescription, Map<String, String> stringCache) {
     String normalizedValue = textEntityDescription.getNormalizedValue();
 //    logger.info("addEntryToTrie adding '" + normalizedValue + "'");
-    List<String> split = SPLIT_ON_CHARACTERS ? getChars(normalizedValue) : getSpaceSeparatedTokens(normalizedValue);
+    //List<String> split = SPLIT_ON_CHARACTERS ? getChars(normalizedValue) : getSpaceSeparatedTokens(normalizedValue);
+    List<String> split =   getChars(normalizedValue);
 
     int n = split.size();
 /*    if (n == 1 && USE_SINGLE_TOKEN_MAP) {
@@ -170,7 +172,7 @@ public class Trie<T> {
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < entry.length(); i++) {
       char c = entry.charAt(i);
-      if (!Character.isWhitespace(c)) {
+      if (!Character.isWhitespace(c) || SPACES_ARE_OK) {
         builder.append(c);
         toAdd.add(builder.toString());
       }
@@ -184,7 +186,7 @@ public class Trie<T> {
    * @param normalizedValue
    * @return list of tokens
    */
-  private List<String> getSpaceSeparatedTokens(String normalizedValue) {
+/*  private List<String> getSpaceSeparatedTokens(String normalizedValue) {
     int findex = 0;
     int nindex = 0;
     List<String> split = new ArrayList<>();
@@ -201,7 +203,7 @@ public class Trie<T> {
       split.add(normalizedValue.substring(findex, nindex));
     }
     return split;
-  }
+  }*/
 
   private void computeFailureFunction() {
     // computeFailureFunction is a method to implement algorithm 3 here from
@@ -213,7 +215,9 @@ public class Trie<T> {
     }
     while (!queue.isEmpty()) {
       TrieNode<T> r = queue.remove();
-      for (String a : r.getTransitionLabels()) {
+      Collection<String> transitionLabels = r.getTransitionLabels();
+     // logger.info("computeFailureFunction transition "+ transitionLabels.size());
+      for (String a : transitionLabels) {
         // a is transition label
         // r is current node
         TrieNode<T> s = r.getKnownNextState(a);

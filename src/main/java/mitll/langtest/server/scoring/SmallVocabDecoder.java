@@ -205,6 +205,12 @@ public class SmallVocabDecoder {
    * @see mitll.langtest.server.trie.ExerciseTrie#getExercises
    */
   public String getTrimmed(String sentence) {
+    return getTrimmedLeaveLastSpace(sentence)
+        //.replaceAll("\\s+", " ")
+        .trim();
+  }
+
+  public String getTrimmedLeaveLastSpace(String sentence) {
     return sentence
         .replaceAll(REMOVE_ME, " ")
         //   .replaceAll("", " ")
@@ -215,9 +221,7 @@ public class SmallVocabDecoder {
         // .replaceAll("\\u2193", " ")
         // .replaceAll("/", " ")
         // .replaceAll("'", "")
-        .replaceAll("\\p{P}", " ")
-        //.replaceAll("\\s+", " ")
-        .trim();
+        .replaceAll("\\p{P}", " ");
   }
 
   /**
