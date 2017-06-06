@@ -21,41 +21,43 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 5/18/17.
  */
-public class DisplayMenu {
-  public static final String SHOW_SOUNDS = "Show Sounds";
+class DisplayMenu {
   private final Logger logger = Logger.getLogger("DisplayMenu");
+
+  private static final String SHOW_SOUNDS = "Show Sounds";
 
   private static final String SHOW_PHONES = "showPhones";
   private static final IconType CHECK = IconType.CHECK;
   private static final String SHOW = "showStorage";
 
-  private NavLink phoneChoice;
+ // private NavLink phoneChoice;
   private KeyStorage storage;
-  
-  public DisplayMenu(KeyStorage storage) {
-    this.storage =storage;
+
+  DisplayMenu(KeyStorage storage) {
+    this.storage = storage;
   }
 
   @NotNull
-  public Dropdown getRealViewMenu() {
+  Dropdown getRealViewMenu() {
     Dropdown view = new Dropdown("Show");
     view.getTriggerWidget().getElement().getStyle().setColor("black");
     view.addStyleName("rightFiveMargin");
     view.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
     view.setWidth("60px");
-   // view.getTriggerWidget().setCaret(false);
 
-   // view.addClickHandler(event -> phoneChoice.setText(SHOW_SOUNDS));
-  //  view.setIcon(IconType.REORDER);
+    view.add(/*phoneChoice =*/ getShowSounds());
+    view.add(getViewMenu());
+    view.add(getDownload());
+
+    return view;
+  }
+
+  @NotNull
+  private NavLink getDownload() {
     NavLink download = new NavLink("Download");
     download.setIcon(IconType.DOWNLOAD_ALT);
-    view.add(download);
-
     download.addClickHandler(event -> LangTest.EVENT_BUS.fireEvent(new DownloadEvent()));
-
-    DropdownSubmenu showChoices = getViewMenu();
-    view.add(showChoices);
-    return view;
+    return download;
   }
 
   @NotNull
@@ -63,35 +65,33 @@ public class DisplayMenu {
     DropdownSubmenu showChoices = new DropdownSubmenu("Show");
     flTextChoices(showChoices);
 
-    phoneChoice = new NavLink(SHOW_SOUNDS);
+    //getShowSounds();
+    //showChoices.add(phoneChoice);
+
+    return showChoices;
+  }
+
+  private NavLink getShowSounds() {
+    NavLink phoneChoice = new NavLink(SHOW_SOUNDS);
     if (getPhonesDisplay() == PhonesChoices.SHOW) {
       phoneChoice.setIcon(CHECK);
     }
 
-    showChoices.add(phoneChoice);
     phoneChoice.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         if (getPhonesDisplay() == PhonesChoices.SHOW) {
-          // phoneChoice.setText("Hide Sounds");
-          storePhoneChoices(PhonesChoices.HIDE.toString());
           phoneChoice.setIcon(null);
+          storePhoneChoices(PhonesChoices.HIDE.toString());
         } else {
-          // phoneChoice.setText("Show Sounds");
           phoneChoice.setIcon(CHECK);
           storePhoneChoices(PhonesChoices.SHOW.toString());
         }
         fireShowEvent();
       }
     });
-
-    return showChoices;
+    return phoneChoice;
   }
-
-//  @NotNull
-//  private String getPhoneMenuTitle() {
-//    return SHOW_SOUNDS;
-//  }
 
   private void flTextChoices(DropdownSubmenu showChoices) {
     NavLink altflChoice = new NavLink("Alternate text");
@@ -110,38 +110,29 @@ public class DisplayMenu {
         altflChoice.setIcon(CHECK);
         break;
     }
-    altflChoice.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        storeShowChoices(ShowChoices.ALTFL.toString());
-        fireShowEvent();
-        altflChoice.setIcon(CHECK);
-        both.setIcon(null);
-        primary.setIcon(null);
-      }
+    altflChoice.addClickHandler(event -> {
+      storeShowChoices(ShowChoices.ALTFL.toString());
+      fireShowEvent();
+      altflChoice.setIcon(CHECK);
+      both.setIcon(null);
+      primary.setIcon(null);
     });
     showChoices.add(primary);
     showChoices.add(altflChoice);
-    primary.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        storeShowChoices(ShowChoices.FL.toString());
-        fireShowEvent();
-        altflChoice.setIcon(null);
-        both.setIcon(null);
-        primary.setIcon(CHECK);
-      }
+    primary.addClickHandler(event -> {
+      storeShowChoices(ShowChoices.FL.toString());
+      fireShowEvent();
+      altflChoice.setIcon(null);
+      both.setIcon(null);
+      primary.setIcon(CHECK);
     });
     showChoices.add(both);
-    both.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        storeShowChoices(ShowChoices.BOTH.toString());
-        fireShowEvent();
-        altflChoice.setIcon(null);
-        both.setIcon(CHECK);
-        primary.setIcon(null);
-      }
+    both.addClickHandler(event -> {
+      storeShowChoices(ShowChoices.BOTH.toString());
+      fireShowEvent();
+      altflChoice.setIcon(null);
+      both.setIcon(CHECK);
+      primary.setIcon(null);
     });
   }
 
@@ -158,11 +149,9 @@ public class DisplayMenu {
     return choices;
   }
 
-
   private void storeShowChoices(String toStore) {
     storage.storeValue(SHOW, toStore);
   }
-
   private void storePhoneChoices(String toStore) {
     storage.storeValue(SHOW_PHONES, toStore);
   }

@@ -305,8 +305,9 @@ public class ClickableWords<T extends CommonExercise> {
         tokens.add(character.toString());
       }
     } else {
+      value = value.replaceAll("/"," / ");  // so X/Y becomes X / Y
       tokens = new ArrayList<>(Arrays.asList(value.split(GoodwaveExercisePanel.SPACE_REGEX)));
-      tokens = tokens.stream().filter(p -> !removePunct(p).isEmpty()).collect(Collectors.toList());
+    //  tokens = tokens.stream().filter(p -> !removePunct(p).isEmpty()).collect(Collectors.toList());
     }
 
     return tokens;

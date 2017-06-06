@@ -106,7 +106,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param id
    * @return
    * @see ExerciseList#pushNewItem
-   * @see #pushNewSectionHistoryToken()
+   * @see #pushNewSectionHistoryToken
    */
   protected String getHistoryTokenFromUIState(String search, int id) {
     //   String unitAndChapterSelection = sectionWidgetContainer.getHistoryToken();
@@ -209,7 +209,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
-      //   logger.info("\tcheckAndAskOrFirst "+ exerciseID);
+      logger.info("\tcheckAndAskOrFirst "+ exerciseID);
       checkAndAskServer(toUse);
     }
   }
@@ -229,7 +229,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param exerciseID
    * @see #loadExercise
    * @see #pushFirstSelection
-   * @see PagingExerciseList#gotTypeAheadEvent
+   * @seex PagingExerciseList#gotTypeAheadEvent
    */
   void pushNewItem(String search, int exerciseID) {
     if (DEBUG_PUSH) {
@@ -389,8 +389,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected void restoreListBoxState(SelectionState selectionState) {
     if (DEBUG) logger.info("restoreListBoxState restore '" + selectionState + "'");
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-    List<String> added = new ArrayList<>(typeOrder);
-    added.add(LISTS);
+//    List<String> added = new ArrayList<>(typeOrder);
+//    added.add(LISTS);
     if (sectionWidgetContainer != null) {
       sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
     }
@@ -412,7 +412,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     if (selectionState.getProject() != controller.getProjectStartupInfo().getProjectid()) {
       //controller.
       // TODO : change the project --- ... and come back and call code below.
-      logger.info("project from state " + selectionState.getProject() + " != " + controller.getProjectStartupInfo().getProjectid());
+      if (selectionState.getProject() != 0) {
+        logger.info("onValueChange project from state " + selectionState.getProject() + " != " + controller.getProjectStartupInfo().getProjectid());
+      }
     }
 
     if (DEBUG_ON_VALUE_CHANGE)
@@ -460,7 +462,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
     // if (timeOfLastRequest >= getTimeOfLastKeyPress()) {
     //   logger.info("restoreUIState time of last " + new Date(timeOfLastRequest) + " > " + new Date(getTimeOfLastKeyPress()));
-    setTypeAheadText(selectionState.getSearch());
+    String search = selectionState.getSearch();
+   // logger.info("restoreUIState search box should be "+search);
+    setTypeAheadText(search);
     //  }
     //  else {
     //    logger.info("restoreUIState ----> key press is newer ");
@@ -474,7 +478,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   /**
    * When we get a history token push, select the exercise type, section, and optionally item.
    *
-   * @see #gotTypeAheadEvent
    * @see #simpleLoadExercises
    */
   protected void loadExercises(String selectionState,
@@ -521,14 +524,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {
       try {
         if (DEBUG) {
-          logger.info("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
+          logger.info("loadExercisesUsingPrefix looking for '" + prefix +
               "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
               " instance " + getInstance()
           );
         }
         getExerciseIDs(typeToSection, prefix, exerciseID, request);
       } catch (Exception e) {
-        logger.warning("got " + e);
+        logger.warning("loadExercisesUsingPrefix got " + e);
       }
     } else {
       if (DEBUG) {
@@ -603,7 +606,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #pushNewSectionHistoryToken
    */
   protected void noSectionsGetExercises(long userID, int exerciseID) {
-    logger.info("noSectionsGetExercises " +userID);
+   // logger.info("noSectionsGetExercises " +userID);
     super.getExercises(userID);
   }
 
@@ -611,9 +614,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * Make sure all sections have a selection - quiz, test type, ilr level
    *
    * @return
-   * @seex SingleSelectExerciseList#gotEmptyExerciseList()
-   * @seex SingleSelectExerciseList#gotSelection()
-   * @seex SingleSelectExerciseList#restoreListFromHistory
    */
   protected int getNumSelections() {
     return sectionWidgetContainer.getNumSelections();

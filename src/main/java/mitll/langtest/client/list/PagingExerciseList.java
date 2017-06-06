@@ -66,8 +66,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   static final String SEARCH = "Search";
-  //private static final int TEN_SECONDS = 10 * 60 * 1000;
-  protected final WaitCursorHelper waitCursorHelper;
+  final WaitCursorHelper waitCursorHelper;
 
   protected ClickablePagingContainer<T> pagingContainer;
 
@@ -133,8 +132,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param onlyDefaultUser
    * @param onlyUninspected
    * @param exerciseID
-   * @paramx setTypeAheadText
-   * @see #gotTypeAheadEvent
    * @see HistoryExerciseList#simpleLoadExercises
    */
   void loadExercises(String selectionState,
@@ -359,7 +356,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param t
    * @see HistoryExerciseList#restoreUIState
    */
-  protected void setTypeAheadText(String t) {
+  void setTypeAheadText(String t) {
 /*    if (typeAhead != null) {
       Set<Long> history = textToWhen.get(t);
       long now = System.currentTimeMillis();
@@ -389,15 +386,29 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       }
     }*/
 
-
     String typeAheadText = getTypeAheadText();
+
+/*
     if (typeAheadText.isEmpty()) {
-      logger.info("setTypeAheadText set type ahead to '" + t + "'");
+      logger.info("\n\n\n\nsetTypeAheadText set type ahead to '" + t + "'");
       if (typeAhead != null) {
         typeAhead.setText(t);
       }
+      else {
+        logger.warning("huh? no type ahead box?");
+      }
     } else if (typeAheadText.equals(t)) {
-      logger.warning("setTypeAheadText not setting text from  '" + typeAheadText + "' to '" + t + "'");
+      logger.warning("\n\n\nsetTypeAheadText not setting text from  '" + typeAheadText + "' to '" + t + "'");
+    }*/
+
+    if (typeAheadText.equals(t)) {
+      logger.warning("\n\n\nsetTypeAheadText not setting text from  '" + typeAheadText + "' to '" + t + "'");
+    } else {
+      if (typeAhead != null) {
+        typeAhead.setText(t);
+      } else {
+        logger.warning("huh? no type ahead box?");
+      }
     }
 
 /*    if (pendingRequests.isEmpty()) {

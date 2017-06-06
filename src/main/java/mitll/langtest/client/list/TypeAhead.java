@@ -93,7 +93,7 @@ public abstract class TypeAhead implements ITypeAhead {
 
   @Override
   public String getText() {
-    return typeAhead.getText();
+    return typeAhead == null ? "" : typeAhead.getText();
   }
 
   @Override

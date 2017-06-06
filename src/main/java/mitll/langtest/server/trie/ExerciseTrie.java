@@ -284,7 +284,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
   /**
    * @param exercise
-   * @param fl
+   * @paramx fl
    * @see #addEnglish(CommonExercise)
    * @see #addFL(boolean, boolean, CommonExercise, String)
    */

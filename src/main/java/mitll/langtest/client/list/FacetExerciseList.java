@@ -178,7 +178,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   *
    * @param controller
    * @return
    */
@@ -463,7 +462,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
       typeOrder = projectStartupInfo.getTypeOrder();
-  //    logger.info("getTypeOrder type order " + typeOrder);
+      //    logger.info("getTypeOrder type order " + typeOrder);
       this.rootNodesInOrder = new ArrayList<>(typeOrder);
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
@@ -981,7 +980,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     List<Pair> pairs = getPairs(typeToSelection);
-   // logger.info("getTypeToValues request " + pairs + " list " + userListID);
+    // logger.info("getTypeToValues request " + pairs + " list " + userListID);
 
     controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs, userListID),
         new AsyncCallback<FilterResponse>() {
@@ -1055,20 +1054,21 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected void restoreListBoxState(SelectionState selectionState) {
     //  logger.info("restoreListBoxState " + selectionState);
     super.restoreListBoxState(selectionState);
-    showSelectionState(selectionState);
+//    showSelectionState(selectionState);
+    downloadHelper.updateDownloadLinks(selectionState, typeOrder);
   }
 
   /**
-   * Add a line that spells out in text which lessons have been chosen, derived from the selection state.
-   * Show in the same type order as the button rows.
+   *x Add a line that spells out in text which lessons have been chosen, derived from the selection state.
+   *x Show in the same type order as the button rows.
    *
    * @param selectionState to get the current selection state from
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  private void showSelectionState(SelectionState selectionState) {
+/*  private void showSelectionState(SelectionState selectionState) {
     // keep the download link info in sync with the selection
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
-  }
+  }*/
 
   /**
    * @seex #rememberAndLoadFirst
@@ -1173,6 +1173,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return newTypeToSelection;
   }
 
+  void pushFirstSelection(int exerciseID, String searchIfAny) {
+    if (numToShow == 1) {
+      super.pushFirstSelection(exerciseID,searchIfAny);
+    }
+    else {
+      askServerForExercise(-1);
+    }
+  }
+
   private int freqid = 0;
 
   /**
@@ -1190,13 +1199,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
-    //   logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
+    logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
       //   logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();
     } else {
-      visibleIDs = setVisibleForDrill(itemID, visibleIDs);
-      getExercises(visibleIDs);
+      getExercises(setVisibleForDrill(itemID, visibleIDs));
     }
   }
 
