@@ -1060,12 +1060,11 @@ public class SlickUserExerciseDAO
   /**
    * TODO : Nobody calls this just now. Maybe later.
    *
-   * @param exToPhones
+   * @paramx exToPhones
    * @seex DatabaseImpl#configureProjects
    */
-  @Override
+/*  @Override
   public void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones) {
-    //this.exToPhones = exToPhones;
     int total = 0;
 
     Map<Integer, Integer> binToCount = new TreeMap<>();
@@ -1094,7 +1093,7 @@ public class SlickUserExerciseDAO
     }
     if (!range.isEmpty()) range = range.subList(0, range.size() - 1);
     logger.info("useExToPhones got range " + range);
-  }
+  }*/
 
   public IRefResultDAO getRefResultDAO() {
     return refResultDAO;

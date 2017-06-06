@@ -60,8 +60,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   static final String TOPIC = "Topic";
   static final String SUB_TOPIC = "Sub-topic";
+  public static final String SUBTOPIC = "subtopic";
+  public static final Set<String> SUBTOPICS = new HashSet<>(Arrays.asList(SUB_TOPIC, SUBTOPIC));
   private static final String GRAMMAR = "Grammar";
   private static final String DIALECT = "Dialect";
+  private static final String DIFFICULTY = "Difficulty";
   private static final String ANY = "any";
   private static final String ALL = "all";
   private List<String> predefinedTypeOrder = new ArrayList<>();
@@ -164,16 +167,26 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    * @param types
    */
   public void reorderTypes(List<String> types) {
+    //logger.info("reorderTypes " + types);
     putAtEnd(types, TOPIC);
     putAtEnd(types, SUB_TOPIC);
+    putAtEnd(types, SUBTOPIC);
     putAtEnd(types, GRAMMAR);
     putAtEnd(types, DIALECT);
+    putAtEnd(types, DIFFICULTY);
+    //logger.info("reorderTypes " + types);
   }
 
   private void putAtEnd(List<String> types, String sound) {
     if (types.contains(sound)) {
       types.remove(sound);
       types.add(sound);
+    } else {
+      String o = sound.toLowerCase();
+      if (types.contains(o)) {
+        types.remove(o);
+        types.add(o);
+      }
     }
   }
 
@@ -451,9 +464,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   /**
-   * @see #getTypeToMatches
    * @param typeToMatch
    * @return
+   * @see #getTypeToMatches
    */
   private Map<String, Set<MatchInfo>> getTypeToMatches(Map<String, Map<String, MatchInfo>> typeToMatch) {
     Map<String, Set<MatchInfo>> typeToMatchRet = new HashMap<>();
@@ -488,12 +501,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String name = child.getName();
     MatchInfo matchInfo = matches.get(name);
 
-    if (DEBUG) logger.info("addOrMerge " + name  + " match info " + matchInfo);
+    if (DEBUG) logger.info("addOrMerge " + name + " match info " + matchInfo);
     if (matchInfo == null) {
       matches.put(name, new MatchInfo(child));
     } else {
       int count = child.getCount();
-      if (DEBUG) logger.info("\taddOrMerge " + name  + " add " +child.getName() + "="+child.getCount() + " to " + matchInfo);
+      if (DEBUG)
+        logger.info("\taddOrMerge " + name + " add " + child.getName() + "=" + child.getCount() + " to " + matchInfo);
       matchInfo.incr(count);
     }
   }
@@ -773,7 +787,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   private Map<String, Lesson<T>> getSectionToLesson(String section) {
     if (section.isEmpty()) {
-      logger.error("huh? section is empty ",new Exception());
+      logger.error("huh? section is empty ", new Exception());
     }
     Map<String, Lesson<T>> unit = typeToUnitToLesson.get(section);
     if (unit == null) {
@@ -896,7 +910,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     if (DEBUG) logger.info("rememberTypesInOrder type->childCount " + typeToCount);
   }
 
-  private void makeRoot() {  root = new SectionNode("root", "root");  }
+  private void makeRoot() {
+    root = new SectionNode("root", "root");
+  }
 
   private int spew = 0;
 

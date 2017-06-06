@@ -639,10 +639,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   }
 
-  @Override
-  public void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones) {
-
-  }
+//  @Override
+//  public void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones) {
+//
+//  }
 
   @Override
   public int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute) {

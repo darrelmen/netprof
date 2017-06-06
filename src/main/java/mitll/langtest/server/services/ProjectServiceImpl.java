@@ -60,6 +60,8 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
+  private static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
+  public static final String ANY = "Any";
 
   @Override
   public List<ProjectInfo> getAll() {
@@ -201,12 +203,23 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         }
       }
 
-      Collection<String> typeOrder2 = db.getProject(projectid).getTypeOrder();
+      Project project = db.getProject(projectid);
+      Collection<String> typeOrder2 = project.getTypeOrder();
 
+      Set<String> toLower = new HashSet<>();
+      typeOrder2.stream().forEach(s -> toLower.add(s.toLowerCase()));
       //  logger.info("typeorder for " +projectid + " is " + typeOrder);
       logger.info("addPending typeorder for " + projectid + " is " + typeOrder2);
 
-      logger.info("addPending importing " + newEx.size() + " exercises");
+      Map<String, ExerciseAttribute> pairToAttr = new HashMap<>();
+      for (CommonExercise ex : newEx) {
+        postProcessUnitToValueToGetAttributes(toLower, pairToAttr, ex);
+      }
+      for (CommonExercise ex : updateEx) {
+        postProcessUnitToValueToGetAttributes(toLower, pairToAttr, ex);
+      }
+
+      logger.info("addPending importing " + newEx.size() + " exercises, ex->attr " + pairToAttr.size());
       new ExerciseCopy().addExercises(importUser,
           projectid,
           new HashMap<>(),
@@ -221,8 +234,42 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
       copyAudio(projectid, newEx, exToInt, slickUEDAO);
 
-      db.configureProject(db.getProject(projectid), true);
+      db.configureProject(project, true);
     }
+  }
+
+  private void postProcessUnitToValueToGetAttributes(Collection<String> typeOrder,
+                                                     Map<String, ExerciseAttribute> pairToAttr,
+                                                     CommonExercise ex) {
+    Map<String, String> unitToValue = ex.getUnitToValue();
+    Map<String, String> filteredUnitToValue = new HashMap<>();
+    List<ExerciseAttribute> toAdd = new ArrayList<>();
+
+    for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
+      String value = pair.getValue();
+      if (value.isEmpty()) value = ANY;
+      String typeName = pair.getKey();
+      if (typeOrder.contains(typeName.toLowerCase())) {
+        filteredUnitToValue.put(typeName, value);
+      } else {
+        String propertyValuePair = typeName + "-" + pair.getValue();
+        ExerciseAttribute exerciseAttribute1 = pairToAttr.get(propertyValuePair);
+        if (exerciseAttribute1 == null) {
+          exerciseAttribute1 = new ExerciseAttribute(typeName, value);
+          //     logger.info("Remember attr " + exerciseAttribute1);
+          pairToAttr.put(propertyValuePair, exerciseAttribute1);
+          if (pairToAttr.size() > REASONABLE_PROPERTY_SPACE_LIMIT) {
+            logger.warn("getExerciseAttributes more than " + pairToAttr.size() +
+                " distinct values for property " + typeName);
+          }
+        }
+        toAdd.add(exerciseAttribute1);
+      }
+    }
+    ex.getMutable().setUnitToValue(filteredUnitToValue);
+    ex.setAttributes(toAdd);
+
+    logger.info("for ex " + ex.getID() + " " + ex.getUnitToValue() + " " + ex.getAttributes());
   }
 
   private void copyAudio(int projectid, List<CommonExercise> newEx, Map<String, Integer> exToInt, SlickUserExerciseDAO slickUEDAO) {
@@ -424,11 +471,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       logger.warn("\n\n\n\nsomehow failed to update " + failed + " out of " + updateEx.size() + " exercises");
   }
 
-  private boolean getWasRetired(Project currentProject) {
+ /* private boolean getWasRetired(Project currentProject) {
     boolean wasRetired = false;
     if (currentProject != null) {
       wasRetired = currentProject.getStatus() == ProjectStatus.RETIRED;
     }
     return wasRetired;
-  }
+  }*/
 }

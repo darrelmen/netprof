@@ -162,7 +162,8 @@ public class FileUploadHelper {
   private void readJSON(Site site, InputStream inputStream) {
     int id = site.id;
     Project project = db.getProject(id);
-    DominoExerciseDAO.Info info = dominoExerciseDAO.readExercises(null, inputStream, project.getID(), db.getUserDAO().getImportUser());
+    DominoExerciseDAO.Info info =
+        dominoExerciseDAO.readExercises(null, inputStream, project.getID(), db.getUserDAO().getImportUser());
 //    logger.info("Got " +info);
     rememberExercises(site, id, info.getExercises());
   }

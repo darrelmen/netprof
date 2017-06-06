@@ -37,6 +37,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -82,4 +83,6 @@ public interface MutableExercise extends CommonShell, MutableShell {
    * @param value
    */
   void addUnitToValue(String unit, String value);
+
+  void setUnitToValue(Map<String,String> unitToValue);
 }

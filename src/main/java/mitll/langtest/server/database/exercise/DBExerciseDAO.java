@@ -48,11 +48,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.database.exercise.SectionHelper.SUBTOPIC;
+import static mitll.langtest.server.database.exercise.SectionHelper.SUB_TOPIC;
+
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
   private final SlickUserExerciseDAO userExerciseDAO;
   private final SlickProject project;
   private final Project fullProject;
+  private static final boolean DEBUG = true;
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
@@ -227,17 +231,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   private void setRootTypes(List<String> typeOrder) {
     Collection<String> attributeTypes = getAttributeTypes();
-    //logger.info("setRootTypes attributeTypes " + attributeTypes);
+    if (DEBUG) logger.info("setRootTypes attributeTypes " + attributeTypes);
 
-    Set<String> collect = attributeTypes
-        .stream()
-        .filter(p -> !p.equals(SectionHelper.SUB_TOPIC))
-        .collect(Collectors.toSet());
+    Set<String> allTypesExceptSubTopic = removeSubtopic(attributeTypes);
 
     String firstProjectType = project.first();
     Set<String> rootTypes = new HashSet<>(Collections.singletonList(firstProjectType));
-    rootTypes.addAll(collect);
-    //logger.info("setRootTypes roots " + rootTypes);
+    rootTypes.addAll(allTypesExceptSubTopic);
+    if (DEBUG) logger.info("setRootTypes roots " + rootTypes);
 
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     sectionHelper.setRootTypes(rootTypes);
@@ -249,15 +250,33 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
 
     if (rootTypes.contains(SectionHelper.TOPIC)) {
-      parentToChild.put(SectionHelper.TOPIC, SectionHelper.SUB_TOPIC);
+      setParentChild(attributeTypes, parentToChild, SectionHelper.TOPIC);
+    } else {
+      String lowerTopic = SectionHelper.TOPIC.toLowerCase();
+      if (rootTypes.contains(lowerTopic)) {
+        setParentChild(attributeTypes, parentToChild, lowerTopic);
+      }
     }
 
     sectionHelper.setParentToChildTypes(parentToChild);
-
-//    logger.info("setRootTypes roots " + rootTypes);
-
+    if (DEBUG) logger.info("setRootTypes roots " + rootTypes);
     sectionHelper.setPredefinedTypeOrder(typeOrder);
-    //   logger.info("parentToChild " + parentToChild);
+    if (DEBUG) logger.info("parentToChild " + parentToChild);
+  }
+
+  private void setParentChild(Collection<String> rootTypes, Map<String, String> parentToChild, String lowerTopic) {
+    if (rootTypes.contains(SUBTOPIC)) {
+      parentToChild.put(lowerTopic, SUBTOPIC);
+    } else if (rootTypes.contains(SUB_TOPIC)) {
+      parentToChild.put(lowerTopic, SUB_TOPIC);
+    }
+  }
+
+  private Set<String> removeSubtopic(Collection<String> attributeTypes) {
+    return attributeTypes
+        .stream()
+        .filter(p -> !SectionHelper.SUBTOPICS.contains(p))
+        .collect(Collectors.toSet());
   }
 
   private Collection<String> getAttributeTypes() {

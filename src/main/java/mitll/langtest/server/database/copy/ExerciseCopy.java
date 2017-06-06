@@ -213,13 +213,13 @@ public class ExerciseCopy {
    * @param typeOrder
    * @see #addExercisesAndAttributes(int, int, SlickUserExerciseDAO, Collection, Collection, Map)
    */
-  public Map<String, List<Integer>> addPredefExercises(int projectid,
-                                                       SlickUserExerciseDAO slickUEDAO,
+  private Map<String, List<Integer>> addPredefExercises(int projectid,
+                                                        SlickUserExerciseDAO slickUEDAO,
 
-                                                       int importUser,
-                                                       Collection<CommonExercise> exercises,
-                                                       Collection<String> typeOrder,
-                                                       Map<String, List<Exercise>> idToCandidateOverride) {
+                                                        int importUser,
+                                                        Collection<CommonExercise> exercises,
+                                                        Collection<String> typeOrder,
+                                                        Map<String, List<Exercise>> idToCandidateOverride) {
     List<SlickExercise> bulk = new ArrayList<>();
     logger.info("addPredefExercises copying " + exercises.size() + " exercises");
     if (typeOrder == null || typeOrder.isEmpty()) {
@@ -263,7 +263,7 @@ public class ExerciseCopy {
           importUser,
           false, typeOrder));
 
-      addAttrbutes(slickUEDAO,
+      addAttributesAndRememberIDs(slickUEDAO,
           projectid, importUser,
           now, attrToID, exToJoins,
 
@@ -285,16 +285,17 @@ public class ExerciseCopy {
    * @param attrToID   map of attribute to db id
    * @param exToJoins  map of old ex id to new attribute db id
    * @param oldID      - at this point we don't have exercise db ids - could be done differently...
+   * @see #addPredefExercises
    */
-  private void addAttrbutes(SlickUserExerciseDAO slickUEDAO,
-                            int projectid,
-                            int importUser,
-                            long now,
-                            Map<ExerciseAttribute, Integer> attrToID,
-                            Map<String, List<Integer>> exToJoins,
+  private void addAttributesAndRememberIDs(SlickUserExerciseDAO slickUEDAO,
+                                           int projectid,
+                                           int importUser,
+                                           long now,
+                                           Map<ExerciseAttribute, Integer> attrToID,
+                                           Map<String, List<Integer>> exToJoins,
 
-                            String oldID,
-                            List<ExerciseAttribute> attributes) {
+                                           String oldID,
+                                           List<ExerciseAttribute> attributes) {
     if (attributes != null && !attributes.isEmpty()) {
       List<Integer> joins;
       exToJoins.put(oldID, joins = new ArrayList<>());
@@ -316,7 +317,7 @@ public class ExerciseCopy {
    * @param now
    * @param attrToID   map of attribute to db id, so we can only store unique attributes (generally)
    * @param joins      attribute ids to associate with this exercise
-   * @paramx known all known attributes
+   *                   #addA
    */
   private void addAttributes(SlickUserExerciseDAO slickUEDAO,
                              int projectid,
@@ -327,9 +328,8 @@ public class ExerciseCopy {
                              Map<ExerciseAttribute, Integer> attrToID,
                              List<Integer> joins) {
     for (ExerciseAttribute attribute : attributes) {
-      boolean contains = attrToID.containsKey(attribute);
       int id;
-      if (contains) {
+      if (attrToID.containsKey(attribute)) {
         id = attrToID.get(attribute);
       } else {
 //        known.add(attribute);

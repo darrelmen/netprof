@@ -465,7 +465,7 @@ public class WordTable {
         }
       }
     } else {
-      logger.warning("getWordToPhones no words in " + netPronImageTypeToEndTime);
+      //logger.warning("getWordToPhones no words in " + netPronImageTypeToEndTime);
     }
     return wordToPhones;
   }

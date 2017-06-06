@@ -65,9 +65,7 @@ public class DominoExerciseDAO {
       return createTime;
     }
 
-    public List<CommonExercise> getExercises() {
-      return exercises;
-    }
+    public List<CommonExercise> getExercises() {   return exercises;    }
 
     public String getLanguage() {
       return language;
