@@ -1052,7 +1052,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-    //  logger.info("restoreListBoxState " + selectionState);
+    logger.info("restoreListBoxState " + selectionState);
     super.restoreListBoxState(selectionState);
 //    showSelectionState(selectionState);
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
@@ -1062,13 +1062,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    *x Add a line that spells out in text which lessons have been chosen, derived from the selection state.
    *x Show in the same type order as the button rows.
    *
-   * @param selectionState to get the current selection state from
+   * @paramx selectionState to get the current selection state from
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-/*  private void showSelectionState(SelectionState selectionState) {
+  private void updateDownloadLinks() {
+    String currentToken = getHistoryToken();
+    SelectionState selectionState = getSelectionState(currentToken);
     // keep the download link info in sync with the selection
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
-  }*/
+  }
 
   /**
    * @seex #rememberAndLoadFirst
@@ -1178,6 +1180,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       super.pushFirstSelection(exerciseID,searchIfAny);
     }
     else {
+      updateDownloadLinks();
       askServerForExercise(-1);
     }
   }
