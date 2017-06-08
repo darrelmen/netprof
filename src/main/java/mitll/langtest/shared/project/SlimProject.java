@@ -32,14 +32,13 @@
 
 package mitll.langtest.shared.project;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class SlimProject extends ProjectInfo {
   private boolean hasModel;
   private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
+  private TreeMap<String,String> props;
 
   public SlimProject() {
   }
@@ -69,10 +68,13 @@ public class SlimProject extends ProjectInfo {
                      boolean isRTL, long created, int port,
                      String modelsDir,
                      String firstType,
-                     String secondType) {
-    super(projectid, name, language, course, countryCode, status, displayOrder, created, port, modelsDir, firstType, secondType);
+                     String secondType,
+                     TreeMap<String,String> props) {
+    super(projectid, name, language, course, countryCode, status, displayOrder, created, port, modelsDir,
+        firstType, secondType);
     this.hasModel = hasModel;
     this.isRTL = isRTL;
+    this.props = props;
   }
 
   public void addChild(SlimProject projectInfo) {
@@ -116,5 +118,9 @@ public class SlimProject extends ProjectInfo {
   public String toString() {
     return "Project #" + getID() + " " + getName() + " " + getLanguage() + " " + getStatus() +
         " num children " + children.size() + " " + getFirstType() + " " + getSecondType();
+  }
+
+  public TreeMap<String, String> getProps() {
+    return props;
   }
 }

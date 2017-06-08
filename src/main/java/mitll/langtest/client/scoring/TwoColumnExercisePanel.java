@@ -1041,8 +1041,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private DivWidget getItemWidget(T e) {
-    InlineLabel itemHeader = commonExerciseUnitChapterItemHelper.getLabel(e);
-    showPopup(itemHeader, commonExerciseUnitChapterItemHelper.getUnitLessonForExercise2(e));
+    InlineLabel itemHeader = commonExerciseUnitChapterItemHelper.showPopup(e);
+    //showPopup(itemHeader, commonExerciseUnitChapterItemHelper.getUnitLessonForExercise2(e));
     itemHeader.addStyleName("floatRight");
     DivWidget itemContainer = new DivWidget();
     itemContainer.add(itemHeader);
@@ -1069,18 +1069,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  private void showPopup(InlineLabel label, String toShow) {
-    label.addMouseOverHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        new BasicDialog().showPopover(
-            label,
-            null,
-            toShow,
-            Placement.LEFT);
-      }
-    });
-  }
+/*  private void showPopup(InlineLabel label, String toShow) {
+    label.addMouseOverHandler(event -> new BasicDialog().showPopover(
+        label,
+        null,
+        toShow,
+        Placement.LEFT));
+  }*/
 
   /**
    * @param e

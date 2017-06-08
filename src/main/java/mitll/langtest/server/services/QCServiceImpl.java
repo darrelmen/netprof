@@ -156,18 +156,18 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
   }
 
   /**
-   * TODO : maybe fully support this
+   * TODOx : maybe fully support this
    *
    * @param id
    * @return
    * @seex ReviewEditableExercise#confirmThenDeleteItem
    */
-  public boolean deleteItem(int id) {
+/*  public boolean deleteItem(int id) {
     boolean b = db.deleteItem(id, getProjectID());
     if (b) {
       // force rebuild of full trie
       getProject().buildExerciseTrie();
     }
     return b;
-  }
+  }*/
 }

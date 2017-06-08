@@ -78,7 +78,7 @@ public class CreateListDialog extends BasicDialog {
   //  private final LangTestDatabaseAsync service;
   private final ListServiceAsync listService = GWT.create(ListService.class);
 
-  private final UserManager userManager;
+ // private final UserManager userManager;
   private final ExerciseController controller;
 
   public CreateListDialog(ListManager navigation,
@@ -86,7 +86,7 @@ public class CreateListDialog extends BasicDialog {
                           ExerciseController controller) {
     this.navigation = navigation;
     //  this.service = service;
-    this.userManager = userManager;
+   // this.userManager = userManager;
     this.controller = controller;
   }
 

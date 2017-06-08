@@ -240,10 +240,14 @@ public class LangTest implements
 
   // services
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+
   private final AudioServiceAsync audioService = GWT.create(AudioService.class);
+
   private final UserServiceAsync userService = GWT.create(UserService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
+
   private final ScoringServiceAsync scoringServiceAsync = GWT.create(ScoringService.class);
+
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
 
@@ -263,7 +267,7 @@ public class LangTest implements
   private UILifecycle initialUI;
   public static EventBus EVENT_BUS = GWT.create(SimpleEventBus.class);
 
-  private KeyStorage storage;// = new KeyStorage(this);
+  private KeyStorage storage;
 
   /**
    * This gets called first.

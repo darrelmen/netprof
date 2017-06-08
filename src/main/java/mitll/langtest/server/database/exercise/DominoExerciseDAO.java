@@ -7,6 +7,7 @@ import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
 import mitll.hlt.domino.shared.model.user.UserDescriptor;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.FileUploadHelper;
+import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import org.apache.commons.lang3.StringUtils;
@@ -129,13 +130,6 @@ public class DominoExerciseDAO {
     return null;
   }
 
-  @NotNull
-  private List<CommonExercise> getCommonExercises(int projid, int creator, JsonArray docArr) {
-    List<CommonExercise> exercises = new ArrayList<>();
-    docArr.forEach(docObj -> exercises.add(getExercise(projid, creator, docObj)));
-    return exercises;
-  }
-
   private int getCreator(int importUser, ProjectDescriptor pd) {
     UserDescriptor creator1 = pd.getCreator();
     return creator1 != null ? creator1.getDocumentDBID() : importUser;
@@ -150,6 +144,13 @@ public class DominoExerciseDAO {
     } catch (IllegalArgumentException e) {
     }
     return lang;
+  }
+
+  @NotNull
+  private List<CommonExercise> getCommonExercises(int projid, int creator, JsonArray docArr) {
+    List<CommonExercise> exercises = new ArrayList<>();
+    docArr.forEach(docObj -> exercises.add(getExercise(projid, creator, docObj)));
+    return exercises;
   }
 
   @NotNull
@@ -172,7 +173,8 @@ public class DominoExerciseDAO {
     return ex;
   }
 
-  private void addContextSentences(int projid, int creator, SimpleHeadDocumentRevision shDoc, VocabularyItem vocabularyItem, Exercise ex) {
+  private void addContextSentences(int projid, int creator, SimpleHeadDocumentRevision shDoc,
+                                   VocabularyItem vocabularyItem, Exercise ex) {
     IDocumentComposite samples = vocabularyItem.getSamples();
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
@@ -180,12 +182,26 @@ public class DominoExerciseDAO {
 //      logger.info("context import id " + compid);
 
       Exercise context = getExercise(projid, compid, creator,
-          sample.getSentenceVal(), sample.getAlternateFormVal(), sample.getTransliterationVal(), sample.getTranslationVal());
+          removeMarkup(sample.getSentenceVal()),
+              removeMarkup(sample.getAlternateFormVal()),
+              removeMarkup(sample.getTransliterationVal()),
+              removeMarkup(sample.getTranslationVal()));
+
       context.setUnitToValue(ex.getUnitToValue());
       ex.getDirectlyRelated().add(context);
     }
   }
 
+  /**
+   * For now we remove markup.
+   * TODO : Consider later actually passing it through.
+   *
+   * @param projid
+   * @param oldid
+   * @param vocabularyItem
+   * @param creatorID
+   * @return
+   */
   @NotNull
   private Exercise getExercise(int projid,
                                int oldid,
@@ -196,8 +212,15 @@ public class DominoExerciseDAO {
     String transliterationVal = vocabularyItem.getTransliterationVal();
     String meaning = vocabularyItem.getMeaningVal();
 
+    return getExercise(projid, oldid, creatorID,
+        removeMarkup(termVal),
+        removeMarkup(alternateFormVal),
+        removeMarkup(transliterationVal),
+        removeMarkup(meaning));
+  }
 
-    return getExercise(projid, oldid, creatorID, termVal, alternateFormVal, transliterationVal, meaning);
+  private String removeMarkup(String termVal) {
+    return termVal.replaceAll(VocabFactory.HTML_TAG_PATTERN,"");
   }
 
   @NotNull

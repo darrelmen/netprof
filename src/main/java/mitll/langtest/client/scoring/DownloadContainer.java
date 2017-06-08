@@ -13,7 +13,8 @@ import mitll.langtest.client.custom.TooltipHelper;
  * Created by go22670 on 5/19/17.
  */
 public class DownloadContainer {
-  private static final String DOWNLOAD_AUDIO = "downloadAudio";
+  public static final String DOWNLOAD_AUDIO = "downloadAudio";
+
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
   private IconAnchor download;
   private Panel downloadContainer;
@@ -22,7 +23,7 @@ public class DownloadContainer {
     addDownloadAudioWidget();
   }
 
-  private DivWidget addDownloadAudioWidget() {
+  private void addDownloadAudioWidget() {
     DivWidget downloadContainer = new DivWidget();
 
     downloadContainer.getElement().setId("downloadContainer");
@@ -35,7 +36,7 @@ public class DownloadContainer {
     downloadContainer.addStyleName("topFiveMargin");
 
     this.downloadContainer = downloadContainer;
-    return downloadContainer;
+    //return downloadContainer;
   }
   /**
    * @return
@@ -46,7 +47,6 @@ public class DownloadContainer {
     download.setIcon(IconType.DOWNLOAD);
     download.setIconSize(IconSize.TWO_TIMES);
     addTooltip(download, DOWNLOAD_YOUR_RECORDING);
-
  /*   download.addClickHandler(event -> controller.logEvent(download, "DownloadUserAudio_Icon", exid,
         "downloading audio file "));*/
     return download;

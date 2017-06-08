@@ -531,7 +531,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   private ScoringAudioPanel getAnswerWidget(final ExerciseController controller, float screenPortion) {
     ScoringAudioPanel widgets =
         new ASRRecordAudioPanel<T>(this, controller, getLocalExercise(), options.getInstance());
-    //widgets.addScoreListener();
     answerAudio = widgets;
     answerAudio.setScreenPortion(screenPortion);
 

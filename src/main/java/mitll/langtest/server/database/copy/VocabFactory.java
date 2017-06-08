@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  *
  */
 public class VocabFactory {
-  private String HTML_TAG_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
+  public static final String HTML_TAG_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
 
   private Pattern pattern = Pattern.compile(HTML_TAG_PATTERN);
 

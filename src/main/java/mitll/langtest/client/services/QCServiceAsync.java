@@ -48,6 +48,6 @@ public interface QCServiceAsync {
 
   void markGender(AudioAttribute attr, boolean isMale, AsyncCallback<Void> async);
 
-  void deleteItem(int exid, AsyncCallback<Boolean> async);
+//  void deleteItem(int exid, AsyncCallback<Boolean> async);
 
 }

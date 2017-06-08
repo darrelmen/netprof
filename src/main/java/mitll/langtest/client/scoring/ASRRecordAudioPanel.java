@@ -29,11 +29,13 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import static mitll.langtest.client.scoring.DownloadContainer.DOWNLOAD_AUDIO;
+
 /**
  * An ASR scoring panel with a record button.
  */
 public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAudioPanel<T> {
-  private static final String DOWNLOAD_AUDIO = "downloadAudio";
+//  private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
@@ -265,13 +267,8 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
 
     addTooltip(download, DOWNLOAD_YOUR_RECORDING);
 
-    download.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(download, "DownloadUserAudio_Icon", exercise,
-            "downloading audio file " + audioPath);
-      }
-    });
+    download.addClickHandler(event -> controller.logEvent(download, "DownloadUserAudio_Icon", exercise,
+        "downloading audio file " + audioPath));
     return download;
   }
 
@@ -284,9 +281,9 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
    * @see #useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
    */
   private void setDownloadHref() {
-    downloadContainer.setVisible(true);
-
     String audioPathToUse = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg", ".mp3") : audioPath;
+
+    downloadContainer.setVisible(true);
 
     String href = DOWNLOAD_AUDIO +
         "?file=" +

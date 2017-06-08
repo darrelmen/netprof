@@ -71,7 +71,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String AUDIO = "audio";
   private static final String LIST = "list";
   private static final String FILE = "file";
-  //private static final String CONTEXT = "context";
+
   private static final String COMPRESSED_SUFFIX = "mp3";
   private static final String USERS = "users";
   private static final String RESULTS = "results";
@@ -109,8 +109,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @throws IOException
    */
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     DatabaseImpl db = getDatabase();
 
     if (db != null) {
@@ -118,13 +117,12 @@ public class DownloadServlet extends DatabaseServlet {
         int projid = getProject(request);
 
         if (projid == -1) {
-          logger.warn("no current project for request " );
+          logger.warn("doGet no current project for request ");
           response.setContentType("text/html");
           response.getOutputStream().write("no project for request".getBytes());
           closeOutputStream(response);
           return;
         }
-
         //       logger.info("doGet : current session found projid " + project1);
         String language = getDatabase().getProject(projid).getLanguage();
 
@@ -132,9 +130,15 @@ public class DownloadServlet extends DatabaseServlet {
         if (requestURI.toLowerCase().contains(AUDIO)) {
           String pathInfo = request.getPathInfo();
           String queryString = request.getQueryString();
-          logger.debug("DownloadServlet.doGet : Request " + queryString + " path " + pathInfo +
-              " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
+          logger.debug("doGet :" +
+              "\n\tRequest " + queryString +
+              "\n\tpath    " + pathInfo +
+              "\n\turi     " + requestURI +
+              "\n\turl     " + request.getRequestURL() +
+              "\n\tpath    " + request.getServletPath());
+
+          // TODO : when could this happen?
           if (queryString == null) {
             setHeader(response, "allAudio.zip");
             writeAllAudio(response, projid);
@@ -158,9 +162,9 @@ public class DownloadServlet extends DatabaseServlet {
           returnSpreadsheet(response, db, requestURI, projid, language);
         }
       } catch (Exception e) {
-        logger.error("Got " + e, e);
+        logger.error("doGet Got " + e, e);
         db.logAndNotify(e);
-        throw new IOException("couldn't process request.", e);
+        throw new IOException("doGet couldn't process request.", e);
       }
     }
 
@@ -224,6 +228,7 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * Make a zip of audio, typically for a chapter or unit.
+   *
    * @param response
    * @param typeToSection
    * @see #doGet
@@ -356,7 +361,7 @@ public class DownloadServlet extends DatabaseServlet {
 
       //logger.debug("file is '" + fileName + "'");
       String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
-    underscores = URLEncoder.encode(underscores, "UTF-8");
+      underscores = URLEncoder.encode(underscores, "UTF-8");
       return underscores;
     }
   }

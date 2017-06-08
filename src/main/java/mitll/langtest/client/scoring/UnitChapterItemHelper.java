@@ -33,12 +33,14 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -93,21 +95,22 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    */
   private Widget getItemHeader(T e) {
     // logger.info("got " + e + " and " + e.getDominoID());
-    int dominoID = e.getDominoID();
-    int idToUse = dominoID != -1 ? dominoID : e.getID();
-    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + idToUse + "/" + e.getOldID());
+//    int dominoID = e.getDominoID();
+//    int idToUse = dominoID != -1 ? dominoID : e.getID();
+    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + getID(e) + "/" + e.getOldID());
     // w.getElement().setId("ItemHeading");
     return w;
   }
 
-  public Widget getSmall(T e) {
+/*  public Widget getSmall(T e) {
     FlowPanel fp = new FlowPanel("small");
     int dominoID = e.getDominoID();
     int idToUse = dominoID != -1 ? dominoID : e.getID();
     fp.getElement().setInnerText("" + idToUse);// + "/" + e.getOldID());
     return fp;
-  }
+  }*/
 
+/*
   public Widget getSmall2(T e) {
     FlowPanel fp = new FlowPanel("small");
     String text = getID(e);
@@ -115,6 +118,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     new TooltipHelper().addTooltip(fp, getUnitLessonForExercise2(e));
     return fp;
   }
+*/
 
   @NotNull
   private String getID(T e) {
@@ -123,7 +127,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     return "" + idToUse;
   }
 
-  public InlineLabel getLabel(T e) {
+  private InlineLabel getLabel(T e) {
     return new InlineLabel(getID(e));
   }
 
@@ -131,9 +135,9 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    * Show unit and chapter info for every item.
    *
    * @return
-   * @see GoodwaveExercisePanel#getQuestionContent
+   * @see #addUnitChapterItem(CommonExercise, Panel)
    */
-  public Panel getUnitLessonForExercise(T exercise) {
+  private Panel getUnitLessonForExercise(T exercise) {
     Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
@@ -150,27 +154,44 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     return flow;
   }
 
-  public String getUnitLessonForExercise2(T exercise) {
+  private String getUnitLessonForExercise2(T exercise) {
+    return getTypeToValue(this.typeOrder, exercise.getUnitToValue());
+  }
+
+  @NotNull
+  public String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue) {
     StringBuilder builder = new StringBuilder();
-    //builder.append("<html><body>");
     for (String type : typeOrder) {
-      String subtext = exercise.getUnitToValue().get(type);
+      String subtext = unitToValue.get(type);
       if (subtext != null && !subtext.isEmpty()) {
-        //    Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
         String html =
-            //  "<div>" +
             "<span>" +
                 "<h5>" + type + "<small style='margin-left:5px'>" + subtext + "</small>" +
                 "</h5>" +
-
-                //   "</div>";
                 "</span>";
         builder.append(html);
       }
     }
-    //builder.append("</body></html>");
-
-    //   logger.info("for " +exercise.getID()+ " return " + builder);
     return builder.toString();
+  }
+
+//  public InlineLabel showPopup(Map<String, String> unitToValue) {
+//    InlineLabel itemHeader = getLabel(exercise);
+//    showPopup(itemHeader, getUnitLessonForExercise2(exercise));
+//    return itemHeader;
+//  }
+
+  public InlineLabel showPopup(T exercise) {
+    InlineLabel itemHeader = getLabel(exercise);
+    showPopup(itemHeader, getUnitLessonForExercise2(exercise));
+    return itemHeader;
+  }
+
+  public void showPopup(InlineLabel label, String toShow) {
+    label.addMouseOverHandler(event -> new BasicDialog().showPopover(
+        label,
+        null,
+        toShow,
+        Placement.LEFT));
   }
 }

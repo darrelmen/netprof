@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -14,12 +15,15 @@ import mitll.langtest.client.*;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
@@ -167,19 +171,18 @@ public class ProjectChoices {
 
     final Container flags = new Container();
     section.add(flags);
-    addFlags(result, nest, flags);
+    flags.add(addFlags(result, nest));
+
     return section;
   }
 
   /**
    * @param result
    * @param nest
-   * @param flags
    * @see #showProjectChoices(List, int)
    */
-  private void addFlags(List<SlimProject> result, int nest, Container flags) {
+  private Thumbnails addFlags(List<SlimProject> result, int nest) {
     Thumbnails current = new Thumbnails();
-    flags.add(current);
 
     List<SlimProject> languages = new ArrayList<>(result);
     sortLanguages(nest, languages);
@@ -187,6 +190,8 @@ public class ProjectChoices {
     for (SlimProject project : languages) {
       current.add(getLangIcon(capitalize(project.getLanguage()), project, nest));
     }
+
+    return current;
   }
 
   @NotNull
@@ -378,14 +383,25 @@ public class ProjectChoices {
     thumbnail.setSize(2);
     final int projid = projectForLang.getID();
 
+    boolean isQC = isQC();
     {
       PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
       button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
       thumbnail.add(button);
+      if (isQC) {
+        Set<String> typeOrder = projectForLang.getProps().keySet();
+        UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper =
+            new UnitChapterItemHelper<>(typeOrder);
+        button.addMouseOverHandler(event -> new BasicDialog().showPopover(
+            button,
+            null,
+            commonExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, projectForLang.getProps()),
+            Placement.LEFT));
+      }
     }
 
     DivWidget horiz = new DivWidget();
-    horiz.getElement().getStyle().setProperty("minHeight", (isQC() ? MIN_HEIGHT : NORMAL_MIN_HEIGHT) + "px"); // so they wrap nicely
+    horiz.getElement().getStyle().setProperty("minHeight", (isQC ? MIN_HEIGHT : NORMAL_MIN_HEIGHT) + "px"); // so they wrap nicely
     thumbnail.add(horiz);
     {
       boolean hasChildren = projectForLang.hasChildren();
@@ -396,8 +412,9 @@ public class ProjectChoices {
       container.setWidth("100%");
       container.addStyleName("floatLeft");
 
-      if (isQC() && !hasChildren) {
+      if (isQC && !hasChildren) {
         container.add(getQCButtons(projectForLang, label));
+
       }
 
       horiz.add(container);

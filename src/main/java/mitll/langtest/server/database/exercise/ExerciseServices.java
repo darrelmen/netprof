@@ -9,10 +9,10 @@ import java.util.Set;
  * Created by go22670 on 3/8/17.
  */
 public interface ExerciseServices {
-  CommonExercise duplicateExercise(CommonExercise exercise);
-
-  @Deprecated
-  boolean deleteItem(int exid, int projectid);
+//  CommonExercise duplicateExercise(CommonExercise exercise);
+//
+//  @Deprecated
+//  boolean deleteItem(int exid, int projectid);
 
   void reloadExercises(int projectid);
 

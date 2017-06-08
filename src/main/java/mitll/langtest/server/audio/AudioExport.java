@@ -275,7 +275,7 @@ public class AudioExport {
    * @param out
    * @param language
    * @throws Exception
-   * @see #writeZipJustOneAudio(OutputStream, SectionHelper, Collection, String, String)
+   * @see #writeZipJustOneAudio
    */
   private void writeToStreamJustOneAudio(Collection<CommonExercise> toWrite,
                                          String audioDirectory,
@@ -311,7 +311,6 @@ public class AudioExport {
     long then = System.currentTimeMillis();
 
     //logger.info("writeFolderContents overall name " + overallName);
-    logger.info("overall name " + overallName);
     if (options.isAllContext()) {
       overallName += "_allContextAudio";
     }
@@ -352,7 +351,7 @@ public class AudioExport {
               audioConversion, names, ex, !options.isJustMale(), language);
         }
         if (!someAudio && numMissing < 20) {
-          logger.warn("writeFolder : no context audio for " + ex.getID() + " in " + ex.getAudioAttributes().size());
+          logger.warn("writeFolder : no context audio for exercise " + ex.getID() + " in " + ex.getAudioAttributes().size() + " attributes");
         }
         // if (someAudio) logger.info("found context for " + ex.getID());
 
@@ -366,14 +365,14 @@ public class AudioExport {
             copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute, language);
             someAudio = true;
           } else {
-            logger.info("no   male audio for " + ex.getID());
+            logger.info("writeFolder : no   male audio for " + ex.getID());
           }
           audioAttribute = getLatest(ex, false);
           if (audioAttribute != null) {
             copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute, language);
             someAudio = true;
           } else {
-            logger.info("no female audio for " + ex.getID());
+            logger.info("writeFolder : no female audio for " + ex.getID());
           }
         } else {
           AudioAttribute recording = getAudioAttribute(majorityUser, ex, options.isJustMale(), speed);

@@ -347,10 +347,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @return
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
    */
-  @Override
+ /* @Override
   public CommonExercise duplicateExercise(CommonExercise exercise) {
     return db.duplicateExercise(exercise);
-  }
+  }*/
 
   /**
    * Can't check if it's valid if we don't have a model.

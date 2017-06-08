@@ -1337,7 +1337,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
    */
-  @Override
+/*  @Override
   public CommonExercise duplicateExercise(CommonExercise exercise) {
     logger.debug("to duplicate  " + exercise);
 
@@ -1372,7 +1372,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.debug("duplicate after " + duplicate);
 
     return duplicate;
-  }
+  }*/
 
   /**
    * @param exid
@@ -1381,6 +1381,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#deleteItem
    * @seex mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
+/*
   @Override
   @Deprecated
   public boolean deleteItem(int exid, int projectid) {
@@ -1394,6 +1395,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     getSectionHelper(projectid).removeExercise(getExercise(projectid, exid));
     return getExerciseDAO(projectid).remove(exid);
   }
+*/
 
   private int warns = 0;
 
@@ -1421,9 +1423,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return toRet;
   }
 
+/*
   public CommonExercise getExerciseByID(int id) {
     return getProjectManagement().getExerciseByID(id);
-  }
+  }*/
 
 /*
   @Nullable
@@ -1477,13 +1480,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * TODO : are we going to support this?
+   * TODOx : are we going to support this?
    *
    * @return
    */
-  private AddRemoveDAO getAddRemoveDAO() {
+/*  private AddRemoveDAO getAddRemoveDAO() {
     return null;//addRemoveDAO;
-  }
+  }*/
 
   /**
    * @param out

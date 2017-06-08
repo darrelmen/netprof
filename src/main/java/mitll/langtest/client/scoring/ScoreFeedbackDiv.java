@@ -26,8 +26,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 5/19/17.
  */
 public class ScoreFeedbackDiv {
-  public static final String OVERALL_SCORE = "Overall Score";
   private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
+
+  private static final String OVERALL_SCORE = "Overall Score";
 
   private ProgressBar progressBar;
   /**

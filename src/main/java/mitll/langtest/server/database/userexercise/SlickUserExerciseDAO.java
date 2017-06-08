@@ -864,6 +864,7 @@ public class SlickUserExerciseDAO
    * @param isContext
    * @param typeOrder
    * @seex UserListManager#editItem
+   * @see mitll.langtest.server.services.ProjectServiceImpl#doUpdate
    */
   @Override
   public boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder) {

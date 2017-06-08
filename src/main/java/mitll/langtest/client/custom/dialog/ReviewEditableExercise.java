@@ -98,13 +98,14 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private static final String FIXED = "Mark Fixed";
   private static final String DUPLICATE = "Duplicate";
   /**
-   * @see #getRemove
+   * @seex #getRemove
    */
-  private static final String DELETE = "Delete";
+/*  private static final String DELETE = "Delete";
   private static final String DELETE_THIS_ITEM = "Delete this item.";
   private static final String ARE_YOU_SURE = "Are you sure?";
   private static final String REALLY_DELETE_ITEM = "Really delete whole item and all audio cuts?";
   private static final List<String> MSGS = Collections.singletonList(REALLY_DELETE_ITEM);
+  */
   private static final String COPY_THIS_ITEM = "Copy this item.";
   private static final String REGULAR_SPEED = " Regular speed";
   private static final String SLOW_SPEED = " Slow speed";
@@ -205,6 +206,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   /**
    * TODO redo preferred voices...
+   *
    * @param exercise
    * @param isMale
    * @return
@@ -243,7 +245,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
                                 TabPanel tabPanel,
                                 boolean isMale,
                                 Collection<AudioAttribute> displayed) {
-    Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(isMale,false);
+    Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(isMale, false);
     List<MiniUser> maleUsers = audioAttributeExercise.getSortedUsers(malesMap);
     addTabsForUsers(newUserExercise, tabPanel, malesMap, maleUsers, displayed);
   }
@@ -499,7 +501,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
           @Override
           public void onSuccess(Void result) {
             widgets.getParent().setVisible(false);
-         //   reloadLearnList();
+            //   reloadLearnList();
             LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
             // TODO : need to update other lists too?
           }
@@ -599,7 +601,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   @Override
   protected Panel getCreateButton(final UserList<CommonShell> ul,
-                                  final ListInterface<CommonShell,CommonExercise> pagingContainer,
+                                  final ListInterface<CommonShell, CommonExercise> pagingContainer,
                                   final Panel toAddTo,
                                   final ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
@@ -609,12 +611,12 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     prevNext.addStyleName("floatLeftAndClear");
     row.add(prevNext);
 
-    if (newUserExercise.isPredefined()) {//getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
+ /*   if (newUserExercise.isPredefined()) {//getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
 //    if (newUserExercise.getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
-      row.add(getRemove());
+      //    row.add(getRemove());
       row.add(getDuplicate());
     }
-
+*/
     row.add(getFixedButton(ul, pagingContainer, toAddTo, normalSpeedRecording));
     boolean keepAudioSelection = getKeepAudioSelection();
 
@@ -634,7 +636,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private Button getFixedButton(final UserList<CommonShell> ul,
-                                final ListInterface<CommonShell,CommonExercise> pagingContainer,
+                                final ListInterface<CommonShell, CommonExercise> pagingContainer,
                                 final Panel toAddTo,
                                 final ControlGroup normalSpeedRecording) {
     final Button fixed = makeFixedButton();
@@ -655,7 +657,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
    */
   @Override
-  void afterValidForeignPhrase(final ListInterface<CommonShell,CommonExercise> exerciseList,
+  void afterValidForeignPhrase(final ListInterface<CommonShell, CommonExercise> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
     super.afterValidForeignPhrase(exerciseList, toAddTo, onClick);
@@ -663,7 +665,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
 
-  private Button getRemove() {
+/*  private Button getRemove() {
     Button remove = new Button(DELETE);
     remove.setType(ButtonType.WARNING);
     remove.addStyleName("floatRight");
@@ -677,9 +679,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       }
     });
     return remove;
-  }
+  }*/
 
-  private void confirmThenDeleteItem() {
+/*  private void confirmThenDeleteItem() {
     DialogHelper dialogHelper = new DialogHelper(true);
     dialogHelper.show(ARE_YOU_SURE, MSGS, new DialogHelper.CloseListener() {
       @Override
@@ -701,12 +703,12 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       public void gotNo() {
       }
     });
-  }
+  }*/
 
   /**
    * @return
    */
-  private Button getDuplicate() {
+/*  private Button getDuplicate() {
     final Button duplicate = new Button(DUPLICATE);
     duplicate.setType(ButtonType.SUCCESS);
     duplicate.addStyleName("floatRight");
@@ -719,14 +721,14 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       }
     });
     return duplicate;
-  }
+  }*/
 
   /**
    * Disable the button initially so we don't accidentally duplicate twice.
    *
    * @param duplicate
    */
-  private void duplicateExercise(final Button duplicate) {
+ /* private void duplicateExercise(final Button duplicate) {
     duplicate.setEnabled(false);
     newUserExercise.getMutable().setCreator(controller.getUser());
     CommonShell commonShell = exerciseList.byHasID(newUserExercise);
@@ -750,7 +752,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         originalList.addExerciseAfter(newUserExercise, result);
       }
     });
-  }
+  }*/
 
   /**
    * @return
@@ -778,7 +780,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
    */
   @Override
-  protected void audioPosted() {   reallyChange(listInterface, false, getKeepAudio());  }
+  protected void audioPosted() {
+    reallyChange(listInterface, false, getKeepAudio());
+  }
 
   /**
    * @return
@@ -837,11 +841,11 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param pagingContainer
    * @param buttonClicked
    * @seex #doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
-   * @see #reallyChange
    * @seex #postEditItem
+   * @see #reallyChange
    */
   @Override
-  protected void doAfterEditComplete(ListInterface<CommonShell,CommonExercise> pagingContainer, boolean buttonClicked) {
+  protected void doAfterEditComplete(ListInterface<CommonShell, CommonExercise> pagingContainer, boolean buttonClicked) {
     //  super.doAfterEditComplete(pagingContainer, buttonClicked);
     changeTooltip(pagingContainer);
     if (buttonClicked) {

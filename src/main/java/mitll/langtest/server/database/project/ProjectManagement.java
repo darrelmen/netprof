@@ -58,6 +58,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -642,8 +644,8 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * For now, not adding difficulty or sound as properties - sort by difficulty though.
    *
-   * @paramx project
    * @return
+   * @paramx project
    */
   @NotNull
 /*
@@ -655,6 +657,7 @@ public class ProjectManagement implements IProjectManagement {
   private boolean hasModel(SlickProject project1) {
     return getModel(project1) != null;
   }
+
   private String getModel(SlickProject project1) {
     return project1.getProp(ServerProperties.MODELS_DIR);
   }
@@ -718,9 +721,17 @@ public class ProjectManagement implements IProjectManagement {
       status = ProjectStatus.DEVELOPMENT;
     }
 
+    TreeMap<String, String> info = new TreeMap<>();
+
+    DateFormat format = new SimpleDateFormat();
+    info.put("Created",format.format(project.created()));
+    info.put("Modified",format.format(project.modified()));
+
     boolean isRTL = false;
     if (status != ProjectStatus.RETIRED) {
-      isRTL = isRTL(db.getExercises(project.id()));
+      List<CommonExercise> exercises = db.getExercises(project.id());
+      isRTL = isRTL(exercises);
+      info.put("Num Items",""+exercises.size());
     }
 
     return new SlimProject(
@@ -736,7 +747,7 @@ public class ProjectManagement implements IProjectManagement {
         project.created().getTime(),
         getPort(project),
         project.getProp(ServerProperties.MODELS_DIR),
-        project.first(), project.second());
+        project.first(), project.second(), info);
   }
 
   private int getPort(SlickProject project) {

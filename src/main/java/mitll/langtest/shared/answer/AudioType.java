@@ -37,16 +37,16 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public enum AudioType implements IsSerializable {
   UNSET("unset"),
 
-  REGULAR("regular"),
-  SLOW("slow"),
+  REGULAR("regular", "", "regular"),
+  SLOW("slow", "", "slow"),
   @Deprecated FAST_AND_SLOW("fastAndSlow"),  // really old legacy thing
   PRACTICE("practice"),  // or avp or flashcard
   // FLASHCARD("flashcard"),
   LEARN("learn"),
   TEXT("text"),
 
-  REVIEW("review"),      // TODO: gah - try to remove this
-  RECORDER("recorder"),  // TODO : somehow user role gets expressed with this
+  @Deprecated REVIEW("review"),      // maybe only see this in legacy data
+  @Deprecated RECORDER("recorder"),  // maybe only see this in legacy data
 
   CONTEXT_REGULAR("context=regular", "context", "regular"),
 
@@ -80,6 +80,14 @@ public enum AudioType implements IsSerializable {
 
   public String getSpeed() {
     return speed;
+  }
+
+  public boolean isRegularSpeed() {
+    return speed.equals("regular");
+  }
+
+  public boolean isSlowSpeed() {
+    return speed.equals("slow");
   }
 
   public boolean isContext() {

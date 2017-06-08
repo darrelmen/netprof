@@ -77,7 +77,7 @@ public interface ListServiceAsync {
 
   void deleteItemFromList(int listid, int exid, AsyncCallback<Boolean> async);
 
-  void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
+//  void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
 
   void updateContext(long userListID, String context, AsyncCallback<Void> async);
   void updateRichText(long userListID, String richText, AsyncCallback<Void> async);
