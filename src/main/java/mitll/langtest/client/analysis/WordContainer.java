@@ -122,7 +122,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
 
   //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
-  //private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
+  private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
 
   protected int getPageSize() {
     return ROWS_TO_SHOW;
@@ -399,17 +399,15 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
       addItems(sortedHistory);
     } else {
       // logger.info("Starting from " +from + " : " +to);
-      // logger.info("Starting from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
+      logger.info("timeChanged : from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
       heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " + yearShortFormat.format(new Date(to)));
 
-      SortedSet<WordScore> wordScores = byTime.subSet(new WordScore(from), new WordScore(to));
+      SortedSet<WordScore> wordScores = byTime.subSet(new WordScore(from+1), new WordScore(to+1));
+
+      logger.info("timeChanged : wordScores " + wordScores.size());
+
       List<WordScore> filtered = new ArrayList<>(wordScores);
-      filtered.sort(new Comparator<WordScore>() {
-        @Override
-        public int compare(WordScore o1, WordScore o2) {
-          return -1*Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
-        }
-      });
+      filtered.sort((o1, o2) -> -1*Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
       //Collections.sort(filtered); // put sort back to by score first
       addItems(filtered);
     }

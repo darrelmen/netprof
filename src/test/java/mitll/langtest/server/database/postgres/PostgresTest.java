@@ -191,6 +191,11 @@ public class PostgresTest extends BaseTest {
     copyProd("Iraqi");
   }
 
+  @Test
+  public void testRussian() {
+    copyProd("Russian");
+  }
+
   /**
    * Broken?
    */

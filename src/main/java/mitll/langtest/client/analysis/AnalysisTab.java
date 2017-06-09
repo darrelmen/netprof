@@ -265,23 +265,29 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(List<WordScore> wordScores) {
-//        logger.info("getWordScores : got " + wordScores.size() + " for user #" + userid);
-        showWordScores(wordScores, controller, analysisPlot, showTab, lowerHalf, /*service,*/ userid, minRecordings);
+        logger.info("getWordScores : got " + wordScores.size() + " for user #" + userid);
+        showWordScores(wordScores, controller, analysisPlot, showTab, lowerHalf, userid, minRecordings);
       }
     });
   }
 
   private void showWordScores(List<WordScore> wordScores,
-                              ExerciseController controller, AnalysisPlot analysisPlot,
-                              ShowTab showTab, Panel lowerHalf,
-                              int userid, int minRecordings) {
-    Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab, new Heading(3, WORDS, SUBTITLE));
+                              ExerciseController controller,
+                              AnalysisPlot analysisPlot,
+                              ShowTab showTab,
+                              Panel lowerHalf,
+                              int userid,
+                              int minRecordings) {
+    {
+      logger.info("showWordScores " + wordScores.size());
+      Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab,
+          new Heading(3, WORDS, SUBTITLE));
 
-    DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", new Heading(3, WORDS, SUBTITLE));
-    wordsContainer.addStyleName("cardBorderShadow");
-    //   wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
-
-    lowerHalf.add(wordsContainer);
+      DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer",
+          new Heading(3, WORDS, SUBTITLE));
+      wordsContainer.addStyleName("cardBorderShadow");
+      lowerHalf.add(wordsContainer);
+    }
 
     DivWidget soundsDiv = getSoundsDiv();
 

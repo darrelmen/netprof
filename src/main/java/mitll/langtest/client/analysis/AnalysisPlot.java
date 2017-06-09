@@ -555,17 +555,14 @@ public class AnalysisPlot extends TimeSeriesPlot {
    */
   private ToolTip getToolTip() {
     return new ToolTip()
-        .setFormatter(new ToolTipFormatter() {
-          public String format(ToolTipData toolTipData) {
-            try {
-              Integer exerciseID = timeToId.get(toolTipData.getXAsLong());
-              CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
-              return getTooltip(toolTipData, exerciseID, commonShell);
-            } catch (Exception e) {
-              logger.warning(e.getMessage());
-              // e.printStackTrace();
-              return "";
-            }
+        .setFormatter(toolTipData -> {
+          try {
+            Integer exerciseID = timeToId.get(toolTipData.getXAsLong());
+            CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
+            return getTooltip(toolTipData, exerciseID, commonShell);
+          } catch (Exception e) {
+            logger.warning(e.getMessage());
+            return "";
           }
         });
   }

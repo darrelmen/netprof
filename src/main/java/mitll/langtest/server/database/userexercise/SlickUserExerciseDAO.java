@@ -1032,19 +1032,28 @@ public class SlickUserExerciseDAO
   /**
    * @param projectid
    * @return
-   * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercisesAndAttributes(int, int, SlickUserExerciseDAO, Collection, Collection)
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercisesAndAttributes
    */
   public Map<String, Integer> getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
+
     List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(projectid);
+
+    addToMap(oldToNew, allPredefByProject);
+
+    addToMap(oldToNew, dao.getAllContextPredefByProject(projectid));
+
+    logger.info("getOldToNew found for project #" + projectid + " " + allPredefByProject.size() + " exercises, " + oldToNew.size() + " old->new");
+//    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
+    return oldToNew;
+  }
+
+  private void addToMap(Map<String, Integer> oldToNew, List<SlickExercise> allPredefByProject) {
     for (SlickExercise exercise : allPredefByProject) {
       Integer before = oldToNew.put(exercise.exid(), exercise.id());
       if (before != null)
         logger.warn("huh? already saw an exercise with id " + exercise.exid() + " replace with " + exercise);
     }
-    logger.info("getOldToNew found for project #" + projectid + " " + allPredefByProject.size() + " exercises, " + oldToNew.size() + " old->new");
-//    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
-    return oldToNew;
   }
 
   /**

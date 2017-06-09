@@ -339,10 +339,9 @@ public class ClickableWords<T extends CommonExercise> {
       return false;
     } else {
       String context = removePunct(longer.toLowerCase());
-      String vocab = removePunct(shorter.toLowerCase());
+      String vocab   = removePunct(shorter.toLowerCase());
       // if (DEBUG) logger.info("context " + context + " longer " + longer);
       boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
-
 /*      if (b && DEBUG)
         logger.info("isMatch match '" + longer + "' '" + shorter + "' context '" + context + "' vocab '" + vocab + "'");
      */
@@ -489,6 +488,7 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   /**
+   * First is russian accent mark.
    * Chinese punctuation marks, spanish punct marks
    * horizontal ellipsis...
    * reverse solidus
@@ -500,6 +500,7 @@ public class ClickableWords<T extends CommonExercise> {
     return t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
         .replaceAll("\\u00ED", "i")
-        .replaceAll("[\\0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
+        .replaceAll("\\u00E9","\\u0435")
+        .replaceAll("[\\u0301\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
   }
 }

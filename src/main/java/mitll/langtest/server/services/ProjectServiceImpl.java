@@ -297,21 +297,26 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         "\n\tattr        " + ex.getAttributes());
   }
 
-  private void copyAudio(int projectid, List<CommonExercise> newEx, Map<String, Integer> exToInt) {
+  /**
+   * @param projectid
+   * @param newEx
+   * @param exToInt
+   * @see #addPending
+   */
+  private void copyAudio(int projectid,
+                         List<CommonExercise> newEx,
+                         Map<String, Integer> exToInt) {
     try {
       List<Project> matches = getProjectsForSameLanguage(projectid);
 
-      //  Map<String, List<SlickAudio>> transcriptToAudioAll = new HashMap<>();
+      logger.info("found  " + matches.size() + " for project " +projectid);
+
       Map<String, AudioMatches> transcriptToAudioMatch = new HashMap<>();
       Map<String, AudioMatches> transcriptToContextAudioMatch = new HashMap<>();
 
       for (Project match : matches) {
-//        int maxID = -1;
-//        Project maxProject = getProjectWithMostExercises(slickUEDAO, matches);
-//        if (maxProject != null) maxID = maxProject.getID();
-
         Map<String, List<SlickAudio>> transcriptToAudio = getTranscriptToAudio(match.getID());
-        logger.info("copyAudio For " + match + " got " + transcriptToAudio.size() + " candidates");
+        logger.info("copyAudio For project " + match.getID() + "/" +match.getProject().name()+ " got " + transcriptToAudio.size() + " candidates");
         getSlickAudios(projectid, newEx, exToInt, transcriptToAudio,
             transcriptToAudioMatch, transcriptToContextAudioMatch);
       }
@@ -320,11 +325,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         List<SlickAudio> copies = new ArrayList<>();
 
         for (AudioMatches m : transcriptToAudioMatch.values()) {
-          logger.info("got " + m);
+          logger.info("copyAudio got transcript match " + m);
           m.deposit(copies);
         }
         for (AudioMatches m : transcriptToContextAudioMatch.values()) {
-          logger.info("got 2 " + m);
+          logger.info("copyAudio got context match " + m);
           m.deposit(copies);
         }
         logger.info("CopyAudio :" +
@@ -339,7 +344,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       }
 
     } catch (Exception e) {
-      logger.info("Got " + e);
+      logger.info("Got " + e, e);
     }
   }
 
@@ -350,6 +355,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     private SlickAudio ms = null;
     private SlickAudio fs = null;
 
+    /**
+     * @param candidate
+     * @see #copyMatchingAudio(int, AudioMatches, int, List)
+     */
     public void add(SlickAudio candidate) {
       AudioType audioType = AudioType.UNSET;
       boolean regularSpeed = audioType.isRegularSpeed();
@@ -358,6 +367,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 //      } catch (IllegalArgumentException e) {
 //        logger.error("Got " + e, e);
 //      }
+      int before = getCount();
       if (candidate.gender() == 0) {
         if (regularSpeed) {
           mr = mr == null ? candidate : mr.dnr() < candidate.dnr() ? candidate : mr;
@@ -371,6 +381,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
           fs = fs == null ? candidate : fs.dnr() < candidate.dnr() ? candidate : fs;
         }
       }
+      int after = getCount();
+      if (after > before) logger.info("added " + candidate);
     }
 
  /*   public SlickAudio getMr() {
@@ -388,6 +400,15 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     public SlickAudio getFs() {
       return fs;
     }*/
+
+    int getCount() {
+      int count = 0;
+      if (mr != null) count++;
+      if (fr != null) count++;
+      if (ms != null) count++;
+      if (fs != null) count++;
+      return count;
+    }
 
     public String toString() {
       return
@@ -423,27 +444,46 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     return transcriptToAudio;
   }
 
+  /**
+   * @see #copyAudio(int, List, Map)
+   * @param projectid
+   * @return
+   */
   private List<Project> getProjectsForSameLanguage(int projectid) {
     String language = db.getProject(projectid).getLanguage();
+
+    logger.info("look for " + language+ " for " +projectid);
+
     return db.getProjectManagement().getProductionProjects().stream()
-        .filter(project -> project.getLanguage().equals(language) && project.getID() != projectid).collect(Collectors.toList());
+        .filter(project ->
+            project.getLanguage().equals(language) &&
+            project.getID() != projectid).collect(Collectors.toList());
   }
 
-  @Nullable
-  private Project getProjectWithMostExercises(SlickUserExerciseDAO slickUEDAO, List<Project> matches) {
-    int maxRows = 0;
-    Project maxProject = null;
-    for (Project project : matches) {
-      int num = slickUEDAO.getNumRows();
-      if (num > maxRows) {
-        maxRows = num;
-        maxProject = project;
-        //  maxID = project.getID();
-      }
-    }
-    return maxProject;
-  }
+//  @Nullable
+//  private Project getProjectWithMostExercises(SlickUserExerciseDAO slickUEDAO, List<Project> matches) {
+//    int maxRows = 0;
+//    Project maxProject = null;
+//    for (Project project : matches) {
+//      int num = slickUEDAO.getNumRows();
+//      if (num > maxRows) {
+//        maxRows = num;
+//        maxProject = project;
+//        //  maxID = project.getID();
+//      }
+//    }
+//    return maxProject;
+//  }
 
+  /**
+   * @param projectid
+   * @param newEx
+   * @param exToInt
+   * @param transcriptToAudio
+   * @param transcriptToMatches
+   * @param transcriptToContextMatches
+   * @see #copyAudio
+   */
   @NotNull
   private void getSlickAudios(int projectid,
                               List<CommonExercise> newEx,
@@ -453,29 +493,39 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
                               Map<String, AudioMatches> transcriptToContextMatches) {
     int match = 0;
     int nomatch = 0;
-    //List<SlickAudio> copies = new ArrayList<>();
+
+    logger.info("getSlickAudios exToInt " + exToInt.size());
+    logger.info("getSlickAudios transcriptToAudio " + transcriptToAudio.size());
+    logger.info("getSlickAudios transcriptToMatches " + transcriptToMatches.size());
+    logger.info("getSlickAudios transcriptToContextMatches " + transcriptToContextMatches.size());
 
     for (CommonExercise ex : newEx) {
       String oldID = ex.getOldID();
       Integer exid = exToInt.get(oldID);
+
+      logger.info("getSlickAudios exercise old " + oldID + " -> " + exid);
 
       if (exid == null) {
         logger.error("huh? can't find " + oldID + " in " + exToInt.size());
       } else {
         {
           String fl = ex.getForeignLanguage();
-          if (transcriptToAudio.get(fl) != null) {
-            List<SlickAudio> audioAttributes = transcriptToAudio.get(fl);
-            if (audioAttributes != null) {
-              AudioMatches audioMatches = transcriptToMatches.get(fl);
-              if (audioMatches == null) transcriptToMatches.put(fl, audioMatches = new AudioMatches());
+          //if (transcriptToAudio.get(fl) != null) {
+          List<SlickAudio> audioAttributes = transcriptToAudio.get(fl);
+          if (audioAttributes != null) {
+            AudioMatches audioMatches = transcriptToMatches.get(fl);
+            if (audioMatches == null) transcriptToMatches.put(fl, audioMatches = new AudioMatches());
 
-              copyMatchingAudio(projectid, audioMatches, exid, audioAttributes);
-              match++;
-            } else {
-              nomatch++;
-            }
+            copyMatchingAudio(projectid, audioMatches, exid, audioAttributes);
+            match++;
+          } else {
+            logger.info("vocab no match " + ex.getEnglish() + " '" + fl + "'");
+            nomatch++;
           }
+          // }
+          //  else {
+          logger.info("vocab no match " + ex.getEnglish() + " '" + fl + "' in " + transcriptToAudio.size());
+          //  }
         }
         // for some reason, we attach the context audio to the parent exercise... might want to fix that later
         for (CommonExercise context : ex.getDirectlyRelated()) {
@@ -484,23 +534,30 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
           if (audioAttributes != null) {
             AudioMatches audioMatches = transcriptToContextMatches.get(cfl);
             if (audioMatches == null) transcriptToContextMatches.put(cfl, audioMatches = new AudioMatches());
-            copyMatchingAudio(projectid, audioMatches, context.getID(), audioAttributes);
+           // int id = context.getID();
+
+            String coldID = context.getOldID();
+            Integer cexid = exToInt.get(oldID);
+
+            logger.info("getSlickAudios context exercise old " + coldID + " -> " + exid);
+
+            copyMatchingAudio(projectid, audioMatches, cexid, audioAttributes);
             match++;
           } else {
+            logger.info("context no match " + ex.getEnglish() + " '" + cfl + "'");
             nomatch++;
           }
         }
       }
     }
     logger.info("getSlickAudio  : match " + match + " no match " + nomatch);
-    // return copies;
   }
 
   private void copyMatchingAudio(int projectid,
-                                 //List<SlickAudio> copies,
                                  AudioMatches matches,
                                  int exid,
                                  List<SlickAudio> audioAttributes) {
+    if (exid == -1) logger.error("copyMatchingAudio huh? exid -1 for project " + projectid + " " + audioAttributes.size());
     for (SlickAudio audio : audioAttributes) {
       SlickAudio audio1 = new SlickAudio(
           -1,
@@ -634,7 +691,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
                                           Collection<ExerciseAttribute> allKnownAttributes, long now, List<ExerciseAttribute> newAttributes) {
     for (ExerciseAttribute newAttr : newAttributes) {
       int i = slickUEDAO.addAttribute(projectid, now, importUser, newAttr);
-    //  allByProject.put(i, newAttr);
+      //  allByProject.put(i, newAttr);
       allKnownAttributes.add(newAttr);
       attrToID.put(newAttr, i);
       logger.info("doUpdate remember new import attribute " + i + " = " + newAttr);

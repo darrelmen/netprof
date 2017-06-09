@@ -208,7 +208,7 @@ public abstract class BaseAudioDAO extends DAO {
       }
 
       if (audioAttributes != null) { // not sure when this would be true...
-        logger.info("addContextAudio found context audio for context exercise " + contextID + " " + audioAttributes.size());
+//        logger.info("addContextAudio found context audio for context exercise " + contextID + " " + audioAttributes.size());
         boolean attachedAll = attachAudio(contextSentence, audioAttributes, language);
       } else {
         if (doDEBUG)
