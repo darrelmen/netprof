@@ -26,7 +26,7 @@ public class WordBounds implements Comparable<WordBounds> {
     return comparison;
   }
 
-  public String [] getParts(String suggestion, int cursor) {
+   String [] getParts(String suggestion, int cursor) {
     String part1 = suggestion.substring(cursor, startIndex);
     String part2 = suggestion.substring(startIndex, endIndex);
     String[] strings = new String[2];
@@ -46,8 +46,7 @@ public class WordBounds implements Comparable<WordBounds> {
   public int getStartIndex() {
     return startIndex;
   }
-
-  public int getEndIndex() {
+  int getEndIndex() {
     return endIndex;
   }
 

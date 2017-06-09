@@ -2,6 +2,7 @@ package mitll.langtest.client.custom.dialog;
 
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 
+import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -19,7 +20,21 @@ public class WordBoundsFactory {
     WordBounds firstWord = null;
     for (String word : searchWords) {
       if (word.isEmpty()) {
-        logger.warning("findNextWord got empty search term");
+        //logger.warning("findNextWord got empty search term");
+      }
+      else {
+        firstWord = getWordBounds(candidate, indexToStartAt, firstWord, word);
+      }
+    }
+    return firstWord;
+
+  }
+
+  public WordBounds findNextWordList(String candidate, Collection<String> searchWords, int indexToStartAt) {
+    WordBounds firstWord = null;
+    for (String word : searchWords) {
+      if (word.isEmpty()) {
+        //logger.warning("findNextWord got empty search term");
       }
       else {
         firstWord = getWordBounds(candidate, indexToStartAt, firstWord, word);

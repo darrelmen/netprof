@@ -171,8 +171,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         );
       }
       if (addToRequest(currentAudioAttr, refID)) req.add(refID);
-    } else
-      logger.warning("huh? how can audio id be -1??? " + currentAudioAttr);
+    } else {
+    //  logger.warning("getRefAudio huh? how can audio id be -1??? " + currentAudioAttr);
+    }
 
     if (contextRefID != -1) {
       // logger.info("getRefAudio asking for context " + contextRefID);
@@ -248,7 +249,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (refID != -1) {
       audioChanged(refID, currentAudioAttr.getDurationInMillis());
     } else {
-      logger.warning("huh? register " + refID);
+      //logger.warning("registerSegments huh? register " + refID);
     }
     if (contextRefID != -1) {
       contextAudioChanged(contextRefID, currentAudioAttr1.getDurationInMillis());
@@ -1168,7 +1169,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @return
    * @see #addContextFields(DivWidget, String, String, CommonExercise)
    */
-  private Panel getContext(CommonExercise contextExercise, String itemText, String altFL,
+  private Panel getContext(CommonExercise contextExercise,
+                           String itemText,
+                           String altFL,
                            AnnotationHelper annotationHelper) {
     String context = contextExercise.getForeignLanguage();
 

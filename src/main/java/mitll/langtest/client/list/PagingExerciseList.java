@@ -402,7 +402,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     }*/
 
     if (typeAheadText.equals(t)) {
-      logger.warning("\n\n\nsetTypeAheadText not setting text from  '" + typeAheadText + "' to '" + t + "'");
+      //logger.warning("\n\n\nsetTypeAheadText not setting text from  '" + typeAheadText + "' to '" + t + "'");
     } else {
       if (typeAhead != null) {
         typeAhead.setText(t);

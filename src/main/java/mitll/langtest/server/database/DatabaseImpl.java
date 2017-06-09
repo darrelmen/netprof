@@ -728,7 +728,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       if (serverProps.useH2()) {
         logger.info("getProject asking for project -1?");
       } else {
-        logger.warn("getProject asking for project -1?", new Exception());
+        logger.warn("getProject asking for project -1?");//, new Exception());
       }
     }
     return projectManagement.getProject(projectid);
