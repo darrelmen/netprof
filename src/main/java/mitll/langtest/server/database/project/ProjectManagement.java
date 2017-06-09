@@ -69,7 +69,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * JUST FOR TESTING
    */
-  private static final boolean DEBUG_ONE_PROJECT = true;
+  private static final boolean DEBUG_ONE_PROJECT = false;
   private static final String LANG_TO_LOAD = "spanish";
 
   private static final int IMPORT_PROJECT_ID = -100;
@@ -514,11 +514,11 @@ public class ProjectManagement implements IProjectManagement {
         }
 
         if (project == null && !idToProject.isEmpty()) {
-          Project firstProject = getFirstProject();
+          //Project firstProject = getFirstProject();
           logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-              ") returning first " + firstProject);//,
+              ") ");//,
           //new IllegalArgumentException());
-          return firstProject;
+          return null;//firstProject;
         }
       }
       return project;

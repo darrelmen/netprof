@@ -409,8 +409,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
 
   private void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
-    recnav.setVisible(show);
-    defectnav.setVisible(show);
+    reflectPermissions(controller.getPermissions());
+//    recnav.setVisible(show);
+//    defectnav.setVisible(show);
   }
 
   private NavLink getContactUs() {
