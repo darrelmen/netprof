@@ -901,6 +901,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (hasAudio(e)) {
       flContainer.add(playAudio = getPlayAudioPanel());
     }
+    else {
+     // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+    }
 
     DivWidget fieldContainer = new DivWidget();
     fieldContainer.setWidth("100%");
@@ -968,9 +971,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return flEntry;
   }
 
+  /**
+   * @see #makeFirstRow(CommonExercise, DivWidget)
+   * @param e
+   * @return
+   */
   private boolean hasAudio(T e) {
-    return e.getAudioAttributePrefGender(controller.getUserManager().isMale(), true) != null;
+    return e.hasAudio(true);
   }
+
+  /**
+   * @see #getItemContent(CommonExercise)
+   * @param e
+   * @param card
+   * @param rowWidget
+   */
 
   private void addContext(T e, Panel card, DivWidget rowWidget) {
     int c = 0;

@@ -131,13 +131,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     if (port != -1) {
       setAvailable();
-
-      String ip = getWebserviceIP();
-      if (!available) {
-        logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port);
-      } else {
-        logger.info("\n\nASRWebserviceScoring CAN talk to " + ip + ":" + port);
-      }
     }
   }
 
@@ -146,11 +139,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   private String getWebserviceIP() {
-    return project.getWebserviceIP();
+    return project.getWebserviceHost();
   }
 
   public void setAvailable() {
-    new Thread(() -> available = isAvailableCheckNow()).start();
+    new Thread(() -> {
+      available = isAvailableCheckNow();
+      reportOnHydra();
+    }
+    ).start();
   }
 
   /**
@@ -163,6 +160,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   public boolean isAvailableCheckNow() {
     return new HTTPClient().isAvailable(getWebserviceIP(), getWebservicePort(), DCODR);
+  }
+
+  private void reportOnHydra() {
+    int port = getWebservicePort();
+    String ip = getWebserviceIP();
+    if (available) {
+      logger.info("ASRWebserviceScoring CAN talk to " + ip + ":" + port);
+    } else {
+      logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port);
+    }
   }
 
   /**

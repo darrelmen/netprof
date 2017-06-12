@@ -42,10 +42,12 @@ import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.langtest.server.scoring.ASRWebserviceScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.npdata.dao.SlickProject;
@@ -62,16 +64,18 @@ public class Project implements PronunciationLookup {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
   /**
-   * @see #getWebserviceIP
+   * @see #getWebserviceHost
    */
-  private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
+  public static final String WEBSERVICE_HOST = "webserviceHost";
   /**
-   * @see #getWebserviceIP
+   * Initially the choices should be hydra and hydra2 (or maybe hydra-dev and hydra2-dev)
+   * @see #getWebserviceHost
    */
-  private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
+  public static final String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
 
   /**
    * @see #getWebservicePort
+   * @see mitll.langtest.server.database.project.ProjectDAO#update(int, ProjectInfo)
    */
   public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
 
@@ -250,12 +254,20 @@ public class Project implements PronunciationLookup {
     if (refResultDecoder != null) refResultDecoder.setStopDecode(true);
   }
 
-  public String getWebserviceIP() {
-    String prop = getProp(WEBSERVICE_HOST_IP1);
-    if (prop == null) prop = WEBSERVICE_HOST_IP;
+  /**
+   * @see ASRWebserviceScoring#getWebserviceIP
+   * @return
+   */
+  public String getWebserviceHost() {
+    String prop = getProp(WEBSERVICE_HOST);
+    if (prop == null) prop = WEBSERVICE_HOST_DEFAULT;
     return prop;
   }
 
+  /**
+   * @see ASRWebserviceScoring#getWebservicePort
+   * @return
+   */
   public int getWebservicePort() {
     String prop = getProp(WEBSERVICE_HOST_PORT);
     if (prop == null) prop = "-1";

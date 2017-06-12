@@ -50,6 +50,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
 
   private long created = 0;
 
+  private String host = "hydra-dev";
   private int port = -1;
   private String modelsDir = "";
   private String firstType = "";
@@ -72,8 +73,10 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
                      int displayOrder,
 
                      long created,
+                     String host,
                      int port,
-                     String modelsDir, String first, String secondType) {
+                     String modelsDir,
+                     String first, String secondType) {
     this.language = language;
     this.id = projectid;
     this.name = name;
@@ -82,6 +85,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.status = status;
     this.displayOrder = displayOrder;
     this.countryCode = countryCode;
+    this.host = host;
     this.port = port;
     this.modelsDir = modelsDir;
     this.firstType = first;
@@ -136,9 +140,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.status = status;
   }
 
-  public int getPort() {
-    return port;
-  }
+  public int getPort() {   return port;  }
 
   public void setPort(int port) {
     this.port = port;
@@ -168,10 +170,6 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     return propertyValue.remove(key);
   }
 
-  public String toString() {
-    return getName() + " " + getStatus() + " lang " + language + " first " + firstType + " second " + secondType;
-  }
-
   public String getFirstType() {
     return firstType;
   }
@@ -184,17 +182,23 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.name = name;
   }
 
+/*
   public void setCourse(String course) {
     this.course = course;
   }
+*/
 
+/*
   public void setCountryCode(String countryCode) {
     this.countryCode = countryCode;
   }
+*/
 
+/*
   public void setDisplayOrder(int displayOrder) {
     this.displayOrder = displayOrder;
   }
+*/
 
   public void setLanguage(String language) {
     this.language = language;
@@ -206,5 +210,9 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
 
   public void setSecondType(String secondType) {
     this.secondType = secondType;
+  }
+
+  public String toString() {
+    return getName() + " " + getStatus() + " lang " + language + " types: " + firstType + ", " + secondType;
   }
 }

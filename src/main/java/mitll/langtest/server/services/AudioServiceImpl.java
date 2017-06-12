@@ -215,7 +215,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * Kick off a thread to do this... so we can return.
    */
   public void ensureAllAudio() {
-    new Thread(() -> db.getProjects().forEach(project -> ensureAudio(project.getID()))).start();
+    new Thread(() -> db.getProjects().forEach(project -> checkAudio(project.getID()))).start();
   }
 
   /**
@@ -275,6 +275,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     ensureCompressedAudio(exercises, language);
   }
 
+  /**
+   * @see #ensureAudioForExercises
+   * @param exercises
+   * @param language
+   */
   private void ensureCompressedAudio(List<CommonExercise> exercises, String language) {
     long then = System.currentTimeMillis();
 

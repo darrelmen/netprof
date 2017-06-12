@@ -38,7 +38,7 @@ public class SlimProject extends ProjectInfo {
   private boolean hasModel;
   private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
-  private TreeMap<String,String> props;
+  private TreeMap<String, String> props;
 
   public SlimProject() {
   }
@@ -65,12 +65,14 @@ public class SlimProject extends ProjectInfo {
                      int displayOrder,
 
                      boolean hasModel,
-                     boolean isRTL, long created, int port,
+                     boolean isRTL, long created,
+                     String host,
+                     int port,
                      String modelsDir,
                      String firstType,
                      String secondType,
-                     TreeMap<String,String> props) {
-    super(projectid, name, language, course, countryCode, status, displayOrder, created, port, modelsDir,
+                     TreeMap<String, String> props) {
+    super(projectid, name, language, course, countryCode, status, displayOrder, created, host, port, modelsDir,
         firstType, secondType);
     this.hasModel = hasModel;
     this.isRTL = isRTL;

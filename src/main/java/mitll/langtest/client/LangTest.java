@@ -520,15 +520,13 @@ public class LangTest implements
       populateRootPanel();
 
       setPageTitle();
-      if (browserCheck == null) logger.warning("no browser check?");
+      //if (browserCheck == null) logger.warning("no browser check?");
       browserCheck.checkForCompatibleBrowser();
 
       String message = startupInfo.getMessage();
       if (message != null && !message.isEmpty()) {
         showErrorMessage("Configuration Error", message);
       }
-
-      // loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
     }
   }
 
@@ -542,25 +540,12 @@ public class LangTest implements
   }
 
   /**
-   * @seex mitll.langtest.client.user.UserManager#login
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
   @Override
   public void showLogin() {
     initialUI.populateRootPanel();
   }
-
-/*
-  private void loadVisualizationPackages() {
-    VisualizationUtils.loadVisualizationApi(new Runnable() {
-      @Override
-      public void run() {
-        //logger.info("\tloaded VisualizationUtils...");
-        logMessageOnServer("loaded VisualizationUtils.");
-      }
-    }, ColumnChart.PACKAGE, LineChart.PACKAGE);
-  }
-*/
 
   /**
    * Set the page title and favicon.

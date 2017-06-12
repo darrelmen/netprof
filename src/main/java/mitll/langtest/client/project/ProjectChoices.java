@@ -308,7 +308,6 @@ public class ProjectChoices {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Recalc Ref");
 
     DivWidget right = new DivWidget();
-    //  right.addStyleName("floatRight");
     right.add(w);
     w.addStyleName("topFiveMargin");
 
@@ -322,7 +321,6 @@ public class ProjectChoices {
       controller.getScoringService().getAllAlignments(new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
-
         }
 
         @Override

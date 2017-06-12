@@ -320,7 +320,7 @@ public class ProjectEditForm extends UserDialog {
       w.setEnabled(false);
       feedback.setText("Please wait...");
 
-      logger.info("check audio for " + info);
+     // logger.info("check audio for " + info);
 
       audioServiceAsync.checkAudio(info.getID(), new AsyncCallback<Void>() {
         @Override
@@ -339,30 +339,6 @@ public class ProjectEditForm extends UserDialog {
     w.addStyleName("bottomFiveMargin");
     return w;
   }
-
-/*
-  private Button getEnsureAudio() {
-    Button w = new Button("Ensure ALL Audio", IconType.STETHOSCOPE);
-    w.addClickHandler(event -> {
-      w.setEnabled(false);
-      feedback.setText("Please wait... for a long time.");
-
-      audioServiceAsync.ensureAllAudio(new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          w.setEnabled(true);
-
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-          w.setEnabled(true);
-          feedback.setText("All Audio check is ongoing.");
-        }
-      });
-    });
-    return w;
-  }*/
 
   private Button getRecalcRefAudio(final ProjectInfo info) {
     final Button w = new Button("Align ref audio", IconType.STETHOSCOPE);

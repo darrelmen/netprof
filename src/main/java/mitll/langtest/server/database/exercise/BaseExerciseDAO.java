@@ -60,6 +60,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final String ENGLISH = "english";
   private static final String MISSING_ENGLISH = "missing english";
   private static final boolean DEBUG = false;
+  public static final String SEMI = ";";
 
   private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
 
@@ -544,15 +545,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see #findDefects()
    */
   private void checkForSemicolons(Map<String, String> fieldToDefect, String foreignLanguagePhrase, String translit) {
-    if (foreignLanguagePhrase.contains(";")) {
+    if (foreignLanguagePhrase.contains(SEMI)) {
       fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE, CONTAINS_SEMI);
     }
-    if (translit.contains(";")) {
+    if (translit.contains(SEMI)) {
       fieldToDefect.put(QCNPFExercise.TRANSLITERATION, CONTAINS_SEMI);
     }
-/*    if (INCLUDE_ENGLISH_SEMI_AS_DEFECT && english.contains(";")) {
-      fieldToDefect.put(QCNPFExercise.ENGLISH, "contains semicolon - should this item be split?");
-    }*/
   }
 
   public void updatePhones(int id,int count){}

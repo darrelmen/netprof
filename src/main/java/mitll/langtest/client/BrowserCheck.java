@@ -61,7 +61,7 @@ public class BrowserCheck {
 
   private final Map<String, Integer> browserToVersion = new HashMap<String, Integer>();
 
-  public BrowserCheck() {
+  BrowserCheck() {
     browserToVersion.put(FIREFOX, 14);
     browserToVersion.put(CHROME, 21);
     browserToVersion.put(IE, 9);

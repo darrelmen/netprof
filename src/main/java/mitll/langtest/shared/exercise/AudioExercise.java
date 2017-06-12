@@ -185,18 +185,37 @@ public class AudioExercise extends ExerciseShell {
     return audioAttributes.values();
   }
 
+  public boolean hasAudio(boolean vocab) {
+    return getAudioAttributes()
+        .stream()
+        .filter(audioAttribute -> (vocab == !audioAttribute.isContextAudio()))
+        .count() > 0;
+  }
+
   /**
    * @param isMale
    * @param isRegular
-   * @return
+   * @return null if no regular and asking for regular...
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
    */
   public AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular) {
     Collection<AudioAttribute> collect = getAudioPrefGender(isMale);
-    Optional<AudioAttribute> max = collect.stream()
+
+    Optional<AudioAttribute> max = collect
+        .stream()
         .filter(p -> p.isRegularSpeed() && isRegular || p.isSlow() && !isRegular)
         .max((o1, o2) -> -1 * Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
-    return max.orElse(null);
+
+    AudioAttribute audioAttribute = max.orElse(null);
+
+    if (audioAttribute == null) {
+      max = collect
+          .stream()
+          .max((o1, o2) -> -1 * Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
+      audioAttribute = max.orElse(null);
+    }
+
+    return audioAttribute;
   }
 
   /**
@@ -212,10 +231,19 @@ public class AudioExercise extends ExerciseShell {
   @NotNull
   private Collection<AudioAttribute> getAudioPrefGender(boolean isMale) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes();
-    Collection<AudioAttribute> collect = audioAttributes.stream().filter(p -> p.isMale() == isMale).collect(Collectors.toList());
+
+   // logger.info("getAudioPrefGender " + isMale + " " + audioAttributes.size());
+    Collection<AudioAttribute> collect = audioAttributes
+        .stream()
+        .filter(p -> p.isMale() == isMale)
+        .collect(Collectors.toList());
+
+   // logger.info("getAudioPrefGender after " + isMale + " " + collect.size());
     if (collect.isEmpty()) {
       collect = audioAttributes;
     }
+ //   logger.info("getAudioPrefGender return " + isMale + " " + collect.size());
+
     return collect;
   }
 

@@ -250,7 +250,6 @@ public class ProjectManagement implements IProjectManagement {
         project));
 
     if (slickProject != null) {
-      //Map<Integer, String> exerciseIDToRefAudio = db.getExerciseIDToRefAudio(id);
       project.setAnalysis(
           new SlickAnalysis(db,
               db.getPhoneDAO(),
@@ -264,15 +263,13 @@ public class ProjectManagement implements IProjectManagement {
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
       //  logMemory();
 
-      Set<Integer> exids = new HashSet<>();
-      for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());
-
+      //Set<Integer> exids = new HashSet<>();
+      //for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());
       project.setRTL(isRTL(rawExercises));
 
 //      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
 //      Map<Integer, ExercisePhoneInfo> exToPhonePerProject = new ExerciseToPhone().getExToPhonePerProject(exids, jsonResults);
 //      project.setExToPhone(exToPhonePerProject);
-
       //   db.getUserExerciseDAO().useExToPhones();
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       //logMemory();
@@ -724,15 +721,18 @@ public class ProjectManagement implements IProjectManagement {
     TreeMap<String, String> info = new TreeMap<>();
 
     DateFormat format = new SimpleDateFormat();
-    info.put("Created",format.format(project.created()));
-    info.put("Modified",format.format(project.modified()));
+    info.put("Created", format.format(project.created()));
+    info.put("Modified", format.format(project.modified()));
 
     boolean isRTL = false;
     if (status != ProjectStatus.RETIRED) {
       List<CommonExercise> exercises = db.getExercises(project.id());
       isRTL = isRTL(exercises);
-      info.put("Num Items",""+exercises.size());
+      info.put("Num Items", "" + exercises.size());
     }
+
+    String prop = project.getProp(Project.WEBSERVICE_HOST);
+    if (prop == null) prop = Project.WEBSERVICE_HOST_DEFAULT;
 
     return new SlimProject(
         project.id(),
@@ -745,6 +745,7 @@ public class ProjectManagement implements IProjectManagement {
         hasModel,
         isRTL,
         project.created().getTime(),
+        prop,
         getPort(project),
         project.getProp(ServerProperties.MODELS_DIR),
         project.first(), project.second(), info);
@@ -752,7 +753,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private int getPort(SlickProject project) {
     try {
-      String prop = project.getProp(ServerProperties.WEBSERVICE_HOST_PORT);
+      String prop = project.getProp(Project.WEBSERVICE_HOST_PORT);
       if (prop == null) return -1;
       else return Integer.parseInt(prop);
     } catch (NumberFormatException e) {

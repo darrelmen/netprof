@@ -613,9 +613,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         typeToValues.put(LISTS, getMatchInfoForEachList(result));
 
         Widget favorites = liForDimensionForType.getWidget(0);
-
-        //Panel w = addChoices(typeToValues, LISTS);
-
         liForDimensionForType.clear();
         liForDimensionForType.add(favorites);
         liForDimensionForType.add(addChoices(typeToValues, LISTS));

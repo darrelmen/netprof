@@ -51,7 +51,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static mitll.langtest.server.ServerProperties.MODELS_DIR;
-import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_PORT;
+import static mitll.langtest.server.database.exercise.Project.*;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
   private static final Logger logger = LogManager.getLogger(ProjectDAO.class);
@@ -72,8 +72,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     propertyDAO = new ProjectPropertyDAO(database, dbConnection);
     dao = new ProjectDAOWrapper(dbConnection);
     userProjectDAO = new UserProjectDAO(dbConnection);
-
-    //  ensureDefaultProject(defaultUser);
   }
 
   public int ensureDefaultProject(int defaultUser) {
@@ -142,6 +140,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       logger.error("update : didn't update " + projectInfo + " for current " + currentProject);
     }
 
+    addOrUpdate(projid, WEBSERVICE_HOST, WEBSERVICE_HOST_DEFAULT);
     addOrUpdate(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
     addOrUpdate(projid, MODELS_DIR, projectInfo.getModelsDir());
     return didChange;
@@ -159,7 +158,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       if (slickProjectProperties.size() > 1)
         logger.error("addOrUpdate got back " + slickProjectProperties.size() + " properties for " + key);
       SlickProjectProperty next = slickProjectProperties.iterator().next();
-      logger.info("update " + next);
+      logger.info("addOrUpdate " + next);
       SlickProjectProperty copy = propertyDAO.getCopy(next, key, port);
       propertyDAO.update(copy);
     }

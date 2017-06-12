@@ -153,6 +153,7 @@ public class ExerciseCopy {
    * @param importUser
    * @param exercises
    * @param typeOrder
+   * @return
    * @see #copyUserAndPredefExercises
    */
   private Map<String, Integer> addContextExercises(int projectid,

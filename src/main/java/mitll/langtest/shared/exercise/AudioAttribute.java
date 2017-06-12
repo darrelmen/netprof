@@ -39,11 +39,9 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.user.MiniUser;
-import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -217,7 +215,12 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   public boolean isSlow() {
-    return matches(SPEED, SLOW) || audioType.equals(AudioType.CONTEXT_SLOW);
+    if (audioType == AudioType.SLOW) {
+      return true;
+    }
+    else {
+      return matches(SPEED, SLOW) || audioType.equals(AudioType.CONTEXT_SLOW);
+    }
   }
 
   public AudioType getAudioType() {
@@ -233,8 +236,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   public boolean isRegularSpeed() {
-    String speed = getSpeed();
-    return speed != null && speed.equalsIgnoreCase(REGULAR) || audioType == AudioType.CONTEXT_REGULAR;
+    if (audioType == AudioType.REGULAR) return true;
+    else {
+      String speed = getSpeed();
+      return speed != null && speed.equalsIgnoreCase(REGULAR) || audioType == AudioType.CONTEXT_REGULAR;
+    }
   }
 
   public String getSpeed() {
@@ -420,6 +426,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public String toString() {
     return "Audio" +
         "\n\tid         " + uniqueID +
+        "\n\texid         " + exid +
         // "\n\tfor ex     " + getID()+
         " (old ex " + getOldexid() + ") :" +
         "\n\tpath       " + audioRef +
@@ -429,8 +436,4 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
         "\n\ttranscript '" + transcript +
         "'\n\tdnr\t" + dnr;
   }
-
-//  public void setRealGender(MiniUser.Gender realGender) {
-//    this.realGender = realGender;
-//  }
 }

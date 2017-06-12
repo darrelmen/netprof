@@ -47,6 +47,8 @@ import java.util.Map;
 public interface AudioRefExercise {
   boolean hasRefAudio();
 
+  boolean hasAudio(boolean vocab);
+
   String getRefAudio();
 
   String getSlowAudioRef();

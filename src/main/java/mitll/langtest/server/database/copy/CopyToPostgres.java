@@ -134,12 +134,6 @@ public class CopyToPostgres<T extends CommonShell> {
     database.close();
   }
 
-/*
-  private DatabaseImpl getAndPopulate() {
-    return getDatabase().setInstallPath("war", "").populateProjects();
-  }
-*/
-
   private static DatabaseImpl getDatabase() {
     File file = new File(NETPROF_PROPERTIES_FULL);
     String name = file.getName();
@@ -258,7 +252,11 @@ public class CopyToPostgres<T extends CommonShell> {
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
-    logger.info("copyOneConfig project is  type order is " + typeOrder + " for import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
+    logger.info("copyOneConfig" +
+        "\n\tproject is " + optName +
+        "\n\tcc is      " + cc +
+        "\n\ttype order is " + typeOrder +
+        "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev, typeOrder);  // TODO : course?
 
@@ -292,8 +290,8 @@ public class CopyToPostgres<T extends CommonShell> {
       // copy ref results
       copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
 
-      // add event table
-      copyEvents(db, projectID, oldToNewUser, exToID);
+      // add event table - why events on an old UI?
+     // copyEvents(db, projectID, oldToNewUser, exToID);
 
       // copy results, words, and phones
       {
@@ -354,7 +352,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param idToFL
    * @param typeOrder
-   * @return
+   * @return map of parent exercise to context sentence
    * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
    */
   private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db,
@@ -441,6 +439,14 @@ public class CopyToPostgres<T extends CommonShell> {
     return pairs;
   }
 
+  /**
+   * @see #copyAudio(DatabaseImpl, Map, Map, Map, int)
+   * @param exToID
+   * @param parentExToChild
+   * @param att
+   * @param oldexid
+   * @return
+   */
   private Integer getModernIDForExercise(Map<String, Integer> exToID, Map<String, Integer> parentExToChild, AudioAttribute att, String oldexid) {
     Integer id = exToID.get(oldexid);
     if (att.isContextAudio()) {

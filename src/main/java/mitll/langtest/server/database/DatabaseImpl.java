@@ -501,15 +501,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public Collection<String> getTypeOrder(int projectid) {
     ISection sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
     if (sectionHelper == null) {
-      logger.warn("no section helper for " + this + " and " + projectid);
+      logger.warn("getTypeOrder no section helper for " + this + " and " + projectid);
     }
-    List<String> objects = Collections.emptyList();
-    Collection<String> strings = (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
+    Collection<String> types = (sectionHelper == null) ? Collections.emptyList() : sectionHelper.getTypeOrder();
 
-    if (strings.isEmpty()) {
-      logger.error("\n\n\ngetTypeOrder : " + projectid + " = " + strings);
+    if (types.isEmpty()) {
+      logger.error("\n\n\ngetTypeOrder : " + projectid + " = " + types);
     }
-    return strings;
+    return types;
   }
 
   /**
@@ -517,7 +516,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
-   * @see #deleteItem(int, int)
+   * @seex #deleteItem(int, int)
    * @see #getCustomOrPredefExercise(int, int)
    */
   @Override
@@ -540,7 +539,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param projectid
    * @return
-   * @seex #getExercises(int)
    * @see Project#buildExerciseTrie
    */
   @Override

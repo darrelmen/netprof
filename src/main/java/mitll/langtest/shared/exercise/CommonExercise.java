@@ -94,6 +94,10 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
 
   CommonAnnotatable getCommonAnnotatable();
 
+  /**
+   * @see mitll.langtest.server.services.ProjectServiceImpl#postProcessUnitToValueToGetAttributes(Collection, Map, CommonExercise)
+   * @param exerciseAttributes
+   */
   void setAttributes(List<ExerciseAttribute> exerciseAttributes);
 
   List<ExerciseAttribute> getAttributes();
