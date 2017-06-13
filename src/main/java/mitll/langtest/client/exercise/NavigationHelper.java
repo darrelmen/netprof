@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 /**
  * A row with prev/next buttons.  Key bindings for keys too.
  * Has confirm dialog appear on next button in some modes.
- *
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -58,29 +58,44 @@ import java.util.logging.Logger;
 public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   private Logger logger = Logger.getLogger("NavigationHelper");
 
+
+  public static final String PREVIOUS = "Previous";
+  public static final String NEXT = "Next";
+
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
 
   private Button prev;
   protected Button next;
   private boolean enableNextOnlyWhenAllCompleted = true;
   private final PostAnswerProvider provider;
-  private final ListInterface<T,?> listContainer;
+  private final ListInterface<T, ?> listContainer;
 
   /**
-   * @see ExercisePanel#getNavigationHelper(ExerciseController)
    * @param exercise
    * @param controller
    * @param provider
    * @param listContainer
    * @param addKeyHandler
+   * @see ExercisePanel#getNavigationHelper(ExerciseController)
    */
   protected NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface<T,?> listContainer, boolean addKeyHandler) {
+                             ListInterface<T, ?> listContainer, boolean addKeyHandler) {
     this(exercise, controller, provider, listContainer, true, addKeyHandler, false, false);
   }
 
+  /**
+   * @param exercise
+   * @param controller
+   * @param provider
+   * @param listContainer
+   * @param addButtons
+   * @param addKeyHandler
+   * @param enableNextOnlyWhenAllCompleted
+   * @param addPrevButton
+   * @see ExercisePanel#getNavigationHelper(ExerciseController)
+   */
   public NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface<T,?> listContainer, boolean addButtons, boolean addKeyHandler,
+                          ListInterface<T, ?> listContainer, boolean addButtons, boolean addKeyHandler,
                           boolean enableNextOnlyWhenAllCompleted, boolean addPrevButton) {
     this.provider = provider;
     this.listContainer = listContainer;
@@ -96,11 +111,11 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   }
 
   /**
-   * @see NavigationHelper#NavigationHelper
    * @param e
    * @param controller
    * @param addButtons
    * @param addKeyHandler
+   * @see NavigationHelper#NavigationHelper
    */
   private void getNextAndPreviousButtons(final HasID e,
                                          final ExerciseController controller, boolean addButtons,
@@ -110,7 +125,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   }
 
   private void makePrevButton(final HasID exercise, boolean addButtons, boolean useKeyHandler) {
-    this.prev = new Button("Previous");
+    this.prev = new Button(PREVIOUS);
     prev.getElement().setId("NavigationHelper_Previous");
     getPrev().addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -127,12 +142,12 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
 
   private void makeNextButton(final HasID exercise, final ExerciseController controller, boolean addButtons) {
     this.next = new Button(getNextButtonText());
-    next.getElement().setId("NavigationHelper_"+getNextButtonText());
+    next.getElement().setId("NavigationHelper_" + getNextButtonText());
 
     next.setType(ButtonType.SUCCESS);
     enableNext(exercise);
 
-    if (addButtons)  add(next);
+    if (addButtons) add(next);
 
     next.getElement().setId("nextButton");
 
@@ -141,17 +156,16 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   }
 
   /**
-   * @see #makeNextButton(HasID, ExerciseController, boolean)
    * @param exercise
+   * @see #makeNextButton(HasID, ExerciseController, boolean)
    */
   protected void enableNext(HasID exercise) {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
-     // logger.info("enableNextOnlyWhenAllCompleted true");
+      // logger.info("enableNextOnlyWhenAllCompleted true");
       next.setEnabled(false);
-    }
-    else {
+    } else {
       boolean b = listContainer.onLast(exercise);
-   //   logger.info("enableNextOnlyWhenAllCompleted false on last = " +  b);
+      //   logger.info("enableNextOnlyWhenAllCompleted false on last = " +  b);
       next.setEnabled(!b);
     }
   }
@@ -165,29 +179,41 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
 
   /**
    * Ignore clicks or keyboard activity when the widget is not enabled.
-   * @see #getNextAndPreviousButtons
+   *
    * @param controller
    * @param exercise
+   * @see #getNextAndPreviousButtons
    */
   public void clickNext(ExerciseController controller, HasID exercise) {
+    logger.info("clickNext " + exercise.getID());
     if (next.isEnabled() && next.isVisible()) {
       if (provider != null) {
+        logger.info("clickNext  post answers " + exercise.getID());
         provider.postAnswers(controller, exercise);
+      } else {
+        logger.info("clickNext NO PROVIDER " + exercise.getID());
+
       }
     }
   }
 
   private String getNextButtonText() {
-    return "Next";
+    return NEXT;
   }
 
   /**
-   * @see ExercisePanel#enableNext
    * @param val
+   * @see ExercisePanel#enableNext
    */
   public void enableNextButton(boolean val) {
     next.setEnabled(val);
   }
-  public Widget getNext() { return next; }
-  private Button getPrev() { return prev; }
+
+  public Widget getNext() {
+    return next;
+  }
+
+  private Button getPrev() {
+    return prev;
+  }
 }

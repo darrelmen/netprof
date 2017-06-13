@@ -199,7 +199,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void goToFirst(String searchIfAny, int exerciseID) {
     if (listOptions.isShowFirstNotCompleted()) {
-      logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny + "'");
+      logger.info("goToFirst IGNORING " + exerciseID + " searchIfAny '" + searchIfAny + "'");
       loadFirstExercise(searchIfAny);
     } else {
       super.goToFirst(searchIfAny, exerciseID);
@@ -593,7 +593,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void onResize() {
-    // super.onResize();
     pagingContainer.onResize(getCurrentExercise());
   }
 

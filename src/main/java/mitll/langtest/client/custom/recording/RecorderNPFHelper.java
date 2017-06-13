@@ -50,6 +50,7 @@ import mitll.langtest.client.list.*;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -125,6 +126,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             new ListOptions()
                 .setInstance(instanceName)
                 .setShowFirstNotCompleted(true)
+                .setActivityType(ActivityType.RECORDER)
         ) {
           private CheckBox filterOnly;
 

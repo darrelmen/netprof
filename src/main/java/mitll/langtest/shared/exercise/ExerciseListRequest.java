@@ -174,7 +174,7 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @param role
+   * @param activityType
    * @return
    * @see PagingExerciseList#getRequest
    */

@@ -429,9 +429,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
         parser.readFromJSON(json);
 
+    // TODO : maybe turn back on later?
+/*
     if (netPronImageTypeListMap.isEmpty()) {
       logger.warn("no word and phones for " + json + " for " + cs);
     }
+    */
 
     correctAndScore.setScores(netPronImageTypeListMap);
 //    logger.info("returning " + correctAndScore);

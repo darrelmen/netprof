@@ -108,6 +108,8 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     navigationHelper.addStyleName("topMargin");
     getElement().setId("ExercisePanel");
     this.doNormalRecording = doNormalRecording;
+
+    logger.info("doNormal " + doNormalRecording);
   }
 
   /**

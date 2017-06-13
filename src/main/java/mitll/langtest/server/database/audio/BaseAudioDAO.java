@@ -364,7 +364,7 @@ public abstract class BaseAudioDAO extends DAO {
 
   /**
    * TODO : Why does this have to be so complicated???
-   *
+   * <p>
    * So this happens on the znetProf side where we don't have access to the actual file
    * We have confidence the file is there b/c we check it's existence every 24 hours, or on every startup of the
    * pnetProf instance.
@@ -475,7 +475,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
-   public Collection<Integer> getRecordedBySameGender(int userid, Map<Integer, String> exToTranscript, int projid) {
+  public Collection<Integer> getRecordedBySameGender(int userid, Map<Integer, String> exToTranscript, int projid) {
     return getAudioExercisesForGenderBothSpeeds(
         userDAO.isMale(userid),
         AudioType.REGULAR.toString(),
@@ -492,12 +492,12 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @see DatabaseImpl#getMaleFemaleProgress(int)
    */
-   public Map<String, Float> getRecordedReport(int projid,
+  public Map<String, Float> getRecordedReport(int projid,
                                               float total,
                                               float totalContext, Set<Integer> exerciseIDs,
                                               Map<Integer, String> exToTranscript,
                                               Map<Integer, String> exToContextTranscript) {
-   Set<Integer> maleReg = new HashSet<>();
+    Set<Integer> maleReg = new HashSet<>();
     Set<Integer> femaleReg = new HashSet<>();
     getCountForGender(projid, AudioType.REGULAR, exerciseIDs, exToTranscript, maleReg, femaleReg);
 
@@ -511,11 +511,11 @@ public abstract class BaseAudioDAO extends DAO {
     float maleSlow = (float) maleSlowSpeed.size();
     float femaleSlow = (float) femaleSlowSpeed.size();
 
-    logger.info("male slow " + maleSlow);
+    if (DEBUG_AUDIO_REPORT) logger.info("male slow " + maleSlow);
 
     maleReg.retainAll(maleSlowSpeed);
     float male = maleReg.size();
-    if (DEBUG_AUDIO_REPORT)logger.info("male total " + male);
+    if (DEBUG_AUDIO_REPORT) logger.info("male total " + male);
 
 //    Set<Integer> femaleIDs = userMapFemales.keySet();
     //   femaleIDs = new HashSet<>(femaleIDs);
@@ -523,7 +523,7 @@ public abstract class BaseAudioDAO extends DAO {
 //    float femaleFast = getCountForGender(projid, AudioType.REGULAR, uniqueIDs, exToTranscript, femaleReg, , false);
 //    float femaleSlow = getCountForGender(projid, AudioType.SLOW, uniqueIDs, exToTranscript, femaleSlowSpeed, , false);
 
-   if (DEBUG_AUDIO_REPORT) logger.info("female fast " + femaleFast + " slow " + femaleSlow);
+    if (DEBUG_AUDIO_REPORT) logger.info("female fast " + femaleFast + " slow " + femaleSlow);
 
     femaleReg.retainAll(femaleSlowSpeed);
     float female = femaleReg.size();
@@ -537,7 +537,7 @@ public abstract class BaseAudioDAO extends DAO {
 
     float cmale = conMale.size();
     float cfemale = conFemale.size();
-    if (DEBUG_AUDIO_REPORT)  logger.info("cmale fast " + cmale + " cfemale fast " + cfemale);
+    if (DEBUG_AUDIO_REPORT) logger.info("cmale fast " + cmale + " cfemale fast " + cfemale);
     Map<String, Float> report = new HashMap<>();
     report.put(BaseAudioDAO.TOTAL, total);
     report.put(BaseAudioDAO.TOTAL_CONTEXT, totalContext);
@@ -754,10 +754,10 @@ public abstract class BaseAudioDAO extends DAO {
                                                              int projid);
 
   /**
-   * @see #getCountForGender
    * @param transcript
    * @param exerciseFL
    * @return
+   * @see #getCountForGender
    */
   boolean isNoAccentMatch(String transcript, String exerciseFL) {
     if (exerciseFL == null) return false;

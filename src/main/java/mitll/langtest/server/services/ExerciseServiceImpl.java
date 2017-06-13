@@ -401,7 +401,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       Collection<Integer> recordedForUser = onlyExample ?
           audioDAO.getRecordedExampleForUser(userID) :
           audioDAO.getRecordedExForUser(userID);
-      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
+      logger.info("\tmarkRecordedState found " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
       for (Shell shell : exercises) {
         if (recordedForUser.contains(shell.getID())) {
           shell.setState(STATE.RECORDED);
@@ -412,7 +412,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     //else {
     //logger.debug("\tnot marking recorded for '" + role + "' and user " + userID);
     //}
-    logger.debug("\tmarkRecordedState marked " + c + "  recorded for '" + activityType + "' and user " + userID + " on " + exercises.size());
+    logger.info("\tmarkRecordedState marked " + c + "  recorded for '" + activityType + "' and user " + userID + " on " + exercises.size());
     return c;
   }
 
@@ -465,7 +465,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
-    //logger.debug("marked " +i + " as recorded role " +role);
+    logger.debug("getExerciseListWrapperForPrefix marked " +i + " as recorded");
 
     if (hasPrefix) {
       //logger.info("check for prefix match over " + exercisesForState.size());

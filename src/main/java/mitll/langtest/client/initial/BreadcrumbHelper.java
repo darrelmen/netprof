@@ -15,11 +15,11 @@ public class BreadcrumbHelper {
   /**
    * TODO : move breadcrumbs up into banner
    */
-  private final Breadcrumbs breadcrumbs;
+//  private final Breadcrumbs breadcrumbs;
 
-  public BreadcrumbHelper() {
-    breadcrumbs = getBreadcrumbs();
-  }
+//  public BreadcrumbHelper() {
+//    breadcrumbs = getBreadcrumbs();
+//  }
 
   /**
    * @return

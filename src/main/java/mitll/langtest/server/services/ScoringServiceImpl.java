@@ -265,7 +265,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         }
       }
     } else {
-      logger.info("no hydra for project " + projid + " so not recalculating alignments.");
+//      logger.info("no hydra for project " + projid + " so not recalculating alignments.");
     }
 
     return idToAlignment;
