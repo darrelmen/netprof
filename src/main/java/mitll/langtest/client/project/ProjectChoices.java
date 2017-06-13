@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 public class ProjectChoices {
   public static final int NORMAL_MIN_HEIGHT = 67;
   public static final String IMPORT_DATA_INTO = "Import data into ";
+  public static final String CREATE_NEW_PROJECT = "Create New Project";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
   private static final int MIN_HEIGHT = 125;
@@ -341,12 +342,11 @@ public class ProjectChoices {
 
       @Override
       public void gotNo() {
-
       }
     };
 
     new DialogHelper(true).show(
-        "Create New Project",
+        CREATE_NEW_PROJECT,
         projectEditForm.getForm(new ProjectInfo(), true),
         listener,
         550);
@@ -509,9 +509,7 @@ public class ProjectChoices {
   }
 
   private void showEditDialog(SlimProject projectForLang) {
-    //logger.info("projectForLang " + projectForLang);
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
-
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {

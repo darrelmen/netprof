@@ -475,7 +475,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
-   Collection<Integer> getRecordedBySameGender(int userid, Map<Integer, String> exToTranscript, int projid) {
+   public Collection<Integer> getRecordedBySameGender(int userid, Map<Integer, String> exToTranscript, int projid) {
     return getAudioExercisesForGenderBothSpeeds(
         userDAO.isMale(userid),
         AudioType.REGULAR.toString(),
@@ -492,7 +492,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @see DatabaseImpl#getMaleFemaleProgress(int)
    */
-   Map<String, Float> getRecordedReport(int projid,
+   public Map<String, Float> getRecordedReport(int projid,
                                               float total,
                                               float totalContext, Set<Integer> exerciseIDs,
                                               Map<Integer, String> exToTranscript,

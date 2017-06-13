@@ -118,6 +118,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     Timestamp created = new Timestamp(projectInfo.getCreated());
     Timestamp now     = new Timestamp(System.currentTimeMillis());
 
+    String countryCode = projectInfo.getCountryCode();
+
+    String ccFromLang = new CreateProject().getCC(projectInfo.getLanguage());
+    if (!ccFromLang.equals(countryCode)) {
+      logger.warn("update : setting country code to " + countryCode +
+          " to be consistent with the language "+projectInfo.getLanguage());
+      countryCode = ccFromLang;
+    }
     SlickProject changed = new SlickProject(projid,
         userid,
         created,
@@ -129,7 +137,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         projectInfo.getStatus().toString(),
         projectInfo.getFirstType(),
         projectInfo.getSecondType(),
-        projectInfo.getCountryCode(),
+        countryCode,
         project.ltsClass(),
         project.dominoid(),
         projectInfo.getDisplayOrder()
@@ -140,14 +148,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       logger.error("update : didn't update " + projectInfo + " for current " + currentProject);
     }
 
-    addOrUpdate(projid, WEBSERVICE_HOST, WEBSERVICE_HOST_DEFAULT);
-    addOrUpdate(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
-    addOrUpdate(projid, MODELS_DIR, projectInfo.getModelsDir());
+    addOrUpdateProperty(projid, WEBSERVICE_HOST, WEBSERVICE_HOST_DEFAULT);
+    addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
+    addOrUpdateProperty(projid, MODELS_DIR, projectInfo.getModelsDir());
     return didChange;
   }
 
-  private void addOrUpdate(int projid, String key, String port) {
-    logger.info("addOrUpdate " +projid + " " + key + "="+port);
+  private void addOrUpdateProperty(int projid, String key, String port) {
+    logger.info("addOrUpdateProperty " +projid + " " + key + "="+port);
 
     ProjectPropertyDAO propertyDAO = getProjectPropertyDAO();
     Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.byProjectAndKey(projid, key);
@@ -156,14 +164,18 @@ public class ProjectDAO extends DAO implements IProjectDAO {
           key, port, CreateProject.MODEL_PROPERTY_TYPE, "");
     } else {
       if (slickProjectProperties.size() > 1)
-        logger.error("addOrUpdate got back " + slickProjectProperties.size() + " properties for " + key);
+        logger.error("addOrUpdateProperty got back " + slickProjectProperties.size() + " properties for " + key);
       SlickProjectProperty next = slickProjectProperties.iterator().next();
-      logger.info("addOrUpdate " + next);
+      logger.info("addOrUpdateProperty " + next);
       SlickProjectProperty copy = propertyDAO.getCopy(next, key, port);
       propertyDAO.update(copy);
     }
   }
 
+  /**
+   * @see #ensureDefaultProject
+   * @return
+   */
   private SlickProject getDefaultProject() {
     Collection<SlickProject> aDefault = dao.getDefault();
     if (aDefault.isEmpty()) {
@@ -171,7 +183,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     } else {
       return aDefault.iterator().next();
     }
-//    return aDefault.isEmpty() ? null : aDefault.iterator().next();
   }
 
   public ProjectPropertyDAO getProjectPropertyDAO() {
@@ -198,7 +209,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param displayOrder
    * @param isDev
    * @return
-   * @see mitll.langtest.server.database.copy.CreateProject#createProject
+   * @see mitll.langtest.server.database.copy.CreateProject#addProject
    */
   public int add(int userid, String name, String language, String course,
                  String firstType, String secondType, String countryCode, int displayOrder, boolean isDev) {
@@ -224,7 +235,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @seex PostgresTest#testDeleteEnglish
    */
   public boolean delete(int id) {
-    logger.info("delete project #" + id);
+   // logger.info("delete project #" + id);
     return dao.delete(id) >0;
   }
 
@@ -234,13 +245,16 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param project
    * @return
    */
-  public boolean update(SlickProject project) {
+/*  public boolean update(SlickProject project) {
+
+    String cc = new CreateProject().getCC(project.language());
+
     int update = dao.update(project);
     if (update == 0) {
       logger.error("update : no project with id for " + project);
     }
     return update > 0;
-  }
+  }*/
 
   /**
    * TODO : consider adding lts class
@@ -257,7 +271,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param secondType
    * @param countryCode
    * @return
-   * @see #ensureDefaultProject(int)
+   * @see #ensureDefaultProject
    */
   @Override
   public int add(int userid,

@@ -64,8 +64,7 @@ public abstract class UserDialog extends BasicDialog {
 
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
-  protected static final String SIGN_UP_WIDTH = 266 +
-      "px";
+  protected static final String SIGN_UP_WIDTH = 266 + "px";
 
   final PropertyHandler props;
   private KeyPressHelper enterKeyButtonHelper;
@@ -109,7 +108,7 @@ public abstract class UserDialog extends BasicDialog {
     markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, false);
   }
 
-  protected void markErrorBlur(FormField dialectGroup, String message) {
+  void markErrorBlur(FormField dialectGroup, String message) {
     markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, true);
   }
 
@@ -143,9 +142,7 @@ public abstract class UserDialog extends BasicDialog {
   void storeUser(User result, UserManager userManager) {
     //logger.info("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
-    userManager.storeUser(result
-        //, passwordHash
-    );
+    userManager.storeUser(result);
   }
 
   public void setEnterKeyButtonHelper(KeyPressHelper enterKeyButtonHelper) {

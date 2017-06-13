@@ -70,8 +70,6 @@ public class BasicDialog {
   private final Logger logger = Logger.getLogger("BasicDialog");
 
   private static final boolean DEBUG = false;
-
-  // private static final int ILR_CHOICE_WIDTH = 80;
   static final String TRY_AGAIN = "Try Again";
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
@@ -281,7 +279,7 @@ public class BasicDialog {
   }
 
   protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message, Placement right) {
-    dialectGroup.setType(ControlGroupType.ERROR);
+    markErrorOnGroup(dialectGroup);
     focusable.setFocus(true);
     setupPopoverThatHidesItself(dialect, header, message, right);
   }
@@ -297,7 +295,7 @@ public class BasicDialog {
   void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right, boolean setFocus) {
     if (DEBUG) logger.info("markErrorBlur " + header + " message " + message);
 
-    dialectGroup.setType(ControlGroupType.ERROR);
+    markErrorOnGroup(dialectGroup);
     if (setFocus) dialect.setFocus(true);
     setupPopoverBlur(dialect, header, message, right, new MyPopover(), dialectGroup, setFocus);
   }
@@ -346,16 +344,20 @@ public class BasicDialog {
    * @param dialectGroup
    * @param header
    * @param message
-   * @seex mitll.langtest.client.custom.dialog.EditableExercise#checkForForeignChange()
+   * @see #markError(ControlGroup, String, String)
    */
   private void markError(ControlGroup dialectGroup, String header, String message, Placement placement) {
-    dialectGroup.setType(ControlGroupType.ERROR);
+    markErrorOnGroup(dialectGroup);
     setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement);
+  }
+
+  private void markErrorOnGroup(ControlGroup dialectGroup) {
+    dialectGroup.setType(ControlGroupType.ERROR);
   }
 
   void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement, boolean grabFocus) {
     // if (DEBUG) logger.info("markError on '" + dialect.getElement().getExID() + "' with " + header + "/" + message);
-    dialectGroup.setType(ControlGroupType.ERROR);
+    markErrorOnGroup(dialectGroup);
     dialect.setFocus(grabFocus);
 //    setupPopover(dialect, header, message, placement);
     Widget widget = dialect;
@@ -430,11 +432,15 @@ public class BasicDialog {
       public void onBlur(BlurEvent event) {
         if (DEBUG) logger.info("got blur, dismissing popover...");
         popover.dontFireAgain();
-        dialectGroup.setType(ControlGroupType.NONE);
+        clearError(dialectGroup);
       }
     });
 
     return popover;
+  }
+
+  protected void clearError(ControlGroup dialectGroup) {
+    dialectGroup.setType(ControlGroupType.NONE);
   }
 
   private Popover setupPopoverBlurNoControl(Widget widget, HasBlurHandlers hasBlurHandlers, String heading, String message, Placement placement, final MyPopover popover, boolean requestFocus) {

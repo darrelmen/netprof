@@ -128,11 +128,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    */
   @Override
   public boolean update(ProjectInfo info) {
-    //Project currentProject = db.getProject(info.getID());
-    //boolean wasRetired = getWasRetired(currentProject);
-    // logger.info("update " +info);
     boolean update = getProjectDAO().update(getUserIDFromSession(), info);
-    if (update/* && wasRetired*/) {
+    if (update) {
       db.configureProject(db.getProject(info.getID()), true);
     }
     db.getProjectManagement().refreshProjects();
@@ -298,7 +295,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
         if (exerciseAttribute1 == null) {
           exerciseAttribute1 = new ExerciseAttribute(typeName, value);
-          logger.info("postProcessUnitToValueToGetAttributes Remember attr " + exerciseAttribute1);
+//          logger.info("postProcessUnitToValueToGetAttributes Remember attr " + exerciseAttribute1);
           pairToAttr.put(propertyValuePair, exerciseAttribute1);
           if (pairToAttr.size() > REASONABLE_PROPERTY_SPACE_LIMIT) {
             logger.warn("getExerciseAttributes more than " + pairToAttr.size() +
@@ -310,6 +307,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
     ex.getMutable().setUnitToValue(filteredUnitToValue);
     ex.setAttributes(toAdd);
+
+    if (ex.getUnitToValue().isEmpty()) logger.warn("huh? no unit,chapter info on exercises " + ex.getID());
 
     logger.info("postProcessUnitToValueToGetAttributes for" +
         "\n\tex          " + ex.getID() +

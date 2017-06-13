@@ -175,10 +175,11 @@ public class CreateProject {
   /**
    * Add brazilian, serbo croatian, french, etc.
    * <p>
-   * TODO : make t
+   * TODO : read this from a json config file
    *
    * @param language
    * @return
+   * @see CopyToPostgres#copyOneConfigCommand
    */
   public String getCC(String language) {
     List<Pair> languages = Arrays.asList(
@@ -206,7 +207,6 @@ public class CreateProject {
         new Pair("tagalog", "ph"),
         new Pair("turkish", "tr"),
         new Pair("urdu", "pk"));
-
 
     Map<String, String> langToCode = new HashMap<>();
     for (Pair pair : languages) langToCode.put(pair.language, pair.cc);

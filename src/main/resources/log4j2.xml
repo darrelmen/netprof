@@ -162,12 +162,13 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="mitll.langtest" level="DEBUG">
+  <!--      <logger name="mitll.langtest" level="DEBUG">
             <appender-ref ref="LogFile"/>
-        </logger>
+        </logger>-->
 
         <root level="debug">
             <appender-ref ref="LogFile" level="debug"/>
         </root>
+
     </loggers>
 </configuration>

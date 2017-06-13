@@ -182,11 +182,9 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.name = name;
   }
 
-/*
   public void setCourse(String course) {
     this.course = course;
   }
-*/
 
 /*
   public void setCountryCode(String countryCode) {
@@ -200,9 +198,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   }
 */
 
-  public void setLanguage(String language) {
-    this.language = language;
-  }
+  public void setLanguage(String language) {  this.language = language;  }
 
   public void setFirstType(String firstType) {
     this.firstType = firstType;
@@ -210,6 +206,14 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
 
   public void setSecondType(String secondType) {
     this.secondType = secondType;
+  }
+
+  public String getHost() {
+    return host;
+  }
+
+  public void setHost(String host) {
+    this.host = host;
   }
 
   public String toString() {
