@@ -30,14 +30,44 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.services;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.ContextPractice;
+import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.flashcard.AVPScoreReport;
+import mitll.langtest.shared.instrumentation.Event;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
+ * The async counterpart of <code>LangTestDatabase</code>.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 1/24/14.
  */
-public interface WavCallback {
-  void getBase64EncodedWavFile(String bytes);
+public interface LangTestDatabaseAsync {
+  void getStartupInfo(AsyncCallback<StartupInfo> async);
+
+  void logMessage(String message, AsyncCallback<Void> async);
+
+  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device,
+                AsyncCallback<Void> async);
+
+  void getEvents(AsyncCallback<Collection<Event>> async);
+
+
+  void getUserHistoryForList(int userid,
+                             Collection<Integer> ids,
+                             long latestResultID,
+                             Map<String, Collection<String>> typeToSection,
+                             int userListID, AsyncCallback<AVPScoreReport> async);
+
+
+  void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
+
+  void getContextPractice(AsyncCallback<ContextPractice> async);
+
+  void reloadExercises(AsyncCallback<Void> async);
 }

@@ -44,7 +44,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AmasService;
 import mitll.langtest.client.services.AmasServiceAsync;

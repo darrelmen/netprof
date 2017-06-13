@@ -30,30 +30,57 @@
  *
  */
 
-package mitll.langtest.client.scoring;
+package mitll.langtest.client.initial;
 
-import mitll.langtest.client.services.LangTestDatabaseAsync;
+import com.github.gwtbootstrap.client.ui.NavLink;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.shared.project.SlimProject;
+import mitll.langtest.shared.user.User;
+import org.jetbrains.annotations.NotNull;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 9/12/12
- * Time: 6:59 PM
- * To change this template use File | Settings | File Templates.
- */
-public interface ScoreListener extends MiniScoreListener {
-  int getOffsetWidth();
+public interface UILifecycle {
+  /**
+   * @see InitialUI#populateRootPanelIfLogin()
+   * @see LangTest#populateRootPanel()
+   * @see LangTest#showLogin()
+   */
+  void populateRootPanel();
+
+  int getHeightOfTopRows();
 
   /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#setClassAvg(float)
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.CommonExercise)
-   * @param classAvg
+   * @see LangTest#gotUser(User)
+   * @param user
    */
-  void setClassAvg(float classAvg);
+  void gotUser(User user);
 
-  void showChart();
+  void startOver();
 
-  void setRefAudio(String refAudio);
+  void showInitialState();
+
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#gotClickOnFlag
+   * @param name
+   * @return
+   */
+  @NotNull
+  NavLink makeBreadcrumb(String name);
+  void removeLastCrumb();
+
+  void clickOnParentCrumb(SlimProject parent);
+
+  /**
+   * @see LangTest#makeFlashContainer()
+   */
+  void setSplash();
+
+  void logout();
+
+  void clearContent();
+
+  void chooseProjectAgain();
+
+  INavigation getNavigation();
 }

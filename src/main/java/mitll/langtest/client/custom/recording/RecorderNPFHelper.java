@@ -34,8 +34,6 @@ package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -44,7 +42,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.exercise.CommentBox;
@@ -53,8 +50,10 @@ import mitll.langtest.client.list.*;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.shared.exercise.AnnotationExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -73,6 +72,9 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   //private final Logger logger = Logger.getLogger("RecorderNPFHelper");
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
+  /**
+   *
+   */
   private final boolean doNormalRecording;
   private boolean added = false;
   private final RecordingProgressTable flex = new RecordingProgressTable();
@@ -80,12 +82,10 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   /**
    * @param controller
    * @param doNormalRecording
-   * @see Navigation#Navigation
+   * @see mitll.langtest.client.banner.NewContentChooser#showView
    */
-  public RecorderNPFHelper(ExerciseController controller,
-                    boolean doNormalRecording,
-                    ReloadableContainer exerciseList) {
-    super(controller, exerciseList);
+  public RecorderNPFHelper(ExerciseController controller, boolean doNormalRecording) {
+    super(controller);
     this.doNormalRecording = doNormalRecording;
   }
 
@@ -104,6 +104,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
       final FlexListLayout outerLayout = this;
+
       protected void styleTopRow(Panel twoRows, Panel topRow) {
         twoRows.add(topRow);
       }
@@ -124,15 +125,15 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             new ListOptions()
                 .setInstance(instanceName)
                 .setShowFirstNotCompleted(true)
-        )
-        {
+        ) {
           private CheckBox filterOnly;
 
           @Override
           protected FacetContainer getSectionWidgetContainer() {
             return new FacetContainer() {
               @Override
-              public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {}
+              public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
+              }
 
               @Override
               public String getHistoryToken() {
@@ -160,7 +161,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             add(filterOnly);
 
             // row 3
-            add( pagingContainer.getTableWithPager(new ListOptions()));
+            add(pagingContainer.getTableWithPager(new ListOptions()));
             setOnlyExamples(!doNormalRecording);
 
             addEventHandler(instanceName);
@@ -203,7 +204,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             filterOnly.setValue(selectionState.isOnlyUnrecorded());
           }
         };
-
       }
     };
   }
@@ -255,7 +255,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
      * @param instance
      * @see RecorderNPFHelper#getFactory
      */
-    MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell,CommonExercise> exerciseList1, String instance) {
+    MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell, CommonExercise> exerciseList1, String instance) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
     }
 
@@ -286,6 +286,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
     /**
      * TODO : confirm we haven't broken this...
+     *
      * @param e
      * @return
      * @seex #ExercisePanel(T, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
@@ -302,14 +303,11 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
           getContentScroller(maybeRTLContent)
           : maybeRTLContent;
 
-//      boolean exampleRecord = isExampleRecord();
-
       Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, isRTLContent(content));
       entry.addStyleName("floatLeftAndClear");
 
       return entry;
     }
-
 
     private boolean isRTLContent(String content) {
       return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
@@ -320,11 +318,12 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
      * @param completedExercise
      * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers
      */
-    @Override
+
+    /*   @Override
     public void postAnswers(ExerciseController controller, HasID completedExercise) {
       super.postAnswers(controller, completedExercise);
       tellOtherListExerciseDirty(exercise);
-    }
+    }*/
 
     /**
      * @param e
@@ -352,8 +351,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
     /**
      * @return
-     * @seex #getEntry(String, String, String, ExerciseAnnotation)
-     * @seex #makeFastAndSlowAudio(String)
      */
     private CommentBox getCommentBox(boolean tooltipOnRight) {
       return new CommentBox(this.exercise.getID(), controller, this, this.exercise.getMutableAnnotation(), tooltipOnRight);

@@ -39,9 +39,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import mitll.langtest.client.BrowserCheck;
+import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.WavCallback;
+import mitll.langtest.client.initial.WavCallback;
 
 import java.util.logging.Logger;
 
@@ -332,7 +332,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Handles either state - either we have flash, in which case we ask flash for the wav file,
    * otherwise we ask webRTC to stop recording and post the audio to us.
    *
-   * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
+   * @see mitll.langtest.client.LangTest#stopRecording(WavCallback)
    */
   public void stopRecording(final WavCallback wavCallback) {
     if (usingWebRTC()) {

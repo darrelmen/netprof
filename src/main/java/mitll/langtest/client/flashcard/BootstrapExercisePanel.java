@@ -46,7 +46,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.PopupHelper;
+import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;

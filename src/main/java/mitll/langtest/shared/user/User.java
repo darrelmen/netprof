@@ -33,6 +33,7 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.client.user.SignUpForm;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
@@ -418,7 +419,7 @@ public class User extends MiniUser {
 
   /**
    * @return
-   * @see mitll.langtest.client.InitialUI#gotUser(User)
+   * @see InitialUI#gotUser(User)
    */
   public boolean isAdmin() {
     return admin;

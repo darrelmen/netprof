@@ -33,8 +33,8 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.user.client.Timer;
-import mitll.langtest.client.BrowserCheck;
-import mitll.langtest.client.WavCallback;
+import mitll.langtest.client.initial.BrowserCheck;
+import mitll.langtest.client.initial.WavCallback;
 
 import java.util.logging.Logger;
 
@@ -182,7 +182,7 @@ class WebAudioRecorder {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
+   * @see mitll.langtest.client.LangTest#stopRecording(WavCallback)
    */
   private static WavCallback wavCallback = null;
 

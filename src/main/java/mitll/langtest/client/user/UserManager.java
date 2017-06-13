@@ -34,7 +34,8 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.initial.PropertyHandler;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
@@ -161,7 +162,7 @@ public class UserManager {
    * For display purposes
    *
    * @return
-   * @see mitll.langtest.client.InitialUI#getGreeting
+   * @see InitialUI#getGreeting
    */
   public String getUserID() {
     if (Storage.isLocalStorageSupported()) {
@@ -230,7 +231,7 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.InitialUI#resetState()
+   * @see InitialUI#resetState()
    */
   public void clearUser() {
     if (Storage.isLocalStorageSupported()) {

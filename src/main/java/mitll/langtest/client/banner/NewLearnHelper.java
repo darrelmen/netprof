@@ -25,7 +25,7 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   NPFlexSectionExerciseList facetExerciseList;
 
   public NewLearnHelper(ExerciseController controller) {
-    super(controller, null);
+    super(controller);
   }
 
   @Override

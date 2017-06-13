@@ -36,7 +36,7 @@ import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;

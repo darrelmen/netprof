@@ -40,7 +40,7 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Timer;
-import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -100,7 +100,7 @@ public class RecordButton extends Button {
    * @param buttonText
    * @param stopButtonText
    * @param propertyHandler
-   * @seex mitll.langtest.client.scoring.SimplePostAudioRecordButton#SimplePostAudioRecordButton(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, String, String, String, String)
+   * @seex mitll.langtest.client.scoring.SimplePostAudioRecordButton#SimplePostAudioRecordButton(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.services.LangTestDatabaseAsync, String, String, String, String)
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton
    */
   protected RecordButton(int delay, boolean doClickAndHold, String buttonText, String stopButtonText, PropertyHandler propertyHandler) {
@@ -151,7 +151,7 @@ public class RecordButton extends Button {
 
   /**
    * @param recordingListener
-   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, mitll.langtest.client.PropertyHandler)
+   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, PropertyHandler)
    */
   protected void setRecordingListener(RecordingListener recordingListener) {
     this.recordingListener = recordingListener;

@@ -63,7 +63,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   private Widget outerBottomRow;
   NPFlexSectionExerciseList facetExerciseList;
 
-  public PracticeHelper(ExerciseController controller) { super(controller, null);  }
+  public PracticeHelper(ExerciseController controller) { super(controller);  }
 
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {

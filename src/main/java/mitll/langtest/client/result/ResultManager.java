@@ -123,7 +123,7 @@ public class ResultManager extends PagerTable {
    * @param nameForAnswer
    * @param eventRegistration
    * @paramx s
-   * @seex mitll.langtest.client.InitialUI.ResultsClickHandler#onClick
+   * @seex mitll.langtest.client.initial.InitialUI.ResultsClickHandler#onClick
    */
   public ResultManager(String nameForAnswer,
                        Collection<String> typeOrder,

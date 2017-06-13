@@ -33,14 +33,13 @@
 package mitll.langtest.server.services;
 
 import mitll.hlt.domino.server.util.ServletUtil;
-import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
-import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.LoginResult;

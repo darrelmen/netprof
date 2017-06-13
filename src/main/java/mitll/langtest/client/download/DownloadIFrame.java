@@ -34,6 +34,7 @@ package mitll.langtest.client.download;
 
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
+import mitll.langtest.client.initial.InitialUI;
 
 /** 
  * DownloadIFrame: Extend the default frame to enable a hidden one time use frame suitable for
@@ -45,7 +46,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class DownloadIFrame extends Frame {
 	/** A separate area in the Domino.html that is used to manage download frames. */
 	/**
-	 * @see mitll.langtest.client.InitialUI
+	 * @see InitialUI
 	 */
 	public static final String DOWNLOAD_AREA_ID = "netProfDownloadArea";
 	

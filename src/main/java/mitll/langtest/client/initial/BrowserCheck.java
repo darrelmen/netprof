@@ -30,13 +30,13 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.initial;
 
 import com.google.gwt.user.client.Window;
+import mitll.langtest.client.LangTest;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 //import java.util.logging.Logger;
 
 /**
@@ -61,7 +61,7 @@ public class BrowserCheck {
 
   private final Map<String, Integer> browserToVersion = new HashMap<String, Integer>();
 
-  BrowserCheck() {
+  public BrowserCheck() {
     browserToVersion.put(FIREFOX, 14);
     browserToVersion.put(CHROME, 21);
     browserToVersion.put(IE, 9);
@@ -72,7 +72,7 @@ public class BrowserCheck {
    * @return
    * @see LangTest#onModuleLoad2()
    */
-  BrowserCheck checkForCompatibleBrowser() {
+  public BrowserCheck checkForCompatibleBrowser() {
     if (browser.equals("Unknown")) getBrowserAndVersion();
     Integer min = browserToVersion.get(browser);
     if (browser.toLowerCase().contains("ie")) { // just skip IE

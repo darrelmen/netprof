@@ -30,56 +30,14 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.initial;
 
-import com.github.gwtbootstrap.client.ui.NavLink;
-import mitll.langtest.client.banner.IBanner;
-import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.shared.project.SlimProject;
-import mitll.langtest.shared.user.User;
-import org.jetbrains.annotations.NotNull;
-
-public interface UILifecycle {
-  /**
-   * @see InitialUI#populateRootPanelIfLogin()
-   * @see LangTest#populateRootPanel()
-   * @see LangTest#showLogin()
-   */
-  void populateRootPanel();
-
-  int getHeightOfTopRows();
-
-  /**
-   * @see LangTest#gotUser(User)
-   * @param user
-   */
-  void gotUser(User user);
-
-  void startOver();
-
-  void showInitialState();
-
-  /**
-   * @see mitll.langtest.client.project.ProjectChoices#gotClickOnFlag
-   * @param name
-   * @return
-   */
-  @NotNull
-  NavLink makeBreadcrumb(String name);
-  void removeLastCrumb();
-
-  void clickOnParentCrumb(SlimProject parent);
-
-  /**
-   * @see LangTest#makeFlashContainer()
-   */
-  void setSplash();
-
-  void logout();
-
-  void clearContent();
-
-  void chooseProjectAgain();
-
-  INavigation getNavigation();
+/**
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 1/24/14.
+ */
+public interface WavCallback {
+  void getBase64EncodedWavFile(String bytes);
 }

@@ -6,28 +6,16 @@ import com.github.gwtbootstrap.client.ui.constants.Alignment;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.UILifecycle;
+import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.download.DownloadEvent;
-import mitll.langtest.client.download.ShowEvent;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +28,7 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 /**
  * Created by go22670 on 4/10/17.
  */
-public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeHandler<String> {
+public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueChangeHandler<String> {
   public static final String SHOW_PHONES = "showPhones";
   public static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
   public static final String MAILTO_SUBJECT = "Question%20about%20netprof";
@@ -61,10 +49,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private Dropdown cog;
 
   private INavigation navigation;
-  private HandlerRegistration handlerRegistration;
+//  private HandlerRegistration handlerRegistration;
   private final Map<String, NavLink> nameToLink = new HashMap<>();
   private Dropdown userDrop;
 
+  /**
+   * @see #addChoicesForUser
+   */
   private final List<Widget> choices = new ArrayList<>();
 
   private final ExerciseController controller;
@@ -118,34 +109,33 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     navCollapse.add(getRightSideChoices(userManager, userMenu));
 
     setCogVisible(userManager.hasUser());
-
-    addHistoryListener();
+   // addHistoryListener();
   }
 
   @NotNull
   private Nav getRecNav() {
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
-    recnav.addStyleName("inlineFlex");
-    recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
-    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
-
+    styleNav(recnav);
     getChoice(recnav, VIEWS.ITEMS.toString());
     getChoice(recnav, VIEWS.CONTEXT.toString());
     return recnav;
   }
 
-  @NotNull
-  private Nav getDefectNav() {
-    Nav recnav = new Nav();
-    recnav.getElement().setId("defectnav");
+  private void styleNav(Nav recnav) {
     recnav.addStyleName("inlineFlex");
     recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
     recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+  }
 
-    getChoice(recnav, VIEWS.DEFECTS.toString());
-    getChoice(recnav, VIEWS.FIX.toString());
-    return recnav;
+  @NotNull
+  private Nav getDefectNav() {
+    Nav nav = new Nav();
+    nav.getElement().setId("defectnav");
+    styleNav(nav);
+    getChoice(nav, VIEWS.DEFECTS.toString());
+    getChoice(nav, VIEWS.FIX.toString());
+    return nav;
   }
 
   @NotNull
@@ -168,9 +158,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
   private Nav getLNav() {
     Nav lnav = new Nav();
     lnav.getElement().setId("lnav");
-    lnav.addStyleName("inlineFlex");
-    lnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
-    lnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+    styleNav(lnav);
 
     return lnav;
   }
@@ -219,19 +207,23 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     subtitle.addStyleName("subtitleNoRecordingForeground");
   }
 
-  private void addHistoryListener() {
+/*  private void addHistoryListener() {
     if (handlerRegistration == null) {
       handlerRegistration = History.addValueChangeHandler(this);
     }
-  }
+  }*/
 
+/*
   public void onValueChange(ValueChangeEvent<String> event) {
+*/
 /*    String token = event.getValue();
     SelectionState selectionState = new SelectionState(token, false);
     String instance1 = selectionState.getInstance();
-      logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");*/
+      logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");*//*
+
     //showSection(instance1);
   }
+*/
 
   private void showSection(String instance1) {
     VIEWS choices = VIEWS.NONE;
@@ -339,7 +331,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     this.navigation = navigation;
   }
 
-
   @Override
   public void reflectPermissions(Collection<User.Permission> permissions) {
     recordMenuVisible();
@@ -407,11 +398,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner, ValueChangeH
     recordMenuVisible();
   }
 
-  private void setVisibleChoices(boolean show) {
+  public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
     reflectPermissions(controller.getPermissions());
-//    recnav.setVisible(show);
-//    defectnav.setVisible(show);
   }
 
   private NavLink getContactUs() {

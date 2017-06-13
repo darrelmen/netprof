@@ -46,7 +46,8 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.instrumentation.Event;
 
@@ -64,7 +65,7 @@ public class EventTable extends PagerTable {
   private Button closeButton;
 
   /**
-   * @see mitll.langtest.client.InitialUI.EventsClickHandler#onClick(ClickEvent)
+   * @see InitialUI.EventsClickHandler#onClick(ClickEvent)
    */
   public void show(final LangTestDatabaseAsync service) {
     // Create the popup dialog box

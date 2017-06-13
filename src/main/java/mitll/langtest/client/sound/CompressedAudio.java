@@ -32,7 +32,7 @@
 
 package mitll.langtest.client.sound;
 
-import mitll.langtest.client.BrowserCheck;
+import mitll.langtest.client.initial.BrowserCheck;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

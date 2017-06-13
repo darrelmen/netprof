@@ -2,7 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
@@ -79,11 +79,11 @@ public class NewContentChooser implements INavigation {
           break;
         case ITEMS:
           clear();
-          new RecorderNPFHelper(controller, true, null).showNPF(divWidget, ITEMS.toString());
+          new RecorderNPFHelper(controller, true).showNPF(divWidget, ITEMS.toString());
           break;
         case CONTEXT:
           clear();
-          new RecorderNPFHelper(controller, false, null).showNPF(divWidget, CONTEXT.toString());
+          new RecorderNPFHelper(controller, false).showNPF(divWidget, CONTEXT.toString());
           break;
         case DEFECTS:
           clear();
@@ -126,7 +126,7 @@ public class NewContentChooser implements INavigation {
   }
 
   @NotNull
-  public ShowTab getShowTab() {
+  private ShowTab getShowTab() {
     return exid -> {
       learnHelper.loadExercise(exid);
       banner.showLearn();
@@ -161,5 +161,6 @@ public class NewContentChooser implements INavigation {
   @Override
   public void clearCurrent() {
     currentSection = NONE;
+  //  banner.setVisibleChoices(false);
   }
 }

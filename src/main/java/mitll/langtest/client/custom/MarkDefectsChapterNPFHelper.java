@@ -69,7 +69,7 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
    * @see
    */
   public MarkDefectsChapterNPFHelper(ExerciseController controller, SimpleChapterNPFHelper learnHelper) {
-    super(controller, learnHelper);
+    super(controller);
   }
 
   /**

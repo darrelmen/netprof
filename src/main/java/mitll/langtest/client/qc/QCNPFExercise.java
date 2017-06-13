@@ -51,7 +51,7 @@ import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.DefectEvent;
 import mitll.langtest.client.exercise.ExerciseController;

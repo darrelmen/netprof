@@ -123,7 +123,6 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     getPrev().setType(ButtonType.SUCCESS);
 
     if (addButtons) add(getPrev());
-    //getPrev().setVisible(!controller.isMinimalUI() || !controller.isPromptBeforeNextItem());
   }
 
   private void makeNextButton(final HasID exercise, final ExerciseController controller, boolean addButtons) {
@@ -138,11 +137,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     next.getElement().setId("nextButton");
 
     // send answers to server
-    next.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        clickNext(controller, exercise);
-      }
-    });
+    next.addClickHandler(event -> clickNext(controller, exercise));
   }
 
   /**

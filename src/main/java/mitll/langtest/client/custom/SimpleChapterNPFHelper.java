@@ -33,14 +33,12 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -68,24 +66,22 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   protected final ExerciseController controller;
   private ExerciseList npfExerciseList;
-  private final ReloadableContainer predefinedContentList;
 
   /**
    * @param controller
-   * @see Navigation#Navigation
+   * @see RecorderNPFHelper#RecorderNPFHelper(ExerciseController, boolean)
    */
-  public SimpleChapterNPFHelper(ExerciseController controller,
-                                ReloadableContainer predefinedContentList) {
+  public SimpleChapterNPFHelper(ExerciseController controller) {
     this.controller = controller;
-    this.predefinedContentList = predefinedContentList;
-
     final SimpleChapterNPFHelper<T, U> outer = this;
     this.flexListLayout = getMyListLayout(outer);
   }
 
+/*
   Panel getCreatedPanel() {
     return getExerciseList() != null ? getExerciseList().getCreatedPanel() : null;
   }
+*/
 
   protected abstract FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer);
 
@@ -93,11 +89,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * Add npf widget to content of a tab - here marked tabAndContent
    *
    * @param instanceName flex, review, etc.
-   * @paramx tabAndContent in this tab
-   * @paramx activityType
-   * @see Navigation#addPracticeTab()
-   * @see Navigation#addTabs
-   * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
+   * @see mitll.langtest.client.banner.NewContentChooser#showView
    */
   public void showNPF(DivWidget content, String instanceName) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
@@ -142,7 +134,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   /**
    * @return
-   * @see SimpleChapterNPFHelper#getCreatedPanel
+   * @seez SimpleChapterNPFHelper#getCreatedPanel
    */
   public ListInterface<?,?> getExerciseList() {
     return npfExerciseList;
@@ -174,7 +166,8 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @return
    * @see mitll.langtest.client.exercise.WaveformExercisePanel
    */
-  protected ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList) {
+  protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
+ /*   protected ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList) {
     final String instance = exerciseList.getInstance();
     return new ExercisePanelFactory<T, U>(controller, exerciseList) {
       @Override
@@ -189,13 +182,14 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
       }
     };
   }
-
+*/
   /**
-   * TODO : make sure this is doing something helpful
+   * TODOx : make sure this is doing something helpful
    *
-   * @param e
+   * @paramz e
    * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, HasID)
    */
+/*
   protected void tellOtherListExerciseDirty(HasID e) {
     if (predefinedContentList != null &&
         predefinedContentList.getReloadable() != null &&
@@ -207,6 +201,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
       //    logger.info("\n\n\n--> SimpleChapterNPFHelper.not reloading " + e.getOldID());
     }
   }
+*/
 
   @Override
   public void onResize() {

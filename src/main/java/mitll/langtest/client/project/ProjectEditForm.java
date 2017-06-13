@@ -10,7 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LifecycleSupport;
+import mitll.langtest.client.initial.LifecycleSupport;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ProjectService;
@@ -22,7 +22,6 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import org.jetbrains.annotations.Nullable;
-import org.moxieapps.gwt.highcharts.client.Series;
 
 import java.util.logging.Logger;
 

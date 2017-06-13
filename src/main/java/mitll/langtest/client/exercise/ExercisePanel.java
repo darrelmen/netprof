@@ -73,6 +73,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   final String message;
   protected final String instance;
+  protected boolean doNormalRecording = true;
 
   /**
    * @param e
@@ -85,8 +86,10 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    */
   ExercisePanel(final T e,
                 final ExerciseController controller,
-                ListInterface<L,T> exerciseList, String instructionMessage,
-                String instance) {
+                ListInterface<L, T> exerciseList,
+                String instructionMessage,
+                String instance,
+                boolean doNormalRecording) {
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
@@ -104,6 +107,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     add(navigationHelper);
     navigationHelper.addStyleName("topMargin");
     getElement().setId("ExercisePanel");
+    this.doNormalRecording = doNormalRecording;
   }
 
   /**

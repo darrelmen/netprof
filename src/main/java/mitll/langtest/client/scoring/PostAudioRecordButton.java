@@ -37,7 +37,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.PopupHelper;
+import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.recorder.RecordButton;

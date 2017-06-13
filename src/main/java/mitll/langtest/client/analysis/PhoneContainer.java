@@ -48,7 +48,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;

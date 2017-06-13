@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.initial;
 
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;

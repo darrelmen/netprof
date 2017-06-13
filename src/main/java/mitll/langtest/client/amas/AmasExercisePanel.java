@@ -43,7 +43,7 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.shared.amas.AmasExerciseImpl;

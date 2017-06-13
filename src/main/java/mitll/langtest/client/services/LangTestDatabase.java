@@ -30,9 +30,12 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.services;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -41,33 +44,75 @@ import mitll.langtest.shared.instrumentation.Event;
 import java.util.Collection;
 import java.util.Map;
 
+
 /**
- * The async counterpart of <code>LangTestDatabase</code>.
+ * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 5/7/12
+ * Time: 5:50 PM
+ * To change this template use File | Settings | File Templates.
  */
-public interface LangTestDatabaseAsync {
-  void getStartupInfo(AsyncCallback<StartupInfo> async);
+@RemoteServiceRelativePath("langtestdatabase")
+public interface LangTestDatabase extends RemoteService {
+  /**
+   * @return
+   * @see LangTest#onModuleLoad()
+   */
+  StartupInfo getStartupInfo();
 
-  void logMessage(String message, AsyncCallback<Void> async);
+  /**
+   * @return
+   * @seex RecorderNPFHelper#getProgressInfo
+   */
+  Map<String, Float> getMaleFemaleProgress();
 
-  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device,
-                AsyncCallback<Void> async);
+  /**
+   * @param userid
+   * @param ids
+   * @param latestResultID
+   * @param typeToSection
+   * @param userListID
+   * @return
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
+   */
+  AVPScoreReport getUserHistoryForList(int userid, Collection<Integer> ids, long latestResultID,
+                                       Map<String, Collection<String>> typeToSection, int userListID);
+  // Telemetry ---
 
-  void getEvents(AsyncCallback<Collection<Event>> async);
+  /**
+   * @param message
+   * @see LangTest#logMessageOnServer(String)
+   */
+  void logMessage(String message);
 
+  /**
+   * @param id
+   * @param widgetType
+   * @param exid
+   * @param context
+   * @param userid
+   * @param hitID
+   * @param device
+   * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent
+   */
+  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device);
 
-  void getUserHistoryForList(int userid,
-                             Collection<Integer> ids,
-                             long latestResultID,
-                             Map<String, Collection<String>> typeToSection,
-                             int userListID, AsyncCallback<AVPScoreReport> async);
+  /**
+   * @return
+   * @see mitll.langtest.client.instrumentation.EventTable#show
+   */
+  Collection<Event> getEvents();
 
+  /**
+   * Dialog support...
+   *
+   * @return
+   * @see mitll.langtest.client.custom.Navigation#makeDialogWindow(LangTestDatabaseAsync, ExerciseController)
+   */
+  ContextPractice getContextPractice();
 
-  void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
-
-  void getContextPractice(AsyncCallback<ContextPractice> async);
-
-  void reloadExercises(AsyncCallback<Void> async);
+  @Deprecated
+  void reloadExercises();
 }

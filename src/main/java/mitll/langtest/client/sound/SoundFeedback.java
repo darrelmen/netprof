@@ -32,6 +32,8 @@
 
 package mitll.langtest.client.sound;
 
+import mitll.langtest.client.services.LangTestDatabaseAsync;
+
 /**
  * Does sound feedback - correct/incorrect to user.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -51,7 +53,7 @@ public class SoundFeedback {
 
   /**
    * @param soundManager
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, mitll.langtest.client.flashcard.ControlState, SoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.exercise.CommonExercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, mitll.langtest.client.flashcard.ControlState, SoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener)
    */
   public SoundFeedback(SoundManagerAPI soundManager) {
     this.soundManager = soundManager;

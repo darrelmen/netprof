@@ -40,7 +40,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;

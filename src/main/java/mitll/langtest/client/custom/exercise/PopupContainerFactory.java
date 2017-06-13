@@ -39,7 +39,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.PopupHelper;
+import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.jetbrains.annotations.NotNull;
 

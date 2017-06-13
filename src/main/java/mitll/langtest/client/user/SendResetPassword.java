@@ -40,8 +40,9 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.instrumentation.EventRegistration;
 
 import java.util.logging.Logger;
@@ -76,7 +77,7 @@ public class SendResetPassword extends UserDialog {
   /**
    * @param token
    * @return
-   * @see mitll.langtest.client.InitialUI#handleResetPass
+   * @see InitialUI#handleResetPass
    */
   public Panel getResetPassword(final String token) {
     Panel container = new DivWidget();

@@ -43,7 +43,7 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.StartupInfo;

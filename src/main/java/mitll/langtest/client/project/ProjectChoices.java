@@ -15,11 +15,12 @@ import mitll.langtest.client.*;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.LifecycleSupport;
+import mitll.langtest.client.initial.PropertyHandler;
+import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
-import mitll.langtest.client.services.ProjectService;
-import mitll.langtest.client.services.ProjectServiceAsync;
-import mitll.langtest.client.services.UserService;
-import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.services.*;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
@@ -600,13 +601,13 @@ public class ProjectChoices {
 //    logger.info("gotClickOnFlag project " + projid + " has " + children);
 
     if (children.size() < 2) {
-      logger.info("onClick select leaf project " + projid +
+      logger.info("gotClickOnFlag onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
       // uiLifecycle.removeLastCrumb();
       uiLifecycle.makeBreadcrumb(name);
       setProjectForUser(projid);
     } else { // at this point, the breadcrumb should be empty?
-      logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");
+      logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
       projectCrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
       uiLifecycle.clearContent();

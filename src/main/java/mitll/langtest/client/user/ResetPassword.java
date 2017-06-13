@@ -40,12 +40,11 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.user.User;
-
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -75,7 +74,7 @@ public class ResetPassword extends UserDialog {
   /**
    * @param props
    * @param eventRegistration
-   * @see mitll.langtest.client.InitialUI#handleResetPass
+   * @see InitialUI#handleResetPass
    */
   public ResetPassword(PropertyHandler props, EventRegistration eventRegistration, UserManager userManager) {
     super(props);
@@ -87,7 +86,7 @@ public class ResetPassword extends UserDialog {
   /**
    * @param token
    * @return
-   * @see mitll.langtest.client.InitialUI#handleResetPass
+   * @see InitialUI#handleResetPass
    */
   public Panel getResetPassword(final String token) {
     Panel container = new DivWidget();

@@ -32,7 +32,7 @@
 
 package mitll.langtest.server;
 
-import mitll.langtest.client.LangTestDatabase;
+import mitll.langtest.client.services.LangTestDatabase;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;

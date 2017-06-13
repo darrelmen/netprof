@@ -37,8 +37,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.PopupHelper;
-import mitll.langtest.client.WavCallback;
+import mitll.langtest.client.initial.PopupHelper;
+import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
@@ -210,11 +210,14 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     final int len = base64EncodedWavFile.length();
 
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+
     AudioContext audioContext = new AudioContext(reqid,
         controller.getUser(),
-        projectStartupInfo.getProjectid(), projectStartupInfo.getLanguage(),
+        projectStartupInfo.getProjectid(),
+        projectStartupInfo.getLanguage(),
         exerciseID,
-        index, audioType);
+        index,
+        audioType);
 
     controller.getAudioService().writeAudioFile(base64EncodedWavFile,
         audioContext,

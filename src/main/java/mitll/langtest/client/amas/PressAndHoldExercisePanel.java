@@ -38,8 +38,8 @@ import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PopupHelper;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
+import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.AudioAnswerListener;
 import mitll.langtest.client.flashcard.FlashcardRecordButtonPanel;
@@ -137,7 +137,7 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
    * @param controller
    * @param qid
    * @return
-   * @see #addRecordingAndFeedbackWidgets(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, int)
+   * @see #addRecordingAndFeedbackWidgets(mitll.langtest.shared.CommonExercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, int)
    */
   private Widget getAnswerAndRecordButtonRow(int exerciseID, LangTestDatabaseAsync service,
                                              ExerciseController controller, int qid, Map<String, Collection<String>> typeToSelection) {
@@ -156,8 +156,8 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
    *
    * @param recordButton
    * @return
-   * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
-   * @see PressAndHoldExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, int)
+   * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.CommonExercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see PressAndHoldExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.CommonExercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, int)
    */
   private Panel getRecordButtonRow(Widget recordButton) {
     Panel recordButtonRow = new HorizontalPanel();
@@ -229,7 +229,7 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
    * @param instance
    * @param qid
    * @return
-   * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
+   * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.CommonExercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   private RecordButtonPanel getAnswerWidget(final int exercise, LangTestDatabaseAsync service,
                                             final ExerciseController controller, final boolean addKeyBinding,

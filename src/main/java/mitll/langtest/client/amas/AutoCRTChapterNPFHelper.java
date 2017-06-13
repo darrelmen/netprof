@@ -35,7 +35,7 @@ package mitll.langtest.client.amas;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -67,7 +67,7 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
    */
   AutoCRTChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
                           ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
-    super(controller, null);
+    super(controller);
   }
 
   /**

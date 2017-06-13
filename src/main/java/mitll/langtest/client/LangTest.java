@@ -59,6 +59,7 @@ import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.initial.*;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
@@ -567,6 +568,7 @@ public class LangTest implements
     return this;
   }
 
+/*
   @Override
   public String getInfoLine() {
     String releaseDate1 = props.getReleaseDate();
@@ -576,10 +578,13 @@ public class LangTest implements
         releaseDate + (usingWebRTC() ? " Flashless recording" : "") +
         "</font></span>";
   }
+*/
 
+/*
   private boolean usingWebRTC() {
     return FlashRecordPanelHeadless.usingWebRTC();
   }
+*/
 
   private void setupSoundManager() {
     soundManager = new SoundManagerStatic();

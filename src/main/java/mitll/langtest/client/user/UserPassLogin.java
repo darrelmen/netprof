@@ -47,11 +47,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.BrowserCheck;
+import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.StartupInfo;
 
@@ -101,7 +102,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
    * @param props
    * @param userManager
    * @param eventRegistration
-   * @see mitll.langtest.client.InitialUI#showLogin
+   * @see InitialUI#showLogin
    */
   public UserPassLogin(PropertyHandler props,
                        UserManager userManager,

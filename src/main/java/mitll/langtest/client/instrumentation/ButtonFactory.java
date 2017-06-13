@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.instrumentation;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -41,8 +40,8 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.UIObject;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
 
 import java.util.logging.Logger;

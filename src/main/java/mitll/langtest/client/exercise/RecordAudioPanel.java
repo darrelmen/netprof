@@ -113,12 +113,9 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
                           AudioType audioType,
                           String instance) {
     super(
-        // use full screen width
-        // use keyboard
         controller, showSpectrogram,
         // no gauge panel
         1.0f, 0,
-      //  exercise.getID(), // TODO : why both here??
         exercise,
         exercise.getID(), instance
     );

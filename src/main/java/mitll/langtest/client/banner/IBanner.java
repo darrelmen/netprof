@@ -2,6 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
@@ -18,6 +19,7 @@ public interface IBanner {
 
   void reflectPermissions(Collection<User.Permission> permissions);
 
+  void setVisibleChoices(boolean visible);
   void setCogVisible(boolean val);
 
   void setBrowserInfo(String v);
@@ -25,7 +27,7 @@ public interface IBanner {
   void setVisibleAdmin(boolean visibleAdmin);
 
   /**
-   * @see mitll.langtest.client.InitialUI#gotUser
+   * @see InitialUI#gotUser
    * @param name
    */
   void setUserName(String name);

@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.initial;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -38,8 +38,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -47,6 +45,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.client.banner.NewContentChooser;
@@ -56,6 +55,8 @@ import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.project.ProjectChoices;
+import mitll.langtest.client.services.LangTestDatabase;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.*;
@@ -64,6 +65,7 @@ import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 
@@ -338,25 +340,34 @@ public class InitialUI implements UILifecycle {
    * @see #getBreadcrumbs()
    */
   private void addCrumbs(Breadcrumbs crumbs) {
-    User current = userManager.getCurrent();
-    if (current != null) {
+    if (userManager.getCurrent() != null) {
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
         addBreadcrumbLevels(crumbs, startupInfo);
-      } else {
+      }
+      else {
         logger.info("no project startup info...");
       }
 
       banner.checkProjectSelected();
     }
+    else logger.warning("addCrumbs no current user");
   }
 
+  /**
+   * @param crumbs
+   * @param startupInfo
+   * @see #addCrumbs
+   */
   private void addBreadcrumbLevels(Breadcrumbs crumbs, ProjectStartupInfo startupInfo) {
     int currentProject = startupInfo.getProjectid();
     crumbs.clear();
     breadcrumbs.setVisible(true);
-    for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
+    List<SlimProject> projects = lifecycleSupport.getStartupInfo().getProjects();
+    logger.info("addBreadcrumb " + projects.size());
+    for (SlimProject project : projects) {
       if (project.hasChildren() && project.hasChild(currentProject)) {
+        logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         crumbs.add(getLangBreadcrumb(project));
         addProjectCrumb(crumbs, project.getChild(currentProject));
 /*        for (int i = 0; i < crumbs.getWidgetCount(); i++) {
@@ -364,10 +375,11 @@ public class InitialUI implements UILifecycle {
         }*/
         break;
       } else if (project.getID() == currentProject) {
+        logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         addProjectCrumb(crumbs, project);
         break;
       } else {
-        // logger.fine("getBreadcrumbs skipping project " + project);
+        logger.info("addBreadcrumbLevels skipping project " + project);
       }
     }
   }
@@ -381,11 +393,12 @@ public class InitialUI implements UILifecycle {
   private NavLink getLangBreadcrumb(SlimProject project) {
     NavLink lang = new NavLink(project.getLanguage());
     lang.addClickHandler(clickEvent -> {
-    //  logger.info("getLangBreadcrumb got click on " + project.getName());
+      logger.info("getLangBreadcrumb got click on " + project.getName());
       clearStartupInfo();
       clearContent();
       removeUntilCrumb(1);
       choices.showProject(project);
+      banner.setVisibleChoices(false);
     });
     return lang;
   }
@@ -394,23 +407,23 @@ public class InitialUI implements UILifecycle {
    * @param crumbs
    * @param project
    * @return
-   * @see #addCrumbs(Breadcrumbs)
+   * @see #addCrumbs
    */
   private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     NavLink lang = new NavLink(project.getName());
     lang.addClickHandler(clickEvent -> {
- //     logger.info("addProjectCrumb choose project again for " + project.getName());
+      logger.info("addProjectCrumb choose project again for " + project.getName());
       chooseProjectAgain();
     });
     crumbs.add(lang);
   }
 
   /**
-   * @see #addCrumbs(Breadcrumbs)
+   * @see #addCrumbs
    */
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
-      logger.info("chooseProjectAgain user --- "+userManager.getUser() + " " + userManager.getUserID());
+      logger.info("chooseProjectAgain user --- " + userManager.getUser() + " " + userManager.getUserID());
 
       userService.forgetProject(new AsyncCallback<Void>() {
         @Override
@@ -419,6 +432,7 @@ public class InitialUI implements UILifecycle {
 
         @Override
         public void onSuccess(Void aVoid) {
+          banner.setVisibleChoices(false);
           navigation.clearCurrent();
         }
       });
@@ -431,9 +445,8 @@ public class InitialUI implements UILifecycle {
 
       clearContent();
       addProjectChoices(0, null);
-    }
-    else {
-      logger.info("no user --- ");
+    } else {
+      logger.info("chooseProjectAgain no user --- ");
     }
   }
 
@@ -473,11 +486,7 @@ public class InitialUI implements UILifecycle {
 
   private void addResizeHandler() {
     final InitialUI outer = this;
-    Window.addResizeHandler(new ResizeHandler() {
-      public void onResize(ResizeEvent event) {
-        outer.onResize();
-      }
-    });
+    Window.addResizeHandler(event -> outer.onResize());
   }
 
   /**
@@ -598,13 +607,10 @@ public class InitialUI implements UILifecycle {
         logger.warning("how can navigation be null????");
       }
     }
+
     if (userID > -1) {
       banner.setCogVisible(true);
-      banner.setVisibleAdmin(
-          user.isAdmin() ||
-              // props.isAdminView() ||
-              user.getUserKind() == User.Kind.PROJECT_ADMIN ||
-              user.isCD());
+      banner.setVisibleAdmin(user.isAdmin() || user.getUserKind() == User.Kind.PROJECT_ADMIN || user.isCD());
     }
   }
 
@@ -663,15 +669,15 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see ProjectChoices#gotClickOnFlag
    * @param name
    * @return
+   * @see ProjectChoices#gotClickOnFlag
    */
   @Override
   @NotNull
   public NavLink makeBreadcrumb(String name) {
     NavLink projectCrumb = new NavLink(name);
-   // logger.info("makeBreadcrumb add " + name);
+    // logger.info("makeBreadcrumb add " + name);
     breadcrumbs.add(projectCrumb);
     breadcrumbs.setVisible(true);
     return projectCrumb;
@@ -696,8 +702,8 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see #getLangBreadcrumb
    * @param count
+   * @see #getLangBreadcrumb
    */
   private void removeUntilCrumb(int count) {
     int widgetCount = breadcrumbs.getWidgetCount();
@@ -706,7 +712,7 @@ public class InitialUI implements UILifecycle {
 
     for (int i = initial; i >= count; i--) {
       boolean remove = breadcrumbs.remove(i);
-     // logger.info("removeUntilCrumb remove at " + i + "  " + remove);
+      // logger.info("removeUntilCrumb remove at " + i + "  " + remove);
     }
   }
 
@@ -741,7 +747,7 @@ public class InitialUI implements UILifecycle {
    */
   protected void showUserPermissions(long userID) {
     lastUser = userID;
-    banner.setBrowserInfo(lifecycleSupport.getInfoLine());
+//    banner.setBrowserInfo(lifecycleSupport.getInfoLine());
     banner.reflectPermissions(lifecycleSupport.getPermissions());
   }
 

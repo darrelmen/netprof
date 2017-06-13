@@ -33,6 +33,7 @@
 package mitll.langtest.client.flashcard;
 
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -88,7 +89,7 @@ public class ControlState {
 
   /**
    * @param storage
-   * @see StatsFlashcardFactory#StatsFlashcardFactory(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, String, mitll.langtest.shared.custom.UserList)
+   * @see StatsFlashcardFactory#StatsFlashcardFactory(LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, String, mitll.langtest.shared.custom.UserList)
    */
   public void setStorage(KeyStorage storage) {
     this.storage = storage;

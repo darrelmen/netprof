@@ -58,7 +58,7 @@ import java.util.logging.Logger;
  * Time: 6:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WaveformExercisePanel<L extends CommonShell, T extends CommonExercise> extends ExercisePanel<L,T> {
+public class WaveformExercisePanel<L extends CommonShell, T extends CommonExercise> extends ExercisePanel<L, T> {
   private final Logger logger = Logger.getLogger("WaveformExercisePanel");
 
   public static final String CONTEXT = "context=";
@@ -80,11 +80,11 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
   public WaveformExercisePanel(T e,
-                               ExerciseController controller, ListInterface<L,T> exerciseList,
-                               boolean doNormalRecording, String instance) {
-    super(e, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance);
+                               ExerciseController controller, ListInterface<L, T> exerciseList,
+                               boolean doNormalRecording,
+                               String instance) {
+    super(e, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance, doNormalRecording);
     getElement().setId("WaveformExercisePanel");
-
 
   }
 
@@ -96,6 +96,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
   /**
    * Make sure we disable the other companion panel.
+   *
    * @param v
    */
   public void setBusy(boolean v) {
@@ -105,8 +106,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     for (RecordAudioPanel ap : audioPanels) {
       if (!ap.isRecording()) {
         ap.setEnabled(!v);
-      }
-      else {
+      } else {
         ap.setEnabled(v);
       }
     }
@@ -128,18 +128,18 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   }
 
   private boolean isNormalRecord() {
-    return !isExampleRecord();
+    return doNormalRecording;
   }
-
-  protected boolean isExampleRecord() {
-    return message.equals(EXAMPLE_RECORD);
+  private boolean isExampleRecord() {
+    return !doNormalRecording;
   }
 
   /**
    * TODO : support recording audio for multiple context sentences...?
-   * @see #getQuestionContent
+   *
    * @param e
    * @return
+   * @see #getQuestionContent
    */
   @Override
   protected String getExerciseContent(T e) {
@@ -155,12 +155,11 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    * @param controller
    * @param index
    * @return
-   * @seex ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, ListInterface)
+   * @seex ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.services.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, ListInterface)
    */
   protected Widget getAnswerWidget(T exercise, ExerciseController controller, final int index) {
     audioPanels = new ArrayList<>();
     Panel vp = new VerticalPanel();
-
 
     // add normal speed recording widget
     if (isNormalRecord()) {
@@ -191,16 +190,16 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   }
 
   /**
-   * @see ExercisePanel#getAnswerWidget(CommonShell, ExerciseController, int)
    * @param exercise
    * @param controller
    * @param index
    * @param vp
    * @param audioType
    * @return
+   * @see ExercisePanel#getAnswerWidget(CommonShell, ExerciseController, int)
    */
   private VerticalPanel addRecordAudioPanelNoCaption(T exercise,
-                                            ExerciseController controller, int index, Panel vp, AudioType audioType) {
+                                                     ExerciseController controller, int index, Panel vp, AudioType audioType) {
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, index, false, audioType, instance);
     audioPanels.add(fast);
     vp.add(fast);
@@ -236,14 +235,14 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
     //completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
-   // logger.info("Not setting state on " +completedExercise.getOldID());
+     logger.info("postAnswers " +completedExercise.getID());
     showRecordedState(completedExercise);
     exerciseList.loadNextExercise(completedExercise);
   }
 
   protected void showRecordedState(HasID completedExercise) {
     int id = completedExercise.getID();
-//    logger.info("Not setting state on " + id);
+    logger.info("showRecordedState setting state on " + id);
 
     exerciseList.setState(id, STATE.RECORDED);
     //L l = exerciseList.byID(id);

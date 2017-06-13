@@ -51,7 +51,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.exercise.CommentBox;

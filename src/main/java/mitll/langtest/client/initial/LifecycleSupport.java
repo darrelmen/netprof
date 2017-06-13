@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.initial;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -44,7 +44,7 @@ import java.util.Collection;
  * MUST BE PUBLIC - for AMASInitialUI to access.
  */
 public interface LifecycleSupport extends EventRegistration {
-  String getInfoLine();
+ // String getInfoLine();
 
   void recordingModeSelect();
 
