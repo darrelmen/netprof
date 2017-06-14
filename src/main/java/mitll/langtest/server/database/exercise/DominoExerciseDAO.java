@@ -4,6 +4,8 @@ import mitll.hlt.domino.shared.model.SimpleHeadDocumentRevision;
 import mitll.hlt.domino.shared.model.document.IDocumentComponent;
 import mitll.hlt.domino.shared.model.document.IDocumentComposite;
 import mitll.hlt.domino.shared.model.document.IMetadataField;
+import mitll.hlt.domino.shared.model.document.SampleSentence;
+import mitll.hlt.domino.shared.model.document.VocabularyItem;
 import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
 import mitll.hlt.domino.shared.model.user.UserDescriptor;
 import mitll.hlt.json.JSONSerializer;
