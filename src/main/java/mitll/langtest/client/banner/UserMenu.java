@@ -8,7 +8,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
-import mitll.langtest.client.*;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.download.DownloadHelper;
@@ -23,8 +23,6 @@ import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.services.LangTestDatabase;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.client.services.UserService;
-import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.client.user.UserTable;
@@ -52,7 +50,7 @@ public class UserMenu {
   private final PropertyHandler props;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private final UserServiceAsync userService = GWT.create(UserService.class);
+ // private final UserServiceAsync userService = GWT.create(UserService.class);
 
   private static final String LOG_OUT = "Sign Out";
   private final UILifecycle uiLifecycle;
@@ -133,7 +131,7 @@ public class UserMenu {
         }
 
         public void onSuccess() {
-          new UserTable(props, userManager.isAdmin()).showUsers(userService);
+          new UserTable(props, userManager.isAdmin()).showUsers(controller.getUserService());
         }
       });
     }
@@ -162,7 +160,7 @@ public class UserMenu {
         }
 
         public void onSuccess() {
-          new ChangePasswordView(userManager.getCurrent(), false, userState, userService).showModal();
+          new ChangePasswordView(userManager.getCurrent(), false, userState, controller.getUserService()).showModal();
         }
       });
     }

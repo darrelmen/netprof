@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -50,8 +49,6 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.services.ListService;
-import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserManager;
@@ -65,7 +62,6 @@ import java.util.logging.Logger;
  */
 public class CreateListDialog extends BasicDialog {
   private final Logger logger = Logger.getLogger("CreateListDialog");
-//  private static final String PRACTICE = "Practice";
 
   private static final String CLASS = "Course Info (optional)";
   private static final String CREATE_LIST = "Create List";
@@ -76,9 +72,8 @@ public class CreateListDialog extends BasicDialog {
 
   private final ListManager navigation;
   //  private final LangTestDatabaseAsync service;
-  private final ListServiceAsync listService = GWT.create(ListService.class);
+  //private final ListServiceAsync listService = GWT.create(ListService.class);
 
- // private final UserManager userManager;
   private final ExerciseController controller;
 
   public CreateListDialog(ListManager navigation,
@@ -216,7 +211,7 @@ public class CreateListDialog extends BasicDialog {
    // int user = userManager.getUser();
     final String safeText = titleBox.getSafeText();
 
-    listService.addUserList(
+    controller.getListService().addUserList(
         safeText,
         sanitize(area.getText()),
         classBox.getSafeText(), isPublic, new AsyncCallback<Long>() {

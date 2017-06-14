@@ -78,7 +78,7 @@ public class ProjectChoices {
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private final UserServiceAsync userService = GWT.create(UserService.class);
+  private final UserServiceAsync userService;// = GWT.create(UserService.class);
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
   private Panel contentRow;
@@ -95,6 +95,7 @@ public class ProjectChoices {
     this.controller = langTest;
     this.userNotification = langTest;
     this.uiLifecycle = uiLifecycle;
+    userService = langTest.getUserService();
   }
 
   /**
@@ -652,7 +653,7 @@ public class ProjectChoices {
    * @see #setProjectForUser
    */
   private void reallySetTheProject(int projectid) {
-    //logger.info("setProjectForUser set project for " + projectid);
+    logger.info("setProjectForUser set project for " + projectid);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override

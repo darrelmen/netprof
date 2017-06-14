@@ -141,7 +141,7 @@ public class ProjectEditForm extends UserDialog {
     info.setFirstType(unit.getSafeText());
     info.setSecondType(chapter.getSafeText());
 
-    //  logger.info("info now " + info);
+    logger.info("updateProject now " + info);
 
     projectServiceAsync.update(info, new AsyncCallback<Boolean>() {
       @Override

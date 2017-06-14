@@ -182,17 +182,21 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
-            long now = System.currentTimeMillis();
-            logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
-
-            logMessage("failed to post audio for " + user + " exercise " + getExerciseID());
-            showPopup(AudioAnswer.Validity.INVALID.getPrompt());
+            onPostFailure(then, user);
           }
 
           public void onSuccess(AudioAnswer result) {
             onPostSuccess(result, then);
           }
         });
+  }
+
+  private void onPostFailure(long then, int user) {
+    long now = System.currentTimeMillis();
+    logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
+
+    logMessage("failed to post audio for " + user + " exercise " + getExerciseID());
+    showPopup(AudioAnswer.Validity.INVALID.getPrompt());
   }
 
   private void onPostSuccess(AudioAnswer result, long then) {

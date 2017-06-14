@@ -590,41 +590,47 @@ public class ProjectManagement implements IProjectManagement {
 
       if (project.getStatus() == ProjectStatus.RETIRED && !userWhere.isAdmin()) {
         logger.info("setStartupInfo project is retired - so kicking the user back to project choice screen.");
+        userWhere.setStartupInfo(null);
       } else {
-        configureProject(project, true, false);
-
-        SlickProject project1 = project.getProject();
-        List<String> typeOrder = project.getTypeOrder();
-
-        ISection<CommonExercise> sectionHelper = project.getSectionHelper();
-
-        String language = project1.language();
-
-        for (String type : typeOrder) {
-          if (type.isEmpty()) logger.error("huh? type order has blank?? " + type);
-        }
-
-        ProjectStartupInfo startupInfo = new ProjectStartupInfo(
-            serverProps.getProperties(),
-            typeOrder,
-            sectionHelper.getSectionNodesForTypes(),
-            project1.id(),
-            language,
-            toEnum(language),
-            LTSFactory.getLocale(language),
-            hasModel(project1),
-            sectionHelper.getTypeToDistinct(),
-            sectionHelper.getRootTypes(), sectionHelper.getParentToChildTypes());
-
-        logger.info("setStartupInfo : For" +
-            "\n\tUser      " + userWhere +
-            "\n\tprojid    " + projid +
-            "\n\ttypeOrder " + typeOrder +
-            "\n\tstartup   " + startupInfo);
-
-        userWhere.setStartupInfo(startupInfo);
+        setStartupInfoOnUser(userWhere, projid, project);
       }
     }
+  }
+
+  private void setStartupInfoOnUser(User userWhere, int projid, Project project) {
+    configureProject(project, true, false);
+
+    SlickProject project1 = project.getProject();
+    List<String> typeOrder = project.getTypeOrder();
+
+    ISection<CommonExercise> sectionHelper = project.getSectionHelper();
+
+    String language = project1.language();
+
+    for (String type : typeOrder) {
+      if (type.isEmpty()) logger.error("setStartupInfo huh? type order has blank?? " + type);
+    }
+
+    ProjectStartupInfo startupInfo = new ProjectStartupInfo(
+        serverProps.getProperties(),
+        typeOrder,
+        sectionHelper.getSectionNodesForTypes(),
+        project1.id(),
+        language,
+        toEnum(language),
+        LTSFactory.getLocale(language),
+        hasModel(project1),
+        sectionHelper.getTypeToDistinct(),
+        sectionHelper.getRootTypes(),
+        sectionHelper.getParentToChildTypes());
+
+    logger.info("setStartupInfo : For" +
+        "\n\tUser      " + userWhere +
+        "\n\tprojid    " + projid +
+        "\n\ttypeOrder " + typeOrder +
+        "\n\tstartup   " + startupInfo);
+
+    userWhere.setStartupInfo(startupInfo);
   }
 
   private Language toEnum(String language) {

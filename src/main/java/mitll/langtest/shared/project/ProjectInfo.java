@@ -33,6 +33,7 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.HasID;
 
@@ -50,7 +51,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
 
   private long created = 0;
 
-  private String host = "hydra-dev";
+  private String host = Project.WEBSERVICE_HOST_DEFAULT;
   private int port = -1;
   private String modelsDir = "";
   private String firstType = "";
@@ -140,7 +141,9 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.status = status;
   }
 
-  public int getPort() {   return port;  }
+  public int getPort() {
+    return port;
+  }
 
   public void setPort(int port) {
     this.port = port;
@@ -198,7 +201,9 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   }
 */
 
-  public void setLanguage(String language) {  this.language = language;  }
+  public void setLanguage(String language) {
+    this.language = language;
+  }
 
   public void setFirstType(String firstType) {
     this.firstType = firstType;
@@ -217,6 +222,6 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   }
 
   public String toString() {
-    return getName() + " " + getStatus() + " lang " + language + " types: " + firstType + ", " + secondType;
+    return getName() + " " + getStatus() + " lang " + language + "@" + host + ":" + port + " types: " + firstType + ", " + secondType;
   }
 }

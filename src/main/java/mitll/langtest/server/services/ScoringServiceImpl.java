@@ -485,6 +485,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return new PrecalcScores(serverProps, cachedResult, usePhoneToDisplay || serverProps.usePhoneToDisplay());
   }
 
+  /**
+   * Doesn't really need to be on the scoring service...
+   * @param resultID
+   * @param roundTrip
+   */
   @Override
   public void addRoundTrip(int resultID, int roundTrip) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);

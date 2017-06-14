@@ -148,7 +148,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       logger.error("update : didn't update " + projectInfo + " for current " + currentProject);
     }
 
-    addOrUpdateProperty(projid, WEBSERVICE_HOST, WEBSERVICE_HOST_DEFAULT);
+    addOrUpdateProperty(projid, WEBSERVICE_HOST, projectInfo.getHost());
     addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
     addOrUpdateProperty(projid, MODELS_DIR, projectInfo.getModelsDir());
     return didChange;

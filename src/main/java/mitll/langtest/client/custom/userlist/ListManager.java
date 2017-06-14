@@ -38,10 +38,11 @@ import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -56,8 +57,6 @@ import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.services.ListService;
-import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -88,7 +87,7 @@ public class ListManager implements RequiresResize {
   private ScrollPanel listScrollPanel;
 
   private final ExerciseController controller;
-  private final ListServiceAsync listService = GWT.create(ListService.class);
+  //private final controller.getListService()Async controller.getListService() = GWT.create(controller.getListService().class);
 
   private final UserManager userManager;
   private TabAndContent yourStuff;
@@ -101,7 +100,7 @@ public class ListManager implements RequiresResize {
   private final ReviewItemHelper reviewItem;
   private final EditItem editItem;
 
-  private static final String PRACTICE = "Audio Vocabulary Practice";
+//  private static final String PRACTICE = "Audio Vocabulary Practice";
   private static final String REVIEW = "review";
   private static final String COMMENT = "comment";
   private static final String ATTENTION = "attention";
@@ -364,14 +363,14 @@ public class ListManager implements RequiresResize {
 
     if (getAll) {
       logger.info("viewLessons----> getAllPredef optional " + optionalExercise);
-      listService.getUserListsForText("",
+      controller.getListService().getUserListsForText("",
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + "_All",
               false, true,
               userManager, onlyMine, optionalExercise));
     } else {
       logger.info("viewLessons for user #" + userManager.getUser());
-      listService.getListsForUser(onlyMine,
+      controller.getListService().getListsForUser(onlyMine,
           onlyVisited,
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + (onlyMine ? "_Mine" : "_Others"),
@@ -393,7 +392,7 @@ public class ListManager implements RequiresResize {
 
     long then = System.currentTimeMillis();
 //    logger.info("------> viewReview : reviewLessons for " + userManager.getUser());
-    listService.getReviewLists(new AsyncCallback<List<UserList<CommonShell>>>() {
+    controller.getListService().getReviewLists(new AsyncCallback<List<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -620,7 +619,7 @@ public class ListManager implements RequiresResize {
   }
 
   private void finishedEditing(final UserList ul, final DivWidget container, TextBox editableHeading) {
-    listService.updateName(ul.getID(), editableHeading.getText(), new AsyncCallback<Void>() {
+    controller.getListService().updateName(ul.getID(), editableHeading.getText(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
 
@@ -667,7 +666,7 @@ public class ListManager implements RequiresResize {
    */
   private void addVisitor(UserList ul) {
     if (ul.getUserID() != controller.getUser()) {
-      listService.addVisitor(ul.getID(), controller.getUser(), new AsyncCallback<UserList>() {
+      controller.getListService().addVisitor(ul.getID(), controller.getUser(), new AsyncCallback<UserList>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -873,7 +872,7 @@ public class ListManager implements RequiresResize {
     controller.logEvent(delete, "Button", getListID(ul), "Delete");
     final int uniqueID = ul.getID();
 
-    listService.deleteList(uniqueID, new AsyncCallback<Boolean>() {
+    controller.getListService().deleteList(uniqueID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("delete list call failed?");
@@ -897,7 +896,7 @@ public class ListManager implements RequiresResize {
    * @see UserListCallback#getIsPublic
    */
   void setPublic(int uniqueID, boolean isPublic) {
-    listService.setPublicOnList(uniqueID, isPublic, new AsyncCallback<Void>() {
+    controller.getListService().setPublicOnList(uniqueID, isPublic, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -954,7 +953,7 @@ public class ListManager implements RequiresResize {
     anImport.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        listService.reallyCreateNewItems(ul.getID(), sanitize(w.getText()),
+        controller.getListService().reallyCreateNewItems(ul.getID(), sanitize(w.getText()),
             new AsyncCallback<Collection<CommonExercise>>() {
               @Override
               public void onFailure(Throwable caught) {

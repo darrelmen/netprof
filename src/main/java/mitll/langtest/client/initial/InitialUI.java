@@ -105,7 +105,7 @@ public class InitialUI implements UILifecycle {
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private final UserServiceAsync userService = GWT.create(UserService.class);
+  //private final UserServiceAsync userService;// = GWT.create(UserService.class);
 
   private final IBanner banner;
 
@@ -212,7 +212,7 @@ public class InitialUI implements UILifecycle {
     breadcrumbs.clear();
     breadcrumbs.setVisible(false);
 
-    userService.logout(userManager.getUserID(), new AsyncCallback<Void>() {
+    controller.getUserService().logout(userManager.getUserID(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
       }
@@ -346,7 +346,7 @@ public class InitialUI implements UILifecycle {
         addBreadcrumbLevels(crumbs, startupInfo);
       }
       else {
-        logger.info("no project startup info...");
+        logger.info("addCrumbs no project startup info yet for " + userManager.getCurrent());
       }
 
       banner.checkProjectSelected();
@@ -425,7 +425,7 @@ public class InitialUI implements UILifecycle {
     if (userManager.hasUser()) {
       logger.info("chooseProjectAgain user --- " + userManager.getUser() + " " + userManager.getUserID());
 
-      userService.forgetProject(new AsyncCallback<Void>() {
+      controller.getUserService().forgetProject(new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable throwable) {
         }

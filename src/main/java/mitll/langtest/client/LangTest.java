@@ -64,6 +64,7 @@ import mitll.langtest.client.initial.*;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
+import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButton;
@@ -79,6 +80,7 @@ import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.user.User;
@@ -240,9 +242,9 @@ public class LangTest implements
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
-  private final AudioServiceAsync audioService = GWT.create(AudioService.class);
+  private final AudioServiceAsync defaultAudioService = GWT.create(AudioService.class);
 
-  private final ScoringServiceAsync scoringServiceAsync = GWT.create(ScoringService.class);
+  private final ScoringServiceAsync defaultScoringServiceAsync = GWT.create(ScoringService.class);
 
   // services
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
@@ -271,6 +273,9 @@ public class LangTest implements
   public static EventBus EVENT_BUS = GWT.create(SimpleEventBus.class);
 
   private KeyStorage storage;
+
+  Map<Integer, AudioServiceAsync> projectToAudioService;
+  Map<Integer, ScoringServiceAsync> projectToScoringService;
 
   /**
    * This gets called first.
@@ -331,8 +336,8 @@ public class LangTest implements
   /**
    * after we change state
    *
-   * @seex ProjectOps#refreshStartupInfo
    * @param reloadWindow
+   * @see ProjectEditForm#updateProject
    */
   public void refreshStartupInfo(boolean reloadWindow) {
     service.getStartupInfo(new AsyncCallback<StartupInfo>() {
@@ -356,31 +361,89 @@ public class LangTest implements
     props = new PropertyHandler(startupInfo.getProperties());
     if (reloadWindow) initialUI.chooseProjectAgain();
 
-
-    createHostSpecificServices(startupInfo);
+    projectToAudioService = createHostSpecificServices(startupInfo);
+    projectToScoringService = createHostSpecificServicesScoring(startupInfo);
   }
 
-  private void createHostSpecificServices(StartupInfo startupInfo) {
-    Map<Integer,AudioServiceAsync> projectToAudioService = new HashMap<>();
-    Map<String,AudioServiceAsync> hostToService = new HashMap<>();
-    startupInfo.getProjects().stream().forEach(slimProject -> {
-      String host = slimProject.getHost();
-      boolean isDefault = false;
-      if (host.equals("127.0.0.1")) isDefault =true;
-      AudioServiceAsync audioServiceAsync = hostToService.get(host);
-      if (audioServiceAsync == null) {
-         AudioServiceAsync audioService = GWT.create(AudioService.class);
+  private Map<Integer, AudioServiceAsync> createHostSpecificServices(StartupInfo startupInfo) {
+    Map<Integer, AudioServiceAsync> projectToAudioService = new HashMap<>();
+    Map<String, AudioServiceAsync> hostToService = new HashMap<>();
 
-         if (!isDefault) {
-           // String moduleBaseURL = GWT.getModuleBaseURL();
-           String moduleBaseURL = ((ServiceDefTarget) audioService).getServiceEntryPoint();
-           ((ServiceDefTarget) audioService).setServiceEntryPoint(moduleBaseURL + "_" + host);
-           logger.info("audio service " +
-               "now at " +((ServiceDefTarget) audioService).getServiceEntryPoint());
-           hostToService.put(host, audioService);
-         }
+    // first figure out unique set of services...
+
+    List<SlimProject> projects = startupInfo.getAllProjects();
+    projects.forEach(slimProject -> {
+      String host = slimProject.getHost();
+      AudioServiceAsync audioServiceAsync = hostToService.get(host);
+
+      if (audioServiceAsync == null) {
+        AudioServiceAsync audioService = GWT.create(AudioService.class);
+        adjustEntryPoint(host, (ServiceDefTarget) audioService);
+        hostToService.put(host, audioService);
       }
     });
+
+    logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
+
+    // then map project to service
+    projects.forEach(slimProject -> {
+      String host = slimProject.getHost();
+      AudioServiceAsync audioServiceAsync = hostToService.get(host);
+      if (audioServiceAsync == null) logger.warning("createHostSpecificServices no audio service for " + host + " project " + slimProject);
+      projectToAudioService.put(slimProject.getID(), audioServiceAsync);
+    });
+
+
+    logger.info("createHostSpecificServices for these projects " + projectToAudioService.keySet());
+
+    return projectToAudioService;
+  }
+
+  private Map<Integer, ScoringServiceAsync> createHostSpecificServicesScoring(StartupInfo startupInfo) {
+    Map<Integer, ScoringServiceAsync> projectToAudioService = new HashMap<>();
+    Map<String, ScoringServiceAsync> hostToService = new HashMap<>();
+
+    // first figure out unique set of services...
+
+    List<SlimProject> projects = startupInfo.getAllProjects();
+
+    projects.forEach(slimProject -> {
+      String host = slimProject.getHost();
+      ScoringServiceAsync ScoringServiceAsync = hostToService.get(host);
+
+      if (ScoringServiceAsync == null) {
+        ScoringServiceAsync audioService = GWT.create(ScoringService.class);
+        adjustEntryPoint(host, (ServiceDefTarget) audioService);
+        hostToService.put(host, audioService);
+      }
+    });
+
+    logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
+
+    // then map project to service
+    projects.forEach(slimProject -> {
+      String host = slimProject.getHost();
+      ScoringServiceAsync ScoringServiceAsync = hostToService.get(host);
+      if (ScoringServiceAsync == null) logger.warning("no audio service for " + host + " project " + slimProject);
+      projectToAudioService.put(slimProject.getID(), ScoringServiceAsync);
+    });
+
+    return projectToAudioService;
+  }
+
+  private void adjustEntryPoint(String host, ServiceDefTarget audioService) {
+    if (!isDefault(host)) {
+      String moduleBaseURL = audioService.getServiceEntryPoint();
+      audioService.setServiceEntryPoint(moduleBaseURL + "/" + host);
+      logger.info("createHostSpecificServices service " +
+          "now at " + audioService.getServiceEntryPoint());
+    }
+  }
+
+  private boolean isDefault(String host) {
+    boolean isDefault = false;
+    if (host.equals("127.0.0.1")) isDefault = true;
+    return isDefault;
   }
 
   /**
@@ -481,7 +544,7 @@ public class LangTest implements
       client.onSuccess(ifPresent);
     } else {
       ImageOptions imageOptions = new ImageOptions(toUse, height, useBkgColorForRef());
-      audioService.getImageForAudioFile(reqid, path, type, imageOptions, exerciseID, new AsyncCallback<ImageResponse>() {
+      getAudioService().getImageForAudioFile(reqid, path, type, imageOptions, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
        /*   if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
@@ -722,12 +785,6 @@ public class LangTest implements
     flashRecordPanel.hide2(); // must be a separate call!
   }
 
-  @Override
-  public ProjectStartupInfo getProjectStartupInfo() {
-    //  logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
-    return projectStartupInfo;
-  }
-
   public boolean hasModel() {
     return projectStartupInfo != null && getProjectStartupInfo().isHasModel();
   }
@@ -739,6 +796,25 @@ public class LangTest implements
 
   public Collection<String> getTypeOrder() {
     return projectStartupInfo == null ? Collections.emptyList() : projectStartupInfo.getTypeOrder();
+  }
+
+  @Override
+  public ProjectStartupInfo getProjectStartupInfo() {
+    //  logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
+    return projectStartupInfo;
+  }
+
+  /**
+   * So we can either get project info from the user itself, or it can be changed later when
+   * the user changes language/project.
+   *
+   * @param user
+   * @see LangTest#gotUser
+   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
+   */
+  public void setProjectStartupInfo(User user) {
+    projectStartupInfo = user.getStartupInfo();
+    logger.info("setProjectStartupInfo project startup " + projectStartupInfo);
   }
 
   /**
@@ -755,19 +831,6 @@ public class LangTest implements
     setProjectStartupInfo(user);
     //  logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
-  }
-
-  /**
-   * So we can either get project info from the user itself, or it can be changed later when
-   * the user changes language/project.
-   *
-   * @param user
-   * @see LangTest#gotUser
-   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
-   */
-  public void setProjectStartupInfo(User user) {
-    projectStartupInfo = user.getStartupInfo();
-//    logger.info("project startup " + projectStartupInfo);
   }
 
   /**
@@ -913,7 +976,8 @@ public class LangTest implements
     return props.isBkgColorForRef();
   }
 
-  public int getRecordTimeout() {    return props.getRecordTimeout();
+  public int getRecordTimeout() {
+    return props.getRecordTimeout();
   }
 
   public boolean isLogClientMessages() {
@@ -934,6 +998,7 @@ public class LangTest implements
   /**
    * These two services are special - they depend on which project/language is living on
    * which hydra host (hydra1 or hydra2 or ...)
+   *
    * @return
    */
   public AudioServiceAsync getAudioService() {
@@ -941,7 +1006,9 @@ public class LangTest implements
     if (projectStartupInfo == null) {
       logger.warning("\n\n\ngetAudioService has no project yet...");
     }
-    return audioService;
+    AudioServiceAsync audioServiceAsync = projectStartupInfo == null ? defaultAudioService : projectToAudioService.get(projectStartupInfo.getProjectid());
+    if (audioServiceAsync == null) logger.warning("getAudioService no audio service for " + projectStartupInfo);
+    return audioServiceAsync == null ? defaultAudioService : audioServiceAsync;
   }
 
   public ScoringServiceAsync getScoringService() {
@@ -949,9 +1016,10 @@ public class LangTest implements
     if (projectStartupInfo == null) {
       logger.warning("getScoringService has no project yet...");
     }
-    return scoringServiceAsync;
+    ScoringServiceAsync audioServiceAsync = projectStartupInfo == null ? defaultScoringServiceAsync : projectToScoringService.get(projectStartupInfo.getProjectid());
+    if (audioServiceAsync == null) logger.warning("getScoringService no audio service for " + projectStartupInfo);
+    return audioServiceAsync == null ? defaultScoringServiceAsync : audioServiceAsync;
   }
-
 
 
   public LangTestDatabaseAsync getService() {

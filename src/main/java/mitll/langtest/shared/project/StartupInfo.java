@@ -36,6 +36,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.project.SlimProject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,7 @@ public class StartupInfo implements IsSerializable {
   public Set<String> getKnownHydraHosts() {
     return projects.stream().map(ProjectInfo::getHost).collect(Collectors.toSet());
   }
+
   /**
    * @param properties
    * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo
@@ -84,8 +86,21 @@ public class StartupInfo implements IsSerializable {
     return projects;
   }
 
+  public List<SlimProject> getAllProjects() {
+    List<SlimProject> all = new ArrayList<>();
+    projects.forEach(slimProject -> {
+      if (slimProject.hasChildren()) {
+        all.addAll(slimProject.getChildren());
+      } else {
+        all.add(slimProject);
+      }
+    });
+    return all;
+  }
+
   /**
    * If the app doesn't start properly, what to show
+   *
    * @return
    */
   public String getMessage() {

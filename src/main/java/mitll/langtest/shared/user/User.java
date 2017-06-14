@@ -377,6 +377,10 @@ public class User extends MiniUser {
     this.startupInfo = startupInfo;
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#setProjectStartupInfo
+   * @return
+   */
   public ProjectStartupInfo getStartupInfo() {
     return startupInfo;
   }

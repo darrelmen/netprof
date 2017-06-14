@@ -48,7 +48,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
   private final EditItem editItem;
   private final UserList<CommonShell> list;
-  private final ListServiceAsync listService = GWT.create(ListService.class);
+  //private final ListServiceAsync listService = GWT.create(ListService.class);
   private  SearchTypeahead searchTypeahead;
   private TextBox quickAddText;
   private HTML message;
@@ -186,7 +186,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
         enableButton(add);
       } else {
         message.setText("");
-        listService.addItemToUserList(list.getID(), searchTypeahead.getCurrentExercise().getID(), new AsyncCallback<Void>() {
+        controller.getListService().addItemToUserList(list.getID(), searchTypeahead.getCurrentExercise().getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
             enableButton(add);
@@ -224,7 +224,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 /*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
         " before adding/changing " + newUserExercise + " -> " + result);*/
         if (result) {
-          listService.newExercise(
+          controller.getListService().newExercise(
               list.getID(),
               makeNewExercise(safeText),
               new AsyncCallback<CommonExercise>() {
@@ -330,7 +330,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
                           final ReloadableContainer learnContainer,
                           final EditableExerciseList editableExerciseList,
                           Button button) {
-    listService.deleteItemFromList(list.getID(), exid, new AsyncCallback<Boolean>() {
+    controller.getListService().deleteItemFromList(list.getID(), exid, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         enableButton();
@@ -349,9 +349,9 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
           logger.warning("deleteItem huh? didn't remove the item " + exid + " from " + list.getID() +
               " now " + list.getExercises().size());
         }
-        if (learnContainer != null && learnContainer.getReloadable() != null) {
-          learnContainer.getReloadable().redraw();   // TODO : or reload???
-        }
+//        if (learnContainer != null && learnContainer.getReloadable() != null) {
+//          learnContainer.getReloadable().redraw();   // TODO : or reload???
+//        }
         logger.warning("deleteItem list size is " + exerciseList.getSize());
         editableExerciseList.enableRemove(exerciseList.getSize() > 0);
       }

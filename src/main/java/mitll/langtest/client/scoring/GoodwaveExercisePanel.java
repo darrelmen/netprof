@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
@@ -44,15 +43,13 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.services.ListService;
-import mitll.langtest.client.services.ListServiceAsync;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
@@ -108,9 +105,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   protected final T exercise;
   protected final ExerciseController controller;
 
-  protected final ListServiceAsync listService = GWT.create(ListService.class);
+//  protected final ListServiceAsync listService = GWT.create(ListService.class);
 
-  private AudioPanel contentAudio, answerAudio;
+ // private AudioPanel contentAudio, answerAudio;
+  private AudioPanel answerAudio;
   protected final NavigationHelper navigationHelper;
   //  private final float screenPortion;
 //  protected final String instance;
@@ -268,10 +266,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
   public void onResize() {
     // logger.info("got onResize for" + instance);
-    if (contentAudio != null) {
-      //  logger.info("got onResize  contentAudio for" + instance);
-      contentAudio.onResize();
-    }
+//    if (contentAudio != null) {
+//      //  logger.info("got onResize  contentAudio for" + instance);
+//      contentAudio.onResize();
+//    }
     if (answerAudio != null) {
       //   logger.info("got onResize answerAudio for" + instance);
       answerAudio.onResize();
