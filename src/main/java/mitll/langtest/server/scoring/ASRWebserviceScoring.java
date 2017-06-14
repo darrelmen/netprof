@@ -59,6 +59,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
+
 /**
  * Does ASR scoring using hydra.
  * <p>
@@ -138,8 +140,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return project.getWebservicePort();
   }
 
+  /**
+   * This is always localhost, since we can't really run on a separate host - we have to be able to
+   * read from the audio file, which for now must be local.
+   *
+   * @return
+   */
   private String getWebserviceIP() {
-    return project.getWebserviceHost();
+    return WEBSERVICE_HOST_DEFAULT;//project.getWebserviceHost();
   }
 
   public void setAvailable() {

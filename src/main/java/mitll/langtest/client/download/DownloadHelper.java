@@ -54,44 +54,46 @@ import mitll.langtest.client.list.SelectionState;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.scoring.DownloadContainer.DOWNLOAD_AUDIO;
+import static mitll.langtest.client.scoring.DownloadContainer.getDownloadAudio;
+
 public class DownloadHelper {
   private final Logger logger = Logger.getLogger("DownloadHelper");
-  private static final String DOWNLOAD_AUDIO = "downloadAudio";
-  private HistoryExerciseList exerciseList;
 
   private SelectionState selectionState;
   private Collection<String> typeOrder;
 
-  public DownloadHelper() {}
+  public DownloadHelper() {
+  }
+
   public DownloadHelper(HistoryExerciseList exerciseList) {
-    this.exerciseList = exerciseList;
     selectionState = exerciseList.getSelectionState();
   }
 
   /**
    * @return
-   * @see mitll.langtest.client.list.SimpleSelectExerciseList#getBottomRow
+   * @seex mitll.langtest.client.list.SimpleSelectExerciseList#getBottomRow
    */
-  public Panel getDownloadButton() {
+/*  public Panel getDownloadButton() {
     Button download = new Button("Download", IconType.DOWNLOAD);
     download.setType(ButtonType.PRIMARY);
     selectionState = exerciseList.getSelectionState();
     download.addClickHandler(clickEvent -> showDialog());
 
     return download;
-  }
+  }*/
 
   /**
    * @param selectionState
-   * @see mitll.langtest.client.list.FacetExerciseList#showSelectionState
+   * @see mitll.langtest.client.list.FacetExerciseList#restoreListBoxState
    */
   public void updateDownloadLinks(SelectionState selectionState, Collection<String> typeOrder) {
     this.selectionState = selectionState;
     this.typeOrder = typeOrder;
   }
 
-  public void downloadContext() {
-    String urlForDownload = toDominoUrl(DOWNLOAD_AUDIO) + getURL(DOWNLOAD_AUDIO, new HashMap<>()) + "&allcontext=true";
+  public void downloadContext(String host) {
+    String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, new HashMap<>()) + "&allcontext=true";
     new DownloadIFrame(urlForDownload);
   }
 
@@ -99,7 +101,7 @@ public class DownloadHelper {
   private Heading status2 = new Heading(4, "");
   private Heading status3 = new Heading(4, "");
 
-  public void showDialog() {
+  public void showDialog(String host) {
     isMale = false;
     isContext = false;
     isRegular = true;
@@ -147,14 +149,14 @@ public class DownloadHelper {
 
     closeButton = new DialogHelper(true).show(
         title,
-       Collections.emptyList(),
+        Collections.emptyList(),
         container,
         "Download",
         "Cancel",
         new DialogHelper.CloseListener() {
           @Override
           public void gotYes() {
-            String urlForDownload = toDominoUrl(DOWNLOAD_AUDIO) + getURL(DOWNLOAD_AUDIO, selectionState.getTypeToSection());
+            String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, selectionState.getTypeToSection());
             new DownloadIFrame(urlForDownload);
           }
 
@@ -164,7 +166,7 @@ public class DownloadHelper {
           }
         }, 550);
     closeButton.setType(ButtonType.SUCCESS);
-  //  closeButton.setEnabled(selectionState.isEmpty());
+    //  closeButton.setEnabled(selectionState.isEmpty());
     closeButton.setEnabled(empty);
   }
 
@@ -300,7 +302,7 @@ public class DownloadHelper {
   private final Image rabbit = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32.png"));
   private final Image rabbitSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32_selected.png"));
 
-//  private DivWidget getGenderChoices(boolean selectFirst) {
+  //  private DivWidget getGenderChoices(boolean selectFirst) {
   private DivWidget getGenderChoices() {
     ButtonGroup buttonGroup = new ButtonGroup();
     ButtonToolbar buttonToolbar = getToolbar(buttonGroup);
@@ -385,10 +387,8 @@ public class DownloadHelper {
     onButton.getElement().setId("Choice_" + title);
     onButton.addClickHandler(handler);
     onButton.getElement().getStyle().setZIndex(0);
-    onButton.setWidth("50" +
-        "px");
-    onButton.setHeight("32" +
-        "px");
+    onButton.setWidth("50" + "px");
+    onButton.setHeight("32" + "px");
     return onButton;
   }
 
@@ -408,13 +408,11 @@ public class DownloadHelper {
   }
 
   private String getURL(String request, Map<String, Collection<String>> typeToSection) {
-    return //command +
-        "?" +
-            "request="  + request +
-            "&unit="    + typeToSection +
-            "&male="    + isMale +
-            "&regular=" + isRegular +
-            "&context=" + isContext
-        ;
+    return "?" +
+        "request="  + request +
+        "&unit="    + typeToSection +
+        "&male="    + isMale +
+        "&regular=" + isRegular +
+        "&context=" + isContext;
   }
 }

@@ -37,10 +37,12 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -296,7 +298,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     logger.debug("returnAudioFile download exercise #" + exercise + " for user id=" + useridString + " file " + file);
 
-    String underscores = getFilenameForDownload(db, Integer.parseInt(exercise), useridString, language, projid);
+    String underscores = getFilenameForDownload(db, projid, Integer.parseInt(exercise), useridString, language);
 
     logger.debug("returnAudioFile query is " + queryString + " exercise " + exercise +
         " user " + useridString + " so name is " + underscores);
@@ -333,8 +335,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @return name without spaces
    * @throws UnsupportedEncodingException
    */
-  private String getFilenameForDownload(DatabaseImpl db, int exercise, String useridString, String language,
-                                        int projid)
+  private String getFilenameForDownload(DatabaseImpl db, int projid, int exercise, String useridString, String language)
       throws UnsupportedEncodingException {
     CommonExercise exercise1 = db.getExercise(projid, exercise);
 
@@ -342,28 +343,33 @@ public class DownloadServlet extends DatabaseServlet {
       logger.error("couldn't find exercise " + exercise + " for '" + useridString + "' and " + language);
       return "Unknown_Exercise";
     } else {
-      boolean english = language.equalsIgnoreCase("english");
-
-      // foreign part
-      String foreignPart = english ? "" : exercise1.getForeignLanguage().trim();
-
-      // english part
-      String englishPart = exercise1.getEnglish().trim();
-      if (englishPart.equals("N/A")) englishPart = "";
-      if (!englishPart.isEmpty()) englishPart = "_" + englishPart;
-
-      // user part
-      String userPart = getUserPart(db, Integer.parseInt(useridString));
-
-      String fileName = foreignPart + englishPart + userPart;
-      fileName = fileName.replaceAll("\\.", "");
-      fileName += "." + COMPRESSED_SUFFIX;
-
-      //logger.debug("file is '" + fileName + "'");
-      String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
-      underscores = URLEncoder.encode(underscores, "UTF-8");
-      return underscores;
+      return getPrettyFileName(db, useridString, language, exercise1);
     }
+  }
+
+  @NotNull
+  private String getPrettyFileName(DatabaseImpl db, String useridString, String language, CommonShell exercise1) throws UnsupportedEncodingException {
+    boolean isEnglish = language.equalsIgnoreCase("isEnglish");
+
+    // foreign part
+    String foreignPart = isEnglish ? "" : exercise1.getForeignLanguage().trim();
+
+    // english part
+    String englishPart = exercise1.getEnglish().trim();
+    if (englishPart.equals("N/A")) englishPart = "";
+    if (!englishPart.isEmpty()) englishPart = "_" + englishPart;
+
+    // user part
+    String userPart = getUserPart(db, Integer.parseInt(useridString));
+
+    String fileName = foreignPart + englishPart + userPart;
+    fileName = fileName.replaceAll("\\.", "");
+    fileName += "." + COMPRESSED_SUFFIX;
+
+    //logger.debug("file is '" + fileName + "'");
+    String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
+    underscores = URLEncoder.encode(underscores, "UTF-8");
+    return underscores;
   }
 
   private String getUserPart(DatabaseImpl db, int userid) {

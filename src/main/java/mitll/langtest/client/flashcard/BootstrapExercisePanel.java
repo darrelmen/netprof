@@ -534,7 +534,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   private void setDownloadHref(String audioPath) {
     String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, ".mp3") : audioPath;
-    downloadContainer.setDownloadHref(audioPathToUse, exercise.getID(), controller.getUser());
+    downloadContainer.setDownloadHref(audioPathToUse, exercise.getID(), controller.getUser(), controller.getHost());
   }
 
   /**

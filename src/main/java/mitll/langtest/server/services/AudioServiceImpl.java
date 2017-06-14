@@ -663,9 +663,5 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-  public void recalcRefAudio(int projid) {
-    Project project = db.getProject(projid);
-    logger.info("recalc ref audio on " + project);
-    project.recalcRefAudio();
-  }
+  public void recalcRefAudio(int projid) {  db.getProject(projid).recalcRefAudio();  }
 }

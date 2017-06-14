@@ -9,8 +9,6 @@ import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -30,13 +28,12 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import static mitll.langtest.client.scoring.DownloadContainer.DOWNLOAD_AUDIO;
+import static mitll.langtest.client.scoring.DownloadContainer.getDownloadAudio;
 
 /**
  * An ASR scoring panel with a record button.
  */
 public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAudioPanel<T> {
-//  private static final String DOWNLOAD_AUDIO = "downloadAudio";
-
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
   private static final String RELEASE_TO_STOP = "Release";
@@ -178,7 +175,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
       addMinicoreListener(historyPanel);
       historyPanel.addStyleName("floatLeft");
       scores.add(historyPanel);
-      historyPanel.showChart();
+      historyPanel.showChart(controller.getHost());
 
       add(scores);
     }
@@ -285,7 +282,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
 
     downloadContainer.setVisible(true);
 
-    String href = DOWNLOAD_AUDIO +
+    String href = getDownloadAudio(controller.getHost()) +
         "?file=" +
         audioPathToUse +
         "&" +
@@ -295,7 +292,6 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
         "userID=" +
         getUser();
     download.setHref(href);
-    //downloadAnchor.setHref(href);
   }
 
   private int getUser() {

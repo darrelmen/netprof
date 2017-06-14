@@ -174,7 +174,7 @@ public class UserMenu {
         }
 
         public void onSuccess() {
-          new DownloadHelper().downloadContext();
+          new DownloadHelper().downloadContext(controller.getHost());
         }
       });
     }

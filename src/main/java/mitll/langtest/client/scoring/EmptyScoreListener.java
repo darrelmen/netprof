@@ -55,7 +55,7 @@ public class EmptyScoreListener implements ScoreListener {
   public void addScore(CorrectAndScore hydecScore) {}
 
   @Override
-  public void showChart() {}
+  public void showChart(String host) {}
 
   @Override
   public void setRefAudio(String refAudio) {}

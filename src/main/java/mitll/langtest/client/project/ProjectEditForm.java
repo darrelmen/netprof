@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.exercise.Services;
 import mitll.langtest.client.initial.LifecycleSupport;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AudioServiceAsync;
@@ -52,25 +53,26 @@ public class ProjectEditForm extends UserDialog {
   private ListBox statusBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
-  private final AudioServiceAsync audioServiceAsync;
-  private final ScoringServiceAsync scoringServiceAsync;
+  //private final AudioServiceAsync audioServiceAsync;
+  //private final ScoringServiceAsync scoringServiceAsync;
 
   private HTML feedback;
   private FormField hydraPort, nameField, unit, chapter, course, hydraHost;
   private ListBox language;
   private FormField model;
+  Services services;
 
   /**
    * @param lifecycleSupport
    * @see ProjectChoices#getCreateNewButton(DivWidget)
    */
-  ProjectEditForm(LifecycleSupport lifecycleSupport,
-                  ExerciseController controller
+  ProjectEditForm(LifecycleSupport lifecycleSupport, ExerciseController controller
   ) {
     super(controller.getProps());
     this.lifecycleSupport = lifecycleSupport;
-    this.audioServiceAsync = controller.getAudioService();
-    this.scoringServiceAsync = controller.getScoringService();
+    services = controller;
+    //this.audioServiceAsync = controller.getAudioService();
+    //this.scoringServiceAsync = controller.getScoringService();
   }
 
   /**
@@ -97,8 +99,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private void checkIsHydraRunning() {
-    int id = info.getID();
-    scoringServiceAsync.isHydraRunning(id, new AsyncCallback<Boolean>() {
+    services.getScoringServiceAsyncForHost(info.getHost()).isHydraRunning(info.getID(), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -390,10 +391,8 @@ public class ProjectEditForm extends UserDialog {
     w.addClickHandler(event -> {
       w.setEnabled(false);
       feedback.setText("Please wait...");
-
       // logger.info("check audio for " + info);
-
-      audioServiceAsync.checkAudio(info.getID(), new AsyncCallback<Void>() {
+      services.getAudioServiceAsyncForHost(info.getHost()).checkAudio(info.getID(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           w.setEnabled(true);
@@ -427,7 +426,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private void recalcRefAudio(ProjectInfo info, Button w) {
-    audioServiceAsync.recalcRefAudio(info.getID(), new AsyncCallback<Void>() {
+    services.getAudioServiceAsyncForHost(info.getHost()).recalcRefAudio(info.getID(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         w.setEnabled(true);

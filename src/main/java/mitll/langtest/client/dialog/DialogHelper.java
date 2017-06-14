@@ -37,7 +37,6 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.download.DownloadHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -96,7 +95,7 @@ public class DialogHelper {
    * @param title
    * @param msgs
    * @param maxHeight
-   * @see DownloadHelper#showDialog
+   * @see mitll.langtest.client.download.DownloadHelper#showDialog
    */
   public Button show(String title,
                      Collection<String> msgs,

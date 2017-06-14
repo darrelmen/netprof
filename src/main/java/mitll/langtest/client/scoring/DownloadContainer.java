@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by go22670 on 5/19/17.
@@ -23,6 +24,12 @@ public class DownloadContainer {
     addDownloadAudioWidget();
   }
 
+  @NotNull
+  public static String getDownloadAudio(String host) {
+    String hostSuffix = host.isEmpty() ? "" : "/" + host;
+    return DownloadContainer.DOWNLOAD_AUDIO + hostSuffix;
+  }
+
   private void addDownloadAudioWidget() {
     DivWidget downloadContainer = new DivWidget();
 
@@ -36,8 +43,8 @@ public class DownloadContainer {
     downloadContainer.addStyleName("topFiveMargin");
 
     this.downloadContainer = downloadContainer;
-    //return downloadContainer;
   }
+
   /**
    * @return
    */
@@ -56,11 +63,22 @@ public class DownloadContainer {
     return new TooltipHelper().addTooltip(w, tip);
   }
 
+  /**
+   * Why the user id?
+   * Why the exercise id?
+   * Who wrote this? Bueller?
+   *
+   * @param audioPathToUse
+   * @param id
+   * @param user
+   * @param host
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#setDownloadHref
+   */
   public void setDownloadHref(String audioPathToUse,
-                       int id,
-                       int user) {
+                              int id,
+                              int user, String host) {
     downloadContainer.setVisible(true);
-    String href = DOWNLOAD_AUDIO +
+    String href = getDownloadAudio(host) +
         "?file=" +
         audioPathToUse +
         "&" +

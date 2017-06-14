@@ -167,12 +167,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     });
 
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> {
-      downloadHelper.showDialog();
+      downloadHelper.showDialog(controller.getHost());
     });
 
     // should be better for change visibility...
     LangTest.EVENT_BUS.addHandler(ShowEvent.TYPE, authenticationEvent -> {
-      //reloadWithCurrent();
       askServerForExercise(-1);
     });
   }

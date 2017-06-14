@@ -39,12 +39,14 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.DownloadContainer;
 import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.client.scoring.SimpleRecordAudioPanel;
 import mitll.langtest.client.scoring.WordTable;
@@ -58,13 +60,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.scoring.DownloadContainer.getDownloadAudio;
+
 /**
  * ASR Scoring panel -- shows phonemes.
- *
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   private final Logger logger = Logger.getLogger("ASRHistoryPanel");
@@ -90,14 +93,15 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
   /**
    * User just got a score back.
-   *
+   * <p>
    * don't show the current score
+   *
    * @param score
    * @param path
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#useResult
    */
   public void gotScore(PretestScore score, String path) {
-    showChart();
+    showChart(controller.getHost());
     addPlayer();
 
     CorrectAndScore hydecScore = new CorrectAndScore(score.getHydecScore(), path);
@@ -107,8 +111,8 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#addScores
    * @param hydecScore
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#addScores
    */
   @Override
   public void addScore(CorrectAndScore hydecScore) {
@@ -116,23 +120,19 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   }
 
   /**
-   * @paramx showOnlyOneExercise
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#showChart()
    * @see MiniScoreListener#gotScore(PretestScore, String)
+   * @param host
    */
-  public void showChart() {
+  public void showChart(String host) {
     clear();
-    addHistory(this);
+    addHistory(this, host);
   }
 
   //call this after adding the widget to the page
   @Override
   public void onLoad() {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        addPlayer();
-      }
-    });
+    Scheduler.get().scheduleDeferred(this::addPlayer);
   }
 
   private native void addPlayer() /*-{
@@ -140,13 +140,13 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   }-*/;
 
   /**
-   *
    * @param vp
+   * @param host
    * @return
-   * @see #showChart
+   * @see MiniScoreListener#showChart
    */
   @NotNull
-  private List<CorrectAndScore> addHistory(Panel vp) {
+  private List<CorrectAndScore> addHistory(Panel vp, String host) {
     List<CorrectAndScore> scoreAndPaths = scores2;
 
     int numScores = scores2.size();
@@ -154,13 +154,13 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
       scoreAndPaths = scores2.subList(numScores - NUM_TO_SHOW, numScores);
     }
 
-    Collections.reverse(scoreAndPaths);
+    Collections.reverse(scoreAndPaths);   //???? right thing to do ? TODO?
 
     TooltipHelper tooltipHelper = new TooltipHelper();
     int j = 0;
     for (CorrectAndScore scoreAndPath : scoreAndPaths) {
       int i = scoreAndPaths.size() - (j++);
-      Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + i, i);
+      Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + i, i, host);
       hp.addStyleName("floatLeft");
       hp.addStyleName("rightTenMargin");
       hp.addStyleName("buttonGroupInset6");
@@ -170,59 +170,59 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   }
 
   /**
+   * Three parts - left to right - audio play widget, colored feedback table, and download button/link.
    * @param tooltipHelper to make tooltips
    * @param scoreAndPath  the audio path and score for the audio
    * @param title         link title
+   * @param host
    * @return
    * @see #addHistory
    */
-  private Panel getAudioAndScore(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath, String title,
-                                 int i) {
+  private Panel getAudioAndScore(TooltipHelper tooltipHelper,
+                                 CorrectAndScore scoreAndPath,
+                                 String title,
+                                 int linkIndex,
+                                 String host) {
     Panel hp = new DivWidget();
     hp.addStyleName("inlineFlex");
-     Anchor audioWidget = getAudioWidget(scoreAndPath, title);
+
     DivWidget audioContainer = new DivWidget();
-    audioContainer.add(audioWidget);
+    audioContainer.add(getAudioWidget(scoreAndPath, title));
 
     hp.add(audioContainer);
     hp.add(makeColoredTable(tooltipHelper, scoreAndPath));
 
-    IconAnchor download = getDownload(scoreAndPath.getPath(), i, getDateToDisplay(scoreAndPath.getTimestamp()));
     DivWidget downloadC = new DivWidget();
-    downloadC.add(download);
+    downloadC.add(getDownload(scoreAndPath.getPath(), linkIndex, getDateToDisplay(scoreAndPath.getTimestamp()), host));
     hp.add(downloadC);
 
     return hp;
   }
 
   private String getDateToDisplay(long timestamp) {
-    return timestamp > 0 ?  this.format.format(new Date(timestamp)) : "";
+    return timestamp > 0 ? this.format.format(new Date(timestamp)) : "";
   }
 
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d");
 
   /**
    * @param audioPath
+   * @param host
    * @return link for this audio
    * @see #getAudioAndScore
    */
-  private IconAnchor getDownload(final String audioPath, int i, String dateFormat) {
+  private IconAnchor getDownload(final String audioPath, int linkIndex, String dateFormat, String host) {
     final IconAnchor download = new IconAnchor();
-    download.getElement().setId("Download_user_audio_link_" + i);
+    download.getElement().setId("Download_user_audio_link_" + linkIndex);
     download.setIcon(IconType.DOWNLOAD);
     download.setIconSize(IconSize.LARGE);
     download.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
 
     addTooltip(download, dateFormat);
-    setDownloadHref(download, audioPath);
+    setDownloadHref(download, audioPath, host);
 
-    download.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(download, "DownloadUserAudio_History",
-            exerciseID, "downloading audio file " + audioPath);
-      }
-    });
+    download.addClickHandler(event -> controller.logEvent(download, "DownloadUserAudio_History",
+        exerciseID, "downloading audio file " + audioPath));
 
     return download;
   }
@@ -230,17 +230,25 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   /**
    * @param download
    * @param audioPath
+   * @param host
    * @see #getDownload
    */
-  private void setDownloadHref(IconAnchor download, String audioPath) {
+  private void setDownloadHref(IconAnchor download, String audioPath, String host) {
     audioPath = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg", ".mp3") : audioPath;
 
-    String href = "downloadAudio?" +
+    String href = getDownloadAudio(host) +
+        "?" +
         "file=" + audioPath + "&" +
         "exerciseID=" + exerciseID + "&" +
         "userID=" + controller.getUserState().getUser();
     download.setHref(href);
   }
+
+//  @NotNull
+//  public static String getDownloadAudio(String host) {
+//    String hostSuffix = host.isEmpty() ? "" : "/" + host;
+//    return DownloadContainer.DOWNLOAD_AUDIO + hostSuffix;
+//  }
 
   /**
    * @param w
@@ -256,20 +264,19 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    * @param scoreAndPath
    * @param title
    * @return
-   * @see #getAudioAndScore(TooltipHelper, CorrectAndScore, String, int)
+   * @see #getAudioAndScore(TooltipHelper, CorrectAndScore, String, int, String)
    */
   private Anchor getAudioWidget(CorrectAndScore scoreAndPath, String title) {
     return new PlayAudioWidget().getAudioWidgetWithEventRecording(scoreAndPath.getPath(), title,
         exerciseID, controller);
   }
 
-
   private Widget makeColoredTable(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
     row.addStyleName("inlineFlex");
     Map<NetPronImageType, List<TranscriptSegment>> scores = scoreAndPath.getScores();
     if (scores.isEmpty()) {
-      logger.warning("makeColoredTable no segments for "+ scoreAndPath);
+      logger.warning("makeColoredTable no segments for " + scoreAndPath);
     }
     row.getElement().setInnerHTML(new WordTable().makeColoredTable(scores));
     tooltipHelper.createAddTooltip(row, "Score" + (" " + scoreAndPath.getPercentScore() + "%"), Placement.BOTTOM);

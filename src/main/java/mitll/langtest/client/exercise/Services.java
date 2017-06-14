@@ -13,6 +13,10 @@ import mitll.langtest.client.services.UserServiceAsync;
  * Created by go22670 on 6/14/17.
  */
 public interface Services extends EventRegistration {
+  AudioServiceAsync getAudioServiceAsyncForHost(String host);
+
+  ScoringServiceAsync getScoringServiceAsyncForHost(String host);
+
   AudioServiceAsync getAudioService();
 
   /**
@@ -21,6 +25,8 @@ public interface Services extends EventRegistration {
    */
   ScoringServiceAsync getScoringService();
 
+
+  String getHost();
 
   LangTestDatabaseAsync getService();
 

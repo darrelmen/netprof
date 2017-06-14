@@ -32,8 +32,6 @@
 
 package mitll.langtest.client.list;
 
-import mitll.langtest.client.download.DownloadHelper;
-
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -196,7 +194,7 @@ public class SelectionState {
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
 
   /**
-   * @see DownloadHelper#showDialog
+   * @see mitll.langtest.client.download.DownloadHelper#showDialog
    * @param typeOrder
    * @return
    */

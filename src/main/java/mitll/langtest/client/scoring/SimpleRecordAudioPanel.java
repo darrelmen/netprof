@@ -2,7 +2,6 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
@@ -139,9 +138,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     playAudioPanel = new RecorderPlayAudioPanel(
         controller.getSoundManager(),
-        postAudioRecordButton,
-        exercise,
-        controller
+        postAudioRecordButton
     );
     playAudioPanel.hidePlayButton();
 
@@ -165,7 +162,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private ASRHistoryPanel getScoreHistory() {
     ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID());
     addMiniScoreListener(historyPanel);
-    historyPanel.showChart();
+    historyPanel.showChart(controller.getHost());
     historyPanel.setWidth("50%");
     return historyPanel;
   }
@@ -176,7 +173,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   private void setDownloadHref() {
     String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, ".mp3") : audioPath;
-    playAudioPanel.setDownloadHref(audioPathToUse, exercise.getID(), getUser());
+    playAudioPanel.setDownloadHref(audioPathToUse, exercise.getID(), getUser(), controller.getHost());
   }
 
   private int getUser() {
@@ -328,6 +325,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       setVisible(hasScoreHistory);
     }
     else logger.warning("scores is null?");
-    miniScoreListener.showChart();
+
+    miniScoreListener.showChart(controller.getHost());
   }
 }

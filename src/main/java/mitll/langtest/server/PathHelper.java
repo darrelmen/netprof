@@ -168,19 +168,6 @@ public class PathHelper {
         audioContext.getUserid());
   }
 
-  /**
-   * CHEESY - assumes audio base dir is related to answers.
-   *
-   * @paramx audioContext
-   * @return
-   */
-/*
-  public String getRelToAnswer(AudioContext audioContext) {
-    String absoluteToAnswer = getAbsoluteToAnswer(audioContext);
-    return getRelToAnswer(absoluteToAnswer);
-  }
-*/
-
   @NotNull
   public String getRelToAnswer(String absoluteToAnswer) {
     return absoluteToAnswer.substring(properties.getAudioBaseDir().length());

@@ -39,8 +39,9 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 
+import static mitll.langtest.client.scoring.DownloadContainer.getDownloadAudio;
+
 public class DownloadLink {
-  private static final String DOWNLOAD_AUDIO = "downloadAudio";
   private static final String DOWNLOAD_SPREADSHEET_AND_AUDIO = "Download spreadsheet and audio for list.";
 
   private final ExerciseController controller;
@@ -60,7 +61,7 @@ public class DownloadLink {
    * @see ListManager#makeTabContent
    */
   public Anchor getDownloadLink(long listid, String linkid, final String name) {
-    final Anchor downloadLink = new Anchor(getURLForDownload(listid));
+    final Anchor downloadLink = new Anchor(getURLForDownload(listid, controller.getHost()));
     new TooltipHelper().addTooltip(downloadLink, DOWNLOAD_SPREADSHEET_AND_AUDIO);
     downloadLink.addClickHandler(event -> controller.logEvent(downloadLink, "DownloadLink", "N/A", "downloading audio for " + name));
     downloadLink.getElement().setId("DownloadLink_" + linkid);
@@ -71,11 +72,11 @@ public class DownloadLink {
   /**
    * @return
    */
-  private SafeHtml getURLForDownload(long listid) {
+  private SafeHtml getURLForDownload(long listid, String host) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a class='" + "icon-download" + "' " +
         "href='" +
-        DOWNLOAD_AUDIO +
+        getDownloadAudio(host) +
         "?list=" + listid +
         "'" +
         ">");

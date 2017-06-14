@@ -128,8 +128,8 @@ public class ScoreFeedbackDiv {
     return wordTableContainer;
   }
 
-  public void setDownloadHref(String audioPathToUse, int id, int user) {
-    downloadContainer.setDownloadHref(audioPathToUse, id, user);
+  public void setDownloadHref(String audioPathToUse, int id, int user, String host) {
+    downloadContainer.setDownloadHref(audioPathToUse, id, user, host);
   }
 
   @NotNull

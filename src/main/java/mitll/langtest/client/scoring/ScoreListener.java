@@ -53,7 +53,7 @@ public interface ScoreListener extends MiniScoreListener {
    */
   void setClassAvg(float classAvg);
 
-  void showChart();
+  void showChart(String host);
 
   void setRefAudio(String refAudio);
 }

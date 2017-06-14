@@ -69,7 +69,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param playButtonSuffix
    * @param exercise
    * @param instance
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, ExerciseController, ScoreListener, String, Shell, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel
    */
   ScoringAudioPanel(String refSentence, String transliteration, ExerciseController controller,
                     String playButtonSuffix, T exercise,
@@ -214,5 +214,5 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
-  public void showChart() {   miniScoreListener.showChart();  }
+  public void showChart() {   miniScoreListener.showChart(controller.getHost());  }
 }

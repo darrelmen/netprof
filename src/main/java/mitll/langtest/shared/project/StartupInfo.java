@@ -33,6 +33,7 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.project.SlimProject;
 
@@ -96,6 +97,11 @@ public class StartupInfo implements IsSerializable {
       }
     });
     return all;
+  }
+
+  public String getHost(int id) {
+    String host = getAllProjects().stream().filter(slimProject -> slimProject.getID() == id).findFirst().get().getHost();
+    return (host.equals(Project.WEBSERVICE_HOST_DEFAULT)) ? "" : host;
   }
 
   /**

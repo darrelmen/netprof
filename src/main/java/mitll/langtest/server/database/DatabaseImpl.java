@@ -1414,26 +1414,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
     CommonExercise toRet = getExercise(projid, id);
     if (toRet == null) {
       // if (warns++ < 50)
-      logger.info("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
+      logger.error("\n\n\ngetCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }
 
     return toRet;
   }
-
-/*
-  public CommonExercise getExerciseByID(int id) {
-    return getProjectManagement().getExerciseByID(id);
-  }*/
-
-/*
-  @Nullable
-  private String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, int projid) {
-    //CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projid, exid);
-    Project project = getProject(projid);
-    return getNativeAudio(userToGender, userid, exid, project);
-  }
-*/
 
   /**
    * @param userToGender

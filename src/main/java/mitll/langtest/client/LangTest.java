@@ -373,14 +373,7 @@ public class LangTest implements
 
     List<SlimProject> projects = startupInfo.getAllProjects();
     projects.forEach(slimProject -> {
-      String host = slimProject.getHost();
-      AudioServiceAsync audioServiceAsync = hostToService.get(host);
-
-      if (audioServiceAsync == null) {
-        AudioServiceAsync audioService = GWT.create(AudioService.class);
-        adjustEntryPoint(host, (ServiceDefTarget) audioService);
-        hostToService.put(host, audioService);
-      }
+      hostToService.computeIfAbsent(slimProject.getHost(), this::getAudioServiceAsyncForHost);
     });
 
     logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
@@ -389,8 +382,11 @@ public class LangTest implements
     projects.forEach(slimProject -> {
       String host = slimProject.getHost();
       AudioServiceAsync audioServiceAsync = hostToService.get(host);
-      if (audioServiceAsync == null) logger.warning("createHostSpecificServices no audio service for " + host + " project " + slimProject);
-      projectToAudioService.put(slimProject.getID(), audioServiceAsync);
+      if (audioServiceAsync == null) {
+        logger.warning("createHostSpecificServices no audio service for " + host + " project " + slimProject);
+      } else {
+        projectToAudioService.put(slimProject.getID(), audioServiceAsync);
+      }
     });
 
 
@@ -399,23 +395,21 @@ public class LangTest implements
     return projectToAudioService;
   }
 
+  @Override
+  public AudioServiceAsync getAudioServiceAsyncForHost(String host) {
+    AudioServiceAsync audioService = GWT.create(AudioService.class);
+    adjustEntryPoint(host, (ServiceDefTarget) audioService);
+    return audioService;
+  }
+
   private Map<Integer, ScoringServiceAsync> createHostSpecificServicesScoring(StartupInfo startupInfo) {
     Map<Integer, ScoringServiceAsync> projectToAudioService = new HashMap<>();
     Map<String, ScoringServiceAsync> hostToService = new HashMap<>();
 
     // first figure out unique set of services...
-
     List<SlimProject> projects = startupInfo.getAllProjects();
-
     projects.forEach(slimProject -> {
-      String host = slimProject.getHost();
-      ScoringServiceAsync ScoringServiceAsync = hostToService.get(host);
-
-      if (ScoringServiceAsync == null) {
-        ScoringServiceAsync audioService = GWT.create(ScoringService.class);
-        adjustEntryPoint(host, (ServiceDefTarget) audioService);
-        hostToService.put(host, audioService);
-      }
+      hostToService.computeIfAbsent(slimProject.getHost(), this::getScoringServiceAsyncForHost);
     });
 
     logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
@@ -423,12 +417,23 @@ public class LangTest implements
     // then map project to service
     projects.forEach(slimProject -> {
       String host = slimProject.getHost();
-      ScoringServiceAsync ScoringServiceAsync = hostToService.get(host);
-      if (ScoringServiceAsync == null) logger.warning("no audio service for " + host + " project " + slimProject);
-      projectToAudioService.put(slimProject.getID(), ScoringServiceAsync);
+      ScoringServiceAsync scoringServiceAsync = hostToService.get(host);
+
+      if (scoringServiceAsync == null) {
+        logger.warning("no audio service for " + host + " project " + slimProject);
+      } else {
+        projectToAudioService.put(slimProject.getID(), scoringServiceAsync);
+      }
     });
 
     return projectToAudioService;
+  }
+
+  @Override
+  public ScoringServiceAsync getScoringServiceAsyncForHost(String host) {
+    ScoringServiceAsync audioService = GWT.create(ScoringService.class);
+    adjustEntryPoint(host, (ServiceDefTarget) audioService);
+    return audioService;
   }
 
   private void adjustEntryPoint(String host, ServiceDefTarget audioService) {
@@ -445,6 +450,7 @@ public class LangTest implements
     if (host.equals("127.0.0.1")) isDefault = true;
     return isDefault;
   }
+
 
   /**
    * Log browser exception on server, include user and exercise ids.  Consider including chapter selection.
@@ -1019,6 +1025,17 @@ public class LangTest implements
     ScoringServiceAsync audioServiceAsync = projectStartupInfo == null ? defaultScoringServiceAsync : projectToScoringService.get(projectStartupInfo.getProjectid());
     if (audioServiceAsync == null) logger.warning("getScoringService no audio service for " + projectStartupInfo);
     return audioServiceAsync == null ? defaultScoringServiceAsync : audioServiceAsync;
+  }
+
+  @Override
+  public String getHost() {
+    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
+    if (projectStartupInfo == null) {
+      logger.warning("\n\n\ngetAudioService has no project yet...");
+      return "";
+    } else {
+      return startupInfo.getHost(projectStartupInfo.getProjectid());
+    }
   }
 
 

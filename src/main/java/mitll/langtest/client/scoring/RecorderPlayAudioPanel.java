@@ -10,11 +10,9 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * Created by go22670 on 4/5/17.
@@ -37,10 +35,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @param postAudioRecordButton1
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  RecorderPlayAudioPanel(SoundManagerAPI soundManager,
-                         final Button postAudioRecordButton1,
-                         CommonExercise exercise,
-                         ExerciseController exerciseController) {
+  RecorderPlayAudioPanel(SoundManagerAPI soundManager, final Button postAudioRecordButton1) {
     super(soundManager, new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -146,10 +141,18 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     return recordFeedback;
   }
 
+  /**
+   * @see SimpleRecordAudioPanel#setDownloadHref
+   * @param audioPathToUse
+   * @param id
+   * @param user
+   * @param host
+   */
   void setDownloadHref(String audioPathToUse,
                        int id,
-                       int user) {
-    downloadContainer.setDownloadHref(audioPathToUse, id, user);
+                       int user,
+                       String host) {
+    downloadContainer.setDownloadHref(audioPathToUse, id, user, host);
   }
 
   public DownloadContainer getRealDownloadContainer() {
