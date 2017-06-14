@@ -1,12 +1,12 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.hlt.domino.shared.model.SimpleHeadDocumentRevision;
-import mitll.hlt.domino.shared.model.document.*;
-import mitll.hlt.domino.shared.model.metadata.Language;
+import mitll.hlt.domino.shared.model.document.IDocumentComponent;
+import mitll.hlt.domino.shared.model.document.IDocumentComposite;
+import mitll.hlt.domino.shared.model.document.IMetadataField;
 import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
 import mitll.hlt.domino.shared.model.user.UserDescriptor;
 import mitll.hlt.json.JSONSerializer;
-import mitll.langtest.server.FileUploadHelper;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
@@ -15,7 +15,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;

@@ -96,7 +96,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid) {
     List<SlickAudio> all = getAll(projid);
-    logger.info("getAudioAttributesByProjectThatHaveBeenChecked " + projid + " found " + all.size() + " that has been checked to exist.");
+    logger.info("getAudioAttributesByProjectThatHaveBeenChecked " + projid +
+        " found " + all.size() + " that has been checked to exist.");
     return toAudioAttribute(all);
   }
 

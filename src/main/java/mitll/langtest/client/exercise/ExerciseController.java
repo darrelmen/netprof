@@ -63,27 +63,7 @@ import java.util.Collection;
  * Time: 11:56 AM
  * To change this template use File | Settings | File Templates.
  */
-public interface ExerciseController extends EventRegistration {
-  LangTestDatabaseAsync getService();
-
-  AudioServiceAsync getAudioService();
-
-  QCServiceAsync getQCService();
-
-  UserServiceAsync getUserService();
-
-  /**
-   * TODO : do we really need to do this?
-   *
-   * @return
-   */
-  ScoringServiceAsync getScoringService();
-
-  ExerciseServiceAsync getExerciseService();
-
-  ListServiceAsync getListService();
-
-
+public interface ExerciseController extends Services {
   UserManager getUserManager();
 
   UserFeedback getFeedback();
@@ -98,14 +78,14 @@ public interface ExerciseController extends EventRegistration {
 
   void stopRecording(WavCallback wavCallback);
 
+  int getRecordTimeout();
+
   SoundManagerAPI getSoundManager();
 
   @Deprecated
   boolean showOnlyOneExercise();
 
   boolean useBkgColorForRef();
-
-  int getRecordTimeout();
 
   boolean isLogClientMessages();
 

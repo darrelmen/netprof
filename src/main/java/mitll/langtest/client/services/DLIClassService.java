@@ -35,6 +35,9 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
+/**
+ * Place holder for future support for class-teacher-student associations.
+ */
 @RemoteServiceRelativePath("dliclass-manager")
 public interface DLIClassService extends RemoteService {
 

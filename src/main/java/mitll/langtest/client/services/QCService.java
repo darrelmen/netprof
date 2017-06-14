@@ -86,12 +86,4 @@ public interface QCService extends RemoteService {
    * @param state
    */
   void markState(int exid, STATE state);
-
-  /**
-   * @deprecated not sure if we really do this in netprof anymore - only in domino?
-   * @see ReviewEditableExercise#confirmThenDeleteItem
-   * @param exid
-   * @return
-   */
-//  boolean deleteItem(int exid);
 }

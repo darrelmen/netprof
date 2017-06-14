@@ -49,6 +49,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -227,7 +228,7 @@ public class LangTest implements
 
   public static final String VERSION_INFO = "2.0.7";
 
-  private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
+//  private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
@@ -239,18 +240,19 @@ public class LangTest implements
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
-  // services
-  private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-
   private final AudioServiceAsync audioService = GWT.create(AudioService.class);
-
-  private final UserServiceAsync userService = GWT.create(UserService.class);
-  private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
 
   private final ScoringServiceAsync scoringServiceAsync = GWT.create(ScoringService.class);
 
+  // services
+  private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+
+  private final UserServiceAsync userService = GWT.create(UserService.class);
+
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
+  private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
 
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
@@ -353,6 +355,32 @@ public class LangTest implements
     this.startupInfo = startupInfo;
     props = new PropertyHandler(startupInfo.getProperties());
     if (reloadWindow) initialUI.chooseProjectAgain();
+
+
+    createHostSpecificServices(startupInfo);
+  }
+
+  private void createHostSpecificServices(StartupInfo startupInfo) {
+    Map<Integer,AudioServiceAsync> projectToAudioService = new HashMap<>();
+    Map<String,AudioServiceAsync> hostToService = new HashMap<>();
+    startupInfo.getProjects().stream().forEach(slimProject -> {
+      String host = slimProject.getHost();
+      boolean isDefault = false;
+      if (host.equals("127.0.0.1")) isDefault =true;
+      AudioServiceAsync audioServiceAsync = hostToService.get(host);
+      if (audioServiceAsync == null) {
+         AudioServiceAsync audioService = GWT.create(AudioService.class);
+
+         if (!isDefault) {
+           // String moduleBaseURL = GWT.getModuleBaseURL();
+           String moduleBaseURL = ((ServiceDefTarget) audioService).getServiceEntryPoint();
+           ((ServiceDefTarget) audioService).setServiceEntryPoint(moduleBaseURL + "_" + host);
+           logger.info("audio service " +
+               "now at " +((ServiceDefTarget) audioService).getServiceEntryPoint());
+           hostToService.put(host, audioService);
+         }
+      }
+    });
   }
 
   /**
@@ -885,8 +913,7 @@ public class LangTest implements
     return props.isBkgColorForRef();
   }
 
-  public int getRecordTimeout() {
-    return props.getRecordTimeout();
+  public int getRecordTimeout() {    return props.getRecordTimeout();
   }
 
   public boolean isLogClientMessages() {
@@ -904,12 +931,31 @@ public class LangTest implements
 
   // services
 
-  public LangTestDatabaseAsync getService() {
-    return service;
+  /**
+   * These two services are special - they depend on which project/language is living on
+   * which hydra host (hydra1 or hydra2 or ...)
+   * @return
+   */
+  public AudioServiceAsync getAudioService() {
+    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
+    if (projectStartupInfo == null) {
+      logger.warning("\n\n\ngetAudioService has no project yet...");
+    }
+    return audioService;
   }
 
-  public AudioServiceAsync getAudioService() {
-    return audioService;
+  public ScoringServiceAsync getScoringService() {
+    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
+    if (projectStartupInfo == null) {
+      logger.warning("getScoringService has no project yet...");
+    }
+    return scoringServiceAsync;
+  }
+
+
+
+  public LangTestDatabaseAsync getService() {
+    return service;
   }
 
   public UserServiceAsync getUserService() {
@@ -922,10 +968,6 @@ public class LangTest implements
 
   public QCServiceAsync getQCService() {
     return qcServiceAsync;
-  }
-
-  public ScoringServiceAsync getScoringService() {
-    return scoringServiceAsync;
   }
 
   public ExerciseServiceAsync getExerciseService() {

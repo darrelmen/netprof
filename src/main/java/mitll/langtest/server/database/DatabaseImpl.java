@@ -1631,8 +1631,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
       //if (!debug) ensureMP3s(exercise);
       // exercises.add(getJsonForExercise(exercise));
     }
-    long now = System.currentTimeMillis();
-    logger.info(getLanguage() + " took " + (now - then) + " millis to attachAllAudio to " + exercises.size() + " exercises");
+    logger.info(project.getProject().name() + "/"+project.getLanguage() +
+        " took " + (System.currentTimeMillis() - then) +
+        " millis to attachAllAudio to " + exercises.size() + " exercises");
   }
 
   public String getUserListName(int listid) {

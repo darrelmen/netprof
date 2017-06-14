@@ -104,7 +104,6 @@ public abstract class BaseAudioDAO extends DAO {
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
-
     //logger.info("getExToAudio - for project #" + projid);
     Collection<AudioAttribute> attributesByProject = getAudioAttributesByProjectThatHaveBeenChecked(projid);
     logger.info("getExToAudio - for " + projid + " got " + attributesByProject.size());
@@ -116,10 +115,12 @@ public abstract class BaseAudioDAO extends DAO {
         exToAudio.put(exid, audioAttributes = new ArrayList<>());
         idToPaths.put(exid, paths = new HashSet<>());
       }
-      String audioRef = audio.getAudioRef();
-      if (!paths.contains(audioRef)) {
-        audioAttributes.add(audio);
-        paths.add(audioRef);
+      {
+        String audioRef = audio.getAudioRef();
+        if (!paths.contains(audioRef)) {
+          audioAttributes.add(audio);
+          paths.add(audioRef);
+        }
       }
       //    else {
       //logger.warn("skipping " +audioRef + " on " + exid);
@@ -293,7 +294,8 @@ public abstract class BaseAudioDAO extends DAO {
     boolean doDebug = firstExercise.getID() == 25921 || firstExercise.getID() == 30219 || DEBUG_ATTACH;
     for (AudioAttribute attr : audioAttributes) {
       MiniUser user = attr.getUser();
-      if (user.isUnknownDefault()) {
+      if (user == null) logger.error("attachAudio no user on attribute " + attr);
+      if (user == null || user.isUnknownDefault()) {
         defaultAudio.add(attr);
       } else {
         audioPaths.add(attr.getAudioRef());

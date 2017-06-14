@@ -48,6 +48,9 @@ import mitll.langtest.shared.scoring.ImageOptions;
 
 import java.util.Collection;
 
+/**
+ * Might actually live on hydra1 or hydra2 - chosen in the client.
+ */
 @RemoteServiceRelativePath("audio-manager")
 public interface AudioService extends RemoteService {
 
@@ -84,7 +87,8 @@ public interface AudioService extends RemoteService {
    * @param exerciseID
    * @return
    */
-  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
+  ImageResponse getImageForAudioFile(int reqid,
+                                     String audioFile, String imageType, ImageOptions imageOptions,
                                      String exerciseID);
 
   /**

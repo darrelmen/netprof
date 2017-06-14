@@ -46,6 +46,9 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * So this could either be hosted on hydra1 or hydra2 or possibly more.
+ */
 @RemoteServiceRelativePath("scoring-manager")
 public interface ScoringService extends RemoteService {
   /**

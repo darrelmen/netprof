@@ -81,6 +81,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
             project.modified().getTime(),
 
             getHydraHost(project),
+
             getPort(project),
             project.getProp(ServerProperties.MODELS_DIR),
             project.first(),

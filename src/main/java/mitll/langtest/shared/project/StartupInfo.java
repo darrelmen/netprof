@@ -38,6 +38,8 @@ import mitll.langtest.shared.project.SlimProject;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -57,6 +59,9 @@ public class StartupInfo implements IsSerializable {
   public StartupInfo() {
   } // for serialization
 
+  public Set<String> getKnownHydraHosts() {
+    return projects.stream().map(ProjectInfo::getHost).collect(Collectors.toSet());
+  }
   /**
    * @param properties
    * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo

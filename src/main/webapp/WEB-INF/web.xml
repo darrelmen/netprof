@@ -59,7 +59,6 @@
         <url-pattern>/langtest/monitoring-manager</url-pattern>
     </servlet-mapping>-->
 
-
     <servlet>
         <servlet-name>analysisService</servlet-name>
         <servlet-class>mitll.langtest.server.services.AnalysisServiceImpl</servlet-class>
@@ -212,69 +211,4 @@
         <servlet-name>scoreServlet</servlet-name>
         <url-pattern>/scoreServlet/*</url-pattern>
     </servlet-mapping>
-
-<!--    <servlet>
-        <servlet-name>dominoUserService</servlet-name>
-        <servlet-class>mitll.hlt.domino.server.user.UserServiceFacadeImpl</servlet-class>
-        <load-on-startup>3</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>dominoUserService</servlet-name>
-        <url-pattern>/dominoCore/user-manager</url-pattern>
-    </servlet-mapping>-->
-
-    <!--    <servlet>
-            <servlet-name>loadTestServlet</servlet-name>
-            <servlet-class>mitll.langtest.server.load.LoadTestServlet</servlet-class>
-        </servlet>
-        <servlet-mapping>
-            <servlet-name>loadTestServlet</servlet-name>
-            <url-pattern>/loadTest/*</url-pattern>
-        </servlet-mapping>-->
-
-    <!-- initialize core data services - Mongo connection pool, etc -->
-<!--
-    <listener>
-        <listener-class>mitll.hlt.domino.server.ServerInitializationManager</listener-class>
-    </listener>
--->
-
-<!--    <context-param>
-        <param-name>config</param-name>
-        <param-value>netProf</param-value>
-    </context-param>
-
-    <context-param>
-        <param-name>configFile</param-name>
-        <param-value>config.properties</param-value>
-    </context-param>-->
-
-    <!-- partial experiment -->
-<!--
-    <listener>
-        <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
-    </listener>
-
-    <filter>
-        <filter-name>ShiroFilter</filter-name>
-        <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
-    </filter>
-
-    <filter-mapping>
-        <filter-name>ShiroFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-        <dispatcher>ERROR</dispatcher>
-    </filter-mapping>
--->
-
-<!--
-    <session-config>
-        <session-timeout>1</session-timeout> &lt;!&ndash; in minutes &ndash;&gt;
-    </session-config>
--->
-
 </web-app>

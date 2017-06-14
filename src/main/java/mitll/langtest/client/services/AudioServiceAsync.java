@@ -36,6 +36,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
 
@@ -59,7 +60,11 @@ public interface AudioServiceAsync {
                             String exerciseID,
                             AsyncCallback<ImageResponse> async);
 
-
+  /**
+   * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio
+   * @param projectid
+   * @param async
+   */
   void checkAudio(int projectid, AsyncCallback<Void> async);
 
   void recalcRefAudio(int id, AsyncCallback<Void> asyncCallback);
