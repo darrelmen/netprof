@@ -177,9 +177,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
       addUserRecorder(controller.getService(), controller, center, options.getScreenPortion(), exercise); // todo : revisit screen portion...
     }
 
-    if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
+//    if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
       center.add(navigationHelper);
-    }
+  //  }
   }
 
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,

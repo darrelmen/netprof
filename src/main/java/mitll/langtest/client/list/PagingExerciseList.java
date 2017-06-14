@@ -456,9 +456,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     });
   }
 
+/*
   private void showPopup(String toShow, String toShow2, Widget over) {
     new PopupHelper().showPopup(toShow, toShow2, over);
   }
+*/
 
   String getHistoryTokenFromUIState(String search, int id) {
     return "search=" + search + SelectionState.SECTION_SEPARATOR + "item=" + id;

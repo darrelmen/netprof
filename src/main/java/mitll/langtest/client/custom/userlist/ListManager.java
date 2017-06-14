@@ -76,10 +76,11 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class ListManager implements RequiresResize {
+  private final Logger logger = Logger.getLogger("ListManager");
+
   public static final int IMPORT_WIDTH = 600;
   public static final int VISIBLE_LINES = 20;
   public static final int CHARACTER_WIDTH = 150;
-  private final Logger logger = Logger.getLogger("ListManager");
 
   private static final String IMPORT_ITEM = "importItem";
 
@@ -87,7 +88,6 @@ public class ListManager implements RequiresResize {
   private ScrollPanel listScrollPanel;
 
   private final ExerciseController controller;
-  //private final controller.getListService()Async controller.getListService() = GWT.create(controller.getListService().class);
 
   private final UserManager userManager;
   private TabAndContent yourStuff;
@@ -100,7 +100,6 @@ public class ListManager implements RequiresResize {
   private final ReviewItemHelper reviewItem;
   private final EditItem editItem;
 
-//  private static final String PRACTICE = "Audio Vocabulary Practice";
   private static final String REVIEW = "review";
   private static final String COMMENT = "comment";
   private static final String ATTENTION = "attention";

@@ -264,9 +264,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * So if we have an existing history token, use it to set current selection.
    * If not, push the current state of the list boxes and act on it
    *
-   * @see SimpleSelectExerciseList#addChoiceRow
+   * @seex SimpleSelectExerciseList#addChoiceRow
    */
-  void pushFirstListBoxSelection() {
+/*  void pushFirstListBoxSelection() {
     if (getHistoryToken().isEmpty()) {
       logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
       pushNewSectionHistoryToken();
@@ -274,7 +274,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       logger.info("pushFirstListBoxSelection fire history for token from URL: " + getHistoryToken() + " instance " + getInstance());
       History.fireCurrentHistoryState();
     }
-  }
+  }*/
 
   /**
    * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#addClickHandlerToButton
@@ -346,7 +346,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         request);
   }
 
-  protected void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+  private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
     logger.info("loadFromSelectionState" +
         " old state " + selectionState.getInfo() +
         " new state " + newState.getInfo());
@@ -460,15 +460,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
           "'");
     }
 
-    // if (timeOfLastRequest >= getTimeOfLastKeyPress()) {
-    //   logger.info("restoreUIState time of last " + new Date(timeOfLastRequest) + " > " + new Date(getTimeOfLastKeyPress()));
     String search = selectionState.getSearch();
    // logger.info("restoreUIState search box should be "+search);
     setTypeAheadText(search);
-    //  }
-    //  else {
-    //    logger.info("restoreUIState ----> key press is newer ");
-    //  }
   }
 
   protected void simpleLoadExercises(String selectionState, String prefix, int exerciseID) {

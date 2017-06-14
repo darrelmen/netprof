@@ -82,8 +82,8 @@ public interface ExerciseController extends Services {
 
   SoundManagerAPI getSoundManager();
 
-  @Deprecated
-  boolean showOnlyOneExercise();
+//  @Deprecated
+//  boolean showOnlyOneExercise();
 
   boolean useBkgColorForRef();
 

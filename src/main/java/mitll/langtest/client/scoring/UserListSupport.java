@@ -140,7 +140,7 @@ public class UserListSupport {
         if (!anyToRemove) {
           removeFromList.add(new NavLink(NOT_ON_ANY_LISTS));
         }
-     //   addSendLinkWhatYouSee(container);
+        //   addSendLinkWhatYouSee(container);
       }
     });
   }
@@ -172,7 +172,7 @@ public class UserListSupport {
         "&body=Link to " + name + " list : " + encode;
   }
 
-  public void addSendLinkWhatYouSee(DropdownBase addToList) {
+  void addSendLinkWhatYouSee(DropdownBase addToList) {
     final NavLink widget = new NavLink("Email these items");
     addToList.add(widget);
     widget.setHref(getMailToThese());
@@ -180,9 +180,9 @@ public class UserListSupport {
   }
 
   @NotNull
-  private String getMailToThese( ) {
+  private String getMailToThese() {
     String token = History.getToken();
-    SelectionState selectionState = new SelectionState(token,false);
+    SelectionState selectionState = new SelectionState(token, false);
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
     String s = trimURL(Window.Location.getHref()) +
@@ -194,7 +194,7 @@ public class UserListSupport {
         "?" +
         "Subject=Share netprof " + controller.getLanguage() +
         " items " +
-        "&body=Link to " + selectionState.getDescription(projectStartupInfo.getTypeOrder()) + " : "+
+        "&body=Link to " + selectionState.getDescription(projectStartupInfo.getTypeOrder()) + " : " +
         URL.encode(s);
   }
 
@@ -234,9 +234,7 @@ public class UserListSupport {
     return new NavLink(name);
   }
 
-  private void getRemoveListLink(UserList ul, DropdownBase removeFromList, int exid,
-                                 Dropdown container
-  ) {
+  private void getRemoveListLink(UserList ul, DropdownBase removeFromList, int exid, Dropdown container) {
     final NavLink widget = getListLink(ul);
     removeFromList.add(widget);
     widget.addClickHandler(event -> {

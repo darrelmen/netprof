@@ -58,6 +58,7 @@ public interface AudioServiceAsync {
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
                             String exerciseID,
+                            String language,
                             AsyncCallback<ImageResponse> async);
 
   /**

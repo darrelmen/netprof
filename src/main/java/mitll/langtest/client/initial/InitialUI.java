@@ -276,12 +276,12 @@ public class InitialUI implements UILifecycle {
    * @see #showLogin()
    */
   protected void populateBelowHeader(Container verticalContainer) {
-    if (showOnlyOneExercise()) {
+/*    if (showOnlyOneExercise()) {
       Panel currentExerciseVPanel = new FlowPanel();
       currentExerciseVPanel.getElement().setId("currentExercisePanel");
       logger.info("adding headstart current exercise");
       RootPanel.get().add(getHeadstart(currentExerciseVPanel));
-    } else {
+    } else {*/
       //  logger.info("adding normal container...");
       RootPanel.get().add(verticalContainer);
 
@@ -292,7 +292,7 @@ public class InitialUI implements UILifecycle {
       child = new Heading(3, "Please allow recording");
       child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
       contentRow.add(child);
-    }
+  //  }
     // logger.info("populateBelowHeader -- ");
     lifecycleSupport.recordingModeSelect();
     makeNavigation();
@@ -461,9 +461,9 @@ public class InitialUI implements UILifecycle {
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel
    * @deprecated
    */
-  private boolean showOnlyOneExercise() {
+/*  private boolean showOnlyOneExercise() {
     return props.getExercise_title() != null;
-  }
+  }*/
 
   /**
    * @param currentExerciseVPanel

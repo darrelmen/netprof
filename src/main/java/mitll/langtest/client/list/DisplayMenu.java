@@ -29,8 +29,6 @@ class DisplayMenu {
   private static final String SHOW_PHONES = "showPhones";
   private static final IconType CHECK = IconType.CHECK;
   private static final String SHOW = "showStorage";
-
- // private NavLink phoneChoice;
   private KeyStorage storage;
 
   DisplayMenu(KeyStorage storage) {
@@ -64,10 +62,6 @@ class DisplayMenu {
   private DropdownSubmenu getViewMenu() {
     DropdownSubmenu showChoices = new DropdownSubmenu("Show");
     flTextChoices(showChoices);
-
-    //getShowSounds();
-    //showChoices.add(phoneChoice);
-
     return showChoices;
   }
 

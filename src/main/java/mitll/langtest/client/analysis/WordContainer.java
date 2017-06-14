@@ -83,8 +83,6 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
   private static final int SIGNED_UP = 95;
   private static final String SIGNED_UP1 = "Date";
 
- // private static final int TABLE_HISTORY_WIDTH = 490; //380
- // private static final int TABLE_HISTORY_WIDTH_NARROW = 500;//360; //380
   private final ExerciseComparator sorter;
   private final ShowTab learnTab;
   private final Heading heading;

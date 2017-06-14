@@ -183,10 +183,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @seex NPFHelper#reload
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
    */
-  public void reload() {
+/*  public void reload() {
     logger.info("reload -- ");
     getExercises(getUser());
-  }
+  }*/
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#doAfterEditComplete
@@ -340,17 +340,20 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
           logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
               " b/c before latest " + lastReqID);
       } else {
-        checkForEmptyExerciseList(result.getExercises().isEmpty());
-        List<T> exercises = result.getExercises();
-        exercises = rememberExercises(exercises);
-        for (ListChangeListener<T> listener : listeners) {
-          listener.listChanged(exercises, "");
-        }
-        if (DEBUG || true) logger.info("\tExerciseList.SetExercisesCallbackWithID onSuccess id = " + id);
-
-        pushFirstSelection(id, "");
-
+        useExercises(result);
       }
+    }
+
+    private void useExercises(ExerciseListWrapper<T> result) {
+      List<T> exercises = result.getExercises();
+      checkForEmptyExerciseList(exercises.isEmpty());
+      exercises = rememberExercises(exercises);
+      for (ListChangeListener<T> listener : listeners) {
+        listener.listChanged(exercises, "");
+      }
+      if (DEBUG || true) logger.info("\tExerciseList.SetExercisesCallbackWithID onSuccess id = " + id);
+
+      pushFirstSelection(id, "");
     }
   }
 
@@ -573,7 +576,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   public void loadExercise(int itemID) {
 //   if (DEBUG) logger.info("ExerciseList.loadExercise itemID " + itemID);
-    pushNewItem("", itemID);
+    pushNewItem(""+itemID, itemID);
   }
 
   /**
@@ -649,9 +652,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return userState.getUser();
   }
 
-  public void clearCachedExercise() {
+/*  public void clearCachedExercise() {
     cachedNext = null;
-  }
+  }*/
 
   /**
    * @param commonExercise

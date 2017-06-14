@@ -308,15 +308,20 @@ public class DownloadHelper {
     ButtonToolbar buttonToolbar = getToolbar(buttonGroup);
 
     for (final String choice : Arrays.asList(M, F)) {
-      com.github.gwtbootstrap.client.ui.Button choice1 = getChoice(choice, false, event -> {
+      logger.info("making choice "+ choice);
+
+      com.github.gwtbootstrap.client.ui.Button choiceButton = getChoice(choice, false, event -> {
+
         if (choice.equals(M)) isMale = true;
         else if (choice.equals(F)) isMale = false;
+
         isMaleSet = true;
+
         showStatus();
       });
-      buttonGroup.add(choice1);
-      if (choice.equals(M)) choice1.setIcon(IconType.MALE);
-      else if (choice.equals(F)) choice1.setIcon(IconType.FEMALE);
+      buttonGroup.add(choiceButton);
+      if (choice.equals(M)) choiceButton.setIcon(IconType.MALE);
+      else if (choice.equals(F)) choiceButton.setIcon(IconType.FEMALE);
     }
 
     return buttonToolbar;
@@ -372,8 +377,10 @@ public class DownloadHelper {
     showStatus();
   }
 
-  private com.github.gwtbootstrap.client.ui.Button getChoice(String title, boolean isActive, ClickHandler handler) {
-    com.github.gwtbootstrap.client.ui.Button onButton = new com.github.gwtbootstrap.client.ui.Button(title.equals(M) ? "" : title.equals(F) ? "" : title);
+  private com.github.gwtbootstrap.client.ui.Button getChoice(String title
+      , boolean isActive, ClickHandler handler) {
+    com.github.gwtbootstrap.client.ui.Button onButton =
+        new com.github.gwtbootstrap.client.ui.Button(title.equals(M) ? "" : title.equals(F) ? "" : title);
     onButton.getElement().setId("Choice_" + title);
     //   controller.register(onButton, exercise.getID());
     onButton.addClickHandler(handler);

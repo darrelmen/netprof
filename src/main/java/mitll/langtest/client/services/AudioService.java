@@ -89,7 +89,8 @@ public interface AudioService extends RemoteService {
    */
   ImageResponse getImageForAudioFile(int reqid,
                                      String audioFile, String imageType, ImageOptions imageOptions,
-                                     String exerciseID);
+                                     String exerciseID,
+                                     String language);
 
   /**
    * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio(ProjectInfo)

@@ -537,11 +537,13 @@ public class LangTest implements
     int height = Integer.parseInt(split[3]);
     String exerciseID = split[4];
 
-    getImage(reqid, key, path, type, toUse, height, exerciseID, client);
+    getImage(reqid, key, path, type, toUse, height, exerciseID, getLanguage(), client);
   }
 
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
-                        String exerciseID, final AsyncCallback<ImageResponse> client) {
+                        String exerciseID,
+                        String language,
+                        final AsyncCallback<ImageResponse> client) {
     //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
@@ -550,22 +552,24 @@ public class LangTest implements
       client.onSuccess(ifPresent);
     } else {
       ImageOptions imageOptions = new ImageOptions(toUse, height, useBkgColorForRef());
-      getAudioService().getImageForAudioFile(reqid, path, type, imageOptions, exerciseID, new AsyncCallback<ImageResponse>() {
-        public void onFailure(Throwable caught) {
+      getAudioService().getImageForAudioFile(reqid, path, type, imageOptions, exerciseID,
+          language,
+          new AsyncCallback<ImageResponse>() {
+            public void onFailure(Throwable caught) {
        /*   if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
           }*/
-          logger.info("message " + caught.getMessage() + " " + caught);
-          logException(caught);
-          client.onFailure(caught);
-        }
+              logger.info("message " + caught.getMessage() + " " + caught);
+              logException(caught);
+              client.onFailure(caught);
+            }
 
-        public void onSuccess(ImageResponse result) {
-          imageCache.put(key, result);
-          //logger.info("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
-          client.onSuccess(result);
-        }
-      });
+            public void onSuccess(ImageResponse result) {
+              imageCache.put(key, result);
+              //logger.info("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
+              client.onSuccess(result);
+            }
+          });
     }
   }
 
@@ -676,7 +680,6 @@ public class LangTest implements
         "</font></span>";
   }
 */
-
 /*
   private boolean usingWebRTC() {
     return FlashRecordPanelHeadless.usingWebRTC();
@@ -696,9 +699,9 @@ public class LangTest implements
    * @see #populateRootPanel()
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel
    */
-  public boolean showOnlyOneExercise() {
+ /* public boolean showOnlyOneExercise() {
     return props.getExercise_title() != null;
-  }
+  }*/
 
   /**
    * Check the URL parameters for special modes.

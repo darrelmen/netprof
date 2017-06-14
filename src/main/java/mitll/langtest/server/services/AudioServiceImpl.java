@@ -533,6 +533,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
+   * TODO : pass in language so we can switch on language
+   *
    * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
    * Also returns the audio file duration -- so we can deal with the difference in length between mp3 and wav
    * versions of the same audio file.  (The browser soundmanager plays mp3 and reports audio offsets into
@@ -552,7 +554,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                             String audioFile,
                                             String imageType,
                                             ImageOptions imageOptions,
-                                            String exerciseID) {
+                                            String exerciseID,
+                                            String language) {
     if (audioFile.isEmpty())
       logger.error("getImageForAudioFile huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
 
@@ -581,9 +584,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long then = System.currentTimeMillis();
 
     String imageOutDir = pathHelper.getImageOutDir();
-    File absoluteFile = getAbsoluteFile(imageOutDir);
+    File absoluteFile = new File(language.toLowerCase(), imageOutDir); getAbsoluteFile(imageOutDir);
 
-//    logger.info("getImageForAudioFile imageOutDir " + imageOutDir + " " +absoluteFile + " type " + imageType1);
+    logger.info("getImageForAudioFile imageOutDir " + imageOutDir + " " +absoluteFile + " type " + imageType1);
     String absolutePathToImage = imageWriter.writeImage(
         wavAudioFile,
         absoluteFile.getAbsolutePath(),
@@ -594,7 +597,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.debug("getImageForAudioFile : got images " +
           // "(" + width + " x " + height + ")" +
           " (" + reqid + ") type " + imageType +
-          " for " + wavAudioFile + " took " + diff + " millis");
+          "\n\tfor wav" + wavAudioFile +
+          "\n\timage " + absolutePathToImage+
+          "\n\ttook " + diff + " millis");
     }
     String installPath = pathHelper.getInstallPath();
 
@@ -614,14 +619,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (duration == 0) {
       logger.error("huh? " + wavAudioFile + " has zero duration???");
     }
-/*
+
     logger.debug("getImageForAudioFile for" +
         "\n\taudio file " + wavAudioFile +
         "\n\ttype       " + imageType +
         "\n\trel path   " + relativeImagePath +
         "\n\turl        " + imageURL +
         "\n\tduration   " + duration);
-*/
 
     return new ImageResponse(reqid, imageURL, duration);
   }
