@@ -47,17 +47,17 @@
         <url-pattern>/langtest/user-manager</url-pattern>
     </servlet-mapping>
 
-<!--
-    <servlet>
-        <servlet-name>monitoringService</servlet-name>
-        <servlet-class>mitll.langtest.server.services.MonitoringServiceImpl</servlet-class>
-        <load-on-startup>3</load-on-startup>
-    </servlet>
+    <!--
+        <servlet>
+            <servlet-name>monitoringService</servlet-name>
+            <servlet-class>mitll.langtest.server.services.MonitoringServiceImpl</servlet-class>
+            <load-on-startup>3</load-on-startup>
+        </servlet>
 
-    <servlet-mapping>
-        <servlet-name>monitoringService</servlet-name>
-        <url-pattern>/langtest/monitoring-manager</url-pattern>
-    </servlet-mapping>-->
+        <servlet-mapping>
+            <servlet-name>monitoringService</servlet-name>
+            <url-pattern>/langtest/monitoring-manager</url-pattern>
+        </servlet-mapping>-->
 
     <servlet>
         <servlet-name>analysisService</servlet-name>
@@ -114,6 +114,11 @@
         <url-pattern>/langtest/audio-manager</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>audioService</servlet-name>
+        <url-pattern>/langtest/audio-manager/h2</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>amasService</servlet-name>
         <servlet-class>mitll.langtest.server.services.AmasServiceImpl</servlet-class>
@@ -145,6 +150,11 @@
     <servlet-mapping>
         <servlet-name>scoringService</servlet-name>
         <url-pattern>/langtest/scoring-manager</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>scoringService</servlet-name>
+        <url-pattern>/langtest/scoring-manager/h2</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -208,7 +218,17 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>downloadServlet</servlet-name>
+        <url-pattern>/downloadAudio/h2/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>scoreServlet</servlet-name>
         <url-pattern>/scoreServlet/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>scoreServlet</servlet-name>
+        <url-pattern>/scoreServlet/h2/*</url-pattern>
     </servlet-mapping>
 </web-app>

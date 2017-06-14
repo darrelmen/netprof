@@ -286,48 +286,47 @@ public abstract class BaseAudioDAO extends DAO {
                              Collection<AudioAttribute> audioAttributes,
                              String language) {
     String installPath = database.getServerProps().getMediaDir();
-
-    List<AudioAttribute> defaultAudio = new ArrayList<>();
-    Set<String> audioPaths = new HashSet<>();
+    //List<AudioAttribute> defaultAudio = new ArrayList<>();
+    // Set<String> audioPaths = new HashSet<>();
     boolean allSucceeded = true;
-
     boolean doDebug = firstExercise.getID() == 25921 || firstExercise.getID() == 30219 || DEBUG_ATTACH;
     for (AudioAttribute attr : audioAttributes) {
-      MiniUser user = attr.getUser();
-      if (user == null) logger.error("attachAudio no user on attribute " + attr);
-      if (user == null || user.isUnknownDefault()) {
-        defaultAudio.add(attr);
-      } else {
-        audioPaths.add(attr.getAudioRef());
-        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, attr, language);
-        if (!didIt) {
-          if (doDebug && allSucceeded) {
-            String foreignLanguage = attr.isContextAudio() && firstExercise.hasContext() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
-            logger.info("attachAudio not attaching audio " +
-                "\n\tid          " + attr.getUniqueID() +
-                "\n\tto exercise " + firstExercise.getID() +
-                "\tsince transcript has changed : " +
-                "\n\told     '" +
-                attr.getTranscript() +
-                "'" +
-                "\n\t vs new '" + foreignLanguage + "'");
-          }
-          allSucceeded = false;
-        } else {
-//          logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getOldID());
-          if (doDebug)
-            logger.info("attachAudio attach audio " + attr.getUniqueID() +
-                "\n\t" + (attr.isMale() ? "male" : "female") +
-                "\n\tuserid " + attr.getUser().getUserID() +
-                "\n\ttype " + attr.getAudioType() +
-                "\n\tto exercise " + firstExercise.getID() +
-                "\n\ttranscript  '" + attr.getTranscript() + "'");
+      //MiniUser user = attr.getUser();
+      // if (user == null)
+      //   logger.error("attachAudio no user on attribute " + attr + " : user db on domino out of sync???");
+//      if (attr.isUnknownDefault()) {
+//        defaultAudio.add(attr);
+//      } else {
+      // audioPaths.add(attr.getAudioRef());
+      boolean didIt = attachAudioAndFixPath(firstExercise, installPath, attr, language);
+      if (!didIt) {
+        if (doDebug && allSucceeded) {
+          String foreignLanguage = attr.isContextAudio() && firstExercise.hasContext() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
+          logger.info("attachAudio not attaching audio " +
+              "\n\tid          " + attr.getUniqueID() +
+              "\n\tto exercise " + firstExercise.getID() +
+              "\tsince transcript has changed : " +
+              "\n\told     '" +
+              attr.getTranscript() +
+              "'" +
+              "\n\t vs new '" + foreignLanguage + "'");
         }
+        allSucceeded = false;
+      } else {
+//          logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getOldID());
+        if (doDebug)
+          logger.info("attachAudio attach audio " + attr.getUniqueID() +
+              "\n\t" + (attr.isMale() ? "male" : "female") +
+              "\n\tuserid " + attr.getUser().getUserID() +
+              "\n\ttype " + attr.getAudioType() +
+              "\n\tto exercise " + firstExercise.getID() +
+              "\n\ttranscript  '" + attr.getTranscript() + "'");
       }
+//      }
       //}
     }
 
-    for (AudioAttribute attr : defaultAudio) {
+/*    for (AudioAttribute attr : defaultAudio) {
       if (!audioPaths.contains(attr.getAudioRef())) {
         boolean didIt = attachAudioAndFixPath(firstExercise, installPath, attr, language);
         if (!didIt) {
@@ -340,12 +339,12 @@ public abstract class BaseAudioDAO extends DAO {
           allSucceeded = false;
         }
       }
-    }
+    }*/
 
-    List<AudioAttribute> toRemove = new ArrayList<>();
+/*    List<AudioAttribute> toRemove = new ArrayList<>();
     for (AudioAttribute attr : firstExercise.getAudioAttributes()) {
       // logger.debug("\treviewing " + attr + " : is default? " + attr.getUser().isUnknownDefault());
-      if (attr.getUser().isUnknownDefault() && audioPaths.contains(attr.getAudioRef())) {
+      if (attr.isUnknownDefault() && audioPaths.contains(attr.getAudioRef())) {
         toRemove.add(attr);
       }
     }
@@ -360,7 +359,7 @@ public abstract class BaseAudioDAO extends DAO {
       //else {
       //   logger.debug("\tremoving " +attr);
       //  }
-    }
+    }*/
     return allSucceeded;
   }
 

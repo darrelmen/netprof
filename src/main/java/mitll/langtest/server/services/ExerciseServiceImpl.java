@@ -412,7 +412,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     //else {
     //logger.debug("\tnot marking recorded for '" + role + "' and user " + userID);
     //}
-    logger.info("\tmarkRecordedState marked " + c + "  recorded for '" + activityType + "' and user " + userID + " on " + exercises.size());
+    if (!activityType.equals(ActivityType.UNSET)) {
+      logger.info("\tmarkRecordedState marked " + c + "  recorded for activity '" + activityType + "' and user " + userID + " on " + exercises.size());
+    }
     return c;
   }
 
@@ -1480,7 +1482,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
       addAnnotations(byID); // todo do this in a better way
-
       if (byID.getAudioAttributes().isEmpty()) {
         toAddAudioTo.add(byID);
         logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");

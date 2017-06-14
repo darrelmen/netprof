@@ -309,6 +309,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return user;
   }
 
+  public boolean isUnknownDefault() {
+    return getUser() == null || getUser().isUnknownDefault();
+  }
+
   /**
    * @param user
    * @see mitll.langtest.client.qc.QCNPFExercise#getGenderGroup

@@ -117,7 +117,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       getUserListManager().setStateOnExercises();
       db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
     } catch (Exception e) {
-      logger.error("couldn't load database " + e, e);
+      logger.error("optionalInit couldn't load database " + e, e);
     }
 
     try {
@@ -392,6 +392,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private void setInstallPath(DatabaseServices db) {
     String installPath = pathHelper.getInstallPath();
     logger.debug("setInstallPath " + installPath);
-    db.setInstallPath(installPath, "");
+    if (db == null) {
+      logger.error("no database services created.");
+    }
+    else {
+      db.setInstallPath(installPath, "");
+    }
   }
 }

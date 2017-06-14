@@ -198,18 +198,23 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public void ensureDefaultUsers() {
-    ensureDefaultUsersLocal();
-    String userId = dominoAdminUser.getUserId();
-    adminUser = delegate.getUser(userId);//BEFORE_LOGIN_USER);
-    // logger.info("ensureDefaultUsers got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
-
-    if (adminUser.getPrimaryGroup() == null) {
-      logger.warn("ensureDefaultUsers no group for " + adminUser);
-      Group group = getPrimaryGroup(PRIMARY);
-      adminUser.setPrimaryGroup(group);
+    if (delegate == null) {
+      logger.error("no delegate - couldn't connect to Mongo!");
     }
+    else {
+      ensureDefaultUsersLocal();
+      String userId = dominoAdminUser.getUserId();
+      adminUser = delegate.getUser(userId);//BEFORE_LOGIN_USER);
+      // logger.info("ensureDefaultUsers got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
 
-    dominoImportUser = delegate.getUser(IMPORT_USER);
+      if (adminUser.getPrimaryGroup() == null) {
+        logger.warn("ensureDefaultUsers no group for " + adminUser);
+        Group group = getPrimaryGroup(PRIMARY);
+        adminUser.setPrimaryGroup(group);
+      }
+
+      dominoImportUser = delegate.getUser(IMPORT_USER);
+    }
   }
 
   /**
@@ -1035,7 +1040,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return miniUser;
   }
 
-  private boolean isMale(DBUser dominoUser) { return dominoUser.getGender() == DMALE;  }
+  private boolean isMale(DBUser dominoUser) {
+    return dominoUser.getGender() == DMALE;
+  }
 
   /**
    * TODO: Reset password works differently now...?
