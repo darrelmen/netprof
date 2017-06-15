@@ -1759,7 +1759,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public Map<String, Float> getMaleFemaleProgress(int projectid) {
     // IUserDAO userDAO = getUserDAO();
-    logger.info("getMaleFemaleProgress getting exercises -- " + projectid);
+//    logger.info("getMaleFemaleProgress getting exercises -- " + projectid);
     Collection<CommonExercise> exercises = getExercises(projectid);
 
 //    List<DBUser> all = userDAO.getAll();
@@ -1786,8 +1786,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       exToContextTranscript.put(shell.getID(), shell.getContext());
     }
 
-    logger.info("getMaleFemaleProgress found " + total + " total exercises, " +
-        uniqueIDs.size());// +
+//    logger.info("getMaleFemaleProgress found " + total + " total exercises, " +        uniqueIDs.size());// +
     // " unique" +
     // " males " + userMapMales.size() + " females " + userMapFemales.size());
 

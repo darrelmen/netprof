@@ -72,7 +72,6 @@ import java.util.Map;
 public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   //private final Logger logger = Logger.getLogger("RecorderNPFHelper");
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
-
   /**
    *
    */
@@ -127,6 +126,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
                 .setInstance(instanceName)
                 .setShowFirstNotCompleted(true)
                 .setActivityType(ActivityType.RECORDER)
+            //    .setContextOnly(!doNormalRecording)
         ) {
           private CheckBox filterOnly;
 

@@ -49,7 +49,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import scala.Tuple2;
-import scala.tools.nsc.backend.icode.Primitives;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -311,47 +310,28 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * only include ids for audio where the audio transcript matches the exercise text
    *
    * @param audioSpeed
-   * @param exToTranscript
    * @param projid
    * @return modifiable set - what's returned from scala isn't
    * @paramx userIDs
-   * @see #getWithContext(boolean, Map, int)
+   * @see #getWithContext
    */
   @Override
   Set<Integer> getAudioExercisesForGender(boolean isMale,
                                           String audioSpeed,
-                                          Map<Integer, String> exToTranscript,
                                           int projid) {
     if (database.getServerProps().shouldCheckAudioTranscript()) {
       logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
     }
 
-    Map<Integer, Collection<Tuple2<Integer, Integer>>> audioForGender1 = dao.getAudioForGender(audioSpeed, projid);
-    Set<Pair> genderMatch = getGenderMatch(isMale, audioForGender1);
+    Map<Integer, Collection<Tuple2<Integer, Integer>>> audioForGender1 = dao.getAudioForGender(audioSpeed, projid,isMale?0:1);
+    Set<Pair> genderMatch = getGenderMatch(audioForGender1);
     return getExercises(genderMatch);
-
-//    Seq<Tuple2<Object, Object>> audioForGender1 = (Seq<Tuple2<Object, Object>>) audioForGender;
-//
-//    scala.collection.Iterator<Tuple2<Object, Object>> iterator = audioForGender1.iterator();
-//
-//    HashSet<Pair> pairs = new HashSet<>();
-//    while (iterator.hasNext()
-//        ) {
-//      Tuple2<Object, Object> next = iterator.next();
-//      Object o = next._1();
-//      Integer exid = (Integer) o;
-//      Integer userid = (Integer) next._2();
-//      Pair pair = new Pair(exid, userid);
-//      pairs.add(pair);
-//    }
-//    return pairs;
   }
 
   /**
    * @param isMale
    * @param regSpeed
    * @param slowSpeed
-   * @param exToTranscript
    * @param projid
    * @return
    * @see #getRecordedBySameGender(int, Map, int)
@@ -360,21 +340,20 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale,
                                                     String regSpeed,
                                                     String slowSpeed,
-                                                    Map<Integer, String> exToTranscript,
                                                     int projid) {
     if (database.getServerProps().shouldCheckAudioTranscript()) {
       logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
     }
 
     Tuple2<Map<Integer, Collection<Tuple2<Integer, Integer>>>,
-        Map<Integer, Collection<Tuple2<Integer, Integer>>>> audioForGenderBothRecorded = dao.getAudioForGenderBothRecorded(regSpeed, slowSpeed, projid);
+        Map<Integer, Collection<Tuple2<Integer, Integer>>>> audioForGenderBothRecorded = dao.getAudioForGenderBothRecorded(regSpeed, slowSpeed, projid, isMale ? 0 : 1);
 
 
     Map<Integer, Collection<Tuple2<Integer, Integer>>> regSpeedPairs = audioForGenderBothRecorded._1();
     Map<Integer, Collection<Tuple2<Integer, Integer>>> slowSpeedPairs = audioForGenderBothRecorded._2();
 
-    Set<Pair> regSpeedGenderMatch = getGenderMatch(isMale, regSpeedPairs);
-    Set<Pair> slowSpeedGenderMatch = getGenderMatch(isMale, slowSpeedPairs);
+    Set<Pair> regSpeedGenderMatch = getGenderMatch(regSpeedPairs);
+    Set<Pair> slowSpeedGenderMatch = getGenderMatch(slowSpeedPairs);
 
     // now find overlap
 
@@ -393,14 +372,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return regExids;
   }
 
-  private Set<Pair> getGenderMatch(boolean isMale, Map<Integer, Collection<Tuple2<Integer, Integer>>> regSpeedPairs) {
+  private Set<Pair> getGenderMatch(Map<Integer, Collection<Tuple2<Integer, Integer>>> regSpeedPairs) {
     Set<Pair> regSpeedGenderMatch = new HashSet<>();
     for (Integer key : regSpeedPairs.keySet()) {
-      boolean male = userDAO.isMale(key);
-      if (male == isMale) {
-        Iterator<Tuple2<Integer, Integer>> iterator = regSpeedPairs.get(key).iterator();
-        regSpeedGenderMatch.addAll(getPairs(iterator));
-      }
+      //boolean male = userDAO.isMale(key);
+      // if (male == isMale) {
+      Iterator<Tuple2<Integer, Integer>> iterator = regSpeedPairs.get(key).iterator();
+      regSpeedGenderMatch.addAll(getPairs(iterator));
+      // }
     }
     return regSpeedGenderMatch;
   }

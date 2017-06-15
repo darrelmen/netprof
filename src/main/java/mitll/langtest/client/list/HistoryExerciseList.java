@@ -45,13 +45,10 @@ import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
  * Created with IntelliJ IDEA.
@@ -601,7 +598,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   protected void noSectionsGetExercises(long userID, int exerciseID) {
    // logger.info("noSectionsGetExercises " +userID);
-    super.getExercises(userID);
+    super.getExercises();
   }
 
   /**

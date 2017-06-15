@@ -82,13 +82,12 @@ public interface IAudioDAO extends IDAO {
   /**
    * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    * @param userid
-   * @param exToTranscript
    * @param projid
    * @return
    */
-  Collection<Integer> getRecordedBySameGender(int userid, Map<Integer, String> exToTranscript, int projid);
+  Collection<Integer> getRecordedBySameGender(int userid, int projid);
 
-  Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext, int projid);
+  Set<Integer> getWithContext(int userid, int projid);
 
   Map<String, Float> getRecordedReport(int projid,
                                        float total,

@@ -155,38 +155,29 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * Get exercises for this user.
    *
-   * @param userID
    * @return true if we asked the server for exercises
    * @see HistoryExerciseList#noSectionsGetExercises(long, int)
    */
-  public boolean getExercises(long userID) {
-    if (DEBUG) logger.info("ExerciseList.getExercises for user " + userID + " instance " + getInstance());
-    ExerciseListRequest request = getRequest();
-
-    logger.info("request is " +request);
-
+  public boolean getExercises() {
+    if (DEBUG) logger.info("ExerciseList.getExercises instance " + getInstance());
+    ExerciseListRequest request = getRequest("");
+//    logger.info("request is " +request);
     service.getExerciseIds(request, new SetExercisesCallback("", "", -1, request));
     return true;
   }
 
-  protected ExerciseListRequest getRequest() {
+  protected abstract ExerciseListRequest getRequest(String prefix);
+/*
+  {
     return new ExerciseListRequest(incrRequest(), getUser())
         .setActivityType(getActivityType())
         .setIncorrectFirstOrder(listOptions.isIncorrectFirst());
   }
+*/
 
   int incrRequest() {
     return ++lastReqID;
   }
-
-  /**
-   * @seex NPFHelper#reload
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
-   */
-/*  public void reload() {
-    logger.info("reload -- ");
-    getExercises(getUser());
-  }*/
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#doAfterEditComplete
@@ -206,7 +197,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (DEBUG) {
       logger.info("ExerciseList.reloadWith id = " + id + " for user " + getUser() + " instance " + getInstance());
     }
-    service.getExerciseIds(getRequest(), new SetExercisesCallbackWithID(id));
+    service.getExerciseIds(getRequest(""), new SetExercisesCallbackWithID(id));
   }
 
   /**
@@ -242,7 +233,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   abstract ActivityType getActivityType();
 
   /**
-   * @see ListInterface#getExercises(long)
+   * @see ListInterface#getExercises()
    */
   protected abstract void showFinishedGettingExercises();
 
@@ -262,7 +253,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see #getExercises
+   * @see ListInterface#getExercises
    */
   class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
     private final String selectionID;
@@ -276,7 +267,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
      * @param searchIfAny
      * @param exerciseID
      * @paramx setTypeAheadText
-     * @see #getExercises(long)
+     * @see ListInterface#getExercises()
      */
     SetExercisesCallback(String selectionID, String searchIfAny, int exerciseID, ExerciseListRequest request) {
       this.selectionID = selectionID;
@@ -676,7 +667,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param commonExercise
-   * @see FacetExerciseList#showExercises(Collection, ExerciseListWrapper)
+   * @see FacetExerciseList#showExercises
    */
   void addExerciseWidget(U commonExercise) {
     createdPanel = factory.getExercisePanel(commonExercise);

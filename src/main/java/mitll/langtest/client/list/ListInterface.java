@@ -83,11 +83,10 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
   void setFactory(ExercisePanelFactory<T,U> factory);
 
   /**
-   * @param userID
    * @see mitll.langtest.client.LangTest#gotUser
    * @see HistoryExerciseList#noSectionsGetExercises(long, int)
    */
-  boolean getExercises(long userID);
+  boolean getExercises();
 
   /**
    * @return

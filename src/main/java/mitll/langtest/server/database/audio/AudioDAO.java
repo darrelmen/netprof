@@ -312,7 +312,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 //  }
 
   @Override
-  Set<Integer> getAudioExercisesForGender(boolean male, String audioSpeed, Map<Integer, String> exToTranscript, int projid) {
+  Set<Integer> getAudioExercisesForGender(boolean male, String audioSpeed, int projid) {
     return null;
   }
 
@@ -363,7 +363,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale, String regSpeed, String slowSpeed, Map<Integer, String> exToTranscript, int projid) {
+  Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale, String regSpeed, String slowSpeed, int projid) {
     return null;
   }
 

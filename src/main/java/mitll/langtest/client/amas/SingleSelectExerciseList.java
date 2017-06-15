@@ -47,10 +47,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
-import mitll.langtest.client.list.HistoryExerciseList;
-import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.SectionWidgetContainer;
-import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.list.*;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 
@@ -119,16 +116,15 @@ public abstract class SingleSelectExerciseList
   }
 
   /**
-   * @param userID
    * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises
    */
-  public boolean getExercises(final long userID) {
+  public boolean getExercises() {
     addWidgets();
     return false;
   }
 
   /**
-   * @see #getExercises(long)
+   * @see ListInterface#getExercises()
    * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
    */

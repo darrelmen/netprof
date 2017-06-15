@@ -160,7 +160,7 @@ public class SelectionState {
           }
         }
       } else if (part.length() > 0) {
-        logger.warning("parseToken skipping part '" + part + "'");
+        logger.info("parseToken skipping part '" + part + "'");
       }
     }
 

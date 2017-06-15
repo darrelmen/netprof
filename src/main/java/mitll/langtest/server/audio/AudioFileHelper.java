@@ -79,20 +79,17 @@ import static mitll.langtest.server.ScoreServlet.EXERCISE_TEXT;
 public class AudioFileHelper implements AlignDecode {
   private static final Logger logger = LogManager.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
-  //  private static final int MIN_WARN_DUR = 30;
   private static final String REG = "reg";
   private static final String SLOW = "slow";
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
-  public static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false);
-//  private static final boolean USE_HYDEC_FALLBACK = false;
+  private static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false);
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
   private final MP3Support mp3Support;
   private final Project project;
   private ASR asrScoring;
-  //private ASRScoring oldschoolScoring;
   private ASRWebserviceScoring webserviceScoring;
   private DecodeCorrectnessChecker decodeCorrectnessChecker;
 
@@ -1199,7 +1196,7 @@ public class AudioFileHelper implements AlignDecode {
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences, transliteration,
 
-        pathHelper.getImageOutDir(), imageOptions,
+        pathHelper.getImageOutDir(language.toLowerCase()), imageOptions,
         options.isDoFlashcard(), options.isCanUseCache(), prefix,
         precalcScores,
         options.isUsePhoneToDisplay());
@@ -1231,11 +1228,6 @@ public class AudioFileHelper implements AlignDecode {
 
     return pretestScore;
   }
-
-/*  @Deprecated
-  private boolean isOldSchoolService() {
-    return serverProps.getOldSchoolService();
-  }*/
 
   /**
    * Hack for percent sign in english - must be a better way.
@@ -1377,7 +1369,6 @@ public class AudioFileHelper implements AlignDecode {
         "\n\tinstall path " + installPath +
         "\n\tmodelsDir    " + modelsDir);
         */
-
     String scoringDir = Scoring.getScoringDir(serverProps.getDcodrBaseDir());
     String dictFile =
         new ConfigFileCreator(serverProps.getProperties(), scoringDir, modelsDir).getDictFile();
@@ -1481,13 +1472,4 @@ public class AudioFileHelper implements AlignDecode {
       return this;
     }
   }
-
-/*  public static void main(String[] arg) {
-    if (arg.length != 3) {
-      System.out.println("Usage: language text file");
-    }
-    else {
-      System.out.println(new AudioFileHelper().getEasyScores(arg[0], arg[1], new File(arg[2])));
-    }
-  }*/
 }

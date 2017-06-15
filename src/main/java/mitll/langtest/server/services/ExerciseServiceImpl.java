@@ -54,7 +54,6 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -141,13 +140,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (serverProps.isAMAS()) {
       return (ExerciseListWrapper<T>) getAMASExerciseIds(request); // TODO : how to do this without forcing it.
     }
-
+/*
     if (request.isNoFilter()) {
       ExerciseListWrapper<T> tExerciseListWrapper = getCachedExerciseWrapper(request, projectID);
       if (tExerciseListWrapper != null) {
         return tExerciseListWrapper;
       }
-    }
+    }*/
 
     logger.debug("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
@@ -296,7 +295,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return commonExercises;
   }
 
-  @Nullable
+/*  @Nullable
   private ExerciseListWrapper<T> getCachedExerciseWrapper(ExerciseListRequest request, int projectID) {
     synchronized (projidToWrapper) {
       ExerciseListWrapper<T> exerciseListWrapper = projidToWrapper.get(projectID);
@@ -312,7 +311,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
     return null;
-  }
+  }*/
 
   private void addScoresForAll(int userid, List<T> exercises) {
     db.getResultDAO().addScoresForAll(userid, exercises);
@@ -467,7 +466,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
-    logger.debug("getExerciseListWrapperForPrefix marked " +i + " as recorded");
+    logger.debug("getExerciseListWrapperForPrefix marked " + i + " as recorded");
 
     if (hasPrefix) {
       //logger.info("check for prefix match over " + exercisesForState.size());
@@ -927,8 +926,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                       Collection<CommonExercise> exercises,
                                                       int projid,
                                                       boolean onlyExamples) {
-    Collection<Integer> recordedBySameGender =
-        getRecordedByMatchingGender(userID, exercises, projid, onlyExamples);
 
     Set<Integer> allExercises = new HashSet<>();
     for (CommonShell exercise : exercises) {
@@ -936,58 +933,70 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     //logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
+    Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples);
     allExercises.removeAll(recordedBySameGender);
     // logger.debug("after all exercises " + allExercises.size());
 
     List<CommonExercise> copy = new ArrayList<>();
     Set<Integer> seen = new HashSet<>();
     for (CommonExercise exercise : exercises) {
-      int trim = exercise.getID();
-      if (allExercises.contains(trim)) {
-        if (seen.contains(trim)) logger.warn("saw " + trim + " " + exercise + " again!");
+      int id = exercise.getID();
+      if (allExercises.contains(id)) {
+        if (seen.contains(id)) logger.error("saw " + id + " " + exercise + " again!");
         if (!onlyExamples || hasContext(exercise)) {
-          seen.add(trim);
-          copy.add(exercise);
+          seen.add(id);
+          copy.addAll(exercise.getDirectlyRelated());
         }
       }
     }
+
+//    getExercisesWithContext();
     //logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
 
     return copy;
   }
 
-  private Collection<Integer> getRecordedByMatchingGender(int userID, Collection<CommonExercise> exercises, int projid, boolean onlyExamples) {
+  private Collection<Integer> getRecordedByMatchingGender(int userID, int projid, boolean onlyExamples) {
     // int userID = request.getUserID();
     logger.debug("filterByUnrecorded : for " + userID + " only by same gender " +
-        " examples only " + onlyExamples + " from " + exercises.size());
+        " examples only " + onlyExamples);// + " from " + exercises.size());
 
+/*
     Map<Integer, String> exToTranscript = new HashMap<>();
     Map<Integer, String> exToContextTranscript = new HashMap<>();
 
     for (CommonExercise shell : exercises) {
       exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+
+
       String context = shell.hasContext() ? shell.getContext() : null;
       if (context != null && !context.isEmpty()) {
         exToContextTranscript.put(shell.getID(), context);
       }
+
     }
+*/
 
     return onlyExamples ?
-        db.getAudioDAO().getWithContext(userID, exToContextTranscript, projid) :
-        db.getAudioDAO().getRecordedBySameGender(userID, exToTranscript, projid);
+        db.getAudioDAO().getWithContext(userID, projid) :
+        db.getAudioDAO().getRecordedBySameGender(userID, projid);
   }
 
+  /**
+   * @param exercises
+   * @return
+   * @see #filterByUnrecorded
+   */
   @NotNull
   private List<CommonExercise> getExercisesWithContext(Collection<CommonExercise> exercises) {
     List<CommonExercise> copy = new ArrayList<>();
     Set<Integer> seen = new HashSet<>();
     for (CommonExercise exercise : exercises) {
-      // String trim = exercise.getID().trim();
-
       if (seen.contains(exercise.getID())) logger.warn("saw " + exercise.getID() + " " + exercise + " again!");
       if (hasContext(exercise)) {
         seen.add(exercise.getID());
-        copy.add(exercise);
+        //    copy.add(exercise);
+        copy.addAll(exercise.getDirectlyRelated());
       }
     }
     //   logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());

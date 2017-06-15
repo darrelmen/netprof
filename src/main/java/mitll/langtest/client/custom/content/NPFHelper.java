@@ -78,17 +78,17 @@ public class NPFHelper implements RequiresResize {
 
   PagingExerciseList<CommonShell, CommonExercise> npfExerciseList = null;
   private final boolean showQC;
-  DivWidget contentPanel;
+  private DivWidget contentPanel;
   private final boolean showFirstNotCompleted;
 
   /**
    * @param controller
    * @param showQC
-   * @see AVPHelper#AVPHelper(ExerciseController)
+   * @seex AVPHelper#AVPHelper(ExerciseController)
    * @see ReviewItemHelper#ReviewItemHelper(ExerciseController)
    * @see ListManager#ListManager
    */
-  public NPFHelper(ExerciseController controller,
+  NPFHelper(ExerciseController controller,
                    boolean showQC,
                    boolean showFirstNotCompleted) {
     this.controller = controller;

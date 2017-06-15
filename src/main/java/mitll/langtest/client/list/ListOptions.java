@@ -15,6 +15,7 @@ public class ListOptions {
   private boolean showFirstNotCompleted = false;
   private ActivityType activityType = UNSET;
   private boolean showPager = true;
+  private boolean contextOnly = false;
 
   public ListOptions() {
   }
@@ -87,5 +88,14 @@ public class ListOptions {
 
   public boolean isShowPager() {
     return showPager;
+  }
+
+  public boolean isContextOnly() {
+    return contextOnly;
+  }
+
+  public ListOptions setContextOnly(boolean contextOnly) {
+    this.contextOnly = contextOnly;
+    return this;
   }
 }

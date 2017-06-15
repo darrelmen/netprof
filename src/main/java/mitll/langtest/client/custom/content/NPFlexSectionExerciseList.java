@@ -48,8 +48,7 @@ import java.util.logging.Logger;
  * @since 1/26/16.
  */
 public class NPFlexSectionExerciseList extends FacetExerciseList {
-  private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList");
-
+  //private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList");
   private static final String COMPLETE = "Complete";
   private static final String LIST_COMPLETE = "List complete!";
 

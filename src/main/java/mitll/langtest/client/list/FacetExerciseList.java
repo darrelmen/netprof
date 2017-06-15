@@ -406,16 +406,16 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   * @param userID
    * @see HistoryExerciseList#noSectionsGetExercises
    */
-  public boolean getExercises(final long userID) {
+  public boolean getExercises() {
     addWidgets();
     return false;
   }
 
-  protected ExerciseListRequest getRequest() {
-    ExerciseListRequest request = super.getRequest();
+  @Override
+  protected ExerciseListRequest getRequest(String prefix) {
+    ExerciseListRequest request = super.getRequest(prefix);
     request.setAddFirst(false);
     return request;
   }
@@ -433,7 +433,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
-   * @see #getExercises(long)
+   * @see ListInterface#getExercises()
    */
   @Override
   public void addWidgets() {

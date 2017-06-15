@@ -583,8 +583,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     long then = System.currentTimeMillis();
 
-    String imageOutDir = pathHelper.getImageOutDir();
-    File absoluteFile = new File(language.toLowerCase(), imageOutDir); getAbsoluteFile(imageOutDir);
+    String imageOutDir = pathHelper.getImageOutDir(language.toLowerCase());
+    File absoluteFile = /*new File(language.toLowerCase(), imageOutDir);*/ getAbsoluteFile(imageOutDir);
 
     logger.info("getImageForAudioFile imageOutDir " + imageOutDir + " " +absoluteFile + " type " + imageType1);
     String absolutePathToImage = imageWriter.writeImage(

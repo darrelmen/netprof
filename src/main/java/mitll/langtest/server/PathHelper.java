@@ -178,7 +178,6 @@ public class PathHelper {
   }
 
   /**
-   *
    * @param language
    * @param exercise
    * @param question - vestigial
@@ -194,15 +193,19 @@ public class PathHelper {
     return getAbsoluteWavPathUnder(planAndTestPath);
   }
 
-  public String getAbsoluteWavPathUnder(String planAndTestPath) { return getWavPath(getAnswerDir(), planAndTestPath); }
+  public String getAbsoluteWavPathUnder(String planAndTestPath) {
+    return getWavPath(getAnswerDir(), planAndTestPath);
+  }
+
   private String getAnswerDir() {
     return properties.getAnswerDir();
   }
 
   /**
    * TODO : make wave file name more helpful - include exercise, user, etc.
+   * <p>
+   * Each file has a unique timestamp...
    *
-   *  Each file has a unique timestamp...
    * @param tomcatWriteDirectory
    * @param planAndTestPath
    * @return
@@ -221,11 +224,11 @@ public class PathHelper {
    * @return path to image output dir
    * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile
    */
-  public String getImageOutDir() {
+  public String getImageOutDir(String language) {
     String imageOutdir = context == null ? IMAGE_OUTDIR : context.getInitParameter(IMAGE_OUTDIR);
     if (imageOutdir == null) imageOutdir = IMAGE_WRITER_IMAGES;
 
-    File test = new File(imageOutdir);
+    File test = new File(imageOutdir, language);
     if (!test.exists()) {
       test = getAbsoluteFile(imageOutdir);
       boolean mkdirs = test.mkdirs();

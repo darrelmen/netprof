@@ -476,12 +476,11 @@ public abstract class BaseAudioDAO extends DAO {
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
-  public Collection<Integer> getRecordedBySameGender(int userid, Map<Integer, String> exToTranscript, int projid) {
+  public Collection<Integer> getRecordedBySameGender(int userid, int projid) {
     return getAudioExercisesForGenderBothSpeeds(
         userDAO.isMale(userid),
         AudioType.REGULAR.toString(),
         AudioType.SLOW.toString(),
-        exToTranscript,
         projid
     );
   }
@@ -734,24 +733,21 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
-  public Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext, int projid) {
-    return getWithContext(userDAO.isMale(userid), exToContext, projid);
+  public Set<Integer> getWithContext(int userid, int projid) {
+    return getWithContext(userDAO.isMale(userid), projid);
   }
 
-  private Set<Integer> getWithContext(boolean male,
-                                      Map<Integer, String> exToContext, int projid) {
-    return getAudioExercisesForGender(male, AudioType.CONTEXT_REGULAR.toString(), exToContext, projid);
+  private Set<Integer> getWithContext(boolean male, int projid) {
+    return getAudioExercisesForGender(male, AudioType.CONTEXT_REGULAR.toString(), projid);
   }
 
   abstract Set<Integer> getAudioExercisesForGender(boolean male,
                                                    String audioSpeed,
-                                                   Map<Integer, String> exToTranscript,
                                                    int projid);
 
   abstract Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale,
                                                              String regSpeed,
                                                              String slowSpeed,
-                                                             Map<Integer, String> exToTranscript,
                                                              int projid);
 
   /**

@@ -150,7 +150,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         new SetExercisesCallback("", prefix, -1, request));
   }
 
-  ExerciseListRequest getRequest(String prefix) {
+  protected ExerciseListRequest getRequest(String prefix) {
+    logger.info("isOnlyExamples " + isOnlyExamples());
+
     return new ExerciseListRequest(incrRequest(),
         controller.getUserState().getUser())
         .setPrefix(prefix)

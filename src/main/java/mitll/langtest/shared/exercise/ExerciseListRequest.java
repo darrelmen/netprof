@@ -196,10 +196,19 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  /**
+   *
+   * @return
+   */
   public boolean isOnlyExamples() {
     return onlyExamples;
   }
 
+  /**
+   * @see PagingExerciseList#getRequest
+   * @param onlyExamples
+   * @return
+   */
   public ExerciseListRequest setOnlyExamples(boolean onlyExamples) {
     this.onlyExamples = onlyExamples;
     return this;
