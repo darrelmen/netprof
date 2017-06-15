@@ -335,6 +335,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return attributes;
   }
 
+  public boolean addAttribute(ExerciseAttribute attribute) {
+    return attributes.add(attribute);
+  }
+
   /**
    * @param context
    * @param altcontext
@@ -576,5 +580,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return isContext;
   }
 
-  public List<VocabToken> getTokens() {  return tokens;  }
+  public List<VocabToken> getTokens() {
+    return tokens;
+  }
 }

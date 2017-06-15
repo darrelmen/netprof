@@ -349,7 +349,7 @@ public class UserSecurityManager implements IUserSecurityManager {
       }
       // if (cookie != -1) addCookie(response,"r",""+cookie);
     } else {
-      log.info("User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
+//      log.debug("lookupUser User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
     }
 //		if (sessUser != null && (!sessUser.isActive())) {
 //			sessUser = null;

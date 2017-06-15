@@ -240,8 +240,11 @@ public class ExerciseCopy {
       CommonExercise exToUse = ex;
       if (exercises1 != null && !exercises1.isEmpty()) {
         for (CommonExercise candidate : exercises1) {
-          if (candidate.getUpdateTime() > ex.getUpdateTime()) {
-            logger.info("for " + oldID +
+          if (candidate.getUpdateTime() > ex.getUpdateTime() &&
+              !candidate.getEnglish().equals(ex.getEnglish()) &&
+              !candidate.getForeignLanguage().equals(ex.getForeignLanguage())
+              ) {
+            logger.info("addPredefExercises for " + oldID +
                 " replacing" +
                 "\n\toriginal " + ex +
                 "\n\twith     " + candidate);
@@ -250,9 +253,11 @@ public class ExerciseCopy {
             }
             exToUse = candidate;
             replacements++;
+
             if (!exToUse.isPredefined()) {
               exToUse.getMutable().setPredef(true);
               converted++;
+              logger.info("addPredefExercises converting " + exToUse.getID() + " " + exToUse.getForeignLanguage() + " " + ex.getEnglish());
             }
           }
         }

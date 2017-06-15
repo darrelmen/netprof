@@ -47,9 +47,7 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
-import mitll.langtest.server.database.connection.PostgreSQLConnection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
-import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.dliclass.DLIClassDAO;
@@ -89,7 +87,10 @@ import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableAudioExercise;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.result.MonitorResult;
@@ -749,14 +750,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   private int readAMASExercises(String lessonPlanFile, String mediaDir, String installPath, boolean isURL) {
     int numExercises;
-    if (isURL) {
-      this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
-      numExercises = fileExerciseDAO.getNumExercises();
-    } else {
-      fileExerciseDAO = new FileExerciseDAO<AmasExerciseImpl>(mediaDir, getOldLanguage(serverProps), absConfigDir,
+//    if (isURL) {
+//      this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
+//      numExercises = fileExerciseDAO.getNumExercises();
+//    } else {
+      fileExerciseDAO = new FileExerciseDAO<>(mediaDir, getOldLanguage(serverProps), absConfigDir,
           lessonPlanFile, installPath);
       numExercises = fileExerciseDAO.getNumExercises();
-    }
+//    }
     return numExercises;
   }
 
@@ -1415,7 +1416,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     CommonExercise toRet = getExercise(projid, id);
     if (toRet == null) {
       // if (warns++ < 50)
-      logger.error("\n\n\ngetCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
+      logger.error("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }
 
@@ -1463,15 +1464,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public ServerProperties getServerProps() {
     return serverProps;
   }
-
-  /**
-   * TODOx : are we going to support this?
-   *
-   * @return
-   */
-/*  private AddRemoveDAO getAddRemoveDAO() {
-    return null;//addRemoveDAO;
-  }*/
 
   /**
    * @param out

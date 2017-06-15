@@ -738,7 +738,20 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   private Set<Integer> getWithContext(boolean male, int projid) {
-    return getAudioExercisesForGender(male, AudioType.CONTEXT_REGULAR.toString(), projid);
+    Set<Integer> audioExercisesForGender = getAudioExercisesForGender(male, AudioType.CONTEXT_REGULAR.toString(), projid);
+
+    logger.info("context for " + projid+ " " + male + " " + audioExercisesForGender.size());
+
+    Set<Integer> audioExercisesForGenderBothSpeeds = new HashSet<>(getAudioExercisesForGenderBothSpeeds(
+        male,
+        AudioType.REGULAR.toString(),
+        AudioType.SLOW.toString(),
+        projid
+    ));
+
+    audioExercisesForGenderBothSpeeds.addAll(audioExercisesForGender);
+
+    return audioExercisesForGenderBothSpeeds;
   }
 
   abstract Set<Integer> getAudioExercisesForGender(boolean male,

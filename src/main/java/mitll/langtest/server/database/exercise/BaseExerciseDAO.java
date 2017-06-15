@@ -60,7 +60,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final String ENGLISH = "english";
   private static final String MISSING_ENGLISH = "missing english";
   private static final boolean DEBUG = false;
-  public static final String SEMI = ";";
+  private static final String SEMI = ";";
 
   private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
 
@@ -72,21 +72,14 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private final boolean addDefects;
 
   private List<CommonExercise> exercises = null;
-   AddRemoveDAO addRemoveDAO;
+  AddRemoveDAO addRemoveDAO;
   /**
    * @see #addNewExercises
    * @see #addOverlays
    * @see #setDependencies
    */
-   IUserExerciseDAO userExerciseDAO;
-  /**
-   * TODO : what's the story here?
-   * @seex #attachAudio
-   *
-   */
-  //private AttachAudio attachAudio;
+  IUserExerciseDAO userExerciseDAO;
   private IAudioDAO audioDAO;
-  //private final int id;
 
   /**
    * @param serverProps
@@ -170,7 +163,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
     // add new items
     addNewExercises();
-   // attachAudio();
+    // attachAudio();
   }
 
 
@@ -209,7 +202,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see #afterReadingExercises
    */
   private void populateIdToExercise() {
-   // logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
+    // logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
     for (CommonExercise e : exercises) {
       idToExercise.put(e.getID(), e);
       idToExercise.put(e.getDominoID(), e);
@@ -218,7 +211,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     int listSize = exercises.size();
     int mapSize = idToExercise.size();
     if (listSize != mapSize) {
-      logger.warn("populateIdToExercise exercises num = " +listSize + " but id->ex " + mapSize);
+      logger.warn("populateIdToExercise exercises num = " + listSize + " but id->ex " + mapSize);
     }
   }
 
@@ -395,7 +388,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       CommonExercise commonExercise = idToExercise.get(id);
       if (commonExercise == null) {
         if (warns++ < 50)
-          logger.warn(this + " couldn't find exercise " + id + " in " + idToExercise.size() + " exercises");
+          logger.warn(this + " couldn't find exercise " + id + " in " + idToExercise.size() + " exercises (" + warns + " warned)");
       }
       return commonExercise;
     }
@@ -553,5 +546,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     }
   }
 
-  public void updatePhones(int id,int count){}
+  public void updatePhones(int id, int count) {
+  }
 }

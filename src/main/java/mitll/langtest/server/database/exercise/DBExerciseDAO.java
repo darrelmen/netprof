@@ -53,6 +53,7 @@ import static mitll.langtest.server.database.exercise.SectionHelper.SUB_TOPIC;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
+
   private final SlickUserExerciseDAO userExerciseDAO;
   private final SlickProject project;
   private final Project fullProject;

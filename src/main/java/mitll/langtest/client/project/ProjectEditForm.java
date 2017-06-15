@@ -39,9 +39,9 @@ public class ProjectEditForm extends UserDialog {
   private static final String NAME = "Name";
   private static final String PROJECT_NAME = "Project Name";
   //public static final String FIRST_TYPE = "First Type";
-  private static final String FIRST_TYPE_HINT = "First type (e.g. Unit)";
+  private static final String FIRST_TYPE_HINT = "First (e.g. Unit)";
   //public static final String SECOND_TYPE = "Second Type";
-  private static final String SECOND_TYPE_HINT = "Second type (e.g. Chapter) OPTIONAL";
+  private static final String SECOND_TYPE_HINT = "Second (e.g. Chapter) OPTIONAL";
 
   //private static final String HYDRA_PORT = "Hydra Port";
   private static final String LANGUAGE_MODEL = "Language Model";
@@ -227,10 +227,10 @@ public class ProjectEditForm extends UserDialog {
 
     {
       DivWidget typesRow = getHDivLabel(fieldset, "Hierarchy");
-      unit = getName(typesRow, info.getFirstType(), FIRST_TYPE_HINT, 100, 30);
+      unit = getName(typesRow, info.getFirstType(), FIRST_TYPE_HINT, 150, 40);
       unit.setText(info.getFirstType());
 
-      chapter = getName(typesRow, info.getSecondType(), SECOND_TYPE_HINT, 100, 30);
+      chapter = getName(typesRow, info.getSecondType(), SECOND_TYPE_HINT, 150, 40);
       chapter.setText(info.getSecondType());
     }
 

@@ -1107,6 +1107,7 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * TODO : really should do this in batch!
    * @param exercise
    * @see mitll.langtest.server.services.ExerciseServiceImpl#addAnnotations
    * @see #markAllFieldsFixed

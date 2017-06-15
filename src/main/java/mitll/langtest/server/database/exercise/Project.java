@@ -64,7 +64,7 @@ public class Project implements PronunciationLookup {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
   /**
-   * @see #getWebserviceHost
+   * @see mitll.langtest.server.services.ProjectServiceImpl#getHydraHost(SlickProject)
    */
   public static final String WEBSERVICE_HOST = "webserviceHost";
   /**

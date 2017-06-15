@@ -319,10 +319,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   Set<Integer> getAudioExercisesForGender(boolean isMale,
                                           String audioSpeed,
                                           int projid) {
-    if (database.getServerProps().shouldCheckAudioTranscript()) {
-      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
-    }
-
+//    if (database.getServerProps().shouldCheckAudioTranscript()) {
+//      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
+//    }
     Map<Integer, Collection<Tuple2<Integer, Integer>>> audioForGender1 = dao.getAudioForGender(audioSpeed, projid,isMale?0:1);
     Set<Pair> genderMatch = getGenderMatch(audioForGender1);
     return getExercises(genderMatch);
@@ -334,20 +333,18 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param slowSpeed
    * @param projid
    * @return
-   * @see #getRecordedBySameGender(int, Map, int)
+   * @see #getRecordedBySameGender
    */
   @Override
   Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale,
                                                     String regSpeed,
                                                     String slowSpeed,
                                                     int projid) {
-    if (database.getServerProps().shouldCheckAudioTranscript()) {
-      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
-    }
-
+//    if (database.getServerProps().shouldCheckAudioTranscript()) {
+//      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
+//    }
     Tuple2<Map<Integer, Collection<Tuple2<Integer, Integer>>>,
         Map<Integer, Collection<Tuple2<Integer, Integer>>>> audioForGenderBothRecorded = dao.getAudioForGenderBothRecorded(regSpeed, slowSpeed, projid, isMale ? 0 : 1);
-
 
     Map<Integer, Collection<Tuple2<Integer, Integer>>> regSpeedPairs = audioForGenderBothRecorded._1();
     Map<Integer, Collection<Tuple2<Integer, Integer>>> slowSpeedPairs = audioForGenderBothRecorded._2();
@@ -362,6 +359,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
     regExids.retainAll(slowExids);
 
+    logger.info("getAudioExercisesForGenderBothSpeeds found " + regExids.size() + " for " + isMale + " " + regSpeed+ " " + slowSpeed + " for " + projid);
     return regExids;
   }
 

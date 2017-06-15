@@ -206,9 +206,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     List<CommonExercise> commonExercises = getSortedExercises(request, exercisesForSearch, predefExercises, request.getUserID());
     ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises);
 
-    if (request.isNoFilter()) {
-      rememberCachedWrapper(projectID, exerciseListWrapper);
-    }
+//    if (request.isNoFilter()) {
+//      rememberCachedWrapper(projectID, exerciseListWrapper);
+//    }
     return exerciseListWrapper;
   }
 
@@ -313,9 +313,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return null;
   }*/
 
+/*
   private void addScoresForAll(int userid, List<T> exercises) {
     db.getResultDAO().addScoresForAll(userid, exercises);
   }
+*/
 
   /**
    * TODO: How does this work with multiple simultaneous users???
@@ -905,7 +907,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       List<CommonExercise> exercises,
       int projid) {
     if (request.isOnlyUnrecordedByMe()) {
-      return getUnrecordedExercises(request.getUserID(), exercises, projid, request.isOnlyExamples());
+      return getUnrecordedExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples());
     } else {
       return request.isOnlyExamples() ? getExercisesWithContext(exercises) : exercises;
     }
@@ -922,36 +924,46 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    */
   @NotNull
-  private List<CommonExercise> getUnrecordedExercises(int userID,
-                                                      Collection<CommonExercise> exercises,
-                                                      int projid,
-                                                      boolean onlyExamples) {
+  private List<CommonExercise> getUnrecordedExercisesMatchingGender(int userID,
+                                                                    Collection<CommonExercise> exercises,
+                                                                    int projid,
+                                                                    boolean onlyExamples) {
 
     Set<Integer> allExercises = new HashSet<>();
-    for (CommonShell exercise : exercises) {
-      allExercises.add(exercise.getID());
+    for (CommonExercise exercise : exercises) {
+      if (onlyExamples) {
+        for (CommonExercise dir : exercise.getDirectlyRelated()) {
+          allExercises.add(dir.getID());
+        }
+      } else {
+        allExercises.add(exercise.getID());
+      }
     }
 
-    //logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
     Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples);
+    logger.debug("getUnrecordedExercisesMatchingGender all exercises " + allExercises.size() + " for " + projid + " userid " + userID +
+        " removing " + recordedBySameGender.size());
     allExercises.removeAll(recordedBySameGender);
-    // logger.debug("after all exercises " + allExercises.size());
+    logger.debug("getUnrecordedExercisesMatchingGender after all exercises " + allExercises.size());
 
     List<CommonExercise> copy = new ArrayList<>();
-    Set<Integer> seen = new HashSet<>();
+    // Set<Integer> seen = new HashSet<>();
     for (CommonExercise exercise : exercises) {
       int id = exercise.getID();
-      if (allExercises.contains(id)) {
-        if (seen.contains(id)) logger.error("saw " + id + " " + exercise + " again!");
-        if (!onlyExamples || hasContext(exercise)) {
-          seen.add(id);
-          copy.addAll(exercise.getDirectlyRelated());
+      if (onlyExamples) {
+        for (CommonExercise dir : exercise.getDirectlyRelated()) {
+          if (allExercises.contains(dir.getID())) {
+            copy.add(dir);
+          }
+        }
+      } else {
+        if (allExercises.contains(id)) {
+          copy.add(exercise);
         }
       }
     }
 
-//    getExercisesWithContext();
-    //logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
+    logger.debug("getUnrecordedExercisesMatchingGender to be recorded " + copy.size() + " from " + exercises.size());
 
     return copy;
   }
@@ -1284,11 +1296,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises");
 
+/*
     if (ids.size() > toAddAudioTo.size()) {
 //      logger.info("getFullExercises decreased from " + ids.size() + " to " + toAddAudioTo.size());
     } else {
 //      logger.info("getFullExercises getting " + ids.size() + " exercises");
     }
+*/
 
     if (!toAddAudioTo.isEmpty()) {
       then = System.currentTimeMillis();
@@ -1314,7 +1328,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
 
-    then = System.currentTimeMillis();
+    addScoreHistories(ids, exercises, userID);
+
+    return new ExerciseListWrapper<>(reqid, exercises, null);//, scoreHistories);
+  }
+
+  private void addScoreHistories(Collection<Integer> ids, List<CommonExercise> exercises, int userID) {
+    long then = System.currentTimeMillis();
     Map<Integer, List<CorrectAndScore>> scoreHistories = getScoreHistories(ids, exercises, userID);
 
     for (CommonExercise exercise : exercises) {
@@ -1326,11 +1346,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
 
-    now = System.currentTimeMillis();
+    long now = System.currentTimeMillis();
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
-
-    return new ExerciseListWrapper<>(reqid, exercises, null);//, scoreHistories);
   }
 
   private void addAlignmentOutput(int projectID, Set<CommonExercise> toAddAudioTo) {
@@ -1481,7 +1499,15 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return typeToEndTimes;
   }
 
-
+  /**
+   * TODO : don't add annotations one at a time.
+   *
+   * @param ids
+   * @param exercises
+   * @param projectID
+   * @return
+   * @see #getFullExercises(int, Collection)
+   */
   @NotNull
   private Set<CommonExercise> getCommonExercisesWithoutAudio(Collection<Integer> ids,
                                                              List<CommonExercise> exercises,
@@ -1491,15 +1517,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
       addAnnotations(byID); // todo do this in a better way
-      if (byID.getAudioAttributes().isEmpty()) {
+      if (byID.getAudioAttributes().isEmpty() || true) {
         toAddAudioTo.add(byID);
         logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
       }
-//      else if (exid == 36738) {
-//        for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
-//          logger.info("audio " + audioAttribute);
-//        }
-//      }
       exercises.add(byID);
     }
     return toAddAudioTo;

@@ -210,7 +210,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       Project project = db.getProject(projectid);
       Collection<String> typeOrder2 = project.getTypeOrder();
 
-      setAttributes(projectid, newEx, updateEx, typeOrder2);
+     // setAttributes(projectid, newEx, updateEx, typeOrder2);
 
       new ExerciseCopy().addExercises(importUser,
           projectid,
@@ -241,7 +241,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @param typeOrder2
    * @see #addPending
    */
-  @NotNull
+/*  @NotNull
   private void setAttributes(int projectid,
                              List<CommonExercise> newEx,
                              List<CommonExercise> updateEx,
@@ -251,26 +251,26 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     //  logger.info("typeorder for " +projectid + " is " + typeOrder);
     logger.info("addPending typeorder for " + projectid + " is " + typeOrder2);
 
-    Map<String, ExerciseAttribute> pairToAttr = new HashMap<>();
-    for (CommonExercise ex : newEx) {
-      postProcessUnitToValueToGetAttributes(toLower, pairToAttr, ex);
-    }
-    for (CommonExercise ex : updateEx) {
-      postProcessUnitToValueToGetAttributes(toLower, pairToAttr, ex);
-    }
+//    Map<String, ExerciseAttribute> pairToAttr = new HashMap<>();
+//    for (CommonExercise ex : newEx) {
+//      postProcessUnitToValueToGetAttributes(toLower, pairToAttr, ex);
+//    }
+//    for (CommonExercise ex : updateEx) {
+//      postProcessUnitToValueToGetAttributes(toLower, pairToAttr, ex);
+//    }
     logger.info("addPending importing " + newEx.size() + " exercises, updating " +
         updateEx.size() +
         " ex->attr " + pairToAttr.size());
-  }
+  }*/
 
   /**
-   * Initially attributes are stored in the unit->value map.
+   * NOPE Initially attributes are stored in the unit->value map.
    *
    * @param typeOrder
    * @param pairToAttr
    * @param ex
    */
-  private void postProcessUnitToValueToGetAttributes(Collection<String> typeOrder,
+/*  private void postProcessUnitToValueToGetAttributes(Collection<String> typeOrder,
                                                      Map<String, ExerciseAttribute> pairToAttr,
                                                      CommonExercise ex) {
     Map<String, String> unitToValue = ex.getUnitToValue();
@@ -315,7 +315,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         "\n\tex          " + ex.getID() +
         "\n\tunit->value " + ex.getUnitToValue() +
         "\n\tattr        " + ex.getAttributes());
-  }
+  }*/
 
   /**
    * @param projectid

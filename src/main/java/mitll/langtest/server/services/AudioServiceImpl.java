@@ -188,6 +188,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
       MiniUser.Gender realGender = byID == null ? MiniUser.Gender.Unspecified : byID.getRealGender();
       audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), commonExercise, exerciseID, audioAnswer, realGender));
+
+//      commonExercise.clearAudio();
     } //else {
     // So Wade has observed that this really messes up the ASR -- silence doesn't appear as silence after you multiply
     // the signal.  Also, the user doesn't get feedback that their mic gain is too high/too low or that they
