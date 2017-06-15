@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -99,9 +100,19 @@ public class StartupInfo implements IsSerializable {
     return all;
   }
 
+  /**
+   * Not sure when these could be out of sync but...
+   * @param id
+   * @return
+   */
   public String getHost(int id) {
-    String host = getAllProjects().stream().filter(slimProject -> slimProject.getID() == id).findFirst().get().getHost();
-    return (host.equals(Project.WEBSERVICE_HOST_DEFAULT)) ? "" : host;
+    List<SlimProject> withThisID = getAllProjects().stream().filter(slimProject -> slimProject.getID() == id).collect(Collectors.toList());
+
+    if (withThisID.isEmpty()) return "";
+    else {
+      String host = withThisID.iterator().next().getHost();
+      return (host.equals(Project.WEBSERVICE_HOST_DEFAULT)) ? "" : host;
+    }
   }
 
   /**
