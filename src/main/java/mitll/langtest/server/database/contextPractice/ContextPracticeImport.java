@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
  *
  * @author <a href="mailto:Jennifer.Melot@ll.mit.edu">Jennifer Melot</a>
  * @since 9/15/15.
+ * @deprecated
  */
 public class ContextPracticeImport {
   private final Pattern dialogEx = Pattern.compile("^\\s*Title\\s*:\\s*(.*)$");

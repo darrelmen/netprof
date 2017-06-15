@@ -947,7 +947,8 @@ public class ListManager implements RequiresResize {
                   ul.addExercise(exercise);
                 }
                 tabPanel.selectTab(0);
-
+                editItem.reload();
+//                showEditItem();
                 //logger.info("after  " + ul.getExercises().size());
                 //     reallyShowLearnTab(tabPanel, learnTab, ul, instanceName);
               }
@@ -972,8 +973,7 @@ public class ListManager implements RequiresResize {
    * @param instanceName1
    * @param isReview
    * @param isComment
-   * @param toSelect
-   * @paramx isAttention
+
    * @see #getListOperations
    */
   private void selectTabGivenHistory(TabPanel tabPanel,

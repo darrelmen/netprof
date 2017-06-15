@@ -52,6 +52,7 @@ import java.sql.Statement;
  * @since 12/31/12
  * Time: 5:00 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
 public class PostgreSQLConnection implements DatabaseConnection {
   private static final Logger logger = LogManager.getLogger(PostgreSQLConnection.class);

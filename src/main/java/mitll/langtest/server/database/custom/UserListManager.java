@@ -773,7 +773,7 @@ public class UserListManager implements IUserListManager {
 
     int contextID = 0;
     try {
-      contextID = makeContextExercise(userExercise, newExerciseID, contextID, projectID);
+      contextID = makeContextExercise(userExercise, newExerciseID, projectID);
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
@@ -790,9 +790,9 @@ public class UserListManager implements IUserListManager {
     return userDAO.getDatabase().getTypeOrder(projectID);
   }
 
-  private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int contextID, int projectID) {
+  private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int projectID) {
     Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
-    contextID = userExerciseDAO.add(userExercise1, false, true, getTypeOrder(projectID));
+    int contextID = userExerciseDAO.add(userExercise1, false, true, getTypeOrder(projectID));
     userExerciseDAO.addContextToExercise(newExerciseID, contextID, projectID);
     userExercise.getDirectlyRelated().add(userExercise1);
     return contextID;

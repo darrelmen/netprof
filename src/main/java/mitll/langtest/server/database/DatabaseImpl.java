@@ -225,12 +225,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
                       ServletContext servletContext*/) {
     this(serverProps.useH2() ?
             new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify, readOnly) :
-            serverProps.usePostgres() ?
-                new PostgreSQLConnection(dbName, logAndNotify) :
-                null,
+//            serverProps.usePostgres() ?
+//                new PostgreSQLConnection(dbName, logAndNotify) :
+            null,
         configDir, relativeConfigDir, dbName,
         serverProps,
-        pathHelper, logAndNotify/*,servletContext*/);
+        pathHelper, logAndNotify);
   }
 
   public DatabaseImpl(DatabaseConnection connection,
@@ -514,9 +514,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @param id
    * @return
+   * @seex #deleteItem(int, int)
    * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
-   * @seex #deleteItem(int, int)
    * @see #getCustomOrPredefExercise(int, int)
    */
   @Override
@@ -601,7 +601,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.server.database.security.UserSecurityManager#setSessionUser
    * @see UserServiceImpl#getUserFromSession
    */
-  public void setStartupInfo(User userWhere) {  setStartupInfo(userWhere, projectForUser(userWhere.getID()));  }
+  public void setStartupInfo(User userWhere) {
+    setStartupInfo(userWhere, projectForUser(userWhere.getID()));
+  }
 
   /**
    * @param userWhere
@@ -651,16 +653,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
       synchronized (this) {
         boolean isURL = serverProps.getLessonPlan().startsWith("http");
         boolean amas = isAmas();
-       // int numExercises;
+        // int numExercises;
 
         if (amas) {
 //          logger.info("Got " + lessonPlanFile);
           // TODO : get media directory from properties
           // TODO : get install path directory from properties
           //numExercises =
-              readAMASExercises(lessonPlanFile, "", "", isURL);
+          readAMASExercises(lessonPlanFile, "", "", isURL);
         } else {
-        //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFile);
+          //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFile);
 
           makeExerciseDAO(lessonPlanFile);
 
@@ -909,7 +911,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   *
    * @param projid
    * @return
    */
@@ -1617,7 +1618,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       //if (!debug) ensureMP3s(exercise);
       // exercises.add(getJsonForExercise(exercise));
     }
-    logger.info(project.getProject().name() + "/"+project.getLanguage() +
+    logger.info(project.getProject().name() + "/" + project.getLanguage() +
         " took " + (System.currentTimeMillis() - then) +
         " millis to attachAllAudio to " + exercises.size() + " exercises");
   }

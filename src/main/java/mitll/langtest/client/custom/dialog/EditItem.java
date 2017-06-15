@@ -72,8 +72,6 @@ public class EditItem {
 
   private final ExerciseController controller;
 
-//  private final ReloadableContainer predefinedContentList;
-
   private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   private final String instanceName;
 
@@ -83,10 +81,12 @@ public class EditItem {
    */
   public EditItem(ExerciseController controller) {
     this.controller = controller;
-    //   this.predefinedContentList = predefinedContentList;
-    this.instanceName = "EditItem";//instanceName;
+    this.instanceName = "EditItem";
   }
 
+  public void reload() {
+    exerciseList.getExercises();
+  }
   /**
    * @param originalList
    * @return
@@ -133,7 +133,6 @@ public class EditItem {
                                                                            UserList<CommonShell> originalList
   ) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
-
     exerciseList = new EditableExerciseList(controller, this, right, instanceName, originalList);
     setFactory(exerciseList, originalList);
     exerciseList.setUnaccountedForVertical(280);   // TODO do something better here

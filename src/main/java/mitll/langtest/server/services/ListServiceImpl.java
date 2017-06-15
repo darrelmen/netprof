@@ -276,7 +276,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     boolean firstColIsEnglish = false;
     List<CommonExercise> newItems = new ArrayList<>();
 
-    logger.info("currently know about " + currentKnownFL.size());
+    logger.info("convertTextToExercises currently know about " + currentKnownFL.size());
 
     int userIDFromSession = getUserIDFromSession();
 
@@ -287,15 +287,22 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
         String fl = parts[0];
         String english = parts[1];
 
+
         if (onFirst && english.equalsIgnoreCase(getProject().getLanguage())) {
-          logger.info("reallyCreateNewItems skipping header line");
+          logger.info("convertTextToExercises skipping header line");
           firstColIsEnglish = true;
         } else {
-          if (!currentKnownFL.contains(fl)) {
-            CommonExercise known = makeOrFindExercise(newItems, firstColIsEnglish, projectID, userIDFromSession, fl, english);
-            if (known != null) knownAlready.add(known);
+          if (fl.trim().isEmpty()) {
+            logger.warn("convertTextToExercises skipping line " + line);
           } else {
-            logger.info("skipping " + fl + " that's already on the list.");
+            if (!currentKnownFL.contains(fl)) {
+              CommonExercise known = makeOrFindExercise(newItems, firstColIsEnglish, projectID, userIDFromSession, fl, english);
+              logger.info("convertTextToExercises made or found " + fl + "=" + english);
+
+              if (known != null) knownAlready.add(known);
+            } else {
+              logger.info("convertTextToExercises skipping " + fl + " that's already on the list.");
+            }
           }
         }
       }
