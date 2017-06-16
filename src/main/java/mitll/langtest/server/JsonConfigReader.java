@@ -27,7 +27,7 @@ class JsonConfigReader {
 
   /**
    * Read json file.
-   *
+   * @see ServerProperties#useProperties
    * @param configDir
    * @throws FileNotFoundException
    */

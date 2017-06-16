@@ -36,6 +36,7 @@ import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
+import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
@@ -119,6 +120,9 @@ public class DownloadServlet extends DatabaseServlet {
         int projid = getProject(request);
 
         if (projid == -1) {
+          projid = getProjectIDFromUser(request, response);
+        }
+        if (projid == -1) {
           logger.warn("doGet no current project for request ");
           response.setContentType("text/html");
           response.getOutputStream().write("no project for request".getBytes());
@@ -173,6 +177,27 @@ public class DownloadServlet extends DatabaseServlet {
     closeOutputStream(response);
   }
 
+  /**
+   *
+   * @param request
+   * @param response not used actually - consider removing...
+   * @return
+   * @throws DominoSessionException
+   */
+  private int getProjectIDFromUser(HttpServletRequest request, HttpServletResponse response) throws DominoSessionException {
+    logger.info("doGet no project id on session, let's try the security manager");
+    User loggedInUser = securityManager.getLoggedInUser(request, response);
+   int projid = -1;
+   if (loggedInUser != null) {
+      logger.debug("doGet found session user " + loggedInUser.getUserID());
+      projid = getMostRecentProjectByUser(loggedInUser.getID());
+    }
+    else {
+      logger.warn("doGet couldn't find user via request...");
+    }
+    return projid;
+  }
+
   private void closeOutputStream(HttpServletResponse response) {
     try {
       response.getOutputStream().close();
@@ -181,6 +206,11 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @param splitArgs
+   * @return
+   */
   private AudioExportOptions getAudioExportOptions(String[] splitArgs) {
     AudioExportOptions options = new AudioExportOptions();
     for (String arg : splitArgs) {
@@ -191,7 +221,7 @@ public class DownloadServlet extends DatabaseServlet {
       else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
       else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
       else {
-        logger.error("huh? got unexpected arg" + arg);
+        logger.error("huh? got unexpected arg '" + arg +"'");
       }
     }
     return options;

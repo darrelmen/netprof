@@ -32,8 +32,6 @@
 
 package mitll.langtest.server;
 
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import org.apache.logging.log4j.LogManager;
@@ -58,17 +56,6 @@ public class DatabaseServlet extends HttpServlet {
   ServerProperties serverProps;
   PathHelper pathHelper;
   IUserSecurityManager securityManager;
-
-  /**
-   * @param wavFile
-   * @param trackInfo
-   * @seex mitll.langtest.server.ScoreServlet#ensureMP3Later
-   */
-//  void writeCompressedVersions(String wavFile, TrackInfo trackInfo) {
-//    File absolutePathToWav = new File(wavFile);
-//    if (!absolutePathToWav.exists()) logger.error("no file at " +absolutePathToWav);
-//    String s = new AudioConversion(serverProps).writeCompressedVersions(absolutePathToWav, false, trackInfo);
-//  }
 
   /**
    * @see DownloadServlet#init

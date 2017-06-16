@@ -60,6 +60,8 @@ import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.custom.INavigation.VIEWS.LISTS;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -410,7 +412,21 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 //      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
 //          " with " + exToCorrect + " and latest " + latestResultID + " and ids " + copies);
 
-      controller.getService().getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getID(), new AsyncCallback<AVPScoreReport>() {
+      int userListID = ul == null ? -1 : ul.getID();
+
+      String lists = "Lists";
+      if (selection.containsKey(lists)) {
+        Collection<String> strings = selection.get(lists);
+        try {
+          if (!strings.isEmpty()) userListID = Integer.parseInt(strings.iterator().next());
+        } catch (NumberFormatException e) {
+          logger.warning("couldn't parse list id???");
+        }
+      }
+
+      // TODO simplify this
+
+      controller.getService().getUserHistoryForList(user, copies, latestResultID, selection, userListID, new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
           logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
@@ -418,8 +434,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
         @Override
         public void onSuccess(AVPScoreReport scoreReport) {
-          // List<AVPHistoryForList> result = scoreReport.getAvpHistoryForLists();
-          showFeedbackCharts(/*result,*/ scoreReport.getSortedHistory());
+          showFeedbackCharts(scoreReport.getSortedHistory());
         }
       });
     }

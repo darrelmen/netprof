@@ -71,7 +71,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       "<p>Try clearing one of your selections or changing the search.</p>";
 
   private static final int LIST_HEIGHT = 450;
-   /**
+  /**
    * @see #showEmptyExercise
    */
   private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
@@ -97,7 +97,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private UserState userState;
   ListOptions listOptions;
 
@@ -129,10 +129,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
 //    if (DEBUG) logger.info("ExerciseList.addWidgets for currentExerciseVPanel " + currentExerciseVPanel.getElement().getExID() + " instance " + getInstance());
-    // this.innerContainer = new DivWidget();
     this.innerContainer = new SimplePanel();
     innerContainer.getElement().setId("ExerciseList_innerContainer");
-    //innerContainer.getElement().getStyle().setWidth(100, Style.Unit.PCT);
     innerContainer.setWidth("100%");
     innerContainer.addStyleName("floatLeftAndClear");
 
@@ -167,13 +165,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   protected abstract ExerciseListRequest getRequest(String prefix);
-/*
-  {
-    return new ExerciseListRequest(incrRequest(), getUser())
-        .setActivityType(getActivityType())
-        .setIncorrectFirstOrder(listOptions.isIncorrectFirst());
-  }
-*/
 
   int incrRequest() {
     return ++lastReqID;
@@ -197,7 +188,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (DEBUG) {
       logger.info("ExerciseList.reloadWith id = " + id + " for user " + getUser() + " instance " + getInstance());
     }
-    service.getExerciseIds(getRequest(""), new SetExercisesCallbackWithID(id));
+    ExerciseListRequest request = getRequest("");
+    service.getExerciseIds(request, new SetExercisesCallbackWithID(id, request));
   }
 
   /**
@@ -277,7 +269,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     public void onFailure(Throwable caught) {
-      logger.warning("SetExercisesCallback.onFailure " + lastReqID);
+//      logger.warning("SetExercisesCallback.onFailure " + lastReqID);
       showFinishedGettingExercises();
       dealWithRPCError(caught);
     }
@@ -287,7 +279,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       if (DEBUG) {
         List<T> exercises = result.getExercises();
         if (exercises == null)
-        logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results");
+          logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results");
       }
       if (isStaleResponse(result)) {
         if (DEBUG)
@@ -303,15 +295,20 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
+  /**
+   * TODO : why do we need two of these????
+   */
   private class SetExercisesCallbackWithID implements AsyncCallback<ExerciseListWrapper<T>> {
     private final int id;
+    private final ExerciseListRequest request;
 
     /**
      * @param id
      * @see #reloadWith
      */
-    SetExercisesCallbackWithID(int id) {
+    SetExercisesCallbackWithID(int id, ExerciseListRequest request) {
       this.id = id;
+      this.request = request;
       if (DEBUG) logger.info("ExerciseList.SetExercisesCallbackWithID id = " + id);
     }
 
@@ -327,7 +324,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " +
             id);
       if (isStaleResponse(result)) {
-        if (DEBUG || true)
+        if (DEBUG)
           logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
               " b/c before latest " + lastReqID);
       } else {
@@ -336,13 +333,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     private void useExercises(ExerciseListWrapper<T> result) {
+      lastSuccessfulRequest = request;
       List<T> exercises = result.getExercises();
       checkForEmptyExerciseList(exercises.isEmpty());
       exercises = rememberExercises(exercises);
       for (ListChangeListener<T> listener : listeners) {
         listener.listChanged(exercises, "");
       }
-      if (DEBUG || true) logger.info("\tExerciseList.SetExercisesCallbackWithID onSuccess id = " + id);
+      if (DEBUG) logger.info("\tExerciseList.SetExercisesCallbackWithID onSuccess id = " + id);
 
       pushFirstSelection(id, "");
     }
@@ -567,7 +565,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   public void loadExercise(int itemID) {
 //   if (DEBUG) logger.info("ExerciseList.loadExercise itemID " + itemID);
-    pushNewItem(""+itemID, itemID);
+    pushNewItem("" + itemID, itemID);
   }
 
   /**
@@ -581,7 +579,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     if (hasExercise(id)) {
-     //  logger.info("checkAndAskServer for " + id);
+      //  logger.info("checkAndAskServer for " + id);
       askServerForExercise(id);
     } else {
       logger.warning("checkAndAskServer : skipping request for " + id);
@@ -612,7 +610,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       showExercise(cachedNext);
     } else {
       pendingReq = true;
-      if (DEBUG || true) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
+      if (DEBUG) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + getInstance());
       service.getExercise(itemID, false, new ExerciseAsyncCallback());
     }
 
@@ -643,10 +641,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return userState.getUser();
   }
 
-/*  public void clearCachedExercise() {
-    cachedNext = null;
-  }*/
-
   /**
    * @param commonExercise
    * @see #rememberAndLoadFirst
@@ -672,7 +666,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   void addExerciseWidget(U commonExercise) {
     createdPanel = factory.getExercisePanel(commonExercise);
     // logger.info("Add exercise widget "  + commonExercise.getID());
-    //  innerContainer.add(createdPanel);
     innerContainer.setWidget(createdPanel);
   }
 
@@ -732,13 +725,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #removeExercise
    */
   void removeCurrentExercise() {
-    logger.info("removeCurrentExercise clear container --- >");
+//    logger.info("removeCurrentExercise clear container --- >");
     clearExerciseContainer();
     innerContainer.getParent().removeStyleName("shadowBorder");
   }
 
   void clearExerciseContainer() {
-   // logger.info("clearing container --- >");
+    // logger.info("clearing container --- >");
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //    logger.info("call stack "+ exceptionAsString);
     innerContainer.clear();
@@ -748,11 +741,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Compare with google response for this state.
    */
   void showEmptyExercise() {
-  //  logger.info("showEmptyExercise --- ");
+    //  logger.info("showEmptyExercise --- ");
     createdPanel = new SimplePanel(new Heading(3, EMPTY_SEARCH));
     createdPanel.addStyleName("leftFiveMargin");
     createdPanel.getElement().setId(EMPTY_PANEL);
-    //innerContainer.add(createdPanel);
     innerContainer.setWidget(createdPanel);
   }
 

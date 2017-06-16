@@ -2,8 +2,6 @@ package mitll.langtest.shared.user;
 
 import mitll.langtest.shared.exercise.HasID;
 
-import java.io.File;
-
 /**
  * Created by go22670 on 1/8/17.
  */

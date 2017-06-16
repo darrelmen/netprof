@@ -151,8 +151,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   protected ExerciseListRequest getRequest(String prefix) {
-    logger.info("isOnlyExamples " + isOnlyExamples());
-
+   // logger.info("isOnlyExamples " + isOnlyExamples());
     return new ExerciseListRequest(incrRequest(),
         controller.getUserState().getUser())
         .setPrefix(prefix)

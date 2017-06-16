@@ -36,7 +36,6 @@ import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
-import mitll.langtest.client.scoring.RefAudioListener;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
@@ -250,35 +249,44 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
 
     if (hasModel) {
-      logger.info("recalcAlignments  recalc " +audioIDs.isEmpty() + " audio ids");
+      logger.info("recalcAlignments recalc " +audioIDs.size() + " audio ids");
+
       if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
+
       for (Integer audioID : audioIDs) {
         // do we have alignment for this audio in the map
         ISlimResult cachedResult = audioToResult.get(audioID);
-
-        if (cachedResult == null) { // nope, ask the database
-          cachedResult = db.getRefResultDAO().getResult(audioID);
-        }
-
-        if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now
-          if (cachedResult != null && !cachedResult.isValid()) {
-            boolean b = db.getRefResultDAO().removeByAudioID(audioID);
-            logger.error("getAlignmentsFromDB remove invalid ref result for audio id " + audioID + " = " + b);
-          }
-
-          PretestScore pretestScore = recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
-          if (pretestScore != null) {
-            idToAlignment.put(audioID, pretestScore);
-          }
-        } else {
-          getCachedAudioRef(idToAlignment, audioID, cachedResult);  // OK, let's translate the db info into the alignment output
-        }
+        recalcOne(projid, audioID, audioFileHelper, userIDFromSession, cachedResult, idToAlignment);
       }
     } else {
       logger.info("recalcAlignments : no hydra for project " + projid + " so not recalculating alignments.");
     }
 
     return idToAlignment;
+  }
+
+  private void recalcOne(int projid, Integer audioID,
+                         AudioFileHelper audioFileHelper,
+                         int userIDFromSession,
+                         ISlimResult cachedResult,
+                         Map<Integer, AlignmentOutput> idToAlignment) {
+    if (cachedResult == null) { // nope, ask the database
+      cachedResult = db.getRefResultDAO().getResult(audioID);
+    }
+
+    if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now
+      if (cachedResult != null && !cachedResult.isValid()) {
+        boolean b = db.getRefResultDAO().removeByAudioID(audioID);
+        logger.error("getAlignmentsFromDB remove invalid ref result for audio id " + audioID + " = " + b);
+      }
+
+      PretestScore pretestScore = recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
+      if (pretestScore != null) {
+        idToAlignment.put(audioID, pretestScore);
+      }
+    } else {
+      getCachedAudioRef(idToAlignment, audioID, cachedResult);  // OK, let's translate the db info into the alignment output
+    }
   }
 
   private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult) {

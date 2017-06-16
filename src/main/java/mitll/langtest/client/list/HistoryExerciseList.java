@@ -343,6 +343,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         request);
   }
 
+  /**
+   *
+   * @param selectionState
+   * @param newState
+   */
   private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
     logger.info("loadFromSelectionState" +
         " old state " + selectionState.getInfo() +
@@ -407,7 +412,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     SelectionState selectionState = getSelectionState(value);
 
     if (selectionState.getProject() != controller.getProjectStartupInfo().getProjectid()) {
-      //controller.
       // TODO : change the project --- ... and come back and call code below.
       if (selectionState.getProject() != 0) {
         logger.info("onValueChange project from state " + selectionState.getProject() + " != " + controller.getProjectStartupInfo().getProjectid());
@@ -510,7 +514,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     ExerciseListRequest request =
         getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
 
-  //  logger.info("loadExercisesUsingPrefix got " + typeToSection + " prefix " + prefix + " and made " + request);
+    logger.info("loadExercisesUsingPrefix got " + typeToSection + " prefix " + prefix + " and made " + request +
+        "\n\tlast " +lastSuccessfulRequest);
 
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {
       try {

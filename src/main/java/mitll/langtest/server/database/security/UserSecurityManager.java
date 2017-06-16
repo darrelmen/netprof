@@ -444,7 +444,7 @@ public class UserSecurityManager implements IUserSecurityManager {
     } else {
       HttpSession session = getCurrentSession(request);
       if (session == null) {
-        log.info("no current session for request " +request);
+        log.info("getUserIDFromRequest no current session for request " +request);
         return -1;
       } else {
         return getUserIDFromSession(session);
@@ -485,7 +485,7 @@ public class UserSecurityManager implements IUserSecurityManager {
       log.warn("lookupUserFromDBSession no user for session " + sid + " in database?");
       return null;
     } else {
-      return userDAO.getByID(userForSession);//rememberUser(userForSession);
+      return userDAO.getByID(userForSession);
     }
   }
 
