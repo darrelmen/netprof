@@ -116,8 +116,6 @@ public class ServerProperties {
   private static final String NP_SERVER = "np.ll.mit.edu";
   private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
 
-//  private static final String DOMINO_SERVER = "domino.url";
-//  private static final String DOMINO_SERVER_DEFAULT = "http://ltea-data2-dev:8080/domino-ltea/";
   // private static final String HELP = "help";
   // private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
   private static final String USE_SCORE_CACHE = "useScoreCache";

@@ -535,12 +535,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       int gender = realGender == Male ? 0 : realGender == MiniUser.Gender.Female ? 1 : 2;
 
       if (gender == 2) {
-        if (!warned.contains(user)) {
+        //if (!warned.contains(user)) {
           logger.warn("getSlickAudio user " + user);
           logger.warn("gender " + realGender);
           logger.warn("gender " + gender);
           warned.add(user);
-        }
+       // }
       }
 
       return new SlickAudio(
