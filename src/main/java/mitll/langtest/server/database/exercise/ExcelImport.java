@@ -91,6 +91,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private static final String OTHER = "Other";
   private static final String EN_TRANSLATION = "EN Translation";
   private static final String ENGLISH = "English";
+
+  /**
+   * @see #readFromSheet(Sheet)
+   */
   private static final String WEEK = "week";
 
   private final List<String> errors = new ArrayList<String>();

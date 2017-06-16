@@ -465,14 +465,12 @@ public class AudioConversion extends AudioBase {
    * sox normalize to -3db -- thanks Paul!
    *
    * @param absolutePathToWav
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#normalizeLevel
-   * @see PathWriter#getPermanentAudioPath
+   * @see PathWriter#copyAndNormalize(File, ServerProperties, File)
    */
   void normalizeLevels(File absolutePathToWav) {
     try {
       final File tempFile = new File(makeTempFile("normalizeLevels"));
       //logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
-
       ProcessBuilder soxFirst2 = new ProcessBuilder(soxPath,
           absolutePathToWav.getAbsolutePath(),
           tempFile.getAbsolutePath(),
@@ -524,39 +522,6 @@ public class AudioConversion extends AudioBase {
     this.lamePath = lamePath;
   }
 
-
-  /**
-   * @param pathToWav
-   * @return
-   * @seex MP3Support#getWavForMP3(String, String)
-   */
-/*  @Deprecated File convertMP3ToWav(String pathToWav) {
-    assert (pathToWav.endsWith(MP3));
-    String mp3File = pathToWav.replace(MP3, ".wav");
-    return writeWavFromMP3(getLame(), pathToWav, mp3File);
-  }*/
-
-  /**
-   * @param lamePath
-   * @param pathToAudioFile
-   * @param mp3File
-   * @return
-   * @deprecated when would this be a good idea???
-   */
-/*  private File writeWavFromMP3(String lamePath, String pathToAudioFile, String mp3File) {
-    ProcessBuilder lameProc = new ProcessBuilder(lamePath, "--decode", pathToAudioFile, mp3File);
-    try {
-      //    System.out.println("convertFileAndCheck running lame" + lameProc.command());
-      new ProcessRunner().runProcess(lameProc);
-      //     System.out.println("convertFileAndCheck exited  lame" + lameProc);
-    } catch (IOException e) {
-      logger.error("Couldn't run " + lameProc);
-      logger.error("got " + e, e);
-    }
-
-    return new File(mp3File);
-  }*/
-
   private int spew = 0;
 
   /**
@@ -593,8 +558,8 @@ public class AudioConversion extends AudioBase {
     if (!testMP3.exists()) {
       if (!new File(pathToAudioFile).exists()) {
         if (SPEW && spew++ < 10) {
-          logger.error("convertToMP3FileAndCheck huh? source file " + pathToAudioFile + " doesn't exist?",
-              new Exception("can't find " + pathToAudioFile));
+          logger.error("convertToMP3FileAndCheck huh? source file " + pathToAudioFile + " doesn't exist?");//,
+              //new Exception("can't find " + pathToAudioFile));
         }
       } else {
         logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +

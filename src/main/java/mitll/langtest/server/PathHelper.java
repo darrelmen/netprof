@@ -221,6 +221,21 @@ public class PathHelper {
   }
 
   /**
+   * For routing from apache, path to audio images will be audioimages/russian, audioimages/spanish etc.
+   * This supports putting russian, say, on hydra2.  This supports the rules:
+   * <p>
+   * <code>
+   * /etc/httpd/conf/httpd.conf:        JkMount /netprof/audioimages/* pdominoWorker
+   * </code>
+   * <p>
+   * <code>
+   * /etc/httpd/conf/httpd.conf:        JkMount /netprof/audioimages/russian/* h2
+   * </code>
+   * <p>
+   * This contrasts with where we put the reference audio (/opt/netprof/bestAudio) and student audio
+   * (/opt/netprof/answers). I.e. this is under the webapp, not in a permanent location.
+   *
+   * @param language as suffix to audioimages directory
    * @return path to image output dir
    * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile
    */
@@ -229,14 +244,15 @@ public class PathHelper {
     if (imageOutdir == null) imageOutdir = IMAGE_WRITER_IMAGES;
 
     File test = new File(imageOutdir, language);
+    String withSuffix = imageOutdir + File.separator + language;
     if (!test.exists()) {
-      test = getAbsoluteFile(imageOutdir);
+      test = getAbsoluteFile(withSuffix);
       boolean mkdirs = test.mkdirs();
       if (mkdirs) {
         logger.debug("getImageOutDir : making dir at : " + test.getAbsolutePath());
       }
     }
-    return imageOutdir;
+    return withSuffix;
   }
 
   public void setProperties(ServerProperties properties) {

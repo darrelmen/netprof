@@ -525,8 +525,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     for (CommonExercise ex : newEx) {
       String oldID = ex.getOldID();
       Integer exid = exToInt.get(oldID);
-
-      logger.info("getSlickAudios exercise old " + oldID + " -> " + exid);
+//      logger.info("getSlickAudios exercise old " + oldID + " -> " + exid);
 
       if (exid == null) {
         logger.error("huh? can't find " + oldID + " in " + exToInt.size());
@@ -552,16 +551,15 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       copyMatchingAudio(projectid, audioMatches, exid, audioAttributes);
       match++;
     } else {
-      logger.info("addAudioForVocab vocab no match " + ex.getEnglish() + " '" + fl + "'");
+     // logger.info("addAudioForVocab vocab no match " + ex.getEnglish() + " '" + fl + "'");
       nomatch++;
     }
 
     if (match == 0) {
-      logger.info("addAudioForVocab vocab no match " + ex.getEnglish() + " '" + fl + "' in " + transcriptToAudio.size());
+      logger.info("addAudioForVocab vocab no match '" + ex.getEnglish() + "' = '" + fl + "' in " + transcriptToAudio.size());
     }
 
-    MatchInfo first = new MatchInfo(match, nomatch);
-    return first;
+    return new MatchInfo(match, nomatch);
   }
 
   private MatchInfo addAudioForContext(int projectid,

@@ -114,7 +114,7 @@ public class PathWriter {
   }
 
   /**
-   * MUST HAVE ACCESS TO AUDIO FILES  - only on pNetProf
+   * MUST HAVE ACCESS TO AUDIO FILES  - only on hydra1 or hydra2
    *
    * @param fileRef
    * @param serverProperties
