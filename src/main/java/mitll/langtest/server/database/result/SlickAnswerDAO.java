@@ -62,13 +62,14 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    *
    * @param answerInfo
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerAlignment(CommonExercise, AudioContext, AnswerInfo.RecordingInfo, String, File, AudioCheck.ValidityAndDur, float, boolean, boolean, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerAlignment
    * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
    */
   public int addAnswer(AnswerInfo answerInfo) {
     boolean isAudioAnswer = answerInfo.getAnswer() == null || answerInfo.getAnswer().length() == 0;
     String answerInserted = isAudioAnswer ? answerInfo.getAudioFile() : answerInfo.getAnswer();
 
+    String model = answerInfo.getModel() == null ? "" : answerInfo.getModel();
     SlickResult res = new SlickResult(-1,
         answerInfo.getUserid(),
         answerInfo.getId(),
@@ -91,7 +92,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getTranscript(),
         -1,
         answerInfo.getProjid(),
-        answerInfo.getModel());
+        model);
 
     int id = dao.insert(res).id();
 

@@ -109,7 +109,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     getElement().setId("ExercisePanel");
     this.doNormalRecording = doNormalRecording;
 
-    logger.info("doNormal " + doNormalRecording);
+ //   logger.info("doNormal " + doNormalRecording);
   }
 
   /**

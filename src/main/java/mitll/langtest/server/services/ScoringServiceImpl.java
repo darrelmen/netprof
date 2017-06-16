@@ -147,38 +147,46 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     new Thread(() -> {
       Collection<Project> projects = db.getProjects();
-
       logger.info("getAllAlignments Doing " + projects.size() + " projects...");
-
-      projects.forEach(project -> {
-        if (project.getWebservicePort() > 100) {
-          try {
-            logger.info("getAllAlignments Doing project : " + project);
-
-            int projectID = project.getID();
-            List<Integer> audioIDs = getAllAudioIDs(projectID);
-
-            long then = System.currentTimeMillis();
-            AudioFileHelper audioFileHelper = project.getAudioFileHelper();
-            logger.info("getAllAlignments Doing project " + project + " " + audioIDs.size() + " audio cuts with " + audioFileHelper);
-
-            Map<Integer, ISlimResult> audioToResult = getAudioIDMap(projectID);
-            //    logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
-            recalcAlignments(projectID, audioIDs, audioFileHelper, userIDFromSession, audioToResult, true);
-
-            long now = System.currentTimeMillis();
-
-            long l = (now - then) / 1000;
-            long min = l / 60;
-            logger.info("getAllAlignments Doing project " + project + " " + audioIDs.size() + " audio cuts took " + min + " minutes.");
-          } catch (Exception e) {
-            logger.error("getAllAlignments got " + e, e);
-          }
-        } else {
-          logger.info("getAllAlignments no hydra service for " + project);
-        }
-      });
+      projects.forEach(project ->
+          recalcAlignments(userIDFromSession, project)
+      );
     }).start();
+  }
+
+  @Override
+  public void recalcAlignments(int projid) {
+    recalcAlignments(getUserIDFromSession(), db.getProject(projid));
+  }
+
+  private void recalcAlignments(int userIDFromSession, Project project) {
+    if (project.getWebservicePort() > 100) {
+      try {
+        String name = project.getProject().name();
+        logger.info("recalcAlignments Doing project : " + name);
+
+        int projectID = project.getID();
+        List<Integer> audioIDs = getAllAudioIDs(projectID);
+
+        long then = System.currentTimeMillis();
+        AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+        logger.info("getAllAlignments Doing project " + name + " : " + audioIDs.size() + " audio cuts with " + audioFileHelper);
+
+        Map<Integer, ISlimResult> audioToResult = getAudioIDMap(projectID);
+        //    logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
+        recalcAlignments(projectID, audioIDs, audioFileHelper, userIDFromSession, audioToResult, true);
+
+        long now = System.currentTimeMillis();
+
+        long l = (now - then) / 1000;
+        long min = l / 60;
+        logger.info("getAllAlignments Doing project " + name + " " + audioIDs.size() + " audio cuts took " + min + " minutes.");
+      } catch (Exception e) {
+        logger.error("getAllAlignments got " + e, e);
+      }
+    } else {
+      logger.info("getAllAlignments no hydra service for " + project);
+    }
   }
 
   /**
@@ -242,6 +250,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
 
     if (hasModel) {
+      logger.info("recalcAlignments  recalc " +audioIDs.isEmpty() + " audio ids");
+      if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
       for (Integer audioID : audioIDs) {
         // do we have alignment for this audio in the map
         ISlimResult cachedResult = audioToResult.get(audioID);
@@ -265,7 +275,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         }
       }
     } else {
-//      logger.info("no hydra for project " + projid + " so not recalculating alignments.");
+      logger.info("recalcAlignments : no hydra for project " + projid + " so not recalculating alignments.");
     }
 
     return idToAlignment;
@@ -281,7 +291,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   private PretestScore recalcRefAudioWithHelper(int projid,
-                                                // Map<Integer, AlignmentOutput> idToAlignment,
                                                 Integer audioID,
                                                 AudioFileHelper audioFileHelper,
                                                 int userIDFromSession) {
@@ -487,6 +496,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   /**
    * Doesn't really need to be on the scoring service...
+   *
    * @param resultID
    * @param roundTrip
    */

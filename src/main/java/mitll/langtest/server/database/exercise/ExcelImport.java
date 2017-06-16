@@ -124,7 +124,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                      ServerProperties serverProps,
                      IUserListManager userListManager,
                      boolean addDefects) {
-    super(serverProps, userListManager, addDefects, serverProps.getLanguage(), -1);
+    super(serverProps, userListManager, addDefects, serverProps.getLanguage());
     this.file = file;
 
     //  logger.info("Reading from " + file);
@@ -137,7 +137,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
-    if (DEBUG || unitIndex > 0) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
+    if (DEBUG || unitIndex > 0)
+      logger.debug("ExcelImport unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
   @Override
@@ -158,7 +159,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     long excelLastModified = getExcelLastModified(file);
     lastModified = excelLastModified == 0 ? lastModified : excelLastModified;
 
-    return readExercises(file);
+    List<CommonExercise> exercises = readExercises(file);
+
+    getSectionHelper().report();
+
+    return exercises;
   }
 
   /**
@@ -311,7 +316,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     int altcontextIndex = -1;
     int contextTranslationIndex = -1;
     int audioIndex = -1;
-    boolean hasAudioIndex = false;
+//    boolean hasAudioIndex = false;
 
     List<String> lastRowValues = new ArrayList<String>();
     Set<String> knownIds = new HashSet<String>();
@@ -328,7 +333,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String first  = typeOrder.size() > 0 ? typeOrder.get(0) : "";
     String second = typeOrder.size() > 1 ? typeOrder.get(1) : "";
 
-    logger.info("First " + first + " second '" + second + "'");
+    logger.info("readFromSheet initial type order First '" + first + "' second '" + second + "'");
     try {
       Iterator<Row> iter = sheet.rowIterator();
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
@@ -353,7 +358,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
             String colNormalized = col.toLowerCase();
             int i = columns.indexOf(col);
 
-//            logger.info("col " + i + " '" + colNormalized + "'");
+            logger.info("readFromSheet col " + i + " '" + colNormalized + "'");
             if (isMatchForEnglish(colNormalized)) {
               gotHeader = true;
               colIndexOffset = i;
@@ -389,12 +394,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                 addColToHeaderForProperty(colToHeader, col, i);
               }
             } else if (isFirstTypeMatch(colNormalized, first) && unitIndex == -1) {
-              //            logger.info("first type match " + colNormalized + " " + first + " unit " + i);
+              logger.info("readFromSheet first type match " + colNormalized + " " + first + " unit " + i);
               unitIndex = i;
               predefinedTypeOrder.add(col);
               unitName = col;
             } else if (isSecondTypeMatch(colNormalized, second)) {
-//              logger.info("second type match " + colNormalized + " " + second + " unit " + i);
+              logger.info("readFromSheet second type match " + colNormalized + " " + second + " unit " + i);
               chapterIndex = i;
               predefinedTypeOrder.add(col);
               chapterName = col;
@@ -543,13 +548,19 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   private final Set<String> toSkip = new HashSet<>(Arrays.asList("Translation".toLowerCase(), "Transliteration".toLowerCase()));
 
+  /**
+   * @param colToHeader
+   * @param col
+   * @param i
+   * @see #readFromSheet
+   */
   private void addColToHeaderForProperty(Map<Integer, String> colToHeader, String col, int i) {
     String s = language.toLowerCase();
     String lcCol = col.toLowerCase();
     if (lcCol.contains(s) || toSkip.contains(lcCol)) {
-      logger.debug("readFromSheet skipping col " + col);
+      logger.debug("addColToHeaderForProperty skipping col " + col);
     } else if (!col.isEmpty()) {
-      logger.debug("readFromSheet adding col '" + col + "' at  " + i + " vs '" + language + "'");
+      logger.debug("addColToHeaderForProperty adding col '" + col + "' at  " + i + " vs '" + language + "'");
       colToHeader.put(i, col);
     }
   }
@@ -610,8 +621,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private boolean contextTransMatch(String colNormalized) {
     return
         colNormalized.contains(CONTEXT_TRANSLATION.toLowerCase()) ||
-        colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase()) ||
-        colNormalized.contains(EN_TRANSLATION.toLowerCase());
+            colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase()) ||
+            colNormalized.contains(EN_TRANSLATION.toLowerCase());
   }
 
   private Collection<CommonExercise> readFromSheetSkips(Sheet sheet, int id) {
@@ -637,7 +648,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
     List<String> typeOrder = getTypeOrder();
     String firstType = typeOrder.size() > 0 ? typeOrder.get(0) : "";
-    String second    = typeOrder.size() > 1 ? typeOrder.get(1) : "";
+    String second = typeOrder.size() > 1 ? typeOrder.get(1) : "";
 
     try {
       Iterator<Row> iter = sheet.rowIterator();
@@ -744,18 +755,20 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exercises;
   }
 
-
   private boolean isFirstTypeMatch(String colNormalized, String typeSpecified) {
-    return colNormalized.equalsIgnoreCase(typeSpecified) ||
-        colNormalized.contains(UNIT) ||
-        colNormalized.contains(BOOK);
+    return !colNormalized.isEmpty() &&
+        (colNormalized.equalsIgnoreCase(typeSpecified) ||
+            colNormalized.contains(UNIT) ||
+            colNormalized.contains(BOOK));
   }
 
   private boolean isSecondTypeMatch(String colNormalized, String typeSpecified) {
-    return
-        colNormalized.equalsIgnoreCase(typeSpecified) ||
+    boolean b = !colNormalized.isEmpty() &&
+        (colNormalized.equalsIgnoreCase(typeSpecified) ||
             colNormalized.contains(CHAPTER) ||
-            colNormalized.contains(LESSON);
+            colNormalized.contains(LESSON));
+    logger.info("check '" + colNormalized + "' vs '" + typeSpecified + "' = " + b);
+    return b;
   }
 
   private boolean contextColMatch(String colNormalized) {

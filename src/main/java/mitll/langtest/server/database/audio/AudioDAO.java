@@ -224,7 +224,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid) {
     try {
-      return getResultsSQL( SELECT_ALL + " WHERE " + DEFECT + "=false");
+      return getResultsSQL(SELECT_ALL + " WHERE " + DEFECT + "=false");
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -436,7 +436,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
-   // return idsOfRecordedExercisesForMales.size();
+    // return idsOfRecordedExercisesForMales.size();
   }
 
   /**
@@ -559,9 +559,12 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       user = checkDefaultUser(userID, user);
       AudioType realType;
       try {
-        realType = AudioType.valueOf(type.toUpperCase().replace("=", "_"));
+        String normalized = type.toUpperCase().replace("=", "_");
+        // make assumption that really old audio like this we should keep, and think of as regular
+        if (normalized.equalsIgnoreCase("fastAndSlow")) realType = AudioType.REGULAR;
+        else realType = AudioType.valueOf(normalized);
       } catch (IllegalArgumentException e) {
-        logger.warn("no audio type for " + type);
+        logger.warn("getResultsForQuery no audio type for " + type);
         realType = AudioType.UNSET;
       }
 
@@ -592,7 +595,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
     //   logger.debug("found " + results.size() + " audio attributes");
 
-    finish(connection, statement, rs,"");
+    finish(connection, statement, rs, "");
 
     return results;
   }
@@ -604,7 +607,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       String string = rs.getString(Database.EXID);
       results.add(Integer.parseInt(string));
     }
-    finish(connection, statement, rs,"");
+    finish(connection, statement, rs, "");
 
     return results;
   }
@@ -728,6 +731,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * This guarantees that there will only be one row in the audio table for the key "user-exid-speed",
    * e.g. user 20 exid 5 and speed "regular" will only appear once if it's not defective.
    *
+   * @return AudioAttribute that represents the audio that has been added to the exercise
    * @paramx userid           part of unique id
    * @paramx exerciseID       part of unique id
    * @paramx projid
@@ -737,14 +741,13 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @paramx durationInMillis
    * @paramx transcript
    * @paramx dnr
-   * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
    */
   @Override
   public AudioAttribute addOrUpdate(AudioInfo info) {
-  //  int userid,
- // } int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
-   //                                 long durationInMillis, String transcript, float dnr) {
+    //  int userid,
+    // } int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
+    //                                 long durationInMillis, String transcript, float dnr) {
 //    if (isBadUser(userid)) {
 //      logger.error("huh? userid is " + userid, new Exception("huh? userid is " + userid));
 //    }
@@ -893,8 +896,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param exerciseID on this exercise
    * @param audioType  at this speed
    * @return > 0 if audio was marked defective
-   * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @seex mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem
    */
   protected int markDefect(int userid, int exerciseID, AudioType audioType) {
     try {

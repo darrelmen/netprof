@@ -8,11 +8,16 @@ import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.services.QCServiceAsync;
 import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.shared.project.SlimProject;
+
+import java.util.List;
 
 /**
  * Created by go22670 on 6/14/17.
  */
 public interface Services extends EventRegistration {
+  List<SlimProject> getAllProjects();
+
   AudioServiceAsync getAudioServiceAsyncForHost(String host);
 
   ScoringServiceAsync getScoringServiceAsyncForHost(String host);

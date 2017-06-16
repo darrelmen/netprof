@@ -453,7 +453,7 @@ public class CopyToPostgres<T extends CommonShell> {
 //      logger.info("copyAudio att " + att.getUniqueID() + " for ex  " + oldexid + " is context " + att.getAudioRef());
       Integer childID = parentExToChild.get(oldexid);
       if (childID == null) {
-        logger.info("copyAudio huh? no child for " + oldexid);
+        //logger.info("copyAudio huh? no child for " + oldexid);
       } else {
         id = childID;
       }

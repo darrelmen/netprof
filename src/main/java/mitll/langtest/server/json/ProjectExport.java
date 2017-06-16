@@ -13,19 +13,19 @@ import java.util.Collection;
  * For the new iOS.
  */
 public class ProjectExport {
-  private static final Logger logger = LogManager.getLogger(ProjectExport.class);
+  //private static final Logger logger = LogManager.getLogger(ProjectExport.class);
 
   /**
-   * @see mitll.langtest.server.ScoreServlet#getProjects
    * @param productionProjects
    * @return
+   * @see mitll.langtest.server.ScoreServlet#getProjects
    */
   public String toJSON(Collection<Project> productionProjects) {
     JsonObject jsonObject = new JsonObject();
     JsonArray value = new JsonArray();
     jsonObject.add("sites", value);
 
-    logger.info("toJSON converting " + productionProjects.size() + " projects");
+    //logger.info("toJSON converting " + productionProjects.size() + " projects");
 
     for (Project project : productionProjects) {
       JsonObject proj = new JsonObject();
@@ -42,6 +42,8 @@ public class ProjectExport {
       proj.addProperty("displayorder", project.getProject().displayorder());
       proj.addProperty("showOnIOS", Boolean.TRUE);
       proj.addProperty("rtl", project.isRTL());
+      String host = project.getWebserviceHost();
+      proj.addProperty("host", host.equals("127.0.0.1") ? "" : host);
     }
     return jsonObject.toString();
   }

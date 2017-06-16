@@ -274,8 +274,8 @@ public class LangTest implements
 
   private KeyStorage storage;
 
-  Map<Integer, AudioServiceAsync> projectToAudioService;
-  Map<Integer, ScoringServiceAsync> projectToScoringService;
+  private Map<Integer, AudioServiceAsync> projectToAudioService;
+  private Map<Integer, ScoringServiceAsync> projectToScoringService;
 
   /**
    * This gets called first.
@@ -344,7 +344,6 @@ public class LangTest implements
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
-
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo, reloadWindow);
       }
@@ -361,22 +360,25 @@ public class LangTest implements
     props = new PropertyHandler(startupInfo.getProperties());
     if (reloadWindow) initialUI.chooseProjectAgain();
 
-    projectToAudioService = createHostSpecificServices(startupInfo);
-    projectToScoringService = createHostSpecificServicesScoring(startupInfo);
+    List<SlimProject> projects = getAllProjects();
+    projectToAudioService = createHostSpecificServices(projects);
+    projectToScoringService = createHostSpecificServicesScoring(projects);
   }
 
-  private Map<Integer, AudioServiceAsync> createHostSpecificServices(StartupInfo startupInfo) {
+  @Override
+  public List<SlimProject> getAllProjects() { return startupInfo.getAllProjects();  }
+
+  private Map<Integer, AudioServiceAsync> createHostSpecificServices(List<SlimProject> projects) {
+
     Map<Integer, AudioServiceAsync> projectToAudioService = new HashMap<>();
     Map<String, AudioServiceAsync> hostToService = new HashMap<>();
 
     // first figure out unique set of services...
-
-    List<SlimProject> projects = startupInfo.getAllProjects();
     projects.forEach(slimProject -> {
       hostToService.computeIfAbsent(slimProject.getHost(), this::getAudioServiceAsyncForHost);
     });
 
-    logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
+//    logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
 
     // then map project to service
     projects.forEach(slimProject -> {
@@ -389,8 +391,7 @@ public class LangTest implements
       }
     });
 
-
-    logger.info("createHostSpecificServices for these projects " + projectToAudioService.keySet());
+    //  logger.info("createHostSpecificServices for these projects " + projectToAudioService.keySet());
 
     return projectToAudioService;
   }
@@ -402,25 +403,24 @@ public class LangTest implements
     return audioService;
   }
 
-  private Map<Integer, ScoringServiceAsync> createHostSpecificServicesScoring(StartupInfo startupInfo) {
+  private Map<Integer, ScoringServiceAsync> createHostSpecificServicesScoring(List<SlimProject> projects) {
     Map<Integer, ScoringServiceAsync> projectToAudioService = new HashMap<>();
     Map<String, ScoringServiceAsync> hostToService = new HashMap<>();
 
     // first figure out unique set of services...
-    List<SlimProject> projects = startupInfo.getAllProjects();
+//    List<SlimProject> projects = startupInfo.getAllProjects();
     projects.forEach(slimProject -> {
       hostToService.computeIfAbsent(slimProject.getHost(), this::getScoringServiceAsyncForHost);
     });
 
-    logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
-
+    //  logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
     // then map project to service
     projects.forEach(slimProject -> {
       String host = slimProject.getHost();
       ScoringServiceAsync scoringServiceAsync = hostToService.get(host);
 
       if (scoringServiceAsync == null) {
-        logger.warning("no audio service for " + host + " project " + slimProject);
+        logger.warning("no scoring service for " + host + " project " + slimProject);
       } else {
         projectToAudioService.put(slimProject.getID(), scoringServiceAsync);
       }
@@ -440,8 +440,7 @@ public class LangTest implements
     if (!isDefault(host)) {
       String moduleBaseURL = audioService.getServiceEntryPoint();
       audioService.setServiceEntryPoint(moduleBaseURL + "/" + host);
-      logger.info("createHostSpecificServices service " +
-          "now at " + audioService.getServiceEntryPoint());
+      //logger.info("createHostSpecificServices service " + "now at " + audioService.getServiceEntryPoint());
     }
   }
 

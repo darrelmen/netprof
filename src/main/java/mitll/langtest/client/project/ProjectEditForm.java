@@ -30,20 +30,17 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
-  private static final String PLEASE_ENTER_A_LANGUAGE_MODEL_DIRECTORY = "Please enter a language model directory.";
-  private static final String PLEASE_ENTER_A_PORT_NUMBER_FOR_THE_SERVICE = "Please enter a port number for the service.";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
+  private static final String PLEASE_ENTER_A_LANGUAGE_MODEL_DIRECTORY = "Please enter a language model directory.";
+  private static final String PLEASE_ENTER_A_PORT_NUMBER_FOR_THE_SERVICE = "Please enter a port number for the service.";
 
   private static final String PLEASE_SELECT_A_LANGUAGE = "Please select a language.";
   private static final String NAME = "Name";
   private static final String PROJECT_NAME = "Project Name";
-  //public static final String FIRST_TYPE = "First Type";
-  private static final String FIRST_TYPE_HINT = "First (e.g. Unit)";
-  //public static final String SECOND_TYPE = "Second Type";
-  private static final String SECOND_TYPE_HINT = "Second (e.g. Chapter) OPTIONAL";
+  private static final String FIRST_TYPE_HINT = "(e.g. Unit)";
+  private static final String SECOND_TYPE_HINT = "(e.g. Chapter) OPTIONAL";
 
-  //private static final String HYDRA_PORT = "Hydra Port";
   private static final String LANGUAGE_MODEL = "Language Model";
 
   private static final int MIN_LENGTH_USER_ID = 4;
@@ -53,26 +50,21 @@ public class ProjectEditForm extends UserDialog {
   private ListBox statusBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
-  //private final AudioServiceAsync audioServiceAsync;
-  //private final ScoringServiceAsync scoringServiceAsync;
 
   private HTML feedback;
   private FormField hydraPort, nameField, unit, chapter, course, hydraHost;
   private ListBox language;
   private FormField model;
-  Services services;
+  private Services services;
 
   /**
    * @param lifecycleSupport
    * @see ProjectChoices#getCreateNewButton(DivWidget)
    */
-  ProjectEditForm(LifecycleSupport lifecycleSupport, ExerciseController controller
-  ) {
+  ProjectEditForm(LifecycleSupport lifecycleSupport, ExerciseController controller) {
     super(controller.getProps());
     this.lifecycleSupport = lifecycleSupport;
     services = controller;
-    //this.audioServiceAsync = controller.getAudioService();
-    //this.scoringServiceAsync = controller.getScoringService();
   }
 
   /**
@@ -392,22 +384,25 @@ public class ProjectEditForm extends UserDialog {
       w.setEnabled(false);
       feedback.setText("Please wait...");
       // logger.info("check audio for " + info);
-      services.getAudioServiceAsyncForHost(info.getHost()).checkAudio(info.getID(), new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          w.setEnabled(true);
-
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-          w.setEnabled(true);
-          feedback.setText("Audio check complete.");
-        }
-      });
+      checkAudio(info, w);
     });
     w.addStyleName("bottomFiveMargin");
     return w;
+  }
+
+  private void checkAudio(ProjectInfo info, Button w) {
+    services.getAudioServiceAsyncForHost(info.getHost()).checkAudio(info.getID(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        w.setEnabled(true);
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        w.setEnabled(true);
+        feedback.setText("Audio check complete.");
+      }
+    });
   }
 
   private Button getRecalcRefAudio(final ProjectInfo info) {

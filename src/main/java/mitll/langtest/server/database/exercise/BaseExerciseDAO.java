@@ -91,13 +91,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   BaseExerciseDAO(ServerProperties serverProps,
                   IUserListManager userListManager,
                   boolean addDefects,
-                  String language,
-                  int id) {
+                  String language ) {
     this.serverProps = serverProps;
     this.userListManager = userListManager;
     this.language = language;
     this.addDefects = addDefects;
-    //this.id = id;
 //    logger.debug("\n\n\nlanguage is " + language);
   }
 

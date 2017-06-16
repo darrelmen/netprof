@@ -69,7 +69,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       SlickUserExerciseDAO userExerciseDAO,
       Project fullProject
   ) {
-    super(serverProps, userListManager, addDefects, fullProject.getProject().language(), fullProject.getProject().id());
+    super(serverProps, userListManager, addDefects, fullProject.getProject().language());
     this.userExerciseDAO = userExerciseDAO;
     this.project = fullProject.getProject();
     this.fullProject = fullProject;

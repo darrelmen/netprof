@@ -39,10 +39,12 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
-  public static final int NORMAL_MIN_HEIGHT = 67;
-  public static final String IMPORT_DATA_INTO = "Import data into ";
-  public static final String CREATE_NEW_PROJECT = "Create New Project";
+  public static final String CHECK_AUDIO = "Check Audio";
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+  private static final int NORMAL_MIN_HEIGHT = 67;
+  private static final String IMPORT_DATA_INTO = "Import data into ";
+  private static final String CREATE_NEW_PROJECT = "Create New Project";
 
   private static final int MIN_HEIGHT = 125;
   private static final String NEW_PROJECT = "New Project";
@@ -63,22 +65,13 @@ public class ProjectChoices {
   private static final int NO_USER_INITIAL = -2;
   private final UILifecycle uiLifecycle;
 
-  /**
-   * @seex #configureUIGivenUser
-   * @seex #gotUser
-   * @seex #lastUser
-   * @seex #resetState
-   * @seex #showUserPermissions
-   */
-  protected long lastUser = NO_USER_INITIAL;
-
   private final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
   private final UserNotification userNotification;
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private final UserServiceAsync userService;// = GWT.create(UserService.class);
+  private final UserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
   private Panel contentRow;
@@ -241,18 +234,28 @@ public class ProjectChoices {
     //left.addStyleName("clear");
     header.add(left);
 
+
+    DivWidget topBottom = new DivWidget();
+    topBottom.addStyleName("floatRight");
+    header.add(topBottom);
+
     DivWidget right = new DivWidget();
     right.addStyleName("floatRight");
-    // right.addStyleName("inlineFlex");
-    header.add(right);
+    right.addStyleName("inlineFlex");
+
+    topBottom.add(right);
     if (isQC()) {
       getCreateNewButton(right);
     }
 
     if (controller.getUserState().isAdmin()) {
-      getEnsureAllAudioButton(right);
+      HTML status = new HTML();
+      status.setHeight("15px");
+      status.addStyleName("leftFiveMargin");
+      getEnsureAllAudioButton(right, status);
       right.addStyleName("topFiveMargin");
-      getRecalcRefAudioButton(right);
+      getRecalcRefAudioButton(right, status);
+      topBottom.add(status);
     }
 
     return header;
@@ -270,21 +273,20 @@ public class ProjectChoices {
     w.setIcon(IconType.PLUS);
     w.setSize(ButtonSize.LARGE);
     w.setType(ButtonType.WARNING);
-    w.addClickHandler(event -> {
-      showNewProjectDialog();
-    });
+    w.addClickHandler(event -> showNewProjectDialog());
   }
 
   /**
    * @param header
    * @see #getHeader(List, int)
    */
-  private void getEnsureAllAudioButton(DivWidget header) {
-    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Check Audio");
+  private void getEnsureAllAudioButton(DivWidget header, HTML status) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(CHECK_AUDIO);
 
     DivWidget right = new DivWidget();
     right.add(w);
-    w.addStyleName("topFiveMargin");
+    // w.addStyleName("topFiveMargin");
+    w.addStyleName("leftFiveMargin");
 
     w.addStyleName("floatLeft");
     header.add(right);
@@ -292,27 +294,37 @@ public class ProjectChoices {
     w.setIcon(IconType.CHECK);
     w.setSize(ButtonSize.LARGE);
     w.setType(ButtonType.SUCCESS);
-    w.addClickHandler(event -> {
-      controller.getAudioService().ensureAllAudio(new AsyncCallback<Void>() {
+    w.addClickHandler(event -> checkAudio(controller.getAllProjects(), status));
+  }
+
+  private void checkAudio(List<SlimProject> projects, HTML status) {
+    if (projects.isEmpty()) {
+      status.setText("All projects complete.");
+    } else {
+      ProjectInfo remove = projects.remove(0);
+      status.setText("Checking " + remove.getName() + "...");
+      controller.getAudioServiceAsyncForHost(remove.getHost()).checkAudio(remove.getID(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
-
+          status.setText("ERROR - couldn't check audio for " + remove.getName());
         }
 
         @Override
         public void onSuccess(Void result) {
-          new ModalInfoDialog("Ensure Audio", "Audio check started... This will take awhile...");
+          status.setText(remove.getName() + " checked...");
+          checkAudio(projects, status);
         }
       });
-    });
+    }
   }
 
-  private void getRecalcRefAudioButton(DivWidget header) {
+  private void getRecalcRefAudioButton(DivWidget header, HTML status) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Recalc Ref");
 
     DivWidget right = new DivWidget();
     right.add(w);
-    w.addStyleName("topFiveMargin");
+    // w.addStyleName("topFiveMargin");
+    w.addStyleName("leftFiveMargin");
 
     w.addStyleName("floatLeft");
     header.add(right);
@@ -320,18 +332,41 @@ public class ProjectChoices {
     w.setIcon(IconType.MEDKIT);
     w.setSize(ButtonSize.LARGE);
     w.setType(ButtonType.SUCCESS);
-    w.addClickHandler(event -> {
-      controller.getScoringService().getAllAlignments(new AsyncCallback<Void>() {
+    w.addClickHandler(event -> recalcProject(controller.getAllProjects(), status));
+  }
+//
+//  private void recalc() {
+//    controller.getScoringService().getAllAlignments(new AsyncCallback<Void>() {
+//      @Override
+//      public void onFailure(Throwable caught) {
+//      }
+//
+//      @Override
+//      public void onSuccess(Void result) {
+//        new ModalInfoDialog("Recalc Ref Audio", "Audio recalc started... This will take awhile...");
+//      }
+//    });
+//  }
+
+  private void recalcProject(List<SlimProject> projects, HTML status) {
+    if (projects.isEmpty()) {
+      status.setText("All projects complete.");
+    } else {
+      ProjectInfo remove = projects.remove(0);
+      status.setText("Recalculating alignments for " + remove.getName() + "...");
+      controller.getScoringServiceAsyncForHost(remove.getHost()).recalcAlignments(remove.getID(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
+          status.setText("ERROR - couldn't recalc audio for " + remove.getName());
         }
 
         @Override
         public void onSuccess(Void result) {
-          new ModalInfoDialog("Recalc Ref Audio", "Audio recalc started... This will take awhile...");
+          status.setText(remove.getName() + " complete...");
+          recalcProject(projects, status);
         }
       });
-    });
+    }
   }
 
   private void showNewProjectDialog() {
@@ -396,7 +431,7 @@ public class ProjectChoices {
             button,
             null,
             commonExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, projectForLang.getProps()),
-            Placement.LEFT));
+            Placement.RIGHT));
       }
     }
 

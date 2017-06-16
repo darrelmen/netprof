@@ -459,19 +459,19 @@ public class InitialUI implements UILifecycle {
    * @return
    * @see #populateRootPanel
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel
-   * @deprecated
+   * @xdeprecated
    */
 /*  private boolean showOnlyOneExercise() {
     return props.getExercise_title() != null;
   }*/
 
   /**
-   * @param currentExerciseVPanel
+   * @paramx currentExerciseVPanel
    * @return
    * @see #populateBelowHeader
-   * @deprecated - we should really test this
+   * @deprecatedx - we should really test this
    */
-  private Container getHeadstart(Panel currentExerciseVPanel) {
+/*  private Container getHeadstart(Panel currentExerciseVPanel) {
     // show fancy lace background image
     currentExerciseVPanel.addStyleName("body");
     currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url(" + LANGTEST_IMAGES + "levantine_window_bg.jpg" + ")");
@@ -482,7 +482,7 @@ public class InitialUI implements UILifecycle {
     verticalContainer2.add(lifecycleSupport.getFlashRecordPanel());
     verticalContainer2.add(currentExerciseVPanel);
     return verticalContainer2;
-  }
+  }*/
 
   private void addResizeHandler() {
     final InitialUI outer = this;

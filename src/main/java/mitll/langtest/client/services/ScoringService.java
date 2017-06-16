@@ -60,6 +60,8 @@ public interface ScoringService extends RemoteService {
 
   void getAllAlignments();
 
+  void recalcAlignments(int projid);
+
   Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs);
 
   /**

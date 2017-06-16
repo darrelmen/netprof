@@ -337,8 +337,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     this.configDir = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
-
-    logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
+//    logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
     try {
       this.serverProps = serverProps;
