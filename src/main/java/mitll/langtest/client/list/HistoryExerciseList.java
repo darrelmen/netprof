@@ -206,7 +206,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
-      logger.info("\tcheckAndAskOrFirst "+ exerciseID);
+      //logger.info("\tcheckAndAskOrFirst "+ exerciseID);
       checkAndAskServer(toUse);
     }
   }
@@ -256,22 +256,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private String getTrimmedToken(String historyToken) {
     return historyToken.length() > 2 ? historyToken.substring(0, historyToken.length() - 2) : historyToken;
   }
-
-  /**
-   * So if we have an existing history token, use it to set current selection.
-   * If not, push the current state of the list boxes and act on it
-   *
-   * @seex SimpleSelectExerciseList#addChoiceRow
-   */
-/*  void pushFirstListBoxSelection() {
-    if (getHistoryToken().isEmpty()) {
-      logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
-      pushNewSectionHistoryToken();
-    } else {
-      logger.info("pushFirstListBoxSelection fire history for token from URL: " + getHistoryToken() + " instance " + getInstance());
-      History.fireCurrentHistoryState();
-    }
-  }*/
 
   /**
    * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#addClickHandlerToButton

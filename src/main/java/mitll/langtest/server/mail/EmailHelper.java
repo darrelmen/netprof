@@ -65,7 +65,7 @@ public class EmailHelper {
   private static final String PASSWORD_RESET = "Password Reset";
   private static final String RESET_PASSWORD = "Reset Password";
   private static final String YOUR_USER_NAME = "Your user name";
-  private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
+ // private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
   //private static final String HELP_EMAIL = "<a href='mailto:" + NETPROF_HELP_DLIFLC_EDU + "'>NetProF Help</a>";
 

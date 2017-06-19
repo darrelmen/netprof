@@ -99,7 +99,7 @@ public class ScoreToJSON {
       if (netPronImageTypeListMap.isEmpty()) {
         String json = pretestScore.getJson();
         if (json == null || json.equalsIgnoreCase("null")) {
-          logger.warn("no json for score");
+//          logger.warn("no json for score");
           return jsonNULL;
         } else {
           JSONObject jsonObject1 = JSONObject.fromObject(json);

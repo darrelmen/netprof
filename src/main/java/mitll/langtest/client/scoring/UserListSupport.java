@@ -19,6 +19,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,7 @@ public class UserListSupport {
   private static final String NEW_LIST = "New List";
   private static final String NOT_ON_ANY_LISTS = "Not on any lists.";
   private static final String EMAIL_LIST = "Email List";
+  private static final String EMAIL_THESE_ITEMS = "Email these items";
   private final PopupContainerFactory popupContainer = new PopupContainerFactory();
 
   private static final int END_INDEX = 15;
@@ -156,24 +158,47 @@ public class UserListSupport {
   }
 
   @NotNull
-  private String getMailTo(int listid, String name) {
-    String s1 = trimURL(Window.Location.getHref());
+  public String getMailToExercise(CommonExercise exercise) {
+    String s = trimURL(Window.Location.getHref()) +
+        "#" +
+        SelectionState.SECTION_SEPARATOR + "search=" + exercise.getID() +
+        getProjectParam();
 
-    String s = s1 +
+    String encode = URL.encode(s);
+    return "mailto:" +
+        "?" +
+        "Subject=Share netprof " + controller.getLanguage() +
+        " item " + exercise.getEnglish() +
+        "&body=" +
+        getPrefix() + exercise.getEnglish() + "/" + exercise.getForeignLanguage() + " : " +
+        encode +
+        getSuffix();
+  }
+
+
+  @NotNull
+  private String getMailTo(int listid, String name) {
+    String s = trimURL(Window.Location.getHref()) +
         "#" +
         SelectionState.SECTION_SEPARATOR + "Lists=" + listid +
-        SelectionState.SECTION_SEPARATOR + "project=" + controller.getProjectStartupInfo().getProjectid();
+        getProjectParam();
 
     String encode = URL.encode(s);
     return "mailto:" +
         "?" +
         "Subject=Share netprof " + controller.getLanguage() +
         " list " + name +
-        "&body=Link to " + name + " list : " + encode;
+        "&body=" +
+        getPrefix() + name + " list : " + encode + getSuffix();
+  }
+
+  @NotNull
+  private String getProjectParam() {
+    return SelectionState.SECTION_SEPARATOR + "project=" + controller.getProjectStartupInfo().getProjectid();
   }
 
   void addSendLinkWhatYouSee(DropdownBase addToList) {
-    final NavLink widget = new NavLink("Email these items");
+    final NavLink widget = new NavLink(EMAIL_THESE_ITEMS);
     addToList.add(widget);
     widget.setHref(getMailToThese());
 //    widget.addClickHandler(event -> controller.logEvent(addToList, "DropUp", ul.getID(), "sharing_" + ul.getID() + "/" + ul.getName()));
@@ -190,12 +215,33 @@ public class UserListSupport {
         token +
         SelectionState.SECTION_SEPARATOR + "project=" + projectStartupInfo.getProjectid();
 
+    String encode = URL.encode(s);
     return "mailto:" +
         "?" +
         "Subject=Share netprof " + controller.getLanguage() +
         " items " +
-        "&body=Link to " + selectionState.getDescription(projectStartupInfo.getTypeOrder()) + " : " +
-        URL.encode(s);
+        "&body=" +
+        getPrefix() +
+        selectionState.getDescription(projectStartupInfo.getTypeOrder()) + " : " +
+        encode +
+        getSuffix();
+  }
+
+  @NotNull
+  public String getPrefix() {
+    return "Hi%2C%0A%20Here's%20a%20link%20to%20";
+  }
+
+  /**
+   * @return
+   */
+  @NotNull
+  public String getSuffix() {
+    return "%0A%20Thanks%2C%20%0A%20" + getFullName();
+  }
+
+  private String getFullName() {
+    return controller.getUserManager().getCurrent().getFullName();
   }
 
   private String trimURL(String url) {

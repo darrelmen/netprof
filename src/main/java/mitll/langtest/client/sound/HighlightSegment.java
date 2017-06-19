@@ -6,6 +6,7 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 
 import java.util.logging.Logger;
 
@@ -116,6 +117,10 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     return span;
   }
 
+  /**
+   * @param clickable
+   * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
+   */
   @Override
   public void setClickable(boolean clickable) {
     this.clickable = clickable;
@@ -142,24 +147,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     return north;
   }
 
-  /**
-   * @return
-   * @see AllHighlight#AllHighlight
-   */
-/*  @Override
-  public DivWidget getDivParent() {
-    logger.info("getDivParent " + this);
-    if (this.divParent == null) logger.warning("getDivParent huh??? parent is null for " + this);
-    return this.divParent;
-  }
-
-  @Override
-  public void setDivParent(DivWidget horizontal) {
-    logger.info("setDivParent " + this);
-    if (horizontal == null) logger.warning("setDivParent huh??? parent is null for " + this);
-    this.divParent = horizontal;
-  }*/
   public String toString() {
-    return "id " + id + " '" + content + "' (" + getLength() + ")";
+    return //"#" + id + " " +
+        "'" + content + "'"+(getLength() > 1 ? " (" + getLength() + ")" : "") + (clickable ? "" : " NC");
   }
 }

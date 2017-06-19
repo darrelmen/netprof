@@ -127,13 +127,8 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   private void makePrevButton(final HasID exercise, boolean addButtons, boolean useKeyHandler) {
     this.prev = new Button(PREVIOUS);
     prev.getElement().setId("NavigationHelper_Previous");
-    getPrev().addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        clickPrev(exercise);
-      }
-    });
-    boolean onFirst = !listContainer.onFirst(exercise);
-    getPrev().setEnabled(onFirst);
+    getPrev().addClickHandler(event -> clickPrev(exercise));
+    getPrev().setEnabled(!listContainer.onFirst(exercise));
     if (useKeyHandler) getPrev().setTitle(LEFT_ARROW_TOOLTIP);
     getPrev().setType(ButtonType.SUCCESS);
 

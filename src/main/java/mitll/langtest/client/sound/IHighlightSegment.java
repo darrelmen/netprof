@@ -31,7 +31,4 @@ public interface IHighlightSegment {
   void clearSouth();
 
   DivWidget getNorth();
-  // DivWidget getDivParent();
-
- // void setDivParent(DivWidget horizontal);
 }

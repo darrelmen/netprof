@@ -52,7 +52,7 @@ public class ClickableWords<T extends CommonExercise> {
   private int fontSize;
 
   private static final boolean DEBUG = false;
-
+boolean showPhones = true;
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    */
@@ -65,12 +65,13 @@ public class ClickableWords<T extends CommonExercise> {
    * @param language
    * @param fontSize
    */
-  ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize) {
+  ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize, boolean showPhones) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
     this.fontSize = fontSize;
+    this.showPhones =showPhones;
   }
 
   /**
@@ -160,6 +161,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param addRightMargin
    * @param isRTL
    * @return a clickable row
+   * @see #getClickableDiv(List, List, boolean, boolean, HasDirection.Direction, List, TwoColumnExercisePanel.FieldType)
    */
   @NotNull
   private DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean addRightMargin, boolean isRTL) {
@@ -202,7 +204,6 @@ public class ClickableWords<T extends CommonExercise> {
    */
   DivWidget getClickableWordsHighlight(String contextSentence,
                                        String highlight,
-                                       //        String searchToken,
                                        TwoColumnExercisePanel.FieldType fieldType,
                                        List<IHighlightSegment> clickables,
                                        boolean isSimple) {
@@ -256,7 +257,7 @@ public class ClickableWords<T extends CommonExercise> {
       boolean isMatch = toFind != null && isMatch(token, toFind);
       boolean searchMatch = isSearchMatch(token, searchToken);
 
-     //  logger.info("got search match for " +searchToken + " in " +token);
+      //  logger.info("got search match for " +searchToken + " in " +token);
       IHighlightSegment clickable = makeClickableText(
           dir,
           token,
@@ -266,7 +267,9 @@ public class ClickableWords<T extends CommonExercise> {
           isSimple, fieldType);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
-      w.addStyleName("rightFiveMargin");
+      if (showPhones) {
+        w.addStyleName("rightFiveMargin");
+      }
       horizontal.add(w);
 
       if (isMatch) {
@@ -339,7 +342,7 @@ public class ClickableWords<T extends CommonExercise> {
       return false;
     } else {
       String context = removePunct(longer.toLowerCase());
-      String vocab   = removePunct(shorter.toLowerCase());
+      String vocab = removePunct(shorter.toLowerCase());
       // if (DEBUG) logger.info("context " + context + " longer " + longer);
       boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
 /*      if (b && DEBUG)
@@ -355,7 +358,7 @@ public class ClickableWords<T extends CommonExercise> {
     } else {
       String context = removePunct(first.toLowerCase());
       String lcSearch = removePunct(search.toLowerCase());
-      return   (context.contains(lcSearch));
+      return (context.contains(lcSearch));
     }
   }
 
@@ -435,6 +438,7 @@ public class ClickableWords<T extends CommonExercise> {
 
     boolean empty = removePunct(html).isEmpty();
     if (empty) {
+    //  logger.info("makeClickableText for '" + html + "' not clickable");
       highlightSegmentDiv.setClickable(false);
     } else {
       highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
@@ -462,7 +466,7 @@ public class ClickableWords<T extends CommonExercise> {
       logger.warning("\n\n\nshowSearchMatch can't find  '" + searchToken + "' in '" + html + "'");
       w.addStyleName(SEARCHMATCH);
     } else {
-     // logger.info("showSearchMatch word bounds " + wordBounds + " for '" + searchToken + "' in '" + html + "'");
+      // logger.info("showSearchMatch word bounds " + wordBounds + " for '" + searchToken + "' in '" + html + "'");
       w.setHTML(getSearchHighlightedHTML(html, wordBounds), dir);
     }
   }
@@ -499,8 +503,9 @@ public class ClickableWords<T extends CommonExercise> {
   protected String removePunct(String t) {
     return t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
+        .replaceAll(GoodwaveExercisePanel.SPACE_REGEX, "")
         .replaceAll("\\u00ED", "i")
-        .replaceAll("\\u00E9","\\u0435")
+        .replaceAll("\\u00E9", "\\u0435")
         .replaceAll("[\\u0301\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
   }
 }

@@ -154,32 +154,38 @@ public class FlashcardRecordButton extends RecordButton {
         }
       } else if (warnUserWhenNotSpace) {
         int keyCode = event.getKeyCode();
+//        logger.info("checkKeyDown key code is " + keyCode);
         if (keyCode == KeyCodes.KEY_ALT || keyCode == KeyCodes.KEY_CTRL || keyCode == KeyCodes.KEY_ESCAPE || keyCode == KeyCodes.KEY_WIN_KEY) {
           //logger.info("key code is " + keyCode);
         } else {
           //logger.info("warn - key code is " + keyCode);
           if (keyCode == KeyCodes.KEY_LEFT) {
+            stopProp(event);
             gotLeftArrow();
-            event.stopPropagation();
           } else if (keyCode == KeyCodes.KEY_RIGHT) {
+            stopProp(event);
             gotRightArrow();
-            event.stopPropagation();
           } else if (keyCode == KeyCodes.KEY_UP) {
+            stopProp(event);
             gotUpArrow();
-            event.stopPropagation();
           } else if (keyCode == KeyCodes.KEY_DOWN) {
+            stopProp(event);
             gotDownArrow();
-            event.stopPropagation();
           } else {
-            if (WARN_NOT_A_SPACE) {
-              warnNotASpace();
-            }
+//            if (WARN_NOT_A_SPACE) {
+//              warnNotASpace();
+//            }
           }
         }
       }
     } else {
       //  logger.info("checkKeyDown ignoring key press... " + listener);
     }
+  }
+
+  private void stopProp(NativeEvent event) {
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   protected void gotRightArrow() {

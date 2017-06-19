@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import static mitll.langtest.client.qc.QCNPFExercise.ENGLISH;
 import static mitll.langtest.client.qc.QCNPFExercise.FOREIGN_LANGUAGE;
 import static mitll.langtest.client.scoring.PhonesChoices.HIDE;
+import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
 import static mitll.langtest.client.scoring.ShowChoices.*;
 
 /**
@@ -47,10 +48,13 @@ import static mitll.langtest.client.scoring.ShowChoices.*;
  */
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
-  // private static final String HALF_WIDTH = "50%";
+
   private static final String LEFT_WIDTH = "60%";
   private static final String RIGHT_WIDTH = "40%";
 
+  /**
+   *
+   */
   private static final String EMAIL = "Email Item";
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
 
@@ -99,10 +103,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param listContainer
    * @param phonesChoices
    * @param alignments
-   * @paramx screenPortion
-   * @paramx instance
-   * @paramx allowRecording
-   * @paramx includeListButtons
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.banner.NewLearnHelper#getFactory
    */
@@ -122,11 +122,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     addStyleName("floatLeftAndClear");
     setWidth("100%");
 
-//    logger.info("Eng " +commonExercise.getEnglish());
-//    logger.info("fl " +commonExercise.getForeignLanguage());
-
     this.choices = choices;
     this.phonesChoices = phonesChoices;
+
+    logger.info("phone display " + phonesChoices);
+
     this.alignments = alignments;
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
@@ -134,15 +134,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (projectStartupInfo != null) {
       int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
-      clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), fontSize);
+      clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), fontSize, phonesChoices == SHOW);
       this.isRTL = clickableWords.isRTL(exercise);
 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(commonExercise));
 
       getRefAudio();
-    }
-    else {
+    } else {
       clickableWords = null;
       commonExerciseUnitChapterItemHelper = null;
     }
@@ -172,7 +171,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
       if (addToRequest(currentAudioAttr, refID)) req.add(refID);
     } else {
-    //  logger.warning("getRefAudio huh? how can audio id be -1??? " + currentAudioAttr);
+      //  logger.warning("getRefAudio huh? how can audio id be -1??? " + currentAudioAttr);
     }
 
     if (contextRefID != -1) {
@@ -300,14 +299,17 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @Override
   public void audioChanged(int id, long duration) {
-    AlignmentOutput alignmentOutput = alignments.get(id);
-    if (alignmentOutput != null) {
-      if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
-      List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
-      DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
-      matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
-    } else {
-      if (DEBUG)  logger.info("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
+    if (phonesChoices == SHOW) {
+      AlignmentOutput alignmentOutput = alignments.get(id);
+      if (alignmentOutput != null) {
+        if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
+        List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
+        DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
+        matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
+      } else {
+        if (DEBUG)
+          logger.info("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
+      }
     }
   }
 
@@ -588,25 +590,27 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String segment = wordSegment.getEvent();
     if (DEBUG)
       logger.info("matchSegmentToWidgetForAudio compare :" +
-          "\n\tsegment " + segment + //" length " + segmentLength +
-          "\n\tvs      " + clickable);
+          "\n\tsegment       " + segment + //" length " + segmentLength +
+          "\n\tvs clickable '" + clickable + "'");
 
     String lcSegment = removePunct(segment.toLowerCase());
     String fragment1 = removePunct(clickable.getContent().toLowerCase());
 
     if (DEBUG)
       logger.info("matchSegmentToWidgetForAudio compare :" +
-          "\n\tsegment " + lcSegment + //" length " + segmentLength +
-          "\n\tvs      " + fragment1);
+          "\n\tsegment       " + lcSegment + //" length " + segmentLength +
+          "\n\tvs clickable '" + fragment1 + "'");
+
+    boolean showPhones = phonesChoices == PhonesChoices.SHOW;
 
     if (lcSegment.equalsIgnoreCase(fragment1)) {  // easy match -
-      if (phonesChoices == PhonesChoices.SHOW) {
+      if (showPhones) {
         clickable.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap));
       }
 
       return clickable;
     } else {
-      Collection<IHighlightSegment> bulk = getMatchingSegments(clickables, clickable, lcSegment);
+      Collection<IHighlightSegment> bulk = showPhones ? getMatchingSegments(clickables, clickable, lcSegment) : Collections.EMPTY_LIST;
 
       if (bulk.isEmpty()) {
         return null;
@@ -630,6 +634,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, isRTL);
   }
 
+  /**
+   * @param clickables
+   * @param clickable
+   * @param lcSegment
+   * @return
+   * @see #matchEventSegmentToClickable
+   */
   @NotNull
   private Collection<IHighlightSegment> getMatchingSegments(Iterator<IHighlightSegment> clickables,
                                                             IHighlightSegment clickable,
@@ -641,26 +652,36 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         "\n\tvs      " + clickable);
 
     while (!lcSegment.isEmpty()) {
-      String fragment = removePunct(clickable.getContent().toLowerCase());
-
+      String t = clickable.getContent().toLowerCase();
+      String fragment = removePunct(t);
+      if (fragment.isEmpty()) {
+        logger.info("BEFORE '" + t +
+            "' after '" + fragment +
+            "'");
+      }
       if (DEBUG_MATCH) logger.info("\tgetMatchingSegments compare :" +
           "\n\tsegment     " + lcSegment +
-          "\n\tvs fragment " + fragment);
+          "\n\tvs fragment '" + fragment + "'");
 
       boolean segmentHasFragment = lcSegment.startsWith(fragment);
       if (segmentHasFragment) {
         bulk.add(clickable);
         lcSegment = lcSegment.substring(fragment.length());
-        if (DEBUG_MATCH) logger.info("\tgetMatchingSegments segment now " + lcSegment);
+        // if (DEBUG_MATCH) logger.info("\tgetMatchingSegments segment now '" + lcSegment + "'");
 
         if (!clickables.hasNext() || lcSegment.isEmpty()) {
           break;
         }
         clickable = clickables.next();
+        // logger.info("clickable now        " + clickable);
         clickable = skipUnclickable(clickables, clickable);
+        // logger.info("after skip clickable " + clickable);
       } else {
-        if (DEBUG_MATCH) logger.info("\tgetMatchingSegments compare : segment '" + lcSegment +
-            "' vs fragment '" + fragment + "'");
+        if (DEBUG_MATCH) {
+          logger.info("\tgetMatchingSegments compare :" +
+              "\n\tsegment     '" + lcSegment + "'" +
+              "\n\tvs fragment '" + fragment + "'");
+        }
         break;
       }
     }
@@ -699,7 +720,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         builder2.append(segment.getEvent()).append(" ");
 
       }
-      if (DEBUG)  logger.info("align    : " + builder2);
+      if (DEBUG) logger.info("align    : " + builder2);
 
     }
     return b;
@@ -722,7 +743,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private String removePunct(String t) {
     return fromFull(t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("['%\\06D4\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
+        .replaceAll("['%\\u06D4\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
   }
 
   /**
@@ -743,13 +764,20 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         builder.append(c);
       }
     }
-    return builder.toString();
+    String s1 = builder.toString();
+//    if (!s.isEmpty() && !s.equalsIgnoreCase(s1)) {
+//      logger.warning("fromFull before '" +
+//          s +
+//          "' after '" + s1 +
+//          "'");
+//    }
+    return s1;
   }
 
   @NotNull
   private IHighlightSegment skipUnclickable(Iterator<IHighlightSegment> iterator, IHighlightSegment clickable) {
     while (!clickable.isClickable() && iterator.hasNext()) {
-      //logger.info("skipUnclickable : skip " + clickable);
+      logger.info("skipUnclickable : skip " + clickable);
       clickable = iterator.next();
     }
     return clickable;
@@ -759,9 +787,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return TO_IGNORE.contains(seg.getEvent());
   }
 
-  private HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
-    return addDomHandler(handler, MouseOverEvent.getType());
-  }
+//  private HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+//    return addDomHandler(handler, MouseOverEvent.getType());
+//  }
 
   /**
    * Row 1: FL - ENGLISH
@@ -816,7 +844,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return card;
   }
 
-  @NotNull
+/*  @NotNull
   private String getMailTo() {
     String s1 = trimURL(Window.Location.getHref());
 
@@ -829,13 +857,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return "mailto:" +
         "?" +
         "Subject=Share netprof item " + exercise.getEnglish() +
-        "&body=Link to " + exercise.getEnglish() + "/" + exercise.getForeignLanguage() + " : " +
-        encode;
-  }
+        "&body=Hi,<br/>    Here's a link to " + exercise.getEnglish() + "/" + exercise.getForeignLanguage() + " : " +
+        encode + "<br/>Thanks,"+ controller.getUserManager().getCurrent().getFullName();
+  }*/
+/*
 
   private String trimURL(String url) {
     return url.split("\\?")[0].split("#")[0];
   }
+*/
 
   private boolean showingComments = false;
 
@@ -856,7 +886,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     {
       NavLink share = new NavLink(EMAIL);
       dropdownContainer.add(share);
-      share.setHref(getMailTo());
+      share.setHref(userListSupport.getMailToExercise(exercise));
     }
     userListSupport.addSendLinkWhatYouSee(dropdownContainer);
 
@@ -900,9 +930,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (hasAudio(e)) {
       flContainer.add(playAudio = getPlayAudioPanel());
-    }
-    else {
-     // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+    } else {
+      // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
     }
 
     DivWidget fieldContainer = new DivWidget();
@@ -972,19 +1001,19 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   * @see #makeFirstRow(CommonExercise, DivWidget)
    * @param e
    * @return
+   * @see #makeFirstRow(CommonExercise, DivWidget)
    */
   private boolean hasAudio(T e) {
     return e.hasAudio(true);
   }
 
   /**
-   * @see #getItemContent(CommonExercise)
    * @param e
    * @param card
    * @param rowWidget
+   * @see #getItemContent(CommonExercise)
    */
 
   private void addContext(T e, Panel card, DivWidget rowWidget) {
@@ -1258,16 +1287,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void contextAudioChanged(int id, long duration) {
-    AlignmentOutput alignmentOutput = alignments.get(id);
-    if (alignmentOutput != null) {
-      if (DEBUG) {
-        logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
-            " alignment " + alignmentOutput);
-      }
-      if (contextClickables == null) {
-        logger.warning("huh? context not set for " + id);
-      } else {
-        matchSegmentsToClickables(id, duration, alignmentOutput, contextClickables, contextPlay, contextClickableRow);
+    if (phonesChoices == SHOW) {
+      AlignmentOutput alignmentOutput = alignments.get(id);
+      if (alignmentOutput != null) {
+        if (DEBUG) {
+          logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
+              " alignment " + alignmentOutput);
+        }
+        if (contextClickables == null) {
+          logger.warning("huh? context not set for " + id);
+        } else {
+          matchSegmentsToClickables(id, duration, alignmentOutput, contextClickables, contextPlay, contextClickableRow);
+        }
       }
     }
   }

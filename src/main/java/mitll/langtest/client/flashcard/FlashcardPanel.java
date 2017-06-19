@@ -77,7 +77,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise>  extends HorizontalPanel {
+public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
   private static final int CARD_HEIGHT = 362;//320;
@@ -197,27 +197,24 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     playRefOrAutoPlay();
 
-    addKeyListener();
+  //  addKeyListener();
   }
 
-  protected void addKeyListener() {
+/*  protected void addKeyListener() {
     if (addKeyBinding) {
       addKeyListener(controller, instance);
-      // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
+      logger.info("FlashcardPanel : " + instance + " adding keybinding ");
     }
-  }
+  }*/
 
   private void playRefOrAutoPlay() {
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        maybePlayRef(controlState);
-        doAutoPlay(controlState);
-      }
+    Scheduler.get().scheduleDeferred((Command) () -> {
+      maybePlayRef(controlState);
+      doAutoPlay(controlState);
     });
   }
 
   private void wasHidden() {
-
     cancelTimer();
     getSoundFeedback().clear();
   }
@@ -227,9 +224,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     if (controlState.isAudioOn() && isTabVisible()) {
       if (!controlState.isAutoPlay()) {
         // logger.info("audio on, so playing ref");
-      playRef();
+        playRef();
       } else {
-    //    logger.info("maybePlayRef auto advance on, so not playing ref here");
+        //    logger.info("maybePlayRef auto advance on, so not playing ref here");
       }
     } else {
       //logger.info("maybePlayRef tab not visible - so no audio.");
@@ -238,6 +235,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   /**
    * TODO: Needed???
+   *
    * @return
    * @see BootstrapExercisePanel#playRefAndGoToNext
    * @see #maybePlayRef
@@ -318,16 +316,16 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost) {
     controller.getQCService().addAnnotation(exercise.getID(), field, status.toString(), commentToPost,
         new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-      @Override
-      public void onSuccess(Void result) {
+          @Override
+          public void onSuccess(Void result) {
 /*        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + exercise.getOldID() +
             " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);*/
-      }
-    });
+          }
+        });
   }
 
   private HTML clickToFlip;
@@ -396,7 +394,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     int rows = lowestRow != null ? basicNumRows + 1 : basicNumRows;
     Grid grid = new Grid(rows, 1);
     int row = 0;
-    //grid.setWidget(row++, 0, contentRow);
     grid.setWidget(row++, 0, contentMiddle);
     grid.setWidget(row++, 0, belowDiv);
     if (lowestRow != null) grid.setWidget(row++, 0, lowestRow);
@@ -432,8 +429,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private Panel getCardContent() {
     final ClickableSimplePanel contentMiddle = new ClickableSimplePanel();
 
-    contentMiddle.setHeight(CARD_HEIGHT +
-        "px");
+    contentMiddle.setHeight(CARD_HEIGHT +        "px");
     contentMiddle.getElement().setId("Focusable_content");
     contentMiddle.addClickHandler(new ClickHandler() {
       @Override
@@ -465,8 +461,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     }
   }
 
-  //private boolean isSongPlaying = false;
-
   /**
    * @param path
    * @param delayMillis
@@ -475,7 +469,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #playRefAndGoToNextIfSet
    */
   private void playRefAndGoToNext(String path, final int delayMillis, boolean useCheck) {
-  //  logger.info("playRefAndGoToNext " + path + " is song playing " + isSongPlaying + " delay " + delayMillis);
+    //  logger.info("playRefAndGoToNext " + path + " is song playing " + isSongPlaying + " delay " + delayMillis);
     if (!isValid(path)) {
       if (isTabVisible()) {
         checkThenLoadNextOnTimer(1000);
@@ -485,8 +479,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     } else {
       if (controlState.isAudioOn()) {
         playAudioAndAdvance(path, delayMillis, useCheck);
-      }
-      else {
+      } else {
         loadNextOnTimer(2000);
       }
     }
@@ -496,7 +489,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
-    //    isSongPlaying = true;
+        //    isSongPlaying = true;
         addPlayingHighlight(foreign);
         if (endListener != null) {
           endListener.songStarted();
@@ -505,7 +498,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
       @Override
       public void songEnded() {
-      //  isSongPlaying = false;
+        //  isSongPlaying = false;
 
         if (endListener != null) endListener.songEnded();
         cancelTimer();
@@ -672,7 +665,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       playRefAndGoToNextIfSet();
     }
     //else {
-      //  logger.info("BootstrapExercisePanel auto play OFF ");
+    //  logger.info("BootstrapExercisePanel auto play OFF ");
     //}
   }
 
@@ -1230,8 +1223,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     }
   }
 
-  private void addKeyListener(ExerciseController controller, final String instance) {
-    //     logger.info("FlashcardRecordButton.addKeyListener : using " + getElement().getExID() + " for " + instance);
+/*  private void addKeyListener(ExerciseController controller, final String instance) {
+    logger.info("FlashcardRecordButton.addKeyListener : for " + instance);
     KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
       @Override
       public String getName() {
@@ -1250,11 +1243,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       }
     };
     controller.addKeyListener(listener);
-  }
+  }*/
 
-  private void checkKeyDown(NativeEvent event) {
+/*  private void checkKeyDown(NativeEvent event) {
+
     if (!shouldIgnoreKeyPress()) {
       int keyCode = event.getKeyCode();
+      logger.info("checkKeyDown --- " + keyCode);
       if (keyCode == KeyCodes.KEY_ALT || keyCode == KeyCodes.KEY_CTRL || keyCode == KeyCodes.KEY_ESCAPE || keyCode == KeyCodes.KEY_WIN_KEY) {
         //logger.info("key code is " + keyCode);
       } else {
@@ -1262,32 +1257,35 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
         if (keyCode == KeyCodes.KEY_LEFT) {
           exerciseList.loadPrev();
           event.stopPropagation();
+          event.preventDefault();
         } else if (keyCode == KeyCodes.KEY_RIGHT) {
           if (!exerciseList.isPendingReq()) {
             gotClickOnNext();
           }
           event.stopPropagation();
+          event.preventDefault();
         } else if (keyCode == KeyCodes.KEY_UP) {
           if (!selectShowFL()) {
             flipCard();
           }
           event.stopPropagation();
+          event.preventDefault();
         } else if (keyCode == KeyCodes.KEY_DOWN) {
           if (!selectShowFL()) {
             flipCard();
           }
           event.stopPropagation();
+          event.preventDefault();
         } else {
           // warnNotASpace();
         }
       }
-
     } else {
-      //  logger.info("checkKeyDown ignoring key press... " + listener);
+      logger.info("checkKeyDown ignoring key press... " + event.getKeyCode());
     }
-  }
+  }*/
 
-  private boolean shouldIgnoreKeyPress() {
+/*  private boolean shouldIgnoreKeyPress() {
     boolean b = !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
     //if (b) {
     //logger.info("attached " + isAttached());
@@ -1295,9 +1293,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     //  logger.info("user     " + controller.getUser());
     // }
     return b;
-  }
-
-  private native boolean checkHidden(String id)  /*-{
+  }*/
+/*
+  private native boolean checkHidden(String id)  *//*-{
       return $wnd.jQuery('#' + id).is(":hidden");
-  }-*/;
+  }-*//*;*/
 }

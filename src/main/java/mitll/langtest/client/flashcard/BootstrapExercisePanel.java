@@ -124,12 +124,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   /**
-   * Don't add one.
-   */
-  protected void addKeyListener() {
-  }
-
-  /**
    * @param controlState
    * @return
    * @see #getRightColumn(mitll.langtest.client.flashcard.ControlState)
@@ -145,25 +139,17 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
     Button onButton = makeGroupButton(buttonGroup, ON);
 
-    onButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controlState.setAudioFeedbackOn(true);
-        setAutoPlay(false);
-        //logger.info("now on " + controlState);
-      }
+    onButton.addClickHandler(event -> {
+      controlState.setAudioFeedbackOn(true);
+      setAutoPlay(false);
     });
     onButton.setActive(controlState.isAudioFeedbackOn());
 
     Button offButton = makeGroupButton(buttonGroup, OFF);
 
-    offButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controlState.setAudioFeedbackOn(false);
-        setAutoPlay(false);
-        //logger.info("now off " + controlState);
-      }
+    offButton.addClickHandler(event -> {
+      controlState.setAudioFeedbackOn(false);
+      setAutoPlay(false);
     });
     offButton.setActive(!controlState.isAudioFeedbackOn());
 
@@ -207,19 +193,14 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     scoreFeedbackRow.setHeight("52px");
     toAddTo.add(scoreFeedbackRow);
 
-    //toAddTo.add();
     DivWidget wrapper = new DivWidget();
     wrapper.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
     recoOutput = new DivWidget();
     wrapper.add(recoOutput);
-    //recoOutput.setWidth("600px");
-    //recoOutput.getElement().getStyle().setProperty("marginLeft", "auto");
-    //recoOutput.getElement().getStyle().setProperty("marginRight","auto");
 
     recoOutput.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
     toAddTo.add(wrapper);
-    //recoOutput.setWidth("100%");
   }
 
   private RecordButtonPanel answerWidget;

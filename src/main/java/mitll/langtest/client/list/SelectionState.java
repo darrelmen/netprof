@@ -58,6 +58,7 @@ public class SelectionState {
   public static final String ONLY_DEFAULT = "onlyDefault";
   public static final String ONLY_UNINSPECTED = "onlyUninspected";
   private static final String ITEM_SEPARATOR = "&#44";
+  private static final String SHOWING_ALL_ENTRIES = "All entries";
 
   static final String INSTANCE = "instance";
   private int item = -1;
@@ -191,7 +192,6 @@ public class SelectionState {
     this.item = item;
   }
 
-  private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
 
   /**
    * @see mitll.langtest.client.download.DownloadHelper#showDialog

@@ -959,8 +959,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return event -> {
       Map<String, String> candidate = new HashMap<>(typeToSelection);
       candidate.put(type, type.equalsIgnoreCase(LISTS) ? "" + newUserListID : key);
-      logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID);
-      //getTypeToValues(candidate, newUserListID);
+    //  logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID);
       setHistoryItem(getHistoryToken(candidate));
     };
   }
