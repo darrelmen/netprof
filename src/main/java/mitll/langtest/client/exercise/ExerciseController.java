@@ -89,6 +89,8 @@ public interface ExerciseController extends Services {
 
   boolean isLogClientMessages();
 
+  void reallySetTheProject(int projectid);
+
   Collection<User.Permission> getPermissions();
 
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);

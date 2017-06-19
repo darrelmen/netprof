@@ -125,7 +125,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     this.choices = choices;
     this.phonesChoices = phonesChoices;
 
-    logger.info("phone display " + phonesChoices);
+    //logger.info("phone display " + phonesChoices);
 
     this.alignments = alignments;
 
@@ -843,29 +843,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     return card;
   }
-
-/*  @NotNull
-  private String getMailTo() {
-    String s1 = trimURL(Window.Location.getHref());
-
-    String s = s1 +
-        "#" +
-        SelectionState.SECTION_SEPARATOR + "search=" + exercise.getID() +
-        SelectionState.SECTION_SEPARATOR + "project=" + controller.getProjectStartupInfo().getProjectid();
-
-    String encode = URL.encode(s);
-    return "mailto:" +
-        "?" +
-        "Subject=Share netprof item " + exercise.getEnglish() +
-        "&body=Hi,<br/>    Here's a link to " + exercise.getEnglish() + "/" + exercise.getForeignLanguage() + " : " +
-        encode + "<br/>Thanks,"+ controller.getUserManager().getCurrent().getFullName();
-  }*/
-/*
-
-  private String trimURL(String url) {
-    return url.split("\\?")[0].split("#")[0];
-  }
-*/
 
   private boolean showingComments = false;
 

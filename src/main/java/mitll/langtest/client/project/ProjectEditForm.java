@@ -23,6 +23,7 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import org.jetbrains.annotations.Nullable;
+import org.moxieapps.gwt.highcharts.client.Chart;
 
 import java.util.logging.Logger;
 
@@ -55,6 +56,7 @@ public class ProjectEditForm extends UserDialog {
   private FormField hydraPort, nameField, unit, chapter, course, hydraHost;
   private ListBox language;
   private FormField model;
+  private CheckBox showOniOSBox;
   private Services services;
 
   /**
@@ -134,7 +136,8 @@ public class ProjectEditForm extends UserDialog {
     info.setFirstType(unit.getSafeText());
     info.setSecondType(chapter.getSafeText());
 
-    logger.info("updateProject now " + info);
+    info.setShowOniOS(showOniOSBox.getValue());
+    //   logger.info("updateProject now " + info);
 
     projectServiceAsync.update(info, new AsyncCallback<Boolean>() {
       @Override
@@ -207,15 +210,19 @@ public class ProjectEditForm extends UserDialog {
       fieldset.add(id);
     }
 
-    nameField = getName(getHDivLabel(fieldset, NAME), info.getName(), PROJECT_NAME);
-    checkNameOnBlur(nameField);
+    {
+      nameField = getName(getHDivLabel(fieldset, NAME), info.getName(), PROJECT_NAME);
+      checkNameOnBlur(nameField);
 
-    Scheduler.get().scheduleDeferred(() -> nameField.getWidget().setFocus(true));
+      Scheduler.get().scheduleDeferred(() -> nameField.getWidget().setFocus(true));
+    }
 
     addLanguage(info, fieldset, isNew);
 
-    course = getName(getHDivLabel(fieldset, "Course"), info.getCourse(), "Course (optional)");
-    course.setText(info.getCourse());
+    {
+      course = getName(getHDivLabel(fieldset, "Course"), info.getCourse(), "Course (optional)");
+      course.setText(info.getCourse());
+    }
 
     {
       DivWidget typesRow = getHDivLabel(fieldset, "Hierarchy");
@@ -238,23 +245,48 @@ public class ProjectEditForm extends UserDialog {
     }
 
     model = getModel(getHDivLabel(fieldset, LANGUAGE_MODEL), info.getModelsDir());
-
-    feedback = new HTML();
-    feedback.addStyleName("topFiveMargin");
-    feedback.addStyleName("bottomFiveMargin");
-    fieldset.add(feedback);
+//
+//    {
+//      showOniOSBox = getShowOniOSBox(getHDivLabel(fieldset, "Show On iOS"));//, info.getCourse(), "Course (optional)");
+//      showOniOSBox.setValue(info.isShowOniOS());
+//    }
 
     if (!isNew) {
       fieldset.add(getCheckAudio(info));
       fieldset.add(getRecalcRefAudio(info));
     }
 
+    {
+      feedback = new HTML();
+      feedback.addStyleName("topFiveMargin");
+      feedback.addStyleName("bottomFiveMargin");
+      fieldset.add(feedback);
+    }
+
     return fieldset;
   }
 
+//  private CheckBox getShowOniOSBox(DivWidget course) {
+//    CheckBox w = new CheckBox();
+//    course.add(w);
+//    return w;
+//  }
+
 
   private void addLifecycle(ProjectInfo info, Fieldset fieldset) {
-    getHDivLabel(fieldset, "Lifecycle").add(statusBox = getBox());
+    DivWidget lifecycle = getHDivLabel(fieldset, "Lifecycle");
+
+    lifecycle.add(statusBox = getBox());
+
+    {
+      showOniOSBox= new CheckBox("Show On iOS");
+
+      logger.info("show on iOS " + info.isShowOniOS());
+      showOniOSBox.setValue(info.isShowOniOS());
+      lifecycle.add(showOniOSBox);
+      showOniOSBox.addStyleName("leftTenMargin");
+    }
+
     checkPortOnBlur(statusBox);
     setBox(info.getStatus());
   }

@@ -71,9 +71,10 @@ public class SlimProject extends ProjectInfo {
                      String modelsDir,
                      String firstType,
                      String secondType,
+                     boolean showOniOS,
                      TreeMap<String, String> props) {
     super(projectid, name, language, course, countryCode, status, displayOrder, created, host, port, modelsDir,
-        firstType, secondType);
+        firstType, secondType, showOniOS);
     this.hasModel = hasModel;
     this.isRTL = isRTL;
     this.props = props;

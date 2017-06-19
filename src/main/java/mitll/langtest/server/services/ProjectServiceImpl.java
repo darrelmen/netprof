@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.services;
 
-import com.google.gwt.media.client.Audio;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.ServerProperties;
@@ -54,7 +53,6 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -63,10 +61,10 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
-  private static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
+ // private static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
   public static final String ANY = "Any";
 
-  @Override
+/*  @Override
   public List<ProjectInfo> getAll() {
     return getProjectDAO().getAll()
         .stream()
@@ -85,13 +83,22 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
             getPort(project),
             project.getProp(ServerProperties.MODELS_DIR),
             project.first(),
-            project.second())
+            project.second(),
+            getShowOniOS(project))
         )
         .collect(Collectors.toList());
+  }*/
+
+/*  private String getHydraHost(SlickProject project) {
+    return project.getProp(Project.WEBSERVICE_HOST);
   }
 
-  private String getHydraHost(SlickProject project) {
-    return project.getProp(Project.WEBSERVICE_HOST);
+  private boolean getShowOniOS(SlickProject project) {
+    String showOnIos = Project.SHOW_ON_IOS;
+    String prop = project.getProp(showOnIos);
+    logger.info("got prop '" +prop+
+        "'");
+    return prop != null && prop.equalsIgnoreCase("true");
   }
 
   private int getPort(SlickProject project) {
@@ -101,7 +108,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       logger.error("got " + e, e);
       return -1;
     }
-  }
+  }*/
 
   private IProjectDAO getProjectDAO() {
     return db.getProjectDAO();

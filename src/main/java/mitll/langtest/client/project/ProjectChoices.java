@@ -99,20 +99,24 @@ public class ProjectChoices {
    * @see InitialUI#addProjectChoices
    */
   public void showProjectChoices(SlimProject parent, int level) {
-    if (parent != null) {
-      contentRow.add(showProjectChoices(getVisibleProjects(parent.getChildren()), level));
+    if (parent == null) {
+      showInitialChoices(level);
     } else {
-      long then = System.currentTimeMillis();
-      service.getStartupInfo(new AsyncCallback<StartupInfo>() {
-        public void onFailure(Throwable caught) {
-          lifecycleSupport.onFailure(caught, then);
-        }
-
-        public void onSuccess(StartupInfo startupInfo) {
-          contentRow.add(showProjectChoices(getVisibleProjects(startupInfo.getProjects()), level));
-        }
-      });
+      contentRow.add(showProjectChoices(getVisibleProjects(parent.getChildren()), level));
     }
+  }
+
+  private void showInitialChoices(int level) {
+    long then = System.currentTimeMillis();
+    service.getStartupInfo(new AsyncCallback<StartupInfo>() {
+      public void onFailure(Throwable caught) {
+        lifecycleSupport.onFailure(caught, then);
+      }
+
+      public void onSuccess(StartupInfo startupInfo) {
+        contentRow.add(showProjectChoices(getVisibleProjects(startupInfo.getProjects()), level));
+      }
+    });
   }
 
   /**
@@ -334,19 +338,6 @@ public class ProjectChoices {
     w.setType(ButtonType.SUCCESS);
     w.addClickHandler(event -> recalcProject(controller.getAllProjects(), status));
   }
-//
-//  private void recalc() {
-//    controller.getScoringService().getAllAlignments(new AsyncCallback<Void>() {
-//      @Override
-//      public void onFailure(Throwable caught) {
-//      }
-//
-//      @Override
-//      public void onSuccess(Void result) {
-//        new ModalInfoDialog("Recalc Ref Audio", "Audio recalc started... This will take awhile...");
-//      }
-//    });
-//  }
 
   private void recalcProject(List<SlimProject> projects, HTML status) {
     if (projects.isEmpty()) {
@@ -635,17 +626,16 @@ public class ProjectChoices {
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
 //    logger.info("gotClickOnFlag project " + projid + " has " + children);
-
     if (children.size() < 2) {
       logger.info("gotClickOnFlag onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
-      // uiLifecycle.removeLastCrumb();
       uiLifecycle.makeBreadcrumb(name);
       setProjectForUser(projid);
     } else { // at this point, the breadcrumb should be empty?
       logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
       projectCrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
+
       uiLifecycle.clearContent();
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     }

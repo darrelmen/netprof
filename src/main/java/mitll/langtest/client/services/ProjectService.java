@@ -40,7 +40,7 @@ import java.util.List;
 
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
-  List<ProjectInfo> getAll();
+  //List<ProjectInfo> getAll();
   boolean exists(int projectid);
   boolean existsByName(String name);
   boolean update(ProjectInfo info);

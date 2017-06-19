@@ -194,7 +194,7 @@ public class UserListSupport {
 
   @NotNull
   private String getProjectParam() {
-    return SelectionState.SECTION_SEPARATOR + "project=" + controller.getProjectStartupInfo().getProjectid();
+    return SelectionState.SECTION_SEPARATOR + SelectionState.PROJECT + "=" + controller.getProjectStartupInfo().getProjectid();
   }
 
   void addSendLinkWhatYouSee(DropdownBase addToList) {

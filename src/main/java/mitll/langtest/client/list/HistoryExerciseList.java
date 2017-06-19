@@ -224,9 +224,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   /**
    * @param search
    * @param exerciseID
+   * @seex PagingExerciseList#gotTypeAheadEvent
    * @see #loadExercise
    * @see #pushFirstSelection
-   * @seex PagingExerciseList#gotTypeAheadEvent
    */
   void pushNewItem(String search, int exerciseID) {
     if (DEBUG_PUSH) {
@@ -328,7 +328,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   /**
-   *
    * @param selectionState
    * @param newState
    */
@@ -375,8 +374,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected void restoreListBoxState(SelectionState selectionState) {
     if (DEBUG) logger.info("restoreListBoxState restore '" + selectionState + "'");
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-//    List<String> added = new ArrayList<>(typeOrder);
-//    added.add(LISTS);
     if (sectionWidgetContainer != null) {
       sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
     }
@@ -395,10 +392,15 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     String value = event.getValue();
     SelectionState selectionState = getSelectionState(value);
 
-    if (selectionState.getProject() != controller.getProjectStartupInfo().getProjectid()) {
-      // TODO : change the project --- ... and come back and call code below.
-      if (selectionState.getProject() != 0) {
-        logger.info("onValueChange project from state " + selectionState.getProject() + " != " + controller.getProjectStartupInfo().getProjectid());
+    int project = selectionState.getProject();
+    int currentProject = controller.getProjectStartupInfo().getProjectid();
+
+   // logger.info("onValueChange project " + project + " vs " + currentProject);
+
+    if (project != currentProject) {
+      if (project != 0) {
+     //   logger.info("onValueChange project from state " + project + " != " + currentProject);
+        projectChangedTo(project);
       }
     }
 
@@ -432,6 +434,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     }
   }
 
+  protected void projectChangedTo(int project) {
+  }
+
   /**
    * @param selectionState
    * @return true if we're just clicking on a different item in the list and don't need to reload the exercise list
@@ -446,7 +451,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     }
 
     String search = selectionState.getSearch();
-   // logger.info("restoreUIState search box should be "+search);
+    // logger.info("restoreUIState search box should be "+search);
     setTypeAheadText(search);
   }
 
@@ -499,7 +504,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
 
     logger.info("loadExercisesUsingPrefix got " + typeToSection + " prefix " + prefix + " and made " + request +
-        "\n\tlast " +lastSuccessfulRequest);
+        "\n\tlast " + lastSuccessfulRequest);
 
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {
       try {
@@ -586,7 +591,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #pushNewSectionHistoryToken
    */
   protected void noSectionsGetExercises(long userID, int exerciseID) {
-   // logger.info("noSectionsGetExercises " +userID);
+    // logger.info("noSectionsGetExercises " +userID);
     super.getExercises();
   }
 

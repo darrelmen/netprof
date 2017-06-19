@@ -69,6 +69,7 @@ public class Project implements PronunciationLookup {
   public static final String WEBSERVICE_HOST = "webserviceHost";
   /**
    * Initially the choices should be hydra and hydra2 (or maybe hydra-dev and hydra2-dev)
+   *
    * @see #getWebserviceHost
    */
   public static final String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
@@ -78,6 +79,7 @@ public class Project implements PronunciationLookup {
    * @see mitll.langtest.server.database.project.ProjectDAO#update(int, ProjectInfo)
    */
   public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+  public static final String SHOW_ON_IOS = "showOniOS";
 
   private SlickProject project;
   private ExerciseDAO<CommonExercise> exerciseDAO;
@@ -256,8 +258,9 @@ public class Project implements PronunciationLookup {
 
   /**
    * Not for right now... - we only run locally.
-   * @see ASRWebserviceScoring#getWebserviceIP
+   *
    * @return
+   * @see ASRWebserviceScoring#getWebserviceIP
    */
   public String getWebserviceHost() {
     String prop = getProp(WEBSERVICE_HOST);
@@ -266,8 +269,8 @@ public class Project implements PronunciationLookup {
   }
 
   /**
-   * @see ASRWebserviceScoring#getWebservicePort
    * @return
+   * @see ASRWebserviceScoring#getWebservicePort
    */
   public int getWebservicePort() {
     String prop = getProp(WEBSERVICE_HOST_PORT);
@@ -276,6 +279,11 @@ public class Project implements PronunciationLookup {
     if (ip == 1)
       logger.error("No webservice host port found.");
     return ip;
+  }
+
+  public boolean isOnIOS() {
+    String prop = getProp(SHOW_ON_IOS);
+    return prop != null && prop.equalsIgnoreCase("true");
   }
 
   public String getModelsDir() {

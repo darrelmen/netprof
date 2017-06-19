@@ -740,6 +740,8 @@ public class ProjectManagement implements IProjectManagement {
     String prop = project.getProp(Project.WEBSERVICE_HOST);
     if (prop == null) prop = Project.WEBSERVICE_HOST_DEFAULT;
 
+    boolean onIOS = isOnIOS(project);
+
     return new SlimProject(
         project.id(),
         project.name(),
@@ -754,7 +756,13 @@ public class ProjectManagement implements IProjectManagement {
         prop,
         getPort(project),
         project.getProp(ServerProperties.MODELS_DIR),
-        project.first(), project.second(), info);
+        project.first(), project.second(), onIOS, info);
+  }
+
+  private boolean isOnIOS(SlickProject project) {
+    String prop2 = project.getProp(Project.SHOW_ON_IOS);
+    if (prop2 == null) prop2 = "false";
+    return prop2.equalsIgnoreCase("true");
   }
 
   private int getPort(SlickProject project) {

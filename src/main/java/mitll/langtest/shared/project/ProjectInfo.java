@@ -56,6 +56,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   private String modelsDir = "";
   private String firstType = "";
   private String secondType = "";
+  private boolean showOniOS = true;
 
   private Map<String, String> propertyValue = new HashMap<>();
 
@@ -77,7 +78,9 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
                      String host,
                      int port,
                      String modelsDir,
-                     String first, String secondType) {
+                     String first,
+                     String secondType,
+                     boolean showOniOS) {
     this.language = language;
     this.id = projectid;
     this.name = name;
@@ -91,6 +94,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.modelsDir = modelsDir;
     this.firstType = first;
     this.secondType = secondType;
+    this.showOniOS = showOniOS;
   }
 
   public String getLanguage() {
@@ -219,6 +223,14 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
 
   public void setHost(String host) {
     this.host = host;
+  }
+
+  public void setShowOniOS(Boolean showOniOS) {
+    this.showOniOS = showOniOS;
+  }
+
+  public boolean isShowOniOS() {
+    return showOniOS;
   }
 
   public String toString() {

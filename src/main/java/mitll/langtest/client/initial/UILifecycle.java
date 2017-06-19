@@ -60,6 +60,8 @@ public interface UILifecycle {
 
   void showInitialState();
 
+  void addBreadcrumbs();
+
   /**
    * @see mitll.langtest.client.project.ProjectChoices#gotClickOnFlag
    * @param name
@@ -67,7 +69,7 @@ public interface UILifecycle {
    */
   @NotNull
   NavLink makeBreadcrumb(String name);
-  void removeLastCrumb();
+ // void removeLastCrumb();
 
   void clickOnParentCrumb(SlimProject parent);
 

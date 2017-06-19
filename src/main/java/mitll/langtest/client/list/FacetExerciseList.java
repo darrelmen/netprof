@@ -1065,8 +1065,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   private void updateDownloadLinks() {
-    String currentToken = getHistoryToken();
-    SelectionState selectionState = getSelectionState(currentToken);
+     SelectionState selectionState = getSelectionState(getHistoryToken());
     // keep the download link info in sync with the selection
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
   }
@@ -1142,9 +1141,21 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     for (Map.Entry<String, String> pair : typeToSelection.entrySet()) {
       builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
     }
+    builder.append(getProjectParam());
     String s = builder.toString();
 //        logger.info("getHistoryToken token '" + s + "'");
     return s;
+  }
+
+  @NotNull
+  private String getProjectParam() {
+    return SelectionState.SECTION_SEPARATOR + SelectionState.PROJECT + "=" + controller.getProjectStartupInfo().getProjectid();
+  }
+
+
+  @Override
+  protected void projectChangedTo(int project) {
+    controller.reallySetTheProject(project);
   }
 
   private int getUserListID(Map<String, String> newTypeToSelection) {

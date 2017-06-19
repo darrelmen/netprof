@@ -85,7 +85,7 @@ public class InitialUI implements UILifecycle {
   public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
 
   protected static final String LOGIN = "Login";
-  private static final String LANGTEST_IMAGES = LangTest.LANGTEST_IMAGES;
+//  private static final String LANGTEST_IMAGES = LangTest.LANGTEST_IMAGES;
   private static final int NO_USER_INITIAL = -2;
 
   private final UserManager userManager;
@@ -105,8 +105,6 @@ public class InitialUI implements UILifecycle {
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  //private final UserServiceAsync userService;// = GWT.create(UserService.class);
-
   private final IBanner banner;
 
   protected Widget headerRow;
@@ -118,8 +116,9 @@ public class InitialUI implements UILifecycle {
   protected Panel contentRow;
   private INavigation navigation;
   private Container verticalContainer;
-  private static final boolean DEBUG = false;
   private final ProjectChoices choices;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param langTest
@@ -351,7 +350,9 @@ public class InitialUI implements UILifecycle {
 
       banner.checkProjectSelected();
     }
-    else logger.warning("addCrumbs no current user");
+    else {
+      logger.warning("addCrumbs no current user");
+    }
   }
 
   /**
@@ -364,10 +365,10 @@ public class InitialUI implements UILifecycle {
     crumbs.clear();
     breadcrumbs.setVisible(true);
     List<SlimProject> projects = lifecycleSupport.getStartupInfo().getProjects();
-    logger.info("addBreadcrumb " + projects.size());
+ //   logger.info("addBreadcrumb " + projects.size());
     for (SlimProject project : projects) {
       if (project.hasChildren() && project.hasChild(currentProject)) {
-        logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+   //     logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         crumbs.add(getLangBreadcrumb(project));
         addProjectCrumb(crumbs, project.getChild(currentProject));
 /*        for (int i = 0; i < crumbs.getWidgetCount(); i++) {
@@ -375,7 +376,7 @@ public class InitialUI implements UILifecycle {
         }*/
         break;
       } else if (project.getID() == currentProject) {
-        logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+     //   logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         addProjectCrumb(crumbs, project);
         break;
       } else {
@@ -393,7 +394,7 @@ public class InitialUI implements UILifecycle {
   private NavLink getLangBreadcrumb(SlimProject project) {
     NavLink lang = new NavLink(project.getLanguage());
     lang.addClickHandler(clickEvent -> {
-      logger.info("getLangBreadcrumb got click on " + project.getName());
+      //logger.info("getLangBreadcrumb got click on " + project.getName());
       clearStartupInfo();
       clearContent();
       removeUntilCrumb(1);
@@ -412,7 +413,7 @@ public class InitialUI implements UILifecycle {
   private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     NavLink lang = new NavLink(project.getName());
     lang.addClickHandler(clickEvent -> {
-      logger.info("addProjectCrumb choose project again for " + project.getName());
+    //  logger.info("addProjectCrumb choose project again for " + project.getName());
       chooseProjectAgain();
     });
     crumbs.add(lang);
@@ -659,12 +660,17 @@ public class InitialUI implements UILifecycle {
     choices.showProjectChoices(parent, level);
   }
 
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+
   /**
-   * TODOx : move breadcrumbs up into banner
    *
    * @see #addProjectChoices
    */
-  private void addBreadcrumbs() {
+   @Override
+   public void addBreadcrumbs() {
     addCrumbs(breadcrumbs);
   }
 
@@ -696,7 +702,7 @@ public class InitialUI implements UILifecycle {
   /**
    * @see #clickOnParentCrumb(SlimProject)
    */
-  public void removeLastCrumb() {
+  private void removeLastCrumb() {
     //logger.info("removeLastCrumb has " +breadcrumbs.getWidgetCount());
     breadcrumbs.remove(breadcrumbs.getWidgetCount() - 1);
   }

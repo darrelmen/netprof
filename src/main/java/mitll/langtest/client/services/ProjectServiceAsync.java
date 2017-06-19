@@ -38,7 +38,7 @@ import mitll.langtest.shared.project.ProjectInfo;
 import java.util.List;
 
 public interface ProjectServiceAsync {
-  void getAll(AsyncCallback<List<ProjectInfo>> async);
+  //void getAll(AsyncCallback<List<ProjectInfo>> async);
 
   void exists(int projectid, AsyncCallback<Boolean> async);
 

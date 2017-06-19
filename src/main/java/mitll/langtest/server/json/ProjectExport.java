@@ -40,7 +40,7 @@ public class ProjectExport {
       proj.addProperty("status", project.getProject().status());
       proj.addProperty("countrycode", project.getProject().countrycode());
       proj.addProperty("displayorder", project.getProject().displayorder());
-      proj.addProperty("showOnIOS", Boolean.TRUE);
+      proj.addProperty("showOnIOS", project.isOnIOS());
       proj.addProperty("rtl", project.isRTL());
       String host = project.getWebserviceHost();
       proj.addProperty("host", host.equals("127.0.0.1") ? "" : host);

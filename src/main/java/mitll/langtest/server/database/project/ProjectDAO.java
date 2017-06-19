@@ -104,10 +104,11 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   * @see mitll.langtest.server.services.ProjectServiceImpl#update
+   * Why some things are slots on SlickProject and why some things are project properties is kinda arbitrary...
    * @param userid
    * @param projectInfo
    * @return
+   * @see mitll.langtest.server.services.ProjectServiceImpl#update
    */
   @Override
   public boolean update(int userid, ProjectInfo projectInfo) {
@@ -116,14 +117,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
     SlickProject project = currentProject.getProject();
     Timestamp created = new Timestamp(projectInfo.getCreated());
-    Timestamp now     = new Timestamp(System.currentTimeMillis());
+    Timestamp now = new Timestamp(System.currentTimeMillis());
 
     String countryCode = projectInfo.getCountryCode();
 
     String ccFromLang = new CreateProject().getCC(projectInfo.getLanguage());
     if (!ccFromLang.equals(countryCode)) {
       logger.warn("update : setting country code to " + countryCode +
-          " to be consistent with the language "+projectInfo.getLanguage());
+          " to be consistent with the language " + projectInfo.getLanguage());
       countryCode = ccFromLang;
     }
     SlickProject changed = new SlickProject(projid,
@@ -151,11 +152,12 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     addOrUpdateProperty(projid, WEBSERVICE_HOST, projectInfo.getHost());
     addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
     addOrUpdateProperty(projid, MODELS_DIR, projectInfo.getModelsDir());
+    addOrUpdateProperty(projid, SHOW_ON_IOS, projectInfo.isShowOniOS() ? "true" : "false");
     return didChange;
   }
 
   private void addOrUpdateProperty(int projid, String key, String port) {
-    logger.info("addOrUpdateProperty " +projid + " " + key + "="+port);
+    logger.info("addOrUpdateProperty " + projid + " " + key + "=" + port);
 
     ProjectPropertyDAO propertyDAO = getProjectPropertyDAO();
     Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.byProjectAndKey(projid, key);
@@ -173,8 +175,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   * @see #ensureDefaultProject
    * @return
+   * @see #ensureDefaultProject
    */
   private SlickProject getDefaultProject() {
     Collection<SlickProject> aDefault = dao.getDefault();
@@ -235,8 +237,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @seex PostgresTest#testDeleteEnglish
    */
   public boolean delete(int id) {
-   // logger.info("delete project #" + id);
-    return dao.delete(id) >0;
+    // logger.info("delete project #" + id);
+    return dao.delete(id) > 0;
   }
 
   /**

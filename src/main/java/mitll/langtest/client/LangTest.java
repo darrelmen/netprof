@@ -344,6 +344,7 @@ public class LangTest implements
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
+
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo, reloadWindow);
       }
@@ -366,7 +367,9 @@ public class LangTest implements
   }
 
   @Override
-  public List<SlimProject> getAllProjects() { return startupInfo.getAllProjects();  }
+  public List<SlimProject> getAllProjects() {
+    return startupInfo.getAllProjects();
+  }
 
   private Map<Integer, AudioServiceAsync> createHostSpecificServices(List<SlimProject> projects) {
 
@@ -824,6 +827,37 @@ public class LangTest implements
     projectStartupInfo = user.getStartupInfo();
     logger.info("setProjectStartupInfo project startup " + projectStartupInfo);
   }
+
+  /**
+   * So if during history changes we see the project has changed, we have to react to it here.
+   * @param projectid
+   * @see mitll.langtest.client.list.FacetExerciseList#projectChangedTo
+   */
+  @Override
+  public void reallySetTheProject(int projectid) {
+//    logger.info("setProjectForUser set project for " + projectid);
+    initialUI.clearContent();
+
+    userService.setProject(projectid, new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+
+      }
+
+      @Override
+      public void onSuccess(User aUser) {
+        if (aUser == null) {
+          logger.warning("huh? no current user? ");
+        } else {
+          setProjectStartupInfo(aUser);
+       //   logger.info("setProjectForUser set project for " + aUser + " show initial state ");
+          initialUI.showInitialState();
+          initialUI.addBreadcrumbs();
+        }
+      }
+    });
+  }
+
 
   /**
    * Init Flash recorder once we login.

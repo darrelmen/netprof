@@ -56,4 +56,5 @@ public interface UserNotification {
   void gotUser(User user);
   Collection<User.Permission> getPermissions();
   void setProjectStartupInfo(User user);
+  void reallySetTheProject(int projectid);
 }

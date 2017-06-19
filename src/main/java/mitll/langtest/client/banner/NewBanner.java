@@ -360,12 +360,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     recordMenuVisible();
   }
 
-  private void recordMenuVisible() {
-    if (recnav != null) {
-      recnav.setVisible(isPermittedToRecord() && hasProjectChoice());
-    }
-  }
-
   private boolean hasProjectChoice() {
     return controller.getProjectStartupInfo() != null;
   }
@@ -401,6 +395,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
     reflectPermissions(controller.getPermissions());
+  }
+
+  private void recordMenuVisible() {
+    if (recnav != null) {
+      recnav.setVisible(isPermittedToRecord() && hasProjectChoice());
+    }
   }
 
   private NavLink getContactUs() {

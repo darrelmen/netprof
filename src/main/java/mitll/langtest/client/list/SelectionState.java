@@ -49,7 +49,7 @@ public class SelectionState {
 
   private static final String ITEM = "item";
   private static final String SEARCH = "search";
-  private static final String PROJECT = "project";
+  public static final String PROJECT = "project";
 
   public static final String SECTION_SEPARATOR = "###";
 
