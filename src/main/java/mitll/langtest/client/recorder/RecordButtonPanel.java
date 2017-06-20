@@ -44,6 +44,7 @@ import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 
@@ -183,7 +184,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
       return true;
     } else {
       initRecordButton();
-      showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt(), recordButton);
+      showPopup(Validity.TOO_SHORT.getPrompt(), recordButton);
       return false;
     }
   }

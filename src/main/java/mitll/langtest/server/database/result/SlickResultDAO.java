@@ -36,8 +36,8 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.UserAndTime;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -86,7 +86,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
           // 0,
           AudioType.UNSET.toString(),
           "",
-          false, AudioAnswer.Validity.INVALID.name(),
+          false, Validity.INVALID.name(),
           0,
           0,
           0,

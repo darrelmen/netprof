@@ -43,7 +43,7 @@ import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.Validity;
 
 import java.util.logging.Logger;
 
@@ -393,8 +393,8 @@ public class RecordButton extends Button {
    * @param validity
    * @return true if showed the popup
    */
-  public boolean checkAndShowTooLoud(AudioAnswer.Validity validity) {
-    if (getPlatform().contains(WINDOWS) && validity == AudioAnswer.Validity.TOO_LOUD) {
+  public boolean checkAndShowTooLoud(Validity validity) {
+    if (getPlatform().contains(WINDOWS) && validity == Validity.TOO_LOUD) {
       showTooLoud();
       return true;
     } else {

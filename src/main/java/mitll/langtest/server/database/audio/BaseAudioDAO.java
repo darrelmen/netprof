@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.audio;
 
 import com.google.common.base.CharMatcher;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.server.audio.AudioExportOptions;
@@ -713,7 +714,8 @@ public abstract class BaseAudioDAO extends DAO {
   public void addOrUpdateUser(int userid, int projid, AudioAttribute attr) {
     long timestamp = attr.getTimestamp();
     if (timestamp == 0) timestamp = System.currentTimeMillis();
-    float dnr = new AudioCheck(database.getServerProps()).getDNR(new File(attr.getActualPath()));
+    ServerProperties serverProps = database.getServerProps();
+    float dnr = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDNR(new File(attr.getActualPath()));
     addOrUpdateUser(new AudioInfo(userid, attr.getExid(), projid, attr.getAudioType(), attr.getAudioRef(), timestamp,
         (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr, attr.getResultid(), attr.getRealGender())
     );
@@ -740,7 +742,7 @@ public abstract class BaseAudioDAO extends DAO {
   private Set<Integer> getWithContext(boolean male, int projid) {
     Set<Integer> audioExercisesForGender = getAudioExercisesForGender(male, AudioType.CONTEXT_REGULAR.toString(), projid);
 
-    logger.info("context for " + projid+ " " + male + " " + audioExercisesForGender.size());
+  //  logger.info("context for " + projid + " " + male + " " + audioExercisesForGender.size());
 
     Set<Integer> audioExercisesForGenderBothSpeeds = new HashSet<>(getAudioExercisesForGenderBothSpeeds(
         male,

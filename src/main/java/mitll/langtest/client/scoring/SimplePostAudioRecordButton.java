@@ -47,6 +47,7 @@ import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
@@ -162,7 +163,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
         logMessage("failed to post audio for " + controller.getUser());// + " exercise " + exercise.getOldID());
-        showPopup(AudioAnswer.Validity.INVALID.getPrompt());
+        showPopup(Validity.INVALID.getPrompt());
       }
 
       /**
@@ -182,7 +183,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
           logger.info("ignoring old response " + result);
           return;
         }
-        if (result.getValidity() == AudioAnswer.Validity.OK) {
+        if (result.getValidity() == Validity.OK) {
           //      validAudio = true;
           useResult(result);
         } else {

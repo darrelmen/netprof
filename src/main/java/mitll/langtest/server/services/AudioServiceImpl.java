@@ -81,7 +81,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   @Override
   public void init() {
     super.init();
-    audioConversion = new AudioConversion(serverProps);
+    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(),serverProps.getMinDynamicRange());
     pathWriter = new PathWriter(serverProps);
   }
 
@@ -617,7 +617,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       relativeImagePath = relativeImagePath.substring(1);
     }
     String imageURL = relativeImagePath;
-    double duration = new AudioCheck(serverProps).getDurationInSeconds(wavAudioFile);
+    double duration = new AudioCheck(serverProps.shouldTrimAudio(),serverProps.getMinDynamicRange()).getDurationInSeconds(wavAudioFile);
     if (duration == 0) {
       logger.error("huh? " + wavAudioFile + " has zero duration???");
     }

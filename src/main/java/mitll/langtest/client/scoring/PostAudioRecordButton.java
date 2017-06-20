@@ -43,6 +43,7 @@ import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 
@@ -132,7 +133,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       controller.stopRecording(this::postAudioFile);
       return true;
     } else {
-      showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt());
+      showPopup(Validity.TOO_SHORT.getPrompt());
       hideWaveform();
       gotShortDurationRecording();
       //logger.info("stopRecording duration " + duration + " < " + MIN_DURATION);
@@ -196,7 +197,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
     logMessage("failed to post audio for " + user + " exercise " + getExerciseID());
-    showPopup(AudioAnswer.Validity.INVALID.getPrompt());
+    showPopup(Validity.INVALID.getPrompt());
   }
 
   private void onPostSuccess(AudioAnswer result, long then) {
@@ -209,8 +210,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       logger.info("onPostSuccess ignoring old response " + result);
       return;
     }
-    if (result.getValidity() == AudioAnswer.Validity.OK ||
-        (controller.getProps().isQuietAudioOK() && result.getValidity() == AudioAnswer.Validity.TOO_QUIET)) {
+    if (result.getValidity() == Validity.OK ||
+        (controller.getProps().isQuietAudioOK() && result.getValidity() == Validity.TOO_QUIET)) {
       validAudio = true;
       useResult(result);
       addRT(result, (int) roundtrip);

@@ -52,6 +52,7 @@ import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -341,7 +342,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     public void receivedAudioAnswer(final AudioAnswer result) {
       // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
-      if (result.getValidity() == AudioAnswer.Validity.OK) {
+      if (result.getValidity() == Validity.OK) {
         //resultIDs.add(result.getResultID());
         int id = exercise.getID();
         exToScore.put(id, result.getScore());

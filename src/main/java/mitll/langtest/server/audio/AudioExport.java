@@ -62,8 +62,8 @@ public class AudioExport {
   private final ServerProperties props;
 
   /**
-   * @see DatabaseImpl#writeZip(OutputStream, Map, int, AudioExportOptions)
    * @param props
+   * @see DatabaseImpl#writeZip(OutputStream, Map, int, AudioExportOptions)
    */
   public AudioExport(ServerProperties props) {
     this.props = props;
@@ -89,7 +89,7 @@ public class AudioExport {
                        boolean isDefectList,
                        AudioExportOptions options,
                        boolean isEnglish) throws Exception {
-    List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState,isEnglish);
+    List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState, isEnglish);
     boolean skipAudio = typeToSection.isEmpty() && !options.isAllContext();
 
     logger.info("writeZip skip audio = " + skipAudio);
@@ -147,10 +147,10 @@ public class AudioExport {
   }
 
   /**
-   * @see #writeZip
    * @param sectionHelper
    * @param exercisesForSelectionState
    * @return
+   * @see #writeZip
    */
   private List<CommonExercise> getSortedExercises(ISection<?> sectionHelper,
                                                   Collection<CommonExercise> exercisesForSelectionState,
@@ -253,9 +253,9 @@ public class AudioExport {
   }
 
   /**
-   * @see #writeToStream
    * @param language1
    * @return
+   * @see #writeToStream
    */
   private String getCountryCode(String language1) {
     return LTSFactory.getLocale(language1);
@@ -328,10 +328,10 @@ public class AudioExport {
       populateGenderToCount(toWrite, maleToCount, femaleToCount);
     }
     // find the male and female with most recordings for this exercise
-    MiniUser male   = justContext ? null : getMaxUser(maleToCount);
+    MiniUser male = justContext ? null : getMaxUser(maleToCount);
     MiniUser female = justContext ? null : getMaxUser(femaleToCount);
 
-    AudioConversion audioConversion = new AudioConversion(props);
+    AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange());
 
     int numMissing = 0;
     Set<String> names = new HashSet<>();
@@ -400,7 +400,7 @@ public class AudioExport {
           " missing audio " + numMissing);
     }
     if (numMissing == numAttach) {
-      logger.error("\nwriteFolderContents huh? no audio attached : " +numMissing);
+      logger.error("\nwriteFolderContents huh? no audio attached : " + numMissing);
     }
   }
 
@@ -597,7 +597,7 @@ public class AudioExport {
         ") writing " + toWrite.size() + " looking in " + audioDirectory);
 
     long then = System.currentTimeMillis();
-    AudioConversion audioConversion = new AudioConversion(props);
+    AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange());
 
     int c = 0;
     int d = 0;

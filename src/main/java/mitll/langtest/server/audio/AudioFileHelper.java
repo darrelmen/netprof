@@ -131,7 +131,7 @@ public class AudioFileHelper implements AlignDecode {
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
 
     this.mp3Support = new MP3Support(pathHelper);
-    audioConversion = new AudioConversion(serverProps);
+    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange());
 
     this.language = project.getLanguage();
     isNoModel = project.isNoModel();
@@ -511,16 +511,16 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper
    * @param exercise
    * @param attribute
    * @param doDecode
    * @param userID
    * @return
+   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper
    */
   public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode, int userID) {
     String audioRef = attribute.getAudioRef();
-    logger.debug("decodeAndRemember alignment -- " + exercise.getID() +  " " + attribute);
+    logger.debug("decodeAndRemember alignment -- " + exercise.getID() + " " + attribute);
     boolean doHydec = false;
     // Do alignment...
     File absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
@@ -706,9 +706,8 @@ public class AudioFileHelper implements AlignDecode {
       // TODO : add word and phone table for refs
       //	recordWordAndPhoneInfo(decodeAnswer, answerID);
       //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
-    }
-    else {
-      logger.warn("not writing to db since alignment output is not valid for audio " +audioid);
+    } else {
+      logger.warn("not writing to db since alignment output is not valid for audio " + audioid);
     }
   }
 
@@ -1060,9 +1059,9 @@ public class AudioFileHelper implements AlignDecode {
     httpClient.addRequestProperty("full", "full");  // full json returned
 
     try {
-      logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to decode '" + english + "'='" + foreignLanguage +"'");
+      logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to decode '" + english + "'='" + foreignLanguage + "'");
       String trim = new SLFFile().cleanToken(foreignLanguage).trim();
-      logger.info("getProxyScore dict " + asrScoring.createHydraDict(trim,""));
+      logger.info("getProxyScore dict " + asrScoring.createHydraDict(trim, ""));
       String json = httpClient.sendAndReceiveAndClose(theFile);
       logger.info("getProxyScore response " + json);
       return new PrecalcScores(serverProps, json);
@@ -1191,7 +1190,7 @@ public class AudioFileHelper implements AlignDecode {
     ASR asrScoring = /*options.isUseOldSchool() || isOldSchoolService() ? oldschoolScoring :*/ getASRScoring();
 //    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
-  //  boolean isWebservice = isWebservice(asrScoring);
+    //  boolean isWebservice = isWebservice(asrScoring);
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences, transliteration,
@@ -1345,7 +1344,7 @@ public class AudioFileHelper implements AlignDecode {
     ArrayList<String> lmSentences = new ArrayList<>();
 
     lmSentences.add(transcript);
-    webserviceScoring.runHydra("",transcript,"", lmSentences,"",true,1000);
+    webserviceScoring.runHydra("", transcript, "", lmSentences, "", true, 1000);
   }
 
   @Nullable

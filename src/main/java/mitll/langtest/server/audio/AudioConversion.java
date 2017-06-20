@@ -31,8 +31,6 @@
 
 package mitll.langtest.server.audio;
 
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.answer.AudioAnswer;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,22 +62,24 @@ public class AudioConversion extends AudioBase {
   private static final int MIN_WARN_DUR = 30;
 
   private final String soxPath;
-  private final long trimMillisBefore;
-  private final long trimMillisAfter;
-  private ServerProperties props;
+//  private final long trimMillisBefore;
+//  private final long trimMillisAfter;
+//private ServerProperties props;
 
   private static final boolean DEBUG = false;
+  private boolean trimAudio = false;
 
   /**
-   * @param props
-   * @see mitll.langtest.server.DatabaseServlet#ensureMP3
+   * @paramx props
+   * @seex mitll.langtest.server.DatabaseServlet#ensureMP3
    */
-  public AudioConversion(ServerProperties props) {
-    trimMillisBefore = props.getTrimBefore();
-    trimMillisAfter = props.getTrimAfter();
+  public AudioConversion(boolean trimAudio, int minDynamicRange) {
+//    trimMillisBefore = props.getTrimBefore();
+//    trimMillisAfter = props.getTrimAfter();
+    this.trimAudio = trimAudio;
     soxPath = getSox();
-    this.props = props;
-    audioCheck = new AudioCheck(props);
+    //  this.props = props;
+    audioCheck = new AudioCheck(trimAudio, minDynamicRange);
     setLame();
   }
 
@@ -111,7 +111,7 @@ public class AudioConversion extends AudioBase {
       logger.error("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
-    if (valid.isValid() && props.shouldTrimAudio()) {
+    if (valid.isValid() && trimAudio) {
       valid.setDuration(trimSilence(file).getDuration());
     }
 
@@ -162,7 +162,8 @@ public class AudioConversion extends AudioBase {
    * @see AudioFileHelper#getAnswer
    */
   public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
-    try {
+    return audioCheck.isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
+/*    try {
       if (file.length() < 44) {
         logger.warn("isValid : audio file " + file.getAbsolutePath() + " length was " + file.length() + " bytes.");
         return new AudioCheck.ValidityAndDur(AudioAnswer.Validity.TOO_SHORT, 0, false);
@@ -175,7 +176,7 @@ public class AudioConversion extends AudioBase {
     } catch (Exception e) {
       logger.error("isValid got " + e, e);
     }
-    return AudioCheck.INVALID_AUDIO;
+    return AudioCheck.INVALID_AUDIO;*/
   }
 
   /**
@@ -559,7 +560,7 @@ public class AudioConversion extends AudioBase {
       if (!new File(pathToAudioFile).exists()) {
         if (SPEW && spew++ < 10) {
           logger.error("convertToMP3FileAndCheck huh? source file " + pathToAudioFile + " doesn't exist?");//,
-              //new Exception("can't find " + pathToAudioFile));
+          //new Exception("can't find " + pathToAudioFile));
         }
       } else {
         logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
@@ -578,4 +579,5 @@ public class AudioConversion extends AudioBase {
     }
     return true;
   }
+
 }

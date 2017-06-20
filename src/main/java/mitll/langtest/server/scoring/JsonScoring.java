@@ -52,7 +52,6 @@ public class JsonScoring {
   }
 
 
-
   /**
    * @param reqid      label response with req id so the client can tell if it got a stale response
    * @param projid
@@ -121,9 +120,9 @@ public class JsonScoring {
   }
 
   /**
-   * @see #getAnswer
    * @param id
    * @return
+   * @see #getAnswer
    */
   private int getMostRecentProjectByUser(int id) {
     return db.getUserProjectDAO().mostRecentByUser(id);
@@ -279,7 +278,7 @@ public class JsonScoring {
   private void writeCompressedVersions(String wavFile, TrackInfo trackInfo) {
     File absolutePathToWav = new File(wavFile);
     if (!absolutePathToWav.exists()) logger.error("no file at " + absolutePathToWav);
-    String s = new AudioConversion(serverProps).writeCompressedVersions(absolutePathToWav, false, trackInfo);
+    String s = new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).writeCompressedVersions(absolutePathToWav, false, trackInfo);
   }
 
   private String getUserID(int userid) {

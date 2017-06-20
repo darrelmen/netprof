@@ -32,8 +32,7 @@
 
 package mitll.langtest.server.audio;
 
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.Validity;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,14 +75,16 @@ public class AudioCheck {
   static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
   //public static final int CLIPPED_FRAME_COUNT = 1;
   private final int MIN_DYNAMIC_RANGE;
-  private final ServerProperties props;
+//  private final ServerProperties props;
 
   // TODO :make a server prop
   private final float FORGIVING_MIN_DNR = 18F;
+  boolean trimAudio;
 
-  public AudioCheck(ServerProperties props) {
-    this.props = props;
-    this.MIN_DYNAMIC_RANGE = props == null ? 26 : props.getMinDynamicRange();
+  public AudioCheck(boolean trimAudio, int minDynamicRange) {
+    //  this.props = props;
+    this.trimAudio = trimAudio;
+    this.MIN_DYNAMIC_RANGE = minDynamicRange;//props == null ? 26 : props.getMinDynamicRange();
   }
 
   private double dB(double power) {
@@ -128,6 +129,23 @@ public class AudioCheck {
     return (frames + 0.0d) / format.getFrameRate();
   }
 
+  public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
+    try {
+      if (file.length() < 44) {
+        logger.warn("isValid : audio file " + file.getAbsolutePath() + " length was " + file.length() + " bytes.");
+        return new AudioCheck.ValidityAndDur(Validity.TOO_SHORT, 0, false);
+      } else {
+        AudioCheck.ValidityAndDur validityAndDur =
+            useSensitiveTooLoudCheck ? checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
+                checkWavFile(file, quietAudioOK);
+        return validityAndDur;
+      }
+    } catch (Exception e) {
+      logger.error("isValid got " + e, e);
+    }
+    return AudioCheck.INVALID_AUDIO;
+  }
+
   /**
    * @param file
    * @param quietAudioOK
@@ -162,7 +180,7 @@ public class AudioCheck {
     if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
       logger.warn("file " + file.getName() + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE +
           "):\n" + dynamicRange);
-      validityAndDur.validity = AudioAnswer.Validity.SNR_TOO_LOW;
+      validityAndDur.validity = Validity.SNR_TOO_LOW;
     }
     validityAndDur.setMaxMinRange(dynamicRange.maxMin);
   }
@@ -172,7 +190,7 @@ public class AudioCheck {
   }
 
   private DynamicRange.RMSInfo getDynamicRange(File file) {
-    String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
+    String highPassFilterFile = new AudioConversion(trimAudio, MIN_DYNAMIC_RANGE).getHighPassFilterFile(file.getAbsolutePath());
     if (highPassFilterFile == null) return new DynamicRange.RMSInfo();
     else {
       File highPass = new File(highPassFilterFile);
@@ -219,7 +237,7 @@ public class AudioCheck {
       long frameLength = ais.getFrameLength();
       if (frameLength < MinRecordLength) {
         logger.debug("INFO: audio recording too short (Length: " + frameLength + ") < min (" + MinRecordLength + ") ");
-        return new ValidityAndDur(AudioAnswer.Validity.TOO_SHORT, dur, false);
+        return new ValidityAndDur(Validity.TOO_SHORT, dur, false);
       }
 
       // Verify audio power
@@ -260,7 +278,7 @@ public class AudioCheck {
       }
 
       float clippedRatio = ((float) countClipped) / (float) frameLength;
-    //  float clippedRatio2 = ((float) cc) / (float) frameLength;
+      //  float clippedRatio2 = ((float) cc) / (float) frameLength;
       boolean wasClipped = usePercent ? clippedRatio > CLIPPED_RATIO : clippedRatio > CLIPPED_RATIO_TIGHTER;// > CLIPPED_FRAME_COUNT;
       //  boolean wasClipped2 = usePercent ? clippedRatio2 > CLIPPED_RATIO : cc > 1;
 /*      logger.info("of " + total +" got " +countClipped + " out of " + n +"  or " + clippedRatio  + "/" +clippedRatio2+
@@ -284,13 +302,13 @@ public class AudioCheck {
 
       boolean micDisconnected = mean < -79.999 && std < 0.001;
 
-      AudioAnswer.Validity validity = validAudio ?
+      Validity validity = validAudio ?
           (wasClipped ?
-              AudioAnswer.Validity.TOO_LOUD :
-              AudioAnswer.Validity.OK) :
+              Validity.TOO_LOUD :
+              Validity.OK) :
           micDisconnected ?
-              AudioAnswer.Validity.MIC_DISCONNECTED :
-              AudioAnswer.Validity.TOO_QUIET;
+              Validity.MIC_DISCONNECTED :
+              Validity.TOO_QUIET;
 
       ValidityAndDur validityAndDur = new ValidityAndDur(validity, dur, quietAudioOK);
 
@@ -321,17 +339,17 @@ public class AudioCheck {
   }
 
   public static class ValidityAndDur {
-    private AudioAnswer.Validity validity;
+    private Validity validity;
     private boolean isValid = false;
     public int durationInMillis;
     private double maxMinRange;
 
     ValidityAndDur() {
-      this(AudioAnswer.Validity.INVALID, 0d, false);
+      this(Validity.INVALID, 0d, false);
     }
 
     public ValidityAndDur(double dur) {
-      this(AudioAnswer.Validity.OK, dur, false);
+      this(Validity.OK, dur, false);
     }
 
     /**
@@ -339,19 +357,19 @@ public class AudioCheck {
      * @param dur
      * @parma quietAudioOK - only useful for automated load testing where we aren't really making recordings
      */
-    ValidityAndDur(AudioAnswer.Validity validity, double dur, boolean quietAudioOK) {
+    ValidityAndDur(Validity validity, double dur, boolean quietAudioOK) {
       this.validity = validity;
       this.durationInMillis = (int) (1000d * dur);
       isValid = validity ==
-          AudioAnswer.Validity.OK ||
-          (validity == AudioAnswer.Validity.TOO_QUIET && quietAudioOK);
+          Validity.OK ||
+          (validity == Validity.TOO_QUIET && quietAudioOK);
     }
 
     public boolean isValid() {
       return isValid; // == AudioAnswer.Validity.OK;
     }
 
-    public AudioAnswer.Validity getValidity() {
+    public Validity getValidity() {
       return validity;
     }
 
@@ -371,8 +389,22 @@ public class AudioCheck {
       this.durationInMillis = (int) (1000d * duration);
     }
 
+    public String dump() {
+      return getValidity() + "," + durationInMillis + "," + maxMinRange;
+    }
+
     public String toString() {
       return "valid " + getValidity() + " dur " + durationInMillis + " max min " + maxMinRange;
     }
+  }
+
+
+  public static void main(String[] arg) {
+    if (arg.length < 1) {
+      System.out.println("Usage : file.wav");
+      return;
+    }
+    ValidityAndDur valid = new AudioCheck(false, 24).isValid(new File(arg[0]), false, false);
+    System.out.println(arg[0] + "," + valid.dump());
   }
 }

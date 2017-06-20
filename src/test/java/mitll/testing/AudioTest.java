@@ -43,7 +43,7 @@ public class AudioTest {
       for (File f : files) {
         if (f.getName().endsWith(".wav")) {
           System.out.println("Got " + f.getName());
-          String highPassFilterFile = new AudioConversion(null).getHighPassFilterFile(f.getAbsolutePath());
+          String highPassFilterFile = new AudioConversion(false,26).getHighPassFilterFile(f.getAbsolutePath());
           File file2 = new File(highPassFilterFile);
           // File file2=f;
           DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(file2);
@@ -62,7 +62,7 @@ public class AudioTest {
       File[] files = file1.listFiles();
       for (File f : files) {
         if (f.getName().endsWith(".wav")) {
-          AudioCheck audioCheck = new AudioCheck(null);
+          AudioCheck audioCheck = new AudioCheck(false,26);
           double durationInSeconds = audioCheck.getDurationInSeconds(f);
           //  System.out.println("before " + durationInSeconds);
        //   File replacement = File.createTempFile("dude", ".wav");
@@ -73,7 +73,7 @@ public class AudioTest {
           //System.out.println("Got " + replacement.getName());
           // String trimmed = new AudioConversion(null).doTrimSilence(replacement.getAbsolutePath());
           /*File trimmedFile =*/
-          double v = new AudioConversion(null).trimSilence(replacement).getDuration();
+          double v = new AudioConversion(false,26).trimSilence(replacement).getDuration();
           //   File file2 = new File(trimmed);
           //   System.out.println("after " + trimmed + " exists " + file2.exists()+
           //       ": "+new AudioCheck(null).getDurationInSeconds(file2) + " : " +v);
@@ -98,7 +98,7 @@ public class AudioTest {
 
     FileUtils.copyFile(replacement, destFile);
 
-    double v2 = new AudioConversion(null).trimSilence(destFile).getDuration();
+    double v2 = new AudioConversion(false,26).trimSilence(destFile).getDuration();
 
     double v3 = audioCheck.getDurationInSeconds(destFile);
 

@@ -65,7 +65,7 @@ public class RefResultDecoder {
   private static final Logger logger = LogManager.getLogger(RefResultDecoder.class);
 
   //  private static final boolean DO_REF_DECODE = true;
- // private static final boolean DO_TRIM = false;
+  // private static final boolean DO_TRIM = false;
   // private static final int SLEEP_BETWEEN_DECODES = 2000;
 //  private static final boolean DO_CALC_DNR = true;
   //private static final boolean ENSURE_OGG = false;
@@ -101,9 +101,9 @@ public class RefResultDecoder {
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
-    this.audioConversion = new AudioConversion(serverProperties);
+    this.audioConversion = new AudioConversion(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange());
     //this.hasModel = hasModel;
-    audioCheck = new AudioCheck(serverProperties);
+    audioCheck = new AudioCheck(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange());
     defaultUser = db.getUserDAO().getDefaultUser();
 
   }
@@ -428,9 +428,9 @@ public class RefResultDecoder {
   }*/
 
   /**
-   * @see Project#ensureAudio
    * @param language
    * @param exercises
+   * @see Project#ensureAudio
    */
   public void ensure(String language,
                      Collection<CommonExercise> exercises) {
@@ -996,10 +996,10 @@ public class RefResultDecoder {
   }
 
   /**
-   * @paramx audioAttributes
    * @param title
    * @param exid
    * @return
+   * @paramx audioAttributes
    * @see #trimRef
    */
 /*  private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, int exid, String comment,
@@ -1064,7 +1064,6 @@ public class RefResultDecoder {
     String[] bestAudios = attribute.getAudioRef().split(File.separator);
     return bestAudios[bestAudios.length - 1];
   }*/
-
   public void setStopDecode(boolean stopDecode) {
     this.stopDecode = stopDecode;
   }

@@ -36,6 +36,7 @@ import mitll.langtest.server.ServerProperties;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -103,7 +104,7 @@ public class PathWriter {
       }
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
     }
-    String s = new AudioConversion(serverProperties).writeCompressedVersions(destination, overwrite, trackInfo);
+    String s = getAudioConversion(serverProperties).writeCompressedVersions(destination, overwrite, trackInfo);
 
     String relPath = destination.getAbsolutePath().substring(serverProperties.getAudioBaseDir().length());
     logger.info("getPermanentAudioPath " +
@@ -111,6 +112,11 @@ public class PathWriter {
         "\n\trel path  " + relPath
     );
     return relPath;
+  }
+
+  @NotNull
+  private AudioConversion getAudioConversion(ServerProperties serverProperties) {
+    return new AudioConversion(serverProperties.shouldTrimAudio(),serverProperties.getMinDynamicRange());
   }
 
   /**
@@ -131,6 +137,6 @@ public class PathWriter {
       }
     }
     // logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
-    new AudioConversion(serverProperties).normalizeLevels(destination);
+    getAudioConversion(serverProperties).normalizeLevels(destination);
   }
 }

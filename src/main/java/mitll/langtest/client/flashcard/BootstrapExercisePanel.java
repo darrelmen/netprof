@@ -58,6 +58,7 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -428,7 +429,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     final double score = result.getScore();
     setDownloadHref(result.getPath());
 
-    boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
+    boolean badAudioRecording = result.getValidity() != Validity.OK;
 //    logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
 //        " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 

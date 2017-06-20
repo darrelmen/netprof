@@ -49,6 +49,7 @@ import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.Validity;
 
 import java.util.Collection;
 import java.util.Map;
@@ -339,7 +340,7 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
     boolean correct = result.isCorrect();
     final double score = result.getScore();
 
-    boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
+    boolean badAudioRecording = result.getValidity() != Validity.OK;
 
     logger.info("PressAndHoldExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
         " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
@@ -352,14 +353,14 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
       }
       initRecordButton();
 
-      AudioAnswer.Validity validity = result.getValidity();
-      if (validity.equals(AudioAnswer.Validity.TOO_LOUD)) {
+      Validity validity = result.getValidity();
+      if (validity.equals(Validity.TOO_LOUD)) {
         addIcon(IconType.BULLHORN);
-      } else if (validity.equals(AudioAnswer.Validity.TOO_SHORT)) {
+      } else if (validity.equals(Validity.TOO_SHORT)) {
         addIcon(IconType.WARNING_SIGN);
-      } else if (validity.equals(AudioAnswer.Validity.TOO_QUIET)) {
+      } else if (validity.equals(Validity.TOO_QUIET)) {
         addIcon(IconType.VOLUME_OFF);
-      } else if (validity.equals(AudioAnswer.Validity.MIC_DISCONNECTED)) {
+      } else if (validity.equals(Validity.MIC_DISCONNECTED)) {
         addIcon(IconType.MICROPHONE_OFF);
       }
 

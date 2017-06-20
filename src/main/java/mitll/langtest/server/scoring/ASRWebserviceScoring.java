@@ -279,7 +279,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           testAudioDir = audioDir;
         }
       }
-      testAudioFileNoSuffix = new AudioConversion(props).convertTo16Khz(audioDir, testAudioFileNoSuffix);
+      testAudioFileNoSuffix = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange()).convertTo16Khz(audioDir, testAudioFileNoSuffix);
     } catch (UnsupportedAudioFileException e) {
       logger.error("Got " + e, e);
     }
@@ -301,7 +301,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     Double cachedDuration = fileToDuration.getIfPresent(filePath);
     if (cachedDuration == null) {
-      cachedDuration = new AudioCheck(props).getDurationInSeconds(wavFile);
+      cachedDuration = new AudioCheck(props.shouldTrimAudio(), props.getMinDynamicRange()).getDurationInSeconds(wavFile);
       fileToDuration.put(filePath, cachedDuration);
       //    logger.info("fileToDur now has "+fileToDuration.size());
     }
