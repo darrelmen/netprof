@@ -35,7 +35,6 @@ package mitll.langtest.shared.exercise;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;

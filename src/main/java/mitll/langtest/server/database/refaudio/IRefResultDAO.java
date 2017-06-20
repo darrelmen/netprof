@@ -38,8 +38,6 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
-import mitll.npdata.dao.SlickRefResultJson;
-import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
@@ -64,16 +62,7 @@ public interface IRefResultDAO extends IDAO {
 
                  boolean isMale, String speed, String model);
 
-  //boolean removeForAudioFile(String audioFile);
   boolean removeByAudioID(int audioID);
-
-  // TODO : add  a simple ex, json pair here
-  // get it, parse it, make reverse map of phone->ex
-  // add this to pairs when read in exercise
-  // add sound to type order...
-  // add fancy table widget?
-  // have widgets cascade values...?
-  // have sort order of items be smarter
 
   /**
    * @see RefResultDecoder#getDecodedFiles
@@ -93,7 +82,6 @@ public interface IRefResultDAO extends IDAO {
   Collection<ISlimResult> getAllSlimForProject(int projid);
   Collection<ISlimResult> getAllSlimForProjectIn(int projid, Set<Integer> audioIDs);
   ISlimResult getResult(int audioid);
-  //JSONObject getJSONScores(Collection<Integer> ids);
 
   /**
    * @see mitll.langtest.server.decoder.RefResultDecoder#trimRef
@@ -101,7 +89,6 @@ public interface IRefResultDAO extends IDAO {
    */
   int getNumResults();
 
- // List<String> getAllFilesForProject(int projid);
   List<Integer> getAllAudioIDsForProject(int projid);
 
   void deleteForProject(int projid);

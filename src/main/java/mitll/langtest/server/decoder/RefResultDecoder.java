@@ -870,6 +870,8 @@ public class RefResultDecoder {
     //List<Result> results = db.getRefResultDAO().getResults();
 
     //List<String> files = db.getRefResultDAO().getAllFilesForProject(projid);
+    String modelsDir = db.getProject(projid).getModelsDir();
+
     List<Integer> files = db.getRefResultDAO().getAllAudioIDsForProject(projid);
 
  /*   Set<String> decodedFiles = new HashSet<>();

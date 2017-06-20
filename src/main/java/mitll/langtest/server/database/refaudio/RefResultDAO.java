@@ -37,14 +37,11 @@ import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
-import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.npdata.dao.SlickRefResultJson;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

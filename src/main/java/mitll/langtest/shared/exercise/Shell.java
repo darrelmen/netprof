@@ -35,8 +35,6 @@ package mitll.langtest.shared.exercise;
 import com.github.gwtbootstrap.client.ui.Button;
 import mitll.langtest.client.exercise.PagingContainer;
 
-import java.util.Map;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

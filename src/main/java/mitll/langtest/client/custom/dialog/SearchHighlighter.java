@@ -2,7 +2,6 @@ package mitll.langtest.client.custom.dialog;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Locale;
 import java.util.logging.Logger;

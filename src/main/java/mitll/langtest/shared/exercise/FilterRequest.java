@@ -33,10 +33,9 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.shared.answer.ActivityType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

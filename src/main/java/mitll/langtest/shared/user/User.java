@@ -34,13 +34,15 @@ package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.initial.InitialUI;
-import mitll.langtest.client.user.UserTable;
 import mitll.langtest.client.user.SignUpForm;
+import mitll.langtest.client.user.UserTable;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import static mitll.langtest.shared.user.User.Kind.STUDENT;
 import static mitll.langtest.shared.user.User.Permission.*;

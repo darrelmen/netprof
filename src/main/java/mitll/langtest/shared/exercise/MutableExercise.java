@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.Collection;

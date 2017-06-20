@@ -35,14 +35,12 @@ package mitll.langtest.shared.project;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.user.Affiliation;
-import mitll.langtest.shared.project.SlimProject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created with IntelliJ IDEA.

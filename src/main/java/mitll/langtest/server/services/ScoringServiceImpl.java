@@ -41,8 +41,8 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.ISlimResult;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -255,8 +255,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
       for (Integer audioID : audioIDs) {
         // do we have alignment for this audio in the map
-        ISlimResult cachedResult = audioToResult.get(audioID);
-        recalcOne(projid, audioID, audioFileHelper, userIDFromSession, cachedResult, idToAlignment);
+        recalcOne(projid, audioID, audioFileHelper, userIDFromSession, audioToResult.get(audioID), idToAlignment);
       }
     } else {
       logger.info("recalcAlignments : no hydra for project " + projid + " so not recalculating alignments.");

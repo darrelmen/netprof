@@ -33,12 +33,8 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   public ExerciseListWrapper() {

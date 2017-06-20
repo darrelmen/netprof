@@ -32,7 +32,10 @@
 
 package mitll.langtest.shared.project;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.TreeMap;
 
 public class SlimProject extends ProjectInfo {
   private boolean hasModel;

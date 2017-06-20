@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.flashcard;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.exercise.HasID;

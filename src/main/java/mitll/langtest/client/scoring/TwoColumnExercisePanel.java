@@ -42,7 +42,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   private static final String LEFT_WIDTH = "60%";
+  private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 85;
+  private static final String LEFT_WIDTH_NO_ENGLISH = LEFT_WIDTH_NO_ENGLISH_VALUE + "%";
+
   private static final String RIGHT_WIDTH = "40%";
+  private static final String RIGHT_WIDTH_NO_ENGLISH = (100 - LEFT_WIDTH_NO_ENGLISH_VALUE) + "%";
 
   /**
    *
@@ -779,10 +783,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return TO_IGNORE.contains(seg.getEvent());
   }
 
-//  private HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
-//    return addDomHandler(handler, MouseOverEvent.getType());
-//  }
-
   /**
    * Row 1: FL - ENGLISH
    * Row 2: AltFL
@@ -806,20 +806,19 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     DivWidget rowWidget = getRowWidget();
     rowWidget.getElement().setId("firstRow");
 
-    SimpleRecordAudioPanel<T> recordPanel = makeFirstRow(e, rowWidget);
+    boolean hasEnglish = isValid(english);
+    SimpleRecordAudioPanel<T> recordPanel = makeFirstRow(e, rowWidget, hasEnglish);
     card.add(rowWidget);
 
-    if (isValid(english)) {
-      DivWidget lr = getHorizDiv();
-      lr.addStyleName("floatLeft");
-      lr.setWidth(RIGHT_WIDTH);
+    DivWidget lr = getHorizDiv();
+    lr.addStyleName("floatLeft");
+    lr.setWidth(hasEnglish ? RIGHT_WIDTH : RIGHT_WIDTH_NO_ENGLISH);
 
-      lr.add(getEnglishWidget(e, english));
-      lr.add(getItemWidget(e));
-      lr.add(getDropdown());
+    if (hasEnglish) lr.add(getEnglishWidget(e, english));
+    lr.add(getItemWidget(e));
+    lr.add(getDropdown());
 
-      rowWidget.add(lr);
-    }
+    rowWidget.add(lr);
 
     rowWidget = getRowWidget();
     card.add(rowWidget);
@@ -885,9 +884,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return widget;
   }
 
-
+  /**
+   * @param e
+   * @param rowWidget
+   * @return
+   * @see #getItemContent
+   */
   @NotNull
-  private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget) {
+  private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget, boolean hasEnglish) {
     SimpleRecordAudioPanel<T> recordPanel = getRecordPanel(e);
 
     DivWidget flContainer = getHorizDiv();
@@ -934,7 +938,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
 
     flContainer.add(fieldContainer);
-    flContainer.setWidth(LEFT_WIDTH);
+    flContainer.setWidth(hasEnglish ? LEFT_WIDTH : LEFT_WIDTH_NO_ENGLISH);
 
     rowWidget.add(flContainer);
     return recordPanel;

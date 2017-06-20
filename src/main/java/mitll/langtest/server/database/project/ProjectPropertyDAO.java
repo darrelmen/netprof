@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.BaseSlickDAO;
-import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.BaseWrapper;

@@ -40,11 +40,13 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;

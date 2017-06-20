@@ -39,8 +39,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 
-import java.util.logging.Logger;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
