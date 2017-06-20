@@ -32,9 +32,9 @@
 
 package mitll.langtest.server.amas;
 
-import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.exercise.Shell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

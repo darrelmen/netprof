@@ -36,8 +36,6 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.project.ProjectInfo;
 
-import java.util.List;
-
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
   //List<ProjectInfo> getAll();

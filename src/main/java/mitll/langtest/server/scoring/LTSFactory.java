@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.scoring;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import corpus.EmptyLTS;
 import corpus.LTS;
 import corpus.ModernStandardArabicLTS;

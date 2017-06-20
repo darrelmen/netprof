@@ -53,7 +53,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
-import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;

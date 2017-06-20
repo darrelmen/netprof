@@ -1,7 +1,6 @@
 package mitll.langtest.client.project;
 
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -10,10 +9,12 @@ import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.LifecycleSupport;
@@ -25,10 +26,10 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.SlimProject;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 

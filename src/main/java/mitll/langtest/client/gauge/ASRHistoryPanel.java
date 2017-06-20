@@ -46,7 +46,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.scoring.DownloadContainer;
 import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.client.scoring.SimpleRecordAudioPanel;
 import mitll.langtest.client.scoring.WordTable;

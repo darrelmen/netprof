@@ -6,7 +6,6 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 
 import java.util.logging.Logger;
 

@@ -48,8 +48,8 @@ import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.*;
-import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.exercise.SectionNode;
 
 import java.util.*;
 import java.util.logging.Logger;

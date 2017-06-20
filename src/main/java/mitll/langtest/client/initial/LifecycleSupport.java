@@ -34,8 +34,8 @@ package mitll.langtest.client.initial;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;

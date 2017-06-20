@@ -47,12 +47,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.StartupInfo;
 

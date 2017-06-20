@@ -40,9 +40,9 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.UIObject;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.initial.PropertyHandler;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 
 import java.util.logging.Logger;
 

@@ -35,20 +35,20 @@ package mitll.langtest.server.decoder;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.*;
+import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -79,7 +79,7 @@ public class RefResultDecoder {
   private boolean stopDecode = false;
   private final PathHelper pathHelper;
   private final AudioConversion audioConversion;
-  private final boolean hasModel;
+  //private final boolean hasModel;
   private final AudioCheck audioCheck;
 
   private final BlockingQueue<DecodeTask> queue = new LinkedBlockingQueue<>();
@@ -96,14 +96,13 @@ public class RefResultDecoder {
   public RefResultDecoder(DatabaseImpl db,
                           ServerProperties serverProperties,
                           PathHelper pathHelper,
-                          AudioFileHelper audioFileHelper,
-                          boolean hasModel) {
+                          AudioFileHelper audioFileHelper) {
     this.db = db;
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
     this.audioConversion = new AudioConversion(serverProperties);
-    this.hasModel = hasModel;
+    //this.hasModel = hasModel;
     audioCheck = new AudioCheck(serverProperties);
     defaultUser = db.getUserDAO().getDefaultUser();
 
@@ -666,14 +665,21 @@ public class RefResultDecoder {
     // boolean b = db.getServerProps().shouldDoDecode();
     //logger.warn("writeRefDecode got " + b + " for should do decode");
     //if (false) {
-    Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
+//    Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
     // String installPath = pathHelper.getInstallPath();
 
+    if (exercises.isEmpty()) {
+      logger.error("writeRefDecode huh? no exercises?");
+      return;
+    }
+
+    db.getAudioDAO().attachAudioToExercises(exercises, language);
+
 //    int numResults = db.getRefResultDAO().getNumResults();
-//      String language = db.getLanguage(projid);
-    logger.debug("writeRefDecode : found " +
-        // numResults +
-        " in ref results table vs " + exToAudio.size() + " exercises with audio");
+//    logger.debug("writeRefDecode : " +
+//        // numResults +
+//        " in ref results table" +
+//        " vs " + exToAudio.size() + " exercises with audio");
 
     db.getRefResultDAO().deleteForProject(projid);
 
@@ -770,12 +776,6 @@ public class RefResultDecoder {
    */
   @NotNull
   private void queueDecodeExercise(String language, Set<Integer> decodedFiles, CommonExercise exercise) {
-    //   Stats stats = new Stats();
-    /*   if (audioAttributes != null) {
-      db.getAudioDAO().attachAudio(exercise, audioAttributes, language);
-      stats.attrc += audioAttributes.size();
-    }*/
-
     Set<Integer> preferredVoices = Collections.emptySet();//.getPreferredVoices();
     Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices, false);
     Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, false);
@@ -802,9 +802,10 @@ public class RefResultDecoder {
       possible += defaultUserAudio.size();
       added = queueDecode(language, decodedFiles, exercise, added, defaultUserAudio);
     }
-    if (added == 0 && spew++ < MAX_SPEW)
-      logger.info("queueDecodeExercise no audio for " + exercise.getID() + " out of " + possible);
-    // return stats;
+    if (added == 0 && (spew++ < MAX_SPEW || spew % 1000 == 0)) {
+      logger.info("queueDecodeExercise (" + spew +
+          ") no audio for " + exercise.getID() + " out of " + possible);
+    }
   }
 
   private int queueDecode(String language, Set<Integer> decodedFiles, CommonExercise exercise, int added,

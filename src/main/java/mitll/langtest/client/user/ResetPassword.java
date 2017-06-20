@@ -40,9 +40,9 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.user.User;
 

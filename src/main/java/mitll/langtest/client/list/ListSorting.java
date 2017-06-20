@@ -1,11 +1,6 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.ListBox;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.Command;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;

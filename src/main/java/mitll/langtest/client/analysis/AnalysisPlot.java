@@ -34,7 +34,6 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;

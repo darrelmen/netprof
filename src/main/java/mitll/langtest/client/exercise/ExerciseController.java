@@ -33,13 +33,10 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.client.initial.PropertyHandler;
-import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
-import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.services.*;
+import mitll.langtest.client.initial.PropertyHandler;
+import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;

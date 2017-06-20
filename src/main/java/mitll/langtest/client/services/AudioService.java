@@ -35,18 +35,12 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
-
-import java.util.Collection;
 
 /**
  * Might actually live on hydra1 or hydra2 - chosen in the client.

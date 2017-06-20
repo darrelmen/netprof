@@ -32,9 +32,6 @@
 
 package mitll.langtest.server.load;
 
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

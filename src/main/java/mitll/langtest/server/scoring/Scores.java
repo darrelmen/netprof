@@ -38,7 +38,10 @@ package mitll.langtest.server.scoring;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Scores is a simple holder for the combination of scores returned when scoring an utterance.

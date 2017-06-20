@@ -34,7 +34,6 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.exercise.ExerciseController;

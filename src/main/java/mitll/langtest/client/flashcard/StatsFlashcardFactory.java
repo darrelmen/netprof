@@ -60,8 +60,6 @@ import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.custom.INavigation.VIEWS.LISTS;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

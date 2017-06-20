@@ -33,7 +33,6 @@
 package mitll.langtest.server.filter;
 
 import mitll.langtest.server.database.security.UserSecurityManager;
-import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.servlet.*;

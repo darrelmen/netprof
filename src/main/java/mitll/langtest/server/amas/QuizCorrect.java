@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.amas;
 
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;

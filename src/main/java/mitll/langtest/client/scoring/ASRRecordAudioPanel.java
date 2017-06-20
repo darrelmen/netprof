@@ -27,7 +27,6 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import static mitll.langtest.client.scoring.DownloadContainer.DOWNLOAD_AUDIO;
 import static mitll.langtest.client.scoring.DownloadContainer.getDownloadAudio;
 
 /**

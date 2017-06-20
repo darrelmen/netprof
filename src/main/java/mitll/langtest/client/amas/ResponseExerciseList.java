@@ -62,7 +62,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.STATE;
 

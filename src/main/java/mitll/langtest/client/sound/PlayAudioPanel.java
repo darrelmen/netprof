@@ -43,10 +43,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.exercise.AudioChangedEvent;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.flashcard.MyCustomIconType;
-import net.liftweb.util.AU;
 
 import java.util.*;
 import java.util.logging.Logger;

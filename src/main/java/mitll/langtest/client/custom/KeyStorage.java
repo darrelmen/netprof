@@ -35,10 +35,10 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.client.initial.LifecycleSupport;
 import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.initial.LifecycleSupport;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 

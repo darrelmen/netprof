@@ -37,9 +37,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.ContextPractice;
-import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.project.StartupInfo;
 
 import java.util.Collection;
 import java.util.Map;

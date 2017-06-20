@@ -34,13 +34,9 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.image.ImageResponse;
-import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
-
-import java.util.Collection;
 
 public interface AudioServiceAsync {
   void writeAudioFile(String base64EncodedString,

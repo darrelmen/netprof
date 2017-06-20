@@ -42,8 +42,6 @@ import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 
-import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
-
 
 /**
  * Created with IntelliJ IDEA.

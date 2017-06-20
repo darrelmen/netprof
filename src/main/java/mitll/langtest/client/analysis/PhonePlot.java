@@ -40,7 +40,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

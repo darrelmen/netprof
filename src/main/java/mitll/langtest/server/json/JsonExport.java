@@ -35,7 +35,6 @@ package mitll.langtest.server.json;
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.exercise.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

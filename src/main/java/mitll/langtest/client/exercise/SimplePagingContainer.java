@@ -46,7 +46,9 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**

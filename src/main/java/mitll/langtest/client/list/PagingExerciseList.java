@@ -39,8 +39,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;

@@ -1,13 +1,5 @@
 package mitll.langtest.client.initial;
 
-import com.github.gwtbootstrap.client.ui.Breadcrumbs;
-import com.github.gwtbootstrap.client.ui.NavLink;
-import com.google.gwt.dom.client.Style;
-import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.project.SlimProject;
-import mitll.langtest.shared.user.User;
-import org.jetbrains.annotations.NotNull;
-
 /**
  * Created by go22670 on 6/13/17.
  */

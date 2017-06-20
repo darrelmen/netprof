@@ -45,7 +45,6 @@ import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SimpleHighlightSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

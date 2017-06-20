@@ -35,7 +35,6 @@ package mitll.langtest.client.initial;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;

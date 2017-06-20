@@ -38,11 +38,11 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
-import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
+import mitll.langtest.client.initial.PopupHelper;
 
 import java.util.logging.Logger;
 

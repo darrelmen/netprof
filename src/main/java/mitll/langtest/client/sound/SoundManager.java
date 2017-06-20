@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.sound;
 
-import java.util.Date;
 import java.util.logging.Logger;
 
 /**

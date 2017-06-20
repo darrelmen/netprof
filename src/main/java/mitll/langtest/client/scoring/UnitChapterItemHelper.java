@@ -34,7 +34,10 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.jetbrains.annotations.NotNull;

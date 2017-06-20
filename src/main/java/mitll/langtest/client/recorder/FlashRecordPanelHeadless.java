@@ -39,8 +39,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
 
 import java.util.logging.Logger;

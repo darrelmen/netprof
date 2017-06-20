@@ -35,7 +35,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;

@@ -1,13 +1,7 @@
 package mitll.langtest.client.exercise;
 
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.services.AudioServiceAsync;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.client.services.ListServiceAsync;
-import mitll.langtest.client.services.QCServiceAsync;
-import mitll.langtest.client.services.ScoringServiceAsync;
-import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.services.*;
 import mitll.langtest.shared.project.SlimProject;
 
 import java.util.List;

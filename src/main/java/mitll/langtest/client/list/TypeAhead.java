@@ -32,20 +32,20 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Controls;
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.base.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTest;
 
 import java.util.logging.Logger;
 

@@ -37,7 +37,6 @@ import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.PrecalcScores;
-import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;

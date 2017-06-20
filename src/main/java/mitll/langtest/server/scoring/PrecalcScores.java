@@ -38,8 +38,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.ISlimResult;
+import mitll.langtest.server.database.result.Result;
 
 import java.util.HashMap;
 import java.util.Map;

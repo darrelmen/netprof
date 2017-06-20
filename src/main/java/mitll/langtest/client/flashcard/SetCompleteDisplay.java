@@ -32,18 +32,11 @@
 
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.ui.incubator.Table;
-import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
-import org.moxieapps.gwt.highcharts.client.Chart;
 
 import java.util.Collection;
 import java.util.List;

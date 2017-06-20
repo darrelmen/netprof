@@ -34,8 +34,8 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;

@@ -3,8 +3,6 @@ package mitll.langtest.server.json;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.database.exercise.Project;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 

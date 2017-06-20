@@ -2,16 +2,16 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
 import mitll.langtest.client.custom.ExerciseListContent;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
-import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
+import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 

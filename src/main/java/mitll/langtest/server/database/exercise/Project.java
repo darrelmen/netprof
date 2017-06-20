@@ -214,15 +214,14 @@ public class Project implements PronunciationLookup {
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
     buildExerciseTrie();
-    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper(), hasModel());
+    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper());
   }
 
   /**
-   * Only public to support deletes...
    *
-   * @see mitll.langtest.server.services.QCServiceImpl#deleteItem
+   *
    */
-  public <T extends CommonShell> void buildExerciseTrie() {
+  private  <T extends CommonShell> void buildExerciseTrie() {
     fullTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder(), true);
     fullContextTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder(), false);
   }

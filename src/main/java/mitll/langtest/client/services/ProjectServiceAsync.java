@@ -35,8 +35,6 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.project.ProjectInfo;
 
-import java.util.List;
-
 public interface ProjectServiceAsync {
   //void getAll(AsyncCallback<List<ProjectInfo>> async);
 

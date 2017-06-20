@@ -43,9 +43,7 @@ import org.apache.logging.log4j.Logger;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.

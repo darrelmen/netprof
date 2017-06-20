@@ -10,20 +10,17 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.Services;
 import mitll.langtest.client.initial.LifecycleSupport;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
-import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import org.jetbrains.annotations.Nullable;
-import org.moxieapps.gwt.highcharts.client.Chart;
 
 import java.util.logging.Logger;
 

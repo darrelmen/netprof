@@ -42,9 +42,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.ImageOptions;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.ArrayList;
