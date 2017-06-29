@@ -28,6 +28,7 @@ plugins {
 apply from: 'gradle-common/common.gradle'
 apply from: 'gradle-common/common-java.gradle'
 //apply plugin: 'java'
+//apply plugin: 'application'
 apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -63,7 +64,7 @@ dependencies {
     compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT') { changing = true;   }
     //compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT') { changing = true }
     compile('mitll.hlt:imagewriter:1.0.0') { changing = true }
-    compile('mitll.hlt:audioimage:1.0.0') { changing = true }
+  //  compile('mitll.hlt:audioimage:1.0.0') { changing = true }
     compile('mitll.hlt:npdata:1.0.0') { changing = true }
 
     compile group: 'javax.json', name: 'javax.json-api', version: '1.0'
