@@ -931,7 +931,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           getEntry(e, QCNPFExercise.MEANING,
               e.getMeaning(),
               FieldType.MEANING,
-              //false, false, true,
               showInitially,
               new ArrayList<>(), true, annotationHelper, false);
       addField(fieldContainer, meaningWidget);

@@ -153,6 +153,10 @@ class DisplayMenu {
     LangTest.EVENT_BUS.fireEvent(new ShowEvent());
   }
 
+  /**
+   * @see #getShowSounds
+   * @return
+   */
   @NotNull
   private PhonesChoices getPhonesDisplay() {
     PhonesChoices choices = PhonesChoices.SHOW;

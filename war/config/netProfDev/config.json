@@ -46,5 +46,11 @@
         }
       ]
     }
+  ],
+  "flags" : [
+    {
+      "lang":"croatian",
+      "cc":"hr"
+    }
   ]
 }

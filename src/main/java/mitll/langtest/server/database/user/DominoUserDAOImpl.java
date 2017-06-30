@@ -804,6 +804,19 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     Set<String> roleAbbreviations = dominoUser.getRoleAbbreviations();
 
     User.Kind kindToUse = User.Kind.STUDENT;
+    Set<User.Kind> seen = setPermissions(permissionSet, roleAbbreviations);
+
+    // teacher trumps others... for the moment
+    // need to have ordering over roles...?
+    if (seen.contains(User.Kind.TEACHER)) {
+      kindToUse = User.Kind.TEACHER;
+    }
+
+    return kindToUse;
+  }
+
+  @NotNull
+  private Set<User.Kind> setPermissions(Set<User.Permission> permissionSet, Set<String> roleAbbreviations) {
     Set<User.Kind> seen = new HashSet<>();
 
     //    logger.warn("getUserKind user " + userId + " has multiple roles - choosing first one... " + roleAbbreviations.size());
@@ -813,17 +826,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       permissionSet.addAll(User.getInitialPermsForRole(kind));
       //    logger.info(userId + " has " + role);
     }
-
-    // teacher trumps others... for the moment
-    // need to have ordering over roles...?
-    if (seen.contains(User.Kind.TEACHER)) {
-      kindToUse = User.Kind.TEACHER;
-    }
-
-    // String firstRole = roleAbbreviations.iterator().next();
-
-    //User.Kind kind = getKindForRole(firstRole);
-    return kindToUse;
+    return seen;
   }
 
   private final Set<String> unknownRoles = new HashSet<>();

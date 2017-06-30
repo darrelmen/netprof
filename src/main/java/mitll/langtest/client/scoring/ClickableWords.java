@@ -7,6 +7,7 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.dialog.WordBounds;
@@ -52,7 +53,8 @@ public class ClickableWords<T extends CommonExercise> {
   private int fontSize;
 
   private static final boolean DEBUG = false;
-boolean showPhones = true;
+  boolean showPhones = true;
+
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    */
@@ -71,7 +73,7 @@ boolean showPhones = true;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
     this.fontSize = fontSize;
-    this.showPhones =showPhones;
+    this.showPhones = showPhones;
   }
 
   /**
@@ -110,6 +112,16 @@ boolean showPhones = true;
     return getTokens(searchToken, isChineseCharacter);
   }
 
+  /**
+   * @param tokens
+   * @param searchTokens
+   * @param isSimple
+   * @param addRightMargin
+   * @param dir
+   * @param clickables
+   * @param fieldType
+   * @return
+   */
   @NotNull
   private DivWidget getClickableDiv(List<String> tokens,
                                     List<String> searchTokens,
@@ -179,6 +191,7 @@ boolean showPhones = true;
       InlineHTML clickable = segment.getClickable();
       if (addRightMargin) {
         clickable.addStyleName("rightFiveMargin");
+        horizontal.add(new InlineHTML(" "));
       }
       if (isRTL) clickable.addStyleName("floatRight");
     }
@@ -267,10 +280,13 @@ boolean showPhones = true;
           isSimple, fieldType);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
-      if (showPhones) {
-        w.addStyleName("rightFiveMargin");
-      }
+      //if (showPhones) {
+    //  w.addStyleName("rightFiveMargin");
+      //}
       horizontal.add(w);
+
+      // add spacer - also required if we want to select text and copy it somewhere.
+      horizontal.add(new InlineHTML(" "));
 
       if (isMatch) {
         if (DEBUG) logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "'");
@@ -438,7 +454,7 @@ boolean showPhones = true;
 
     boolean empty = removePunct(html).isEmpty();
     if (empty) {
-    //  logger.info("makeClickableText for '" + html + "' not clickable");
+      //  logger.info("makeClickableText for '" + html + "' not clickable");
       highlightSegmentDiv.setClickable(false);
     } else {
       highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
