@@ -187,6 +187,9 @@ distributions {
             from('war/config/netProfDev') {
                 into 'config'
             }
+            from('config') {
+                into 'serverConfig'
+            }
             from('war/config/netProfDLI') {
                 into 'configProduction'
             }
