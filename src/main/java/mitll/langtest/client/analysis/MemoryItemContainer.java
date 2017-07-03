@@ -69,7 +69,7 @@ import java.util.logging.Logger;
 public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagingContainer<T> {
   private final Logger logger = Logger.getLogger("MemoryItemContainer");
 
-  static final int TABLE_WIDTH = 420;
+  private static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
   private static final int PAGE_SIZE = 11;
   private final Long selectedUser;
@@ -152,7 +152,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return appTitle + ":" + controller.getUser() + ":";
   }
 
-  protected String truncate(String columnText) {
+  private String truncate(String columnText) {
     if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
     return columnText;
   }
@@ -199,11 +199,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<T> users) {
-   // logger.info("getTableWithPager" + users.size());
-
+    // logger.info("getTableWithPager" + users.size());
     Panel tableWithPager = getTableWithPager(new ListOptions());
-
-   // logger.info("getTableWithPager tableWithPager ");
+    // logger.info("getTableWithPager tableWithPager ");
 
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
@@ -289,7 +287,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
         }
       }
     }
-    i++;
+  //  i++;
   }
 
   @Override
@@ -378,9 +376,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   protected void addTooltip() {
-    new TooltipHelper().addTooltip(table, "Click on a " +
-        header +
-        ".");
+    new TooltipHelper().addTooltip(table, "Click on a " + header + ".");
   }
 
   private Column<T, SafeHtml> getItemColumn() {
@@ -421,11 +417,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       public SafeHtml getValue(T shell) {
         Date date = new Date(getItemDate(shell));
         String signedUp = format.format(date);
-
-//        String format = MemoryItemContainer.this.format.format(now);
-//        if (format.substring(format.length() - 2).equals(signedUp.substring(signedUp.length() - 2))) {
-//          signedUp = signedUp.substring(0, signedUp.length() - 4);
-//        }
 
         // drop year if this year
         if (signedUp.equals(todaysDate)) {

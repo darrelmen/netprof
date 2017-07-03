@@ -133,8 +133,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     table.setColumnWidth(num, 50 + "px");
   }
 
-
-
   private void addFinalScore() {
     Column<UserInfo, SafeHtml> start = getFinal();
     start.setSortable(true);
