@@ -45,7 +45,6 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
 
 import java.util.logging.Logger;
 
@@ -77,12 +76,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     this.flexListLayout = getMyListLayout(outer);
   }
 
-/*
-  Panel getCreatedPanel() {
-    return getExerciseList() != null ? getExerciseList().getCreatedPanel() : null;
-  }
-*/
-
   protected abstract FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer);
 
   /**
@@ -93,7 +86,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   public void showNPF(DivWidget content, String instanceName) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
-    // DivWidget content = tabAndContent.getContent();
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
       logger.info("\t: adding npf content instanceName = " + instanceName);
@@ -112,8 +104,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   @Override
   public void showContent(Panel listContent, String instanceName) {
     listContent.add(doNPF(instanceName));
-   // listContent.addStyleName("userListBackground");
-   // listContent.getElement().getStyle().setMarginRight(RIGHT_SIDE_MARGIN, Style.Unit.PX);
   }
 
   private final FlexListLayout<T, U> flexListLayout;
@@ -167,41 +157,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see mitll.langtest.client.exercise.WaveformExercisePanel
    */
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
- /*   protected ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList) {
-    final String instance = exerciseList.getInstance();
-    return new ExercisePanelFactory<T, U>(controller, exerciseList) {
-      @Override
-      public Panel getExercisePanel(final U e) {
-        return new WaveformExercisePanel<T, U>(e, controller, exerciseList, true, instance) {
-          @Override
-          public void postAnswers(ExerciseController controller, HasID completedExercise) {
-            super.postAnswers(controller, completedExercise);
-            tellOtherListExerciseDirty(e);
-          }
-        };
-      }
-    };
-  }
-*/
-  /**
-   * TODOx : make sure this is doing something helpful
-   *
-   * @paramz e
-   * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, HasID)
-   */
-/*
-  protected void tellOtherListExerciseDirty(HasID e) {
-    if (predefinedContentList != null &&
-        predefinedContentList.getReloadable() != null &&
-        predefinedContentList.getReloadable().getCurrentExerciseID() != -1 &&
-        e.getID() == predefinedContentList.getReloadable().getCurrentExerciseID()) {
-      // logger.info("SimpleChapterNPFHelper.reloading " + e.getOldID());
-      predefinedContentList.getReloadable().loadExercise(e.getID());
-    } else {
-      //    logger.info("\n\n\n--> SimpleChapterNPFHelper.not reloading " + e.getOldID());
-    }
-  }
-*/
 
   @Override
   public void onResize() {
@@ -209,14 +164,11 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
       flexListLayout.onResize();
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
-    } else {
-//      logger.info("SimpleChapterNPFHelper.onResize : not sending resize event - flexListLayout is null?");
     }
   }
 
   protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonExercise> extends FlexListLayout<T, U> {
     private final SimpleChapterNPFHelper<T, U> outer;
-
     protected MyFlexListLayout(ExerciseController controller, SimpleChapterNPFHelper<T, U> outer) {
       super(controller);
       this.outer = outer;

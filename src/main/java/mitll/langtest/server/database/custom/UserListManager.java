@@ -91,7 +91,7 @@ public class UserListManager implements IUserListManager {
   private static final boolean DEBUG = false;
 
   private final IUserDAO userDAO;
-  private final IReviewedDAO reviewedDAO, secondStateDAO;
+ // private final IReviewedDAO reviewedDAO, secondStateDAO;
   private int i = 0;
 
   private IUserExerciseDAO userExerciseDAO;
@@ -100,13 +100,14 @@ public class UserListManager implements IUserListManager {
   private final IUserListExerciseJoinDAO userListExerciseJoinDAO;
   private final IAnnotationDAO annotationDAO;
   private final PathHelper pathHelper;
+  private IStateManager stateManager;
 
   /**
    * @param userDAO
    * @param userListDAO
    * @param userListExerciseJoinDAO
    * @param annotationDAO
-   * @param reviewedDAO
+   * @paramx reviewedDAO
    * @param pathHelper
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
@@ -114,193 +115,23 @@ public class UserListManager implements IUserListManager {
                          IUserListDAO userListDAO,
                          IUserListExerciseJoinDAO userListExerciseJoinDAO,
                          IAnnotationDAO annotationDAO,
-                         IReviewedDAO reviewedDAO,
-                         IReviewedDAO secondStateDAO,
+//                         IReviewedDAO reviewedDAO,
+//                         IReviewedDAO secondStateDAO,
+                         IStateManager stateManager,
                          IUserExerciseListVisitorDAO visitorDAO,
                          PathHelper pathHelper) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     this.annotationDAO = annotationDAO;
-    this.reviewedDAO = reviewedDAO;
-    this.secondStateDAO = secondStateDAO;
+  //  this.reviewedDAO = reviewedDAO;
+   // this.secondStateDAO = secondStateDAO;
     this.pathHelper = pathHelper;
     this.visitorDAO = visitorDAO;
+    this.stateManager = stateManager;
   }
 
-  /**
-   * TODO put this back
-   * TODO : this doesn't really do anything - doesn't touch the exercises?????
-   * <p>
-   * Turned off setting second state for now -- what does it mean?
-   *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#init()
-   */
-  @Override
-  public void setStateOnExercises() {
-    // getAmmendedStateMap();
-    Map<Integer, StateCreator> exerciseToState = getExerciseToState(false);
-    //setStateOnExercises(exerciseToState, true);
-    //setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
-  }
 
-  /**
-   * TODO put this back
-   * @see  #setStateOnExercises()
-   * @param exerciseToState
-   * @param firstState
-   */
-/*  private void setStateOnExercises(Map<Integer, StateCreator> exerciseToState, boolean firstState) {
-    //logger.debug("found " + exerciseToState.size() + " state markings");
-    Set<Integer> userExercisesRemaining = setStateOnPredefExercises(exerciseToState, firstState);
-    setStateOnUserExercises(exerciseToState, userExercisesRemaining, firstState);
-  }*/
-
-  /**
-   * TODO put this back
-   * @param exerciseToState
-   * @param firstState
-   * @return
-   * @see #setStateOnExercises(java.util.Map, boolean)
-   */
-  // set state on predef exercises
-/*  private Set<Integer> setStateOnPredefExercises(Map<Integer, StateCreator> exerciseToState, boolean firstState) {
-    int childCount = 0;
-    Set<Integer> userExercisesRemaining = new HashSet<>(exerciseToState.keySet());
-    for (Map.Entry<Integer, StateCreator> pair : exerciseToState.entrySet()) {
-      CommonExercise predefExercise = userExerciseDAO.getPredefExercise(pair.getKey());
-      if (predefExercise != null) {
-        userExercisesRemaining.remove(pair.getKey());
-        if (firstState) {
-          predefExercise.setState(pair.getValue().getState());
-        } else {
-          predefExercise.setSecondState(pair.getValue().getState());
-        }
-        childCount++;
-      }
-    }
-    if (childCount > 0) {
-      logger.debug("got " + userExercisesRemaining.size() + " in userExercisesRemaining, updated " + childCount + " predef exercises");
-    }
-    return userExercisesRemaining;
-  }*/
-
-  /**
-   * TODO : this should probably do something on the actual exercises in the exercise dao
-   */
-  // set states on user exercises
-/*  private void setStateOnUserExercises(Map<Integer, StateCreator> exerciseToState,
-                                       Set<Integer> userExercisesRemaining,
-                                       boolean firstState) {
-    int childCount = 0;
-    Collection<CommonExercise> userExercises = userExerciseDAO.getByExID(userExercisesRemaining);
-
-    for (Shell commonUserExercise : userExercises) {
-      int id = commonUserExercise.getID();
-      StateCreator state = exerciseToState.get(id);
-      if (state == null) {
-        logger.error("huh? can't find ex id " + id);
-      } else {
-        if (firstState) {
-          commonUserExercise.setState(state.getState());
-        } else {
-          commonUserExercise.setSecondState(state.getState());
-        }
-        childCount++;
-      }
-    }
-    if (childCount > 0) {
-      logger.debug("updated " + childCount + " user exercises");
-    }
-  }*/
-
-  /**
-   * Update an old db where the review table doesn't have a state column.
-   *
-   * @return
-   */
-/*  private void getAmmendedStateMap() {
-    Map<String, ReviewedDAO.StateCreator> stateMap = getExerciseToState(false);
-    // logger.debug("got " + stateMap.size() +" in state map");
-    Map<String, Long> exerciseToCreator = annotationDAO.getAnnotatedExerciseToCreator();
-    //logger.debug("got " + exerciseToCreator.size() +" in defectIds");
-
-    int childCount = 0;
-    Set<String> reviewed = new HashSet<String>(stateMap.keySet());
-    long now = System.currentTimeMillis();
-
-    for (String exid : reviewed) {   // incorrect - could be defect or comment for now
-      if (exerciseToCreator.keySet().contains(exid)) {
-        ReviewedDAO.StateCreator stateCreator = stateMap.get(exid);
-        if (stateCreator.getState().equals(STATE.UNSET)) { // only happen when we have an old db
-          stateMap.put(exid, new ReviewedDAO.StateCreator(STATE.DEFECT, stateCreator.getCreatorID(), now));
-          reviewedDAO.setState(exid, STATE.DEFECT, stateCreator.getCreatorID());
-          childCount++;
-        }
-      }
-    }
-
-    if (childCount > 0) {
-      logger.info("updated " + childCount + " rows in review table");
-    }
-    //  return stateMap;
-  }*/
-
-  /**
-   * So this returns a map of exercise id to current (latest) state.  The exercise may have gone through
-   * many states, but this should return the latest one.
-   * <p>
-   * If an item has been recorded, the most recent state will be exercise id->UNSET.
-   *
-   * @param skipUnset
-   * @return
-   * @see IUserListManager#getCommentedList(Collection, Set)
-   */
-  @Override
-  public Map<Integer, StateCreator> getExerciseToState(boolean skipUnset) {
-    return reviewedDAO.getExerciseToState(skipUnset);
-  }
-
-  /**
-   * Mark the exercise with its states - but not if you're a recorder...
-   *
-   * @param shells
-   * @see #getReviewList
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
-   */
-  @Override
-  public void markState(Collection<? extends CommonShell> shells) {
-    Map<Integer, StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
-
-    //logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
-    //int c = 0;
-    for (CommonShell shell : shells) {
-      StateCreator stateCreator = exerciseToState.get(shell.getID());
-      if (stateCreator != null) {
-        shell.setState(stateCreator.getState());
-        //  logger.debug("\t for " + shell.getOldID() + " state " + stateCreator.getState());
-        //  c++;
-      }
-    }
-
-    // does this help anyone???
-    // want to know if we have a new recording AFTER it's been inspected - why did the thing that I fixed now change back to needs inspection
-    // maybe turn off for now???
-/*    if (false) {
-      logger.debug("markState - first state " + c);
-      exerciseToState = secondStateDAO.getExerciseToState(false);
-
-      int n = 0;
-      for (CommonShell shell : shells) {
-        ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getOldID());
-        if (stateCreator != null) {
-          n++;
-          shell.setSecondState(stateCreator.getState());
-        }
-      }
-      logger.debug("markState - sec state " + n);
-    }*/
-  }
 
   /**
    * @param userid
@@ -324,6 +155,11 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+  @Override
+  public int getNumLists(int userid, int projid) {
+    return userListDAO.getNumMineAndPublic(userid,projid);
+  }
+
   /**
    * @param userid
    * @param name
@@ -344,8 +180,7 @@ public class UserListManager implements IUserListManager {
       logger.error("createUserList huh? no user with id " + userid);
       return null;
     } else {
-      logger.info("found\n\t" + userListDAO.getAllByUser(userid, projid));
-
+      //logger.info("found\n\t" + userListDAO.getAllByUser(userid, projid));
       if (hasByName(userid, name, projid)) {
         return null;
       } else {
@@ -364,25 +199,25 @@ public class UserListManager implements IUserListManager {
 
   @Override
   public Collection<UserList<CommonShell>> getMyLists(int userid, int projid) {
-    return getListsForUser(userid, true, false, projid);
+    return getListsForUser(userid, projid, true, false);
   }
 
   /**
    * TODO : expensive -- could just be a query against your own lists and/or against visited lists...
    *
    * @param userid
+   * @param projid
    * @param listsICreated
    * @param visitedLists
-   * @param projid
    * @return
-   * @seex mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @see mitll.langtest.server.services.ListServiceImpl#getListsForUser
+   * @see #getMyLists
    */
   @Override
   public Collection<UserList<CommonShell>> getListsForUser(int userid,
+                                                           int projid,
                                                            boolean listsICreated,
-                                                           boolean visitedLists,
-                                                           int projid) {
+                                                           boolean visitedLists) {
     if (userid == -1) {
       return Collections.emptyList();
     }
@@ -408,7 +243,7 @@ public class UserListManager implements IUserListManager {
     }
 
     if (visitedLists) {
-      Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid);
+      Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid, 0, 10);
       //    logger.info("found " + listsForUser1.size() + " visited by " + userid);
 
       for (UserList<CommonShell> userList : listsForUser1) {
@@ -418,24 +253,27 @@ public class UserListManager implements IUserListManager {
       }
     }
 
-    if (listsForUser.isEmpty()) {
-      if (DEBUG) {
-        logger.warn("getListsForUser - list is empty for " + userid + " only created " +
-            listsICreated + " visited " + visitedLists);
+    // put favorite at front
+    {
+      if (listsForUser.isEmpty()) {
+        if (DEBUG) {
+          logger.warn("getListsForUser - list is empty for " + userid + " only created " +
+              listsICreated + " visited " + visitedLists);
+        }
+      } else if (favorite != null) {
+        listsForUser.remove(favorite);
+        listsForUser.add(0, favorite);// put at front
       }
-    } else if (favorite != null) {
-      listsForUser.remove(favorite);
-      listsForUser.add(0, favorite);// put at front
     }
 
-    if (DEBUG) {
+/*    if (DEBUG) {
       logger.debug("getListsForUser found " + listsForUser.size() +
           " lists for user #" + userid + " only created " + listsICreated + " visited " + visitedLists +
           "\n\tfavorite " + favorite);
       if (listsForUser.size() < 4) {
         for (UserList ul : listsForUser) logger.debug("\t" + ul);
       }
-    }
+    }*/
 
     return listsForUser;
   }
@@ -471,7 +309,7 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
 
     // if it's on the defect list, remove it
-    for (Integer exid : reviewedDAO.getDefectExercises()) {
+    for (Integer exid : stateManager.getDefectExercises()) {
       incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
     }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
@@ -493,7 +331,7 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
 
     // if it's on the defect list, remove it
-    for (Integer exid : reviewedDAO.getDefectExercises()) {
+    for (Integer exid : stateManager.getDefectExercises()) {
       incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
     }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
@@ -510,7 +348,7 @@ public class UserListManager implements IUserListManager {
 
   @Override
   public UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids) {
-    Set<Integer> defectIds = getAttentionIDs();
+    Set<Integer> defectIds = stateManager.getAttentionIDs();
     defectIds.retainAll(ids);
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
@@ -520,14 +358,14 @@ public class UserListManager implements IUserListManager {
 
   @Override
   public UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids) {
-    Set<Integer> defectIds = getAttentionIDs();
+    Set<Integer> defectIds = stateManager.getAttentionIDs();
     defectIds.retainAll(ids);
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
 
     return getReviewListEx(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID, typeOrder);
   }
-
+/*
   @NotNull
   private Set<Integer> getAttentionIDs() {
     Map<Integer, StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
@@ -540,7 +378,7 @@ public class UserListManager implements IUserListManager {
       }
     }
     return defectIds;
-  }
+  }*/
 
   /**
    * TODO : probably a bad idea to do a massive where in ... ids.
@@ -553,7 +391,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids) {
-    Set<Integer> defectIds = getDefectIDs();
+    Set<Integer> defectIds = stateManager.getDefectIDs();
     defectIds.retainAll(ids);
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
@@ -570,7 +408,7 @@ public class UserListManager implements IUserListManager {
 
   @Override
   public UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder, Set<Integer> ids) {
-    Set<Integer> defectIds = getDefectIDs();
+    Set<Integer> defectIds = stateManager.getDefectIDs();
     defectIds.retainAll(ids);
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
@@ -578,7 +416,7 @@ public class UserListManager implements IUserListManager {
     return getReviewListEx(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
   }
 
-  @NotNull
+/*  @NotNull
   private Set<Integer> getDefectIDs() {
     Set<Integer> defectIds = new HashSet<>();
     Map<Integer, StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
@@ -590,7 +428,7 @@ public class UserListManager implements IUserListManager {
       }
     }
     return defectIds;
-  }
+  }*/
 
   /**
    * @param allKnown
@@ -660,7 +498,7 @@ public class UserListManager implements IUserListManager {
     new ExerciseSorter(typeOrder).getSorted(copy, false, false, "");
 
     userList.setExercises(copy);
-    markState(copy);
+    stateManager.markState(copy);
     logger.debug("getReviewList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
@@ -835,18 +673,18 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * TODO : why all this foolishness with the id?
-   * TODO : put this back?
+   * TODOx : why all this foolishness with the id?
+   * TODOx : put this back?
    *
    * @param userExercise
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
    */
-  @Override
+/*  @Override
   public CommonExercise duplicate(CommonExercise userExercise) {
     logger.error("should call domino instead");
     return userExercise;
-/*    String newid = getDupID(userExercise);
+*//*    String newid = getDupID(userExercise);
 
     logger.debug("duplicating " + userExercise + " with id " + newid);
     userExercise.getCombinedMutableUserExercise().setOldID(newid);
@@ -859,8 +697,8 @@ public class UserListManager implements IUserListManager {
       addAnnotation(assignedID, pair.getKey(), value.getStatus(), value.getComment(), userExercise.getCombinedMutableUserExercise().getCreator());
     }
 
-    return userExercise;*/
-  }
+    return userExercise;*//*
+  }*/
 
 /*  private String getDupID(CommonExercise userExercise) {
     String id = userExercise.getOldID();
@@ -1154,9 +992,9 @@ public class UserListManager implements IUserListManager {
     }
     if (predefExercise != null) {
       if (state.equals(STATE.ATTN_LL)) {
-        setSecondState(predefExercise, state, creatorID);
+        stateManager.setSecondState(predefExercise, state, creatorID);
       } else {
-        setState(predefExercise, state, creatorID);
+        stateManager.setState(predefExercise, state, creatorID);
       }
       if (state.equals(STATE.FIXED)) {
         markAllFieldsFixed(predefExercise, creatorID);
@@ -1174,11 +1012,11 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
    */
-  @Override
+/*  @Override
   public void setState(Shell shell, STATE state, long creatorID) {
     shell.setState(state);
     reviewedDAO.setState(shell.getID(), state, creatorID);
-  }
+  }*/
 
   /**
    * @param shell
@@ -1187,30 +1025,34 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
    * @see mitll.langtest.server.database.custom.UserListManager#markState
    */
+/*
   @Override
   public void setSecondState(Shell shell, STATE state, long creatorID) {
     shell.setSecondState(state);
     secondStateDAO.setState(shell.getID(), state, creatorID);
   }
+*/
 
   /**
    * @param exerciseID
    * @return
    * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
    */
+/*
   @Override
   public STATE getCurrentState(int exerciseID) {
     return reviewedDAO.getCurrentState(exerciseID);
   }
+*/
 
   /**
    * @param exerciseid
    * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int, int)
    */
-  @Override
+/*  @Override
   public void removeReviewed(int exerciseid) {
     reviewedDAO.remove(exerciseid);
-  }
+  }*/
 
   /**
    * @param userExercise
@@ -1297,7 +1139,7 @@ public class UserListManager implements IUserListManager {
     return userListExerciseJoinDAO;
   }
 
-  @Override
+/*  @Override
   public IReviewedDAO getReviewedDAO() {
     return reviewedDAO;
   }
@@ -1305,15 +1147,15 @@ public class UserListManager implements IUserListManager {
   @Override
   public IReviewedDAO getSecondStateDAO() {
     return secondStateDAO;
-  }
+  }*/
 
   @Override
   public void createTables(DBConnection dbConnection, List<String> created) {
     List<IDAO> idaos = Arrays.asList(
         userListDAO,
         userListExerciseJoinDAO,
-        reviewedDAO,
-        secondStateDAO
+        stateManager.getReviewedDAO(),
+        stateManager.getSecondStateDAO()
     );
 
     for (IDAO dao : idaos) createIfNotThere(dbConnection, dao, created);
@@ -1338,11 +1180,11 @@ public class UserListManager implements IUserListManager {
     return visitorDAO;
   }
 
-  public Collection<Integer> getDefectExercises() {
+/*  public Collection<Integer> getDefectExercises() {
     return reviewedDAO.getDefectExercises();
   }
 
   public Collection<Integer> getInspectedExercises() {
     return reviewedDAO.getInspectedExercises();
-  }
+  }*/
 }

@@ -576,10 +576,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         break;
       case REVIEW:
       case QUALITY_CONTROL:
-        getUserListManager().markState(exerciseShells);
+        db.getStateManager().markState(exerciseShells);
         break;
       case MARK_DEFECTS:
-        Collection<Integer> defectExercises = getUserListManager().getDefectExercises();
+        Collection<Integer> defectExercises = db.getStateManager().getDefectExercises();
         //  int c = 0;
         for (CommonShell shell : exerciseShells) {
           if (defectExercises.contains(shell.getID())) {
@@ -1065,7 +1065,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    */
   private List<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
-    Collection<Integer> inspected = getUserListManager().getInspectedExercises();
+    Collection<Integer> inspected = db.getStateManager().getInspectedExercises();
     // logger.info("found " + inspected.size());
     List<CommonExercise> copy = new ArrayList<CommonExercise>();
     for (CommonExercise exercise : exercises) {

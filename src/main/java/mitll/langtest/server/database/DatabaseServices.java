@@ -36,6 +36,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.contextPractice.ContextServices;
+import mitll.langtest.server.database.custom.IStateManager;
 import mitll.langtest.server.database.exercise.ExerciseServices;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -133,4 +134,6 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   Collection<String> getTypeOrder(int projectid);
 
   void setStartupInfo(User userWhere, int projid);
+
+  IStateManager getStateManager();
 }

@@ -762,7 +762,6 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.debug("adding " + bulk.size() + " results...");
     slickResultDAO.addBulk(bulk);
     logger.debug("added  " + bulk.size() + " results...");
-
     //}
   }
 

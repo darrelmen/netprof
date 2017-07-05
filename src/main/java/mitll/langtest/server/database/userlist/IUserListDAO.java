@@ -66,6 +66,11 @@ public interface IUserListDAO extends IDAO {
 
   void add(UserList<CommonShell> userList, int projid);
 
+  /**
+   * JUST FOR DEBUGGING
+   * @see mitll.langtest.server.database.custom.UserListManager#createUserList
+   * @return
+   */
   int getCount();
 
   List<UserList<CommonShell>> getAllByUser(long userid, int projectID);
@@ -83,9 +88,11 @@ public interface IUserListDAO extends IDAO {
 
   UserList<CommonShell> getWhere(int unique, boolean warnIfMissing);
 
-  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid);
+  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, int start, int length);
 
   void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);
+
+  int getNumMineAndPublic(int userid, int projid);
 
   void setPublicOnList(long userListID, boolean isPublic);
 

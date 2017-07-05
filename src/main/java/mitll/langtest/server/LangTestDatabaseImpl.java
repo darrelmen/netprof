@@ -114,7 +114,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private void optionalInit() {
     try {
       db.preloadContextPractice();
-      getUserListManager().setStateOnExercises();
+      db.getStateManager().setStateOnExercises();
       db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
     } catch (Exception e) {
       logger.error("optionalInit couldn't load database " + e, e);

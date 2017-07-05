@@ -116,7 +116,8 @@ public class ResultManager extends PagerTable {
 
 //  private Map<String, Typeahead> typeToSuggest = new HashMap<String, Typeahead>();
 //  private Typeahead userIDSuggest, textSuggest;
- // ResultTypeAhead resultTypeAhead;
+  // ResultTypeAhead resultTypeAhead;
+
   /**
    * @param nameForAnswer
    * @param eventRegistration
@@ -199,7 +200,7 @@ public class ResultManager extends PagerTable {
 
     cellTable = new CellTable<>();
     ResultTypeAhead resultTypeAhead = new ResultTypeAhead(typeOrder, cellTable, resultServiceAsync);
-    Widget table = getAsyncTable(numResults, getDownloadAnchor(),resultTypeAhead);
+    Widget table = getAsyncTable(numResults, getDownloadAnchor(), resultTypeAhead);
     table.setWidth("100%");
 
     dialogVPanel.add(resultTypeAhead.getSearchBoxes());
@@ -210,7 +211,7 @@ public class ResultManager extends PagerTable {
     dialogBox.show();
   }
 
-   /**
+  /**
    * Also shows on the bottom a widget for review.
    *
    * @param numResults
@@ -452,7 +453,8 @@ public class ResultManager extends PagerTable {
     Column<MonitorResult, SafeHtml> fl = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(MonitorResult answer) {
-        return getNoWrapContent(answer.getForeignText());
+        String foreignText = answer != null ? answer.getForeignText() : "";
+        return getNoWrapContent(foreignText);
       }
     };
 

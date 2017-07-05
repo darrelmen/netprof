@@ -359,11 +359,12 @@ public class UserListDAO extends DAO implements IUserListDAO {
   /**
    * @param userid
    * @param projid
-   * @return
+   * @param start
+   *@param length @return
    * @see IUserListManager#getListsForUser
    */
   @Override
-  public Collection<UserList<CommonShell>> getListsForUser(int userid, int projid) {
+  public Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, int start, int length) {
     Collection<Integer> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
     //  final List<Long> listsForVisitor = (List<Long>) listsForVisitor1;
     List<UserList<CommonShell>> objects = Collections.emptyList();
@@ -457,6 +458,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
   @Override
   public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
+  }
+
+  @Override
+  public int getNumMineAndPublic(int userid, int projid) {
+    return 0;
   }
 
   @Override

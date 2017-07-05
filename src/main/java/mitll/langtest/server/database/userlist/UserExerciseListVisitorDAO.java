@@ -161,7 +161,7 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
   /**
    * @param userid
    * @return
-   * @see IUserListDAO#getListsForUser(int, int)
+   * @see IUserListDAO#getListsForUser(int, int, int, int)
    */
   @Override
   public Collection<Integer> getListsForVisitor(int userid) {

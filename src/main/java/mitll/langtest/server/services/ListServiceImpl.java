@@ -52,6 +52,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
   private static final boolean DEBUG = true;
 
+  @Override
+  public int getNumLists() {
+    int userIDFromSession = getUserIDFromSession();
+    return getUserListManager().getNumLists(userIDFromSession, getProjectID(userIDFromSession));
+  }
+
   /**
    * @param name
    * @param description
@@ -123,7 +129,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
     try {
-      return getUserListManager().getListsForUser(getUserIDFromSession(), onlyCreated, visited, getProjectID());
+      return getUserListManager().getListsForUser(getUserIDFromSession(), getProjectID(), onlyCreated, visited);
     } catch (Exception e) {
       logger.error("Got " + e, e);
       return Collections.emptyList();

@@ -41,6 +41,8 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ListServiceAsync {
+
+
   /**
    * TODO : add ability to search through list text...
    * @param search
@@ -77,12 +79,12 @@ public interface ListServiceAsync {
 
   void deleteItemFromList(int listid, int exid, AsyncCallback<Boolean> async);
 
-//  void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
-
   void updateContext(long userListID, String context, AsyncCallback<Void> async);
   void updateRichText(long userListID, String richText, AsyncCallback<Void> async);
 
   void updateName(long userListID, String name, AsyncCallback<Void> async);
 
   void getProjectIDForList(int userListID, AsyncCallback<Integer> async);
+
+  void getNumLists(AsyncCallback<Integer> async);
 }

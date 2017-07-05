@@ -49,6 +49,8 @@ import java.util.List;
 
 @RemoteServiceRelativePath("list-manager")
 public interface ListService extends RemoteService {
+  int getNumLists();
+
   /**
    * @param name
    * @param description

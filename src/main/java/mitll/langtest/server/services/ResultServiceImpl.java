@@ -92,17 +92,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       start = 0;
     }
     List<MonitorResult> resultList = results.subList(start, min);
-    logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
-//    int projectID = getProjectID();
-
-// TODO : not doing this - ideally not needed
-
-/*
-    for (MonitorResult result : resultList) {
-      ensureCompressedAudio(result.getUserid(), db.getCustomOrPredefExercise(projectID, result.getExID()), result.getAnswer());
-    }
-*/
-
+    //logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
     return new ResultAndTotal(new ArrayList<>(resultList), n, req);
   }
 

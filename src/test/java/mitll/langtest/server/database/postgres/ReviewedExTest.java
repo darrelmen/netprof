@@ -50,7 +50,7 @@ public class ReviewedExTest extends BaseTest {
   @Test
   public void testReviewed() {
     DatabaseImpl spanish = getDatabase("spanish");
-
+/*
 //    IUserExerciseDAO dao = spanish.getUserExerciseDAO();
     IUserListManager userListManager = spanish.getUserListManager();
 
@@ -72,7 +72,7 @@ public class ReviewedExTest extends BaseTest {
       Collections.sort(stateCreators);
 
       for (StateCreator stateCreator : stateCreators) logger.info("Got " + stateCreator);
-    }
+    }*/
   }
 
 }

@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface IUserListManager {
+public interface IUserListManager /*extends IStateManager*/ {
   @Deprecated
   int REVIEW_MAGIC_ID  = -100;
   @Deprecated
@@ -58,17 +58,12 @@ public interface IUserListManager {
   @Deprecated
   int ATTN_LL_MAGIC_ID = -300;
 
-  void setStateOnExercises();
-
-  Map<Integer, StateCreator> getExerciseToState(boolean skipUnset);
-
-  void markState(Collection<? extends CommonShell> shells);
-
   long addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
+  int getNumLists(int userid, int projid);
   Collection<UserList<CommonShell>> getMyLists(int userid, int projid);
 
-  Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists, int projid);
+  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists);
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#rememberProject(int, int)
@@ -86,15 +81,10 @@ public interface IUserListManager {
   UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids);
   UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder, Set<Integer> ids);
 
-//  List<UserList<CommonShell>> getByName(int userid,String name,int projid);
   @Deprecated
   UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids);
   UserList<CommonShell> getSimpleUserListByID(int id);
   UserList<CommonExercise> getUserListByIDExercises(long id, int projid, Collection<String> typeOrder, Set<Integer> ids);
-
-  Collection<Integer> getDefectExercises();
-
-  Collection<Integer> getInspectedExercises();
 
   List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
 
@@ -106,7 +96,7 @@ public interface IUserListManager {
 
   void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder);
 
-  CommonExercise duplicate(CommonExercise userExercise);
+ // CommonExercise duplicate(CommonExercise userExercise);
 
 
   UserList addVisitor(int userListID, long user);
@@ -116,18 +106,10 @@ public interface IUserListManager {
 
   void addAnnotation(int exerciseID, String field, String status, String comment, int userid);
 
-  STATE getCurrentState(int exerciseID);
-
-  void removeReviewed(int exerciseid);
-
 
   void addAnnotations(CommonExercise exercise);
 
   void markState(int exid, STATE state, int creatorID);
-
-  void setState(Shell shell, STATE state, long creatorID);
-
-  void setSecondState(Shell shell, STATE state, long creatorID);
 
   void markCorrectness(int id, boolean correct, int userid);
 
@@ -144,10 +126,6 @@ public interface IUserListManager {
   IUserListDAO getUserListDAO();
 
   IUserListExerciseJoinDAO getUserListExerciseJoinDAO();
-
-  IReviewedDAO getReviewedDAO();
-
-  IReviewedDAO getSecondStateDAO();
 
   void createTables(DBConnection dbConnection, List<String> created);
 

@@ -48,7 +48,9 @@ import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
+import mitll.langtest.server.database.custom.IStateManager;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.custom.StateManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.dliclass.DLIClassDAO;
 import mitll.langtest.server.database.dliclass.DLIClassJoinDAO;
@@ -153,7 +155,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IAudioDAO audioDAO;
   private IAnswerDAO answerDAO;
   private IUserListManager userListManager;
-
+IStateManager stateManager;
   private IUserExerciseDAO userExerciseDAO;
   // private AddRemoveDAO addRemoveDAO;
 
@@ -337,12 +339,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
     IReviewedDAO reviewedDAO = new SlickReviewedDAO(this, dbConnection, true);
     IReviewedDAO secondStateDAO = new SlickReviewedDAO(this, dbConnection, false);
 
+    stateManager = new StateManager(reviewedDAO, secondStateDAO);
     userListManager = new UserListManager(this.userDAO,
         userListDAO,
         userListExerciseJoinDAO,
         annotationDAO,
-        reviewedDAO,
-        secondStateDAO,
+        stateManager,
+        //reviewedDAO,
+        //secondStateDAO,
         new SlickUserListExerciseVisitorDAO(this, dbConnection),
         pathHelper);
 
@@ -615,6 +619,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public void setStartupInfo(User userWhere, int projid) {
     projectManagement.setStartupInfo(userWhere, projid);
+  }
+
+  @Override
+  public IStateManager getStateManager() {
+    return stateManager;
   }
 
   /**
@@ -1817,11 +1826,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   public IReviewedDAO getReviewedDAO() {
-    return userListManager.getReviewedDAO();
+    return stateManager.getReviewedDAO();
   }
 
   public IReviewedDAO getSecondStateDAO() {
-    return userListManager.getSecondStateDAO();
+    return stateManager.getSecondStateDAO();
   }
 
   @Override
