@@ -225,12 +225,7 @@ public class ResultManager extends PagerTable {
 
     final SingleSelectionModel<MonitorResult> selectionModel = new SingleSelectionModel<>();
     cellTable.setSelectionModel(selectionModel);
-    cellTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        respondToClick(selectionModel.getSelectedObject());
-      }
-    });
+    cellTable.getSelectionModel().addSelectionChangeHandler(event -> respondToClick(selectionModel.getSelectedObject()));
 
     addColumnsToTable(cellTable);
     cellTable.setRowCount(numResults, true);

@@ -51,6 +51,9 @@ import java.util.List;
 public interface ListService extends RemoteService {
   int getNumLists();
 
+
+  Collection<UserList<CommonShell>> getLists();
+
   /**
    * @param name
    * @param description

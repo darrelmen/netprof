@@ -1,6 +1,7 @@
 package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.Widget;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by go22670 on 4/10/17.
@@ -21,6 +22,9 @@ public interface INavigation {
       return name().substring(0,1) + name().substring(1).toLowerCase();
     }
   }
+
+  @NotNull
+  VIEWS getCurrentView();
 
   void showView(VIEWS view);
 

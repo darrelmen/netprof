@@ -380,6 +380,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
     return userLists;
   }
 
+  @Override
+  public Collection<UserList<CommonShell>> getLists(int userid, int projid) {
+    return null;
+  }
+
   private List<UserList<CommonShell>> getIn(Collection<Integer> ids) {
     String s = ids.toString();
     s = s.replaceAll("\\[", "").replaceAll("\\]", "");

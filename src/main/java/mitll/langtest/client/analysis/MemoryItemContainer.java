@@ -58,7 +58,9 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.exercise.HasID;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -76,11 +78,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final String selectedUserKey;
   private final String header;
 
-  static final int ID_WIDTH = 130;
   private static final int SIGNED_UP = 95;
   private static final String SIGNED_UP1 = "Started";
   private static final int STUDENT_WIDTH = 300;
   public static final String SELECTED_USER = "selectedUser";
+  static final int ID_WIDTH = 130;
   private int idWidth = ID_WIDTH;
 
   private final String todayYear;
@@ -95,9 +97,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param header
    * @see BasicUserContainer#BasicUserContainer
    */
-  MemoryItemContainer(ExerciseController controller,
-                      String selectedUserKey,
-                      String header) {
+  public MemoryItemContainer(ExerciseController controller,
+                             String selectedUserKey,
+                             String header) {
     super(controller);
     this.selectedUserKey = selectedUserKey;
     this.selectedUser = getSelectedUser(selectedUserKey);
@@ -153,8 +155,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   private String truncate(String columnText) {
-    if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+    int maxLengthId = getMaxLengthId();
+    if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
     return columnText;
+  }
+
+  protected int getMaxLengthId() {
+    return MAX_LENGTH_ID;
   }
 
   /**
@@ -179,7 +186,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     {
       Column<T, SafeHtml> userCol = getItemColumn();
       userCol.setSortable(true);
-      table.setColumnWidth(userCol, idWidth + "px");
+      table.setColumnWidth(userCol, getIdWidth() + "px");
       addColumn(userCol, new TextHeader(header));
       table.addColumnSortHandler(getUserSorter(userCol, getList()));
     }
@@ -187,10 +194,19 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     {
       dateCol = getDateColumn();
       dateCol.setSortable(true);
-      addColumn(dateCol, new TextHeader(SIGNED_UP1));
+      addColumn(dateCol, new TextHeader(getDateColHeader()));
       table.setColumnWidth(dateCol, SIGNED_UP + "px");
       table.addColumnSortHandler(getDateSorter(dateCol, getList()));
     }
+  }
+
+  protected int getIdWidth() {
+    return idWidth;
+  }
+
+  @NotNull
+  protected String getDateColHeader() {
+    return SIGNED_UP1;
   }
 
   /**
@@ -287,12 +303,17 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
         }
       }
     }
-  //  i++;
+    //  i++;
   }
 
   @Override
   protected void setMaxWidth() {
-    table.getElement().getStyle().setProperty("maxWidth", TABLE_WIDTH + "px");
+    int tableWidth = getMaxTableWidth();
+    table.getElement().getStyle().setProperty("maxWidth", tableWidth + "px");
+  }
+
+  protected int getMaxTableWidth() {
+    return TABLE_WIDTH;
   }
 
   @Override
@@ -390,10 +411,23 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       }
 
       @Override
+      public String getCellStyleNames(Cell.Context context, T object) {
+        return shouldHighlight(object) ? "tableRowUserCurrentColor" : "";
+      }
+
+      @Override
       public SafeHtml getValue(T shell) {
-        return getSafeHtml(truncate(getItemLabel(shell)));
+        return getSafeHtml(getTruncatedItemLabel(shell));
       }
     };
+  }
+
+  protected boolean shouldHighlight(T object) {
+    return false;
+  }
+
+  protected String getTruncatedItemLabel(T shell) {
+    return truncate(getItemLabel(shell));
   }
 
   protected abstract String getItemLabel(T shell);
@@ -403,9 +437,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
+        if (isClick(event)) gotClickOnItem(object);
       }
 
       @Override
@@ -431,6 +463,23 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   public abstract Long getItemDate(T shell);
+
+  protected void checkGotClick(T object, NativeEvent event) {
+    if (isClick(event)) {
+      gotClickOnItem(object);
+    }
+    if (isDoubleClick(event)) {
+      logger.info("got double!");
+    }
+  }
+
+  private boolean isClick(NativeEvent event) {
+    return BrowserEvents.CLICK.equals(event.getType());
+  }
+
+  private boolean isDoubleClick(NativeEvent event) {
+    return BrowserEvents.DBLCLICK.equals(event.getType());
+  }
 
   public void gotClickOnItem(final T user) {
     storeSelectedUser(user.getID());

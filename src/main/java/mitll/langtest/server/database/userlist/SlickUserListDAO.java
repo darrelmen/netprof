@@ -47,6 +47,7 @@ import mitll.npdata.dao.userexercise.UserExerciseListDAOWrapper;
 import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import scala.Option;
 
 import java.sql.SQLException;
@@ -335,11 +336,32 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     }
   }
 
+  /**
+   * Are we going to use this??
+   * @param userid
+   * @param projid
+   * @param start
+   * @param length
+   * @return
+   */
   @Override
   public Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, int start, int length) {
+    List<UserList<CommonShell>> ret = new ArrayList<>();
+    getListsForUser(userid, projid).subList(start, start + length).forEach(ue -> ret.add(fromSlick(ue)));
+    return ret;
+  }
+
+  @Override
+  public Collection<UserList<CommonShell>> getLists(int userid, int projid) {
+    List<UserList<CommonShell>> ret = new ArrayList<>();
+    getListsForUser(userid, projid).forEach(ue -> ret.add(fromSlick(ue)));
+    return ret;
+  }
+
+  @NotNull
+  private List<SlickUserExerciseList> getListsForUser(int userid, int projid) {
     Set<Integer> unique = new HashSet<>();
 
-    List<UserList<CommonShell>> ret = new ArrayList<>();
 
     List<SlickUserExerciseList> temp = new ArrayList<>();
     {
@@ -376,10 +398,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
           }
       );
     }
-
-    temp.subList(start, start + length).forEach(ue -> ret.add(fromSlick(ue)));
-
-    return ret;
+    return temp;
   }
 
   /**

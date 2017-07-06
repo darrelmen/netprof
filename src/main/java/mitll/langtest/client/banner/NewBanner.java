@@ -278,6 +278,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     return learn;
   }
 
+  /**
+   * @see NewContentChooser#getShowTab
+   */
   public void showLearn() {
     gotClickOnChoice(VIEWS.LEARN.toString(), viewToLink.get(VIEWS.LEARN));
   }
@@ -303,6 +306,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     return learn;
   }
 
+  /**
+   * @see #checkProjectSelected
+   * @see #gotClickOnChoice
+   * @param learn
+   */
   private void showActive(NavLink learn) {
     for (NavLink link : nameToLink.values()) link.setActive(false);
     learn.setActive(true);
@@ -388,7 +396,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   @Override
   public void checkProjectSelected() {
     setVisibleChoices(controller.getProjectStartupInfo() != null);
-    showActive(viewToLink.get(VIEWS.LEARN));
+    showActive(viewToLink.get(navigation.getCurrentView()));
     recordMenuVisible();
   }
 

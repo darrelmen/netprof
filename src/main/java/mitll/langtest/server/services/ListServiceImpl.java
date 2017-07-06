@@ -50,12 +50,20 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
   private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
+  @Deprecated
   @Override
   public int getNumLists() {
     int userIDFromSession = getUserIDFromSession();
     return getUserListManager().getNumLists(userIDFromSession, getProjectID(userIDFromSession));
+  }
+
+  @Override
+  public Collection<UserList<CommonShell>> getLists() {
+    int userIDFromSession = getUserIDFromSession();
+
+    return getUserListManager().getUserListDAO().getLists(userIDFromSession, getProjectID(userIDFromSession));
   }
 
   /**

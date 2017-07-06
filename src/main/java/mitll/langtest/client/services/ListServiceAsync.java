@@ -50,7 +50,10 @@ public interface ListServiceAsync {
    */
   void getUserListsForText(String search, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
+
+  @Deprecated
   void getListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
+
 
   void addItemToUserList(int userListID, int exID, AsyncCallback<Void> async);
 
@@ -87,4 +90,6 @@ public interface ListServiceAsync {
   void getProjectIDForList(int userListID, AsyncCallback<Integer> async);
 
   void getNumLists(AsyncCallback<Integer> async);
+
+  void getLists(AsyncCallback<Collection<UserList<CommonShell>>> async);
 }

@@ -219,21 +219,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
                                                               List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<UserInfo>() {
-          public int compare(UserInfo o1, UserInfo o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return Integer.valueOf(o1.getDiff()).compareTo(o2.getDiff());
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              return Integer.valueOf(o1.getDiff()).compareTo(o2.getDiff());
+            }
+          }
+          return -1;
         });
     return columnSortHandler;
   }
@@ -243,9 +241,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
+        checkGotClick(object, event);
       }
 
       @Override
@@ -260,9 +256,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
+        checkGotClick(object, event);
       }
 
       @Override
@@ -272,14 +266,22 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     };
   }
 
+//  protected void checkGotClick(UserInfo object, NativeEvent event) {
+//    if (isClick(event)) {
+//      gotClickOnItem(object);
+//    }
+//  }
+//
+//  private boolean isClick(NativeEvent event) {
+//    return BrowserEvents.CLICK.equals(event.getType());
+//  }
+
   private Column<UserInfo, SafeHtml> getDiff() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
+        checkGotClick(object, event);
       }
 
       @Override
@@ -294,9 +296,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
+        checkGotClick(object, event);
       }
 
       @Override

@@ -10,6 +10,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListManager;
+import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.shared.user.User;
@@ -23,6 +24,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * Created by go22670 on 4/10/17.
  */
 public class NewContentChooser implements INavigation {
+  public static final String CURRENT_VIEW = "CurrentView";
   private final Logger logger = Logger.getLogger("NewContentChooser");
 
   private final DivWidget divWidget = new DivWidget();
@@ -31,6 +33,7 @@ public class NewContentChooser implements INavigation {
   private final ExerciseController controller;
   private final ListManager listManager;
   private final IBanner banner;
+  private final ListView listView;
 
   private VIEWS currentSection = VIEWS.NONE;
 
@@ -43,13 +46,21 @@ public class NewContentChooser implements INavigation {
     practiceHelper = new PracticeHelper(controller);
     this.controller = controller;
     this.listManager = new ListManager(controller, null);
+    this.listView = new ListView(controller);
     this.banner = banner;
   }
 
   @Override
   public void showInitialState() {
     clearCurrent();
-    showView(LEARN);
+    showView(getCurrentView());
+  }
+
+  @Override
+  @NotNull
+  public VIEWS getCurrentView() {
+    String currentView = controller.getStorage().getValue(CURRENT_VIEW);
+    return (currentView.isEmpty()) ? LEARN : VIEWS.valueOf(currentView);
   }
 
   @Override
@@ -59,6 +70,7 @@ public class NewContentChooser implements INavigation {
       //  logger.info("showView - already showing " + view);
     } else {
       currentSection = view;
+      storeValue(view);
       switch (view) {
         case LEARN:
           clear();
@@ -75,7 +87,8 @@ public class NewContentChooser implements INavigation {
           break;
         case LISTS:
           clear();
-          divWidget.add(listManager.showLists());
+//          divWidget.add(listManager.showLists());
+          listView.showContent(divWidget, "listView");
           break;
         case ITEMS:
           clear();
@@ -105,6 +118,10 @@ public class NewContentChooser implements INavigation {
           logger.warning("huh? unknown view " + view);
       }
     }
+  }
+
+  private void storeValue(VIEWS view) {
+    controller.getStorage().storeValue(CURRENT_VIEW, view.name());
   }
 
   public void showProgress() {
@@ -161,6 +178,6 @@ public class NewContentChooser implements INavigation {
   @Override
   public void clearCurrent() {
     currentSection = NONE;
-  //  banner.setVisibleChoices(false);
+    //  banner.setVisibleChoices(false);
   }
 }
