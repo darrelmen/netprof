@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -26,25 +27,34 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
     this.count = node.getCount();
   }
 
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#getMatchInfoForEachList
+   * @param value
+   * @param count
+   * @param userListID
+   * @param italic
+   * @param tooltip
+   */
   public MatchInfo(String value, int count, int userListID, boolean italic, String tooltip) {
     this.value = value;
     this.count = count;
     this.userListID = userListID;
-    this.italic =italic;
+    this.italic = italic;
     this.tooltip = tooltip;
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addOrMerge
    * @param c
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addOrMerge
    */
   public void incr(int c) {
     count += c;
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#mergeMaps2(Map, Map)
    * @return
+   * @see mitll.langtest.server.database.exercise.SectionHelper#mergeMaps2(Map, Map)
+   * @see mitll.langtest.client.list.FacetExerciseList#getAnchor(String, MatchInfo, int, boolean)
    */
   public int getCount() {
     return count;

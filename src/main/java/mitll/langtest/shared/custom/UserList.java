@@ -72,6 +72,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   private boolean isPrivate;
   private boolean isReview;
+  private boolean isDeleted;
   private long modified;
   private String contextURL;
 
@@ -90,6 +91,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @param classMarker
    * @param richText
    * @param projid
+   * @param isDeleted
    * @paramx user
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see IUserListDAO#getWhere(int, boolean)
@@ -104,7 +106,7 @@ public class UserList<T extends HasID> extends BaseExercise {
                   long modified,
                   String contextURL,
                   String richText,
-                  int projid) {
+                  int projid, boolean isDeleted) {
     super(uniqueID);
     this.userid = userid;
     this.userChosenID = userChosenID;
@@ -116,6 +118,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.contextURL = contextURL;
     this.richText = richText;
     this.projid = projid;
+    this.isDeleted =isDeleted;
   }
 
   public int getUserID() {
@@ -286,5 +289,9 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   public int getProjid() {
     return projid;
+  }
+
+  public boolean isDeleted() {
+    return isDeleted;
   }
 }

@@ -183,8 +183,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   /**
-   * @see #makeCellTable(boolean)
    * @param sortEnglish
+   * @see #makeCellTable(boolean)
    */
   protected void configureTable(boolean sortEnglish) {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
@@ -204,9 +204,11 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     });
   }
 
-  protected void gotRangeChanged(Range newRange) {}
+  protected void gotRangeChanged(Range newRange) {
+  }
 
-  protected void addSelectionModel() {}
+  protected void addSelectionModel() {
+  }
 
   public void flush() {
     if (comp != null) {
@@ -313,6 +315,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   protected void addItem(T item) {
     getList().add(item);
+  }
+
+  public void addItemFirst(T item) {
+    getList().add(0, item);
   }
 
   /**

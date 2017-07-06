@@ -71,19 +71,6 @@ public class DownloadHelper {
   }
 
   /**
-   * @return
-   * @seex mitll.langtest.client.list.SimpleSelectExerciseList#getBottomRow
-   */
-/*  public Panel getDownloadButton() {
-    Button download = new Button("Download", IconType.DOWNLOAD);
-    download.setType(ButtonType.PRIMARY);
-    selectionState = exerciseList.getSelectionState();
-    download.addClickHandler(clickEvent -> showDialog());
-
-    return download;
-  }*/
-
-  /**
    * @param selectionState
    * @see mitll.langtest.client.list.FacetExerciseList#restoreListBoxState
    */
@@ -155,9 +142,10 @@ public class DownloadHelper {
         "Cancel",
         new DialogHelper.CloseListener() {
           @Override
-          public void gotYes() {
+          public boolean gotYes() {
             String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, selectionState.getTypeToSection());
             new DownloadIFrame(urlForDownload);
+            return true;
           }
 
           @Override
@@ -166,7 +154,6 @@ public class DownloadHelper {
           }
         }, 550);
     closeButton.setType(ButtonType.SUCCESS);
-    //  closeButton.setEnabled(selectionState.isEmpty());
     closeButton.setEnabled(empty);
   }
 

@@ -584,7 +584,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public T simpleRemove(int id) {
     T es = byID(id);
-    pagingContainer.forgetExercise(es);
+    pagingContainer.forgetItem(es);
 
     if (isEmpty()) {
       removeCurrentExercise();

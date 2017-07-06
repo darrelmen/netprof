@@ -26,12 +26,10 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   @NotNull
-  protected String getDateColHeader() {
-    return "Date";
-  }
+  protected String getDateColHeader() {   return "Date";  }
 
   protected int getIdWidth() {
-    return 300;
+    return 200;
   }
 
   protected int getMaxTableWidth() {
@@ -51,8 +49,10 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   protected void addColumnsToTable(boolean sortEnglish) {
     super.addColumnsToTable(sortEnglish);
     addDescrip();
+    addClass();
     addOwner();
-   // addIsPublic();
+
+    // addIsPublic();
   }
 
   protected boolean shouldHighlight(UserList<CommonShell> object) {
@@ -87,6 +87,14 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     table.setColumnWidth(diff, 200 + "px");
   }
 
+  private void addClass() {
+    Column<UserList<CommonShell>, SafeHtml> diff = getListClass();
+    diff.setSortable(true);
+    addColumn(diff, new TextHeader("Class"));
+    table.addColumnSortHandler(getClassSorted(diff, getList()));
+    table.setColumnWidth(diff, 100 + "px");
+  }
+
   private void addOwner() {
     Column<UserList<CommonShell>, SafeHtml> diff = getOwner();
     diff.setSortable(true);
@@ -106,6 +114,21 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
         return getSafeHtml(shell.getDescription());
+      }
+    };
+  }
+
+  private Column<UserList<CommonShell>, SafeHtml> getListClass() {
+    return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserList<CommonShell> shell) {
+        return getSafeHtml(shell.getClassMarker());
       }
     };
   }
@@ -131,10 +154,18 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::getDescription));
     return columnSortHandler;
   }
+
   private ColumnSortEvent.ListHandler<UserList<CommonShell>> getOwnerSorted(Column<UserList<CommonShell>, SafeHtml> englishCol,
-                                                                           List<UserList<CommonShell>> dataList) {
+                                                                            List<UserList<CommonShell>> dataList) {
     ColumnSortEvent.ListHandler<UserList<CommonShell>> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::getUserChosenID));
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<UserList<CommonShell>> getClassSorted(Column<UserList<CommonShell>, SafeHtml> englishCol,
+                                                                            List<UserList<CommonShell>> dataList) {
+    ColumnSortEvent.ListHandler<UserList<CommonShell>> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::getClassMarker));
     return columnSortHandler;
   }
 }

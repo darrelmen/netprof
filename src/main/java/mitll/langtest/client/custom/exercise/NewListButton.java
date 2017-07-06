@@ -12,6 +12,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.UserListSupport;
+import mitll.langtest.shared.custom.UserList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -33,7 +34,7 @@ public class NewListButton {
     this.exid = exid;
     this.controller = controller;
     this.userListSupport = userListSupport;
-    this.dropdown =dropdown;
+    this.dropdown = dropdown;
   }
 
   private final PopupContainerFactory popupContainerFactory = new PopupContainerFactory();
@@ -57,17 +58,8 @@ public class NewListButton {
         makeANewList(this);
       }
     };
-    textBox.addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-        boolean duplicateName = isDuplicateName(textBox.getText());
-        if (duplicateName) {
-          textBox.getElement().getStyle().setColor("red");
-        } else {
-          textBox.getElement().getStyle().setColor("black");
-        }
-      }
-    });
+    textBox.addKeyUpHandler(event ->
+        textBox.getElement().getStyle().setColor(isDuplicateName(textBox.getText()) ? "red" : "black"));
     textBox.getElement().setId("NewList");
     textBox.setVisibleLength(60);
     return textBox;
@@ -77,8 +69,7 @@ public class NewListButton {
     String newListName = textEntry.getValue().trim();
     if (!newListName.isEmpty()) {
       controller.logEvent(textEntry, "NewList_TextBox", exid, "make new list called '" + newListName + "'");
-      boolean duplicateName = isDuplicateName(newListName);
-      if (duplicateName) {
+      if (isDuplicateName(newListName)) {
         logger.info("---> not adding duplicate list " + newListName);
         popupContainerFactory.showPopup("Already list with that name.", dropdown);
       } else {
@@ -99,14 +90,14 @@ public class NewListButton {
         title,
         "",
         "",
-        isPublic, new AsyncCallback<Long>() {
+        isPublic, new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
           }
 
           @Override
-          public void onSuccess(Long result) {
-            if (result == -1) {
+          public void onSuccess(UserList result) {
+            if (result == null) {
               logger.warning("should never happen!");
             } else {
               textBox.setText("");

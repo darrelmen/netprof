@@ -37,11 +37,13 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -49,11 +51,12 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class DialogHelper {
+  private final Logger logger = Logger.getLogger("DialogHelper");
   private final boolean doYesAndNo;
+  private Modal dialogBox;
 
   public interface CloseListener {
-    void gotYes();
-
+    boolean gotYes();
     void gotNo();
   }
 
@@ -104,13 +107,15 @@ public class DialogHelper {
                      String cancelButtonName,
                      final CloseListener listener,
                      int maxHeight) {
-    final Modal dialogBox = new Modal();
+    return showDialog(title, msgs, other, cancelButtonName, listener, maxHeight, getCloseButton(buttonName));
+  }
+
+  @NotNull
+  public Button showDialog(String title, Collection<String> msgs, Widget other, String cancelButtonName,
+                            CloseListener listener, int maxHeight, Button closeButton) {
+      dialogBox = new Modal();
     dialogBox.setTitle("<b>" + title + "</b>");
     if (maxHeight > 0) dialogBox.setMaxHeigth(maxHeight + "px");
-    Button closeButton;
-    closeButton = new Button(buttonName);
-    closeButton.setType(ButtonType.PRIMARY);
-    closeButton.setFocus(true);
 
     FluidContainer container = new FluidContainer();
 
@@ -131,18 +136,9 @@ public class DialogHelper {
     FluidRow row = new FluidRow();
     row.addStyleName("topFiveMargin");
     if (doYesAndNo) {
-      row.add(new Column(4, closeButton));
-      row.add(new Column(4, new Heading(4)));
-      Button noButton = new Button(cancelButtonName);
-      noButton.setType(ButtonType.INVERSE);
-
-      row.add(new Column(4, noButton));
-      noButton.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          dialogBox.hide();
-          if (listener != null) listener.gotNo();
-        }
-      });
+      row.add(new Column(4, getCancel(cancelButtonName, listener, dialogBox)));
+      row.add(new Column(6, new Heading(4)));
+      row.add(new Column(2, closeButton));
     } else {
       row.add(new Column(2, 6, closeButton));
     }
@@ -151,10 +147,13 @@ public class DialogHelper {
     w.add(new Column(12, new Heading(6)));
     container.add(w);
 
-    closeButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
+    closeButton.addClickHandler(event -> {
+      //dialogBox.hide();
+      logger.info("clicked on close");
+      boolean shouldHide = true;
+      if (listener != null) shouldHide = listener.gotYes();
+      if (shouldHide) {
         dialogBox.hide();
-        if (listener != null) listener.gotYes();
       }
     });
 
@@ -162,5 +161,28 @@ public class DialogHelper {
     dialogBox.show();
 
     return closeButton;
+  }
+
+  public void hide() { dialogBox.hide(); }
+
+  @NotNull
+  private Button getCloseButton(String buttonName) {
+    Button closeButton;
+    closeButton = new Button(buttonName);
+    closeButton.setType(ButtonType.PRIMARY);
+    closeButton.setFocus(true);
+    return closeButton;
+  }
+
+  @NotNull
+  private Button getCancel(String cancelButtonName, CloseListener listener, Modal dialogBox) {
+    Button noButton = new Button(cancelButtonName);
+    noButton.setType(ButtonType.INVERSE);
+
+    noButton.addClickHandler(event -> {
+      dialogBox.hide();
+      if (listener != null) listener.gotNo();
+    });
+    return noButton;
   }
 }

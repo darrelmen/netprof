@@ -46,9 +46,9 @@ public interface IUserListDAO extends IDAO {
   void updateModified(long uniqueID);
 
   /**
-   * @see mitll.langtest.server.services.ListServiceImpl#updateContext(long, String)
    * @param uniqueID
    * @param context
+   * @see mitll.langtest.server.services.ListServiceImpl#updateContext(long, String)
    */
   void updateContext(long uniqueID, String context);
 
@@ -58,18 +58,21 @@ public interface IUserListDAO extends IDAO {
 
 
   /**
-   * @see IUserListManager#addVisitor(int, long)
    * @param listid
    * @param userid
+   * @see IUserListManager#addVisitor(int, long)
    */
   void addVisitor(long listid, long userid);
+
+  void removeVisitor(int listid, int userid);
 
   void add(UserList<CommonShell> userList, int projid);
 
   /**
    * JUST FOR DEBUGGING
-   * @see mitll.langtest.server.database.custom.UserListManager#createUserList
+   *
    * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    */
   int getCount();
 
@@ -83,13 +86,25 @@ public interface IUserListDAO extends IDAO {
 
   boolean remove(long unique);
 
+  void bringBack(long unique);
+
   UserList<CommonShell> getWithExercises(int unique);
+
   UserList<CommonExercise> getWithExercisesEx(long unique);
 
   UserList<CommonShell> getWhere(int unique, boolean warnIfMissing);
 
-  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, int start, int length);
+//  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, int start, int length);
+
   Collection<UserList<CommonShell>> getLists(int userid, int projid);
+
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, int, boolean, boolean)
+   * @param userid
+   * @param projid
+   * @return
+   */
+  Collection<UserList<CommonShell>> getVisitedLists(int userid, int projid);
 
   void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);
 

@@ -79,22 +79,12 @@ public class ListOperations {
     learn.setType(ButtonType.SUCCESS);
     learn.addStyleName("leftFiveMargin");
     r1.add(learn);
-    learn.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.showLearnList(ul.getID());
-      }
-    });
+    learn.addClickHandler(event -> controller.showLearnList(ul.getID()));
 
     Button drill = new Button("Drill");
     drill.setType(ButtonType.SUCCESS);
     r1.add(drill);
-    drill.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.showDrillList(ul.getID());
-      }
-    });
+    drill.addClickHandler(event -> controller.showDrillList(ul.getID()));
     drill.addStyleName("leftFiveMargin");
 
     return r1;

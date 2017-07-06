@@ -62,7 +62,7 @@ public interface ListService extends RemoteService {
    * @return
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
-  long addUserList(String name, String description, String dliClass, boolean isPublic);
+  UserList addUserList(String name, String description, String dliClass, boolean isPublic);
 
   /**
    * @param userListID
@@ -99,6 +99,7 @@ public interface ListService extends RemoteService {
    * @see ListManager#addVisitor
    */
   UserList addVisitor(int userListID, int user);
+  void removeVisitor(int userListID, int user);
 
   int getProjectIDForList(int userListID);
 

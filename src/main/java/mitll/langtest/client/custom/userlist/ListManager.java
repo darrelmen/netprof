@@ -50,6 +50,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.TextArea;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.content.ReviewItemHelper;
+import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.tabs.TabAndContent;
@@ -72,7 +73,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/20/15.
  */
-public class ListManager implements RequiresResize {
+public class ListManager implements RequiresResize, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListManager");
 
   private static final int IMPORT_WIDTH = 600;
@@ -242,7 +243,7 @@ public class ListManager implements RequiresResize {
 
     // create tab
     create = makeTab(tabPanel, IconType.PLUS_SIGN, CREATE);
-    final CreateListDialog createListDialog = new CreateListDialog(this, userManager, controller);
+    final CreateListDialog createListDialog = new CreateListDialog(this, controller);
     create.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -1098,5 +1099,9 @@ public class ListManager implements RequiresResize {
     } else {
       showEditItem(ul, finalEditItem, this.editItem);
     }
+  }
+
+  public void madeIt(UserList list) {
+
   }
 }

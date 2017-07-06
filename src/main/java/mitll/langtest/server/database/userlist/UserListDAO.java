@@ -84,6 +84,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
     userListVisitorJoinDAO.add(listid, userid, System.currentTimeMillis());
   }
 
+  @Override
+  public void removeVisitor(int listid, int userid) {
+
+  }
+
   /**
    * @param listid
    * @see UserListDAO#remove
@@ -308,6 +313,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
     return remove(USER_EXERCISE_LIST, "uniqueid", unique);
   }
 
+  @Override
+  public void bringBack(long unique) {
+    
+  }
+
   /**
    * TODO don't want to always get all the exercises!
    *
@@ -359,11 +369,12 @@ public class UserListDAO extends DAO implements IUserListDAO {
   /**
    * @param userid
    * @param projid
-   * @param start
-   *@param length @return
+   * @paraxm start
+   *@paramx length
+   *  @return
    * @see IUserListManager#getListsForUser
    */
-  @Override
+/*  @Override
   public Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, int start, int length) {
     Collection<Integer> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
     //  final List<Long> listsForVisitor = (List<Long>) listsForVisitor1;
@@ -378,10 +389,15 @@ public class UserListDAO extends DAO implements IUserListDAO {
 //      }
 //    });
     return userLists;
-  }
+  }*/
 
   @Override
   public Collection<UserList<CommonShell>> getLists(int userid, int projid) {
+    return null;
+  }
+
+  @Override
+  public Collection<UserList<CommonShell>> getVisitedLists(int userid, int projid) {
     return null;
   }
 
@@ -440,7 +456,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
           rs.getString("description"), // exp
           rs.getString("classmarker"),
           rs.getBoolean(ISPRIVATE),
-          rs.getTimestamp("modified").getTime(), "", "", -1)
+          rs.getTimestamp("modified").getTime(), "", "", -1, false)
       );
     }
     //logger.debug("getWhere : got " + lists);

@@ -45,6 +45,8 @@ import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -55,7 +57,7 @@ import java.util.logging.Logger;
 public abstract class ClickablePagingContainer<T extends HasID> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("ClickablePagingContainer");
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private final Map<Integer, T> idToExercise = new HashMap<>();
 
   public ClickablePagingContainer(ExerciseController controller) {
@@ -82,13 +84,13 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    * @see ListInterface#simpleRemove(int)
    */
   //@Override
-  public void forgetExercise(T es) {
+  public void forgetItem(T es) {
     List<T> list = getList();
     int before = getList().size();
 
     if (!list.remove(es)) {
       if (!list.remove(getByID(es.getID()))) {
-        logger.warning("forgetExercise couldn't remove " + es);
+        logger.warning("forgetItem couldn't remove " + es);
 //        for (T t : list) {
 //          logger.info("\tnow has " + t.getOldID());
 //        }
@@ -99,7 +101,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
       if (list.size() == before - 1) {
         //logger.info("\tPagingContainer : now has " + list.size()+ " items");
       } else {
-        logger.warning("\tPagingContainer.forgetExercise : now has " + list.size() + " items vs " + before);
+        logger.warning("\tPagingContainer.forgetItem : now has " + list.size() + " items vs " + before);
       }
       idToExercise.remove(es.getID());
     }
@@ -164,7 +166,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    */
   protected Collection<Integer> getIdsForRange(Range visibleRange) {
     int start = visibleRange.getStart();
-    int end   = Math.min(getList().size(), start + visibleRange.getLength());
+    int end = Math.min(getList().size(), start + visibleRange.getLength());
     // logger.info("ClickablePagingContainer.getVisibleIDs : get from " + start + " to " + end + " vs " + getList().size());
 
     List<Integer> visible = new ArrayList<>();
@@ -221,7 +223,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   /**
-   * @param afterThisOne
+   * @param afterThisOne null means put at the start
    * @param exercise
    * @see mitll.langtest.client.list.PagingExerciseList#addExerciseAfter
    */
@@ -231,7 +233,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     int before = list.size();
 //    String id = exercise.getOldID();
     idToExercise.put(exercise.getID(), exercise);
-    int i = list.indexOf(afterThisOne);
+    int i = afterThisOne == null ? -1 : list.indexOf(afterThisOne);
     list.add(i + 1, exercise);
     int after = list.size();
     // logger.info("data now has "+ after + " after adding " + exercise.getOldID());
@@ -255,8 +257,21 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   public void markCurrentExercise(int itemID) {
     if (getList() == null || getList().isEmpty()) return;
 
-    T t = idToExercise.get(itemID);
-    markCurrent(getIndex(t), t);
+    T found = null;
+
+    if (idToExercise.isEmpty()) {
+     // List<T> collect = getList().stream().filter(item -> item.getID() == itemID).collect(Collectors.toList());
+       getList().forEach(item -> idToExercise.put(item.getID(),item));
+//      if (!collect.isEmpty()) {
+//        found = collect.get(0);
+//      }
+    }
+//    else {
+      found = idToExercise.get(itemID);
+  //  }
+
+    logger.info("markCurrentExercise for " + itemID + " in " +idToExercise.size() + " found " + found);
+    markCurrent(getIndex(found), found);
   }
 
   private void markCurrent(int i, T itemToSelect) {
@@ -264,8 +279,8 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
       int pageEnd = table.getPageStart() + table.getPageSize();
-      logger.info("marking " + i + " out of " + table.getRowCount() + " page start " + table.getPageStart() +
-          " end " + pageEnd);
+      logger.info("markCurrent marking " + i + " out of " + table.getRowCount() + " page start " + table.getPageStart() +
+          " end " + pageEnd + " item " + itemToSelect);
     }
 
     scrollToVisible(i);

@@ -33,8 +33,6 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
-import mitll.langtest.server.database.reviewed.IReviewedDAO;
-import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
@@ -42,65 +40,70 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
 import mitll.npdata.dao.DBConnection;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface IUserListManager /*extends IStateManager*/ {
   @Deprecated
-  int REVIEW_MAGIC_ID  = -100;
+  int REVIEW_MAGIC_ID = -100;
   @Deprecated
   int COMMENT_MAGIC_ID = -200;
   @Deprecated
   int ATTN_LL_MAGIC_ID = -300;
 
-  long addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
+  UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
   int getNumLists(int userid, int projid);
+
   Collection<UserList<CommonShell>> getMyLists(int userid, int projid);
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists);
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject(int, int)
    * @param userid
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject(int, int)
    */
   UserList createFavorites(int userid, int projid);
 
   UserList<CommonShell> getCommentedList(Collection<String> typeOrder, Set<Integer> ids);
+
   UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids);
+
   UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids);
 
   UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder, Set<Integer> ids);
+
   UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids);
+
   UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder, Set<Integer> ids);
 
   @Deprecated
   UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids);
+
   UserList<CommonShell> getSimpleUserListByID(int id);
+
   UserList<CommonExercise> getUserListByIDExercises(long id, int projid, Collection<String> typeOrder, Set<Integer> ids);
 
   List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
 
   UserList getUserList(int userListID);
+
   void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
+
   void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir);
 
   void addItemToList(int userListID, String exerciseID, int exid);
 
   void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder);
 
- // CommonExercise duplicate(CommonExercise userExercise);
-
-
   UserList addVisitor(int userListID, long user);
 
+  void removeVisitor(int userListID, int user);
 
   boolean addDefect(int exerciseID, String field, String comment);
 

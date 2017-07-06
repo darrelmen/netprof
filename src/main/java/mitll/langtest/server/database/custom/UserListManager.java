@@ -42,8 +42,6 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.reviewed.IReviewedDAO;
-import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
@@ -145,13 +143,13 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public long addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
+  public UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
     UserList userList = createUserList(userid, name, description, dliClass, !isPublic, projid);
     if (userList == null) {
-      logger.info("no user list??? for " + userid + " " + name);
-      return -1;
+      logger.warn("addUserList no user list??? for " + userid + " " + name);
+      return null;
     } else {
-      return userList.getID();
+      return userList;
     }
   }
 
@@ -181,11 +179,25 @@ public class UserListManager implements IUserListManager {
       return null;
     } else {
       //logger.info("found\n\t" + userListDAO.getAllByUser(userid, projid));
-      if (hasByName(userid, name, projid)) {
-        return null;
-      } else {
+
+      List<UserList<CommonShell>> byName = userListDAO.getByName(userid, name, projid);
+      if (!byName.isEmpty()) {
+        UserList<CommonShell> commonShellUserList = byName.get(0);
+        if (commonShellUserList.isDeleted()) {
+          userListDAO.bringBack(commonShellUserList.getID());
+          return commonShellUserList;
+        }
+        else {
+          return null;
+        }
+      }
+      //if (hasByName(userid, name, projid)) {
+      //  return null;
+      //}
+      else {
         long now = System.currentTimeMillis();
-        UserList e = new UserList(i++, userid, userWhere.getUserID(), name, description, dliClass, isPrivate, now, "", "", projid);
+        UserList e = new UserList(i++, userid, userWhere.getUserID(), name, description, dliClass, isPrivate,
+            now, "", "", projid, false);
         userListDAO.add(e, projid);
         logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
         return e;
@@ -243,7 +255,9 @@ public class UserListManager implements IUserListManager {
     }
 
     if (visitedLists) {
-      Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid, 0, 10);
+      //Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid, 0, 10);
+   //   Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getLists(userid, projid);
+      Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getVisitedLists(userid, projid);
       //    logger.info("found " + listsForUser1.size() + " visited by " + userid);
 
       for (UserList<CommonShell> userList : listsForUser1) {
@@ -454,7 +468,7 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User qcUser = getQCUser();
     UserList<CommonShell> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(), "", "", -1);
+        false, System.currentTimeMillis(), "", "", -1, false);
 
     List<CommonShell> copy = new ArrayList<>();
     for (CommonShell orig : onList) copy.add(orig.getShell());
@@ -473,7 +487,7 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User qcUser = getQCUser();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(), "", "", -1);
+        false, System.currentTimeMillis(), "", "", -1, false);
 
 //    List<CommonShell> copy = new ArrayList<>();
 //    for (CommonShell orig : onList) copy.add(orig.getShell());
@@ -905,6 +919,10 @@ public class UserListManager implements IUserListManager {
     } else {
       return null;
     }
+  }
+
+  public void removeVisitor(int userListID, int user) {
+    userListDAO.removeVisitor(userListID, user);
   }
 
   private boolean listExists(int id) {

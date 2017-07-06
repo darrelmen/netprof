@@ -51,14 +51,14 @@ public interface ListServiceAsync {
   void getUserListsForText(String search, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
 
-  @Deprecated
+
   void getListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
 
   void addItemToUserList(int userListID, int exID, AsyncCallback<Void> async);
 
   void addUserList(String name, String description, String dliClass,
-                   boolean isPublic, AsyncCallback<Long> async);
+                   boolean isPublic, AsyncCallback<UserList> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 
@@ -92,4 +92,6 @@ public interface ListServiceAsync {
   void getNumLists(AsyncCallback<Integer> async);
 
   void getLists(AsyncCallback<Collection<UserList<CommonShell>>> async);
+
+  void removeVisitor(int userListID, int user, AsyncCallback<Void> async);
 }

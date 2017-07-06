@@ -365,8 +365,8 @@ public class ProjectChoices {
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
-      public void gotYes() {
-        projectEditForm.newProject();
+      public boolean gotYes() {
+        projectEditForm.newProject(); return true;
       }
 
       @Override
@@ -541,8 +541,8 @@ public class ProjectChoices {
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
-      public void gotYes() {
-        projectEditForm.updateProject();
+      public boolean gotYes() {
+        projectEditForm.updateProject(); return true;
       }
 
       @Override
@@ -559,7 +559,7 @@ public class ProjectChoices {
   private void showImportDialog(SlimProject projectForLang) {
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
-      public void gotYes() {
+      public boolean gotYes() {
         projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -569,6 +569,7 @@ public class ProjectChoices {
           public void onSuccess(Void result) {
           }
         });
+        return true;
       }
 
       @Override
@@ -586,7 +587,7 @@ public class ProjectChoices {
   private void showDeleteDialog(SlimProject projectForLang, Heading label) {
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
-      public void gotYes() {
+      public boolean gotYes() {
         label.setSubtext("Deleting... please wait.");
         projectServiceAsync.delete(projectForLang.getID(), new AsyncCallback<Boolean>() {
           @Override
@@ -598,6 +599,7 @@ public class ProjectChoices {
             uiLifecycle.startOver();
           }
         });
+        return true;
       }
 
       @Override

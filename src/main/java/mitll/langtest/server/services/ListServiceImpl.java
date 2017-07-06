@@ -75,7 +75,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public long addUserList(String name, String description, String dliClass, boolean isPublic) {
+  public UserList addUserList(String name, String description, String dliClass, boolean isPublic) {
     return getUserListManager().addUserList(getUserIDFromSession(), name, description, dliClass, isPublic, getProjectID());
   }
 
@@ -117,6 +117,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   public UserList addVisitor(int userListID, int user) {
     return getUserListManager().addVisitor(userListID, user);
+  }
+
+  public void removeVisitor(int userListID, int user) {
+    getUserListManager().removeVisitor(userListID, user);
   }
 
   @Override
