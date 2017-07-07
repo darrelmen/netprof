@@ -145,9 +145,11 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   public void loadExercise(int exid) { npfExerciseList.loadExercise(exid);  }
 
+/*
   public void showList(int userlistID) {
 
   }
+*/
 
   /**
    * This is important - this is where the actual content is chosen.

@@ -660,6 +660,7 @@ public class ListManager implements RequiresResize, CreateListComplete {
    *
    * @param ul
    * @see #showList
+   * @see mitll.langtest.client.list.FacetExerciseList#addVisitor
    */
   private void addVisitor(UserList ul) {
     if (ul.getUserID() != controller.getUser()) {

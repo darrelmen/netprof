@@ -58,7 +58,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
@@ -73,6 +72,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   private static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
+
   private static final int PAGE_SIZE = 11;
   private final Long selectedUser;
   private final String selectedUserKey;
@@ -84,28 +84,34 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   public static final String SELECTED_USER = "selectedUser";
   static final int ID_WIDTH = 130;
   private int idWidth = ID_WIDTH;
-
+  int pageSize = PAGE_SIZE;
   private final String todayYear;
   private final String todaysDate;
 
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
 
+  public MemoryItemContainer(ExerciseController controller, String selectedUserKey, String header) {
+    this(controller, selectedUserKey, header, PAGE_SIZE);
+  }
+
   /**
    * @param controller
    * @param selectedUserKey
    * @param header
+   * @param pageSize
    * @see BasicUserContainer#BasicUserContainer
    */
   public MemoryItemContainer(ExerciseController controller,
                              String selectedUserKey,
-                             String header) {
+                             String header, int pageSize) {
     super(controller);
     this.selectedUserKey = selectedUserKey;
     this.selectedUser = getSelectedUser(selectedUserKey);
     this.header = header;
     todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - 2);
+    this.pageSize = pageSize;
   }
 
   /**
@@ -169,7 +175,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see SimplePagingContainer#makeCellTable
    */
   protected int getPageSize() {
-    return isShort() ? 8 : PAGE_SIZE;
+    return isShort() ? 8 : pageSize;
   }
 
   private boolean isShort() {
@@ -195,7 +201,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       dateCol = getDateColumn();
       dateCol.setSortable(true);
       addColumn(dateCol, new TextHeader(getDateColHeader()));
-      table.setColumnWidth(dateCol, SIGNED_UP + "px");
+      table.setColumnWidth(dateCol, 100 + "px");
       table.addColumnSortHandler(getDateSorter(dateCol, getList()));
     }
   }
@@ -410,10 +416,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
         }
       }
 
-      @Override
-      public String getCellStyleNames(Cell.Context context, T object) {
-        return shouldHighlight(object) ? "tableRowUserCurrentColor" : "";
-      }
+//      @Override
+//      public String getCellStyleNames(Cell.Context context, T object) {
+//        return shouldHighlight(object) ? "tableRowUserCurrentColor" : "";
+//      }
 
       @Override
       public SafeHtml getValue(T shell) {
@@ -422,9 +428,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     };
   }
 
-  protected boolean shouldHighlight(T object) {
-    return false;
-  }
+//  protected boolean shouldHighlight(T object) {
+//    return false;
+//  }
 
   protected String getTruncatedItemLabel(T shell) {
     return truncate(getItemLabel(shell));

@@ -73,7 +73,7 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
-  static final String LISTS = "Lists";
+  public static final String LISTS = "Lists";
 
   /**
    * @see #addPageSize
@@ -424,12 +424,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @param newUserListID
    * @see mitll.langtest.client.banner.NewLearnHelper#showList
    */
-  public void showList(int newUserListID) {
+/*  public void showList(int newUserListID) {
     Map<String, String> candidate = new HashMap<>(typeToSelection);
     candidate.put(LISTS, "" + newUserListID);
     // logger.info("showList " + candidate);
     getTypeToValues(candidate, newUserListID);
-  }
+  }*/
 
   /**
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
@@ -530,6 +530,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       //   li
       //    ul
       //
+      logger.info("addChoices --- " + type);
       liForDimensionForType.add(addChoices(typeToValues, type));
     }
 
@@ -599,7 +600,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void populateListChoices(ListItem liForDimensionForType) {
     ListServiceAsync listService = controller.getListService();
-    // logger.info("populateListChoices --- ");
+    logger.info("populateListChoices --- ");
     listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -614,6 +615,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         Widget favorites = liForDimensionForType.getWidget(0);
         liForDimensionForType.clear();
         liForDimensionForType.add(favorites);
+        logger.info("populateListChoices --- for " + result.size() + " lists ");
         liForDimensionForType.add(addChoices(typeToValues, LISTS));
       }
     });
@@ -667,7 +669,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type) {
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
-    // logger.info("addChoices " + type + "=" + selectionForType);
+    logger.info("addChoices " + type + "=" + selectionForType);
     if (selectionForType == null) { // no selection made, show all possible values for type
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
@@ -690,6 +692,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         liForDimension.add(addChoices(typeToValues, childType));
       } else {
         if (type.equalsIgnoreCase(LISTS)) {
+          logger.info("addChoices addListChoice " + type + "=" + selectionForType);
           addListChoice(type, choices, selectionForType);
         } else {
           choices.add(getSelectedAnchor(type, selectionForType));
@@ -707,7 +710,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       if (listName != null) {
         choices.add(getSelectedAnchor(type, listName));
       } else {
-        logger.info("addListChoice couldn't find list in known lists...");
+        logger.info("addListChoice couldn't find list " +userListID+ " in known lists...");
         addVisitor(type, choices, userListID);
       }
     } catch (NumberFormatException e) {
@@ -716,6 +719,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void addVisitor(String type, Panel choices, int userListID) {
+    logger.info("addVisitor " +type + " : " +userListID);
+
     controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {

@@ -36,14 +36,9 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.SlickDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.util.Collection;
 
 public class SlickUserListExerciseVisitorDAO extends SlickDAO implements IUserExerciseListVisitorDAO {
-  private static final Logger logger = LogManager.getLogger(SlickUserListExerciseVisitorDAO.class);
-
+  //private static final Logger logger = LogManager.getLogger(SlickUserListExerciseVisitorDAO.class);
   private final UserExerciseListVisitorDAOWrapper dao;
 
   public SlickUserListExerciseVisitorDAO(Database database, DBConnection dbConnection) {
@@ -54,25 +49,5 @@ public class SlickUserListExerciseVisitorDAO extends SlickDAO implements IUserEx
   @Override
   public void add(long listID, long visitor, long modified) {
     dao.insert((int) listID, (int) visitor, modified);
-  }
-
-  @Override
-  public Collection<Integer> getListsForVisitor(int userid) {
-    return dao.byUser(userid);
-  }
-
-  /**
-   * Now that we just mark lists as deleted this is moot
-   *
-   * @param listid
-   * @return
-   */
-  @Override
-  public boolean remove(long listid) {
-    return false;
-  }
-
-  public boolean isEmpty() {
-    return dao.getNumRows() == 0;
   }
 }

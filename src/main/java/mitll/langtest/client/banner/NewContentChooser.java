@@ -1,6 +1,7 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
@@ -13,6 +14,7 @@ import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -152,14 +154,20 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showLearnList(int listid) {
+    setHistoryWithList(listid);
     banner.showLearn();
-    learnHelper.showList(listid);
+  //  learnHelper.showList(listid);
+  }
+
+  private void setHistoryWithList(int listid) {
+    History.newItem(FacetExerciseList.LISTS +"=" + listid);
   }
 
   @Override
   public void showDrillList(int listid) {
+    setHistoryWithList(listid);
     banner.showDrill();
-    practiceHelper.showList(listid);
+   // practiceHelper.showList(listid);
   }
 
   @Override

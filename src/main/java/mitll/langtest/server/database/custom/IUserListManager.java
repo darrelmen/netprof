@@ -101,7 +101,7 @@ public interface IUserListManager /*extends IStateManager*/ {
 
   void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder);
 
-  UserList addVisitor(int userListID, long user);
+  UserList addVisitor(int userListID, int user);
 
   void removeVisitor(int userListID, int user);
 

@@ -77,10 +77,10 @@ public class UserListDAO extends DAO implements IUserListDAO {
   /**
    * @param listid
    * @param userid
-   * @see UserListManager#addVisitor(long, long)
+   * @see UserListManager#addVisitor
    */
   @Override
-  public void addVisitor(long listid, long userid) {
+  public void addVisitor(int listid, int userid) {
     userListVisitorJoinDAO.add(listid, userid, System.currentTimeMillis());
   }
 
@@ -90,13 +90,15 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   /**
-   * @param listid
+   * @paramx listid
    * @see UserListDAO#remove
    */
+/*
   private void removeVisitor(long listid) {
     logger.debug("remove visitor reference " + listid);
     userListVisitorJoinDAO.remove(listid);
   }
+*/
 
   private void createUserListTable(Database database) throws SQLException {
 //    logger.debug("createUserListTable --- ");
@@ -308,14 +310,14 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   @Override
   public boolean remove(long unique) {
-    removeVisitor(unique);
+//    removeVisitor(unique);
     logger.debug("remove from " + USER_EXERCISE_LIST + " = " + unique);
     return remove(USER_EXERCISE_LIST, "uniqueid", unique);
   }
 
   @Override
   public void bringBack(long unique) {
-    
+
   }
 
   /**
@@ -392,7 +394,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }*/
 
   @Override
-  public Collection<UserList<CommonShell>> getLists(int userid, int projid) {
+  public Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid) {
     return null;
   }
 

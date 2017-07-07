@@ -102,7 +102,7 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListDAO#addVisitor(long, long)
+   * @see IUserListDAO#addVisitor(int, int)
    */
   @Override
   public void add(long listID, long visitor,long modified) {
@@ -159,11 +159,11 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
   }*/
 
   /**
-   * @param userid
+   * @paramx userid
    * @return
-   * @see IUserListDAO#getListsForUser(int, int, int, int)
+   * @seex IUserListDAO#getListsForUser(int, int, int, int)
    */
-  @Override
+/*  @Override
   public Collection<Integer> getListsForVisitor(int userid) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
         VISITORID +
@@ -175,7 +175,7 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
       logger.error("got " + e, e);
     }
     return null;
-  }
+  }*/
 
   private Collection<Integer> getVisitors(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -226,10 +226,10 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
     return false;
   }
 
-  @Override
-  public boolean remove(long listid) {
-    return remove(USER_EXERCISE_LIST_VISITOR, USERLISTID, listid);
-  }
+//  @Override
+//  public boolean remove(long listid) {
+//    return remove(USER_EXERCISE_LIST_VISITOR, USERLISTID, listid);
+//  }
 
   private void addColumnToTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +

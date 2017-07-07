@@ -67,8 +67,8 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
     };
   }
 
-  @Override
+/*  @Override
   public void showList(int listid) {
     facetExerciseList.showList(listid);
-  }
+  }*/
 }

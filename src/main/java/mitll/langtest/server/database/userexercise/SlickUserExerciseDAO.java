@@ -728,9 +728,17 @@ public class SlickUserExerciseDAO
     return userExercises2;
   }
 
+  /**
+   * @see #getOnList
+   * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateListEx
+   * @param listID
+   * @return
+   */
   public List<CommonExercise> getCommonExercises(int listID) {
     return getUserExercises(dao.getOnList(listID));
   }
+
+  public int getNumOnList(int listID) {  return dao.getNumOnList(listID);  }
 
   @Override
   public CommonExercise getByExID(int exid) {

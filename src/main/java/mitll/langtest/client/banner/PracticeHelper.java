@@ -80,10 +80,10 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
     }
   }
 
-  @Override
+/*  @Override
   public void showList(int listid) {
     facetExerciseList.showList(listid);
-  }
+  }*/
 
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {

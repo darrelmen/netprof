@@ -60,9 +60,9 @@ public interface IUserListDAO extends IDAO {
   /**
    * @param listid
    * @param userid
-   * @see IUserListManager#addVisitor(int, long)
+   * @see IUserListManager#addVisitor(int, int)
    */
-  void addVisitor(long listid, long userid);
+  void addVisitor(int listid, int userid);
 
   void removeVisitor(int listid, int userid);
 
@@ -96,7 +96,7 @@ public interface IUserListDAO extends IDAO {
 
 //  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, int start, int length);
 
-  Collection<UserList<CommonShell>> getLists(int userid, int projid);
+  Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid);
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, int, boolean, boolean)

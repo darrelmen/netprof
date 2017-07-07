@@ -256,7 +256,7 @@ public class UserListManager implements IUserListManager {
 
     if (visitedLists) {
       //Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid, 0, 10);
-   //   Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getLists(userid, projid);
+   //   Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getAllPublicNotMine(userid, projid);
       Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getVisitedLists(userid, projid);
       //    logger.info("found " + listsForUser1.size() + " visited by " + userid);
 
@@ -907,7 +907,7 @@ public class UserListManager implements IUserListManager {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#addVisitor
    */
   @Override
-  public UserList addVisitor(int userListID, long user) {
+  public UserList addVisitor(int userListID, int user) {
     logger.debug("addVisitor - user " + user + " visits " + userListID);
     UserList where = getUserList(userListID);
     if (where != null) {

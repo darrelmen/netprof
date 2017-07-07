@@ -21,12 +21,18 @@ import java.util.List;
  * Created by go22670 on 7/6/17.
  */
 public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
-  ListContainer(ExerciseController controller) {
-    super(controller, "netprof" + ":" + controller.getUser() + ":" + "list", "List");
+  private boolean slim = false;
+
+  ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID) {
+    super(controller, "netprof" + ":" + controller.getUser() + ":" + storageID, "List",
+        pageSize);
+    this.slim = slim;
   }
 
   @NotNull
-  protected String getDateColHeader() {   return "Date";  }
+  protected String getDateColHeader() {
+    return "Date";
+  }
 
   protected int getIdWidth() {
     return 200;
@@ -41,23 +47,24 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     return 100;
   }
 
-  protected int getPageSize() {
-    return 20;
-  }
+//  protected int getPageSize() {
+//    return 20;
+//  }
 
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
     super.addColumnsToTable(sortEnglish);
     addDescrip();
-    addClass();
-    addOwner();
-
+    if (!slim) {
+      addClass();
+      addOwner();
+    }
     // addIsPublic();
   }
 
-  protected boolean shouldHighlight(UserList<CommonShell> object) {
-    return object.getUserID() == controller.getUser();
-  }
+//  protected boolean shouldHighlight(UserList<CommonShell> object) {
+//    return object.getUserID() == controller.getUser();
+//  }
 
   @Override
   protected int getNameCompare(UserList<CommonShell> o1, UserList<CommonShell> o2) {

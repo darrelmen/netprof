@@ -63,7 +63,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public Collection<UserList<CommonShell>> getLists() {
     int userIDFromSession = getUserIDFromSession();
 
-    return getUserListManager().getUserListDAO().getLists(userIDFromSession, getProjectID(userIDFromSession));
+    return getUserListManager().getUserListDAO().getAllPublicNotMine(userIDFromSession, getProjectID(userIDFromSession));
   }
 
   /**
@@ -116,6 +116,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see ListManager#addVisitor(mitll.langtest.shared.custom.UserList)
    */
   public UserList addVisitor(int userListID, int user) {
+    logger.info("addVisitor " + userListID + " by  " + user);
     return getUserListManager().addVisitor(userListID, user);
   }
 

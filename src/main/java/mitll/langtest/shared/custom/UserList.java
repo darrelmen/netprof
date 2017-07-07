@@ -77,6 +77,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
+  private int count;
   private String richText;
 
   public UserList() {
@@ -293,5 +294,13 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   public boolean isDeleted() {
     return isDeleted;
+  }
+
+  public int getCount() {
+    return count;
+  }
+
+  public void setCount(int count) {
+    this.count = count;
   }
 }
