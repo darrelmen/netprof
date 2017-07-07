@@ -112,4 +112,5 @@ public interface IUserListDAO extends IDAO {
 
   void setPublicOnList(long userListID, boolean isPublic);
 
+  void update(UserList<?> userList);
 }

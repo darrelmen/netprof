@@ -637,7 +637,7 @@ public class CopyToPostgres<T extends CommonShell> {
       if (newUserID == null) {
         logger.error("UserListManager can't find user " + oldID + " in " + oldToNewUser.size());
       } else {
-        SlickUserExerciseList user = slickUserListDAO.toSlick2(list, newUserID, projid);
+        SlickUserExerciseList user = slickUserListDAO.toSlick2(list, newUserID, projid, -1);
         bulk.add(user);
         // slickUserListDAO.addWithUser(list, newUserID, projid);
         count++;

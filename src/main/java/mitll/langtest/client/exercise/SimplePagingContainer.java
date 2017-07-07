@@ -376,6 +376,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return pager.getPageSize();
   }
 
+  public int getNumItems() {
+    return getList().size();
+  }
+
   public interface TableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.

@@ -96,12 +96,16 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return copy;
   }
 
-  public SlickUserExerciseList toSlick(UserList<CommonShell> shared, int projid) {
-    return toSlick2(shared, shared.getUserID(), projid);
+  public SlickUserExerciseList toSlick(UserList<?> shared) {
+    return toSlick2(shared, shared.getUserID(), shared.getProjid(), shared.getID());
   }
 
-  public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid, int projid) {
-    return new SlickUserExerciseList(-1,
+  public SlickUserExerciseList toSlick(UserList<CommonShell> shared, int projid) {
+    return toSlick2(shared, shared.getUserID(), projid, -1);
+  }
+
+  public SlickUserExerciseList toSlick2(UserList<?> shared, int userid, int projid, int id) {
+    return new SlickUserExerciseList(id,
         userid,
         new Timestamp(shared.getModified()),
         shared.getName(),
@@ -165,19 +169,18 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
   @Override
   public void removeVisitor(int listid, int userid) {
+    //logger.info("remove " +userid + " From " +listid);
     visitorDAOWrapper.remove(listid, userid);
   }
 
   @Override
   public void add(UserList<CommonShell> userList, int projid) {
-    int assignedID = dao.insert(toSlick(userList, projid));
-    userList.setUniqueID(assignedID);
+    userList.setUniqueID(dao.insert(toSlick(userList, projid)));
   }
 
-  public void addWithUser(UserList<CommonShell> userList, int userid, int projid) {
-    SlickUserExerciseList user = toSlick2(userList, userid, projid);
-    userList.setUniqueID(dao.insert(user));
-  }
+//  public void addWithUser(UserList<CommonShell> userList, int userid, int projid) {
+//    userList.setUniqueID(dao.insert(toSlick2(userList, userid, projid, -1)));
+//  }
 
   @Override
   public void updateModified(long uniqueID) {
@@ -461,6 +464,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   public void setPublicOnList(long userListID, boolean isPublic) {
     int i = dao.setPublic((int) userListID, isPublic);
     if (i == 0) logger.error("setPublicOnList : huh? didn't update the userList for " + userListID);
+  }
+
+  @Override
+  public void update(UserList userList) {
+    dao.update(toSlick(userList));
   }
 
   public UserExerciseListVisitorDAOWrapper getVisitorDAOWrapper() {

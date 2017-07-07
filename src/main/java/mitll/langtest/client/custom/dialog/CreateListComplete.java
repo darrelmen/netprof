@@ -7,4 +7,5 @@ import mitll.langtest.shared.custom.UserList;
  */
 public interface CreateListComplete {
   void madeIt(UserList userList);
+  void gotEdit();
 }

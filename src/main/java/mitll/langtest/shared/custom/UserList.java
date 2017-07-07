@@ -119,7 +119,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.contextURL = contextURL;
     this.richText = richText;
     this.projid = projid;
-    this.isDeleted =isDeleted;
+    this.isDeleted = isDeleted;
   }
 
   public int getUserID() {
@@ -281,13 +281,6 @@ public class UserList<T extends HasID> extends BaseExercise {
     return richText;
   }
 
-  @Override
-  public String toString() {
-    return "UserList #" + getID() + " '" + name + "' by " + getUserID() +
-        " : " + (isReview ? " REVIEW " : "") +
-        " : with " + getNumItems() + " exercises.";
-  }
-
   public int getProjid() {
     return projid;
   }
@@ -302,5 +295,24 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   public void setCount(int count) {
     this.count = count;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setClassMarker(String classMarker) {
+    this.classMarker = classMarker;
+  }
+
+  public void setPrivate(boolean aPrivate) {
+    isPrivate = aPrivate;
+  }
+
+  @Override
+  public String toString() {
+    return "UserList #" + getID() + " '" + name + "' by " + getUserID() +
+        " : " + (isReview ? " REVIEW " : "") +
+        " : with " + getNumItems() + " exercises.";
   }
 }

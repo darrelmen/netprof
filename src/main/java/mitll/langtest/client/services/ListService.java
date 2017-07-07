@@ -63,6 +63,7 @@ public interface ListService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
   UserList addUserList(String name, String description, String dliClass, boolean isPublic);
+  void update(UserList userList);
 
   /**
    * @param userListID

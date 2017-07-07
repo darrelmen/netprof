@@ -79,6 +79,11 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return getUserListManager().addUserList(getUserIDFromSession(), name, description, dliClass, isPublic, getProjectID());
   }
 
+  @Override
+  public void update(UserList userList) {
+    getUserListManager().update(userList);
+  }
+
   /**
    * @param id
    * @return

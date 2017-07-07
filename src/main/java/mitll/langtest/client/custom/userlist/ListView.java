@@ -6,12 +6,12 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
@@ -32,6 +32,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
+  public static final int HEADING_SIZE = 3;
+  public static final int PAGE_SIZE = 8;
   private final Logger logger = Logger.getLogger("ListView");
 
   private final ExerciseController controller;
@@ -41,13 +43,9 @@ public class ListView implements ContentView, CreateListComplete {
     this.controller = controller;
   }
 
-
   public void showContent(Panel listContent, String instanceName) {
-
-    SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
-
-    com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(animated);
-
+//    SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
+//    com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(animated);
     listContent.clear();
     //listContent.add(waitCursor);
 
@@ -67,11 +65,11 @@ public class ListView implements ContentView, CreateListComplete {
     right.add(top);
     top.addStyleName("leftTenMargin");
     top.addStyleName("bottomFiveMargin");
-
     top.addStyleName("cardBorderShadow");
 
     DivWidget bottom = new DivWidget();
     right.add(bottom);
+
     bottom.addStyleName("cardBorderShadow");
     bottom.addStyleName("leftTenMargin");
 
@@ -84,13 +82,15 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        Panel tableWithPager = (myLists = new ListContainer(controller, 20, true,"myLists")).getTableWithPager(result);
+        Panel tableWithPager = (myLists = new ListContainer(controller, 20, true, "myLists")).getTableWithPager(result);
         result.forEach(list -> {
           if (list.getUserID() == controller.getUser()) {
             names.add(list.getName());
           }
         });
         addPagerAndHeader(tableWithPager, "Your Lists", left);
+        tableWithPager.setHeight("600px");
+
         left.add(getButtons(myLists));
       }
     });
@@ -103,10 +103,15 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        ListContainer listContainer = new ListContainer(controller, 10, false,"visited");
+        ListContainer listContainer = new ListContainer(controller, PAGE_SIZE, false, "visited");
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, "Visited", top);
-        top.add(getLDButtons(listContainer));
+
+        tableWithPager.setHeight("300px");
+
+        DivWidget ldButtons = getLDButtons(listContainer);
+        ldButtons.add(getRemoveVisitorButton(listContainer));
+        top.add(ldButtons);
       }
     });
 
@@ -119,17 +124,21 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        ListContainer listContainer = new ListContainer(controller, 10, false,"others");
+        ListContainer listContainer = new ListContainer(controller, PAGE_SIZE, false, "others");
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, "Other's Lists", bottom);
+        tableWithPager.setHeight("300px");
+
         bottom.add(getLDButtons(listContainer));
       }
     });
-
   }
 
   private void addPagerAndHeader(Panel tableWithPager, String visited, DivWidget top) {
-    top.add(new Heading(5, visited));
+    Heading w = new Heading(HEADING_SIZE, visited);
+    w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    w.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    top.add(w);
     top.add(tableWithPager);
     tableWithPager.getElement().getStyle().setClear(Style.Clear.BOTH);
     tableWithPager.setWidth("100%");
@@ -140,13 +149,54 @@ public class ListView implements ContentView, CreateListComplete {
   @NotNull
   private DivWidget getButtons(ListContainer container) {
     DivWidget buttons = new DivWidget();
+    buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
     buttons.add(getAddButton());
     buttons.add(getRemoveButton());
-
+    buttons.add(getEdit());
+    buttons.add(getImport());
+    buttons.add(getAddItems());
     addDrillAndLearn(buttons, container);
 
     return buttons;
+  }
+
+  private IsWidget getEdit() {
+    Button successButton = getSuccessButton("");
+    successButton.setIcon(IconType.PENCIL);
+
+    successButton.addClickHandler(event -> editDialogHelper = doEdit());
+
+
+    return successButton;
+  }
+
+  private IsWidget getImport() {
+    Button successButton = getSuccessButton("");
+    successButton.setIcon(IconType.UPLOAD);
+    successButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+
+      }
+    });
+    return successButton;
+  }
+
+  private IsWidget getAddItems() {
+    Button successButton = getSuccessButton("Items");
+    successButton.setIcon(IconType.PLUS);
+    successButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        editList();
+      }
+    });
+    return successButton;
+  }
+
+  private void editList() {
+
   }
 
   @NotNull
@@ -166,14 +216,23 @@ public class ListView implements ContentView, CreateListComplete {
   private Button getLearnButton(ListContainer container) {
     String learn1 = "Learn";
     Button learn = getSuccessButton(learn1);
-    learn.addClickHandler(event -> controller.showLearnList(getCurrentSelection(container).getID()));
+    learn.addClickHandler(event -> {
+          if (!container.isEmpty()) {
+            controller.showLearnList(getCurrentSelection(container).getID());
+          }
+        }
+    );
     return learn;
   }
 
   @NotNull
   private Button getDrillButton(ListContainer container) {
     Button drill = getSuccessButton("Drill");
-    drill.addClickHandler(event -> controller.showDrillList(getCurrentSelection(container).getID()));
+    drill.addClickHandler(event -> {
+      if (!container.isEmpty()) {
+        controller.showDrillList(getCurrentSelection(container).getID());
+      }
+    });
     return drill;
   }
 
@@ -185,12 +244,12 @@ public class ListView implements ContentView, CreateListComplete {
     return learn;
   }
 
-  private DialogHelper dialogHelper;
+  private DialogHelper dialogHelper, editDialogHelper;
 
   @NotNull
   private Button getAddButton() {
     final Button add = new Button("", IconType.PLUS);
-    add.addClickHandler(event -> dialogHelper = doAdd(add));
+    add.addClickHandler(event -> dialogHelper = doAdd());
     add.setType(ButtonType.SUCCESS);
     return add;
   }
@@ -204,63 +263,94 @@ public class ListView implements ContentView, CreateListComplete {
     return add;
   }
 
+  @NotNull
+  private Button getRemoveVisitorButton(ListContainer visited) {
+    final Button add = new Button("", IconType.MINUS);
+    add.addStyleName("leftFiveMargin");
+    add.addClickHandler(event -> gotDeleteVisitor(add, getCurrentSelection(visited), visited));
+    add.setType(ButtonType.DANGER);
+    return add;
+  }
+
   private UserList<CommonShell> getCurrentSelection(ListContainer container) {
-    return container.getCurrentSelection();
+    UserList<CommonShell> currentSelection = container.getCurrentSelection();
+    logger.info("Current selection is " + currentSelection);
+    return currentSelection;
   }
 
   private void gotDelete(Button delete, UserList<CommonShell> currentSelection) {
     final int uniqueID = currentSelection.getID();
-    if (currentSelection.getUserID() == controller.getUser()) {
-      controller.logEvent(delete, "Button", currentSelection.getName(), "Delete");
+    controller.logEvent(delete, "Button", currentSelection.getName(), "Delete");
 
-      if (currentSelection.isFavorite()) {
-        Window.alert("Can't delete your favorites list.");
-      } else {
-        controller.getListService().deleteList(uniqueID, new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            logger.warning("delete list call failed?");
-          }
-
-          @Override
-          public void onSuccess(Boolean result) {
-            if (result) {
-              removeFromLists(currentSelection);
-            } else {
-              logger.warning("deleteList ---> did not do deleteList " + uniqueID);
-            }
-          }
-        });
-      }
+    if (currentSelection.isFavorite()) {
+      Window.alert("Can't delete your favorites list.");
     } else {
-/*      controller.getListService().removeVisitor(uniqueID, controller.getUser(), new AsyncCallback<Void>() {
+      controller.getListService().deleteList(uniqueID, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
-
+          logger.warning("delete list call failed?");
         }
 
         @Override
-        public void onSuccess(Void result) {
-          removeFromLists(currentSelection);
+        public void onSuccess(Boolean result) {
+          if (result) {
+            removeFromLists(delete, myLists, currentSelection);
+          } else {
+            logger.warning("deleteList ---> did not do deleteList " + uniqueID);
+          }
         }
-      });*/
+      });
     }
   }
 
-  private void removeFromLists(UserList<CommonShell> currentSelection) {
-    int index = myLists.getIndex(currentSelection);
-    //logger.info("deleteList ---> did do deleteList " + uniqueID + " index " + index);
-    myLists.forgetItem(currentSelection);
-    UserList<CommonShell> at = myLists.getAt(index);
-    //logger.info("next is " + at.getName());
-    myLists.markCurrentExercise(at.getID());
-    names.remove(currentSelection.getName());
+  private void gotDeleteVisitor(Button delete, UserList<CommonShell> currentSelection, ListContainer container) {
+    final int uniqueID = currentSelection.getID();
+
+    delete.setEnabled(false);
+    controller.getListService().removeVisitor(uniqueID, controller.getUser(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        delete.setEnabled(true);
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        delete.setEnabled(true);
+        removeFromLists(delete, container, currentSelection);
+      }
+    });
   }
 
-  private DialogHelper doAdd(Button add) {
+  private void removeFromLists(Button delete, ListContainer listContainer, UserList<CommonShell> currentSelection) {
+    if (listContainer == myLists) {
+      String name = currentSelection.getName();
+      names.remove(name);
+    }
+
+    int index = listContainer.getIndex(currentSelection);
+    //logger.info("deleteList ---> did do deleteList " + uniqueID + " index " + index);
+    listContainer.forgetItem(currentSelection);
+    int numItems = listContainer.getNumItems();
+    if (numItems == 0) {
+      delete.setEnabled(false);
+    } else {
+      if (index == numItems) index = numItems - 1;
+      UserList<CommonShell> at = listContainer.getAt(index);
+      //logger.info("next is " + at.getName());
+      listContainer.markCurrentExercise(at.getID());
+    }
+  }
+
+  /**
+   * @return
+   * @see #getAddButton
+   */
+  private DialogHelper doAdd() {
     DivWidget contents = new DivWidget();
     CreateListDialog createListDialog = new CreateListDialog(this, controller);
     createListDialog.doCreate(contents);
+
+
     DialogHelper dialogHelper = new DialogHelper(true);
     Button closeButton = dialogHelper.show(
         "Create New List",
@@ -271,25 +361,54 @@ public class ListView implements ContentView, CreateListComplete {
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
-            logger.info("\n\ngotYes");
-
             boolean okToCreate = createListDialog.isOKToCreate(names);
-            //    add.setEnabled(okToCreate);
-            logger.info("\n\ngotYes = okToCreate " + okToCreate);
             if (okToCreate) {
               createListDialog.doCreate();
             }
-
             return okToCreate;
           }
 
           @Override
           public void gotNo() {
-            //   add.setEnabled(true);
-            logger.info("\n\ngotNo");
-
           }
         }, 550);
+
+    closeButton.setType(ButtonType.SUCCESS);
+    closeButton.setIcon(IconType.PLUS);
+
+    return dialogHelper;
+  }
+
+  CreateListDialog editDialog;
+
+  private DialogHelper doEdit() {
+    DivWidget contents = new DivWidget();
+    editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection());
+    editDialog.doCreate(contents);
+
+
+    DialogHelper dialogHelper = new DialogHelper(true);
+    Button closeButton = dialogHelper.show(
+        "Edit",
+        Collections.emptyList(),
+        contents,
+        "Edit",
+        "Cancel",
+        new DialogHelper.CloseListener() {
+          @Override
+          public boolean gotYes() {
+            boolean okToCreate = editDialog.isValidName();
+            if (okToCreate) {
+              editDialog.doEdit(myLists.getCurrentSelection(), myLists);
+            }
+            return okToCreate;
+          }
+
+          @Override
+          public void gotNo() {
+          }
+        }, 550);
+
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setIcon(IconType.PLUS);
 
@@ -308,6 +427,11 @@ public class ListView implements ContentView, CreateListComplete {
     myLists.addExerciseAfter(null, userList);
     myLists.markCurrentExercise(userList.getID());
     names.add(userList.getName());
-    //   myLists.redraw();
+  }
+
+  @Override
+  public void gotEdit() {
+    logger.info("\n\n\ngot edit");
+    editDialog.doEdit(myLists.getCurrentSelection(), myLists);
   }
 }

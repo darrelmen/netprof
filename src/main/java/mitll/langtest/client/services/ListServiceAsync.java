@@ -94,4 +94,6 @@ public interface ListServiceAsync {
   void getLists(AsyncCallback<Collection<UserList<CommonShell>>> async);
 
   void removeVisitor(int userListID, int user, AsyncCallback<Void> async);
+
+  void update(UserList userList, AsyncCallback<Void> async);
 }

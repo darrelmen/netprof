@@ -38,22 +38,17 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.userlist.ListManager;
+import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Set;
 import java.util.logging.Logger;
@@ -71,16 +66,22 @@ public class CreateListDialog extends BasicDialog {
   private static final String TITLE = "Title";
   private static final String DESCRIPTION_OPTIONAL = "Description (optional)";
   private final CreateListComplete navigation;
-  FormField titleBox;
+  private FormField titleBox;
   private final ExerciseController controller;
-  KeyPressHelper enterKeyButtonHelper;
-  TextArea theDescription;
-  FormField classBox;
-  RadioButton radioButton;
+  private KeyPressHelper enterKeyButtonHelper;
+  private TextArea theDescription;
+  private FormField classBox;
+  private RadioButton radioButton;
+  UserList current = null;
 
   public CreateListDialog(CreateListComplete navigation, ExerciseController controller) {
     this.navigation = navigation;
     this.controller = controller;
+  }
+
+  public CreateListDialog(CreateListComplete navigation, ExerciseController controller, UserList current) {
+    this(navigation, controller);
+    this.current = current;
   }
 
   /**
@@ -103,64 +104,74 @@ public class CreateListDialog extends BasicDialog {
     child.addStyleName("userListContainer");
 
     FluidRow row = new FluidRow();
-//    child.add(row);
-//    final Heading header = new Heading(2, "Create a New List");
-//    row.add(header);
-//
-//    row = new FluidRow();
     child.add(row);
 
-    titleBox = addControlFormField(row, TITLE);
-    final TextBoxBase box = titleBox.box;
-    box.getElement().setId("CreateListDialog_Title");
+    {
+      titleBox = addControlFormField(row, TITLE);
+      final TextBoxBase box = titleBox.box;
+      if (current != null) box.setText(current.getName());
+      box.getElement().setId("CreateListDialog_Title");
+      box.addBlurHandler(event -> controller.logEvent(box, "TextBox", "Create New List", "Title = " + box.getValue()));
+    }
 
-    box.addBlurHandler(event -> controller.logEvent(box, "TextBox", "Create New List", "Title = " + box.getValue()));
+    {
+      row = new FluidRow();
+      child.add(row);
 
-    row = new FluidRow();
-    child.add(row);
-    theDescription = new TextArea();
-    final FormField description = getSimpleFormField(row, DESCRIPTION_OPTIONAL, theDescription, 1);
-    description.box.getElement().setId("CreateListDialog_Description");
-    description.box.addBlurHandler(event -> controller.logEvent(description.box, "TextBox", "Create New List", "Description = " + description.box.getValue()));
+      theDescription = new TextArea();
+      if (current != null) theDescription.setText(current.getDescription());
+      final FormField description = getSimpleFormField(row, DESCRIPTION_OPTIONAL, theDescription, 1);
+      description.box.getElement().setId("CreateListDialog_Description");
+      description.box.addBlurHandler(event -> controller.logEvent(description.box, "TextBox", "Create New List", "Description = " + description.box.getValue()));
+    }
 
-    row = new FluidRow();
-    child.add(row);
+    {
+      row = new FluidRow();
+      child.add(row);
 
-    classBox = addControlFormField(row, CLASS);
-    classBox.box.getElement().setId("CreateListDialog_CourseInfo");
-    classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, "TextBox", "Create New List", "CourseInfo = " + classBox.box.getValue()));
+      classBox = addControlFormField(row, CLASS);
+      if (current != null) classBox.setText(current.getClassMarker());
+      classBox.box.getElement().setId("CreateListDialog_CourseInfo");
+      classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, "TextBox", "Create New List", "CourseInfo = " + classBox.box.getValue()));
+    }
+
+    {
+      row = new FluidRow();
+      child.add(row);
+
+      radioButton = new RadioButton("Public_Private_Group", "Public");
+      RadioButton radioButton2 = new RadioButton("Public_Private_Group", "Private");
+
+      // students by default have private lists - ?
+      boolean isPrivate = controller.getUserState().getCurrent().isStudent();
+
+      if (current != null) isPrivate = current.isPrivate();
+
+      radioButton.setValue(!isPrivate);
+      radioButton2.setValue(isPrivate);
 
 
-    row = new FluidRow();
-    child.add(row);
+      Panel hp = new HorizontalPanel();
+      hp.add(radioButton);
+      radioButton2.addStyleName("leftFiveMargin");
+      hp.add(radioButton2);
 
-    radioButton = new RadioButton("Public_Private_Group", "Public");
-    RadioButton radioButton2 = new RadioButton("Public_Private_Group", "Private");
+      ControlGroup widgets = addControlGroupEntry(row, "Keep List Public/Private?", hp, "");
 
-    boolean isStudent = controller.getUserState().getCurrent().isStudent();
+      row.add(widgets);
+    }
 
-    radioButton.setValue(!isStudent);
-    radioButton2.setValue(isStudent);
+    //row = new FluidRow();
+    // child.add(row);
 
-    Panel hp = new HorizontalPanel();
-    hp.add(radioButton);
-    radioButton2.addStyleName("leftFiveMargin");
-    hp.add(radioButton2);
-
-    ControlGroup widgets = addControlGroupEntry(row, "Keep List Public/Private?", hp, "");
-
-    row.add(widgets);
-
-    row = new FluidRow();
-    child.add(row);
-
-    submit = makeCreateButton(enterKeyButtonHelper, theDescription, classBox, radioButton);
+    /*submit =*/
+    makeCreateButton(enterKeyButtonHelper, theDescription, classBox, radioButton);
     //row.add(submit);
 
-    Scheduler.get().scheduleDeferred(() -> box.setFocus(true));
+    Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
   }
 
-  private Button submit;
+  //private Button submit;
 
   private Button makeCreateButton(final KeyPressHelper enterKeyButtonHelper,
                                   final TextArea area,
@@ -176,7 +187,11 @@ public class CreateListDialog extends BasicDialog {
     submit.addStyleName("leftFiveMargin");
     submit.addClickHandler(event -> {
       logger.info("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getSafeText());
-      gotCreate(enterKeyButtonHelper, area, classBox, publicRadio);
+      if (current == null) {
+        gotCreate(enterKeyButtonHelper, area, classBox, publicRadio);
+      } else {
+        navigation.gotEdit();
+      }
     });
     enterKeyButtonHelper.addKeyHandler(submit);
     return submit;
@@ -193,16 +208,27 @@ public class CreateListDialog extends BasicDialog {
                          RadioButton publicRadio) {
     enterKeyButtonHelper.removeKeyHandler();
     //if (isOKToCreate()) {
-      addUserList(titleBox, area, classBox, publicRadio.getValue());
+    addUserList(titleBox, area, classBox, publicRadio.getValue());
     //} else {
     //  logger.warning("nope - not OK");
-  //  }
+    //  }
   }
 
   public boolean isOKToCreate(Set<String> names) {
-    return validateCreateList(titleBox) && !names.contains(titleBox.getSafeText());
+    return isValidName() && !names.contains(titleBox.getSafeText());
   }
 
+  public boolean isValidName() {
+    return validateCreateList(titleBox);
+  }
+
+  /**
+   * @param titleBox
+   * @param area
+   * @param classBox
+   * @param isPublic
+   * @see #gotCreate
+   */
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic) {
     final String safeText = titleBox.getSafeText();
     logger.info("addUserList " + safeText);
@@ -248,7 +274,26 @@ public class CreateListDialog extends BasicDialog {
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
-  public Button getSubmit() {
-    return submit;
+  public void doEdit(UserList<CommonShell> currentSelection, ListContainer container) {
+    currentSelection.setName(titleBox.getSafeText());
+    currentSelection.setDescription(sanitize(theDescription.getText()));
+    currentSelection.setClassMarker(sanitize(classBox.getSafeText()));
+    currentSelection.setPrivate(!radioButton.getValue());
+
+    controller.getListService().update(currentSelection, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        container.redraw();
+      }
+    });
   }
+
+//  public Button getSubmit() {
+//    return submit;
+//  }
 }

@@ -1198,6 +1198,11 @@ public class UserListManager implements IUserListManager {
     return visitorDAO;
   }
 
+  @Override
+  public void update(UserList userList) {
+    userListDAO.update(userList);
+  }
+
 /*  public Collection<Integer> getDefectExercises() {
     return reviewedDAO.getDefectExercises();
   }

@@ -1105,4 +1105,9 @@ public class ListManager implements RequiresResize, CreateListComplete {
   public void madeIt(UserList list) {
 
   }
+
+  @Override
+  public void gotEdit() {
+
+  }
 }

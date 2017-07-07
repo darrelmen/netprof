@@ -133,4 +133,6 @@ public interface IUserListManager /*extends IStateManager*/ {
   void createTables(DBConnection dbConnection, List<String> created);
 
   IUserExerciseListVisitorDAO getVisitorDAO();
+
+  void update(UserList userList);
 }

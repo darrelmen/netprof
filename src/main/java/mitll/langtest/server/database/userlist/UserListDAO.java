@@ -513,6 +513,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
     }
   }
 
+  @Override
+  public void update(UserList<?> userList) {
+
+  }
+
   public IUserExerciseListVisitorDAO getUserListVisitorJoinDAO() {
     return userListVisitorJoinDAO;
   }
