@@ -177,10 +177,45 @@ public class ListView implements ContentView, CreateListComplete {
     successButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-
+doImport();
       }
     });
     return successButton;
+  }
+
+  private void doImport() {
+    ImportBulk importBulk = new ImportBulk();
+    UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
+    DivWidget contents = importBulk.showImportItem(controller);
+
+
+    DialogHelper dialogHelper = new DialogHelper(true);
+    Button closeButton = dialogHelper.show(
+        "Import Bulk",
+        Collections.emptyList(),
+        contents,
+        "Import",
+        "Cancel",
+        new DialogHelper.CloseListener() {
+          @Override
+          public boolean gotYes() {
+            if (currentSelection.isFavorite()) {
+              Window.alert("Can't import into favorites...");
+              return false;
+            }
+            else {
+              importBulk.doBulk(controller, currentSelection);
+              return true;
+            }
+          }
+
+          @Override
+          public void gotNo() {
+          }
+        }, 550);
+
+    closeButton.setType(ButtonType.SUCCESS);
+  //  closeButton.setIcon(IconType.PLUS);
   }
 
   private IsWidget getAddItems() {

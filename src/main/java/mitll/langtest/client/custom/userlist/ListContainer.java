@@ -138,7 +138,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        return getSafeHtml(shell.getDescription());
+        return getSafeHtml(truncate(shell.getDescription()));
       }
     };
   }
@@ -153,7 +153,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        return getSafeHtml(shell.getClassMarker());
+        return getSafeHtml(truncate(shell.getClassMarker()));
       }
     };
   }

@@ -160,7 +160,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return appTitle + ":" + controller.getUser() + ":";
   }
 
-  private String truncate(String columnText) {
+  protected String truncate(String columnText) {
     int maxLengthId = getMaxLengthId();
     if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
     return columnText;
