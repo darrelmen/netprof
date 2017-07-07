@@ -196,12 +196,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     addColumnsToTable(sortEnglish);
 
-    table.addRangeChangeHandler(new RangeChangeEvent.Handler() {
-      @Override
-      public void onRangeChange(RangeChangeEvent event) {
-        gotRangeChanged(event.getNewRange());
-      }
-    });
+    table.addRangeChangeHandler(event -> gotRangeChanged(event.getNewRange()));
   }
 
   protected void gotRangeChanged(Range newRange) {

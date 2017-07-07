@@ -1338,12 +1338,21 @@ body .ch-password-modal .force-pw-label {
 }
 
 body .big-modal.modal.in {
-    left: 7%;
-    right: 7%;
-    bottom: 5%;
-    top: 5%;
+    left: 3%;
+    right: 3%;
+    bottom: 3%;
+    top: 3%;
     max-width: none;
 }
+
+/*
+body .big-modal.modal.in {
+     left: 7%;
+     right: 7%;
+     bottom: 5%;
+     top: 5%;
+     max-width: none;
+ }*/
 
 /**
 * Constrain the vertical size of popup in the workflow task editor and allow scrolling.

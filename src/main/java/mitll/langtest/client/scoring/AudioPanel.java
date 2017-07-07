@@ -399,11 +399,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     path = getReadyToPlayAudio(path);
 
     // wait for rest of page to do layout before asking for the images
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        getImages();
-      }
-    });
+    Scheduler.get().scheduleDeferred(() -> getImages());
 
     return path;
   }
@@ -492,7 +488,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
   }
 
-  private int getImageWidth() {
+  protected int getImageWidth() {
     try {
       int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
 //      int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;

@@ -125,9 +125,9 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             new ListOptions()
                 .setInstance(instanceName)
                 .setShowFirstNotCompleted(true)
-                .setActivityType(ActivityType.RECORDER)
+                .setActivityType(ActivityType.RECORDER),
             //    .setContextOnly(!doNormalRecording)
-        ) {
+            -1) {
           private CheckBox filterOnly;
 
           @Override

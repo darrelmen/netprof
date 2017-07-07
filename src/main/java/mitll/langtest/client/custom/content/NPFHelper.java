@@ -270,7 +270,7 @@ public class NPFHelper implements RequiresResize {
    */
   PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
     return new NPExerciseList(right, controller,
-        listOptions) {
+        listOptions, -1) {
       @Override
       protected void onLastItem() {
         new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {

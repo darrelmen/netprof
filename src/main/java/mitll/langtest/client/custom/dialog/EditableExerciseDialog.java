@@ -64,6 +64,7 @@ import java.util.logging.Logger;
  * <T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise, UL extends UserList<?>>
  */
 class EditableExerciseDialog extends NewUserExercise {
+  public static final String ITEM = "Item";
   private final Logger logger = Logger.getLogger("EditableExerciseDialog");
 
   private final HTML fastAnno = new HTML();
@@ -130,7 +131,7 @@ class EditableExerciseDialog extends NewUserExercise {
         }
       }
 
-      Heading child = new Heading(4, "Item", "" + newUserExercise.getID());
+      Heading child = new Heading(4, ITEM, "" + newUserExercise.getID());
       child.addStyleName("rightFiveMargin");
       flow.add(child);
 
@@ -159,13 +160,13 @@ class EditableExerciseDialog extends NewUserExercise {
                                   ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
-    PrevNextList prevNext = getPrevNext(pagingContainer);
-    prevNext.getElement().setId("PrevNextList");
-    prevNext.addStyleName("floatLeftAndClear");
-    prevNext.addStyleName("rightFiveMargin");
-    row.add(prevNext);
+//    PrevNextList prevNext = getPrevNext(pagingContainer);
+//    prevNext.getElement().setId("PrevNextList");
+//    prevNext.addStyleName("floatLeftAndClear");
+//    prevNext.addStyleName("rightFiveMargin");
+//    row.add(prevNext);
 
-    configureButtonRow(row);
+    //configureButtonRow(row);
 
     return row;
   }
@@ -175,10 +176,10 @@ class EditableExerciseDialog extends NewUserExercise {
    * @return
    * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
-  PrevNextList<CommonShell> getPrevNext(ListInterface<CommonShell, CommonExercise> pagingContainer) {
-    CommonShell shell = pagingContainer.byID(newUserExercise.getID());
-    return new PrevNextList<>(shell, exerciseList, shouldDisableNext(), controller);
-  }
+//  PrevNextList<CommonShell> getPrevNext(ListInterface<CommonShell, CommonExercise> pagingContainer) {
+//    CommonShell shell = pagingContainer.byID(newUserExercise.getID());
+//    return new PrevNextList<>(shell, exerciseList, shouldDisableNext(), controller);
+//  }
 
   /**
    * @param row
@@ -330,6 +331,17 @@ class EditableExerciseDialog extends NewUserExercise {
         useAnnotation(newUserExercise, "refAudio", fastAnno);
       }
     }
+  }
+
+  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row,
+                                                             boolean recordRegularSpeed,
+                                                             String instance) {
+    return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed, instance) {
+      @Override
+      protected int getImageWidth() {
+        return 450;
+      }
+    };
   }
 
   private void setTranslit(CommonExercise newUserExercise) {

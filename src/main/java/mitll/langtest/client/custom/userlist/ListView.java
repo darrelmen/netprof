@@ -15,7 +15,9 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
+import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.domino.common.DominoSimpleModal;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
@@ -103,7 +105,7 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        ListContainer listContainer = new ListContainer(controller, PAGE_SIZE, false, "visited");
+        ListContainer listContainer = new ListContainer(controller, 6, false, "visited");
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, "Visited", top);
 
@@ -164,10 +166,7 @@ public class ListView implements ContentView, CreateListComplete {
   private IsWidget getEdit() {
     Button successButton = getSuccessButton("");
     successButton.setIcon(IconType.PENCIL);
-
     successButton.addClickHandler(event -> editDialogHelper = doEdit());
-
-
     return successButton;
   }
 
@@ -177,7 +176,7 @@ public class ListView implements ContentView, CreateListComplete {
     successButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-doImport();
+        doImport();
       }
     });
     return successButton;
@@ -202,8 +201,7 @@ doImport();
             if (currentSelection.isFavorite()) {
               Window.alert("Can't import into favorites...");
               return false;
-            }
-            else {
+            } else {
               importBulk.doBulk(controller, currentSelection);
               return true;
             }
@@ -215,7 +213,7 @@ doImport();
         }, 550);
 
     closeButton.setType(ButtonType.SUCCESS);
-  //  closeButton.setIcon(IconType.PLUS);
+    //  closeButton.setIcon(IconType.PLUS);
   }
 
   private IsWidget getAddItems() {
@@ -231,7 +229,11 @@ doImport();
   }
 
   private void editList() {
-
+    Panel widgets = new EditItem(controller).editItem(getCurrentSelection(myLists));
+    DominoSimpleModal widgets1 = new DominoSimpleModal(false, "Add/Edit Items", "OK", DominoSimpleModal.ModalSize.Big, widgets) {
+    };
+    widgets1.setMaxHeigth("500px");
+    widgets1.init();
   }
 
   @NotNull

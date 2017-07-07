@@ -50,10 +50,13 @@ import java.util.Collection;
  */
 public abstract class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   //private Logger logger = Logger.getLogger("NPExerciseList");
+  int pageSize;
+
   protected NPExerciseList(Panel currentExerciseVPanel,
                            ExerciseController controller,
-                           ListOptions listOptions) {
+                           ListOptions listOptions, int pageSize) {
     super(currentExerciseVPanel, controller, listOptions);
+    this.pageSize = pageSize;
   }
 
   protected NPExerciseList(Panel currentExerciseVPanel,
@@ -99,6 +102,13 @@ public abstract class NPExerciseList extends HistoryExerciseList<CommonShell, Co
             getActivityType() == ActivityType.RECORDER,
             listOptions.isShowFirstNotCompleted()
         ) {
+          @Override
+          protected int getNumTableRowsGivenScreenHeight() {
+            if (pageSize == -1) {
+              return super.getNumTableRowsGivenScreenHeight();
+            } else return pageSize;
+          }
+
           @Override
           public void gotClickOnItem(CommonShell e) {
             outer.gotClickOnItem(e);

@@ -73,7 +73,6 @@ import java.util.logging.Logger;
  */
 abstract class NewUserExercise extends BasicDialog {
   public static final String OPTIONAL = "optional";
-  //final ReloadableContainer predefinedContentList;
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   public static final String CONTEXT = "context";
@@ -103,7 +102,6 @@ abstract class NewUserExercise extends BasicDialog {
 
   final ExerciseController controller;
 
-//  final ListServiceAsync listService = GWT.create(ListService.class);
   protected String originalForeign = "";
   protected String originalEnglish = "";
   protected String originalRefAudio;
@@ -824,7 +822,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @see #makeRegularAudioPanel
    * @see #makeSlowAudioPanel
    */
-  CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row,
+  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row,
                                                    boolean recordRegularSpeed,
                                                    String instance) {
     return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed, instance);

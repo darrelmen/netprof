@@ -45,7 +45,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
   private final EditItem editItem;
   private final UserList<CommonShell> list;
-  //private final ListServiceAsync listService = GWT.create(ListService.class);
   private  SearchTypeahead searchTypeahead;
   private TextBox quickAddText;
   private HTML message;
@@ -69,13 +68,40 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
         new ListOptions()
             .setInstance(instanceName)
             .setShowTypeAhead(false)
-            .setSort(false));
+            .setSort(false), 12);
     this.editItem = editItem;
     this.list = list;
 
     if (list.isEmpty()) delete.setEnabled(false);
+    pagingContainer.setPageSize(8);
    // this.searchTypeahead = new SearchTypeahead(controller, this);
   }
+//
+//  protected ClickablePagingContainer<CommonShell> makePagingContainer() {
+//    pagingContainer =
+//        new ClickablePagingContainer<CommonShell>(controller
+//        ) {
+////          public void gotClickOnItem(CommonShell e) {
+////          }
+////
+////          @Override
+////          protected void addColumnsToTable(boolean sortEnglish) {
+////          }
+////
+////
+////          @Override
+////          protected void gotRangeChanged(Range newRange) {
+////            //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
+////            gotVisibleRangeChanged(getIdsForRange(newRange));
+////          }
+//
+//          @Override
+//          protected int getNumTableRowsGivenScreenHeight() {
+//            return 12;
+//          }
+//        };
+//    return pagingContainer;
+//  }
 
   protected DivWidget getOptionalWidget() {
     DivWidget widgets = new DivWidget();
@@ -309,6 +335,8 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     // delete.addStyleName("topFiftyMargin");
     return delete;
   }
+
+  protected int getNumTableRowsGivenScreenHeight() { return 12; }
 
   /**
    * Removes from 4 lists!

@@ -603,9 +603,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
 
-    PrevNextList prevNext = getPrevNext(pagingContainer);
-    prevNext.addStyleName("floatLeftAndClear");
-    row.add(prevNext);
+//    PrevNextList prevNext = getPrevNext(pagingContainer);
+//    prevNext.addStyleName("floatLeftAndClear");
+//    row.add(prevNext);
 
  /*   if (newUserExercise.isPredefined()) {//getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
 //    if (newUserExercise.getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list

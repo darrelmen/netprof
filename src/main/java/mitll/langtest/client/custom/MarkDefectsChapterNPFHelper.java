@@ -99,7 +99,7 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
 //        logger.info("instance is " + instanceName);
         return new NPExerciseList(currentExercisePanel,
             controller,
-            new ListOptions().setInstance(instanceName)) {
+            new ListOptions().setInstance(instanceName), -1) {
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override

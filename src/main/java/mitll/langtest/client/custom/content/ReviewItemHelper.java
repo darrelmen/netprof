@@ -149,7 +149,7 @@ public class ReviewItemHelper extends NPFHelper {
                                                                                String instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
       return new NPExerciseList(currentExercisePanel, outer.getController(),
-          new ListOptions(instanceName)) {
+          new ListOptions(instanceName), -1) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         @Override

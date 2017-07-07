@@ -89,6 +89,7 @@ public class EditItem {
   public void reload() {
     exerciseList.getExercises();
   }
+
   /**
    * @param originalList
    * @return
@@ -132,19 +133,13 @@ public class EditItem {
    */
   private PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel right,
                                                                            String instanceName,
-                                                                           UserList<CommonShell> originalList
-  ) {
+                                                                           UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
     exerciseList = new EditableExerciseList(controller, this, right, instanceName, originalList);
     setFactory(exerciseList, originalList);
     exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      @Override
-      public void execute() {
-        exerciseList.onResize();
-      }
-    });
+    Scheduler.get().scheduleDeferred(() -> exerciseList.onResize());
     return exerciseList;
   }
 
@@ -199,6 +194,7 @@ public class EditItem {
         Panel panel = new ResizableSimple();
         panel.getElement().setId("EditItemPanel");
 
+        logger.info("Creator " + exercise.getCreator() + " vs " + controller.getUser());
         boolean iCreatedThisItem = didICreateThisItem(exercise) ||
             (controller.getUserManager().isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
         if (iCreatedThisItem) {  // it's mine!
@@ -208,7 +204,12 @@ public class EditItem {
                   originalList,
                   outer,
                   getInstance()
-              );
+              ) {
+                @Override
+                protected void addItemsAtTop(Panel container) {
+
+                }
+              };
           panel.add(editableExercise.addFields(outer, panel));
           editableExercise.setFields(exercise);
         } else {

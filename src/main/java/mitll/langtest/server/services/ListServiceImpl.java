@@ -62,7 +62,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @Override
   public Collection<UserList<CommonShell>> getLists() {
     int userIDFromSession = getUserIDFromSession();
-
     return getUserListManager().getUserListDAO().getAllPublicNotMine(userIDFromSession, getProjectID(userIDFromSession));
   }
 
@@ -343,7 +342,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return currentKnownFL;
   }
 
-  private CommonExercise makeOrFindExercise(List<CommonExercise> newItems, boolean firstColIsEnglish, int projectID, int userIDFromSession, String fl, String english) {
+  private CommonExercise makeOrFindExercise(List<CommonExercise> newItems, boolean firstColIsEnglish, int projectID,
+                                            int userIDFromSession, String fl, String english) {
     if (firstColIsEnglish || (isValidForeignPhrase(english, "") && !isValidForeignPhrase(fl, ""))) {
       String temp = english;
       english = fl;

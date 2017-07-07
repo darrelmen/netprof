@@ -87,6 +87,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @see #getAudioExportOptions
    */
   private static final String ALLCONTEXT = "allcontext";
+  public static final String LISTS = "Lists=[";
 
   /**
    * This is getting complicated.
@@ -148,14 +149,26 @@ public class DownloadServlet extends DatabaseServlet {
           if (queryString == null) {
             setHeader(response, "allAudio.zip");
             writeAllAudio(response, projid);
-          } else if (queryString.startsWith(LIST)) {
-            String[] split = queryString.split("list=");
+          } else if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
 
-            if (split.length == 2) {
-              String[] splitArgs = split[1].split("&");
-              String listid = splitArgs[0];
+            if (queryString.contains(LISTS)) {
+              String s = queryString.split("Lists=\\[")[1];
+              String[] split = s.split(("\\]"));
+              String listid = split[0];
               if (!listid.isEmpty()) {
+                String[] splitArgs = split[1].split("&");
                 writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs));
+              }
+            }
+            else {
+              String[] split = queryString.split("list=");
+
+              if (split.length == 2) {
+                String[] splitArgs = split[1].split("&");
+                String listid = splitArgs[0];
+                if (!listid.isEmpty()) {
+                  writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs));
+                }
               }
             }
           } else if (queryString.startsWith(FILE)) {
@@ -287,8 +300,10 @@ public class DownloadServlet extends DatabaseServlet {
     return name;
   }
 
-  private String getBaseName(DatabaseImpl db, Map<String, Collection<String>> typeToSection,
-                             int projectid, String language,
+  private String getBaseName(DatabaseImpl db,
+                             Map<String, Collection<String>> typeToSection,
+                             int projectid,
+                             String language,
                              AudioExportOptions audioExportOptions) {
     String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection, projectid);
     name = name.replaceAll("\\,", "_");
