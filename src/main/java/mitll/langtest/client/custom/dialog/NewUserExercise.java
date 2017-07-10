@@ -73,6 +73,7 @@ import java.util.logging.Logger;
  */
 abstract class NewUserExercise extends BasicDialog {
   public static final String OPTIONAL = "optional";
+  public static final String WIDGET_ID = "NewUserExercise_WaveformPostAudioRecordButton_";
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   public static final String CONTEXT = "context";
@@ -852,17 +853,15 @@ abstract class NewUserExercise extends BasicDialog {
         public void playStarted() {
           otherRAP.setEnabled(false);
         }
-
         @Override
         public void playStopped() {
           otherRAP.setEnabled(true);
         }
       });
 
-      String id = "NewUserExercise_WaveformPostAudioRecordButton_";
       String speed = (recordRegularSpeed ? "Regular" : "Slow") + "_speed";
-      getPostAudioButton().getElement().setId(id + speed);
-      getPlayButton().getElement().setId(id + "Play_" + speed);
+      getPostAudioButton().getElement().setId(WIDGET_ID + speed);
+      getPlayButton().getElement().setId(WIDGET_ID + "Play_" + speed);
       controller.register(getPlayButton(), newExercise.getID());
     }
 
@@ -880,7 +879,6 @@ abstract class NewUserExercise extends BasicDialog {
           new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this,
               recordRegularSpeed ? 0 : 1,
               false, // don't record in results table????
-
               RecordButton.RECORD1,
               RecordButton.STOP1,
               audioType) {
@@ -915,15 +913,12 @@ abstract class NewUserExercise extends BasicDialog {
 
               // logger.info("useResult got back " + result.getAudioAttribute() + " for " + newUserExercise);
               if (result.getAudioAttribute() != null) {
-
                 if (recordRegularSpeed) {
                   result.getAudioAttribute().markRegular();
                 } else {
                   result.getAudioAttribute().markSlow();
                 }
-
                 newUserExercise.getMutableAudio().addAudio(result.getAudioAttribute());
-
               } else {
                 logger.warning("no valid audio on " + result);
               }
@@ -944,14 +939,13 @@ abstract class NewUserExercise extends BasicDialog {
               audioPosted();
             }
           };
-      postAudioButton.getElement().setId("NewUserExercise_WaveformPostAudioRecordButton_" + (recordRegularSpeed ? "Regular" : "Slow") + "_speed");
+      postAudioButton.getElement().setId(WIDGET_ID + (recordRegularSpeed ? "Regular" : "Slow") + "_speed");
       return postAudioButton;
     }
 
     public void setOtherRAP(RecordAudioPanel otherRAP) {
       this.otherRAP = otherRAP;
     }
-
     public WaveformPostAudioRecordButton getPostAudioButton() {
       return postAudioButton;
     }

@@ -107,7 +107,8 @@ public abstract class DominoSimpleModal extends Modal {
 		setTitle(title);
 		prepareContentWidget();
 		add(contentWidget);
-		add(createFooter());
+		ModalFooter footer = createFooter();
+		if (footer != null) add(footer);
 		show();
 		log.info("Showing item modal " + title);
 	}
@@ -132,14 +133,19 @@ public abstract class DominoSimpleModal extends Modal {
 		UIHandler handler = new UIHandler();
 		ModalFooter modalFooter = new ModalFooter();
 		FluidRow footerRow = new FluidRow();
-		closeBtn = new Button(closeBtnNm);
-		closeBtn.addClickHandler(handler);
+		makeCloseButton(handler);
 		footerCol = new Column(12, closeBtn);
 		footerRow.add(footerCol);
 		modalFooter.add(footerRow);
 		return modalFooter;
 	}
-	
+
+	protected void makeCloseButton(UIHandler handler) {
+		closeBtn = new Button(closeBtnNm);
+		closeBtn.addClickHandler(handler);
+//		return closeBtn;
+	}
+
 	public Button getCloseButton() { return closeBtn; }
 	
 	/**

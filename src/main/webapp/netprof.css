@@ -1298,7 +1298,7 @@ body .domino-modal.modal.in {
     overflow: hidden;
     width: auto;
     max-width: 560px;
-    max-height: 650px;
+    max-height: 660px;
 }
 
 body .small-modal.modal.in {
@@ -1341,7 +1341,7 @@ body .big-modal.modal.in {
     left: 3%;
     right: 3%;
     bottom: 3%;
-    top: 3%;
+    top: 2%;
     max-width: none;
 }
 

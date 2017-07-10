@@ -114,7 +114,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
                           String instance) {
     super(
         controller, showSpectrogram,
-        // no gauge panel
         1.0f, 0,
         exercise,
         exercise.getID(), instance
@@ -290,7 +289,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       recordImage2.setVisible(false);
 
       getElement().setId("MyPlayAudioPanel");
-      setHeight(HEIGHT_OF_RECORD_ROW + "px");
+     // setHeight(HEIGHT_OF_RECORD_ROW + "px");
 
       postAudioRecordButton.addStyleName("leftFiveMargin");
       postAudioRecordButton.addStyleName("floatLeft");

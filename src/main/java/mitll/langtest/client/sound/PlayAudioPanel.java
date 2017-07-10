@@ -239,7 +239,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   private void stylePlayButton(Button playButton) {
     playButton.setType(ButtonType.INFO);
-    playButton.setSize(ButtonSize.LARGE);
+    //if (isLarge) {
+   //   playButton.setSize(ButtonSize.LARGE);
+   // }
     playButton.getElement().getStyle().setProperty("minWidth", "15px");
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");

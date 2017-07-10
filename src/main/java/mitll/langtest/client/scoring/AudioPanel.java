@@ -89,7 +89,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
 
-//  private final ScoreListener gaugePanel;
   protected String audioPath;
   private final Map<String, Integer> reqs = new HashMap<>();
   private int reqid;
@@ -280,7 +279,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private Image getWaveformImage() {
     Image waveformImage = getWaveform().getImage();
     waveformImage.getElement().setId("waveformImage");
-    // waveformImage.setHeight(getWaveformHeight()+"px");
     //  waveformImage.setAltText(WAVEFORM_TOOLTIP);
     waveformImage.setTitle(WAVEFORM_TOOLTIP);
     return waveformImage;
@@ -393,7 +391,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #onLoad()
    * @see RecordButton.RecordingListener#stopRecording(long)
    * @see mitll.langtest.client.scoring.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult
-   * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
+   * @see mitll.langtest.client.result.ResultManager#getAsyncTable
    */
   public String getImagesForPath(String path) {
     path = getReadyToPlayAudio(path);
@@ -594,7 +592,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
   }
 
-  private int getScaledImageHeight(String type) {
+  protected int getScaledImageHeight(String type) {
     float heightForType = type.equals(WAVEFORM) ? getWaveformHeight() : SPECTROGRAM_HEIGHT;
     return Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
   }

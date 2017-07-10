@@ -52,7 +52,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
   @Override
   protected int getMaxLengthId() {
-    return 100;
+    return 45;
   }
 
 //  protected int getPageSize() {

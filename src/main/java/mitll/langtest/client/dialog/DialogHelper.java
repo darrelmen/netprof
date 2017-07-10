@@ -33,10 +33,13 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.domino.common.DominoSimpleModal;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -57,6 +60,7 @@ public class DialogHelper {
 
   public interface CloseListener {
     boolean gotYes();
+
     void gotNo();
   }
 
@@ -89,7 +93,17 @@ public class DialogHelper {
   }
 
   public Button show(String title, Widget contents, CloseListener listener, int max) {
-    return show(title, Collections.emptyList(), contents, "OK", "Cancel", listener, max);
+    return show(title, Collections.emptyList(), contents, "OK", "Cancel", listener, max, false);
+  }
+
+  public Button show(String title,
+                     Collection<String> msgs,
+                     Widget other,
+                     String buttonName,
+                     String cancelButtonName,
+                     final CloseListener listener,
+                     int maxHeight) {
+    return show(title, msgs, other, buttonName, cancelButtonName, listener, maxHeight, false);
   }
 
   /**
@@ -106,14 +120,26 @@ public class DialogHelper {
                      String buttonName,
                      String cancelButtonName,
                      final CloseListener listener,
-                     int maxHeight) {
-    return showDialog(title, msgs, other, cancelButtonName, listener, maxHeight, getCloseButton(buttonName));
+                     int maxHeight,
+                     boolean isBig) {
+    return showDialog(title, msgs, other, cancelButtonName, listener, maxHeight, getCloseButton(buttonName), isBig);
   }
 
   @NotNull
   public Button showDialog(String title, Collection<String> msgs, Widget other, String cancelButtonName,
-                            CloseListener listener, int maxHeight, Button closeButton) {
-      dialogBox = new Modal();
+                           CloseListener listener, int maxHeight, Button closeButton,
+                           boolean isBig) {
+    dialogBox = new Modal();
+
+    if (isBig) {
+      dialogBox.addStyleName("big-modal");
+      dialogBox.addStyleName("domino-modal");
+      dialogBox.setCloseVisible(false);
+      dialogBox.setAnimation(true);
+      dialogBox.getWidget(1).getElement().getStyle().setPaddingTop(5, Style.Unit.PX);
+
+      dialogBox.setBackdrop(BackdropType.STATIC);
+    }
     dialogBox.setTitle("<b>" + title + "</b>");
     if (maxHeight > 0) dialogBox.setMaxHeigth(maxHeight + "px");
 
@@ -135,7 +161,7 @@ public class DialogHelper {
     // add buttons
     FluidRow row = new FluidRow();
     row.addStyleName("topFiveMargin");
-    if (doYesAndNo) {
+    if (doYesAndNo && cancelButtonName != null) {
       row.add(new Column(4, getCancel(cancelButtonName, listener, dialogBox)));
       row.add(new Column(6, new Heading(4)));
       row.add(new Column(2, closeButton));
@@ -163,7 +189,9 @@ public class DialogHelper {
     return closeButton;
   }
 
-  public void hide() { dialogBox.hide(); }
+  public void hide() {
+    dialogBox.hide();
+  }
 
   @NotNull
   private Button getCloseButton(String buttonName) {

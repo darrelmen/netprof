@@ -2,6 +2,7 @@ package mitll.langtest.client.custom.userlist;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.ModalFooter;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -34,8 +35,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
-  public static final int HEADING_SIZE = 3;
-  public static final int PAGE_SIZE = 8;
+  private static final int HEADING_SIZE = 3;
+  private static final int PAGE_SIZE = 8;
   private final Logger logger = Logger.getLogger("ListView");
 
   private final ExerciseController controller;
@@ -146,7 +147,7 @@ public class ListView implements ContentView, CreateListComplete {
     tableWithPager.setWidth("100%");
   }
 
-  private Set<String> names = new HashSet<>();
+  private final Set<String> names = new HashSet<>();
 
   @NotNull
   private DivWidget getButtons(ListContainer container) {
@@ -166,7 +167,7 @@ public class ListView implements ContentView, CreateListComplete {
   private IsWidget getEdit() {
     Button successButton = getSuccessButton("");
     successButton.setIcon(IconType.PENCIL);
-    successButton.addClickHandler(event -> editDialogHelper = doEdit());
+    successButton.addClickHandler(event -> doEdit());
     return successButton;
   }
 
@@ -229,11 +230,34 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void editList() {
-    Panel widgets = new EditItem(controller).editItem(getCurrentSelection(myLists));
-    DominoSimpleModal widgets1 = new DominoSimpleModal(false, "Add/Edit Items", "OK", DominoSimpleModal.ModalSize.Big, widgets) {
-    };
-    widgets1.setMaxHeigth("500px");
-    widgets1.init();
+    Panel contents = new EditItem(controller).editItem(getCurrentSelection(myLists));
+//    DominoSimpleModal widgets1 = new DominoSimpleModal(false, "Add/Edit Items", "OK", DominoSimpleModal.ModalSize.Big, widgets) {
+//      @Override
+//      protected ModalFooter createFooter() {
+//        super.createFooter();
+//        return null;
+//      }
+//    };
+//    Button closeButton = widgets1.getCloseButton();
+//    if (closeButton == null) logger.warning("huh? no close button?");
+//    else widgets.add(closeButton);
+//
+//    widgets1.setMaxHeigth("500px");
+//    widgets1.init();
+
+
+    DialogHelper dialogHelper = new DialogHelper(true);
+    Button closeButton = dialogHelper.show(
+        "Add/Edit Items",
+        Collections.emptyList(),
+        contents,
+        "OK",
+        null,//"Cancel",
+        null, 660, true);
+
+    closeButton.setType(ButtonType.SUCCESS);
+    closeButton.setIcon(IconType.PLUS);
+   // return dialogHelper;
   }
 
   @NotNull
@@ -281,7 +305,7 @@ public class ListView implements ContentView, CreateListComplete {
     return learn;
   }
 
-  private DialogHelper dialogHelper, editDialogHelper;
+  private DialogHelper dialogHelper;
 
   @NotNull
   private Button getAddButton() {
@@ -311,7 +335,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private UserList<CommonShell> getCurrentSelection(ListContainer container) {
     UserList<CommonShell> currentSelection = container.getCurrentSelection();
-    logger.info("Current selection is " + currentSelection);
+//    logger.info("Current selection is " + currentSelection);
     return currentSelection;
   }
 
@@ -416,7 +440,7 @@ public class ListView implements ContentView, CreateListComplete {
     return dialogHelper;
   }
 
-  CreateListDialog editDialog;
+  private CreateListDialog editDialog;
 
   private DialogHelper doEdit() {
     DivWidget contents = new DivWidget();

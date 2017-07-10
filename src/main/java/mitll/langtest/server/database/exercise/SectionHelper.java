@@ -451,7 +451,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       iterator.remove();
 
       if (pairs.isEmpty()) {
-        logger.error("huh? pairs is empty for type " + type);
+        logger.error("getTypeToMatchPairs : huh? pairs is empty for type " + type);
       } else {
         for (SectionNode child : node.getChildren()) {
           Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(pairs, child);

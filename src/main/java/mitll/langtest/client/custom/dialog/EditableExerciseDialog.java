@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -339,7 +340,14 @@ class EditableExerciseDialog extends NewUserExercise {
     return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed, instance) {
       @Override
       protected int getImageWidth() {
-        return 450;
+        return 600;
+      }
+
+      @Override
+      protected int getScaledImageHeight(String type) {
+        return 40;
+//        float heightForType = type.equals(WAVEFORM) ? getWaveformHeight() : SPECTROGRAM_HEIGHT;
+//        return Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
       }
     };
   }
