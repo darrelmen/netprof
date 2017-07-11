@@ -102,7 +102,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
     if (!defResult.isEmpty()) {
       defaultResult = defResult.iterator().next();
-//      logger.info("default " + defaultResult);
       return defaultResult.id();
     } else {
       logger.info("nope - no default result ");
@@ -166,7 +165,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return deviceType == null ? "" : deviceType;
   }
 
-  public Result fromSlick(SlickResult slick) {
+  private Result fromSlick(SlickResult slick) {
     String audiotype = slick.audiotype();
     audiotype = audiotype.replaceAll("=", "_");
     return new Result(slick.id(),
@@ -194,8 +193,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     String audiotype = slick.audiotype();
     audiotype = audiotype.replaceAll("=", "_");
     String simpleDevice = slick.device();
-    String dtype = slick.devicetype();
-    String device = dtype == null ? "Unk" : dtype.equals("browser") ? simpleDevice : (dtype + "/" + simpleDevice);
+   // String dtype = slick.devicetype();
+   // String device = dtype == null ? "Unk" : dtype.equals("browser") ? simpleDevice : (dtype + "/" + simpleDevice);
 
     return new MonitorResult(slick.id(),
         slick.userid(),
@@ -321,8 +320,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   public Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language) {
     List<CorrectAndScore> resultsForExIDInForUser = getResultsForExIDInForUser(ids, userid, "", language);
-    Map<Integer, List<CorrectAndScore>> collect = resultsForExIDInForUser.stream().collect(Collectors.groupingBy(CorrectAndScore::getExid));
-    return collect;
+    return resultsForExIDInForUser.stream().collect(Collectors.groupingBy(CorrectAndScore::getExid));
   }
 
   @Override
@@ -330,10 +328,15 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return dao.numRowsForProject(projid);
   }
 
-  @Override
+  /**
+   * @seex BaseResultDAO#getCorrectAndScores(String)
+   * @param language
+   * @return
+   */
+/*  @Override
   List<CorrectAndScore> getAllCorrectAndScores(String language) {
     return getCorrectAndScores(dao.correctAndScore(), language);
-  }
+  }*/
 
 /*  private List<ExerciseIDAndScore> getExAndScore(Collection<SlickExerciseScore> slickCorrectAndScores) {
     List<ExerciseIDAndScore> cs = new ArrayList<>();
@@ -400,9 +403,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     }
   }
 
+/*
   Map<Integer, SlickExerciseScore> getCorrectAndScoresForReal(int userid, Collection<Integer> exids) {
     return dao.exidAndScoreWhere(userid, exids);
   }
+*/
 
   private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
     List<CorrectAndScore> cs = new ArrayList<>();
@@ -411,7 +416,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return cs;
   }
 
-  private ParseResultJson parser = new ParseResultJson(database.getServerProps());
+  private final ParseResultJson parser = new ParseResultJson(database.getServerProps());
 
   @NotNull
   private CorrectAndScore fromSlickCorrectAndScoreWithRelPath(SlickCorrectAndScore cs,
@@ -491,9 +496,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return dao.practicedByUser(userid, projid);
   }
 
-  public boolean isEmpty() {
+/*  public boolean isEmpty() {
     return dao.getNumRows() == 0;
-  }
+  }*/
 
   public int getDefaultResult() {
     return defaultResult.id();

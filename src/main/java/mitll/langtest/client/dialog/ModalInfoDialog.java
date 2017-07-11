@@ -61,7 +61,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class ModalInfoDialog {
-  private final Logger logger = Logger.getLogger("ModalInfoDialog");
+ // private final Logger logger = Logger.getLogger("ModalInfoDialog");
 
   private static final List<String> MESSAGES = Collections.emptyList();
   private final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper();
@@ -91,11 +91,10 @@ public class ModalInfoDialog {
 
     modal.show();
   }
-
-
-  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler, boolean bigger) {
-    return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler, bigger, true);
-  }
+//
+//  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler, boolean bigger) {
+//    return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler, bigger, true);
+//  }
 
   public Modal getModal(String title, Collection<String> messages, Collection<String> values, Widget widget,
                         HiddenHandler handler, boolean bigger, boolean addEnterKeyBinding) {
@@ -116,12 +115,7 @@ public class ModalInfoDialog {
       modal.addHiddenHandler(handler);
     }
 
-    modal.addHiddenHandler(new HiddenHandler() {
-      @Override
-      public void onHidden(HiddenEvent hiddenEvent) {
-        enterKeyButtonHelper.removeKeyHandler();
-      }
-    });
+    modal.addHiddenHandler(hiddenEvent -> enterKeyButtonHelper.removeKeyHandler());
     return modal;
   }
 
@@ -157,22 +151,13 @@ public class ModalInfoDialog {
 
     // Set focus on the widget. We have to use a deferred command or a
     // timer since GWT will lose it again if we set it in-line here
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        begin.setFocus(true);
-      }
-    });
+    Scheduler.get().scheduleDeferred((Command) () -> begin.setFocus(true));
 
     if (addEnterKeyBinding) {
       enterKeyButtonHelper.addKeyHandler(begin);
     }
 
-    begin.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        modal.hide();
-      }
-    });
+    begin.addClickHandler(event -> modal.hide());
     return begin;
   }
 }

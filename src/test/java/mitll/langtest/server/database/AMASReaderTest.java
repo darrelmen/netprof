@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 public class AMASReaderTest {
   private static final Logger logger = LogManager.getLogger(AMASReaderTest.class);
   // public static final String AM_LB_002 = "AM-LB-002";
-  private static DatabaseImpl database;
+ /* private static DatabaseImpl database;
 
   @BeforeClass
   public static void setup() {
@@ -42,7 +42,6 @@ public class AMASReaderTest {
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan());
   }
 
-
   @Test
   public void testReport() {
     database.doReport(new PathHelper("war", null), "", 2016);
@@ -51,7 +50,6 @@ public class AMASReaderTest {
   @Test
   public void testMe() {
     //database.getAMASSectionHelper().report();
-
     Collection<AmasExerciseImpl> exercises = database.getAMASExercises();
     Stream<AmasExerciseImpl> amasExerciseStream = exercises.stream().filter(ex -> ex.getOldID().equals("AM-LA-004"));
     Optional<AmasExerciseImpl> first = amasExerciseStream.findFirst();
@@ -69,5 +67,5 @@ public class AMASReaderTest {
     audioFileHelper.makeAutoCRT(".");
 
     database.getAMASSectionHelper().report();
-  }
+  }*/
 }

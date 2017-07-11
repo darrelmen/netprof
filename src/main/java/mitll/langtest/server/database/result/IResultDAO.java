@@ -77,7 +77,7 @@ public interface IResultDAO extends IDAO {
                                                                           ExerciseSorter sorter,
                                                                           String language);
 
-  SessionInfo getSessions(String language);
+ // SessionInfo getSessions(String language);
 
   void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest, String language);
 
@@ -85,7 +85,7 @@ public interface IResultDAO extends IDAO {
 
   List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session, String language);
 
-  void invalidateCachedResults();
+//  void invalidateCachedResults();
 
   int getNumResults(int projid);
 

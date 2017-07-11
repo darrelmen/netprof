@@ -234,7 +234,6 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    */
   private void setDownloadHref(IconAnchor download, String audioPath, String host) {
     audioPath = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg", ".mp3") : audioPath;
-
     String href = getDownloadAudio(host) +
         "?" +
         "file=" + audioPath + "&" +
@@ -242,12 +241,6 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
         "userID=" + controller.getUserState().getUser();
     download.setHref(href);
   }
-
-//  @NotNull
-//  public static String getDownloadAudio(String host) {
-//    String hostSuffix = host.isEmpty() ? "" : "/" + host;
-//    return DownloadContainer.DOWNLOAD_AUDIO + hostSuffix;
-//  }
 
   /**
    * @param w

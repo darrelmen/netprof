@@ -161,18 +161,23 @@ public class DialogHelper {
     // add buttons
     FluidRow row = new FluidRow();
     row.addStyleName("topFiveMargin");
+    row.getElement().setId("buttonRow");
     if (doYesAndNo && cancelButtonName != null) {
       row.add(new Column(4, getCancel(cancelButtonName, listener, dialogBox)));
       row.add(new Column(6, new Heading(4)));
       row.add(new Column(2, closeButton));
     } else {
-      row.add(new Column(2, 6, closeButton));
+      row.add(new Column(2, 10, closeButton));
     }
     container.add(row);
-    FluidRow w = new FluidRow();
-    w.add(new Column(12, new Heading(6)));
-    container.add(w);
 
+/*
+    {
+      FluidRow w = new FluidRow();
+      w.add(new Column(12, new Heading(6)));
+      container.add(w);
+    }
+*/
     closeButton.addClickHandler(event -> {
       //dialogBox.hide();
       logger.info("clicked on close");

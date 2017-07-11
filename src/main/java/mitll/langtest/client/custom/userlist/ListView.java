@@ -37,6 +37,9 @@ import java.util.logging.Logger;
 public class ListView implements ContentView, CreateListComplete {
   private static final int HEADING_SIZE = 3;
   private static final int PAGE_SIZE = 8;
+  public static final String CREATE_NEW_LIST = "Create New List";
+  public static final String EDIT = "Edit";
+  public static final String ADD_EDIT_ITEMS = "Add/Edit Items";
   private final Logger logger = Logger.getLogger("ListView");
 
   private final ExerciseController controller;
@@ -248,7 +251,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     DialogHelper dialogHelper = new DialogHelper(true);
     Button closeButton = dialogHelper.show(
-        "Add/Edit Items",
+        ADD_EDIT_ITEMS,
         Collections.emptyList(),
         contents,
         "OK",
@@ -256,7 +259,7 @@ public class ListView implements ContentView, CreateListComplete {
         null, 660, true);
 
     closeButton.setType(ButtonType.SUCCESS);
-    closeButton.setIcon(IconType.PLUS);
+    //closeButton.setIcon(IconType.PLUS);
    // return dialogHelper;
   }
 
@@ -414,7 +417,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     DialogHelper dialogHelper = new DialogHelper(true);
     Button closeButton = dialogHelper.show(
-        "Create New List",
+        CREATE_NEW_LIST,
         Collections.emptyList(),
         contents,
         "Add",
@@ -450,7 +453,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     DialogHelper dialogHelper = new DialogHelper(true);
     Button closeButton = dialogHelper.show(
-        "Edit",
+        EDIT,
         Collections.emptyList(),
         contents,
         "Edit",

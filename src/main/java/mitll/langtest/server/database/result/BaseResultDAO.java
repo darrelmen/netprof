@@ -54,10 +54,10 @@ public abstract class BaseResultDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseResultDAO.class);
 
   private static final int MINUTE = 60 * 1000;
-  protected static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
+  private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
   private final boolean DEBUG = false;
   List<MonitorResult> cachedMonitorResultsForQuery = null;
-  private List<CorrectAndScore> cachedResultsForQuery2 = null;
+  //private List<CorrectAndScore> cachedResultsForQuery2 = null;
 
   /**
    * @param database
@@ -114,9 +114,9 @@ public abstract class BaseResultDAO extends DAO {
    * @return
    * @see #getExerciseCorrectAndScores
    */
-  protected List<ExerciseCorrectAndScore> getSortedAVPHistory(List<CorrectAndScore> results,
-                                                              Collection<Integer> allIds,
-                                                              final Map<Integer, CollationKey> idToKey) {
+  private List<ExerciseCorrectAndScore> getSortedAVPHistory(List<CorrectAndScore> results,
+                                                            Collection<Integer> allIds,
+                                                            final Map<Integer, CollationKey> idToKey) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
     Collections.sort(sortedResults, new Comparator<ExerciseCorrectAndScore>() {
       @Override
@@ -165,7 +165,7 @@ public abstract class BaseResultDAO extends DAO {
    * @return
    * @see #getSortedAVPHistory(List, Collection, Map)
    */
-  protected List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(List<CorrectAndScore> results, Collection<Integer> allIds) {
+  private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(List<CorrectAndScore> results, Collection<Integer> allIds) {
     SortedMap<Integer, ExerciseCorrectAndScore> idToScores = new TreeMap<>();
     if (results != null) {
       for (CorrectAndScore r : results) {
@@ -246,10 +246,10 @@ public abstract class BaseResultDAO extends DAO {
    * @return
    * @see #getExerciseCorrectAndScoresByPhones
    */
-  protected List<ExerciseCorrectAndScore> getSortedAVPHistoryByPhones(List<CorrectAndScore> results,
-                                                                      Collection<Integer> allIds,
-                                                                      final Map<Integer, CommonExercise> idToEx,
-                                                                      final ExerciseSorter sorter
+  private List<ExerciseCorrectAndScore> getSortedAVPHistoryByPhones(List<CorrectAndScore> results,
+                                                                    Collection<Integer> allIds,
+                                                                    final Map<Integer, CommonExercise> idToEx,
+                                                                    final ExerciseSorter sorter
   ) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
     Collections.sort(sortedResults, new Comparator<ExerciseCorrectAndScore>() {
@@ -355,7 +355,13 @@ public abstract class BaseResultDAO extends DAO {
     }
     return new ArrayList<>();
   }*/
-  private List<CorrectAndScore> getCorrectAndScores(String language) {
+
+  /**
+   * @seex #getSessions(String)
+   * @param language
+   * @return
+   */
+/*  private List<CorrectAndScore> getCorrectAndScores(String language) {
     try {
       synchronized (this) {
         if (cachedResultsForQuery2 != null) {
@@ -372,7 +378,7 @@ public abstract class BaseResultDAO extends DAO {
       logException(ee);
     }
     return new ArrayList<>();
-  }
+  }*/
 
   /**
    * So multiple recordings for the same item are counted as 1.
@@ -400,7 +406,9 @@ public abstract class BaseResultDAO extends DAO {
 
   abstract Collection<UserAndTime> getUserAndTimes();
 
+/*
   abstract List<CorrectAndScore> getAllCorrectAndScores(String language);
+*/
 
   /**
    * @param userID
@@ -419,6 +427,13 @@ public abstract class BaseResultDAO extends DAO {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getScoreHistories(Collection, List, int)
+   * @param userid
+   * @param exercises
+   * @param language
+   * @return
+   */
   public Map<Integer, List<CorrectAndScore>> getScoreHistories(int userid, Collection<Integer> exercises, String language) {
     return getCorrectAndScoreMap(exercises, userid, language);
   }
@@ -462,6 +477,7 @@ public abstract class BaseResultDAO extends DAO {
     return userToAnswers;
   }
 
+/*
   private List<Session> partitionIntoSessions(Map<Integer, List<Session>> userToSessions,
                                               Integer userid, List<CorrectAndScore> answersForUser) {
     Session s = null;
@@ -486,6 +502,7 @@ public abstract class BaseResultDAO extends DAO {
     }
     return sessions;
   }
+*/
 
   /**
    * @param answersForUser
@@ -544,10 +561,10 @@ public abstract class BaseResultDAO extends DAO {
    * <p>
    * Multiple answers to the same exercise childCount as one answer.
    *
-   * @param language
+   * @paramx language
    * @return list of duration and numAnswer pairs
    */
-  public SessionInfo getSessions(String language) {
+/*  public SessionInfo getSessions(String language) {
     Map<Integer, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getCorrectAndScores(language));
     List<Session> sessions = new ArrayList<>();
 
@@ -579,8 +596,9 @@ public abstract class BaseResultDAO extends DAO {
     }
 
     return new SessionInfo(sessions, userToRate);
-  }
+  }*/
 
+/*
   private List<Session> makeSessionsForUser(Map<Integer, List<Session>> userToSessions,
                                             Map.Entry<Integer, List<CorrectAndScore>> userToAnswersEntry) {
     Integer userid = userToAnswersEntry.getKey();
@@ -588,15 +606,17 @@ public abstract class BaseResultDAO extends DAO {
 
     return makeSessionsForUser(userToSessions, userid, answersForUser);
   }
+*/
 
-  private List<Session> makeSessionsForUser(Map<Integer, List<Session>> userToSessions,
+/*  private List<Session> makeSessionsForUser(Map<Integer, List<Session>> userToSessions,
                                             Integer userid,
                                             List<CorrectAndScore> answersForUser) {
     sortByTime(answersForUser);
 
     return partitionIntoSessions(userToSessions, userid, answersForUser);
-  }
+  }*/
 
+/*
   private void sortByTime(List<CorrectAndScore> answersForUser) {
     Collections.sort(answersForUser);
   }
@@ -605,12 +625,13 @@ public abstract class BaseResultDAO extends DAO {
     Iterator<Session> iter = sessions.iterator();
     while (iter.hasNext()) if (iter.next().getNumAnswers() < 2) iter.remove();
   }
+*/
 
   /**
    * @see AnswerDAO#addAnswerToTable
    */
-  public synchronized void invalidateCachedResults() {
+/*  public synchronized void invalidateCachedResults() {
     cachedResultsForQuery2 = null;
     cachedMonitorResultsForQuery = null;
-  }
+  }*/
 }

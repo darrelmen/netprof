@@ -235,7 +235,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 //          ") millis : " + info + " result id " + newID);
     }
 
-    resultDAO.invalidateCachedResults();
+//    resultDAO.invalidateCachedResults();
 
     return newID;
   }
@@ -288,7 +288,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
       }
 
       statement.close();
-      resultDAO.invalidateCachedResults();
+      //resultDAO.invalidateCachedResults();
     } catch (Exception e) {
       logger.error("got " + e, e);
     } finally {
@@ -300,7 +300,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    * @param id
    * @param processDur
    * @param isCorrect
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getPretestScore
    * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(int, PretestScore, boolean)
    */
   @Override
