@@ -28,11 +28,12 @@ plugins {
 apply from: 'gradle-common/common.gradle'
 apply from: 'gradle-common/common-java.gradle'
 //apply plugin: 'java'
-//apply plugin: 'application'
+apply plugin: 'application'
 apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'distribution'
+apply plugin: "jacoco"
 
 putnami {
     module 'mitll.langtest.LangTest'
@@ -238,6 +239,33 @@ publishing {
         }
     }
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "${buildDir}/jacoco/html"
+    }
+}
+
+check.dependsOn jacocoTestReport
+
+//jacoco {
+//    applyTo run
+//}
+//
+//task applicationCodeCoverageReport(type:JacocoReport){
+//    executionData run
+//    sourceSets sourceSets.main
+//}
+//
+//test {
+//    jacoco {
+//        append = false
+//        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+//        classDumpDir = file("$buildDir/jacoco/classpathdumps")
+//    }
+//}
 
 // add eclipse preferences.
 tasks.eclipse.doLast {
