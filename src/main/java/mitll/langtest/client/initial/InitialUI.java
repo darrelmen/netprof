@@ -377,7 +377,7 @@ public class InitialUI implements UILifecycle {
         addProjectCrumb(crumbs, project);
         break;
       } else {
-        logger.info("addBreadcrumbLevels skipping project " + project);
+      //  logger.info("addBreadcrumbLevels skipping project " + project);
       }
     }
   }

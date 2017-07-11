@@ -41,6 +41,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -49,11 +50,10 @@ import java.util.Collection;
  * @since 1/5/16.
  */
 public abstract class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
-  //private Logger logger = Logger.getLogger("NPExerciseList");
-  int pageSize;
+  private Logger logger = Logger.getLogger("NPExerciseList");
+  private int pageSize;
 
-  protected NPExerciseList(Panel currentExerciseVPanel,
-                           ExerciseController controller,
+  protected NPExerciseList(Panel currentExerciseVPanel, ExerciseController controller,
                            ListOptions listOptions, int pageSize) {
     super(currentExerciseVPanel, controller, listOptions);
     this.pageSize = pageSize;
@@ -90,23 +90,32 @@ public abstract class NPExerciseList extends HistoryExerciseList<CommonShell, Co
    */
   protected ClickablePagingContainer<CommonShell> makePagingContainer() {
     final PagingExerciseList<CommonShell, CommonExercise> outer = this;
-//    if (logger == null) {
-//      logger = Logger.getLogger("NPExerciseList");
-//    }
-//    logger.info("makePagingContainer : for " + getInstance() + " show first not complete " + showFirstNotCompleted);
+    if (logger == null) {
+      logger = Logger.getLogger("NPExerciseList");
+    }
+    final boolean showFirstNotCompleted = listOptions.isShowFirstNotCompleted();
+
+    logger.info("makePagingContainer : for" +
+        "\n\tinstance " + getInstance() +
+        "\n\tshow first not complete " + showFirstNotCompleted +
+        "\n\tactivityType " + getActivityType());
+
+    boolean isRecorder = getActivityType() == ActivityType.RECORDER;
 
     pagingContainer =
         new PagingContainer<CommonShell>(
             controller,
             getVerticalUnaccountedFor(),
-            getActivityType() == ActivityType.RECORDER,
-            listOptions.isShowFirstNotCompleted()
+            isRecorder,
+            showFirstNotCompleted
         ) {
           @Override
           protected int getNumTableRowsGivenScreenHeight() {
             if (pageSize == -1) {
               return super.getNumTableRowsGivenScreenHeight();
-            } else return pageSize;
+            } else {
+              return pageSize;
+            }
           }
 
           @Override

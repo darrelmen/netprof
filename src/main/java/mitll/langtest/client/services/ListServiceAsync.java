@@ -62,6 +62,10 @@ public interface ListServiceAsync {
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 
+  /**
+   * @deprecated
+   * @param async
+   */
   void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
 
   void setPublicOnList(int userListID, boolean isPublic, AsyncCallback<Void> async);

@@ -5,6 +5,8 @@ import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -16,6 +18,8 @@ import java.util.Set;
  * Created by go22670 on 7/5/17.
  */
 public class StateManager implements IStateManager {
+  private static final Logger logger = LogManager.getLogger(StateManager.class);
+
   private final IReviewedDAO reviewedDAO, secondStateDAO;
 
   public StateManager(IReviewedDAO reviewedDAO,
@@ -35,7 +39,7 @@ public class StateManager implements IStateManager {
   @Override
   public void setStateOnExercises() {
     // getAmmendedStateMap();
-    Map<Integer, StateCreator> exerciseToState = getExerciseToState(false);
+ //   Map<Integer, StateCreator> exerciseToState = getExerciseToState(false);
     //setStateOnExercises(exerciseToState, true);
     //setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
   }
@@ -44,11 +48,9 @@ public class StateManager implements IStateManager {
   public IReviewedDAO getReviewedDAO() {
     return reviewedDAO;
   }
-
   public IReviewedDAO getSecondStateDAO() {
     return secondStateDAO;
   }
-
 
   /**
    * TODO put this back
@@ -167,7 +169,6 @@ public class StateManager implements IStateManager {
     return reviewedDAO.getExerciseToState(skipUnset);
   }
 
-
   /**
    * Mark the exercise with its states - but not if you're a recorder...
    *
@@ -179,16 +180,19 @@ public class StateManager implements IStateManager {
   public void markState(Collection<? extends CommonShell> shells) {
     Map<Integer, StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
 
-    //logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
-    //int c = 0;
+    logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
+    int c = 0;
     for (CommonShell shell : shells) {
       StateCreator stateCreator = exerciseToState.get(shell.getID());
       if (stateCreator != null) {
         shell.setState(stateCreator.getState());
         //  logger.debug("\t for " + shell.getOldID() + " state " + stateCreator.getState());
-        //  c++;
+          c++;
       }
     }
+
+    logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states, marked " + c);
+
 
     // does this help anyone???
     // want to know if we have a new recording AFTER it's been inspected - why did the thing that I fixed now change back to needs inspection
@@ -288,10 +292,16 @@ public class StateManager implements IStateManager {
   }
 
 
-  public Collection<Integer> getDefectExercises() {
-    return reviewedDAO.getDefectExercises();
-  }
+  /**
+   * @see UserListManager#getCommentedList
+   * @return
+   */
+  public Collection<Integer> getDefectExercises() {  return reviewedDAO.getDefectExercises();  }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUninspected(Collection)
+   * @return
+   */
   public Collection<Integer> getInspectedExercises() {
     return reviewedDAO.getInspectedExercises();
   }

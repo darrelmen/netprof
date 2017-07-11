@@ -92,7 +92,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see #makeFixedButton
    */
   private static final String FIXED = "Mark Fixed";
-  private static final String DUPLICATE = "Duplicate";
+ // private static final String DUPLICATE = "Duplicate";
   /**
    * @seex #getRemove
    */
@@ -102,7 +102,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private static final String REALLY_DELETE_ITEM = "Really delete whole item and all audio cuts?";
   private static final List<String> MSGS = Collections.singletonList(REALLY_DELETE_ITEM);
   */
-  private static final String COPY_THIS_ITEM = "Copy this item.";
+//  private static final String COPY_THIS_ITEM = "Copy this item.";
   private static final String REGULAR_SPEED = " Regular speed";
   private static final String SLOW_SPEED = " Slow speed";
   private static final int DELAY_MILLIS = 5000;
@@ -187,13 +187,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       addNewOrYourRecordingTab(tabPanel, audioAttribute, false);
     }
 
-
-    tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
-      @Override
-      public void onShow(TabPanel.ShowEvent showEvent) {
-        currentTab = tabLinks.indexOf(showEvent.getTarget());
-      }
-    });
+    tabPanel.addShowHandler(showEvent -> currentTab = tabLinks.indexOf(showEvent.getTarget()));
 
     tabPanel.selectTab(currentTab);
 
@@ -211,10 +205,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     Set<Integer> preferredVoices = controller.getProps().getPreferredVoices();
     Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(isMale, preferredVoices, false);
     List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
-    boolean maleEmpty = maleUsers.isEmpty();
-
-    return maleEmpty ?
-        Collections.emptyList() : malesMap.get(maleUsers.get(0));
+    return maleUsers.isEmpty() ?  Collections.emptyList() : malesMap.get(maleUsers.get(0));
   }
 
   /**
@@ -618,12 +609,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
     //   logger.info("value is  " + keepAudioSelection);
     keepAudio.setValue(keepAudioSelection);
-    keepAudio.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        storeKeepAudio(keepAudio.getValue());
-      }
-    });
+    keepAudio.addClickHandler(clickEvent -> storeKeepAudio(keepAudio.getValue()));
     keepAudio.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     row.add(keepAudio);
     configureButtonRow(row);
@@ -636,12 +622,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
                                 final Panel toAddTo,
                                 final ControlGroup normalSpeedRecording) {
     final Button fixed = makeFixedButton();
-    fixed.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, true, true);
-      }
-    });
+    fixed.addClickHandler(event -> validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, true, true));
     return fixed;
   }
 
@@ -762,12 +743,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     fixed.addStyleName("floatLeftAndClear");
     fixed.addStyleName("marginRight");
 
-    fixed.addMouseOverHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        checkForForeignChange();
-      }
-    });
+    fixed.addMouseOverHandler(event -> checkForForeignChange());
     addTooltip(fixed, MARK_FIXED_TOOLTIP);
     return fixed;
   }

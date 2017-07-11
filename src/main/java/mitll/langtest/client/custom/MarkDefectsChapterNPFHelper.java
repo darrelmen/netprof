@@ -59,16 +59,15 @@ import java.util.Map;
  * @since 3/30/16.
  */
 public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-//  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
+  //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
   private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
   private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
 
   /**
    * @param controller
-   * @param learnHelper
    * @see
    */
-  public MarkDefectsChapterNPFHelper(ExerciseController controller, SimpleChapterNPFHelper learnHelper) {
+  public MarkDefectsChapterNPFHelper(ExerciseController controller) {
     super(controller);
   }
 
@@ -95,11 +94,13 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName,
-                                                                                 DivWidget listHeader, DivWidget footer) {
-//        logger.info("instance is " + instanceName);
-        return new NPExerciseList(currentExercisePanel,
-            controller,
-            new ListOptions().setInstance(instanceName), -1) {
+                                                                                 DivWidget listHeader,
+                                                                                 DivWidget footer) {
+        return new NPExerciseList(currentExercisePanel, controller,
+            new ListOptions()
+                .setInstance(instanceName)
+                .                setShowFirstNotCompleted(true)
+            .setActivityType(ActivityType.MARK_DEFECTS), -1) {
           private CheckBox filterOnly, uninspectedOnly;
 
           @Override
@@ -120,8 +121,7 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
 
             // row 3
             add(pagingContainer.getTableWithPager(new ListOptions()));
-
-            addEventHandler(instanceName, this);
+         //   addEventHandler(instanceName, this);
           }
 
           /**
@@ -149,10 +149,10 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
            * @return
            */
           protected String getHistoryTokenFromUIState(String search, int id) {
-            String s = super.getHistoryTokenFromUIState(search, id) + SelectionState.SECTION_SEPARATOR +
-                SelectionState.ONLY_DEFAULT + "=" + filterOnly.getValue() + SelectionState.SECTION_SEPARATOR +
-                SelectionState.ONLY_UNINSPECTED + "=" + uninspectedOnly.getValue();
-            return s;
+            return
+                super.getHistoryTokenFromUIState(search, id) + SelectionState.SECTION_SEPARATOR +
+                    SelectionState.ONLY_DEFAULT + "=" + filterOnly.getValue() + SelectionState.SECTION_SEPARATOR +
+                    SelectionState.ONLY_UNINSPECTED + "=" + uninspectedOnly.getValue();
           }
 
           @Override
@@ -171,10 +171,11 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
    * For instance if you mark a defect here, and fix it there, coming back here, if you filter
    * for uninspected, the item should not be there.
    *
-   * @param instanceName
-   * @param container
+   * @paramx instanceName
+   * @paramx container
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#afterValidForeignPhrase
    */
+/*
   private void addEventHandler(final String instanceName, HistoryExerciseList container) {
     LangTest.EVENT_BUS.addHandler(DefectEvent.TYPE, authenticationEvent -> {
       if (authenticationEvent.getSource().equals(instanceName)) {
@@ -185,6 +186,7 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
       }
     });
   }
+*/
 
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {

@@ -552,7 +552,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
-    //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + activityType);
+    logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + request.getActivityType());
     markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
 
     // TODO : do this the right way vis-a-vis type safe collection...
@@ -569,6 +569,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return exerciseListWrapper;
   }
 
+  /**
+   * @see #makeExerciseListWrapper(ExerciseListRequest, Collection)
+   * @param onlyExamples
+   * @param userID
+   * @param exerciseShells
+   * @param activityType
+   */
   private void markStateForActivity(boolean onlyExamples, int userID, List<CommonShell> exerciseShells, ActivityType activityType) {
     switch (activityType) {
       case RECORDER:
@@ -576,20 +583,24 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         break;
       case REVIEW:
       case QUALITY_CONTROL:
+      case MARK_DEFECTS:
         db.getStateManager().markState(exerciseShells);
         break;
-      case MARK_DEFECTS:
-        Collection<Integer> defectExercises = db.getStateManager().getDefectExercises();
-        //  int c = 0;
-        for (CommonShell shell : exerciseShells) {
-          if (defectExercises.contains(shell.getID())) {
-            shell.setState(STATE.DEFECT);
-            //    c++;
-          }
-        }
-        break;
+     //   markDefects(exerciseShells);
+      //  break;
       default:
         break;
+    }
+  }
+
+  private void markDefects(List<CommonShell> exerciseShells) {
+    Collection<Integer> defectExercises = db.getStateManager().getDefectExercises();
+    //  int c = 0;
+    for (CommonShell shell : exerciseShells) {
+      if (defectExercises.contains(shell.getID())) {
+        shell.setState(STATE.DEFECT);
+        //    c++;
+      }
     }
   }
 

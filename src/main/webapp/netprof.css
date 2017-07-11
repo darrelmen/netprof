@@ -552,12 +552,12 @@ fieldset > legend {
     /*
     font-weight: bold;
     */
-    word-wrap: normal; /* Internet Explorer 5.5+ */
+/*    word-wrap: normal;
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
     line-height: 100%;
-    float: left;
+    float: left;*/
 }
 
 .flfont {

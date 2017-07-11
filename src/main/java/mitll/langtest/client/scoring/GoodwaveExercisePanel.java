@@ -107,7 +107,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
 //  protected final ListServiceAsync listService = GWT.create(ListService.class);
 
- // private AudioPanel contentAudio, answerAudio;
+  // private AudioPanel contentAudio, answerAudio;
   private AudioPanel answerAudio;
   protected final NavigationHelper navigationHelper;
   //  private final float screenPortion;
@@ -132,7 +132,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    */
   protected GoodwaveExercisePanel(final T commonExercise,
                                   final ExerciseController controller,
-                                  final ListInterface<CommonShell,T> listContainer,
+                                  final ListInterface<CommonShell, T> listContainer,
                                   ExerciseOptions options
   ) {
     this.options = options;
@@ -178,12 +178,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     }
 
 //    if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
-      center.add(navigationHelper);
-  //  }
+    center.add(navigationHelper);
+    //  }
   }
 
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                              final ListInterface<CommonShell,T> listContainer,
+                                                              final ListInterface<CommonShell, T> listContainer,
                                                               boolean addKeyHandler, boolean includeListButtons) {
     NavigationHelper<CommonShell> widgets = new NavigationHelper<>(getLocalExercise(), controller, new PostAnswerProvider() {
       @Override
@@ -387,7 +387,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @see mitll.langtest.client.qc.QCNPFExercise#getEntry
    */
   protected Panel getContentWidget(String label, String value, boolean includeLabel) {
-    Panel nameValueRow = new FlowPanel();
+    //Panel nameValueRow = new FlowPanel();
+    DivWidget nameValueRow = new DivWidget();
+    nameValueRow.addStyleName("inlineFlex");
     nameValueRow.getElement().setId("nameValueRow_" + label);
     nameValueRow.addStyleName("Instruction");
 
@@ -548,5 +550,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     return isBusy;
   }
 
-  protected String getInstance() { return options.getInstance(); }
+  protected String getInstance() {
+    return options.getInstance();
+  }
 }

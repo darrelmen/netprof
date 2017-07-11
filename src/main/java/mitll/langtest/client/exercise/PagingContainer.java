@@ -106,7 +106,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
     this.showExerciseState = showExerciseState;
     // this.instance = instance;
-    // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
+    logger.info("PagingContainer  show " + showExerciseState + " for recorder " + isRecorder);
   }
 
   /**

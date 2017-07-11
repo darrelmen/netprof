@@ -336,6 +336,12 @@ public class UserListManager implements IUserListManager {
     return reviewList;
   }
 
+  /**
+   * @see #getUserListByIDExercises(long, int, Collection, Set)
+   * @param typeOrder
+   * @param ids
+   * @return
+   */
   @Override
   public UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder, Set<Integer> ids) {
     //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
@@ -844,7 +850,8 @@ public class UserListManager implements IUserListManager {
    * @param ids
    * @return
    * @see
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserListByID
+   * @see  #deleteItemFromList(int, int, Collection)
+   * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItems
    */
   @Override
   public UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids) {
@@ -868,10 +875,6 @@ public class UserListManager implements IUserListManager {
       return userListDAO.getWithExercises(id);
     }
   }
-
-/*  public List<UserList<CommonShell>> getByName(int userid, String name, int projid) {
-    return userListDAO.getByName(userid, name, projid);
-  }*/
 
   /**
    * TODO : OK the review, comment, and attention LL (if needed) lists need to be in context of project.

@@ -62,8 +62,8 @@ import java.util.logging.Logger;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 3/26/2014.
  * @see ListManager#ListManager(ExerciseController, HasWidgets)
+ * @since 3/26/2014.
  */
 public class ReviewItemHelper extends NPFHelper {
   private final Logger logger = Logger.getLogger("ReviewItemHelper");
@@ -72,7 +72,6 @@ public class ReviewItemHelper extends NPFHelper {
    *
    */
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
-
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
 
   /**
@@ -124,7 +123,6 @@ public class ReviewItemHelper extends NPFHelper {
         @Override
         public Panel getExercisePanel(CommonExercise exercise) {
           CommonExercise userExercise = new Exercise(exercise);
-
           ReviewEditableExercise reviewEditableExercise =
               new ReviewEditableExercise(controller,
                   userExercise, ul,
@@ -134,9 +132,7 @@ public class ReviewItemHelper extends NPFHelper {
 
           SimplePanel ignoredContainer = new SimplePanel();
 
-          Panel widgets = reviewEditableExercise.addFields(
-              npfExerciseList,
-              ignoredContainer);
+          Panel widgets = reviewEditableExercise.addFields(npfExerciseList, ignoredContainer);
           reviewEditableExercise.setFields(exercise);
 
           return widgets;
@@ -148,12 +144,14 @@ public class ReviewItemHelper extends NPFHelper {
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                String instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
-      return new NPExerciseList(currentExercisePanel, outer.getController(),
-          new ListOptions(instanceName), -1) {
+      return new NPExerciseList(currentExercisePanel, outer.getController(), new ListOptions(instanceName), -1) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         @Override
-        protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+        protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
+                                                             String prefix,
+                                                             boolean onlyWithAudioAnno, boolean onlyUnrecorded,
+                                                             boolean onlyDefaultUser, boolean onlyUninspected) {
           return super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected).setQC(true);
         }
 

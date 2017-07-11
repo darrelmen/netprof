@@ -305,9 +305,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    */
   public void onResize(T currentExercise) {
     int numRows = getNumTableRowsGivenScreenHeight();
-    logger.info("onResize size is " + numRows);
+ //   logger.info("onResize size is " + numRows);
     if (table.getPageSize() != numRows) {
-      logger.info("2 onResize size is " + numRows);
+   //   logger.info("2 onResize size is " + numRows);
       table.setPageSize(numRows);
       table.redraw();
       markCurrent(currentExercise);
@@ -315,8 +315,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public void setPageSize(int pageSize) {
-    logger.info("page size is " + pageSize);
-  //  logger.info("got ",new Exception());
+  //  logger.info("page size is " + pageSize);
     table.setPageSize(pageSize);
     table.redraw();
   }

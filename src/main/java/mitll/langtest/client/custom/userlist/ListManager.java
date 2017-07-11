@@ -72,6 +72,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/20/15.
+ * @deprecated
  */
 public class ListManager implements RequiresResize, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListManager");

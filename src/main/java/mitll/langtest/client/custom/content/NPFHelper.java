@@ -81,19 +81,18 @@ public class NPFHelper implements RequiresResize {
 
   PagingExerciseList<CommonShell, CommonExercise> npfExerciseList = null;
   private final boolean showQC;
-  private DivWidget contentPanel;
   private final boolean showFirstNotCompleted;
 
   /**
+   * TODO : remove showQC
+   *
    * @param controller
    * @param showQC
    * @seex AVPHelper#AVPHelper(ExerciseController)
    * @see ReviewItemHelper#ReviewItemHelper(ExerciseController)
    * @see ListManager#ListManager
    */
-  NPFHelper(ExerciseController controller,
-                   boolean showQC,
-                   boolean showFirstNotCompleted) {
+  NPFHelper(ExerciseController controller, boolean showQC, boolean showFirstNotCompleted) {
     this.controller = controller;
     this.showQC = showQC;
     this.showFirstNotCompleted = showFirstNotCompleted;
@@ -109,7 +108,6 @@ public class NPFHelper implements RequiresResize {
   public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     logger.info(getClass() + " : adding npf content instanceName = " +
         instanceName + " for list " + ul + " with " + ul.getExercises().size() + " load " + loadExercises);
-
 
     showNPF(ul, tabAndContent, instanceName, loadExercises, null);
   }
@@ -149,7 +147,6 @@ public class NPFHelper implements RequiresResize {
                                boolean loadExercises,
                                HasID toSelect) {
     listContent.add(doNPF(ul, instanceName, loadExercises, toSelect));
-    //listContent.addStyleName("userListBackground");
   }
 
   /**
@@ -182,7 +179,6 @@ public class NPFHelper implements RequiresResize {
    */
   Panel doInternalLayout(UserList<CommonShell> ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-
     // row 1
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("internalLayout_Row");
@@ -232,12 +228,7 @@ public class NPFHelper implements RequiresResize {
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
         makeExerciseList(right, new ListOptions().setInstance(instanceName).setShowFirstNotCompleted(showFirstNotCompleted));
     setFactory(exerciseList, instanceName, showQC);
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      @Override
-      public void execute() {
-        exerciseList.onResize();
-      }
-    });
+    Scheduler.get().scheduleDeferred(exerciseList::onResize);
     return exerciseList;
   }
 
@@ -269,16 +260,10 @@ public class NPFHelper implements RequiresResize {
    * @see #makeNPFExerciseList
    */
   PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
-    return new NPExerciseList(right, controller,
-        listOptions, -1) {
+    return new NPExerciseList(right, controller, listOptions, -1) {
       @Override
       protected void onLastItem() {
-        new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            reloadExercises();
-          }
-        });
+        new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
       }
     };
   }
@@ -299,6 +284,7 @@ public class NPFHelper implements RequiresResize {
       final boolean showQC) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
       private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
@@ -323,6 +309,6 @@ public class NPFHelper implements RequiresResize {
   }
 
   public void setContentPanel(DivWidget content) {
-    this.contentPanel = content;
+    DivWidget contentPanel = content;
   }
 }

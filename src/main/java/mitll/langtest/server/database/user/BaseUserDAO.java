@@ -103,8 +103,8 @@ public abstract class BaseUserDAO extends DAO {
   @Deprecated
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
-  protected final Collection<String> admins;
-  protected Set<String> defaultUsers;
+   final Collection<String> admins;
+   Set<String> defaultUsers;
 
   BaseUserDAO(Database database) {
     super(database);

@@ -102,11 +102,11 @@ public class NewContentChooser implements INavigation {
           break;
         case DEFECTS:
           clear();
-          new MarkDefectsChapterNPFHelper(controller, null).showNPF(divWidget, DEFECTS.toString());
+          new MarkDefectsChapterNPFHelper(controller).showNPF(divWidget, DEFECTS.toString());
           break;
         case FIX:
           clear();
-          listManager.viewReview(divWidget);
+          listManager.viewReview(divWidget);  // TODO : no more list manager
           break;
         case NONE:
 //          if (hasProjectChoice() && currentSection == NONE) {

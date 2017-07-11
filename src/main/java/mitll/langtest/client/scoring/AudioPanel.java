@@ -71,9 +71,10 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
-  public static final String RECORD = "Record";
   private final Logger logger = Logger.getLogger("AudioPanel");
-  public static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
+
+  private static final String RECORD = "Record";
+  private static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
 
   private static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
 

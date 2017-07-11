@@ -105,7 +105,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
 
   private static final String REF_AUDIO = "refAudio";
   /**
-   * @see #addApprovedButton(ListInterface, NavigationHelper)
+   * @see #addApprovedButton
    */
   private static final String APPROVED = "Mark Inspected";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
@@ -115,8 +115,8 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
-  private static final String ATTENTION_LL = "Attention LL";
-  private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
+  // private static final String ATTENTION_LL = "Attention LL";
+//  private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
 
   public static final String REVIEW = "review";
   //public static final String COMMENT = "comment";
@@ -223,9 +223,9 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
 
     if (!getInstance().contains(REVIEW) && !getInstance().toLowerCase().contains(COMMENT.toLowerCase())) {
       approvedButton = addApprovedButton(listContainer, navHelper);
-      if (controller.hasModel()) {
-        addAttnLLButton(listContainer, navHelper);
-      }
+//      if (controller.hasModel()) {
+//        addAttnLLButton(listContainer, navHelper);
+//      }
     }
     setApproveButtonState();
     return navHelper;
@@ -243,16 +243,11 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     approved.addStyleName("leftFiveMargin");
     widgets.add(approved);
     approved.setType(ButtonType.PRIMARY);
-    approved.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        markReviewed(listContainer, exercise);
-      }
-    });
+    approved.addClickHandler(event -> markReviewed(listContainer, exercise));
     approvedTooltip = addTooltip(approved, APPROVED_BUTTON_TOOLTIP);
     return approved;
   }
-
+/*
   private Button addAttnLLButton(final ListInterface listContainer, NavigationHelper widgets) {
     Button attention = new Button(ATTENTION_LL);
     attention.getElement().setId("attention");
@@ -267,7 +262,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     });
     addTooltip(attention, MARK_FOR_LL_REVIEW);
     return attention;
-  }
+  }*/
 
   @Override
   protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
@@ -283,23 +278,25 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    * @see #nextWasPressed
    */
   private void markReviewed(ListInterface listContainer, HasID completedExercise) {
-    if (isCourseContent()) {
-      markReviewed(completedExercise);
-      boolean allCorrect = incorrectFields.isEmpty();
-      listContainer.setState(completedExercise.getID(), allCorrect ? STATE.APPROVED : STATE.DEFECT);
-      listContainer.redraw();
-      navigationHelper.clickNext(controller, completedExercise);
-    }
+//    if (isCourseContent()) {
+    markReviewed(completedExercise);
+    boolean allCorrect = incorrectFields.isEmpty();
+    int id = completedExercise.getID();
+    logger.info("mark " + id + " = " + allCorrect + " incorrect fields " + incorrectFields.size()  + " : " +incorrectFields);
+    listContainer.setState(id, allCorrect ? STATE.APPROVED : STATE.DEFECT);
+    listContainer.redraw();
+    navigationHelper.clickNext(controller, completedExercise);
+    //  }
   }
 
   /**
    * So if the attention LL button has been pressed, clicking next should not step on that setting
    *
-   * @param listContainer
-   * @param completedExercise
-   * @see #addAttnLLButton(ListInterface, NavigationHelper)
+   * @paramx listContainer
+   * @paramx completedExercise
+   * @seex #addAttnLLButton(ListInterface, NavigationHelper)
    */
-  private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
+/*  private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
     if (isCourseContent()) {
       controller.getQCService().markState(completedExercise.getID(), STATE.ATTN_LL,
           new AsyncCallback<Void>() {
@@ -316,11 +313,11 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
       listContainer.redraw();
       navigationHelper.clickNext(controller, completedExercise);
     }
-  }
+  }*/
 
-  private boolean isCourseContent() {
-    return !getInstance().equals(REVIEW) && !getInstance().equalsIgnoreCase(COMMENT);
-  }
+//  private boolean isCourseContent() {
+//    return !getInstance().equals(REVIEW) && !getInstance().equalsIgnoreCase(COMMENT);
+//  }
 
   /**
    * @param completedExercise
@@ -746,6 +743,14 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     }
   }
 
+  /**
+   *
+   * @param e
+   * @param field
+   * @param label
+   * @param value
+   * @return
+   */
   private Widget getEntry(T e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
   }
@@ -776,21 +781,22 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
 
     // comment to left, content to right
 
-    Panel row = new FlowPanel();
+    Panel row = new DivWidget();
     row.getElement().setId("QCNPFExercise_row_" + field);
 
-    row.addStyleName("trueInlineStyle");
+  //  row.addStyleName("trueInlineStyle");
+    row.addStyleName("inlineFlex");
     qcCol.addStyleName("floatLeftAndClear");
     row.add(qcCol);
-    if (addLeftMargin) {
-      content.getElement().getStyle().setMarginLeft(80, Style.Unit.PX);
-    }
+//    if (addLeftMargin) {
+//      content.getElement().getStyle().setMarginLeft(80, Style.Unit.PX);
+//    }
     row.add(content);
 
     Panel rowContainer = new FlowPanel();
     rowContainer.getElement().setId("QCNPFExercise_rowContainer_" + field);
     rowContainer.addStyleName("topFiveMargin");
-    rowContainer.addStyleName("blockStyle");
+   // rowContainer.addStyleName("blockStyle");
     rowContainer.add(row);
     rowContainer.add(commentRow);
 
@@ -859,12 +865,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     final CheckBox checkBox = new CheckBox("");
     checkBox.getElement().setId("CheckBox_" + field);
     checkBox.addStyleName(isComment ? "wideCenteredRadio" : "centeredRadio");
-    checkBox.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkBoxWasClicked(checkBox.getValue(), field, commentRow, commentEntry);
-      }
-    });
+    checkBox.addClickHandler(event -> checkBoxWasClicked(checkBox.getValue(), field, commentRow, commentEntry));
     checkBox.setValue(!alreadyMarkedCorrect);
     if (!isComment) {
       addTooltip(checkBox, CHECKBOX_TOOLTIP);
@@ -890,26 +891,17 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
       addCorrectComment(field);
     }
 
-    //System.out.println("checkBoxWasClicked : instance = '" +instance +"'");
-    if (isCourseContent()) {
-      //String id = ;
-      // System.out.println("\tcheckBoxWasClicked : instance = '" +instance +"'");
-      //if (instance.equalsIgnoreCase(Navigation.CLASSROOM)) {
-      STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
-      exercise.setState(state);
-      listContainer.setState(exercise.getID(), state);
-      //   System.out.println("\tcheckBoxWasClicked : state now = '" +state +"'");
+    //if (isCourseContent()) {
+    STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
+    exercise.setState(state);
+    listContainer.setState(exercise.getID(), state);
+    listContainer.redraw();
+    setApproveButtonState();
+    markReviewed(exercise);
 
-      listContainer.redraw();
-      //  }
-      //  else {
-      //    System.out.println("\tcheckBoxWasClicked : ignoring instance = '" +instance +"'");
-      //   }
-
-      setApproveButtonState();
-      markReviewed(exercise);
-      LangTest.EVENT_BUS.fireEvent(new DefectEvent(getInstance()));
-    }
+    String instance = getInstance();
+  //  LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
+    //}
   }
 
   /**

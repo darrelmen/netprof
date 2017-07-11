@@ -52,6 +52,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
 //  private HandlerRegistration handlerRegistration;
   private final Map<String, NavLink> nameToLink = new HashMap<>();
   private Dropdown userDrop;
+  /**
+   * @see #addChoicesForUser(ComplexWidget)
+   */
+  private Map<VIEWS, NavLink> viewToLink = new HashMap<>();
 
   /**
    * @see #addChoicesForUser
@@ -117,8 +121,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
     styleNav(recnav);
-    getChoice(recnav, VIEWS.ITEMS.toString());
-    getChoice(recnav, VIEWS.CONTEXT.toString());
+    getChoice(recnav, VIEWS.ITEMS);
+    getChoice(recnav, VIEWS.CONTEXT);
     return recnav;
   }
 
@@ -133,8 +137,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     Nav nav = new Nav();
     nav.getElement().setId("defectnav");
     styleNav(nav);
-    getChoice(nav, VIEWS.DEFECTS.toString());
-    getChoice(nav, VIEWS.FIX.toString());
+
+    viewToLink.put(VIEWS.DEFECTS,  getChoice(nav, VIEWS.DEFECTS));
+
+    getChoice(nav, VIEWS.FIX);
     return nav;
   }
 
@@ -245,7 +251,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     info.add(getContactUs());
   }
 
-  private Map<VIEWS, NavLink> viewToLink = new HashMap<>();
 
   /**
    * @param nav
@@ -256,7 +261,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
 
    // logger.info("addChoicesForUser has project " + hasProject);
     for (VIEWS choice : Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS, VIEWS.LISTS)) {
-      NavLink choice1 = getChoice(nav, choice.toString());
+      NavLink choice1 = getChoice(nav, choice);
       if (first) {
         choice1.addStyleName("leftTenMargin");
       }
@@ -267,7 +272,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   }
 
   @NotNull
-  private NavLink getChoice(ComplexWidget nav, String instanceName) {
+  private NavLink getChoice(ComplexWidget nav, VIEWS views) {
+    String instanceName = views.toString();
 //    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
     NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
@@ -364,7 +370,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   public void setUserName(String name) {
     userDrop.setTitle(name);
     userDrop.setText(name);
-
     recordMenuVisible();
   }
 
@@ -373,7 +378,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   }
 
   private void defectMenuVisible() {
-    defectnav.setVisible(isQC() && hasProjectChoice());
+    boolean qc = isQC();
+    boolean b = hasProjectChoice();
+//    logger.info("is QC " + controller.getUser() + " : " + qc + " has choice " + b);
+    defectnav.setVisible(qc && b);
   }
 
   private boolean isPermittedToRecord() {
@@ -386,7 +394,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
 
   private boolean isQC() {
     //  logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
-    return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || isAdmin();
+    boolean admin = isAdmin();
+ //   logger.info("is admin " + admin);
+    boolean canDoQC = controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL);
+   // logger.info("is canDoQC " + canDoQC);
+    return canDoQC || admin;
   }
 
   @Override
@@ -396,7 +408,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   @Override
   public void checkProjectSelected() {
     setVisibleChoices(controller.getProjectStartupInfo() != null);
-    showActive(viewToLink.get(navigation.getCurrentView()));
+    VIEWS currentView = navigation.getCurrentView();
+   // logger.info("Current view is " + currentView);
+    NavLink learn = viewToLink.get(currentView);
+
+  //  logger.info("Current view link is " + learn);
+//    if (learn == null) learn = viewToLink.get(VIEWS.LEARN);
+    showActive(learn);
     recordMenuVisible();
   }
 

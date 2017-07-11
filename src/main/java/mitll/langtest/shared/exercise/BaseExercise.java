@@ -33,6 +33,8 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.list.PagingExerciseList;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -58,6 +60,11 @@ public class BaseExercise implements IsSerializable, Shell {
     return id;
   }
 
+  /**
+   * @see PagingContainer#getEnglishColumn
+   * @see PagingExerciseList#getFirstNotCompleted
+   * @return
+   */
   @Override
   public STATE getState() {
     return state;

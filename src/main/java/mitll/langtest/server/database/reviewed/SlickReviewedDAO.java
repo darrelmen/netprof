@@ -121,6 +121,10 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
     return exidToState;
   }
 
+  /**
+   *
+   * @return
+   */
   @Override
   public Collection<Integer> getDefectExercises() {
     Map<Integer, StateCreator> exerciseToState = getExerciseToState(true);
@@ -135,18 +139,15 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
 
   @Override
   public Collection<Integer> getInspectedExercises() {
-    Map<Integer, StateCreator> exerciseToState = getExerciseToState(true);
-    Set<Integer> ids = new HashSet<>();
-
     Collection<STATE> toMatch = new HashSet<>();
     toMatch.add(STATE.APPROVED);
     toMatch.add(STATE.DEFECT);
     toMatch.add(STATE.FIXED);
     toMatch.add(STATE.ATTN_LL);
 
-    for (Map.Entry<Integer, StateCreator> pair : exerciseToState.entrySet()) {
+    Set<Integer> ids = new HashSet<>();
+    for (Map.Entry<Integer, StateCreator> pair : getExerciseToState(true).entrySet()) {
       STATE state = pair.getValue().getState();
-
       if (toMatch.contains(state)) {
         ids.add(pair.getKey());
       }
