@@ -28,7 +28,7 @@ plugins {
 apply from: 'gradle-common/common.gradle'
 apply from: 'gradle-common/common-java.gradle'
 //apply plugin: 'java'
-apply plugin: 'application'
+//apply plugin: 'application'
 apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'com.github.johnrengelman.shadow'
