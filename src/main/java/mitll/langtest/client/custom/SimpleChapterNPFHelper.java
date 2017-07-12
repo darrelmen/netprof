@@ -102,9 +102,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see #showNPF
    */
   @Override
-  public void showContent(Panel listContent, String instanceName) {
-    listContent.add(doNPF(instanceName));
-  }
+  public void showContent(Panel listContent, String instanceName) { listContent.add(doNPF(instanceName));  }
 
   private final FlexListLayout<T, U> flexListLayout;
 

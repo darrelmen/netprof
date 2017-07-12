@@ -297,6 +297,10 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper(ExerciseListRequest, Collection)
+   * @return
+   */
   public boolean isQC() {
     return QC;
   }

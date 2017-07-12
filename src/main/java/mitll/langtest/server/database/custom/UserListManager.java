@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.custom;
 
-import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.PathWriter;
@@ -309,13 +308,12 @@ public class UserListManager implements IUserListManager {
    * Also, incorrect annotations are the latest annotations- a field can have a history of correct and incorrect
    * annotations - only if the latest is incorrect should the item appear on the comment or defect list.
    *
-   * @param typeOrder
    * @param ids
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getReviewLists
    */
   @Override
-  public UserList<CommonShell> getCommentedList(Collection<String> typeOrder, Set<Integer> ids) {
+  public UserList<CommonShell> getCommentedList(Set<Integer> ids) {
     //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
 
     Collection<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
@@ -323,15 +321,15 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
 
     // if it's on the defect list, remove it
-    for (Integer exid : stateManager.getDefectExercises()) {
-      incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
-    }
+//    for (Integer exid : stateManager.getDefectExercises()) {
+//      incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
+//    }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
     incorrectAnnotations.retainAll(ids);
     Collection<CommonExercise> include = userExerciseDAO.getByExID(incorrectAnnotations);
     //logger.debug("getCommentedList include " + include.size() + " included ");
 
-    UserList<CommonShell> reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectAnnotations, COMMENT_MAGIC_ID, typeOrder);
+    UserList<CommonShell> reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectAnnotations, COMMENT_MAGIC_ID);
     reviewList.setUniqueID(COMMENT_MAGIC_ID);
     return reviewList;
   }
@@ -351,17 +349,17 @@ public class UserListManager implements IUserListManager {
     // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
 
     // if it's on the defect list, remove it
-    for (Integer exid : stateManager.getDefectExercises()) {
-      incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
-    }
-    //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
+//    for (Integer exid : stateManager.getDefectExercises()) {
+//      incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
+//    }
+    logger.debug("getCommentedList After there are - idToCreator items ");
 
     incorrectAnnotations.retainAll(ids);
 
     Collection<CommonExercise> include = userExerciseDAO.getByExID(incorrectAnnotations);
     //logger.debug("getCommentedList include " + include.size() + " included ");
 
-    UserList<CommonExercise> reviewList = getReviewListEx(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectAnnotations, COMMENT_MAGIC_ID, typeOrder);
+    UserList<CommonExercise> reviewList = getReviewListEx(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectAnnotations, COMMENT_MAGIC_ID);
     reviewList.setUniqueID(COMMENT_MAGIC_ID);
     return reviewList;
   }
@@ -373,7 +371,7 @@ public class UserListManager implements IUserListManager {
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
 
-    return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID, typeOrder);
+    return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID);
   }
 
   @Override
@@ -383,7 +381,7 @@ public class UserListManager implements IUserListManager {
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
 
-    return getReviewListEx(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID, typeOrder);
+    return getReviewListEx(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID);
   }
 /*
   @NotNull
@@ -416,24 +414,23 @@ public class UserListManager implements IUserListManager {
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
-    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
+    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID);
   }
 
   /**
-   * @param typeOrder
    * @param ids
    * @return
    * @see #getUserListByIDExercises(long, int, Collection, Set)
    */
 
   @Override
-  public UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder, Set<Integer> ids) {
+  public UserList<CommonExercise> getDefectListEx(Set<Integer> ids) {
     Set<Integer> defectIds = stateManager.getDefectIDs();
     defectIds.retainAll(ids);
     Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
-    return getReviewListEx(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
+    return getReviewListEx(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID);
   }
 
 /*  @NotNull
@@ -456,18 +453,16 @@ public class UserListManager implements IUserListManager {
    * @param description
    * @param ids
    * @param userListID
-   * @param typeOrder   used by sorter to sort first in unit & chapter order
    * @return
    * @see IUserListManager#getAttentionList(Collection, Set)
-   * @see IUserListManager#getCommentedList(Collection, Set)
+   * @see IUserListManager#getCommentedList(Set)
    * @see IUserListManager#getDefectList(Collection, Set)
    */
   private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
                                               String name,
                                               String description,
                                               Collection<Integer> ids,
-                                              int userListID,
-                                              Collection<String> typeOrder) {
+                                              int userListID) {
     List<CommonExercise> onList = getReviewedExercises(allKnown, ids);
 
     // TODO : is the projid really needed here?
@@ -480,14 +475,13 @@ public class UserListManager implements IUserListManager {
     for (CommonShell orig : onList) copy.add(orig.getShell());
 
     logger.debug("getReviewList '" + name + "' ids size = " + allKnown.size() + " yielded " + copy.size());// + " took " + (now - then) + " millis");
-    return getCommonUserList(typeOrder, userList, copy);
+    return getCommonUserList(userList, copy);
   }
 
   private UserList<CommonExercise> getReviewListEx(Collection<CommonExercise> allKnown,
                                                    String name, String description,
                                                    Collection<Integer> ids,
-                                                   int userListID,
-                                                   Collection<String> typeOrder) {
+                                                   int userListID) {
     List<CommonExercise> onList = getReviewedExercises(allKnown, ids);
 
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
@@ -498,24 +492,23 @@ public class UserListManager implements IUserListManager {
 //    List<CommonShell> copy = new ArrayList<>();
 //    for (CommonShell orig : onList) copy.add(orig.getShell());
 
-    logger.debug("getReviewList '" + name + "' ids size = " + allKnown.size() + " yielded " + onList.size());// + " took " + (now - then) + " millis");
-    return getCommonUserList(typeOrder, userList, onList);
+    logger.debug("getReviewListEx '" + name + "' ids size = " + allKnown.size() + " yielded " + onList.size());// + " took " + (now - then) + " millis");
+    return getCommonUserList(userList, onList);
   }
 
   /**
    * TODO : should we worry about sort order for english?
    *
-   * @param typeOrder
+   * @param <T>
    * @param userList
    * @param copy
-   * @param <T>
    * @return
    */
   @NotNull
-  private <T extends CommonShell> UserList<T> getCommonUserList(Collection<String> typeOrder, UserList<T> userList, List<T> copy) {
+  private <T extends CommonShell> UserList<T> getCommonUserList(UserList<T> userList, List<T> copy) {
     userList.setReview(true);
 
-    new ExerciseSorter(typeOrder).getSorted(copy, false, false, "");
+    new ExerciseSorter().getSorted(copy, false, false, "");
 
     userList.setExercises(copy);
     stateManager.markState(copy);
@@ -546,11 +539,12 @@ public class UserListManager implements IUserListManager {
    * @param idToUserExercise
    * @param ids
    * @return
-   * @see #getReviewList(Collection, String, String, Collection, int, Collection)
+   * @see #getReviewList(Collection, String, String, Collection, int)
    */
   private List<CommonExercise> getReviewedUserExercises(Map<Integer, CommonExercise> idToUserExercise, Collection<Integer> ids) {
     List<CommonExercise> onList = new ArrayList<>();
 
+    logger.info("getReviewed checking " + ids.size() + " against " + idToUserExercise.size());
     for (Integer id : ids) {
       CommonExercise commonExercise = idToUserExercise.get(id);
       if (commonExercise != null && !commonExercise.isPredefined()) {
@@ -572,7 +566,7 @@ public class UserListManager implements IUserListManager {
           //e.setTooltip(byID.getCombinedTooltip());
           //logger.debug("getReviewedUserExercises : found " + e.getOldID() + " tooltip " + e.getTooltip());
         } else {
-          logger.warn("getReviewedUserExercises : huh? can't find predef exercise " + id);
+          logger.warn("\n\ngetReviewedUserExercises : huh? can't find predef exercise " + id);
         }
       }
     }
@@ -860,9 +854,9 @@ public class UserListManager implements IUserListManager {
       return null;
     }
     return
-        id == REVIEW_MAGIC_ID ? getDefectList(typeOrder, ids) :
-            id == COMMENT_MAGIC_ID ? getCommentedList(typeOrder, ids) :
-                id == ATTN_LL_MAGIC_ID ? getAttentionList(typeOrder, ids) :
+      //  id == REVIEW_MAGIC_ID ? getDefectList(typeOrder, ids) :
+            id == COMMENT_MAGIC_ID ? getCommentedList(ids) :
+        //        id == ATTN_LL_MAGIC_ID ? getAttentionList(typeOrder, ids) :
                     userListDAO.getWithExercises(id);
   }
 
@@ -896,9 +890,9 @@ public class UserListManager implements IUserListManager {
       return null;
     }
     return
-        id == REVIEW_MAGIC_ID ? getDefectListEx(typeOrder, ids) :
+       // id == REVIEW_MAGIC_ID ? getDefectListEx(ids) :
             id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder, ids) :
-                id == ATTN_LL_MAGIC_ID ? getAttentionListEx(typeOrder, ids) :
+         //       id == ATTN_LL_MAGIC_ID ? getAttentionListEx(typeOrder, ids) :
                     userListDAO.getWithExercisesEx(id);
 
   }

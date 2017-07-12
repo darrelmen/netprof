@@ -33,7 +33,6 @@
 package mitll.langtest.server.services;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -176,26 +175,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     getUserListManager().addItemToList(userListID, "" + exID, customOrPredefExercise.getID());
   }
 
-  /**
-   * @return
-   * @see ListManager#viewReview
-   */
+
   @Override
-  public List<UserList<CommonShell>> getReviewLists() {
-    IUserListManager userListManager = getUserListManager();
+  public UserList<CommonShell> getReviewList() {
     int projectID = getProjectID();
-    Collection<String> typeOrder = db.getTypeOrder(projectID);
     Set<Integer> ids = db.getIDs(projectID);
-    UserList<CommonShell> defectList = userListManager.getDefectList(typeOrder, ids);
-
-    List<UserList<CommonShell>> lists = new ArrayList<>();
-    lists.add(defectList);
-
-    lists.add(userListManager.getCommentedList(typeOrder, ids));
-    if (!getProject().isNoModel()) {
-      lists.add(userListManager.getAttentionList(typeOrder, ids));
-    }
-    return lists;
+    return getUserListManager().getCommentedList(ids);
   }
 
   /**

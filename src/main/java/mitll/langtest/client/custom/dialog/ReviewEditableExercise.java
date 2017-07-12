@@ -56,7 +56,6 @@ import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
 
@@ -131,7 +130,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   public ReviewEditableExercise(ExerciseController controller,
                                 CommonExercise changedUserExercise,
 
-                                UserList<CommonShell> originalList,
+                                int originalList,
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                                 String instanceName) {
     super(controller,
@@ -155,13 +154,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     tabs = new ArrayList<>();
 
     TabPanel tabPanel = new TabPanel();
-
-//    RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, ADD_AUDIO, false, false);
-//
-//    tabAndContent.getContent().add(getRecordingWidget());
-//    tabAndContent.getTab().setIcon(IconType.PLUS);
-//
-//    tabPanel.selectTab(0);
     tabLinks.clear();
 
     Collection<AudioAttribute> maleDisplayed = getDisplayedAudio(audioAttributeExercise, true);
@@ -577,7 +569,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * <p>
    * Add a fixed button, so we know when to clear the comments and remove this item from the reviewed list.
    *
-   * @param ul
    * @param pagingContainer
    * @param toAddTo
    * @param normalSpeedRecording
@@ -585,8 +576,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see #addFields
    */
   @Override
-  protected Panel getCreateButton(final UserList<CommonShell> ul,
-                                  final ListInterface<CommonShell, CommonExercise> pagingContainer,
+  protected Panel getCreateButton(final ListInterface<CommonShell, CommonExercise> pagingContainer,
                                   final Panel toAddTo,
                                   final ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
@@ -602,7 +592,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       row.add(getDuplicate());
     }
 */
-    row.add(getFixedButton(ul, pagingContainer, toAddTo, normalSpeedRecording));
+    row.add(getFixedButton(pagingContainer, toAddTo, normalSpeedRecording));
     boolean keepAudioSelection = getKeepAudioSelection();
 
     //   logger.info("value is  " + keepAudioSelection);
@@ -615,8 +605,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return row;
   }
 
-  private Button getFixedButton(final UserList<CommonShell> ul,
-                                final ListInterface<CommonShell, CommonExercise> pagingContainer,
+  private Button getFixedButton(final ListInterface<CommonShell, CommonExercise> pagingContainer,
                                 final Panel toAddTo,
                                 final ControlGroup normalSpeedRecording) {
     final Button fixed = makeFixedButton();
@@ -629,7 +618,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param toAddTo
    * @param onClick
    * @see #isValidForeignPhrase
-   * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
+   * @seex mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
    */
   @Override
   void afterValidForeignPhrase(final ListInterface<CommonShell, CommonExercise> exerciseList,
@@ -731,7 +720,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   /**
    * @return
-   * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   * @see NewUserExercise#getCreateButton(ListInterface, Panel, ControlGroup)
    */
   private Button makeFixedButton() {
     Button fixed = new Button(FIXED);
@@ -828,9 +817,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     //   int user = controller.getUser();
 
 //    logger.info("doAfterEditComplete : forgetting exercise " + id + " current user " + user + " before list had " + ul.getExercises().size());
-    if (!originalList.remove(newUserExercise)) {
-      logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + originalList);
-    }
+//    if (!originalList.remove(newUserExercise)) {
+//      logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + originalList);
+//    }
 //    if (!originalList.remove(newUserExercise)) {
 //      //   logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
 //    }

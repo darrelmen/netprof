@@ -34,7 +34,6 @@ package mitll.langtest.client.custom.dialog;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -201,7 +200,7 @@ public class EditItem {
           EditableExerciseDialog editableExercise =
               new EditableExerciseDialog(controller,
                   exercise,
-                  originalList,
+                  originalList.getID(),
                   outer,
                   getInstance()
               ) {

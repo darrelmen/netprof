@@ -162,7 +162,7 @@ public class StateManager implements IStateManager {
    *
    * @param skipUnset
    * @return
-   * @see IUserListManager#getCommentedList(Collection, Set)
+   * @see IUserListManager#getCommentedList(Set)
    */
   @Override
   public Map<Integer, StateCreator> getExerciseToState(boolean skipUnset) {
@@ -293,7 +293,7 @@ public class StateManager implements IStateManager {
 
 
   /**
-   * @see UserListManager#getCommentedList
+   * @see IUserListManager#getCommentedList
    * @return
    */
   public Collection<Integer> getDefectExercises() {  return reviewedDAO.getDefectExercises();  }

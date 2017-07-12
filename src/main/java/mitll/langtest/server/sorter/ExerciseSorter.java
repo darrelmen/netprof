@@ -52,9 +52,8 @@ public class ExerciseSorter extends SimpleSorter {
 
   /**
    * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
-   * @param typeOrder
    */
-  public ExerciseSorter(Collection<String> typeOrder) { super(typeOrder); }
+  public ExerciseSorter() { super(false); }
 
   /**
    * @param typeOrder
@@ -62,7 +61,7 @@ public class ExerciseSorter extends SimpleSorter {
    * @see mitll.langtest.server.ScoreServlet#doGet
    */
   public ExerciseSorter(Collection<String> typeOrder, Map<String, Integer> phoneToCount) {
-    this(typeOrder);
+    this();
     this.phoneToCount = phoneToCount;
   }
 

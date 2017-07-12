@@ -139,8 +139,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     styleNav(nav);
 
     viewToLink.put(VIEWS.DEFECTS,  getChoice(nav, VIEWS.DEFECTS));
+    viewToLink.put(VIEWS.FIX,  getChoice(nav, VIEWS.FIX));
 
-    getChoice(nav, VIEWS.FIX);
     return nav;
   }
 
@@ -409,11 +409,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   public void checkProjectSelected() {
     setVisibleChoices(controller.getProjectStartupInfo() != null);
     VIEWS currentView = navigation.getCurrentView();
-   // logger.info("Current view is " + currentView);
+    logger.info("Current view is " + currentView);
     NavLink learn = viewToLink.get(currentView);
 
-  //  logger.info("Current view link is " + learn);
-//    if (learn == null) learn = viewToLink.get(VIEWS.LEARN);
+    logger.info("Current view link is " + learn);
+    if (learn == null) {
+      logger.warning("huh? keys are " + viewToLink.keySet());
+      learn = viewToLink.get(VIEWS.LEARN);
+    }
     showActive(learn);
     recordMenuVisible();
   }

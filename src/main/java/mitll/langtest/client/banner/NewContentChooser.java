@@ -2,6 +2,8 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
@@ -9,15 +11,18 @@ import mitll.langtest.client.analysis.StudentAnalysis;
 import mitll.langtest.client.custom.ExerciseListContent;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
+import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
-import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.FacetExerciseList;
+import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
@@ -33,7 +38,7 @@ public class NewContentChooser implements INavigation {
   private final ExerciseListContent learnHelper;
   private final ExerciseListContent practiceHelper;
   private final ExerciseController controller;
-  private final ListManager listManager;
+ // private final ListManager listManager;
   private final IBanner banner;
   private final ListView listView;
 
@@ -47,7 +52,7 @@ public class NewContentChooser implements INavigation {
     learnHelper = new NewLearnHelper(controller);
     practiceHelper = new PracticeHelper(controller);
     this.controller = controller;
-    this.listManager = new ListManager(controller, null);
+    //this.listManager = new ListManager(controller, null);
     this.listView = new ListView(controller);
     this.banner = banner;
   }
@@ -106,7 +111,22 @@ public class NewContentChooser implements INavigation {
           break;
         case FIX:
           clear();
-          listManager.viewReview(divWidget);  // TODO : no more list manager
+          controller.getListService().getReviewList(new AsyncCallback<UserList<CommonShell>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(UserList<CommonShell> result) {
+              List<CommonShell> exercises = result.getExercises();
+              CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
+              Panel review = new ReviewItemHelper(controller).doNPF(result, "review", true, toSelect);
+              divWidget.add(review);
+            }
+          });
+
+          //   listManager.viewReview(divWidget);  // TODO : no more list manager
           break;
         case NONE:
 //          if (hasProjectChoice() && currentSection == NONE) {
@@ -156,18 +176,18 @@ public class NewContentChooser implements INavigation {
   public void showLearnList(int listid) {
     setHistoryWithList(listid);
     banner.showLearn();
-  //  learnHelper.showList(listid);
+    //  learnHelper.showList(listid);
   }
 
   private void setHistoryWithList(int listid) {
-    History.newItem(FacetExerciseList.LISTS +"=" + listid);
+    History.newItem(FacetExerciseList.LISTS + "=" + listid);
   }
 
   @Override
   public void showDrillList(int listid) {
     setHistoryWithList(listid);
     banner.showDrill();
-   // practiceHelper.showList(listid);
+    // practiceHelper.showList(listid);
   }
 
   @Override

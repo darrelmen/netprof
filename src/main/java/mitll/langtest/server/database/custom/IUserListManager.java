@@ -70,7 +70,7 @@ public interface IUserListManager /*extends IStateManager*/ {
    */
   UserList createFavorites(int userid, int projid);
 
-  UserList<CommonShell> getCommentedList(Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonShell> getCommentedList(Set<Integer> ids);
 
   UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids);
 
@@ -80,7 +80,7 @@ public interface IUserListManager /*extends IStateManager*/ {
 
   UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids);
 
-  UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonExercise> getDefectListEx(Set<Integer> ids);
 
   @Deprecated
   UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids);

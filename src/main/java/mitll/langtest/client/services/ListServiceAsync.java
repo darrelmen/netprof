@@ -66,7 +66,7 @@ public interface ListServiceAsync {
    * @deprecated
    * @param async
    */
-  void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
+ // void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
 
   void setPublicOnList(int userListID, boolean isPublic, AsyncCallback<Void> async);
 
@@ -100,4 +100,6 @@ public interface ListServiceAsync {
   void removeVisitor(int userListID, int user, AsyncCallback<Void> async);
 
   void update(UserList userList, AsyncCallback<Void> async);
+
+  void getReviewList(AsyncCallback<UserList<CommonShell>> async);
 }

@@ -78,10 +78,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final String selectedUserKey;
   private final String header;
 
-  private static final int SIGNED_UP = 95;
+//  private static final int SIGNED_UP = 95;
   private static final String SIGNED_UP1 = "Started";
   private static final int STUDENT_WIDTH = 300;
-  public static final String SELECTED_USER = "selectedUser";
+  static final String SELECTED_USER = "selectedUser";
   static final int ID_WIDTH = 130;
   private int idWidth = ID_WIDTH;
   private int pageSize = PAGE_SIZE;

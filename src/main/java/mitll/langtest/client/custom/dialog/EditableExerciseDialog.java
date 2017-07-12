@@ -45,7 +45,6 @@ import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.FormField;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -76,20 +75,20 @@ class EditableExerciseDialog extends NewUserExercise {
 
   /**
    * @param changedUserExercise
-   * @param originalList
+   * @param originalListID
    * @paramx predefinedContent   - so we can tell it to update its tooltip
    * @see EditItem#setFactory
    */
   public EditableExerciseDialog(ExerciseController controller,
                                 CommonExercise changedUserExercise,
-                                UserList<CommonShell> originalList,
+                                int originalListID,
 
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                                 String instanceName) {
-    super(controller, changedUserExercise, instanceName, originalList);
+    super(controller, changedUserExercise, instanceName, originalListID);
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
-    this.originalList = originalList;
+  //  this.originalList = originalList;
     this.exerciseList = exerciseList;
   }
 
@@ -146,7 +145,6 @@ class EditableExerciseDialog extends NewUserExercise {
   /**
    * Add remove from list button
    *
-   * @param ul
    * @param pagingContainer
    * @param toAddTo
    * @param normalSpeedRecording
@@ -154,8 +152,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see NewUserExercise#addFields
    */
   @Override
-  protected Panel getCreateButton(UserList<CommonShell> ul,
-                                  ListInterface<CommonShell,CommonExercise> pagingContainer,
+  protected Panel getCreateButton(ListInterface<CommonShell, CommonExercise> pagingContainer,
                                   Panel toAddTo,
                                   ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
@@ -174,7 +171,7 @@ class EditableExerciseDialog extends NewUserExercise {
   /**
    * @param pagingContainer
    * @return
-   * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   * @see NewUserExercise#getCreateButton(ListInterface, Panel, ControlGroup)
    */
 //  PrevNextList<CommonShell> getPrevNext(ListInterface<CommonShell, CommonExercise> pagingContainer) {
 //    CommonShell shell = pagingContainer.byID(newUserExercise.getID());

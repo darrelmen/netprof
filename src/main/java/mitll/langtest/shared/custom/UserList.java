@@ -33,7 +33,7 @@
 package mitll.langtest.shared.custom;
 
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.userlist.ListManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
@@ -202,7 +202,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   /**
    * @param uniqueID
    * @see IUserListDAO#add(UserList, int)
-   * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList
+   * @see IUserListManager#getCommentedList
    */
   public void setUniqueID(int uniqueID) {
     this.id = uniqueID;

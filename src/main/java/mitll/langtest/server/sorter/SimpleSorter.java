@@ -49,10 +49,12 @@ import java.util.List;
  * @since 10/9/15.
  */
 public class SimpleSorter extends ExerciseComparator {
-  protected final Collection<String> typeOrder;
+ // protected final Collection<String> typeOrder;
+  private  boolean sortByEnglishOnly;
 
-  SimpleSorter(Collection<String> typeOrder) {
-    this.typeOrder = typeOrder;
+  SimpleSorter(boolean sortByEnglishOnly) {
+   // this.typeOrder = typeOrder;
+    this.sortByEnglishOnly = sortByEnglishOnly;
   }
 
   /**
@@ -67,7 +69,7 @@ public class SimpleSorter extends ExerciseComparator {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    */
   public void getSorted(List<? extends CommonShell> toSort, final boolean recordedLast, boolean sortByFL, String searchTerm) {
-    if (typeOrder.isEmpty()) {
+    if (sortByEnglishOnly) {//typeOrder.isEmpty()) {
       sortByEnglish(toSort, searchTerm);
     } else {
       Collections.sort(toSort, (Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, sortByFL, searchTerm));

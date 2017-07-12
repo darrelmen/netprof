@@ -131,8 +131,8 @@ abstract class NewUserExercise extends BasicDialog {
 
   ControlGroup normalSpeedRecording = null;
   ControlGroup slowSpeedRecording = null;
-  UserList<CommonShell> originalList;
-
+  //UserList<CommonShell> originalList;
+final int listID;
   /**
    * TODO : What is this for???
    */
@@ -147,7 +147,8 @@ abstract class NewUserExercise extends BasicDialog {
    * @param controller
    * @param newExercise
    * @param instance
-   * @param originalList
+   * @paramx originalList
+   * @param listID
    * @paramx editableExerciseList
    * @paramx service
    * @paramx itemMarker
@@ -157,11 +158,11 @@ abstract class NewUserExercise extends BasicDialog {
       ExerciseController controller,
       CommonExercise newExercise,
       String instance,
-      UserList<CommonShell> originalList) {
+       int listID) {
     this.controller = controller;
     this.newUserExercise = newExercise;
     this.instance = instance;
-    this.originalList = originalList;
+    this.listID = listID;
   //  this.predefinedContentList = predefinedContent;
   }
 
@@ -190,7 +191,8 @@ abstract class NewUserExercise extends BasicDialog {
     container.add(upper);
 
     makeForeignLangRow(upper);
-    final String id1 = "" + originalList.getID();
+//    int listID = originalList.getID();
+    final String id1 = "" + listID;
 
     foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
     // focusOn(formField); // Bad idea since steals the focus after search
@@ -207,18 +209,14 @@ abstract class NewUserExercise extends BasicDialog {
     this.toAddTo = toAddTo;
     this.listInterface = listInterface;
 
-    Panel buttonRow = getCreateButton(originalList, listInterface, toAddTo, normalSpeedRecording);
+    Panel buttonRow = getCreateButton(listInterface, toAddTo, normalSpeedRecording);
     if (buttonRow != null) {
       container.add(buttonRow);
-/*      Button widgets = makeCancelButton();
-      if (widgets != null) {
-        buttonRow.add(widgets);
-      }*/
-    }
+   }
 
-    addBlurHandler(originalList.getID(), foreignLang);
-    addBlurHandler(originalList.getID(), translit);
-    addBlurHandler(originalList.getID(), english);
+    addBlurHandler(listID, foreignLang);
+    addBlurHandler(listID, translit);
+    addBlurHandler(listID, english);
     return container;
   }
 
@@ -316,7 +314,7 @@ abstract class NewUserExercise extends BasicDialog {
     return isEnglish() ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
   }
 
-  private void makeForeignLangRow(Panel container) {
+  private FormField makeForeignLangRow(Panel container) {
     //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
     Panel row = new FluidRow();
     container.add(row);
@@ -326,6 +324,7 @@ abstract class NewUserExercise extends BasicDialog {
     foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
     setMarginBottom(foreignLang);
+    return foreignLang;
   }
 
   private String getLanguage() {
@@ -395,9 +394,9 @@ abstract class NewUserExercise extends BasicDialog {
 
   private void logBlur(String prefix, TextBoxBase box) {
     try {
-      long uniqueID = originalList.getID();
-      controller.logEvent(box, "TextBox", "UserList_" + uniqueID, prefix + box.getValue());
+      controller.logEvent(box, "TextBox", "UserList_" + listID, prefix + box.getValue());
     } catch (Exception e) {
+      logger.warning("got exception " + e);
       //e.printStackTrace();
     }
   }
@@ -611,15 +610,13 @@ abstract class NewUserExercise extends BasicDialog {
   }
 
   /**
-   * @param ul
    * @param pagingContainer
    * @param toAddTo
    * @param normalSpeedRecording
    * @return
    * @see #addFields
    */
-  abstract Panel getCreateButton(UserList<CommonShell> ul,
-                                 ListInterface<CommonShell, CommonExercise> pagingContainer,
+  abstract Panel getCreateButton(ListInterface<CommonShell, CommonExercise> pagingContainer,
                                  Panel toAddTo,
                                  ControlGroup normalSpeedRecording);
 

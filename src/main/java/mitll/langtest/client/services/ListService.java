@@ -38,14 +38,11 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
-import mitll.langtest.client.custom.tabs.TabAndContent;
-import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
-import java.util.List;
 
 @RemoteServiceRelativePath("list-manager")
 public interface ListService extends RemoteService {
@@ -124,7 +121,7 @@ public interface ListService extends RemoteService {
    * @return
    * @see ListManager#viewReview(Panel)
    */
-  List<UserList<CommonShell>> getReviewLists();
+  //List<UserList<CommonShell>> getReviewLists();
 
   /**
    * @param userListID
@@ -132,6 +129,8 @@ public interface ListService extends RemoteService {
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   void addItemToUserList(int userListID, int exID);
+
+  UserList<CommonShell> getReviewList();
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase

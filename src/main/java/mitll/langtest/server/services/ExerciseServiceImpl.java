@@ -593,6 +593,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 
+/*
   private void markDefects(List<CommonShell> exerciseShells) {
     Collection<Integer> defectExercises = db.getStateManager().getDefectExercises();
     //  int c = 0;
@@ -603,6 +604,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
   }
+*/
 
   /**
    * 0) Add annotations to fields on exercise
@@ -756,8 +758,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getSortedExercises
    */
   private <T extends CommonShell> void sortExercises(boolean isRecorder, List<T> commonExercises, boolean sortByFL, String searchTerm) {
-    new ExerciseSorter(db.getTypeOrder(getProjectID()))
-        .getSorted(commonExercises, isRecorder, sortByFL, searchTerm);
+    new ExerciseSorter().getSorted(commonExercises, isRecorder, sortByFL, searchTerm);
   }
 
   /**
@@ -805,6 +806,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return new TripleExercises<T>(exercieByExid, basicExercises, predefExercises ? fullContextTrie.getExercises(prefix) : Collections.emptyList());
   }
 
+  /**
+   * Three buckets - match by id, matches on vocab item, then match on context sentences
+   * @param <T>
+   */
   private static class TripleExercises<T extends CommonExercise> {
     private List<T> byID = Collections.emptyList();
     private List<T> byExercise = Collections.emptyList();

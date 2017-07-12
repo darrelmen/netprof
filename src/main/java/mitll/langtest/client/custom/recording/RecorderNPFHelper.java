@@ -129,24 +129,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             //    .setContextOnly(!doNormalRecording)
             -1) {
           private CheckBox filterOnly;
-//          @Override
-//          protected FacetContainer getSectionWidgetContainer() {
-//            return new FacetContainer() {
-//              @Override
-//              public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
-//              }
-//
-//              @Override
-//              public String getHistoryToken() {
-//                return null;
-//              }
-//
-//              @Override
-//              public int getNumSelections() {
-//                return 0;
-//              }
-//            };
-//          }
 
           @Override
           protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {

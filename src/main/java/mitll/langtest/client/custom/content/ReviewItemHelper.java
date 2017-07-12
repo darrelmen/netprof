@@ -33,14 +33,11 @@
 package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
-import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.SimplePagingContainer;
@@ -57,6 +54,8 @@ import mitll.langtest.shared.exercise.ExerciseListRequest;
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static mitll.langtest.shared.answer.ActivityType.QUALITY_CONTROL;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -94,7 +93,7 @@ public class ReviewItemHelper extends NPFHelper {
   @Override
   protected Panel doInternalLayout(final UserList<CommonShell> ul, String instanceName) {
     logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-    this.flexListLayout = new ReviewFlexListLayout(ul);
+    this.flexListLayout = new ReviewFlexListLayout(ul.getID());
     Panel widgets = flexListLayout.doInternalLayout(ul == null ? -1 : ul.getID(), instanceName, true);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
@@ -110,11 +109,20 @@ public class ReviewItemHelper extends NPFHelper {
   }
 
   private class ReviewFlexListLayout extends FlexListLayout<CommonShell, CommonExercise> {
-    private final UserList<CommonShell> ul;
+    private final int ulID;
 
-    ReviewFlexListLayout(UserList<CommonShell> ul) {
+    ReviewFlexListLayout(int ulID) {
       super(ReviewItemHelper.this.controller);
-      this.ul = ul;
+      this.ulID = ulID;
+    }
+
+    protected void styleTopRow(Panel twoRows, Panel topRow) {
+      twoRows.add(topRow);
+    }
+
+    protected void styleBottomRow(Panel bottomRow) {
+      bottomRow.setWidth("100%");
+      bottomRow.addStyleName("inlineFlex");
     }
 
     @Override
@@ -125,7 +133,8 @@ public class ReviewItemHelper extends NPFHelper {
           CommonExercise userExercise = new Exercise(exercise);
           ReviewEditableExercise reviewEditableExercise =
               new ReviewEditableExercise(controller,
-                  userExercise, ul,
+                  userExercise,
+                  ulID,
                   pagingExerciseList,
                   "ReviewEditableExercise"
               );
@@ -144,7 +153,8 @@ public class ReviewItemHelper extends NPFHelper {
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                String instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
-      return new NPExerciseList(currentExercisePanel, outer.getController(), new ListOptions(instanceName), -1) {
+      return new NPExerciseList(currentExercisePanel, outer.getController(),
+          new ListOptions(instanceName).setActivityType(QUALITY_CONTROL), -1) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         @Override
@@ -180,12 +190,7 @@ public class ReviewItemHelper extends NPFHelper {
 
           // row 2
           this.checkBox = new com.github.gwtbootstrap.client.ui.CheckBox(ONLY_WITH_AUDIO_DEFECTS);
-          checkBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-              pushNewSectionHistoryToken();
-            }
-          });
+          checkBox.addClickHandler(event -> pushNewSectionHistoryToken());
           checkBox.addStyleName("leftFiveMargin");
           add(checkBox);
 

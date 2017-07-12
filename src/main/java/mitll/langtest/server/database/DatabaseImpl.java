@@ -89,10 +89,7 @@ import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableAudioExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.result.MonitorResult;
@@ -1640,6 +1637,12 @@ IStateManager stateManager;
     return getUserListManager().getUserListByID(listid, getSectionHelper(projectid).getTypeOrder(), getIDs(projectid));
   }*/
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds(ExerciseListRequest)
+   * @param listid
+   * @param projectid
+   * @return
+   */
   @Override
   public UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid) {
     return getUserListManager().getUserListByIDExercises(listid,
