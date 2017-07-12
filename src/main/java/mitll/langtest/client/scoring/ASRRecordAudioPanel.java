@@ -27,7 +27,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import static mitll.langtest.client.scoring.DownloadContainer.getDownloadAudio;
+import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 /**
  * An ASR scoring panel with a record button.

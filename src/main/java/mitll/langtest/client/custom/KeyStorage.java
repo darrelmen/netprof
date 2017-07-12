@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  * @since 3/5/14.
  */
 public class KeyStorage {
-  private Logger logger = Logger.getLogger("KeyStorage");
+  private final Logger logger = Logger.getLogger("KeyStorage");
 
   private ExerciseController controller;
   private final boolean DEBUG = false;

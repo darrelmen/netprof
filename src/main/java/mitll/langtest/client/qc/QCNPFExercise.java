@@ -50,9 +50,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
-import mitll.langtest.client.exercise.DefectEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
@@ -704,7 +702,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
       // logger.info("getPanelForAudio path after  " + audioRef);
     }
     String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), e.getTransliteration(), controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<>(audioRef, e.getForeignLanguage(), e.getTransliteration(), controller,
         controller.getProps().showSpectrogram(), 70, speed, e, getInstance());
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");

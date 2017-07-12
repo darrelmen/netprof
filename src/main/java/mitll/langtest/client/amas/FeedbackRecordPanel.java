@@ -88,7 +88,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
   private static final String AUDIO = "Audio";
   private List<TextResponse> textResponses;
   private final QuizScorePanel quizScorePanel;
-  private final Set<Integer> selfScoreQuestions = new HashSet<Integer>();
+  private final Set<Integer> selfScoreQuestions = new HashSet<>();
   private final AmasServiceAsync amasService = GWT.create(AmasService.class);
 
   /**
@@ -184,7 +184,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
       logger = Logger.getLogger("FeedbackRecordPanel");
     }
     if (textResponses == null) {
-      textResponses = new ArrayList<TextResponse>();
+      textResponses = new ArrayList<>();
     }
     String responseType = controller.getProps().getResponseType();
 

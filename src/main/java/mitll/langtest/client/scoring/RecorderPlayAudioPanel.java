@@ -10,6 +10,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -28,7 +29,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    */
   private Image recordImage1;
   private Image recordImage2;
-  private  DownloadContainer downloadContainer;
+  private final DownloadContainer downloadContainer;
 
   /**
    * @param soundManager

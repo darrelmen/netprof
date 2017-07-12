@@ -420,7 +420,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
 
     @Override
     public Set<String> getConsumedEvents() {
-      Set<String> events = new HashSet<String>();
+      Set<String> events = new HashSet<>();
       if (consumeClicks) events.add(BrowserEvents.CLICK);
       return events;
     }

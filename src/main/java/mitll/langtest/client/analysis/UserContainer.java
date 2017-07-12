@@ -34,7 +34,6 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -148,7 +147,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    */
   private ColumnSortEvent.ListHandler<UserInfo> getNumSorter(Column<UserInfo, SafeHtml> englishCol,
                                                              List<UserInfo> dataList) {
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         (o1, o2) -> {
           if (o1 == o2) {
@@ -170,7 +169,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
   private ColumnSortEvent.ListHandler<UserInfo> getFinalSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                List<UserInfo> dataList) {
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<UserInfo>() {
           public int compare(UserInfo o1, UserInfo o2) {
@@ -193,7 +192,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
   private ColumnSortEvent.ListHandler<UserInfo> getCurrentSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                  List<UserInfo> dataList) {
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<UserInfo>() {
           public int compare(UserInfo o1, UserInfo o2) {
@@ -217,7 +216,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
   private ColumnSortEvent.ListHandler<UserInfo> getDiffSorter(Column<UserInfo, SafeHtml> englishCol,
                                                               List<UserInfo> dataList) {
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         (o1, o2) -> {
           if (o1 == o2) {

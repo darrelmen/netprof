@@ -6,8 +6,8 @@ import com.google.gwt.event.shared.GwtEvent;
  * Created by go22670 on 11/18/16.
  */
 public class PlayAudioEvent extends GwtEvent<PlayAudioEventHandler> {
-  public static Type<PlayAudioEventHandler> TYPE = new Type<>();
-  private int id;
+  public static final Type<PlayAudioEventHandler> TYPE = new Type<>();
+  private final int id;
 
   public PlayAudioEvent(int id) {
     this.id = id;

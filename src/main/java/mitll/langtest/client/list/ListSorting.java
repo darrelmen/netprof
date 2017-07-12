@@ -12,7 +12,7 @@ import java.util.Comparator;
  */
 public class ListSorting<T extends CommonShell, U extends Shell> {
   private final PagingExerciseList<T, U> exerciseList;
-  private String locale;
+  private final String locale;
 
   private static final String ENGLISH_ASC = "English : A-Z";
   private static final String MEANING_ASC = "Meaning : A-Z";

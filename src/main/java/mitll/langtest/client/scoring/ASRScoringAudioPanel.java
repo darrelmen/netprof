@@ -55,12 +55,12 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> {
-  private Logger logger = Logger.getLogger("ASRScoringAudioPanel");
+  private final Logger logger = Logger.getLogger("ASRScoringAudioPanel");
   private static final String ANIMATED_PROGRESS44_GIF = "animated_progress44.gif";
   private static final String WAIT_GIF = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS44_GIF;
   private static final String SCORE = "score";
   private static final int WAIT_GIF_DELAY = 150;
-  private final Set<String> tested = new HashSet<String>();
+  private final Set<String> tested = new HashSet<>();
   private boolean useScoreToColorBkg = true;
 
   /**

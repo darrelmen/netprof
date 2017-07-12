@@ -44,7 +44,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -106,7 +105,7 @@ public class ResultManager extends PagerTable {
 
   private final AudioTag audioTag = new AudioTag();
   private final String nameForAnswer;
-  private final Map<Column<?, ?>, String> colToField = new HashMap<Column<?, ?>, String>();
+  private final Map<Column<?, ?>, String> colToField = new HashMap<>();
   private final Collection<String> typeOrder;
   private int req = 0;
   private final ExerciseController controller;

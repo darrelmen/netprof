@@ -34,8 +34,6 @@ package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.tabs.TabAndContent;
@@ -283,7 +281,7 @@ public class NPFHelper implements RequiresResize {
       final String instanceName,
       final boolean showQC) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
-      private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+      private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
       public Panel getExercisePanel(CommonExercise e) {

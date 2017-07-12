@@ -17,7 +17,6 @@ import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListOptions;
@@ -329,7 +328,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
       CommonShell currentSelection = pagingContainer.getCurrentSelection();
       if (currentSelection != null) {
         delete.setEnabled(false);
-        deleteItem(currentSelection.getID(), widgets, null, widgets, delete);
+        deleteItem(currentSelection.getID(), widgets, widgets, delete);
       }
     });
     // delete.addStyleName("topFiftyMargin");
@@ -343,16 +342,13 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
    *
    * @param exid
    * @param exerciseList
-   * @param learnContainer
    * @param editableExerciseList
    * @param button
    * @paramx uniqueID
    * @see EditableExerciseList#makeDeleteButton
    */
   private void deleteItem(final int exid,
-                          // final long uniqueID,
                           final PagingExerciseList<?, ?> exerciseList,
-                          final ReloadableContainer learnContainer,
                           final EditableExerciseList editableExerciseList,
                           Button button) {
     controller.getListService().deleteItemFromList(list.getID(), exid, new AsyncCallback<Boolean>() {
@@ -377,7 +373,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 //        if (learnContainer != null && learnContainer.getReloadable() != null) {
 //          learnContainer.getReloadable().redraw();   // TODO : or reload???
 //        }
-        logger.warning("deleteItem list size is " + exerciseList.getSize());
+        logger.info("deleteItem list size is " + exerciseList.getSize());
         editableExerciseList.enableRemove(exerciseList.getSize() > 0);
       }
 

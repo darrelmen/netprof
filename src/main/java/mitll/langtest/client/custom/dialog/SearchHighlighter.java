@@ -3,7 +3,6 @@ package mitll.langtest.client.custom.dialog;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 
-import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -16,7 +15,7 @@ public class SearchHighlighter {
   /**
    * Regular expression used to collapse all whitespace in a query string.
    */
-  private static final String NORMALIZE_TO_SINGLE_WHITE_SPACE = "\\s+";
+  //private static final String NORMALIZE_TO_SINGLE_WHITE_SPACE = "\\s+";
 
 /*  String getQueryHighlightString(String formattedSuggestion, String query) {
     String lowerCaseSuggestion = normalizeSuggestion(formattedSuggestion);
@@ -31,7 +30,7 @@ public class SearchHighlighter {
    * Normalize the search key by making it lower case, removing multiple spaces,
    * apply whitespace masks, and make it lower case.
    */
-  private String normalizeSearch(String search) {
+/*  private String normalizeSearch(String search) {
     // Use the same whitespace masks and case normalization for the search
     // string as was used with the candidate values.
     search = normalizeSuggestion(search);
@@ -40,13 +39,13 @@ public class SearchHighlighter {
     search = search.replaceAll(NORMALIZE_TO_SINGLE_WHITE_SPACE, WHITESPACE_STRING);
 
     return search.trim();
-  }
+  }*/
 
   /**
    * Takes the formatted suggestion, makes it lower case and blanks out any
    * existing whitespace for searching.
    */
-  private String normalizeSuggestion(String formattedSuggestion) {
+/*  private String normalizeSuggestion(String formattedSuggestion) {
     // Formatted suggestions should already have normalized whitespace. So we
     // can skip that step.
 
@@ -62,11 +61,11 @@ public class SearchHighlighter {
 //      }
 //    }
     return formattedSuggestion;
-  }
+  }*/
 
-  private boolean debug = false;
+  private final boolean debug = false;
 
-  private WordBoundsFactory factory = new WordBoundsFactory();
+  private final WordBoundsFactory factory = new WordBoundsFactory();
   /**
    * @param searchWords
    * @param suggestion
@@ -141,5 +140,5 @@ public class SearchHighlighter {
     return firstWord;
   }*/
 
-  private static final String WHITESPACE_STRING = " ";
+//  private static final String WHITESPACE_STRING = " ";
 }

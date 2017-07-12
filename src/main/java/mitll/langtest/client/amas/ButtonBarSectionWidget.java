@@ -62,7 +62,7 @@ public class ButtonBarSectionWidget implements SectionWidget {
 
   private final String type;
 
-  private final List<Button> buttons = new ArrayList<Button>();
+  private final List<Button> buttons = new ArrayList<>();
   private SingleSelectExerciseList singleSelectExerciseList;
 
   /**
@@ -94,7 +94,7 @@ public class ButtonBarSectionWidget implements SectionWidget {
 
     horizontalPanel.add(getButtonBarChoices(values, type, buttonType));
 
-    Set<String> unique = new HashSet<String>(values);
+    Set<String> unique = new HashSet<>(values);
 
     if (unique.size() < 2) {
       horizontalPanel.setVisible(false);
@@ -113,7 +113,7 @@ public class ButtonBarSectionWidget implements SectionWidget {
     buttonGroup.setToggle(ToggleType.RADIO);
     toolbar.add(buttonGroup);
 
-    Set<String> seen = new HashSet<String>();
+    Set<String> seen = new HashSet<>();
     for (String v : values) {
       if (!seen.contains(v)) {
         Button choice1 = getChoice(buttonGroup, v);
@@ -178,7 +178,7 @@ public class ButtonBarSectionWidget implements SectionWidget {
 
   @Override
   public List<String> getCurrentSelections() {
-    List<String> strings = new ArrayList<String>();
+    List<String> strings = new ArrayList<>();
     for (Button button : buttons) {
       //  logger.info("getCurrentSelection for  " + getProperty() + " button "  + button.getElement().getExID() + " active " + button.isActive());
       if (button.isActive()) {

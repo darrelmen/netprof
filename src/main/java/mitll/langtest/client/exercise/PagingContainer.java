@@ -156,7 +156,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   }
 
   private ColumnSortEvent.ListHandler<T> getFLSorter(Column<T, SafeHtml> flColumn, List<T> dataList) {
-    ColumnSortEvent.ListHandler<T> columnSortHandler2 = new ColumnSortEvent.ListHandler<T>(dataList);
+    ColumnSortEvent.ListHandler<T> columnSortHandler2 = new ColumnSortEvent.ListHandler<>(dataList);
 
     columnSortHandler2.setComparator(flColumn,
         new Comparator<T>() {
@@ -181,7 +181,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   }
 
   private ColumnSortEvent.ListHandler<T> getEnglishSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
-    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     final boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
     columnSortHandler.setComparator(englishCol,
         new Comparator<T>() {

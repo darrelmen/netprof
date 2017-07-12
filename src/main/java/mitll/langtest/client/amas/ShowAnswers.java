@@ -143,7 +143,7 @@ class ShowAnswers {
   }
 
   private Collection<String> trim(Collection<String> alternateAnswers) {
-    List<String> copy = new ArrayList<String>();
+    List<String> copy = new ArrayList<>();
     for (String alt : alternateAnswers) {
       if (!alt.trim().isEmpty()) {
         copy.add(alt);

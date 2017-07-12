@@ -27,7 +27,7 @@ import java.util.Map;
 public class ResultTypeAhead {
   private static final String USER_ID = "User";
 
-  private final Map<String, Typeahead> typeToSuggest = new HashMap<String, Typeahead>();
+  private final Map<String, Typeahead> typeToSuggest = new HashMap<>();
   private Typeahead textSuggest;
   private final Collection<String> typeOrder;
   private final CellTable<MonitorResult> cellTable;
@@ -106,7 +106,7 @@ public class ResultTypeAhead {
   }
 
   public Map<String, String> getUnitToValue() {
-    Map<String, String> unitToValue = new HashMap<String, String>();
+    Map<String, String> unitToValue = new HashMap<>();
     for (String type : typeOrder) {
       Typeahead suggestBox = typeToSuggest.get(type);
       if (suggestBox != null) {

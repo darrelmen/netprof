@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class NavigationHelper<T extends Shell> extends HorizontalPanel {
-  private Logger logger = Logger.getLogger("NavigationHelper");
+  private final Logger logger = Logger.getLogger("NavigationHelper");
 
 
   public static final String PREVIOUS = "Previous";

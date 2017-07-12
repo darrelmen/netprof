@@ -136,7 +136,7 @@ public class StudentAnalysis extends DivWidget {
   }
 
   private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
-    List<UserInfo> filtered = new ArrayList<UserInfo>();
+    List<UserInfo> filtered = new ArrayList<>();
     for (UserInfo userInfo : users) {
       String userID = userInfo.getUserID();
       if (userID != null && !userID.equals("defectDetector")) {

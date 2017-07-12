@@ -187,7 +187,7 @@ public class EditItem {
 
     exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(
         controller, exerciseList) {
-      private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+      private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
       public Panel getExercisePanel(CommonExercise exercise) {

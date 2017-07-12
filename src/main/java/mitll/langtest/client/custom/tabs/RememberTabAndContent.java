@@ -47,7 +47,7 @@ import java.util.Set;
  */
 public class RememberTabAndContent extends TabAndContent {
   private final Set<Widget> widgets = new HashSet<>();
-  boolean isCheckable;
+  final boolean isCheckable;
 
   /**
    * @param iconType

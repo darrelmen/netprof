@@ -170,7 +170,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
   private ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> getEnglishSorter(Column<ExerciseCorrectAndScore, SafeHtml> englishCol,
                                                                                 List<ExerciseCorrectAndScore> dataList) {
-    ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<ExerciseCorrectAndScore>(dataList);
+    ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<ExerciseCorrectAndScore>() {
           public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
@@ -195,7 +195,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
   private ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> getFLSorter(Column<ExerciseCorrectAndScore, SafeHtml> flColumn,
                                                                            List<ExerciseCorrectAndScore> dataList) {
-    ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler2 = new ColumnSortEvent.ListHandler<ExerciseCorrectAndScore>(dataList);
+    ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler2 = new ColumnSortEvent.ListHandler<>(dataList);
 
     columnSortHandler2.setComparator(flColumn,
         new Comparator<ExerciseCorrectAndScore>() {
@@ -225,7 +225,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
   private ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> getScoreSorter(Column<ExerciseCorrectAndScore, SafeHtml> scoreCol,
                                                                               List<ExerciseCorrectAndScore> dataList) {
-    ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<ExerciseCorrectAndScore>(dataList);
+    ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(scoreCol,
         new Comparator<ExerciseCorrectAndScore>() {
           public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {

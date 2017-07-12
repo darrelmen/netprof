@@ -56,6 +56,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/5/2014.
+ * @deprecated
  */
 class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>>> {
   private final Logger logger = Logger.getLogger("UserListCallback");

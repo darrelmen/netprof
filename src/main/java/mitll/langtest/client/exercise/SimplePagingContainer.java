@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.Range;
-import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -70,7 +69,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
   protected final ExerciseController controller;
-  private ListDataProvider<T> dataProvider;
+  private final ListDataProvider<T> dataProvider;
   protected CellTable<T> table;
   protected SingleSelectionModel<T> selectionModel;
   int verticalUnaccountedFor = 100;
@@ -80,7 +79,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   protected SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
-    this.dataProvider = new ListDataProvider<T>();
+    this.dataProvider = new ListDataProvider<>();
   }
 
   /**
@@ -159,7 +158,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
-    return new CellTable<T>(getPageSize(), o);
+    return new CellTable<>(getPageSize(), o);
   }
 
   protected int getPageSize() {

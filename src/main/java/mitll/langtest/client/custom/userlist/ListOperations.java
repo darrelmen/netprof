@@ -10,8 +10,6 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -25,6 +23,7 @@ import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 3/1/17.
+ * @deprecated
  */
 public class ListOperations {
   private final Logger logger = Logger.getLogger("ListOperations");

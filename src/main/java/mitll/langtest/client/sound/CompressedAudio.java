@@ -46,7 +46,7 @@ public class CompressedAudio {
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
-  private static boolean isIE = BrowserCheck.getIEVersion() > 0;
+  private static final boolean isIE = BrowserCheck.getIEVersion() > 0;
   public static native boolean supportsOgg() /*-{
       if (typeof $wnd.Modernizr == "undefined") {
           console.log("no modernizr?");

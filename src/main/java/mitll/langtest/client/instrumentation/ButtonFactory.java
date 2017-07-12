@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  * @since 3/24/2014.
  */
 public class ButtonFactory implements EventLogger {
-  private Logger logger = Logger.getLogger("ButtonFactory");
+  private final Logger logger = Logger.getLogger("ButtonFactory");
   private final LangTestDatabaseAsync service;
   private final PropertyHandler props;
   private final ExerciseController controller;
@@ -133,40 +133,38 @@ public class ButtonFactory implements EventLogger {
     final ButtonFactory outer = this;
     if (context.getUserid() == -1) context.setUserid(controller.getUserState().getUser());
 
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        try {
-          if (outer != null &&
-              props != null &&
-              controller != null &&
-              service != null) {
-            String browserInfo = controller.getBrowserInfo();
+    Scheduler.get().scheduleDeferred(() -> {
+      try {
+        if (outer != null &&
+            props != null &&
+            controller != null &&
+            service != null) {
+          String browserInfo = controller.getBrowserInfo();
 
-            if (
-                browserInfo != null) {
-              //logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
+          if (
+              browserInfo != null) {
+            //logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
 
-              service.logEvent(widgetID, widgetType, context.exid, context.context, context.getUserid(), "", browserInfo,
-                  new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                      if (caught != null &&
-                          caught.getMessage() != null &&
-                          !caught.getMessage().trim().equals("0")) {
-                        logger.warning("logEvent FAILED to send event for " + widgetID + " message '" + caught.getMessage() + "'");
-                        caught.printStackTrace();
-                      }
+            service.logEvent(widgetID, widgetType, context.exid, context.context, context.getUserid(), "", browserInfo,
+                new AsyncCallback<Void>() {
+                  @Override
+                  public void onFailure(Throwable caught) {
+                    if (caught != null &&
+                        caught.getMessage() != null &&
+                        !caught.getMessage().trim().equals("0")) {
+                      logger.warning("logEvent FAILED to send event for " + widgetID + " message '" + caught.getMessage() + "'");
+                      caught.printStackTrace();
                     }
+                  }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                      //logger.info("logEvent sent event for " + widgetID);
-                    }
-                  });
-            }
+                  @Override
+                  public void onSuccess(Void result) {
+                    //logger.info("logEvent sent event for " + widgetID);
+                  }
+                });
           }
-        } catch (Exception e) {
         }
+      } catch (Exception e) {
       }
     });
   }

@@ -146,7 +146,7 @@ public class DecoratedFields {
 		messageLocation.setText(this.helpMsg);
 		if ((controls == null)||controls.size() < 1) {
 			log.warning("DecoratedFields init error! No controls provided!");
-			this.controls = new ArrayList<Widget>();
+			this.controls = new ArrayList<>();
 		} else {
 			this.controls = controls;
 			Widget firstControl = controls.get(0);

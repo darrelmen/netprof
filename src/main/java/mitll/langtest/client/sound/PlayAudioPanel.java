@@ -37,7 +37,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
@@ -84,13 +83,13 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected String playLabel;
   private String pauseLabel = PAUSE_LABEL;
   protected IconAnchor playButton;
-  private boolean isSlow;
+  private final boolean isSlow;
 
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
       "Please add this site to its whitelist.</font>");
-  private Collection<AudioControl> listeners = new HashSet<>();
+  private final Collection<AudioControl> listeners = new HashSet<>();
   private SimpleAudioListener simpleAudioListener;
-  private final List<PlayListener> playListeners = new ArrayList<PlayListener>();
+  private final List<PlayListener> playListeners = new ArrayList<>();
   private static int counter = 0;
   private final int id;
   private boolean playing = false;

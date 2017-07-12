@@ -39,7 +39,7 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.userlist.ListManager;
 import mitll.langtest.client.exercise.ExerciseController;
 
-import static mitll.langtest.client.scoring.DownloadContainer.getDownloadAudio;
+import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 public class DownloadLink {
   private static final String DOWNLOAD_SPREADSHEET_AND_AUDIO = "Download spreadsheet and audio for list.";

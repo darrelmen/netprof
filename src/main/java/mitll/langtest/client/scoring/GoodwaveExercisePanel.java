@@ -115,7 +115,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   private boolean hasClickable = false;
   private boolean isJapanese = false;
   //  private boolean allowRecording = true;
-  protected ExerciseOptions options;
+  protected final ExerciseOptions options;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -530,7 +530,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    */
   private ScoringAudioPanel getAnswerWidget(final ExerciseController controller, float screenPortion) {
     ScoringAudioPanel widgets =
-        new ASRRecordAudioPanel<T>(this, controller, getLocalExercise(), options.getInstance());
+        new ASRRecordAudioPanel<>(this, controller, getLocalExercise(), options.getInstance());
     answerAudio = widgets;
     answerAudio.setScreenPortion(screenPortion);
 

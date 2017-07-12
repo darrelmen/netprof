@@ -71,8 +71,8 @@ public class SegmentHighlightAudioControl implements AudioControl {
     private final Logger logger = Logger.getLogger("SegmentAudioControl");
     private TranscriptSegment currentSegment;
     private final TreeMap<TranscriptSegment, IHighlightSegment> words;
-    private static boolean DEBUG = false;
-    private static boolean DEBUG_DETAIL = false;
+    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_DETAIL = false;
     /**
      * @param words
      * @see SegmentHighlightAudioControl#SegmentHighlightAudioControl

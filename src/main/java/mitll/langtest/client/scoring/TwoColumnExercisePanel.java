@@ -130,7 +130,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (projectStartupInfo != null) {
       int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
-      clickableWords = new ClickableWords<T>(listContainer, commonExercise, controller.getLanguage(), fontSize, phonesChoices == SHOW);
+      clickableWords = new ClickableWords<>(listContainer, commonExercise, controller.getLanguage(), fontSize, phonesChoices == SHOW);
       this.isRTL = clickableWords.isRTL(exercise);
 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
@@ -1102,7 +1102,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private SimpleRecordAudioPanel<T> getRecordPanel(T e) {
     //  logger.info("exercise " + e.getID() + " " + e.getScores().size() + " scores");
-    return new SimpleRecordAudioPanel<T>(new BusyPanel() {
+    return new SimpleRecordAudioPanel<>(new BusyPanel() {
       @Override
       public boolean isBusy() {
         return false;

@@ -36,10 +36,7 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.domino.common.DominoSimpleModal;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -76,7 +73,7 @@ public class DialogHelper {
 */
 
   public void showErrorMessage(String title, String msg) {
-    List<String> msgs = new ArrayList<String>();
+    List<String> msgs = new ArrayList<>();
     msgs.add(msg);
     showErrorMessage(title, msgs);
   }

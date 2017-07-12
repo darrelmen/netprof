@@ -98,8 +98,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   ExerciseListRequest lastSuccessfulRequest = null;
 
   private static final boolean DEBUG = false;
-  private UserState userState;
-  ListOptions listOptions;
+  private final UserState userState;
+  final ListOptions listOptions;
 
   /**
    * @param currentExerciseVPanel

@@ -40,8 +40,6 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -121,7 +119,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see #checkForForeignChange
    * @see #getKeepAudio
    */
-  private CheckBox keepAudio = new CheckBox("Keep Audio even if text changes");
+  private final CheckBox keepAudio = new CheckBox("Keep Audio even if text changes");
 
   /**
    * @param changedUserExercise
@@ -251,7 +249,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return widget;
   }
 
-  private List<MyRecordAudioPanel> panels = new ArrayList<>();
+  private final List<MyRecordAudioPanel> panels = new ArrayList<>();
 
   private Panel getRecordAudioWithAnno(DivWidget widget, AudioType audioTypeRegular) {
     MyRecordAudioPanel w = new MyRecordAudioPanel(widget, audioTypeRegular, instance);
@@ -363,7 +361,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     }
   }
 
-  private List<TabLink> tabLinks = new ArrayList<>();
+  private final List<TabLink> tabLinks = new ArrayList<>();
 
   private RememberTabAndContent getRememberTabAndContent(TabPanel tabPanel,
                                                          String tabTitle,

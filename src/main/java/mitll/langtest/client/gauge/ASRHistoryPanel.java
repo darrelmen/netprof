@@ -59,7 +59,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.scoring.DownloadContainer.getDownloadAudio;
+import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 /**
  * ASR Scoring panel -- shows phonemes.

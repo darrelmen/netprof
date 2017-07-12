@@ -54,7 +54,7 @@ public class ProjectEditForm extends UserDialog {
   private ListBox language;
   private FormField model;
   private CheckBox showOniOSBox;
-  private Services services;
+  private final Services services;
 
   /**
    * @param lifecycleSupport

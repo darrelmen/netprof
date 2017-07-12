@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.GwtEvent;
  * Created by go22670 on 11/18/16.
  */
 public class ListChangedEvent extends GwtEvent<ListChangedEventHandler> {
-  public static Type<ListChangedEventHandler> TYPE = new Type<>();
+  public static final Type<ListChangedEventHandler> TYPE = new Type<>();
 //  private int exid;
 
   public ListChangedEvent() {

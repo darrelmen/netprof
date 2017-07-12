@@ -84,14 +84,14 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   public static final String SELECTED_USER = "selectedUser";
   static final int ID_WIDTH = 130;
   private int idWidth = ID_WIDTH;
-  int pageSize = PAGE_SIZE;
+  private int pageSize = PAGE_SIZE;
   private final String todayYear;
   private final String todaysDate;
 
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
 
-  public MemoryItemContainer(ExerciseController controller, String selectedUserKey, String header) {
+  MemoryItemContainer(ExerciseController controller, String selectedUserKey, String header) {
     this(controller, selectedUserKey, header, PAGE_SIZE);
   }
 
@@ -102,9 +102,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param pageSize
    * @see BasicUserContainer#BasicUserContainer
    */
-  public MemoryItemContainer(ExerciseController controller,
-                             String selectedUserKey,
-                             String header, int pageSize) {
+  protected MemoryItemContainer(ExerciseController controller,
+                                String selectedUserKey,
+                                String header, int pageSize) {
     super(controller);
     this.selectedUserKey = selectedUserKey;
     this.selectedUser = getSelectedUser(selectedUserKey);
@@ -182,7 +182,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return Window.getClientHeight() < 822;
   }
 
-  protected Column<T, SafeHtml> dateCol;
+  Column<T, SafeHtml> dateCol;
 
   /**
    * @param sortEnglish
@@ -256,7 +256,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param userToSelect
    * @see #getTableWithPager
    */
-  protected void makeInitialSelection(Collection<T> users, T userToSelect) {
+  private void makeInitialSelection(Collection<T> users, T userToSelect) {
     if (users.isEmpty()) {
       return;
     }
@@ -318,13 +318,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     table.getElement().getStyle().setProperty("maxWidth", tableWidth + "px");
   }
 
-  protected int getMaxTableWidth() {
+  private int getMaxTableWidth() {
     return TABLE_WIDTH;
   }
 
   @Override
   protected void addSelectionModel() {
-    selectionModel = new SingleSelectionModel<T>();
+    selectionModel = new SingleSelectionModel<>();
     table.setSelectionModel(selectionModel);
   }
 
@@ -337,7 +337,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   private ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
                                                        List<T> dataList) {
-    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<T>() {
           public int compare(T o1, T o2) {
@@ -351,7 +351,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   private ColumnSortEvent.ListHandler<T> getDateSorter(Column<T, SafeHtml> englishCol,
                                                        List<T> dataList) {
-    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<T>() {
           public int compare(T o1, T o2) {
@@ -402,7 +402,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     }
   }
 
-  protected void addTooltip() {
+  void addTooltip() {
     new TooltipHelper().addTooltip(table, "Click on a " + header + ".");
   }
 
@@ -428,11 +428,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     };
   }
 
-//  protected boolean shouldHighlight(T object) {
-//    return false;
-//  }
-
-  protected String getTruncatedItemLabel(T shell) {
+  private String getTruncatedItemLabel(T shell) {
     return truncate(getItemLabel(shell));
   }
 
@@ -468,7 +464,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     };
   }
 
-  public abstract Long getItemDate(T shell);
+  protected abstract Long getItemDate(T shell);
 
   protected void checkGotClick(T object, NativeEvent event) {
     if (isClick(event)) {

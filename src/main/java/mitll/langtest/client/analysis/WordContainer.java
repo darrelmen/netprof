@@ -181,7 +181,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
 
   private ColumnSortEvent.ListHandler<WordScore> getEnglishSorter(Column<WordScore, SafeHtml> englishCol,
                                                                   List<WordScore> dataList) {
-    ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<WordScore>(dataList);
+    ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         (o1, o2) -> {
           if (o1 == o2) {
@@ -204,7 +204,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
 
   private ColumnSortEvent.ListHandler<WordScore> getScoreSorter(Column<WordScore, SafeHtml> scoreCol,
                                                                 List<WordScore> dataList) {
-    ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<WordScore>(dataList);
+    ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(scoreCol,
         (o1, o2) -> {
           if (o1 == o2) {

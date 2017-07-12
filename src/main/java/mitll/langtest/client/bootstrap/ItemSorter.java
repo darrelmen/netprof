@@ -57,7 +57,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
    * @see mitll.langtest.client.bootstrap
    */
   public List<String> getSortedItems(Collection<String> sections) {
-    List<String> items = new ArrayList<String>(sections);
+    List<String> items = new ArrayList<>(sections);
     boolean isInt = true;
     for (String item : items) {
       try {

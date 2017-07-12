@@ -270,7 +270,7 @@ public class LangTest implements
   private final KeyPressHelper keyPressHelper = new KeyPressHelper(false, true);
   private boolean isMicConnected = true;
   private UILifecycle initialUI;
-  public static EventBus EVENT_BUS = GWT.create(SimpleEventBus.class);
+  public static final EventBus EVENT_BUS = GWT.create(SimpleEventBus.class);
 
   private KeyStorage storage;
 
@@ -581,7 +581,7 @@ public class LangTest implements
         .expireAfterWrite(7, TimeUnit.DAYS)
         .build();
   */
-  private Map<String, ImageResponse> imageCache = lruCache(MAX_CACHE_SIZE);
+  private final Map<String, ImageResponse> imageCache = lruCache(MAX_CACHE_SIZE);
 
   private static <K, V> Map<K, V> lruCache(final int maxSize) {
     return new LinkedHashMap<K, V>(maxSize * 4 / 3, 0.75f, true) {
@@ -1109,7 +1109,7 @@ public class LangTest implements
     return flashRecordPanel;
   }
 
-  private long then = 0;
+  private final long then = 0;
 
   /**
    * Recording interface

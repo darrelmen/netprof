@@ -45,8 +45,6 @@ import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -196,7 +194,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   @Override
   protected void addSelectionModel() {
-    selectionModel = new SingleSelectionModel<T>();
+    selectionModel = new SingleSelectionModel<>();
     table.setSelectionModel(selectionModel);
   }
 
@@ -323,7 +321,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   public static class ClickableCell extends SafeHtmlCell {
     @Override
     public Set<String> getConsumedEvents() {
-      Set<String> events = new HashSet<String>();
+      Set<String> events = new HashSet<>();
       events.add(BrowserEvents.CLICK);
       return events;
     }

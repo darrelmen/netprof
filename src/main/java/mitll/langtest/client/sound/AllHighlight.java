@@ -20,8 +20,8 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
 
   private final Collection<IHighlightSegment> set;
 
-  private DivWidget north;
-  private DivWidget south;
+  private final DivWidget north;
+  private final DivWidget south;
 
   /**
    * @param bulk

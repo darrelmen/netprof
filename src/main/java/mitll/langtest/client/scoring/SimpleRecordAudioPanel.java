@@ -25,7 +25,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
-  private Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   public static final String OGG = ".ogg";
 
@@ -56,7 +56,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   /**
    * @param controller
    * @param exercise
-   * @paramx history
    * @param listContainer
    * @see TwoColumnExercisePanel#getRecordPanel
    */

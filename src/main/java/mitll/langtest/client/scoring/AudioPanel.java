@@ -113,7 +113,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
   protected final T exercise;
   final String instance;
-  int exerciseID;
+  final int exerciseID;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_GET_IMAGES = false;

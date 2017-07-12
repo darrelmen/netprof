@@ -79,7 +79,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   private boolean doFlashcardAudio = false;
   private boolean allowAlternates = false;
-  private AudioType audioType;
+  private final AudioType audioType;
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.

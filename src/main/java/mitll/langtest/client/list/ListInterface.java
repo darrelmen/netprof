@@ -36,7 +36,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.client.custom.dialog.PrevNextList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
@@ -123,7 +122,6 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
 
   /**
    * @return
-   * @see PrevNextList#clickNext()
    */
   boolean onFirst();
 

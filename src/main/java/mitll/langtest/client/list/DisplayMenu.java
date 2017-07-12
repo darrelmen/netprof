@@ -11,6 +11,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.ShowEvent;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.ShowChoices;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 5/18/17.
+ * @see FacetExerciseList#getPagerAndSort(ExerciseController)
  */
 class DisplayMenu {
   private final Logger logger = Logger.getLogger("DisplayMenu");
@@ -28,7 +30,7 @@ class DisplayMenu {
   private static final String SHOW_PHONES = "showPhones";
   private static final IconType CHECK = IconType.CHECK;
   private static final String SHOW = "showStorage";
-  private KeyStorage storage;
+  private final KeyStorage storage;
 
   DisplayMenu(KeyStorage storage) {
     this.storage = storage;

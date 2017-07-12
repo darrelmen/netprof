@@ -59,7 +59,7 @@ public class BrowserCheck {
   int ver = 0;
   private String version = "";
 
-  private final Map<String, Integer> browserToVersion = new HashMap<String, Integer>();
+  private final Map<String, Integer> browserToVersion = new HashMap<>();
 
   public BrowserCheck() {
     browserToVersion.put(FIREFOX, 14);

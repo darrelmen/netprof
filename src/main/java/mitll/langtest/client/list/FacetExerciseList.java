@@ -80,7 +80,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private static final String PAGE_SIZE_HEADER = "View";
 
-  public static int FIRST_PAGE_SIZE = 5;
+  public static final int FIRST_PAGE_SIZE = 5;
   private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, /*5,*/ 10, 25/*, 50*/);
   private static final String ITEMS_PAGE = " items/page";
 
@@ -113,7 +113,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private Map<String, String> typeToSelection = new HashMap<>();
   private final Map<String, Boolean> typeToShowAll = new HashMap<>();
   private List<String> rootNodesInOrder = new ArrayList<>();
-  private Map<Integer, String> idToListName = new HashMap<>();
+  private final Map<Integer, String> idToListName = new HashMap<>();
 
   /**
    * @param secondRow             add the section panel to this row
@@ -1360,9 +1360,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
-  private Set<Integer> exercisesWithScores = new HashSet<>();
+  private final Set<Integer> exercisesWithScores = new HashSet<>();
 
-  private Map<Integer, CommonExercise> fetched = new HashMap<>();
+  private final Map<Integer, CommonExercise> fetched = new HashMap<>();
 
   /**
    * @param result

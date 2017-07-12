@@ -556,7 +556,7 @@ public class BasicDialog {
     return simpleFormField;
   }
 
-  private final Map<Widget, Popover> widgetToPopover = new HashMap<Widget, Popover>();
+  private final Map<Widget, Popover> widgetToPopover = new HashMap<>();
 
   void addPopover(Widget widget, String header, String htmlStr) {
     Popover popover = widgetToPopover.get(widget);

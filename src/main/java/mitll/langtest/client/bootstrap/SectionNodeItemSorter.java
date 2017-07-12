@@ -37,7 +37,7 @@ import mitll.langtest.shared.exercise.SectionNode;
 import java.util.*;
 
 public class SectionNodeItemSorter {
-  private ItemSorter itemSorter = new ItemSorter();
+  private final ItemSorter itemSorter = new ItemSorter();
   public List<String> getSorted(Set<String> keys) {
     List<String> items = new ArrayList<>(keys);
     boolean isInt = true;

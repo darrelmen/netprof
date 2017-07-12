@@ -317,7 +317,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private ColumnSortEvent.ListHandler<PhoneAndStats> getEnglishSorter(Column<PhoneAndStats, SafeHtml> englishCol,
                                                                       List<PhoneAndStats> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<PhoneAndStats>() {
           public int compare(PhoneAndStats o1, PhoneAndStats o2) {
@@ -349,7 +349,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private ColumnSortEvent.ListHandler<PhoneAndStats> getCountSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
                                                                     List<PhoneAndStats> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(scoreCol,
         new Comparator<PhoneAndStats>() {
           public int compare(PhoneAndStats o1, PhoneAndStats o2) {
@@ -379,7 +379,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private ColumnSortEvent.ListHandler<PhoneAndStats> getCurrSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
                                                                    List<PhoneAndStats> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(scoreCol,
         new Comparator<PhoneAndStats>() {
           public int compare(PhoneAndStats o1, PhoneAndStats o2) {

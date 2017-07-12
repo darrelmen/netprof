@@ -37,12 +37,12 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   public static final String MALE = "male";
   public static final String SLOW = "slow";
 
-  private ExerciseController controller;
-  private CommonExercise exercise;
+  private final ExerciseController controller;
+  private final CommonExercise exercise;
   private boolean includeContext = false;
   private AudioAttribute currentAudioAttr = null;
-  private AudioChangeListener listener;
-  private Set<Integer> allIDs = new HashSet<>();
+  private final AudioChangeListener listener;
+  private final Set<Integer> allIDs = new HashSet<>();
 
   /**
    * @see TwoColumnExercisePanel#getPlayAudioPanel

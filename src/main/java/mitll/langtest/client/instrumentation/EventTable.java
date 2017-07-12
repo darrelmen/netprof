@@ -123,14 +123,14 @@ public class EventTable extends PagerTable {
   }
 
   private Widget getTable(Collection<Event> result, Widget rightOfPager) {
-    final CellTable<Event> table = new CellTable<Event>();
+    final CellTable<Event> table = new CellTable<>();
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);
     table.setWidth(width + "px");
     addColumns(table);
 
     // Create a data provider.
-    ListDataProvider<Event> dataProvider = new ListDataProvider<Event>();
+    ListDataProvider<Event> dataProvider = new ListDataProvider<>();
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);

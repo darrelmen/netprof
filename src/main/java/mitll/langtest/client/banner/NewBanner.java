@@ -55,7 +55,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   /**
    * @see #addChoicesForUser(ComplexWidget)
    */
-  private Map<VIEWS, NavLink> viewToLink = new HashMap<>();
+  private final Map<VIEWS, NavLink> viewToLink = new HashMap<>();
 
   /**
    * @see #addChoicesForUser

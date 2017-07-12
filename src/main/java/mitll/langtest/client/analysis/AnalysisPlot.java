@@ -446,8 +446,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
         }
 
 
-        String label = granToLabel.get(gran);
-        String seriesInfo = gran + "/" + label;
+     //   String label = granToLabel.get(gran);
+    //    String seriesInfo = gran + "/" + label;
         //   logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
 
         if (PhoneSession.chooseThisSize(size, total, anyBigger)) {

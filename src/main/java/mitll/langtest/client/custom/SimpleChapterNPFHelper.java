@@ -58,7 +58,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonExercise>
-    implements ReloadableContainer, RequiresResize, ExerciseListContent {
+    implements RequiresResize, ExerciseListContent {
   public static final int RIGHT_SIDE_MARGIN = 155;//120;
   private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
   private boolean madeNPFContent = false;

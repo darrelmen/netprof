@@ -54,8 +54,8 @@ import mitll.langtest.client.list.SelectionState;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.scoring.DownloadContainer.DOWNLOAD_AUDIO;
-import static mitll.langtest.client.scoring.DownloadContainer.getDownloadAudio;
+import static mitll.langtest.client.download.DownloadContainer.DOWNLOAD_AUDIO;
+import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 public class DownloadHelper {
   private final Logger logger = Logger.getLogger("DownloadHelper");
@@ -84,9 +84,9 @@ public class DownloadHelper {
     new DownloadIFrame(urlForDownload);
   }
 
-  private Heading status1 = new Heading(4, "");
-  private Heading status2 = new Heading(4, "");
-  private Heading status3 = new Heading(4, "");
+  private final Heading status1 = new Heading(4, "");
+  private final Heading status2 = new Heading(4, "");
+  private final Heading status3 = new Heading(4, "");
 
   public void showDialog(String host) {
     isMale = false;
@@ -222,7 +222,7 @@ public class DownloadHelper {
     buttonGroup.setToggle(ToggleType.RADIO);
     toolbar.add(buttonGroup);
 
-    Set<String> seen = new HashSet<String>();
+    Set<String> seen = new HashSet<>();
 
     for (String v : values) {
       if (!seen.contains(v)) {

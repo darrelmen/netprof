@@ -1,4 +1,4 @@
-package mitll.langtest.client.scoring;
+package mitll.langtest.client.download;
 
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;

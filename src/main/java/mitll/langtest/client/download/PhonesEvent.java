@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.GwtEvent;
  * Created by go22670 on 11/18/16.
  */
 public class PhonesEvent extends GwtEvent<PhonesEventHandler> {
-  public static Type<PhonesEventHandler> TYPE = new Type<>();
+  public static final Type<PhonesEventHandler> TYPE = new Type<>();
 
   public PhonesEvent() {
   }

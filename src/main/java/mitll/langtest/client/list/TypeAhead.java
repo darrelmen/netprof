@@ -56,7 +56,7 @@ import java.util.logging.Logger;
  * @since 9/25/14.
  */
 public abstract class TypeAhead implements ITypeAhead {
-  private Logger logger = Logger.getLogger("TypeAhead");
+  private final Logger logger = Logger.getLogger("TypeAhead");
 
   /**
    * @see #makeTypeAhead
@@ -64,7 +64,7 @@ public abstract class TypeAhead implements ITypeAhead {
   private static final int WIDTH = 180 - 32;
   private static final int RIGHT_MARIGN_FOR_SEARCH = 10;
   private final TextBox typeAhead = new TextBox();
-  private WaitCursorHelper waitCursorHelper;
+  private final WaitCursorHelper waitCursorHelper;
 
   /**
    * @param column

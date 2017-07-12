@@ -332,7 +332,7 @@ public class UserTable extends PagerTable {
       table.addColumnSortHandler(getEnabledSorter(enabled, list));
     }
 
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(list);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(list);
     columnSortHandler.setComparator(id,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -378,7 +378,7 @@ public class UserTable extends PagerTable {
   }
 
   private CellTable<User> getTable() {
-    final CellTable<User> table = new CellTable<User>();
+    final CellTable<User> table = new CellTable<>();
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);
     table.setWidth(width + "px");
@@ -387,7 +387,7 @@ public class UserTable extends PagerTable {
 
   private List<User> getDataProvider(List<User> users, CellTable<User> table) {
     // Create a data provider.
-    ListDataProvider<User> dataProvider = new ListDataProvider<User>();
+    ListDataProvider<User> dataProvider = new ListDataProvider<>();
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
@@ -477,7 +477,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getAgeSorter(TextColumn<User> englishCol,
                                                          List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -502,7 +502,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getGenderSorter(TextColumn<User> englishCol,
                                                             List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -526,7 +526,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getUserIDSorter(TextColumn<User> englishCol,
                                                             List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -547,7 +547,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getDialectSorter(TextColumn<User> englishCol,
                                                              List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -570,7 +570,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getDeviceSorter(TextColumn<User> englishCol,
                                                             List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -593,7 +593,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getAdminSorter(TextColumn<User> englishCol,
                                                            List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -616,7 +616,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getEnabledSorter(TextColumn<User> englishCol,
                                                              List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -639,7 +639,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getKindSorter(TextColumn<User> englishCol,
                                                           List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -662,7 +662,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getIPSorter(TextColumn<User> englishCol,
                                                         List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -685,7 +685,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getPermSorter(TextColumn<User> englishCol,
                                                           List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -708,7 +708,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getTimeSorter(Column<User, SafeHtml> englishCol,
                                                           List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -732,7 +732,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getNumRecordingsSorter(TextColumn<User> englishCol,
                                                                    List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -755,7 +755,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getRateSorter(TextColumn<User> englishCol,
                                                           List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -776,7 +776,7 @@ public class UserTable extends PagerTable {
 
   private ColumnSortEvent.ListHandler<User> getCompleteSorter(TextColumn<User> englishCol,
                                                               List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
           public int compare(User o1, User o2) {

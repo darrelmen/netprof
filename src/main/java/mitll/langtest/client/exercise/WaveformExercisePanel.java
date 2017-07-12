@@ -189,7 +189,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
   private void addExampleSentenceRecorder(T exercise, ExerciseController controller,
                                           int index, Panel vp) {
-    RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, index, false,
+    RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false,
         AudioAttribute.CONTEXT_AUDIO_TYPE, instance);
     audioPanels.add(fast);
     vp.add(fast);
@@ -209,7 +209,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    */
   private VerticalPanel addRecordAudioPanelNoCaption(T exercise,
                                                      ExerciseController controller, int index, Panel vp, AudioType audioType) {
-    RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, index, false, audioType, instance);
+    RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false, audioType, instance);
     audioPanels.add(fast);
     vp.add(fast);
 

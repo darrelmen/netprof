@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
@@ -30,7 +31,7 @@ public class ScoreFeedbackDiv {
 
   private static final String OVERALL_SCORE = "Overall Score";
 
-  private ProgressBar progressBar;
+  private final ProgressBar progressBar;
   /**
    * @see #getWordTableContainer
    */
@@ -39,8 +40,8 @@ public class ScoreFeedbackDiv {
   public static final int FIRST_STEP = 35;
   public static final int SECOND_STEP = 75;
 
-  private PlayAudioPanel playAudioPanel;
-  private DownloadContainer downloadContainer;
+  private final PlayAudioPanel playAudioPanel;
+  private final DownloadContainer downloadContainer;
 
   /**
    * @param playAudioPanel

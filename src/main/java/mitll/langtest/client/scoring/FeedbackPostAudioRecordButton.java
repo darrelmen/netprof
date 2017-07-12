@@ -16,7 +16,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
 
   private static final String STOP = "Stop";
 
-  private RecordingAudioListener simpleRecordAudioPanel;
+  private final RecordingAudioListener simpleRecordAudioPanel;
 
   /**
    * @see SimpleRecordAudioPanel#makePlayAudioPanel

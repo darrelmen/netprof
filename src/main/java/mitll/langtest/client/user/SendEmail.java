@@ -21,7 +21,7 @@ public class SendEmail extends UserDialog {
   private Button sendEmail;
   private final EventRegistration eventRegistration;
  // UserServiceAsync service;
-  FormField userField;
+ final FormField userField;
 
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
 

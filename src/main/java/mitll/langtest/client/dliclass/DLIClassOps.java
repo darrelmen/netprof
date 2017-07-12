@@ -257,7 +257,7 @@ public class DLIClassOps implements RequiresResize {
     });
   }
 
-  private RequiresResize requiresResize = null;
+  private final RequiresResize requiresResize = null;
   //private OpsUserContainer opsUserContainer;
 
   /**

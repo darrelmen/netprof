@@ -51,7 +51,7 @@ import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.ClickableWords;
-import mitll.langtest.client.scoring.DownloadContainer;
+import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.scoring.ScoreFeedbackDiv;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
@@ -510,7 +510,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   private PlayAudioPanel playAudioPanel;
-  private DownloadContainer downloadContainer;
+  private final DownloadContainer downloadContainer;
 
   private void setDownloadHref(String audioPath) {
     String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, ".mp3") : audioPath;

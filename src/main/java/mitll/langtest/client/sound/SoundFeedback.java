@@ -132,7 +132,7 @@ public class SoundFeedback {
     }
   }
 
-  public static interface EndListener {
+  public interface EndListener {
     void songStarted();
     void songEnded();
   }

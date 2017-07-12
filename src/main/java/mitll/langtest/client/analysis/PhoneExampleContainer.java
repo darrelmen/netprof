@@ -142,7 +142,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
   private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,
                                                                      List<WordAndScore> dataList) {
-    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<WordAndScore>(dataList);
+    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<WordAndScore>() {
           public int compare(WordAndScore o1, WordAndScore o2) {

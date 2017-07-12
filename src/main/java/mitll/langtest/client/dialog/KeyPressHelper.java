@@ -57,7 +57,7 @@ public class KeyPressHelper {
 
   private final boolean removeOnEnter;
   private HandlerRegistration keyHandler;
-  private final Map<String, KeyListener> listeners = new HashMap<String, KeyListener>();
+  private final Map<String, KeyListener> listeners = new HashMap<>();
 
   /**
    * @see mitll.langtest.client.dialog.ModalInfoDialog

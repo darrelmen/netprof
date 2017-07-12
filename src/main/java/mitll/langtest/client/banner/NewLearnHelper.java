@@ -57,7 +57,7 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
-      private Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+      private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
       public Panel getExercisePanel(CommonExercise e) {

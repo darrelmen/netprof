@@ -70,7 +70,7 @@ import java.util.logging.Logger;
  * TODO : make PostAudioRecordButton extend this class.
  */
 public abstract class SimplePostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
-  private Logger logger = Logger.getLogger("SimplePostAudioRecordButton");
+  private final Logger logger = Logger.getLogger("SimplePostAudioRecordButton");
 
   private static final String RELEASE_TO_STOP = "Release";
 
@@ -264,7 +264,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 
   public Map<String, Float> getPhoneScores() {
     if (null == lastResult.getPretestScore())
-      return new HashMap<String, Float>();
+      return new HashMap<>();
     return lastResult.getPretestScore().getPhoneScores();
   }
 

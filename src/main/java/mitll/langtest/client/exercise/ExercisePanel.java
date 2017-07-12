@@ -64,13 +64,13 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
 
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
-  private final List<Widget> answers = new ArrayList<Widget>();
-  private final Set<Widget> completed = new HashSet<Widget>();
+  private final List<Widget> answers = new ArrayList<>();
+  private final Set<Widget> completed = new HashSet<>();
   protected T exercise = null;
   final ExerciseController controller;
   private final NavigationHelper<L> navigationHelper;
   final ListInterface<L,T> exerciseList;
-  private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
+  private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
   final String message;
   protected final String instance;
   protected boolean doNormalRecording = true;
@@ -135,7 +135,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   }
 
   private NavigationHelper<L> getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper<L>(exercise, controller, this, exerciseList, true, true, true, false);
+    return new NavigationHelper<>(exercise, controller, this, exerciseList, true, true, true, false);
   }
 
   void addInstructions() {
@@ -252,7 +252,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
     Set<Widget> objects = indexToWidgets.get(index);
-    if (objects == null) indexToWidgets.put(index, objects = new HashSet<Widget>());
+    if (objects == null) indexToWidgets.put(index, objects = new HashSet<>());
     objects.add(answerWidget);
   }
 

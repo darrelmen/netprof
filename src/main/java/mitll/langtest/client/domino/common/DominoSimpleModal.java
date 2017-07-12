@@ -48,17 +48,17 @@ import java.util.logging.Logger;
  */
 public abstract class DominoSimpleModal extends Modal {
 	
-	public static enum ModalSize { Big, Normal, Small };
-	
+	public enum ModalSize { Big, Normal, Small }
+
 	private static final Logger log = Logger.getLogger(DominoSimpleModal.class.getName());
 	private static final String DEF_CLOSE_BTN_NM = "Close";
     private Button closeBtn = null;
 	private Column footerCol;
 	
-	private String title; 
+	private final String title;
 	private String closeBtnNm = DEF_CLOSE_BTN_NM;
-	private ModalSize mType;
-	protected Widget contentWidget;
+	private final ModalSize mType;
+	protected final Widget contentWidget;
 	
 	public DominoSimpleModal(String title, ModalSize mType) {
 		this(true, title, DEF_CLOSE_BTN_NM, ModalSize.Big, null); 		

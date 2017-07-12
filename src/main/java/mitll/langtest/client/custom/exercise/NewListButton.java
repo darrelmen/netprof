@@ -1,8 +1,6 @@
 package mitll.langtest.client.custom.exercise;
 
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel;

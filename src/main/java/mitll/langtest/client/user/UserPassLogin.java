@@ -95,8 +95,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private boolean signInHasFocus = true;
   private final EventRegistration eventRegistration;
 
-  private SignUp signUpForm;
-  private SignIn signInForm;
+  private final SignUp signUpForm;
+  private final SignIn signInForm;
 
   /**
    * @param props

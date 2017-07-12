@@ -8,10 +8,6 @@ import mitll.langtest.client.list.Reloadable;
  */
 public interface ExerciseListContent extends ContentView {
   void hideList();
-
   void loadExercise(int exid);
-
   Reloadable getReloadable();
-
-//  void showList(int listid);
 }

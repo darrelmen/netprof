@@ -7,7 +7,6 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.dialog.WordBounds;
@@ -49,7 +48,7 @@ public class ClickableWords<T extends CommonExercise> {
   private static final String JAPANESE = "Japanese";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private ListInterface listContainer;
-  private WordBoundsFactory factory = new WordBoundsFactory();
+  private final WordBoundsFactory factory = new WordBoundsFactory();
   private int fontSize;
 
   private static final boolean DEBUG = false;

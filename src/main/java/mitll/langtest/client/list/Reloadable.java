@@ -41,11 +41,7 @@ package mitll.langtest.client.list;
 public interface Reloadable {
   void redraw();
 
- // void reload();
-
   void reloadWithCurrent();
-
-//  void clearCachedExercise();
 
   int getCurrentExerciseID();
 
