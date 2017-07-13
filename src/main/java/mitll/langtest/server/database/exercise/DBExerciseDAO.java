@@ -54,10 +54,11 @@ import static mitll.langtest.server.database.exercise.SectionHelper.SUB_TOPIC;
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
 
+  private static final int SPEW_THRESH = 5;
   private final SlickUserExerciseDAO userExerciseDAO;
   private final SlickProject project;
   private final Project fullProject;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
@@ -124,11 +125,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
       //userExerciseDAO.useExToPhones(exerciseToPhoneForProject);
 
-      logger.info("readExercises" +
+/*      logger.info("readExercises" +
           "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
-          "\n\tfor        " + projid +
-          "\n\ttype order " + typeOrder);
-
+          "\n\ttype order " + typeOrder);*/
       Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
 
       //  logger.info("addExerciseAttributes found " + allByProject.size() + " attributes");
@@ -146,8 +145,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               exToAttrs
           );
 
-      logger.info("readExercises project " + project +
-          " readExercises got " + allNonContextExercises.size() + " predef exercises");
+      logger.info("readExercises" +
+          "\n\tfor        " + projid +
+          "\n\tproject    " + project.name() +
+          "\n\ttype order " + typeOrder +
+          "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+          "\n\tgot        " + allNonContextExercises.size() + " predef exercises");
 
 //      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
       Map<Integer, CommonExercise> idToContext =
@@ -156,7 +159,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               getSectionHelper(),
               exerciseToPhoneForProject, fullProject, allByProject, exToAttrs
           ));
-      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
+//      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
 
       attachContextExercises(allNonContextExercises, userExerciseDAO.getAllRelated(projid), idToContext);
 
@@ -197,12 +200,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         } else if (c++ < 2) {
           logger.warn("1 " + prefix + " didn't attach " + relatedExercise + "" + " for\n" + root);
         }
-      } else if (c++ < 10) {
+      } else if (c++ < SPEW_THRESH) {
         logger.warn("2 " + prefix + " didn't attach " + relatedExercise + "" +
             " for, e.g. " + allNonContextExercises.iterator().next());
       }
     }
-    logger.info(prefix + " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);
+//    logger.info(prefix + " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);
   }
 
   /**

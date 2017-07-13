@@ -77,11 +77,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
 
   /**
-   *
-   */
-  public static final String DATABASE_REFERENCE = "databaseReference";
-
-  /**
    * @see
    */
   private String relativeConfigDir;
@@ -94,8 +89,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   @Override
   public void init() {
     try {
-      this.pathHelper = new PathHelper(getServletContext());
-      readProperties(getServletContext());
+      ServletContext servletContext = getServletContext();
+      this.pathHelper = new PathHelper(servletContext);
+      this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
       setInstallPath(db);
 
@@ -197,7 +193,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       projectInfos = db.getProjectManagement().getNestedProjectInfo();
     }
 
-    return new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffliations());
+    return new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
   }
 
   /**
@@ -336,31 +332,32 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @param servletContext
    * @see #init()
    */
-  private void readProperties(ServletContext servletContext) {
+  private ServerProperties readProperties(ServletContext servletContext) {
     ServerInitializationManagerNetProf serverInitializationManagerNetProf = new ServerInitializationManagerNetProf();
     ServerProperties serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
 
     File configDir = serverInitializationManagerNetProf.getConfigDir();
-//    logger.info("readProperties configDir from props " + configDir);
+    logger.info("readProperties : configDir from props " + configDir);
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     this.configDir = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
-//    logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
+    logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
     try {
-      this.serverProps = serverProps;
-      db = makeDatabaseImpl(this.serverProps.getH2Database());
-//      logger.info("readProperties made database " + db);
+      db = makeDatabaseImpl(serverProps);
+      logger.info("readProperties made database " + db);
       securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
-      //    logger.info("readProperties made securityManager " + securityManager);
+      logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
-      //  logger.info("readProperties shareDB ");
     } catch (Exception e) {
-      logger.error("Got " + e, e);
+      logger.error("readProperties got " + e, e);
     }
 
-    shareDB(servletContext);
+    shareDB(servletContext, db);
+    logger.info("readProperties shareDB ");
 //    shareLoadTesting(servletContext);
+
+    return serverProps;
   }
 /*
   private void shareLoadTesting(ServletContext servletContext) {
@@ -372,23 +369,10 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 */
 
-  private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
+  private DatabaseImpl makeDatabaseImpl(ServerProperties serverProps) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false
+    return new DatabaseImpl(configDir, relativeConfigDir, serverProps.getH2Database(), serverProps, pathHelper, true, this, false
     );
-  }
-
-  /**
-   * @param servletContext
-   * @see #readProperties
-   */
-  private void shareDB(ServletContext servletContext) {
-    Object databaseReference = servletContext.getAttribute(DATABASE_REFERENCE);
-    if (databaseReference != null) {
-      logger.debug("hmm... found existing database reference " + databaseReference);
-    }
-    servletContext.setAttribute(DATABASE_REFERENCE, db);
-//    logger.info("shareDB shared db " + servletContext.getAttribute(DATABASE_REFERENCE));
   }
 
   /**
@@ -401,8 +385,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     logger.debug("setInstallPath " + installPath);
     if (db == null) {
       logger.error("no database services created.");
-    }
-    else {
+    } else {
       db.setInstallPath(installPath, "");
     }
   }

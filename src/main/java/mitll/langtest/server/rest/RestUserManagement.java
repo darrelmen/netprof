@@ -569,7 +569,6 @@ public class RestUserManagement {
             boolean male = gender.equalsIgnoreCase("male");
 
             SignUpUser user2 = new SignUpUser(user,
-                //                passwordH,
                 emailH,
                 email,
                 User.Kind.CONTENT_DEVELOPER,
@@ -583,8 +582,7 @@ public class RestUserManagement {
                 "",
                 serverProps.getAppURL(),
                 "OTHER");
-//            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
-//                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
+
             user1 = getUserManagement().addUser(user2);
           } catch (NumberFormatException e) {
             logger.warn("couldn't parse age " + age);

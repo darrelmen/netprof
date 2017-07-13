@@ -646,7 +646,7 @@ public class SlickUserExerciseDAO
     }
 
     if (addTypesToSection) {
-      logger.info("getExercises type order " + typeOrder);
+    //  logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allPairs);
     }
     //  logger.info("getExercises created " + copy.size() + " exercises");
@@ -848,9 +848,7 @@ public class SlickUserExerciseDAO
   ) {
     int projectid = lookup.getID();
     List<SlickExercise> allContextPredefByProject = dao.getAllContextByProject(projectid);
-
-    logger.info("getContextByProject For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
-
+//    logger.info("getContextByProject For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
     return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
         exerciseToPhoneForProject, lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);
   }

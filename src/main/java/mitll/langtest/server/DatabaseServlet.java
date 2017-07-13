@@ -34,6 +34,7 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.security.IUserSecurityManager;
+import mitll.langtest.server.services.MyRemoteServiceServlet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -126,7 +127,7 @@ public class DatabaseServlet extends HttpServlet {
    */
   DatabaseImpl getDatabase() {
     if (db == null) {
-      Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
+      Object databaseReference = getServletContext().getAttribute(MyRemoteServiceServlet.DATABASE_REFERENCE);
       if (databaseReference != null) {
         db = (DatabaseImpl) databaseReference;
         securityManager = db.getUserSecurityManager();

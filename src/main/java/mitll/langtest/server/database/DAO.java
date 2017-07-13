@@ -55,8 +55,6 @@ import java.util.Set;
 public class DAO {
   private static final Logger logger = LogManager.getLogger(DAO.class);
   protected final LogAndNotify logAndNotify;
-  private final boolean isMYSQL;
-  private final boolean isPostgreSQL;
 
   public static final String ID = "ID";
 
@@ -73,8 +71,6 @@ public class DAO {
   protected DAO(Database database) {
     this.database = database;
     this.logAndNotify = database.getLogAndNotify();
-    isMYSQL = database.getServerProps().useMYSQL();
-    isPostgreSQL = database.getServerProps().usePostgres();
   }
 
   protected int getNumColumns(Connection connection, String table) throws SQLException {
@@ -358,14 +354,15 @@ public class DAO {
   }
 
   protected String getIdentity() {
-    return isMYSQL ? "BIGINT NOT NULL AUTO_INCREMENT" : isPostgreSQL ? "SERIAL" : "IDENTITY";
+    return "IDENTITY";
   }
 
   protected String getVarchar() {
-    return isMYSQL ? "VARCHAR(256)" : "VARCHAR";
+    return "VARCHAR";
   }
+
   protected String getPrimaryKey(String col) {
-    return isMYSQL ? "PRIMARY KEY (" + col + "), " : "";
+    return "";
   }
 
   /**

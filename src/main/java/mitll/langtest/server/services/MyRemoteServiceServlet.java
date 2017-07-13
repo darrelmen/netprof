@@ -64,6 +64,11 @@ import java.io.IOException;
 public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
   private static final Logger logger = LogManager.getLogger(MyRemoteServiceServlet.class);
 
+  /**
+   *
+   */
+  public static final String DATABASE_REFERENCE = "databaseReference";
+
   protected DatabaseServices db;
   protected ServerProperties serverProps;
   protected IUserSecurityManager securityManager;
@@ -78,35 +83,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   @Override
   public void init() {
     findSharedDatabase();
-    readProperties(getServletContext());
+    this.serverProps = readProperties(getServletContext());
 
-    if (serverProps.isAMAS()) {
+    if (serverProps != null && serverProps.isAMAS()) {
       audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
-    }
-  }
-
-  private DatabaseImpl getDatabase() {
-    DatabaseImpl db = null;
-
-    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
-    if (databaseReference != null) {
-      db = (DatabaseImpl) databaseReference;
-      this.pathHelper = new PathHelper(getServletContext(), db.getServerProps());
-      // logger.debug("found existing database reference " + db + " under " +getServletContext());
-    } else {
-      logger.info("getDatabase : no existing db reference yet...");
-    }
-    return db;
-  }
-
-  private void findSharedDatabase() {
-    if (db == null) {
-      db = getDatabase();
-      if (db == null) {
-        logger.error("findSharedDatabase no database?");
-      } else {
-        securityManager = db.getUserSecurityManager();
-      }
     }
   }
 
@@ -120,8 +100,8 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @param servletContext
    * @see #init
    */
-  private void readProperties(ServletContext servletContext) {
-    serverProps = new ServerInitializationManagerNetProf().getServerProps(servletContext);
+  private ServerProperties readProperties(ServletContext servletContext) {
+    return new ServerInitializationManagerNetProf().getServerProps(servletContext);
   }
 
   /**
@@ -458,26 +438,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   }
 */
 
-  /**
-   * true = create a new session
-   *
-   * @return
-   * @see UserServiceImpl#changePasswordWithToken(String, String, String)
-   * @see UserServiceImpl#loginUser
-   */
-  protected HttpSession createSession() {
-    return getThreadLocalRequest().getSession(true);
-  }
-
-  /**
-   * false = don't create the session
-   *
-   * @return
-   */
-  protected HttpSession getCurrentSession() {
-    return getThreadLocalRequest().getSession(false);
-  }
-
   private MailSupport getMailSupport() {
     return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
   }
@@ -544,5 +504,56 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   protected IUserListManager getUserListManager() {
     return db.getUserListManager();
+  }
+
+  /**
+   * Find shared db and make the user security manager.
+   */
+  private void findSharedDatabase() {
+    if (db == null) {
+      db = getDatabase();
+      if (db == null) {
+        logger.error("findSharedDatabase no database?");
+      } else {
+        securityManager = db.getUserSecurityManager();
+      }
+    }
+  }
+
+  /**
+   * Find the shared db reference.
+   * @return
+   */
+  private DatabaseImpl getDatabase() {
+    DatabaseImpl db = null;
+
+    Object databaseReference = getServletContext().getAttribute(DATABASE_REFERENCE);
+    if (databaseReference != null) {
+      db = (DatabaseImpl) databaseReference;
+      this.pathHelper = new PathHelper(getServletContext(), db.getServerProps());
+      //logger.debug("getDatabase : found existing database reference " + db + " under " +getServletContext());
+    } else {
+      logger.warn("getDatabase : no existing db reference yet - config error?");
+    }
+    return db;
+  }
+
+  /**
+   * All the other servlets that come after this one can now use this db (DatabaseServices) reference.
+   * This depends on the load order of the servlets being defined with this one going first. See
+   * load-on-startup parameter in web.xml.
+   *
+   * @see #DATABASE_REFERENCE
+   * @param servletContext db is shared via the servlet context
+   * @param db             to share with other servlets that load after this one
+   * @see #readProperties
+   */
+  protected void shareDB(ServletContext servletContext, DatabaseServices db) {
+    Object databaseReference = servletContext.getAttribute(DATABASE_REFERENCE);
+    if (databaseReference != null) {
+      logger.debug("shareDB : hmm... found existing database reference " + databaseReference);
+    }
+    servletContext.setAttribute(DATABASE_REFERENCE, db);
+//    logger.info("shareDB shared db " + servletContext.getAttribute(DATABASE_REFERENCE));
   }
 }

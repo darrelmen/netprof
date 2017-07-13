@@ -883,7 +883,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public void rememberTypesInOrder(final List<String> predefinedTypeOrder, List<List<Pair>> seen) {
     SectionNode child = root;
 
-    if (seen.isEmpty()) logger.error("huh? no types to remember?");
+    //if (seen.isEmpty()) logger.error("huh? no types to remember?");
 
     if (DEBUG) {
       logger.info("rememberTypesInOrder type order " + predefinedTypeOrder +

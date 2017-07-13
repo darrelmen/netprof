@@ -72,7 +72,7 @@ public class ServerInitializationManagerNetProf {
    * The default properties filename
    */
   private static final String DEFAULT_PROPS_FN = appName + ".properties";
-  public static final String UNKNOWN1 = "Unknown";
+  private static final String UNKNOWN1 = "Unknown";
   public static final String UNKNOWN = UNKNOWN1;
 
   /**
@@ -88,12 +88,12 @@ public class ServerInitializationManagerNetProf {
   public ServerProperties getServerProps(ServletContext newContext) {
     DateFormatter.init(new GWTDateFormatter());
 
-    ServerProperties props = null;
+    ServerProperties props;
     try {
       InputStream in = findServerProperties(newContext);
       props = getServerProperties(in, newContext);
     } catch (Exception e) {
-      log.error("trying to read props - got " + e, e);
+      log.error("getServerProps : trying to read props - got " + e, e);
       props = new ServerProperties();
     }
     return props;

@@ -87,19 +87,15 @@ public class ServerProperties {
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
 
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
-  @Deprecated
-  private static final String USE_MYSQL = "useMYSQL";
-  private static final String USE_H_2 = "useH2";
+   private static final String USE_H_2 = "useH2";
   private static final String USE_POSTGRE_SQL = "usePostgreSQL";
-  //private static final String TYPE_ORDER = "typeOrder";
-  //@Deprecated
+
   //private static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   public static final String MODELS_DIR = "MODELS_DIR";
   private static final String DB_CONFIG = "dbConfig";
   private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES = "postgres";
-
   //public static final String CONFIG = "config";
   //public static final String CONFIG_JSON = "config.json";
 
@@ -184,11 +180,12 @@ public class ServerProperties {
    */
   private final Set<Integer> preferredVoices = new HashSet<>();
   private EmailList emailList;
-  private String fontFamily;
-  private String fontFaceURL;
   private final Map<String, String> phoneToDisplay = new HashMap<>();
   private List<Affiliation> affliations = new ArrayList<>();
 
+  /**
+   * TODO : Probably put these back in
+   */
   private String releaseVers = "Unknown";
   private String buildUser = "Unknown";
   private String buildVers = "Unknown";
@@ -201,12 +198,9 @@ public class ServerProperties {
    */
   public static List<String> CORE_PROPERTIES = Arrays.asList(
       ServerProperties.MODELS_DIR,
-    //  "N_OUTPUT",
-   //   "N_HIDDEN",
       WEBSERVICE_HOST_PORT
   );
   private String configFileFullPath;
-
 
   private final Set<String> lincoln = new HashSet<>(Arrays.asList(
       "gvidaver",
@@ -223,7 +217,6 @@ public class ServerProperties {
       "dajone3",
       //"WagnerSandy",
       "rbtrbt"));
-
 
   public ServerProperties() {
   }
@@ -783,20 +776,12 @@ public class ServerProperties {
     return props.getProperty("miraFlavor", getLanguage().toLowerCase() + "-amas3");
   }
 
-  public boolean useMYSQL() {
-    return getDefaultFalse(USE_MYSQL);
-  }
-
   public boolean useH2() {
     return getDefaultFalse(USE_H_2);
   }
 
   public void setH2(boolean val) {
     props.setProperty(USE_H_2, Boolean.valueOf(val).toString());
-  }
-
-  public boolean usePostgres() {
-    return getDefaultFalse(USE_POSTGRE_SQL);
   }
 
   public boolean doAudioCheckOnStartup() {
@@ -813,38 +798,6 @@ public class ServerProperties {
 
   public boolean doAudioChecksInProduction() {
     return getDefaultTrue(DO_AUDIO_CHECKS_IN_PRODUCTION);
-  }
-
-  public void setRTL(boolean isRTL) {
-    props.setProperty("rtl", isRTL ? "true" : "false");
-  }
-
-/*
-  public void setFontFamily(String fontNames) {
-    this.fontFamily = fontNames;
-    props.setProperty(FONT_FAMILY, fontNames);
-  }
-
-  private String getFontFamily() {
-    return fontFamily;
-  }
-
-  public void setFontFaceURL(String fontFaceURL) {
-    this.fontFaceURL = fontFaceURL;
-  }
-
-  public String getFontFaceURL() {
-    return fontFaceURL;
-  }
-*/
-
-  /**
-   * Something like : "https://domino-devel/dominoNP/attach/"
-   *
-   * @return
-   */
-  public String getAudioAttachPrefix() {
-    return props.getProperty("audioAttachPrefix");//,"https://domino-devel/dominoNP/attach/");
   }
 
   public int getSleepBetweenDecodes() {
@@ -914,22 +867,6 @@ public class ServerProperties {
     return props.getProperty(HYDRA_HOST, HYDRA_HOST_URL_DEFAULT);
   }
 
-/*
-  public String getDominoURL() {
-    return props.getProperty(DOMINO_SERVER, DOMINO_SERVER_DEFAULT);
-  }
-*/
-
-/*
-  public String getHelp() {
-    return props.getProperty(DOMINO_SERVER, DOMINO_SERVER_DEFAULT);
-  }
-*/
-
-  public boolean shouldRecalcStudentAudio() {
-    return getDefaultTrue("shouldRecalcStudentAudio");
-  }
-
   /**
    * @return
    * @deprecated
@@ -943,15 +880,20 @@ public class ServerProperties {
     return models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
 
-  public boolean shouldRecalcDNR() {
+/*  public boolean shouldRecalcDNR() {
     return getDefaultTrue("shouldRecalcDNROnAudio");
-  }
+  }*/
 
-  public List<Affiliation> getAffliations() {
+  public List<Affiliation> getAffiliations() {
     return affliations;
   }
 
   public Set<String> getLincolnPeople() { return  lincoln; }
+
+  /**
+   * @see LangTestDatabaseImpl#getStartupInfo
+   * @return
+   */
   public Map<String, String> getUIProperties() {
     return  getPropertyMap(uiprops);
   }

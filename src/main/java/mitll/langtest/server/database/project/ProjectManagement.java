@@ -177,11 +177,8 @@ public class ProjectManagement implements IProjectManagement {
    * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
    */
   private void configureProjects() {
-    Collection<Project> projects = getProjects();
-//    logger.info("configureProjects got " + projects.size() + " projects");
-    for (Project project : projects) {
-      configureProject(project, false, false);
-    }
+    getProjects().forEach(project -> configureProject(project, false, false));
+    logMemory();
   }
 
   public void configureProjectByID(int projid) {
@@ -210,9 +207,8 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
 
-    logger.info("configureProject " + project);
+//    logger.info("configureProject " + project.getProject().name() + " ---- ");
     SlickProject slickProject = project.getProject();
-    //  project.setConfigured(slickProject != null);
 
     if (slickProject == null) {
       logger.info("configureProject : note : no project for " + project);
@@ -277,7 +273,6 @@ public class ProjectManagement implements IProjectManagement {
       logger.warn("\n\n\nhuh? no slick project for " + project);
     }
 
-    logMemory();
   }
 
   /**
@@ -426,7 +421,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #rememberProject(PathHelper, ServerProperties, LogAndNotify, SlickProject, DatabaseImpl)
    */
   private void setExerciseDAO(Project project) {
-    logger.info("setExerciseDAO on " + project);
+//    logger.info("setExerciseDAO on " + project);
     DBExerciseDAO dbExerciseDAO = new DBExerciseDAO(
         serverProps,
         db.getUserListManager(),
@@ -545,9 +540,7 @@ public class ProjectManagement implements IProjectManagement {
   }*/
 
   @Override
-  public Collection<Project> getProjects() {
-    return idToProject.values();
-  }
+  public Collection<Project> getProjects() {  return idToProject.values();  }
 
   @Override
   public Collection<Project> getProductionProjects() {

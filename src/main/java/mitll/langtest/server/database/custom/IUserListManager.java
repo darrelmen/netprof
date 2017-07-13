@@ -120,8 +120,6 @@ public interface IUserListManager   {
 
   boolean deleteItemFromList(int listid, int exid, Collection<String> typeOrder);
 
-//  void setPublicOnList(long userListID, boolean isPublic);
-
   Collection<Integer> getAudioAnnos();
 
   IAnnotationDAO getAnnotationDAO();

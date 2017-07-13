@@ -525,7 +525,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    */
   private void setExerciseState(int exercise, int user, Shell exercise1) {
     if (exercise1 != null) {
-      IUserListManager userListManager = getUserListManager();
       STATE currentState = db.getStateManager().getCurrentState(exercise);
       if (currentState == STATE.APPROVED) { // clear approved on new audio -- we need to review it again
         db.getStateManager().setState(exercise1, STATE.UNSET, user);

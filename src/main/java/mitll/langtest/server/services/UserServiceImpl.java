@@ -276,6 +276,26 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
+  /**
+   * true = create a new session
+   *
+   * @return
+   * @see UserServiceImpl#changePasswordWithToken(String, String, String)
+   * @see UserServiceImpl#loginUser
+   */
+  protected HttpSession createSession() {
+    return getThreadLocalRequest().getSession(true);
+  }
+
+  /**
+   * false = don't create the session
+   *
+   * @return
+   */
+  protected HttpSession getCurrentSession() {
+    return getThreadLocalRequest().getSession(false);
+  }
+
   private String getBaseURL() {
     return ServletUtil.get().getBaseURL(getThreadLocalRequest());
   }

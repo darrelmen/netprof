@@ -152,7 +152,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IAudioDAO audioDAO;
   private IAnswerDAO answerDAO;
   private IUserListManager userListManager;
-IStateManager stateManager;
+  IStateManager stateManager;
   private IUserExerciseDAO userExerciseDAO;
   // private AddRemoveDAO addRemoveDAO;
 
@@ -175,10 +175,6 @@ IStateManager stateManager;
 
   private mitll.langtest.server.database.user.UserManagement userManagement = null;
 
-  /**
-   * @see #writeUserListAudio(OutputStream, int, int, AudioExportOptions)
-   */
-  // private final String configDir;
   /**
    * Only for AMAS.
    *
@@ -218,15 +214,12 @@ IStateManager stateManager;
    * @param mustAlreadyExist
    * @param logAndNotify
    * @param readOnly
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl
    */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
-                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify, boolean readOnly/*,
-                      ServletContext servletContext*/) {
+                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify, boolean readOnly) {
     this(serverProps.useH2() ?
             new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify, readOnly) :
-//            serverProps.usePostgres() ?
-//                new PostgreSQLConnection(dbName, logAndNotify) :
             null,
         configDir, relativeConfigDir, dbName,
         serverProps,
@@ -244,34 +237,42 @@ IStateManager stateManager;
     long now;
     this.connection = connection;
     absConfigDir = configDir;
-    // this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
     this.logAndNotify = logAndNotify;
     this.pathHelper = pathHelper;
 
-    if (maybeGetH2Connection(relativeConfigDir, dbName, serverProps)) return;
-    then = System.currentTimeMillis();
-    initializeDAOs(pathHelper);
-    now = System.currentTimeMillis();
-    if (now - then > 300) {
-      logger.info("took " + (now - then) + " millis to initialize DAOs for " + getOldLanguage(serverProps));
-    }
+    if (!maybeGetH2Connection(relativeConfigDir, dbName, serverProps)) {
+      then = System.currentTimeMillis();
+      initializeDAOs(pathHelper);
+      now = System.currentTimeMillis();
 
-    this.pathHelper = pathHelper;
+      if (now - then > 300) {
+        logger.info("DatabaseImpl : took " + (now - then) + " millis to initialize DAOs");
+      }
+
+      this.pathHelper = pathHelper;
+    }
   }
 
   private String getOldLanguage(ServerProperties serverProps) {
     return serverProps.getLanguage();
   }
 
+  /**
+   * Confusing...
+   * @param relativeConfigDir
+   * @param dbName
+   * @param serverProps
+   * @return true if we want an h2 connection and didn't get one
+   */
   private boolean maybeGetH2Connection(String relativeConfigDir, String dbName, ServerProperties serverProps) {
     try {
       Connection connection1 = getConnection();
       if (connection1 == null && serverProps.useH2()) {
-        logger.warn("couldn't open connection to database at " + relativeConfigDir + " : " + dbName);
+        logger.warn("maybeGetH2Connection couldn't open connection to database at " + relativeConfigDir + " : " + dbName);
         return true;
       } else {
-        closeConnection(connection1);
+        closeConnection(connection1);  // TODO : ? why?
       }
     } catch (Exception e) {
       logger.error("couldn't open connection to database, got " + e.getMessage(), e);
@@ -760,9 +761,9 @@ IStateManager stateManager;
 //      this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
 //      numExercises = fileExerciseDAO.getNumExercises();
 //    } else {
-      fileExerciseDAO = new FileExerciseDAO<>(mediaDir, getOldLanguage(serverProps), absConfigDir,
-          lessonPlanFile, installPath);
-      numExercises = fileExerciseDAO.getNumExercises();
+    fileExerciseDAO = new FileExerciseDAO<>(mediaDir, getOldLanguage(serverProps), absConfigDir,
+        lessonPlanFile, installPath);
+    numExercises = fileExerciseDAO.getNumExercises();
 //    }
     return numExercises;
   }
@@ -1633,10 +1634,10 @@ IStateManager stateManager;
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds(ExerciseListRequest)
    * @param listid
    * @param projectid
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds(ExerciseListRequest)
    */
   @Override
   public UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid) {
