@@ -141,7 +141,17 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     this.exerciseList = exerciseList;
   }
 
-  private int currentTab = 0;
+  public Panel addFields(final ListInterface<CommonShell, CommonExercise> listInterface, final Panel toAddTo) {
+    Panel widgets = super.addFields(listInterface, toAddTo);
+
+    english.box.setEnabled(false);
+    foreignLang.box.setEnabled(false);
+    translit.box.setEnabled(false);
+    context.box.setEnabled(false);
+    contextTrans.box.setEnabled(false);
+    return widgets;
+  }
+    private int currentTab = 0;
 
   /**
    * @return
@@ -814,16 +824,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private void userSaidExerciseIsFixed() {
     final int id = newUserExercise.getID();
-    //   int user = controller.getUser();
-
-//    logger.info("doAfterEditComplete : forgetting exercise " + id + " current user " + user + " before list had " + ul.getExercises().size());
-//    if (!originalList.remove(newUserExercise)) {
-//      logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + originalList);
-//    }
-//    if (!originalList.remove(newUserExercise)) {
-//      //   logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
-//    }
-
     controller.getQCService().markState(id, STATE.FIXED, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -833,17 +833,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       public void onSuccess(Void result) {
         logger.info("doAfterEditComplete : forgetting exercise " + id);
         exerciseList.forgetExercise(id);
-
-      /*  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            reloadLearnList();
-          }
-        });*/
       }
     });
-    //else {
-    //logger.info("----> doAfterEditComplete : button not clicked ");
-    // }
   }
 
   @Override

@@ -46,8 +46,7 @@ import java.util.Collection;
 
 @RemoteServiceRelativePath("list-manager")
 public interface ListService extends RemoteService {
-  int getNumLists();
-
+ // int getNumLists();
 
   Collection<UserList<CommonShell>> getLists();
 
@@ -67,7 +66,7 @@ public interface ListService extends RemoteService {
    * @param isPublic
    * @see ListManager#setPublic(long, boolean)
    */
-  void setPublicOnList(int userListID, boolean isPublic);
+ // void setPublicOnList(int userListID, boolean isPublic);
   // Deleting lists and exercises from lists
 
   /**
@@ -115,7 +114,7 @@ public interface ListService extends RemoteService {
    * @return
    * @see ListManager#viewLessons
    */
-  Collection<UserList<CommonShell>> getUserListsForText(String search);
+  //Collection<UserList<CommonShell>> getUserListsForText(String search);
 
   /**
    * @return
@@ -160,7 +159,7 @@ public interface ListService extends RemoteService {
    */
   void editItem(CommonExercise userExercise, boolean keepAudio);
 
-  void updateContext(long userListID, String context);
-  void updateRichText(long userListID, String richText);
-  void updateName(long userListID, String name);
+//  void updateContext(long userListID, String context);
+//  void updateRichText(long userListID, String richText);
+//  void updateName(long userListID, String name);
 }

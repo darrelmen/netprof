@@ -56,7 +56,6 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
@@ -72,9 +71,11 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 abstract class NewUserExercise extends BasicDialog {
-  public static final String OPTIONAL = "optional";
-  public static final String WIDGET_ID = "NewUserExercise_WaveformPostAudioRecordButton_";
   private final Logger logger = Logger.getLogger("NewUserExercise");
+
+
+  private static final String OPTIONAL = "optional";
+  private static final String WIDGET_ID = "NewUserExercise_WaveformPostAudioRecordButton_";
 
   public static final String CONTEXT = "context";
   static final String CONTEXT_TRANSLATION = "context translation";
@@ -94,8 +95,6 @@ abstract class NewUserExercise extends BasicDialog {
   static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
   static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
-//  private static final String ENTER_THE_ENGLISH_PHRASE = "Enter the english equivalent.";
-//  private static final String ENTER_MEANING = "Enter the meaning of the english.";
 
   private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
 
@@ -131,8 +130,8 @@ abstract class NewUserExercise extends BasicDialog {
 
   ControlGroup normalSpeedRecording = null;
   ControlGroup slowSpeedRecording = null;
-  //UserList<CommonShell> originalList;
-final int listID;
+
+  private final int listID;
   /**
    * TODO : What is this for???
    */
@@ -147,11 +146,7 @@ final int listID;
    * @param controller
    * @param newExercise
    * @param instance
-   * @paramx originalList
    * @param listID
-   * @paramx editableExerciseList
-   * @paramx service
-   * @paramx itemMarker
    * @see EditableExerciseDialog#EditableExerciseDialog
    */
   public NewUserExercise(
@@ -163,7 +158,6 @@ final int listID;
     this.newUserExercise = newExercise;
     this.instance = instance;
     this.listID = listID;
-  //  this.predefinedContentList = predefinedContent;
   }
 
   /**
@@ -172,9 +166,7 @@ final int listID;
    * @return
    * @see EditItem#setFactory
    */
-  public Panel addFields(
-      final ListInterface<CommonShell, CommonExercise> listInterface,
-      final Panel toAddTo) {
+  public Panel addFields(final ListInterface<CommonShell, CommonExercise> listInterface, final Panel toAddTo) {
     final FluidContainer container = new ResizableFluid();
     DivWidget upper = new DivWidget();
     upper.getElement().setId("addNewFieldContainer");
@@ -314,7 +306,7 @@ final int listID;
     return isEnglish() ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
   }
 
-  private FormField makeForeignLangRow(Panel container) {
+  protected FormField makeForeignLangRow(Panel container) {
     //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
     Panel row = new FluidRow();
     container.add(row);
@@ -383,12 +375,9 @@ final int listID;
   }
 
   private void addOnBlur(final TextBoxBase box, final String prefix) {
-    box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        gotBlur();
-        logBlur(prefix, box);
-      }
+    box.addBlurHandler(event -> {
+      gotBlur();
+      logBlur(prefix, box);
     });
   }
 
@@ -754,12 +743,7 @@ final int listID;
       //logger.info("checkIfNeedsRefAudio : new user ex " + newUserExercise);
       Button recordButton = rap.getButton();
       markError(normalSpeedRecording, recordButton, recordButton, "", RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE, Placement.RIGHT);
-      recordButton.addMouseOverHandler(new MouseOverHandler() {
-        @Override
-        public void onMouseOver(MouseOverEvent event) {
-          normalSpeedRecording.setType(ControlGroupType.NONE);
-        }
-      });
+      recordButton.addMouseOverHandler(event -> normalSpeedRecording.setType(ControlGroupType.NONE));
     }
   }
 
@@ -980,12 +964,7 @@ final int listID;
         Button recordButton = rap.getButton();
         markError(normalSpeedRecording, recordButton, recordButton, "",
             RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE);
-        recordButton.addMouseOverHandler(new MouseOverHandler() {
-          @Override
-          public void onMouseOver(MouseOverEvent event) {
-            normalSpeedRecording.setType(ControlGroupType.NONE);
-          }
-        });
+        recordButton.addMouseOverHandler(event -> normalSpeedRecording.setType(ControlGroupType.NONE));
         return false;
       } else {
         return true;

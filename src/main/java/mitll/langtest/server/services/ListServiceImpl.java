@@ -51,12 +51,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
   private static final boolean DEBUG = false;
 
-  @Deprecated
+/*  @Deprecated
   @Override
   public int getNumLists() {
     int userIDFromSession = getUserIDFromSession();
     return getUserListManager().getNumLists(userIDFromSession, getProjectID(userIDFromSession));
-  }
+  }*/
 
   @Override
   public Collection<UserList<CommonShell>> getLists() {
@@ -108,18 +108,20 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param isPublic
    * @see ListManager#setPublic
    */
+/*
   @Override
   public void setPublicOnList(int userListID, boolean isPublic) {
     getUserListManager().setPublicOnList(userListID, isPublic);
   }
+*/
 
   /**
    * @param userListID
    * @param user
-   * @see ListManager#addVisitor(mitll.langtest.shared.custom.UserList)
+   * @see mitll.langtest.client.list.FacetExerciseList#addVisitor
    */
   public UserList addVisitor(int userListID, int user) {
-    logger.info("addVisitor " + userListID + " by  " + user);
+    //logger.info("addVisitor " + userListID + " by  " + user);
     return getUserListManager().addVisitor(userListID, user);
   }
 
@@ -129,7 +131,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
   @Override
   public int getProjectIDForList(int userListID) {
-    UserList userList = getUserListManager().getUserList(userListID);
+    UserList userList = getUserListManager().getUserListNoExercises(userListID);
     if (userList == null) return -1;
     else return userList.getProjid();
   }
@@ -138,9 +140,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param onlyCreated
    * @param visited
    * @return
-   * @see mitll.langtest.client.custom.Navigation#showInitialState()
-   * @see ListManager#viewLessons
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
+   * @seex mitll.langtest.client.custom.Navigation#showInitialState()
+   * @seex ListManager#viewLessons
+   * @seex mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
@@ -157,10 +159,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @return
    * @see ListManager#viewLessons
    */
-  @Override
-  public Collection<UserList<CommonShell>> getUserListsForText(String search) {
-    return getUserListManager().getUserListsForText(search, getUserIDFromSession(), getProjectID());
-  }
+//  @Override
+//  public Collection<UserList<CommonShell>> getUserListsForText(String search) {
+//    return getUserListManager().getUserListsForText(search, getUserIDFromSession(), getProjectID());
+//  }
 
   /**
    * TODO : maybe remove second arg
@@ -352,7 +354,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
             projectID,
             false);
     newItem.setForeignLanguage(fl);
-
     newItems.add(newItem);
     logger.info("reallyCreateNewItems new " + newItem);
     return null;
@@ -390,10 +391,11 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   /**
-   * @param id
-   * @param context
-   * @see mitll.langtest.client.custom.userlist.ListOperations#attachMedia
+   * @paramx id
+   * @paramx context
+   * @seez mitll.langtest.client.custom.userlist.ListOperations#attachMedia
    */
+/*
   public void updateContext(long id, String context) {
     getUserListDAO().updateContext(id, context);
   }
@@ -401,12 +403,17 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public void updateRichText(long id, String richText) {
     getUserListDAO().updateRichText(id, richText);
   }
+*/
 
+/*
   private IUserListDAO getUserListDAO() {
     return getUserListManager().getUserListDAO();
   }
+*/
 
+/*
   public void updateName(long id, String name) {
     getUserListDAO().updateName(id, name);
   }
+*/
 }

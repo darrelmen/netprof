@@ -46,19 +46,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-public interface IUserListManager /*extends IStateManager*/ {
-  @Deprecated
-  int REVIEW_MAGIC_ID = -100;
+public interface IUserListManager   {
+  //@Deprecated
+  //int REVIEW_MAGIC_ID = -100;
   @Deprecated
   int COMMENT_MAGIC_ID = -200;
-  @Deprecated
-  int ATTN_LL_MAGIC_ID = -300;
+  //@Deprecated
+  //int ATTN_LL_MAGIC_ID = -300;
 
   UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
   int getNumLists(int userid, int projid);
 
-  Collection<UserList<CommonShell>> getMyLists(int userid, int projid);
+//  Collection<UserList<CommonShell>> getMyLists(int userid, int projid);
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists);
 
@@ -66,21 +66,21 @@ public interface IUserListManager /*extends IStateManager*/ {
    * @param userid
    * @param projid
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject(int, int)
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject
    */
   UserList createFavorites(int userid, int projid);
 
   UserList<CommonShell> getCommentedList(Set<Integer> ids);
 
-  UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids);
-
-  UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids);
+//  UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids);
+//
+//  UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids);
 
   UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder, Set<Integer> ids);
 
-  UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids);
-
-  UserList<CommonExercise> getDefectListEx(Set<Integer> ids);
+//  UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids);
+//
+//  UserList<CommonExercise> getDefectListEx(Set<Integer> ids);
 
   @Deprecated
   UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids);
@@ -91,7 +91,7 @@ public interface IUserListManager /*extends IStateManager*/ {
 
   List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
 
-  UserList getUserList(int userListID);
+  UserList getUserListNoExercises(int userListID);
 
   void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
 
@@ -120,7 +120,7 @@ public interface IUserListManager /*extends IStateManager*/ {
 
   boolean deleteItemFromList(int listid, int exid, Collection<String> typeOrder);
 
-  void setPublicOnList(long userListID, boolean isPublic);
+//  void setPublicOnList(long userListID, boolean isPublic);
 
   Collection<Integer> getAudioAnnos();
 

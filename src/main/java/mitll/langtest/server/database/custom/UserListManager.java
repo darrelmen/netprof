@@ -82,7 +82,7 @@ public class UserListManager implements IUserListManager {
   private static final String COMMENTS = "Comments";
   private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
   private static final String REVIEW = "Defects";
-  private static final String ATTENTION = "AttentionLL";
+//  private static final String ATTENTION = "AttentionLL";
   private static final String ITEMS_TO_REVIEW = "Possible defects to fix";
 
   private static final boolean DEBUG = false;
@@ -204,14 +204,16 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+/*
   private boolean hasByName(int userid, String name, int projid) {
     return userListDAO.hasByName(userid, name, projid);
   }
+*/
 
-  @Override
+/*  @Override
   public Collection<UserList<CommonShell>> getMyLists(int userid, int projid) {
     return getListsForUser(userid, projid, true, false);
-  }
+  }*/
 
   /**
    * TODO : expensive -- could just be a query against your own lists and/or against visited lists...
@@ -364,25 +366,25 @@ public class UserListManager implements IUserListManager {
     return reviewList;
   }
 
-  @Override
-  public UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids) {
-    Set<Integer> defectIds = stateManager.getAttentionIDs();
-    defectIds.retainAll(ids);
-    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
-    logger.debug("\tgetAttentionList ids #=" + allKnown.size());
-
-    return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID);
-  }
-
-  @Override
-  public UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids) {
-    Set<Integer> defectIds = stateManager.getAttentionIDs();
-    defectIds.retainAll(ids);
-    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
-    logger.debug("\tgetAttentionList ids #=" + allKnown.size());
-
-    return getReviewListEx(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID);
-  }
+//  @Override
+//  public UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids) {
+//    Set<Integer> defectIds = stateManager.getAttentionIDs();
+//    defectIds.retainAll(ids);
+//    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
+//    logger.debug("\tgetAttentionList ids #=" + allKnown.size());
+//
+//    return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID);
+//  }
+//
+//  @Override
+//  public UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids) {
+//    Set<Integer> defectIds = stateManager.getAttentionIDs();
+//    defectIds.retainAll(ids);
+//    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
+//    logger.debug("\tgetAttentionList ids #=" + allKnown.size());
+//
+//    return getReviewListEx(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID);
+//  }
 /*
   @NotNull
   private Set<Integer> getAttentionIDs() {
@@ -404,9 +406,10 @@ public class UserListManager implements IUserListManager {
    * @param typeOrder used by sorter to sort first in unit & chapter order
    * @param ids       only within this set
    * @return
-   * @see mitll.langtest.server.services.ListServiceImpl#getReviewLists
+   * @seex mitll.langtest.server.services.ListServiceImpl#getReviewLists
    * @see IUserListManager#getUserListByID
    */
+/*
   @Override
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids) {
     Set<Integer> defectIds = stateManager.getDefectIDs();
@@ -416,6 +419,7 @@ public class UserListManager implements IUserListManager {
 
     return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID);
   }
+*/
 
   /**
    * @param ids
@@ -423,6 +427,7 @@ public class UserListManager implements IUserListManager {
    * @see #getUserListByIDExercises(long, int, Collection, Set)
    */
 
+/*
   @Override
   public UserList<CommonExercise> getDefectListEx(Set<Integer> ids) {
     Set<Integer> defectIds = stateManager.getDefectIDs();
@@ -432,6 +437,7 @@ public class UserListManager implements IUserListManager {
 
     return getReviewListEx(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID);
   }
+*/
 
 /*  @NotNull
   private Set<Integer> getDefectIDs() {
@@ -608,11 +614,11 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void newExercise(int userListID, CommonExercise userExercise, String mediaDir) {
-    newExerciseOnList(getUserList(userListID), userExercise, mediaDir);
+    newExerciseOnList(getUserListNoExercises(userListID), userExercise, mediaDir);
   }
 
-  public UserList getUserList(int userListID) {
-    logger.info("getUserList for " + userListID);
+  public UserList getUserListNoExercises(int userListID) {
+    logger.info("getUserListNoExercises for " + userListID);
     return userListDAO.getWhere(userListID, true);
   }
 
@@ -657,7 +663,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void addItemToList(int userListID, @Deprecated String exerciseID, int exid) {
-    UserList where = getUserList(userListID);
+    UserList where = getUserListNoExercises(userListID);
 
     if (where != null) {
       addItemToGivenList(where, exerciseID, exid);
@@ -906,7 +912,7 @@ public class UserListManager implements IUserListManager {
   @Override
   public UserList addVisitor(int userListID, int user) {
     logger.debug("addVisitor - user " + user + " visits " + userListID);
-    UserList where = getUserList(userListID);
+    UserList where = getUserListNoExercises(userListID);
     if (where != null) {
       userListDAO.addVisitor(where.getID(), user);
       return where;
@@ -1125,10 +1131,10 @@ public class UserListManager implements IUserListManager {
     return userListExerciseJoinDAO.remove(listid, exid);
   }
 
-  @Override
-  public void setPublicOnList(long userListID, boolean isPublic) {
-    userListDAO.setPublicOnList(userListID, isPublic);
-  }
+//  @Override
+//  public void setPublicOnList(long userListID, boolean isPublic) {
+//    userListDAO.setPublicOnList(userListID, isPublic);
+//  }
 
   /**
    * @return

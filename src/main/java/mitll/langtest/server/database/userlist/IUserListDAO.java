@@ -50,11 +50,13 @@ public interface IUserListDAO extends IDAO {
    * @param context
    * @see mitll.langtest.server.services.ListServiceImpl#updateContext(long, String)
    */
+/*
   void updateContext(long uniqueID, String context);
 
   void updateRichText(long uniqueID, String richText);
 
   void updateName(long id, String name);
+*/
 
 
   /**

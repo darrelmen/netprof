@@ -63,8 +63,9 @@ import java.util.logging.Logger;
  * <T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise, UL extends UserList<?>>
  */
 class EditableExerciseDialog extends NewUserExercise {
-  public static final String ITEM = "Item";
   private final Logger logger = Logger.getLogger("EditableExerciseDialog");
+
+  private static final String ITEM = "Item";
 
   private final HTML fastAnno = new HTML();
   private final HTML slowAnno = new HTML();

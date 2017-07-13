@@ -198,7 +198,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
       logger.error("got " + e, e);
     }
   }
-
+/*
   @Override
   public void updateContext(long uniqueID, String context) {
 
@@ -212,7 +212,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   @Override
   public void updateName(long id, String name) {
 
-  }
+  }*/
 
   @Override
   public int getCount() {

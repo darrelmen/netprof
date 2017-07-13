@@ -187,6 +187,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     dao.updateModified((int) uniqueID);
   }
 
+/*
   @Override
   public void updateContext(long uniqueID, String context) {
     dao.updateContext((int) uniqueID, context);
@@ -201,6 +202,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   public void updateName(long uniqueID, String name) {
     dao.updateName((int) uniqueID, name);
   }
+*/
 
   @Override
   public int getCount() {

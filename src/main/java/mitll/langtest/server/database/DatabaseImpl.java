@@ -1579,7 +1579,7 @@ IStateManager stateManager;
           copyAsExercises,
           language,
           getAudioDAO(),
-          listid == IUserListManager.REVIEW_MAGIC_ID,
+          listid == IUserListManager.COMMENT_MAGIC_ID,
           options);
     }
     return language + "_" + userListByID.getName();
@@ -1631,11 +1631,6 @@ IStateManager stateManager;
       return language1 + "_" + userListByID.getName();
     }
   }
-
-/*  @Override
-  public UserList<CommonShell> getUserListByID(long listid, int projectid) {
-    return getUserListManager().getUserListByID(listid, getSectionHelper(projectid).getTypeOrder(), getIDs(projectid));
-  }*/
 
   /**
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds(ExerciseListRequest)
