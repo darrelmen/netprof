@@ -33,8 +33,11 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   public ExerciseListWrapper() {
@@ -43,11 +46,12 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   private int reqID;
   private List<T> exercises;
   private CommonExercise firstExercise;
-  //private Map<Integer, List<CorrectAndScore>> histories;
+  private Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise;
+  private Map<Integer,Float> idToScore;
 
-/*  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise) {
+  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise) {
     this(reqID, ids, firstExercise, new HashMap<>());
-  }*/
+  }
 
   /**
    * @param reqID
@@ -56,13 +60,13 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
-  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise
-     // ,                             Map<Integer, List<CorrectAndScore>> histories
+  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise,
+                             Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise
   ) {
     this.reqID = reqID;
     this.exercises = ids;
     this.firstExercise = firstExercise;
-   // this.histories = histories;
+    this.scoreHistoryPerExercise = scoreHistoryPerExercise;
   }
 
   public int getReqID() {
@@ -77,9 +81,21 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
     return firstExercise;
   }
 
+  public Map<Integer, List<CorrectAndScore>> getScoreHistoryPerExercise() {
+    return scoreHistoryPerExercise;
+  }
+
   public String toString() {
     return "req " + reqID + " has " + exercises.size() + " exercises" +
         (firstExercise != null ? ", first is " + firstExercise.getID() : "");
+  }
+
+  public Map<Integer, Float> getIdToScore() {
+    return idToScore;
+  }
+
+  public void setIdToScore(Map<Integer, Float> idToScore) {
+    this.idToScore = idToScore;
   }
 
 /*  public Map<Integer, List<CorrectAndScore>> getHistories() {

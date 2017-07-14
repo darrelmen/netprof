@@ -587,7 +587,7 @@ public class AudioExercise extends ExerciseShell {
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addAltFL
    */
   public String getAltFL() {
     return altfl;

@@ -330,9 +330,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param exercises
    * @param <X>
    */
-  private <X extends CommonShell> void addScores(int userid, List<X> exercises) {
-    db.getResultDAO().addScores(userid, exercises);
+/*
+  private <X extends CommonShell> void getScores(int userid, List<X> exercises) {
+    db.getResultDAO().getScores(userid, exercises);
   }
+  */
 
   /**
    * Return shortest matches first (on fl term).
@@ -552,7 +554,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
-    logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + request.getActivityType());
+    logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
     markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
 
     // TODO : do this the right way vis-a-vis type safe collection...
@@ -564,17 +566,19 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     ExerciseListWrapper<T> exerciseListWrapper =
         new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);
 
-    addScores(userID, exerciseShells1);
+    //  getScores(userID, exerciseShells1);
+    Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exerciseShells1);
+    exerciseListWrapper.setIdToScore(scores);
     logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper);
     return exerciseListWrapper;
   }
 
   /**
-   * @see #makeExerciseListWrapper(ExerciseListRequest, Collection)
    * @param onlyExamples
    * @param userID
    * @param exerciseShells
    * @param activityType
+   * @see #makeExerciseListWrapper(ExerciseListRequest, Collection)
    */
   private void markStateForActivity(boolean onlyExamples, int userID, List<CommonShell> exerciseShells, ActivityType activityType) {
     switch (activityType) {
@@ -586,7 +590,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       case MARK_DEFECTS:
         db.getStateManager().markState(exerciseShells);
         break;
-     //   markDefects(exerciseShells);
+      //   markDefects(exerciseShells);
       //  break;
       default:
         break;
@@ -808,6 +812,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * Three buckets - match by id, matches on vocab item, then match on context sentences
+   *
    * @param <T>
    */
   private static class TripleExercises<T extends CommonExercise> {
@@ -1339,32 +1344,53 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     then = System.currentTimeMillis();
-    addScores(userID, exercises);
+
+    // I don't think we even have to do this...
+    //getScores(userID, exercises);
+//    Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exercises);
+
     now = System.currentTimeMillis();
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
 
-    addScoreHistories(ids, exercises, userID);
+    Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise = getScoreHistoryPerExercise(ids, exercises, userID);
 
-    return new ExerciseListWrapper<>(reqid, exercises, null);//, scoreHistories);
+    return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistoryPerExercise);//, scoreHistories);
   }
 
-  private void addScoreHistories(Collection<Integer> ids, List<CommonExercise> exercises, int userID) {
+  /**
+   * Join between exercises and scores
+   *
+   * @param ids
+   * @param exercises
+   * @param userID
+   * @see #getFullExercises
+   */
+  private Map<Integer, List<CorrectAndScore>> getScoreHistoryPerExercise(Collection<Integer> ids,
+                                                                         List<CommonExercise> exercises,
+                                                                         int userID) {
     long then = System.currentTimeMillis();
     Map<Integer, List<CorrectAndScore>> scoreHistories = getScoreHistories(ids, exercises, userID);
 
+    Map<Integer, List<CorrectAndScore>> idToScores = new HashMap<>();
+
     for (CommonExercise exercise : exercises) {
-      List<CorrectAndScore> scoreTotal = scoreHistories.get(exercise.getID());
+      int id = exercise.getID();
+      List<CorrectAndScore> scoreTotal = scoreHistories.get(id);
+
       if (scoreTotal == null) {
         //logger.error("huh? no history for " + exercise.getID());
       } else {
         exercise.getMutable().setScores(scoreTotal);
+        idToScores.put(id, scoreTotal);
       }
     }
 
     long now = System.currentTimeMillis();
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
+
+    return idToScores;
   }
 
   private void addAlignmentOutput(int projectID, Set<CommonExercise> toAddAudioTo) {
@@ -1533,7 +1559,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
       addAnnotations(byID); // todo do this in a better way
-      if (byID.getAudioAttributes().isEmpty() || true) {
+      if (true || byID.getAudioAttributes().isEmpty()) {
         toAddAudioTo.add(byID);
         logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
       }
@@ -1542,8 +1568,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return toAddAudioTo;
   }
 
+  /**
+   * @param ids
+   * @param exercises
+   * @param userID
+   * @return
+   * @see #getScoreHistoryPerExercise
+   */
   private Map<Integer, List<CorrectAndScore>> getScoreHistories(Collection<Integer> ids,
-                                                                List<CommonExercise> exercises, int userID) {
+                                                                List<CommonExercise> exercises,
+                                                                int userID) {
     return (exercises.isEmpty()) ? Collections.emptyMap() :
         db.getResultDAO().getScoreHistories(userID, ids, getLanguage(exercises.get(0)));
   }

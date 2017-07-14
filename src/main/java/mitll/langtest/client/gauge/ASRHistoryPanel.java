@@ -50,6 +50,7 @@ import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.client.scoring.SimpleRecordAudioPanel;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
+import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -70,6 +71,9 @@ import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
  */
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   private final Logger logger = Logger.getLogger("ASRHistoryPanel");
+
+  private static final int YEAR_LENGTH = 2;
+  private static final int YEAR_SUFFIX = (YEAR_LENGTH + 2);
   private static final int NUM_TO_SHOW = 2;
 
   /**
@@ -80,6 +84,10 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   private final ExerciseController controller;
   private final int exerciseID;
 
+  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
+  private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
+  private final String todaysDate,todayYear;
+
   /**
    * @see SimpleRecordAudioPanel#getScoreHistory
    */
@@ -88,6 +96,20 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     this.exerciseID = exerciseID;
     getElement().setId("ASRHistoryPanel");
     addStyleName("inlineFlex");
+
+    todaysDate = format.format(new Date());
+    todayYear = todaysDate.substring(todaysDate.length() - YEAR_LENGTH);
+  }
+
+  private String getVariableInfoDateStamp(Date date) {
+    String signedUp = format.format(date);
+    // drop year if this year
+    if (signedUp.equals(todaysDate)) {
+      signedUp = todayTimeFormat.format(date);
+    } else if (todayYear.equals(signedUp.substring(signedUp.length() - YEAR_LENGTH))) {
+      signedUp = signedUp.substring(0, signedUp.length() - YEAR_SUFFIX);
+    }
+    return signedUp;
   }
 
   /**
@@ -199,10 +221,11 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   }
 
   private String getDateToDisplay(long timestamp) {
-    return timestamp > 0 ? this.format.format(new Date(timestamp)) : "";
+    return timestamp > 0 ?
+        getVariableInfoDateStamp(new Date(timestamp)) :
+        "";
   }
 
-  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d");
 
   /**
    * @param audioPath
@@ -247,7 +270,8 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    * @see #getDownload
    */
   private void addTooltip(Widget w, String dateFormat) {
-    String tip = "Download your recording" + (dateFormat.isEmpty()
+    String tip = "Download recording" +
+        (dateFormat.isEmpty()
         ? "" : " from " + dateFormat);
     new TooltipHelper().createAddTooltip(w, tip, Placement.LEFT);
   }

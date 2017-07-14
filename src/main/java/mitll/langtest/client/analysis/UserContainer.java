@@ -56,9 +56,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
-  private final Logger logger = Logger.getLogger("UserContainer");
+  //private final Logger logger = Logger.getLogger("UserContainer");
 
-  private static final String CURRENT = "Avg";//"Curr.";
+  private static final String CURRENT = "Avg";
   private static final int CURRENT_WIDTH = 60;
   private static final int DIFF_WIDTH = 55;
   private static final int INITIAL_SCORE_WIDTH = 75;
@@ -84,7 +84,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     super(controller, selectedUserKey, STUDENT);
     this.rightSide = rightSide;
     this.learnTab = learnTab;
-    logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
+   // logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
     this.overallBottom = overallBottom;
   }
 
@@ -264,16 +264,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       }
     };
   }
-
-//  protected void checkGotClick(UserInfo object, NativeEvent event) {
-//    if (isClick(event)) {
-//      gotClickOnItem(object);
-//    }
-//  }
-//
-//  private boolean isClick(NativeEvent event) {
-//    return BrowserEvents.CLICK.equals(event.getType());
-//  }
 
   private Column<UserInfo, SafeHtml> getDiff() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {

@@ -428,7 +428,7 @@ public abstract class BaseResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getScoreHistories(Collection, List, int)
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getScoreHistories
    * @param userid
    * @param exercises
    * @param language
@@ -455,14 +455,14 @@ public abstract class BaseResultDAO extends DAO {
     return getResultsForExIDInForUser(userID, firstExercise.getID(), isFlashcardRequest, language);
   }
 
+  abstract List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language);
+
   private List<CorrectAndScore> getResultsForExIDInForUser(int userID,
                                                            int id,
                                                            boolean isFlashcardRequest,
                                                            String language) {
     return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID, language);
   }
-
-  abstract List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language);
 
   abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid, String language);
 

@@ -85,15 +85,19 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
       sortBy((o1, o2) -> -1 * compForeign(o1, o2));
     } else if (selectedValue.equals(SCORE_LOW_TO_HIGH)) {
       sortBy((o1, o2) -> {
-        int i = Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+        int i = compareScores(o1, o2);
         return compareShells(o1, o2, i);
       });
     } else if (selectedValue.equals(SCORE_DSC)) {
       sortBy((o1, o2) -> {
-        int i = -1 * Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+        int i = -1 * compareScores(o1, o2);
         return compareShells(o1, o2, i);
       });
     }
+  }
+
+  private int compareScores(T o1, T o2) {
+    return Float.valueOf(o1.getScore()).compareTo(o2.getScore());
   }
 
   private void sortBy(Comparator<T> comp) {

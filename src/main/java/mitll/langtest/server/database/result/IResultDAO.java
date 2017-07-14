@@ -37,6 +37,7 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
@@ -77,15 +78,11 @@ public interface IResultDAO extends IDAO {
                                                                           ExerciseSorter sorter,
                                                                           String language);
 
- // SessionInfo getSessions(String language);
-
   void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest, String language);
 
   Map<Integer, List<CorrectAndScore>> getScoreHistories(int userid, Collection<Integer> exercises, String language);
 
   List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session, String language);
-
-//  void invalidateCachedResults();
 
   int getNumResults(int projid);
 
@@ -95,7 +92,15 @@ public interface IResultDAO extends IDAO {
 
   Collection<Integer> getPracticedByUser(int userid, int projid);
 
-  <T extends CommonShell> void addScores(int userid, Collection<T> exercises);
+  /**
+   *
+   * @param userid
+   * @param exercises
+   * @param <T>
+   * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises(int, Collection)
+   */
+  <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises);
 
-  <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises);
+ // <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises);
 }

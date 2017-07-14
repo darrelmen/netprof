@@ -112,8 +112,6 @@ public class ServerProperties {
   private static final String NP_SERVER = "np.ll.mit.edu";
   private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
 
-  // private static final String HELP = "help";
-  // private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -124,8 +122,7 @@ public class ServerProperties {
   private static final String ANSWER_DIR = "answerDir";
   private static final String NETPROF_AUDIO_DIR = "audioDir";
   private static final String DCODR_DIR = "dcodrDir";
-  //  private static final String RECO_TEST = "recoTest";
-//  private static final String RECO_TEST2 = "recoTest2";
+
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = "" + 0.31f;
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";

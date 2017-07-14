@@ -193,8 +193,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     String audiotype = slick.audiotype();
     audiotype = audiotype.replaceAll("=", "_");
     String simpleDevice = slick.device();
-   // String dtype = slick.devicetype();
-   // String device = dtype == null ? "Unk" : dtype.equals("browser") ? simpleDevice : (dtype + "/" + simpleDevice);
+    // String dtype = slick.devicetype();
+    // String device = dtype == null ? "Unk" : dtype.equals("browser") ? simpleDevice : (dtype + "/" + simpleDevice);
 
     return new MonitorResult(slick.id(),
         slick.userid(),
@@ -303,6 +303,20 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * @param ids
    * @param userid
+   * @param language
+   * @return
+   * @see BaseResultDAO#getScoreHistories
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getScoreHistories
+   */
+  public Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language) {
+    return getResultsForExIDInForUser(ids, userid, "", language)
+        .stream()
+        .collect(Collectors.groupingBy(CorrectAndScore::getExid));
+  }
+
+  /**
+   * @param ids
+   * @param userid
    * @param ignoredSession
    * @param language
    * @return
@@ -312,15 +326,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids), language);
   }
 
+
   @Override
   List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language) {
     return getCorrectAndScores(dao.correctAndScoreMatchAVP(ids, true), language);
-  }
-
-
-  public Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language) {
-    List<CorrectAndScore> resultsForExIDInForUser = getResultsForExIDInForUser(ids, userid, "", language);
-    return resultsForExIDInForUser.stream().collect(Collectors.groupingBy(CorrectAndScore::getExid));
   }
 
   @Override
@@ -349,20 +358,20 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * Scores for indicated exercises for user.
    *
+   * @param <T>
    * @param userid
    * @param exercises
-   * @param <T>
    */
   @Override
-  public <T extends CommonShell> void addScores(int userid, Collection<T> exercises) {
+  public <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises) {
     List<Integer> collect = exercises
         .stream()
         .map(HasID::getID)
         .collect(Collectors.toList());
-
     Map<Integer, SlickExerciseScore> correctAndScoresForReal = dao.exidAndScoreWhere(userid, collect);
-    // logger.info("for " + userid + " checking " + exercises.size() + " found " + correctAndScoresForReal.size() + " scores");
-    setScores(exercises, correctAndScoresForReal);
+    logger.info("getScores : for " + userid + " checking " + exercises.size() + " found " + correctAndScoresForReal.size() + " scores");
+//    setScores(exercises, correctAndScoresForReal);
+    return getScores(exercises, correctAndScoresForReal);
   }
 
 
@@ -373,17 +382,20 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param exercises
    * @param <T>
    */
-  @Override
+/*  @Override
   public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
     setScores(exercises, dao.exidAndScore(userid));
-  }
+  }*/
 
   /**
    * Consider a cache here - this isn't going to change much
+   * <p>
+   * Set the score on the exercise - just a float.
    *
    * @param exercises
    * @param correctAndScoresForReal
-   * @param <T>
+   * @see #getScores
+   * @seex #addScoresForAll
    */
   private <T extends CommonShell> void setScores(Collection<T> exercises,
                                                  Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
@@ -398,9 +410,40 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
       }
     }
     long now = System.currentTimeMillis();
-    if (now - then > 100) {
-      logger.info("setScores took " + (now - then) + " to get " + c + " scores");
+    if (now - then > 10) {
+      logger.info("setScores took " + (now - then) + " to" +
+          "\n\tget " + c + " scores," +
+          "\n\tand " + exercises.size() + " exercises, " +
+          "\n\tcorrect & score " + correctAndScoresForReal.size());
     }
+  }
+
+  private <T extends HasID> Map<Integer, Float> getScores(Collection<T> exercises,
+                                        Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
+    Map<Integer, Float> idToScore = new HashMap<>();
+
+    long then = System.currentTimeMillis();
+    int c = 0;
+    for (HasID ex : exercises) {
+      int id = ex.getID();
+
+      SlickExerciseScore slickExerciseScore = correctAndScoresForReal.get(id);
+      if (slickExerciseScore != null) {
+        //ex.getMutableShell().setScore(slickExerciseScore.pronscore());
+        idToScore.put(id, slickExerciseScore.pronscore());
+        c++;
+//        logger.info("Set "+ ex.getID() + " to "+ slickExerciseScore.pronscore());
+      }
+    }
+    long now = System.currentTimeMillis();
+    if (now - then > 10) {
+      logger.info("getScores took " + (now - then) + " to" +
+          "\n\tget " + c + " scores," +
+          "\n\tand " + exercises.size() + " exercises, " +
+          "\n\tcorrect & score " + correctAndScoresForReal.size());
+    }
+
+    return idToScore;
   }
 
 /*
@@ -480,7 +523,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return relPrefix;
   }
 
-  public Collection<SlickPerfResult> getPerf(int projid, float minScore) {  return dao.perf(projid, minScore);  }
+  public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
+    return dao.perf(projid, minScore);
+  }
 
   /**
    * @param userid

@@ -105,11 +105,6 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   @Override
-  public void setScore(float score) {
-    this.score = score;
-  }
-
-  @Override
   public String getForeignLanguage() {
     return foreignLanguage;
   }
@@ -120,21 +115,21 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
         (getID() == ((ExerciseShell) other).getID());
   }
 
-
   @Override
   public MutableShell getMutableShell() {
     return this;
   }
+
 
   @Override
   public Collection<String> getRefSentences() {
     return Collections.singleton(getForeignLanguage());
   }
 
-
   public void setForeignLanguage(String foreignLanguage) {
     this.foreignLanguage = foreignLanguage;
   }
+
 
   @Override
   public void setEnglish(String english) {
@@ -146,6 +141,15 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     return numPhones;
   }
 
+  @Override
+  public void setScore(float score) {
+    this.score = score;
+  }
+
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#setProgressBarScore
+   * @return
+   */
   public float getScore() {
     return score;
   }

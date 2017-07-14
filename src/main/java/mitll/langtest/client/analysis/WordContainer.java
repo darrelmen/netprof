@@ -111,9 +111,7 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
     this.learnTab = learnTab;
     this.heading = w;
 
-
-    Date now = new Date();
-    todaysDate = format.format(now);
+    todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - 2);
   }
 
@@ -282,25 +280,28 @@ class WordContainer extends AudioExampleContainer<WordScore> implements Analysis
 
       @Override
       public SafeHtml getValue(WordScore shell) {
-        Date date = new Date(shell.getTimestamp());
-        String signedUp = format.format(date);
-
-        // drop year if this year
-        if (signedUp.equals(todaysDate)) {
-          signedUp = todayTimeFormat.format(date);
-        } else if (todayYear.equals(signedUp.substring(signedUp.length() - 2))) {
-          signedUp = signedUp.substring(0, signedUp.length() - 4);
-        }
-
-        return getSafeHtml(signedUp);
+        return getSafeHtml(getVariableInfoDateStamp(shell));
       }
     };
+  }
+
+  private String getVariableInfoDateStamp(WordScore shell) {
+    Date date = new Date(shell.getTimestamp());
+    String signedUp = format.format(date);
+
+    // drop year if this year
+    if (signedUp.equals(todaysDate)) {
+      signedUp = todayTimeFormat.format(date);
+    } else if (todayYear.equals(signedUp.substring(signedUp.length() - 2))) {
+      signedUp = signedUp.substring(0, signedUp.length() - 4);
+    }
+    return signedUp;
   }
 
   private ColumnSortEvent.ListHandler<WordScore> getDateSorter(Column<WordScore, SafeHtml> englishCol,
                                                                List<WordScore> dataList) {
     ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol, (o1, o2) -> getDateCompare(o1, o2));
+    columnSortHandler.setComparator(englishCol, this::getDateCompare);
     return columnSortHandler;
   }
 

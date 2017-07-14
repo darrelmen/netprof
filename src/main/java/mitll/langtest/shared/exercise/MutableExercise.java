@@ -32,6 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.server.database.result.BaseResultDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.Collection;
@@ -70,8 +71,9 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void setCreator(int id);
 
   void setPredef(boolean isPredef);
+
   /**
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addAltFL
    * @return
    */
   String getAltFL();

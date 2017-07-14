@@ -1801,8 +1801,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
 /*  @Override
-  public <T extends CommonShell> void addScores(int userid, Collection<T> exercises) {
-    resultDAO.addScores(userid, exercises);
+  public <T extends CommonShell> void getScores(int userid, Collection<T> exercises) {
+    resultDAO.getScores(userid, exercises);
   }*/
 //
 //  @Override

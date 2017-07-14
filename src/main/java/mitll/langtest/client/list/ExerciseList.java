@@ -33,6 +33,7 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -48,6 +49,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -172,6 +174,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#doAfterEditComplete
+   * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#showNPF
    */
   @Override
   public void reloadWithCurrent() {
@@ -183,6 +186,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    *
    * @param id
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#doAfterEditComplete
+   * @see #reloadWithCurrent
    */
   private void reloadWith(int id) {
     if (DEBUG) {
@@ -290,6 +294,15 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         if (DEBUG) logger.info("onSuccess last req now " + lastSuccessfulRequest);
         checkForEmptyExerciseList(result.getExercises().isEmpty());
         int idToUse = exerciseID == -1 ? result.getFirstExercise() == null ? -1 : result.getFirstExercise().getID() : exerciseID;
+
+        Map<Integer, Float> idToScore = result.getIdToScore();
+        for (T ex : result.getExercises()) {
+          int id = ex.getID();
+          if (idToScore.containsKey(id)) {
+            ex.getMutableShell().setScore(idToScore.get(id));
+          }
+        }
+
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
       }
     }

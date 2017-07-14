@@ -56,7 +56,9 @@ public class ServerInitializationManagerNetProf {
 
   private static final boolean DEBUG = false;
   private static final String DEFAULT_PROPERTY_HOME =
-      File.separator + "opt" + File.separator + appName + File.separator + "config";
+      File.separator + "opt" +
+          File.separator + appName +
+          File.separator + "config";
 
   /**
    * The name of the config file attribute optionally passed in as -D.
@@ -75,12 +77,7 @@ public class ServerInitializationManagerNetProf {
   private static final String UNKNOWN1 = "Unknown";
   public static final String UNKNOWN = UNKNOWN1;
 
-  /**
-   * The name of the server properties instance in the context.
-   */
-  // public static final String PROPS_ATT_NAME = "ds-properties";
-
-  /**
+ /**
    * @param newContext
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
