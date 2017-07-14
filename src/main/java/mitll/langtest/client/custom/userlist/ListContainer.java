@@ -7,6 +7,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -23,9 +24,17 @@ import java.util.List;
 public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private boolean slim = false;
 
-  ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID) {
+  /**
+   * @see ListView#showContent(Panel, String)
+   * @param controller
+   * @param pageSize
+   * @param slim
+   * @param storageID
+   * @param shortPageSize
+   */
+  ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID, int shortPageSize) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + storageID, "List",
-        pageSize);
+        pageSize, shortPageSize);
     this.slim = slim;
   }
 
@@ -38,26 +47,14 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     return 200;
   }
 
-/*
-  protected int getMaxTableWidth() {
-    return 800;
-  }
-*/
-
   @Override
   protected void setMaxWidth() {
-    // int tableWidth = getMaxTableWidth();
-    // table.getElement().getStyle().setProperty("maxWidth", tableWidth + "px");
   }
 
   @Override
   protected int getMaxLengthId() {
     return 45;
   }
-
-//  protected int getPageSize() {
-//    return 20;
-//  }
 
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
@@ -69,12 +66,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     } else {
       addIsPublic();
     }
-    // addIsPublic();
   }
-
-//  protected boolean shouldHighlight(UserList<CommonShell> object) {
-//    return object.getUserID() == controller.getUser();
-//  }
 
   @Override
   protected int getNameCompare(UserList<CommonShell> o1, UserList<CommonShell> o2) {

@@ -90,9 +90,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
+  private int shortPageSize = 8;
 
   MemoryItemContainer(ExerciseController controller, String selectedUserKey, String header) {
-    this(controller, selectedUserKey, header, PAGE_SIZE);
+    this(controller, selectedUserKey, header, PAGE_SIZE, 8);
   }
 
   /**
@@ -100,11 +101,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param selectedUserKey
    * @param header
    * @param pageSize
+   * @param shortPageSize
    * @see BasicUserContainer#BasicUserContainer
    */
   protected MemoryItemContainer(ExerciseController controller,
                                 String selectedUserKey,
-                                String header, int pageSize) {
+                                String header,
+                                int pageSize, int shortPageSize) {
     super(controller);
     this.selectedUserKey = selectedUserKey;
     this.selectedUser = getSelectedUser(selectedUserKey);
@@ -112,6 +115,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - 2);
     this.pageSize = pageSize;
+    this.shortPageSize =shortPageSize;
   }
 
   /**
@@ -174,11 +178,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @return
    * @see SimplePagingContainer#makeCellTable
    */
-  protected int getPageSize() {
-    return isShort() ? 8 : pageSize;
-  }
+  protected int getPageSize() {    return isOnLaptop() ? shortPageSize : pageSize;  }
 
-  private boolean isShort() {
+  /**
+   *
+   * @return
+   */
+  private boolean isOnLaptop() {
     return Window.getClientHeight() < 822;
   }
 

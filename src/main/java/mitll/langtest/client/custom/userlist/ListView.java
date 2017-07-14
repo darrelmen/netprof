@@ -33,12 +33,23 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
-  private static final int HEADING_SIZE = 3;
-  private static final int PAGE_SIZE = 8;
-  public static final String CREATE_NEW_LIST = "Create New List";
-  public static final String EDIT = "Edit";
-  public static final String ADD_EDIT_ITEMS = "Add/Edit Items";
   private final Logger logger = Logger.getLogger("ListView");
+
+  private static final int HEADING_SIZE = 3;
+  private static final int VISITED_PAGE_SIZE = 6;
+  private static final int VISITED_SHORT_SIZE = 6;
+
+  private static final int BROWSE_PAGE_SIZE = 8;
+  private static final int BROWSE_SHORT_PAGE_SIZE = 6;
+
+  private static final String CREATE_NEW_LIST = "Create New List";
+  private static final String EDIT = "Edit";
+  private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
+
+  private static final int MY_LIST_HEIGHT = 560;
+  private static final int VISITED_HEIGHT = (MY_LIST_HEIGHT / 2) - 35;
+  private static final int BROWSE_HEIGHT  = (MY_LIST_HEIGHT / 2) - 30;
+
 
   private final ExerciseController controller;
   private ListContainer myLists;
@@ -48,11 +59,7 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   public void showContent(Panel listContent, String instanceName) {
-//    SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
-//    com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(animated);
     listContent.clear();
-    //listContent.add(waitCursor);
-
     DivWidget leftRight = new DivWidget();
     leftRight.addStyleName("inlineFlex");
     listContent.add(leftRight);
@@ -86,14 +93,15 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        Panel tableWithPager = (myLists = new ListContainer(controller, 20, true, "myLists")).getTableWithPager(result);
+        Panel tableWithPager = (myLists = new ListContainer(controller, 20, true, "myLists", 15)).getTableWithPager(result);
         result.forEach(list -> {
           if (list.getUserID() == controller.getUser()) {
             names.add(list.getName());
           }
         });
         addPagerAndHeader(tableWithPager, "Your Lists", left);
-        tableWithPager.setHeight("600px");
+        tableWithPager.setHeight(MY_LIST_HEIGHT +
+            "px");
 
         left.add(getButtons(myLists));
       }
@@ -107,11 +115,13 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        ListContainer listContainer = new ListContainer(controller, 6, false, "visited");
+        ListContainer listContainer =
+            new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE);
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, "Visited", top);
 
-        tableWithPager.setHeight("300px");
+        tableWithPager.setHeight(VISITED_HEIGHT +
+            "px");
 
         DivWidget ldButtons = getLDButtons(listContainer);
         ldButtons.add(getRemoveVisitorButton(listContainer));
@@ -128,10 +138,11 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        ListContainer listContainer = new ListContainer(controller, PAGE_SIZE, false, "others");
+        ListContainer listContainer =
+            new ListContainer(controller, BROWSE_PAGE_SIZE, false, "others", BROWSE_SHORT_PAGE_SIZE);
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, "Other's Lists", bottom);
-        tableWithPager.setHeight("300px");
+        tableWithPager.setHeight(BROWSE_HEIGHT + "px");
 
         bottom.add(getLDButtons(listContainer));
       }
@@ -175,12 +186,7 @@ public class ListView implements ContentView, CreateListComplete {
   private IsWidget getImport() {
     Button successButton = getSuccessButton("");
     successButton.setIcon(IconType.UPLOAD);
-    successButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        doImport();
-      }
-    });
+    successButton.addClickHandler(event -> doImport());
     return successButton;
   }
 
@@ -258,7 +264,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     closeButton.setType(ButtonType.SUCCESS);
     //closeButton.setIcon(IconType.PLUS);
-   // return dialogHelper;
+    // return dialogHelper;
   }
 
   @NotNull

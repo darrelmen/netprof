@@ -34,6 +34,9 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.PhoneSession;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
@@ -49,12 +52,14 @@ import java.util.List;
  */
 class PhonePlot extends TimeSeriesPlot {
   //private final Logger logger = Logger.getLogger("PhonePlot");
-
   private static final String PRONUNCIATION_SCORE = " trend";
   private static final int CHART_HEIGHT = 315;
   private static final int NARROW_WIDTH = 330;
   private static final int NARROW_WIDTH_REALLY = 320;
 
+  /**
+   * @see AnalysisTab#getPhoneReport
+   */
   PhonePlot() {
     getElement().setId("PhonePlot");
   }

@@ -113,9 +113,9 @@ public class AnalysisTab extends DivWidget {
     add(analysisPlot);
 
     DivWidget bottom = new DivWidget();
-    //bottom.addStyleName("inlineFlex");
+    bottom.addStyleName("inlineFlex");
     bottom.getElement().setId("bottom");
-    bottom.addStyleName("floatLeftAndClear");
+    //bottom.addStyleName("floatLeftAndClear");
     bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
     if (overallBottom != null) { // are we in student or teacher view
       overallBottom.clear();
@@ -323,6 +323,16 @@ public class AnalysisTab extends DivWidget {
     return wordsContainer;
   }
 
+  /**
+   * @see #showWordScores
+   * @param service
+   * @param controller
+   * @param userid
+   * @param lowerHalf
+   * @param analysisPlot
+   * @param showTab
+   * @param minRecordings
+   */
   private void getPhoneReport(AnalysisServiceAsync service,
                               final ExerciseController controller,
                               int userid,
@@ -332,7 +342,6 @@ public class AnalysisTab extends DivWidget {
                               final int minRecordings) {
     final PhoneExampleContainer exampleContainer =
         new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
-
 
     final PhonePlot phonePlot = new PhonePlot();
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot);
