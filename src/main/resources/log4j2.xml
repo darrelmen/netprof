@@ -52,8 +52,8 @@
               -->
 
         <RollingFile name="LogFile"
-                     fileName="${catalina.home}/logs/netprof-app.log"
-                     filePattern="${catalina.home}/logs/netprof-app-%d{MM-dd-yyyy}-%i.log.gz">
+                     fileName="${sys:catalina.base}/logs/${web:contextPath}-app.log"
+                     filePattern="{sys:catalina.base}/logs/${web:contextPath}-app-%d{MM-dd-yyyy}-%i.log.gz">
 
             <PatternLayout
                     pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
@@ -63,8 +63,8 @@
         </RollingFile>
 
         <RollingFile name="SecFile"
-                     fileName="${catalina.home}/logs/netprof-access.log"
-                     filePattern="${catalina.home}/logs/netprof-access-%d{MM-dd-yyyy}-%i.log.gz">
+                     fileName="${sys:catalina.base}/logs/${web:contextPath}-access.log"
+                     filePattern="${sys:catalina.base}/logs/${web:contextPath}-access-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout
                     pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
             <Policies>

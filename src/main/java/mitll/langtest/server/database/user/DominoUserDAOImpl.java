@@ -51,6 +51,7 @@ import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteException;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.configuration.DeploymentMode;
 import org.apache.ignite.configuration.IgniteConfiguration;
@@ -192,7 +193,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     // Override default discovery SPI.
     cfg.setDiscoverySpi(spi);
 
-    return Ignition.start(cfg);
+    try {
+      return Ignition.start(cfg);
+    } catch (IgniteException e) {
+      logger.error("getIgnite : Couldn't start ignite - got " + e,e);
+      return null;
+    }
   }
 
   private MyMongoUserServiceDelegate makeMyServiceDelegate() {
@@ -1074,7 +1080,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param newHashPassword
    * @param baseURL
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#changePFor
+   * @see mitll.langtest.server.rest.RestUserManagement#changePFor
    * @deprecated
    */
   @Override

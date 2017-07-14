@@ -460,9 +460,6 @@ public class RestUserManagement {
    */
   private boolean changePFor(String userid, String freeTextPassword, String baseURL) {
     User userByID = db.getUserDAO().getUserByID(userid);
-
-    //  freeTextPassword = rot13(freeTextPassword);
-    //   String hash = Md5Hash.getHash(freeTextPassword);
     boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword, baseURL);
 
     if (!b) {
@@ -491,7 +488,6 @@ public class RestUserManagement {
   private String getBaseURL(HttpServletRequest r) {
     return ServletUtil.get().getBaseURL(r);
   }
-
 
   private EmailHelper getEmailHelper() {
     return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), pathHelper);
