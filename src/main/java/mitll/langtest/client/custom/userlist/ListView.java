@@ -39,7 +39,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final int VISITED_PAGE_SIZE = 6;
   private static final int VISITED_SHORT_SIZE = 6;
 
-  private static final int BROWSE_PAGE_SIZE = 8;
+  private static final int BROWSE_PAGE_SIZE = 7;
   private static final int BROWSE_SHORT_PAGE_SIZE = 6;
 
   private static final String CREATE_NEW_LIST = "Create New List";
@@ -141,7 +141,7 @@ public class ListView implements ContentView, CreateListComplete {
         ListContainer listContainer =
             new ListContainer(controller, BROWSE_PAGE_SIZE, false, "others", BROWSE_SHORT_PAGE_SIZE);
         Panel tableWithPager = listContainer.getTableWithPager(result);
-        addPagerAndHeader(tableWithPager, "Other's Lists", bottom);
+        addPagerAndHeader(tableWithPager, "Other's Public Lists", bottom);
         tableWithPager.setHeight(BROWSE_HEIGHT + "px");
 
         bottom.add(getLDButtons(listContainer));
@@ -169,7 +169,7 @@ public class ListView implements ContentView, CreateListComplete {
     buttons.add(getAddButton());
     buttons.add(getRemoveButton());
     buttons.add(getEdit());
-    buttons.add(getImport());
+   // buttons.add(getImport());
     buttons.add(getAddItems());
     addDrillAndLearn(buttons, container);
 
@@ -177,7 +177,7 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private IsWidget getEdit() {
-    Button successButton = getSuccessButton("");
+    Button successButton = getSuccessButton("Title");
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> doEdit());
     return successButton;
@@ -226,45 +226,23 @@ public class ListView implements ContentView, CreateListComplete {
 
   private IsWidget getAddItems() {
     Button successButton = getSuccessButton("Items");
-    successButton.setIcon(IconType.PLUS);
-    successButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        editList();
-      }
-    });
+    successButton.setIcon(IconType.PENCIL);
+    successButton.addClickHandler(event -> editList());
     return successButton;
   }
 
   private void editList() {
     Panel contents = new EditItem(controller).editItem(getCurrentSelection(myLists));
-//    DominoSimpleModal widgets1 = new DominoSimpleModal(false, "Add/Edit Items", "OK", DominoSimpleModal.ModalSize.Big, widgets) {
-//      @Override
-//      protected ModalFooter createFooter() {
-//        super.createFooter();
-//        return null;
-//      }
-//    };
-//    Button closeButton = widgets1.getCloseButton();
-//    if (closeButton == null) logger.warning("huh? no close button?");
-//    else widgets.add(closeButton);
-//
-//    widgets1.setMaxHeigth("500px");
-//    widgets1.init();
-
-
     DialogHelper dialogHelper = new DialogHelper(true);
     Button closeButton = dialogHelper.show(
         ADD_EDIT_ITEMS,
         Collections.emptyList(),
         contents,
         "OK",
-        null,//"Cancel",
+        null,
         null, 660, true);
 
     closeButton.setType(ButtonType.SUCCESS);
-    //closeButton.setIcon(IconType.PLUS);
-    // return dialogHelper;
   }
 
   @NotNull
@@ -454,7 +432,6 @@ public class ListView implements ContentView, CreateListComplete {
     editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection());
     editDialog.doCreate(contents);
 
-
     DialogHelper dialogHelper = new DialogHelper(true);
     Button closeButton = dialogHelper.show(
         EDIT,
@@ -478,7 +455,7 @@ public class ListView implements ContentView, CreateListComplete {
         }, 550);
 
     closeButton.setType(ButtonType.SUCCESS);
-    closeButton.setIcon(IconType.PLUS);
+  //  closeButton.setIcon(IconType.PLUS);
 
     return dialogHelper;
   }
