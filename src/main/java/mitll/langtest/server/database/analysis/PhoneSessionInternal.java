@@ -46,13 +46,13 @@ import java.util.Map;
  * @since 12/4/15.
  */
 public class PhoneSessionInternal {
-  private final SummaryStatistics summaryStatistics  = new SummaryStatistics();
+  private final SummaryStatistics summaryStatistics = new SummaryStatistics();
   private final SummaryStatistics summaryStatistics2 = new SummaryStatistics();
 
   private double mean;
   private double stdev;
   private double meanTime;
-  private long count;
+  private long count = 0;
   private final long bin;
   private long start;
   private long end = 0;
@@ -86,11 +86,8 @@ public class PhoneSessionInternal {
 
   public void remember() {
     this.count = summaryStatistics.getN();
-
     this.mean = summaryStatistics.getMean();
-
     this.stdev = summaryStatistics.getStandardDeviation();
-
     this.meanTime = summaryStatistics2.getMean();
   }
 
@@ -118,15 +115,15 @@ public class PhoneSessionInternal {
     return bin;
   }
 
-  public long getEnd() {
-    return end;
-  }
-
   public long getStart() {
     return start;
   }
 
-  public MinMaxPriorityQueue<WordAndScore> getQueue() {
+  public long getEnd() {
+    return end;
+  }
+
+  MinMaxPriorityQueue<WordAndScore> getQueue() {
     return queue;
   }
 

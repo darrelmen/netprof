@@ -531,7 +531,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       //   li
       //    ul
       //
-      logger.info("addChoices --- " + type);
+     // logger.info("addChoices --- " + type);
       liForDimensionForType.add(addChoices(typeToValues, type));
     }
 
@@ -601,7 +601,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void populateListChoices(ListItem liForDimensionForType) {
     ListServiceAsync listService = controller.getListService();
-    logger.info("populateListChoices --- ");
+    //logger.info("populateListChoices --- ");
     listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -610,13 +610,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
         Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-
         typeToValues.put(LISTS, getMatchInfoForEachList(result));
 
         Widget favorites = liForDimensionForType.getWidget(0);
         liForDimensionForType.clear();
         liForDimensionForType.add(favorites);
-        logger.info("populateListChoices --- for " + result.size() + " lists ");
+      //  logger.info("populateListChoices --- for " + result.size() + " lists ");
         liForDimensionForType.add(addChoices(typeToValues, LISTS));
       }
     });
@@ -670,7 +669,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type) {
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
-    logger.info("addChoices " + type + "=" + selectionForType);
+
+    //logger.info("addChoices " + type + "=" + selectionForType);
+
     if (selectionForType == null) { // no selection made, show all possible values for type
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
@@ -1057,7 +1058,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-    logger.info("restoreListBoxState " + selectionState);
+   // logger.info("restoreListBoxState " + selectionState);
     super.restoreListBoxState(selectionState);
 //    showSelectionState(selectionState);
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
@@ -1231,7 +1232,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
-    logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
+   // logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
       //   logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();

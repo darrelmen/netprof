@@ -119,17 +119,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     message.setText("");
   }
 
-  @NotNull
-  private DivWidget getRemoveButtonContainer() {
-    DivWidget delW = new DivWidget();
-    delW.addStyleName("floatLeft");
-    delW.addStyleName("leftFiveMargin");
-    delW.getElement().getStyle().setClear(Style.Clear.LEFT);
-    Button deleteButton = makeDeleteButton();
-    delW.add(deleteButton);
-    return delW;
-  }
-
   /**
    * @return
    * @see #getOptionalWidget
@@ -138,17 +127,40 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private DivWidget getAddButtonContainer() {
     DivWidget addW = new DivWidget();
     addW.addStyleName("floatLeft");
-
-    Typeahead exercise = getTypeahead("exercise");
-
-    addW.add(exercise);
     Button add = getAddButton();
-    add.addStyleName("leftFiveMargin");
-
-    addW.add(add);
-
+    addW.add(getTypeahead(add));
+    {
+      add.addStyleName("leftFiveMargin");
+      addW.add(add);
+    }
     addW.add(message = getFeedback());
     return addW;
+  }
+
+  @NotNull
+  private DivWidget getRemoveButtonContainer() {
+    DivWidget delW = new DivWidget();
+    delW.addStyleName("floatLeft");
+    delW.addStyleName("leftFiveMargin");
+    delW.getElement().getStyle().setClear(Style.Clear.LEFT);
+    delW.add(makeDeleteButton());
+    return delW;
+  }
+
+  /**
+   * @return
+   * @see #getAddButtonContainer
+   */
+  private Typeahead getTypeahead( Button add) {
+    quickAddText = new TextBox();
+    quickAddText.setMaxLength(100);
+    quickAddText.setVisibleLength(40);
+    quickAddText.addStyleName("topMargin");
+    quickAddText.setWidth(235 + "px");
+
+    quickAddText.addKeyUpHandler(event -> searchTypeahead.clearCurrentExercise());
+    this.searchTypeahead = new SearchTypeahead(controller, this,add);
+    return searchTypeahead.getTypeaheadUsing(quickAddText);
   }
 
   private HTML getFeedback() {
@@ -161,46 +173,17 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     return message;
   }
 
-  /**
-   * @param whichField
-   * @return
-   * @see #getAddButtonContainer
-   */
-  private Typeahead getTypeahead(final String whichField) {
-    quickAddText = new TextBox();
-    quickAddText.setMaxLength(100);
-    quickAddText.setVisibleLength(40);
-    quickAddText.addStyleName("topMargin");
-    quickAddText.setWidth(235 + "px");
-
-    quickAddText.addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-        searchTypeahead.clearCurrentExercise();
-      }
-    });
-    this.searchTypeahead = new SearchTypeahead(controller, this);
-
-    return searchTypeahead.getTypeaheadUsing(whichField, quickAddText);
-  }
-
   @NotNull
   private Button getAddButton() {
     Button add = new Button(ADD, IconType.PLUS);
-
-    add.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        add.setEnabled(false);
-        onClickAdd(add);
-      }
-    });
     add.setType(ButtonType.SUCCESS);
+    add.addClickHandler(event -> onClickAdd(add));
     return add;
   }
 
 
   private void onClickAdd(Button add) {
+    add.setEnabled(false);
     if (searchTypeahead.getCurrentExercise() != null) {
       if (isOnList()) {
         // TODO : warn user already added.
@@ -301,8 +284,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     addExercise(currentExercise);
     int after = getSize();
 
-    logger.info("before " + before + " after " + after);
-
+//    logger.info("before " + before + " after " + after);
     enableRemove(true);
 
     gotClickOnItem(currentExercise);
@@ -323,15 +305,12 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     EditableExerciseList widgets = this;
 
     delete = makeDeleteButtonItself();
-
     delete.addClickHandler(event -> {
       CommonShell currentSelection = pagingContainer.getCurrentSelection();
       if (currentSelection != null) {
-        delete.setEnabled(false);
         deleteItem(currentSelection.getID(), widgets, widgets, delete);
       }
     });
-    // delete.addStyleName("topFiftyMargin");
     return delete;
   }
 
@@ -351,6 +330,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
                           final PagingExerciseList<?, ?> exerciseList,
                           final EditableExerciseList editableExerciseList,
                           Button button) {
+    button.setEnabled(false);
     controller.getListService().deleteItemFromList(list.getID(), exid, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -393,13 +373,10 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     Button delete = new Button(REMOVE_FROM_LIST);
     delete.getElement().setId("Remove_from_list");
     // delete.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
-
     delete.setType(ButtonType.WARNING);
     //   delete.addStyleName("floatRight");
-    // if (ul == null) logger.warning("no user list");
-    // else
     if (controller == null) {
-      logger.warning("no controller??");
+//      logger.warning("no controller??");
     } else {
       controller.register(delete, "", "");//"Remove from list " + ul.getID() + "/" + ul.getName());
     }
@@ -408,12 +385,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
   @Override
   protected void onLastItem() {
-    new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
-      @Override
-      public void onHidden(HiddenEvent hiddenEvent) {
-        reloadExercises();
-      }
-    });
+    new ModalInfoDialog("Complete", "List complete!", hiddenEvent -> reloadExercises());
   }
 
   private void enableRemove(boolean enabled) {

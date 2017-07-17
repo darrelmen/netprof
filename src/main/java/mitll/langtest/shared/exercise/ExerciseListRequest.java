@@ -272,7 +272,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   /**
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getLimitedMatches(ExerciseListRequest, List)
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getFirstFew
    */
   public int getLimit() {
     return limit;

@@ -55,7 +55,7 @@ import java.util.logging.Logger;
 public abstract class ClickablePagingContainer<T extends HasID> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("ClickablePagingContainer");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private final Map<Integer, T> idToExercise = new HashMap<>();
 
   public ClickablePagingContainer(ExerciseController controller) {
@@ -255,20 +255,11 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   public void markCurrentExercise(int itemID) {
     if (getList() == null || getList().isEmpty()) return;
 
-    T found = null;
-
     if (idToExercise.isEmpty()) {
-     // List<T> collect = getList().stream().filter(item -> item.getID() == itemID).collect(Collectors.toList());
-       getList().forEach(item -> idToExercise.put(item.getID(),item));
-//      if (!collect.isEmpty()) {
-//        found = collect.get(0);
-//      }
+      getList().forEach(item -> idToExercise.put(item.getID(), item));
     }
-//    else {
-      found = idToExercise.get(itemID);
-  //  }
-
-    logger.info("markCurrentExercise for " + itemID + " in " +idToExercise.size() + " found " + found);
+    T found = idToExercise.get(itemID);
+    // logger.info("markCurrentExercise for " + itemID + " in " +idToExercise.size() + " found " + found);
     markCurrent(getIndex(found), found);
   }
 
@@ -303,9 +294,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    */
   public void onResize(T currentExercise) {
     int numRows = getNumTableRowsGivenScreenHeight();
- //   logger.info("onResize size is " + numRows);
+    //   logger.info("onResize size is " + numRows);
     if (table.getPageSize() != numRows) {
-   //   logger.info("2 onResize size is " + numRows);
+      //   logger.info("2 onResize size is " + numRows);
       table.setPageSize(numRows);
       table.redraw();
       markCurrent(currentExercise);
@@ -313,7 +304,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public void setPageSize(int pageSize) {
-  //  logger.info("page size is " + pageSize);
+    //  logger.info("page size is " + pageSize);
     table.setPageSize(pageSize);
     table.redraw();
   }

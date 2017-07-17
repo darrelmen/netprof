@@ -73,7 +73,6 @@ import java.util.logging.Logger;
 abstract class NewUserExercise extends BasicDialog {
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
-
   private static final String OPTIONAL = "optional";
   private static final String WIDGET_ID = "NewUserExercise_WaveformPostAudioRecordButton_";
 
@@ -430,20 +429,6 @@ abstract class NewUserExercise extends BasicDialog {
    */
   void doAfterEditComplete(ListInterface<CommonShell,CommonExercise> pagingContainer, boolean buttonClicked) {
     changeTooltip(pagingContainer);
-/*    if (predefinedContentList != null) {
-      if (DEBUG)
-        logger.info("doAfterEditComplete : predef content list not null");// + " id " + predefinedContentList.getCurrentExerciseID());
-
-      Reloadable reloadable = predefinedContentList.getReloadable();
-      if (reloadable == null) {
-        //logger.warning("doAfterEditComplete : reloadable null????");// + " id " + predefinedContentList.getCurrentExerciseID());
-      } else {
-        reloadable.reloadWithCurrent();
-      }
-    }*/
-    //else {
-    //   if (DEBUG || true) logger.warning("doAfterEditComplete : no predef content " + buttonClicked);// + " id " + predefinedContentList.getCurrentExerciseID());
-    //}
   }
 
   /**
@@ -452,7 +437,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @param pagingContainer
    * @see #doAfterEditComplete(ListInterface, boolean)
    */
-  void changeTooltip(ListInterface<CommonShell,CommonExercise> pagingContainer) {
+  private void changeTooltip(ListInterface<CommonShell,CommonExercise> pagingContainer) {
     CommonShell byID = pagingContainer.byID(newUserExercise.getID());
     if (DEBUG) logger.info("changeTooltip " + byID);
     if (byID == null) {

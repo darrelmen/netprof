@@ -165,9 +165,7 @@ public class PhoneAnalysis {
             logger.error("getPhoneSessions got 0 end time " + internal);
           }
           List<WordAndScore> examples = new ArrayList<>();
-          for (WordAndScore example : internal.getQueue()) {
-            examples.add(example);
-          }
+          examples.addAll(internal.getQueue());
           sessions2.add(new PhoneSession(key, internal.getBin(), internal.getCount(), mean, stdev1, meanTime,
               internal.getStart(), internal.getEnd(), examples));
         }

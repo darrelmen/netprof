@@ -3,6 +3,7 @@ package mitll.langtest.client.sound;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 
 import java.util.logging.Logger;
 
@@ -20,6 +21,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
 
   /**
    * @param content
+   * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
    * @see mitll.langtest.client.scoring.WordTable#addPhonesBelowWord2
    */
   public SimpleHighlightSegment(String content, int id) {

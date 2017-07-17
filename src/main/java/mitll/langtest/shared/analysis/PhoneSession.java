@@ -49,7 +49,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private double mean;
   private double stdev;
   private double meanTime;
-  private long count;
+  private long count = 0;
   private long bin;
   private long start;
   private long end;
@@ -57,7 +57,6 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private List<WordAndScore> examples;
 
   /**
-   * @see mitll.langtest.server.database.analysis.PhoneAnalysis#getPhoneSessions(String, List, boolean)
    * @param phone
    * @param bin
    * @param count
@@ -66,6 +65,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
    * @param meanTime
    * @param start
    * @param end
+   * @see mitll.langtest.server.database.analysis.PhoneAnalysis#getPhoneSessions(String, List, boolean)
    */
   public PhoneSession(String phone, long bin, long count, double mean, double stdev, double meanTime, long start, long end,
                       List<WordAndScore> examples) {
@@ -80,6 +80,9 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     this.examples = examples;
   }
 
+  /**
+   * For RPC
+   */
   public PhoneSession() {
   }
 
@@ -92,8 +95,6 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   public double getMean() {
     return mean;
   }
-
-
 
   public double getStdev() {
     return stdev;
@@ -130,14 +131,6 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return count;
   }
 
-  public String toString() {
-    return phone + " : " + new Date(bin) +
-        " start " + new Date(start) +
-        " end " + new Date(end) +
-        " n " + count +
-        " mean " + mean + "  stdev " + stdev + " time " + meanTime;
-  }
-
   public long getStart() {
     return start;
   }
@@ -152,5 +145,13 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
 
   public List<WordAndScore> getExamples() {
     return examples;
+  }
+
+  public String toString() {
+    return phone + " : " + new Date(bin) +
+        " start " + new Date(start) +
+        " end " + new Date(end) +
+        " n " + count +
+        " mean " + mean + "  stdev " + stdev + " time " + meanTime;
   }
 }

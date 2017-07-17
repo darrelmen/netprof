@@ -185,12 +185,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     // now if there's a prefix, filter by prefix match
 
     TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
-    if (!request.getPrefix().isEmpty()) {
+    String prefix = request.getPrefix();
+    if (!prefix.isEmpty()) {
       logger.info("getExerciseWhenNoUnitChapter found prefix for user list " + userListByID);
       // now do a trie over matches
-      exercisesForSearch = getExercisesForSearch(request.getPrefix(), exercises, predefExercises);
+      exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises);
       if (request.getLimit() > 0) {
-        exercisesForSearch.setByExercise(getFirstFew(request, exercisesForSearch.getByExercise()));
+        exercisesForSearch.setByExercise(getFirstFew(prefix,request, exercisesForSearch.getByExercise()));
       }
     }
 //    logger.info("triple resp " + exercisesForSearch);
@@ -344,12 +345,19 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    */
   @NotNull
-  private List<CommonExercise> getFirstFew(ExerciseListRequest request, List<CommonExercise> exercises) {
-    Collections.sort(exercises, (o1, o2) -> {
+  private List<CommonExercise> getFirstFew(String prefix, ExerciseListRequest request, List<CommonExercise> exercises) {
+    exercises.sort((o1, o2) -> {
       String foreignLanguage = o1.getForeignLanguage();
+      boolean hasSearch1 = foreignLanguage.toLowerCase().contains(prefix.toLowerCase());
       String foreignLanguage1 = o2.getForeignLanguage();
-      int i = Integer.valueOf(foreignLanguage.length()).compareTo(foreignLanguage1.length());
-      return i == 0 ? foreignLanguage.compareTo(foreignLanguage1) : i;
+      boolean hasSearch2 = foreignLanguage1.toLowerCase().contains(prefix.toLowerCase());
+
+      if (hasSearch1 && !hasSearch2) return -1;
+      else if (hasSearch2 && !hasSearch1) return +1;
+      else {
+        int i = Integer.valueOf(foreignLanguage.length()).compareTo(foreignLanguage1.length());
+        return i == 0 ? foreignLanguage.compareTo(foreignLanguage1) : i;
+      }
     });
     exercises = exercises.subList(0, Math.min(exercises.size(), request.getLimit()));
     return exercises;

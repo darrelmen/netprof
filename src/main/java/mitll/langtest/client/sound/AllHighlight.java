@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -24,6 +25,8 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   private final DivWidget south;
 
   /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchEventSegmentToClickable
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchSegmentToWidgetForAudio
    * @param bulk
    */
   public AllHighlight(Collection<IHighlightSegment> bulk) {
@@ -36,7 +39,7 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
 
     add(north = new DivWidget());
     north.addStyleName("floatLeft");
-    north.getElement().setId("north_bulk_" + bulk.size());
+    north.getElement().setId("all_highlight_north_bulk_" + bulk.size());
 
     for (IHighlightSegment seg : set) {
       Widget w = seg.asWidget();
@@ -45,7 +48,7 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
       seg.clearSouth();
     }
     add(south = new DivWidget());
-    south.getElement().setId("south_bulk_" + bulk.size());
+    south.getElement().setId("all_highlight_south_bulk_" + bulk.size());
     south.addStyleName("floatLeft");
     south.getElement().getStyle().setClear(Style.Clear.BOTH);
   }

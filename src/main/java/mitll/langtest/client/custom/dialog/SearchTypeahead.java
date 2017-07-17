@@ -1,5 +1,6 @@
 package mitll.langtest.client.custom.dialog;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
@@ -28,31 +29,30 @@ public class SearchTypeahead {
   private static final int DISPLAY_ITEMS = 15;
   private static final String WHITESPACE_STRING = " ";
 
-
   private final ExerciseController controller;
   private int req = 0;
   private final FeedbackExerciseList feedbackExerciseList;
   private CommonShell currentExercise = null;
   private final SearchHighlighter highlighter = new SearchHighlighter();
+  private Button add;
 
-  SearchTypeahead(ExerciseController controller, FeedbackExerciseList feedbackExerciseList) {
+  SearchTypeahead(ExerciseController controller, FeedbackExerciseList feedbackExerciseList, Button add) {
     this.controller = controller;
     this.feedbackExerciseList = feedbackExerciseList;
+    this.add = add;
   }
 
   /**
-   * @param whichField
    * @param w
    * @param <T>
    * @return
    * @see EditableExerciseList#getTypeahead
    */
-   <T extends CommonShell> Typeahead getTypeaheadUsing(final String whichField, TextBox w) {
+  <T extends CommonShell> Typeahead getTypeaheadUsing(TextBox w) {
     SuggestOracle oracle = new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        logger.info("make request for '" + request.getQuery() + "'");
-
+        //logger.info("make request for '" + request.getQuery() + "'");
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
             .setPrefix(w.getText())
             .setLimit(DISPLAY_ITEMS)
@@ -65,7 +65,7 @@ public class SearchTypeahead {
 
               @Override
               public void onSuccess(ExerciseListWrapper<T> result) {
-                logger.info("getTypeaheadUsing got req back " + result.getReqID() + " vs " + req);
+//                logger.info("getTypeaheadUsing got req back " + result.getReqID() + " vs " + req);
                 makeSuggestionResponse(result, callback, request);
               }
             }
@@ -75,22 +75,14 @@ public class SearchTypeahead {
 
     Typeahead typeahead = new Typeahead(oracle);
     typeahead.setDisplayItemCount(DISPLAY_ITEMS);
-    typeahead.setMatcherCallback(new Typeahead.MatcherCallback() {
-      @Override
-      public boolean compareQueryToItem(String query, String item) {
-        return true;
-      }
-    });
-    typeahead.setUpdaterCallback(new Typeahead.UpdaterCallback() {
-      @Override
-      public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
-        ExerciseSuggestion exerciseSuggestion = (ExerciseSuggestion) selectedSuggestion;
-        currentExercise = exerciseSuggestion.getShell();
-        return selectedSuggestion.getReplacementString();
-      }
+    typeahead.setMatcherCallback((query, item) -> true);
+    typeahead.setUpdaterCallback(selectedSuggestion -> {
+      currentExercise = ((ExerciseSuggestion) selectedSuggestion).getShell();
+      add.setEnabled(currentExercise != null);
+      return selectedSuggestion.getReplacementString();
     });
 
-    w.getElement().setId("TextBox_" + whichField);
+    w.getElement().setId("TextBox_exercise");
     typeahead.setWidget(w);
     return typeahead;
   }
@@ -105,25 +97,21 @@ public class SearchTypeahead {
                                       SuggestOracle.Callback callback,
                                       SuggestOracle.Request request) {
     List<? extends CommonShell> exercises = result.getExercises();
-    exercises.sort(new Comparator<CommonShell>() {
-      @Override
-      public int compare(CommonShell o1, CommonShell o2) {
-        return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
-      }
-    });
+    exercises.sort((Comparator<CommonShell>) (o1, o2) -> o1.getForeignLanguage().compareTo(o2.getForeignLanguage()));
 
     int size = exercises.size();
-    if (size == 0) clearCurrentExercise();
+    if (size == 0) {
+      clearCurrentExercise();
+    }
     int limit = request.getLimit();
 
     if (size > limit) {
-      logger.info("makeSuggestionResponse From " + size + " to " + limit);
+//      logger.info("makeSuggestionResponse From " + size + " to " + limit);
       exercises = exercises.subList(0, limit);
     }
 
     int numberTruncated = Math.max(0, size - limit);
     //  logger.info("trunc " + numberTruncated);
-
     SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), exercises));
     response.setMoreSuggestionsCount(numberTruncated);
 
@@ -134,8 +122,9 @@ public class SearchTypeahead {
     }
   }
 
-   void clearCurrentExercise() {
+  void clearCurrentExercise() {
     currentExercise = null;
+    add.setEnabled(false);
   }
 
   @NotNull
@@ -156,13 +145,8 @@ public class SearchTypeahead {
     String displayString = highlighter.getHighlightedString(searchWords, formattedSuggestion, lowerCaseSuggestion);
 
     // logger.info(resp.getID() + " displayString " + displayString);
-    ExerciseSuggestion suggestion = createSuggestion(resp.getForeignLanguage(),
-        displayString,
-        resp);
-
-    return suggestion;
+    return createSuggestion(resp.getForeignLanguage(), displayString, resp);
   }
-
 
   /**
    * @see #makeSuggestionResponse
@@ -211,8 +195,8 @@ public class SearchTypeahead {
   }
 
   /**
-   * @see EditableExerciseList#isOnList
    * @return
+   * @see EditableExerciseList#isOnList
    */
   CommonShell getCurrentExercise() {
     return currentExercise;
@@ -238,6 +222,5 @@ public class SearchTypeahead {
     public CommonShell getShell() {
       return shell;
     }
-
   }
 }

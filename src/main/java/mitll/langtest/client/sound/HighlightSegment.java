@@ -21,7 +21,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   private boolean highlighted = false;
   private boolean clickable = true;
   private final DivWidget north, south;
-  private final int id;
+  // private final int id;
   private final String content;
   private final InlineHTML span;
 
@@ -31,40 +31,60 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @see mitll.langtest.client.scoring.WordTable#addPhonesBelowWord2
    */
   public HighlightSegment(int id, String content) {
-    this(id, content, HasDirection.Direction.LTR);
+    this(id, content, HasDirection.Direction.LTR, true);
   }
 
   /**
    * @param id
    * @param html
    * @param dir
+   * @param addSouth
    * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
    */
-  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir) {
+  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir, boolean addSouth) {
     DivWidget north;
     add(north = new DivWidget());
 
     getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+
     this.span = new InlineHTML(html, dir);
-    this.content = html;
-    north.add(span);
-    north.getElement().setId("Highlight_North_" + id);
-    boolean isLTR = dir == HasDirection.Direction.LTR;
-    north.addStyleName(isLTR ? "floatLeft" : "floatRight");
-    this.north = north;
     span.getElement().setId("highlight_" + id + "_" + html);
 
-    add(south = new DivWidget());
+    this.content = html;
+    boolean isLTR = dir == HasDirection.Direction.LTR;
 
+    configureNorth(id, north, isLTR, span);
+    this.north = north;
+
+    if (addSouth) {
+      add(south = new DivWidget());
+      configureSouth(id, south, isLTR);
+    } else {
+      south = null;
+    }
+    length = html.length();
+    // this.id = id;
+  }
+
+  private void configureSouth(int id, DivWidget south, boolean isLTR) {
     if (isLTR) {
       south.addStyleName("floatLeft");
     }
-
     south.getElement().getStyle().setClear(Style.Clear.BOTH);
     south.getElement().setId("Highlight_South_" + id);
+  }
 
-    length = html.length();
-    this.id = id;
+  private void configureNorth(int id, DivWidget north, boolean isLTR, InlineHTML span) {
+    north.add(span);
+    north.getElement().setId("Highlight_North_" + id);
+
+    String floatDir = isLTR ? "floatLeft" : "floatRight";
+    north.addStyleName(floatDir);
+
+    InlineHTML spacer = new InlineHTML(" ");
+    spacer.setWidth("4px");
+    spacer.addStyleName(floatDir);
+    north.add(spacer);
   }
 
   public int getLength() {
@@ -148,6 +168,6 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
 
   public String toString() {
     return //"#" + id + " " +
-        "'" + content + "'"+(getLength() > 1 ? " (" + getLength() + ")" : "") + (clickable ? "" : " NC");
+        "'" + content + "'" + (getLength() > 1 ? " (" + getLength() + ")" : "") + (clickable ? "" : " NC");
   }
 }

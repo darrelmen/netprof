@@ -815,8 +815,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   @Override
   protected void doAfterEditComplete(ListInterface<CommonShell, CommonExercise> pagingContainer, boolean buttonClicked) {
-    //  super.doAfterEditComplete(pagingContainer, buttonClicked);
-    changeTooltip(pagingContainer);
+      super.doAfterEditComplete(pagingContainer, buttonClicked);
+    //changeTooltip(pagingContainer);
     if (buttonClicked) {
       userSaidExerciseIsFixed();
     }

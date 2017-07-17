@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -86,7 +87,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final PhonesChoices phonesChoices;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_MATCH = false;
+  private static final boolean DEBUG_MATCH = true;
   private boolean isRTL = false;
   private DivWidget contextClickableRow;
 
@@ -424,7 +425,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (clickablesIterator.hasNext()) {
         List<TranscriptSegment> phonesInWord = getPhonesInWord(phones, wordSegment);
 
-        if (DEBUG)
+        if (DEBUG_MATCH)
           logger.info("doOneToManyMatch got segment " + wordSegment);// + " length " + segmentLength);
 
         IHighlightSegment value1 =
@@ -471,9 +472,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             if (phonesInWordAll.isEmpty()) {
               logger.warning("doOneToManyMatch no matches for " + current + " and " + lcSegment);
             } else {
+              logger.info("doOneToManyMatch got matches for " + current + " and " + lcSegment + " fragment1 " + fragment1);
+
               current.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWordAll, audioControl, phoneMap));
               segmentToWord.put(wordSegment, current); // only one for now...
               clickableRow.add(current.asWidget());
+
+              // add spacer - also required if we want to select text and copy it somewhere.
+          //    clickableRow.add(new InlineHTML(" "));
 
               if (!isRTL) {
                 current.asWidget().addStyleName("floatLeft");
@@ -497,6 +503,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           }
           segmentToWord.put(wordSegment, value1);
           clickableRow.add(value1.asWidget());
+          //clickableRow.add(new InlineHTML(" "));
         }
       }
     }
@@ -511,6 +518,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       Widget w = next.asWidget();
       if (!isRTL) w.addStyleName("floatLeft");
       clickableRow.add(w);
+//      InlineHTML w1 = new InlineHTML(" ");
+//      if (!isRTL) w1.addStyleName("floatLeft");
+//      clickableRow.add(w1);
     }
   }
 
@@ -773,7 +783,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private IHighlightSegment skipUnclickable(Iterator<IHighlightSegment> iterator, IHighlightSegment clickable) {
     while (!clickable.isClickable() && iterator.hasNext()) {
-      logger.info("skipUnclickable : skip " + clickable);
+     // logger.info("skipUnclickable : skip " + clickable);
       clickable = iterator.next();
     }
     return clickable;
