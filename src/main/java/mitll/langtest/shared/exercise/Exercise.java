@@ -267,6 +267,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.creator = exercise.getCreator();
   }
 
+  @Override public CommonShell getShell(boolean includeContext) {
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, getContext(), getContextTranslation());
+  }
+
   private void copyAudio(AudioRefExercise exercise) {
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
       addAudio(audioAttribute);

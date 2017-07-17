@@ -35,6 +35,7 @@ import java.util.logging.Logger;
  */
 class EditableExerciseList extends NPExerciseList implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
+
   private static final String ADD = "Add";
 
   /**
@@ -73,34 +74,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
     if (list.isEmpty()) delete.setEnabled(false);
     pagingContainer.setPageSize(8);
-   // this.searchTypeahead = new SearchTypeahead(controller, this);
   }
-//
-//  protected ClickablePagingContainer<CommonShell> makePagingContainer() {
-//    pagingContainer =
-//        new ClickablePagingContainer<CommonShell>(controller
-//        ) {
-////          public void gotClickOnItem(CommonShell e) {
-////          }
-////
-////          @Override
-////          protected void addColumnsToTable(boolean sortEnglish) {
-////          }
-////
-////
-////          @Override
-////          protected void gotRangeChanged(Range newRange) {
-////            //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
-////            gotVisibleRangeChanged(getIdsForRange(newRange));
-////          }
-//
-//          @Override
-//          protected int getNumTableRowsGivenScreenHeight() {
-//            return 12;
-//          }
-//        };
-//    return pagingContainer;
-//  }
 
   protected DivWidget getOptionalWidget() {
     DivWidget widgets = new DivWidget();
@@ -225,7 +199,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
       @Override
       public void onSuccess(Boolean result) {
         enableButton(add);
-
 /*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
         " before adding/changing " + newUserExercise + " -> " + result);*/
         if (result) {
@@ -280,9 +253,9 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private void showNewItem(CommonShell currentExercise) {
     list.addExercise(currentExercise);
 
-    int before = getSize();
+//    int before = getSize();
     addExercise(currentExercise);
-    int after = getSize();
+ //   int after = getSize();
 
 //    logger.info("before " + before + " after " + after);
     enableRemove(true);

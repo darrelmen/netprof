@@ -40,15 +40,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import java.util.Collection;
 
 public interface ListServiceAsync {
-  /**
-   * TODO : add ability to search through list text...
-   * @paramx search
-   * @param async
-   */
-  //void getUserListsForText(String search, AsyncCallback<Collection<UserList<CommonShell>>> async);
-
   void getListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
-
 
   void addItemToUserList(int userListID, int exID, AsyncCallback<Void> async);
 
@@ -56,14 +48,6 @@ public interface ListServiceAsync {
                    boolean isPublic, AsyncCallback<UserList> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
-
-  /**
-   * @deprecated
-   * @param async
-   */
- // void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
-
- // void setPublicOnList(int userListID, boolean isPublic, AsyncCallback<Void> async);
 
   void newExercise(int userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
 
@@ -81,14 +65,7 @@ public interface ListServiceAsync {
 
   void deleteItemFromList(int listid, int exid, AsyncCallback<Boolean> async);
 
-//  void updateContext(long userListID, String context, AsyncCallback<Void> async);
-//  void updateRichText(long userListID, String richText, AsyncCallback<Void> async);
-//
-//  void updateName(long userListID, String name, AsyncCallback<Void> async);
-
   void getProjectIDForList(int userListID, AsyncCallback<Integer> async);
-
-  //void getNumLists(AsyncCallback<Integer> async);
 
   void getLists(AsyncCallback<Collection<UserList<CommonShell>>> async);
 

@@ -191,7 +191,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       // now do a trie over matches
       exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises);
       if (request.getLimit() > 0) {
-        exercisesForSearch.setByExercise(getFirstFew(prefix,request, exercisesForSearch.getByExercise()));
+        exercisesForSearch.setByExercise(getFirstFew(prefix, request, exercisesForSearch.getByExercise()));
       }
     }
 //    logger.info("triple resp " + exercisesForSearch);
@@ -346,6 +346,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   @NotNull
   private List<CommonExercise> getFirstFew(String prefix, ExerciseListRequest request, List<CommonExercise> exercises) {
+    //logger.info("getFirstFew only taking " + request.getLimit() + " from " + exercises.size() + " that match " + prefix);
+
     exercises.sort((o1, o2) -> {
       String foreignLanguage = o1.getForeignLanguage();
       boolean hasSearch1 = foreignLanguage.toLowerCase().contains(prefix.toLowerCase());
@@ -354,12 +356,19 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
       if (hasSearch1 && !hasSearch2) return -1;
       else if (hasSearch2 && !hasSearch1) return +1;
-      else {
+      else if (hasSearch1 && hasSearch2) {
         int i = Integer.valueOf(foreignLanguage.length()).compareTo(foreignLanguage1.length());
         return i == 0 ? foreignLanguage.compareTo(foreignLanguage1) : i;
+      } else {
+        String cforeignLanguage = o1.getContext();
+        String cforeignLanguage1 = o2.getContext();
+        int i = Integer.valueOf(cforeignLanguage.length()).compareTo(cforeignLanguage1.length());
+        return i == 0 ? cforeignLanguage.compareTo(cforeignLanguage1) : i;
       }
     });
+
     exercises = exercises.subList(0, Math.min(exercises.size(), request.getLimit()));
+
     return exercises;
   }
 
@@ -560,7 +569,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
     }
-    List<CommonShell> exerciseShells = getExerciseShells(exercises);
+    List<CommonShell> exerciseShells = getExerciseShells(exercises,request.getLimit() >-1);
 
     logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
     markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
@@ -574,7 +583,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     ExerciseListWrapper<T> exerciseListWrapper =
         new ExerciseListWrapper<T>(request.getReqID(), exerciseShells1, firstExercise);
 
-    //  getScores(userID, exerciseShells1);
     Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exerciseShells1);
     exerciseListWrapper.setIdToScore(scores);
     logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper);
@@ -1146,10 +1154,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #makeExerciseListWrapper
    */
-  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises) {
+  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises,boolean includeContext) {
     List<CommonShell> ids = new ArrayList<>();
     for (T e : exercises) {
-      ids.add(e.getShell());
+      ids.add(e.getShell(includeContext));
     }
     return ids;
   }

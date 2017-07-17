@@ -49,7 +49,9 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   protected String english = "";
   protected String meaning = "";
   protected String foreignLanguage = "";
-  protected int numPhones;
+  private String cforeignLanguage = "";
+  private String cenglish = "";
+  int numPhones;
   private float score = -1.0f;
 
   public ExerciseShell() {
@@ -59,7 +61,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @see AudioExercise#AudioExercise(int, int)
    */
   ExerciseShell(int realID) {
-    this("", "", "", realID, 0);
+    this("", "", "", realID, 0, "", "");
   }
 
   /**
@@ -67,28 +69,34 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @param meaning
    * @param foreignLanguage
    * @param realID
+   * @param cfl
+   * @param cenglish
    * @paramx context
    * @paramx contextTranslation
-   * @see #getShell()
+   * @see CommonShell#getShell(boolean)
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
-  private ExerciseShell(String english,
-                        String meaning,
-                        String foreignLanguage,
-                        int realID, int numPhones) {
+  ExerciseShell(String english,
+                String meaning,
+                String foreignLanguage,
+                int realID,
+                int numPhones, String cfl, String cenglish) {
     super(realID);
     this.english = english;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
     this.numPhones = numPhones;
+    this.cforeignLanguage = cfl;
+    this.cenglish = cenglish;
   }
 
   /**
+   * @param includeContext
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
-  public CommonShell getShell() {
-    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones);
+  public CommonShell getShell(boolean includeContext) {
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, "", "");
   }
 
   public String getEnglish() {
@@ -147,8 +155,8 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#setProgressBarScore
    * @return
+   * @see mitll.langtest.client.list.FacetExerciseList#setProgressBarScore
    */
   public float getScore() {
     return score;
@@ -156,10 +164,18 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
 
   public String toString() {
     return "ExerciseShell " +
-        "id = " +
-        //getOldID() + "/" +
-        getID() +
+        "id = " + getID() +
         " : '" + getEnglish() + "'" +
         " states " + getState() + "/" + getSecondState();
+  }
+
+  @Override
+  public String getCforeignLanguage() {
+    return cforeignLanguage;
+  }
+
+  @Override
+  public String getCenglish() {
+    return cenglish;
   }
 }

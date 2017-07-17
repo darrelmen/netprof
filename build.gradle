@@ -62,7 +62,7 @@ description = 'NetProF pronunciation feedback'
 
 dependencies {
     // our modules
-    compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT') { changing = true;   }
+    compile('mitll.hlt:domino-core:1.2.0-SNAPSHOT') { changing = true;   }
     //compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT') { changing = true }
     compile('mitll.hlt:imagewriter:1.0.0') { changing = true }
   //  compile('mitll.hlt:audioimage:1.0.0') { changing = true }

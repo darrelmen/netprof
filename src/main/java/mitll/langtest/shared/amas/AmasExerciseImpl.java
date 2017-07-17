@@ -99,9 +99,9 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     this.altID = id;  // TODO : how does this work? do we need to worry about it?
     //this.contentTrans = contentTrans;
     this.orient = orient;
-   // this.orientTrans = orientTrans;
+    // this.orientTrans = orientTrans;
     this.isListening = isListening;
-   // this.ilr = ilr;
+    // this.ilr = ilr;
     this.audioURL = audioURL;
   }
 
@@ -250,7 +250,8 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   }
 
   @Override
-  public void setSecondState(STATE state) {}
+  public void setSecondState(STATE state) {
+  }
 
   public String toString() {
     return "Exercise " + getOldID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
@@ -277,19 +278,6 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return null;
   }
 
-/*
-  public String getAltFL() {
-    return "";
-  }
-*/
-
-/*
-  @Override
-  public String getTransliteration() {
-    return null;
-  }
-*/
-
   public int getDominoID() {
     return realID;
   }
@@ -305,7 +293,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   }
 
   @Override
-  public CommonShell getShell() {
+  public CommonShell getShell(boolean includeContext) {
     return null;
   }
 
@@ -319,30 +307,27 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return 0;
   }
 
-/*  public String getContentTrans() {
-    return contentTrans;
+  @Override
+  public String getCforeignLanguage() {
+    return null;
   }
-*/
+
+  @Override
+  public String getCenglish() {
+    return null;
+  }
 
   public String getOrient() {
     return orient;
   }
-
-/*  public String getOrientTrans() {
-    return orientTrans;
-  }
-
-  public String getIlr() {
-    return ilr;
-  }*/
 
   public boolean isListening() {
     return isListening;
   }
 
   /**
-   * @see mitll.langtest.client.amas.AudioExerciseContent#addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
    * @return
+   * @see mitll.langtest.client.amas.AudioExerciseContent#addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
    */
   public String getAudioURL() {
     return audioURL;

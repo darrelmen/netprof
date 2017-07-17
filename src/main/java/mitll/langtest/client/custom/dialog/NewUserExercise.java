@@ -71,6 +71,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 abstract class NewUserExercise extends BasicDialog {
+  public static final String CONTEXT_BOX = "ContextBox = ";
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   private static final String OPTIONAL = "optional";
@@ -349,8 +350,7 @@ abstract class NewUserExercise extends BasicDialog {
     TextBoxBase box = formField.box;
     box.setText(originalContext = newUserExercise.getContext());
     markPlaceholder(box, originalContext);
-    final String prefix = "ContextBox = ";
-    addOnBlur(box, prefix);
+    addOnBlur(box, CONTEXT_BOX);
 
     useAnnotation(newUserExercise, CONTEXT, contextAnno);
     return formField;

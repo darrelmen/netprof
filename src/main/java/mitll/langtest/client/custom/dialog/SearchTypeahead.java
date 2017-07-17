@@ -97,8 +97,7 @@ public class SearchTypeahead {
                                       SuggestOracle.Callback callback,
                                       SuggestOracle.Request request) {
     List<? extends CommonShell> exercises = result.getExercises();
-    exercises.sort((Comparator<CommonShell>) (o1, o2) -> o1.getForeignLanguage().compareTo(o2.getForeignLanguage()));
-
+    //  exercises.sort((Comparator<CommonShell>) (o1, o2) -> o1.getForeignLanguage().compareTo(o2.getForeignLanguage()));
     int size = exercises.size();
     if (size == 0) {
       clearCurrentExercise();
@@ -134,18 +133,19 @@ public class SearchTypeahead {
     String[] searchWords = normalizeSearch(query).split(WHITESPACE_STRING);
 
     for (CommonShell resp : exercises) {
-      suggestions.add(getSuggestion(searchWords, resp));
+      suggestions.add(getSuggestion(query, searchWords, resp));
     }
     return suggestions;
   }
 
-  private ExerciseSuggestion getSuggestion(String[] searchWords, CommonShell resp) {
-    String formattedSuggestion = resp.getForeignLanguage() + " - " + resp.getEnglish();
+  private ExerciseSuggestion getSuggestion(String query, String[] searchWords, CommonShell resp) {
+    String foreignLanguage = resp.getForeignLanguage();
+    boolean found = foreignLanguage.toLowerCase().contains(query.toLowerCase());
+    String formattedSuggestion = found ? (foreignLanguage + " - " + resp.getEnglish()) : (resp.getCforeignLanguage() + " - " + resp.getCenglish() + " (Context)");
     String lowerCaseSuggestion = normalizeSuggestion(formattedSuggestion);
     String displayString = highlighter.getHighlightedString(searchWords, formattedSuggestion, lowerCaseSuggestion);
-
     // logger.info(resp.getID() + " displayString " + displayString);
-    return createSuggestion(resp.getForeignLanguage(), displayString, resp);
+    return createSuggestion(foreignLanguage, displayString, resp);
   }
 
   /**

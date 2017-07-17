@@ -478,7 +478,7 @@ public class UserListManager implements IUserListManager {
         false, System.currentTimeMillis(), "", "", -1, false);
 
     List<CommonShell> copy = new ArrayList<>();
-    for (CommonShell orig : onList) copy.add(orig.getShell());
+    for (CommonShell orig : onList) copy.add(orig.getShell(false));
 
     logger.debug("getReviewList '" + name + "' ids size = " + allKnown.size() + " yielded " + copy.size());// + " took " + (now - then) + " millis");
     return getCommonUserList(userList, copy);

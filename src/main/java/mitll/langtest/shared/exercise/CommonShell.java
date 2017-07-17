@@ -55,8 +55,12 @@ public interface CommonShell extends Shell {
    */
   Collection<String> getRefSentences();
 
-  CommonShell getShell();
+  CommonShell getShell(boolean includeContext);
 
   int getNumPhones();
   float getScore();
+
+  String getCforeignLanguage();
+
+  String getCenglish();
 }

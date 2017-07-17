@@ -89,7 +89,6 @@ class EditableExerciseDialog extends NewUserExercise {
     super(controller, changedUserExercise, instanceName, originalListID);
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
-  //  this.originalList = originalList;
     this.exerciseList = exerciseList;
   }
 
@@ -341,10 +340,7 @@ class EditableExerciseDialog extends NewUserExercise {
       }
 
       @Override
-      protected int getScaledImageHeight(String type) {
-        return 40;
-//        float heightForType = type.equals(WAVEFORM) ? getWaveformHeight() : SPECTROGRAM_HEIGHT;
-//        return Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
+      protected int getScaledImageHeight(String type) {      return 40;
       }
     };
   }

@@ -316,7 +316,7 @@ public class ExerciseListRequest implements IsSerializable {
   public String toString() {
     return
         "req #" + getReqID() + " " +
-            (limit == -1 ? "" : "limit                  '" + limit + "'") +
+            (limit == -1 ? "" : "\n\tlimit                  '" + limit + "'") +
             (prefix.isEmpty() ? "" : "\n\tprefix                  '" + prefix + "'") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection           " + getTypeToSelection()) +
             "\n\tuser list id        " + userListID +

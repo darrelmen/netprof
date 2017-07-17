@@ -69,7 +69,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       if (customOrPredefExercise == null) {
         logger.warn("Couldn't find exercise for " + id);
       } else {
-        shells.add(customOrPredefExercise.getShell());
+        shells.add(customOrPredefExercise.getShell(false));
       }
     }
     return shells;
