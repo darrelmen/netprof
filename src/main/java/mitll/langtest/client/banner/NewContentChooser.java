@@ -31,14 +31,13 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * Created by go22670 on 4/10/17.
  */
 public class NewContentChooser implements INavigation {
-  public static final String CURRENT_VIEW = "CurrentView";
   private final Logger logger = Logger.getLogger("NewContentChooser");
 
+  private static final String CURRENT_VIEW = "CurrentView";
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
   private final ExerciseListContent practiceHelper;
   private final ExerciseController controller;
- // private final ListManager listManager;
   private final IBanner banner;
   private final ListView listView;
 
@@ -52,7 +51,6 @@ public class NewContentChooser implements INavigation {
     learnHelper = new NewLearnHelper(controller);
     practiceHelper = new PracticeHelper(controller);
     this.controller = controller;
-    //this.listManager = new ListManager(controller, null);
     this.listView = new ListView(controller);
     this.banner = banner;
   }

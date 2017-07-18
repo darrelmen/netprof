@@ -28,12 +28,13 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 /**
  * Created by go22670 on 4/10/17.
  */
-public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueChangeHandler<String> {
-  public static final String SHOW_PHONES = "showPhones";
-  public static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
-  public static final String MAILTO_SUBJECT = "Question%20about%20netprof";
-  public static final IconType CHECK = IconType.CHECK;
+public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
+
+
+  private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
+  private static final String MAILTO_SUBJECT = "Question%20about%20netprof";
+  //public static final IconType CHECK = IconType.CHECK;
 
   public static final String SHOW = "showStorage";
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
@@ -49,8 +50,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   private Dropdown cog;
 
   private INavigation navigation;
-//  private HandlerRegistration handlerRegistration;
-  private final Map<String, NavLink> nameToLink = new HashMap<>();
+   private final Map<String, NavLink> nameToLink = new HashMap<>();
   private Dropdown userDrop;
   /**
    * @see #addChoicesForUser(ComplexWidget)
@@ -206,30 +206,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
 
   private Label subtitle;
 
+  /**
+   * Tell them we can't record.
+   * @see InitialUI#setSplash
+   */
   @Override
   public void setSubtitle() {
     this.subtitle.setText(RECORDING_DISABLED);
     subtitle.removeStyleName("subtitleForeground");
     subtitle.addStyleName("subtitleNoRecordingForeground");
   }
-
-/*  private void addHistoryListener() {
-    if (handlerRegistration == null) {
-      handlerRegistration = History.addValueChangeHandler(this);
-    }
-  }*/
-
-/*
-  public void onValueChange(ValueChangeEvent<String> event) {
-*/
-/*    String token = event.getValue();
-    SelectionState selectionState = new SelectionState(token, false);
-    String instance1 = selectionState.getInstance();
-      logger.info("onValueChange got '" + token + "' instance '" + instance1 + "'");*//*
-
-    //showSection(instance1);
-  }
-*/
 
   private void showSection(String instance1) {
     VIEWS choices = VIEWS.NONE;
@@ -257,9 +243,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
    */
   private void addChoicesForUser(ComplexWidget nav) {
     boolean first = true;
-   // boolean hasProject = hasProjectChoice();
-
-   // logger.info("addChoicesForUser has project " + hasProject);
     for (VIEWS choice : Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS, VIEWS.LISTS)) {
       NavLink choice1 = getChoice(nav, choice);
       if (first) {
@@ -298,11 +281,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     showSection(instanceName);
     showActive(learn);
   }
-
-/*  private void setHistoryItem(String historyToken) {
-    if (true) logger.info("NewBanner.setHistoryItem '" + historyToken + "' -------------- ");
-    History.newItem(historyToken);
-  }*/
 
   @NotNull
   private NavLink getLink(ComplexWidget nav, String learn1) {
@@ -359,12 +337,19 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
   }
 
   @Override
+  public void reset() {
+    setCogVisible(false);
+    setRecNavVisible(false);
+    setDefectNavVisible(false);
+  }
+
+/*  @Override
   public void setBrowserInfo(String v) {
   }
 
   @Override
   public void setVisibleAdmin(boolean visibleAdmin) {
-  }
+  }*/
 
   @Override
   public void setUserName(String name) {
@@ -381,7 +366,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     boolean qc = isQC();
     boolean b = hasProjectChoice();
 //    logger.info("is QC " + controller.getUser() + " : " + qc + " has choice " + b);
-    defectnav.setVisible(qc && b);
+    boolean visible = qc && b;
+    setDefectNavVisible(visible);
+  }
+
+  private void setDefectNavVisible(boolean visible) {
+    defectnav.setVisible(visible);
   }
 
   private boolean isPermittedToRecord() {
@@ -399,10 +389,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
     boolean canDoQC = controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL);
    // logger.info("is canDoQC " + canDoQC);
     return canDoQC || admin;
-  }
-
-  @Override
-  public void onResize() {
   }
 
   @Override
@@ -428,8 +414,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {//}, ValueCh
 
   private void recordMenuVisible() {
     if (recnav != null) {
-      recnav.setVisible(isPermittedToRecord() && hasProjectChoice());
+      boolean visible = isPermittedToRecord() && hasProjectChoice();
+      setRecNavVisible(visible);
     }
+  }
+
+  private void setRecNavVisible(boolean visible) {
+    recnav.setVisible(visible);
   }
 
   private NavLink getContactUs() {

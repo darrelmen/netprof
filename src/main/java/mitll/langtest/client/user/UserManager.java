@@ -254,7 +254,7 @@ public class UserManager {
    */
   void storeUser(User user) {
     if (Storage.isLocalStorageSupported()) {
-      logger.info("storeUser : user now " + user);
+     // logger.info("storeUser : user now " + user);
       rememberUser(user);
       gotNewUser(user);
     } else {  // not sure what we could possibly do here...

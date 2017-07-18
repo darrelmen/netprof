@@ -42,8 +42,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.banner.NewBanner.SHOW_PHONES;
-
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -55,6 +53,7 @@ import static mitll.langtest.client.banner.NewBanner.SHOW_PHONES;
  */
 public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   private final Logger logger = Logger.getLogger("ExercisePanelFactory");
+  private static final String SHOW_PHONES = "showPhones";
 
   protected final ExerciseController controller;
   protected ListInterface<T, U> exerciseList;
@@ -104,7 +103,7 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
     if (show != null && !show.isEmpty()) {
       try {
         choices = PhonesChoices.valueOf(show);
-    //    logger.info("ExercisePanelFactory got " + choices);
+        //    logger.info("ExercisePanelFactory got " + choices);
       } catch (IllegalArgumentException ee) {
         logger.warning("getPhoneChoices for '" + show + "' got " + ee);
       }

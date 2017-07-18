@@ -82,7 +82,6 @@ public class InitialUI implements UILifecycle {
   public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
 
   protected static final String LOGIN = "Login";
-//  private static final String LANGTEST_IMAGES = LangTest.LANGTEST_IMAGES;
   private static final int NO_USER_INITIAL = -2;
 
   private final UserManager userManager;
@@ -204,7 +203,7 @@ public class InitialUI implements UILifecycle {
   }
 
   public void logout() {
-    lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
+    banner.reset();
     breadcrumbs.clear();
     breadcrumbs.setVisible(false);
 
@@ -218,6 +217,8 @@ public class InitialUI implements UILifecycle {
         resetState();
       }
     });
+
+    lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
   }
 
   /**
@@ -272,24 +273,16 @@ public class InitialUI implements UILifecycle {
    * @see #showLogin()
    */
   protected void populateBelowHeader(Container verticalContainer) {
-/*    if (showOnlyOneExercise()) {
-      Panel currentExerciseVPanel = new FlowPanel();
-      currentExerciseVPanel.getElement().setId("currentExercisePanel");
-      logger.info("adding headstart current exercise");
-      RootPanel.get().add(getHeadstart(currentExerciseVPanel));
-    } else {*/
-      //  logger.info("adding normal container...");
-      RootPanel.get().add(verticalContainer);
+    RootPanel.get().add(verticalContainer);
 
-      /**
-       * {@link #makeFlashContainer}
-       */
-      contentRow.add(lifecycleSupport.getFlashRecordPanel());
-      child = new Heading(3, "Please allow recording");
-      child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
-      contentRow.add(child);
-  //  }
-    // logger.info("populateBelowHeader -- ");
+    /**
+     * {@link #makeFlashContainer}
+     */
+    contentRow.add(lifecycleSupport.getFlashRecordPanel());
+    child = new Heading(3, "Please allow recording");
+    child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
+    contentRow.add(child);
+
     lifecycleSupport.recordingModeSelect();
     makeNavigation();
     addResizeHandler();
@@ -340,14 +333,12 @@ public class InitialUI implements UILifecycle {
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
         addBreadcrumbLevels(crumbs, startupInfo);
-      }
-      else {
+      } else {
         logger.info("addCrumbs no project startup info yet for " + userManager.getCurrent());
       }
 
       banner.checkProjectSelected();
-    }
-    else {
+    } else {
       logger.warning("addCrumbs no current user");
     }
   }
@@ -362,10 +353,10 @@ public class InitialUI implements UILifecycle {
     crumbs.clear();
     breadcrumbs.setVisible(true);
     List<SlimProject> projects = lifecycleSupport.getStartupInfo().getProjects();
- //   logger.info("addBreadcrumb " + projects.size());
+    //   logger.info("addBreadcrumb " + projects.size());
     for (SlimProject project : projects) {
       if (project.hasChildren() && project.hasChild(currentProject)) {
-   //     logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+        //     logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         crumbs.add(getLangBreadcrumb(project));
         addProjectCrumb(crumbs, project.getChild(currentProject));
 /*        for (int i = 0; i < crumbs.getWidgetCount(); i++) {
@@ -373,11 +364,11 @@ public class InitialUI implements UILifecycle {
         }*/
         break;
       } else if (project.getID() == currentProject) {
-     //   logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+        //   logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         addProjectCrumb(crumbs, project);
         break;
       } else {
-      //  logger.info("addBreadcrumbLevels skipping project " + project);
+        //  logger.info("addBreadcrumbLevels skipping project " + project);
       }
     }
   }
@@ -410,7 +401,7 @@ public class InitialUI implements UILifecycle {
   private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     NavLink lang = new NavLink(project.getName());
     lang.addClickHandler(clickEvent -> {
-    //  logger.info("addProjectCrumb choose project again for " + project.getName());
+      //  logger.info("addProjectCrumb choose project again for " + project.getName());
       chooseProjectAgain();
     });
     crumbs.add(lang);
@@ -453,35 +444,6 @@ public class InitialUI implements UILifecycle {
     banner.setNavigation(navigation);
   }
 
-  /**
-   * @return
-   * @see #populateRootPanel
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel
-   * @xdeprecated
-   */
-/*  private boolean showOnlyOneExercise() {
-    return props.getExercise_title() != null;
-  }*/
-
-  /**
-   * @paramx currentExerciseVPanel
-   * @return
-   * @see #populateBelowHeader
-   * @deprecatedx - we should really test this
-   */
-/*  private Container getHeadstart(Panel currentExerciseVPanel) {
-    // show fancy lace background image
-    currentExerciseVPanel.addStyleName("body");
-    currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url(" + LANGTEST_IMAGES + "levantine_window_bg.jpg" + ")");
-    currentExerciseVPanel.addStyleName("noMargin");
-
-    Container verticalContainer2 = new FluidContainer();
-    verticalContainer2.getElement().setId("root_vertical_container");
-    verticalContainer2.add(lifecycleSupport.getFlashRecordPanel());
-    verticalContainer2.add(currentExerciseVPanel);
-    return verticalContainer2;
-  }*/
-
   private void addResizeHandler() {
     final InitialUI outer = this;
     Window.addResizeHandler(event -> outer.onResize());
@@ -492,9 +454,6 @@ public class InitialUI implements UILifecycle {
    */
   protected void onResize() {
     if (navigation != null) navigation.onResize();
-    if (banner != null) {
-      banner.onResize();
-    }
   }
 
   /**
@@ -578,7 +537,7 @@ public class InitialUI implements UILifecycle {
    * Only get the exercises if the user has accepted mic access.
    *
    * @param user
-   * @see LangTest#makeFlashContainer
+   * @see LangTest#gotUser
    * @see UserManager#gotNewUser(User)
    * @see UserManager#storeUser
    */
@@ -597,7 +556,7 @@ public class InitialUI implements UILifecycle {
       configureUIGivenUser(userID);
       lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
-      logger.info("ignoring got user for current user " + userID);
+      logger.info("gotUser ignoring got user for current user " + userID);
       if (navigation != null) {
         showNavigation();
         navigation.showPreviousState();
@@ -608,7 +567,7 @@ public class InitialUI implements UILifecycle {
 
     if (userID > -1) {
       banner.setCogVisible(true);
-      banner.setVisibleAdmin(user.isAdmin() || user.getUserKind() == User.Kind.PROJECT_ADMIN || user.isCD());
+      //banner.setVisibleAdmin(user.isAdmin() || user.getUserKind() == User.Kind.PROJECT_ADMIN || user.isCD());
     }
   }
 
@@ -663,11 +622,10 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   *
    * @see #addProjectChoices
    */
-   @Override
-   public void addBreadcrumbs() {
+  @Override
+  public void addBreadcrumbs() {
     addCrumbs(breadcrumbs);
   }
 
@@ -730,6 +688,7 @@ public class InitialUI implements UILifecycle {
 
     if (DEBUG)
       logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+
     if (childCount > 0) {
       Node child = contentRow.getElement().getChild(0);
       Element as = Element.as(child);
@@ -750,7 +709,6 @@ public class InitialUI implements UILifecycle {
    */
   protected void showUserPermissions(long userID) {
     lastUser = userID;
-//    banner.setBrowserInfo(lifecycleSupport.getInfoLine());
     banner.reflectPermissions(lifecycleSupport.getPermissions());
   }
 

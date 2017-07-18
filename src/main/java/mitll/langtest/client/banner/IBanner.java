@@ -22,17 +22,13 @@ public interface IBanner {
   void setVisibleChoices(boolean visible);
   void setCogVisible(boolean val);
 
-  void setBrowserInfo(String v);
-
-  void setVisibleAdmin(boolean visibleAdmin);
+  void reset();
 
   /**
    * @see InitialUI#gotUser
    * @param name
    */
   void setUserName(String name);
-
-  void onResize();
 
   void checkProjectSelected();
 

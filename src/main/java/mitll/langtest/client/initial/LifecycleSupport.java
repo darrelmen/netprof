@@ -44,8 +44,6 @@ import java.util.Collection;
  * MUST BE PUBLIC - for AMASInitialUI to access.
  */
 public interface LifecycleSupport extends EventRegistration {
- // String getInfoLine();
-
   void recordingModeSelect();
 
   void clearStartupInfo();

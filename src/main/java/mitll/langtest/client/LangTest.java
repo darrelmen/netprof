@@ -802,7 +802,6 @@ public class LangTest implements
 
   public void clearStartupInfo() {
     this.projectStartupInfo = null;
-    //  logger.info("clearStartupInfo   ");
   }
 
   public Collection<String> getTypeOrder() {
