@@ -152,9 +152,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IAudioDAO audioDAO;
   private IAnswerDAO answerDAO;
   private IUserListManager userListManager;
-  IStateManager stateManager;
+  private IStateManager stateManager;
   private IUserExerciseDAO userExerciseDAO;
-  // private AddRemoveDAO addRemoveDAO;
 
   private IEventDAO eventDAO;
   private IProjectDAO projectDAO;
@@ -323,7 +322,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
     answerDAO = new SlickAnswerDAO(this, dbConnection);
-//    addRemoveDAO = new AddRemoveDAO(this);
 
     refresultDAO = new SlickRefResultDAO(this, dbConnection, serverProps.shouldDropRefResult());
     userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
@@ -343,8 +341,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
         userListExerciseJoinDAO,
         annotationDAO,
         stateManager,
-        //reviewedDAO,
-        //secondStateDAO,
         new SlickUserListExerciseVisitorDAO(this, dbConnection),
         pathHelper);
 

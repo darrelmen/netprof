@@ -45,20 +45,10 @@ import java.util.Map;
  * @since 10/22/15.
  */
 public class WordAndScore extends WordScore {
-/*  private int exid;
-
-  private float pronScore;
-  private long resultID;
-  private long timestamp;
-  private String answerAudio;
-  private String refAudio;
-  private Map<NetPronImageType, List<TranscriptSegment>> transcript;*/
-
   private int wseq;
   private int seq;
   private String word;
   private String scoreJson;
-
 
   /**
    * @param word
@@ -75,16 +65,10 @@ public class WordAndScore extends WordScore {
   public WordAndScore(int exid, String word, float pronScore, int resultID, int wseq, int seq, String answerAudio,
                       String refAudio, String scoreJson, long timestamp) {
     super(exid, pronScore, timestamp, resultID, answerAudio, refAudio, null);
-//    this.exid = exid;
     this.word = word;
-  //  this.pronScore = pronScore;
-    //this.resultID = resultID;
     this.wseq = wseq;
     this.seq = seq;
-   // this.answerAudio = answerAudio;
-   // this.refAudio = refAudio;
     this.scoreJson = scoreJson;
-   //  this.timestamp = timestamp;
   }
 
   public WordAndScore() {
@@ -125,58 +109,14 @@ public class WordAndScore extends WordScore {
     return word;
   }
 
-  /**
-   * @return
-   * @see PhoneExampleContainer#getItemColumn()
-   */
-/*  public float getPronScore() {
-    return pronScore;
-  }
-
-  public long getResultID() {
-    return resultID;
-  }
-
-  public String getAnswerAudio() {
-    return answerAudio;
-  }
-
-  public String getRefAudio() {
-    return refAudio;
-  }*/
-
   public String getScoreJson() {
     return scoreJson;
   }
 
-  /**
-   * @param transcript
-   * @see PhoneDAO#setTranscript(WordAndScore, Map)
-   */
-  /*public void setTranscript(Map<NetPronImageType, List<TranscriptSegment>> transcript) {
-    this.transcript = transcript;
-  }
-*/
-  /**
-   * @return
-   * @see PhoneExampleContainer#getItemColumn
-   */
-  /*public Map<NetPronImageType, List<TranscriptSegment>> getTranscript() {
-    return transcript;
-  }
-*/
   public void clearJSON() {
     scoreJson = "";
   }
 
-  /*public int getExid() {
-    return exid;
-  }
-
-  public long getTimestamp() {
-    return timestamp;
-  }
-*/
   public String toString() {
     return getExid() + " #" + getWseq() + " : " + getWord() + "\ts " + getPronScore() + "\tres " + getResultID() +
         "\tanswer " + getAnswerAudio() + " ref " + getRefAudio();

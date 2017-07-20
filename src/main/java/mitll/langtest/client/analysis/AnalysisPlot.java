@@ -312,7 +312,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
    */
   private void populateExerciseMap(ExerciseServiceAsync service, int userid) {
     // logger.info("populateExerciseMap : get exercises for user " + userid);
-
     service.getExerciseIds(
         new ExerciseListRequest(1, userid)
             .setOnlyForUser(true),
@@ -533,17 +532,15 @@ public class AnalysisPlot extends TimeSeriesPlot {
   }
 
   private SeriesClickEventHandler getSeriesClickEventHandler() {
-    return new SeriesClickEventHandler() {
-      public boolean onClick(SeriesClickEvent clickEvent) {
-        long nearestXAsLong = clickEvent.getNearestXAsLong();
-        Integer s = timeToId.get(nearestXAsLong);
-        if (s != null) {
-          playAudio.playLast(s, userid);
-        } else {
-          logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
-        }
-        return true;
+    return clickEvent -> {
+      long nearestXAsLong = clickEvent.getNearestXAsLong();
+      Integer s = timeToId.get(nearestXAsLong);
+      if (s != null) {
+        playAudio.playLast(s, userid);
+      } else {
+        logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
       }
+      return true;
     };
   }
 

@@ -191,26 +191,27 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       listener.refAudioComplete();
       cacheOthers(listener);
     } else {
-      controller.getScoringService().getAlignments(
-          controller.getProjectStartupInfo().getProjectid(),
-          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
-            @Override
-            public void onFailure(Throwable caught) {
+      ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
-            }
+      // threre could be a race where we go to get this after we log out...
+      if (projectStartupInfo != null) {
+        controller.getScoringService().getAlignments(
+            projectStartupInfo.getProjectid(),
+            req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+              @Override
+              public void onFailure(Throwable caught) {
 
-            @Override
-            public void onSuccess(Map<Integer, AlignmentOutput> result) {
-              alignments.putAll(result);
-              registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
-              cacheOthers(listener);
-            }
-          });
+              }
+
+              @Override
+              public void onSuccess(Map<Integer, AlignmentOutput> result) {
+                alignments.putAll(result);
+                registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
+                cacheOthers(listener);
+              }
+            });
+      }
     }
-    // {
-    //   logger.info("no current audio for " + exercise.getID());
-    //  listener.refAudioComplete();
-    // }
   }
 
   public int getRefAudio() {

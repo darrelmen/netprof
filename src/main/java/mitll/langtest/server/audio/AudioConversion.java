@@ -57,14 +57,12 @@ public class AudioConversion extends AudioBase {
   private static final boolean SPEW = true;
   private static final String MP3 = ".mp3";
   public static final String WAV = ".wav";
-  //private static final String OGG = ".ogg";
   private final AudioCheck audioCheck;
   private static final int MIN_WARN_DUR = 30;
 
   private final String soxPath;
 //  private final long trimMillisBefore;
 //  private final long trimMillisAfter;
-//private ServerProperties props;
 
   private static final boolean DEBUG = false;
   private boolean trimAudio = false;
@@ -78,7 +76,6 @@ public class AudioConversion extends AudioBase {
 //    trimMillisAfter = props.getTrimAfter();
     this.trimAudio = trimAudio;
     soxPath = getSox();
-    //  this.props = props;
     audioCheck = new AudioCheck(trimAudio, minDynamicRange);
     setLame();
   }
@@ -220,7 +217,6 @@ public class AudioConversion extends AudioBase {
       float sampleRate = audioFileFormat.getFormat().getSampleRate();
       if (sampleRate != SIXTEEN_K) {
         long then = System.currentTimeMillis();
-        //     String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
         String convertTo16KHZ = convertTo16KHZ(wavFile.getAbsolutePath());
         wavFile = copyFileAndDeleteOriginal(wavFile, convertTo16KHZ, SIXTEEN_K_SUFFIX);
 
@@ -413,7 +409,7 @@ public class AudioConversion extends AudioBase {
       if (!new ConvertToOGG().writeOGG(absolutePathToWav, overwrite, trackInfo)) return FILE_MISSING;
       return mp3File;
     } catch (Exception e) {
-      logger.error("Got " + e, e);
+      logger.error("writeCompressedVersions got " + e, e);
       return FILE_MISSING;
     }
   }
@@ -466,7 +462,7 @@ public class AudioConversion extends AudioBase {
    * sox normalize to -3db -- thanks Paul!
    *
    * @param absolutePathToWav
-   * @see PathWriter#copyAndNormalize(File, ServerProperties, File)
+   * @see PathWriter#copyAndNormalize
    */
   void normalizeLevels(File absolutePathToWav) {
     try {
@@ -505,20 +501,25 @@ public class AudioConversion extends AudioBase {
 
   private String lamePath = null;
 
+  /**
+   * @return
+   * @see #writeMP3(File, boolean, TrackInfo, String)
+   */
   private String getLame() {
     return lamePath;
   }
 
+  /**
+   * @see #AudioConversion
+   */
   private void setLame() {
     String lamePath = LAME_PATH_WINDOWS;    // Windows
     if (!new File(lamePath).exists()) {
       lamePath = LAME_PATH_LINUX;
     }
     if (!new File(lamePath).exists()) {
-      logger.error("no lame installed at " + lamePath + " or " + LAME_PATH_WINDOWS);
+//      logger.error("no lame installed at " + lamePath + " or " + LAME_PATH_WINDOWS);
       lamePath = LAME;
-    } else {
-//      logger.info("found  lame at " + new File(lamePath).getAbsolutePath());
     }
     this.lamePath = lamePath;
   }
@@ -536,15 +537,15 @@ public class AudioConversion extends AudioBase {
    */
   private boolean convertToMP3FileAndCheck(String lamePath, String pathToAudioFile, String mp3File, TrackInfo trackInfo) {
     if (DEBUG) logger.debug("convertToMP3FileAndCheck convert " + pathToAudioFile + " to " + mp3File);
+
     String title = trackInfo.getTitle();
-    String author = trackInfo.getArtist();
     if (title != null && title.length() > 30) {
       title = title.substring(0, 30);
     }
     if (title == null) title = "";
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File,
         "--tt", title,
-        "--ta", author,
+        "--ta", trackInfo.getArtist(),
         "--tc", trackInfo.getComment(),
         "--tl", trackInfo.getAlbum());
     try {
@@ -563,7 +564,7 @@ public class AudioConversion extends AudioBase {
           //new Exception("can't find " + pathToAudioFile));
         }
       } else {
-        logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
+        logger.error("convertToMP3FileAndCheck didn't write MP3 : " + testMP3.getAbsolutePath() +
             " exe path " + lamePath +
             " command was " + lameProc.command());
         try {
@@ -571,7 +572,7 @@ public class AudioConversion extends AudioBase {
             return false;
           }
         } catch (IOException e) {
-          logger.error("for " + lameProc + " got " + e, e);
+          logger.error("convertToMP3FileAndCheck for " + lameProc + " got " + e, e);
         }
 
       }

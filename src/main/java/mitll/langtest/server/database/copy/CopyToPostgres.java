@@ -99,11 +99,11 @@ public class CopyToPostgres<T extends CommonShell> {
       databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
       String language = databaseLight.getLanguage();
       boolean hasModel = databaseLight.getServerProps().hasModel();
-      logger.info("loading " + language + " " + hasModel);
+      logger.info("copyOneConfigCommand : loading " + language + " " + hasModel);
       String nameToUse = optionalName.isEmpty() ? language : optionalName;
       new CopyToPostgres().copyOneConfig(databaseLight, new CreateProject().getCC(language), nameToUse, displayOrder, !hasModel);
     } catch (Exception e) {
-      logger.error("got " + e, e);
+      logger.error("copyOneConfigCommand : got " + e, e);
     } finally {
       if (databaseLight != null) {
         databaseLight.close();

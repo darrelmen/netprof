@@ -103,8 +103,13 @@ public abstract class BaseUserDAO extends DAO {
   @Deprecated
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
-   final Collection<String> admins;
-   Set<String> defaultUsers;
+  final Collection<String> admins;
+
+  /**
+   * @see #isDefaultUser
+   * @see DominoUserDAOImpl#ensureDefaultUsers
+   */
+  Set<String> defaultUsers = new HashSet<>();
 
   BaseUserDAO(Database database) {
     super(database);
@@ -290,7 +295,6 @@ public abstract class BaseUserDAO extends DAO {
    * @param last
    * @param url
    * @return
-
    * @see #addShellUser
    * @see #addUserAndGetID
    */

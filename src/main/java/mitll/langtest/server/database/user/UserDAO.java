@@ -53,7 +53,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
   /**
    * @param database
-   * @paramx serverProperties
    */
   public UserDAO(Database database) {
     super(database);
@@ -61,7 +60,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       createTable(database);
       ensureDefaultUsers();
     } catch (Exception e) {
-      logger.error("got " + e, e);
+      logger.error("UserDAO : got " + e, e);
       database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN);
     }
   }

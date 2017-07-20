@@ -44,6 +44,7 @@ import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
@@ -205,6 +206,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return new MyMongoUserServiceDelegate();
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   */
   @Override
   public void ensureDefaultUsers() {
     if (delegate == null) {
