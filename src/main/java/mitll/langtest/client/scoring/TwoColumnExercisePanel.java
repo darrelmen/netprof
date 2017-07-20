@@ -87,7 +87,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final PhonesChoices phonesChoices;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_MATCH = true;
+  private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
   private DivWidget contextClickableRow;
 

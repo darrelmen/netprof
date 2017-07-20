@@ -109,9 +109,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private Panel tableWithPager;
 
   /**
-   * TODO : for now only single selection
+   * for now only single selection
    */
   private Map<String, String> typeToSelection = new HashMap<>();
+  /**
+   * @see #addChoicesForType
+   */
   private final Map<String, Boolean> typeToShowAll = new HashMap<>();
   private List<String> rootNodesInOrder = new ArrayList<>();
   private final Map<Integer, String> idToListName = new HashMap<>();
@@ -531,26 +534,29 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       //   li
       //    ul
       //
-     // logger.info("addChoices --- " + type);
+      // logger.info("addChoices --- " + type);
       liForDimensionForType.add(addChoices(typeToValues, type));
     }
 
-    allTypesContainer.add(liForDimensionForList = addListFacet());
-  }
-
-  @NotNull
-  private ListItem addListFacet() {
-    ListItem liForDimensionForType = getTypeContainer(LISTS);
-    populateListChoices(liForDimensionForType);
-    return liForDimensionForType;
+    allTypesContainer.add(liForDimensionForList = addListFacet(typeToValues));
   }
 
   private ListItem liForDimensionForList;
 
+  /**
+   * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, DivWidget, int)
+   */
   private void gotListChanged() {
     if (liForDimensionForList != null) {
-      populateListChoices(liForDimensionForList);
+      populateListChoices(liForDimensionForList, null);
     }
+  }
+
+  @NotNull
+  private ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
+    ListItem liForDimensionForType = getTypeContainer(LISTS);
+    populateListChoices(liForDimensionForType, typeToValues);
+    return liForDimensionForType;
   }
 
   /**
@@ -585,7 +591,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       try {
         Integer userListID = Integer.parseInt(next);
         exerciseListRequest.setUserListID(userListID);
-        logger.info("getExerciseListRequest userlist = " + userListID);
+        //   logger.info("getExerciseListRequest userlist = " + userListID);
       } catch (NumberFormatException e) {
         logger.warning("couldn't parse " + next);
       }
@@ -594,14 +600,31 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
+   * Cheesy hack so we can deal with adding lists without reloading the whole facets
+   */
+  private Map<String, Set<MatchInfo>> lastTypeToValues;
+
+  /**
    * TODO: reverse this - get the lists first, then build the facets
    *
    * @param liForDimensionForType
+   * @param typeToValues          - need to remember this and pass it through so later link clicks will have it
    * @see #addFacetsForReal
    */
-  private void populateListChoices(ListItem liForDimensionForType) {
+  private void populateListChoices(ListItem liForDimensionForType, Map<String, Set<MatchInfo>> typeToValues) {
     ListServiceAsync listService = controller.getListService();
     //logger.info("populateListChoices --- ");
+
+    if (typeToValues == null) {
+      typeToValues = lastTypeToValues;
+      //logger.info("populateListChoices --- using remembered  " + typeToValues);
+    } else {
+      lastTypeToValues = new HashMap<>();
+      lastTypeToValues.putAll(typeToValues);
+    }
+
+    final Map<String, Set<MatchInfo>> finalTypeToValues = typeToValues;
+
     listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -609,14 +632,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-        typeToValues.put(LISTS, getMatchInfoForEachList(result));
+        finalTypeToValues.put(LISTS, getMatchInfoForEachList(result));
 
         Widget favorites = liForDimensionForType.getWidget(0);
         liForDimensionForType.clear();
         liForDimensionForType.add(favorites);
-      //  logger.info("populateListChoices --- for " + result.size() + " lists ");
-        liForDimensionForType.add(addChoices(typeToValues, LISTS));
+        //  logger.info("populateListChoices --- for " + result.size() + " lists ");
+        liForDimensionForType.add(addChoices(finalTypeToValues, LISTS));
       }
     });
   }
@@ -694,7 +716,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         liForDimension.add(addChoices(typeToValues, childType));
       } else {
         if (type.equalsIgnoreCase(LISTS)) {
-          logger.info("addChoices addListChoice " + type + "=" + selectionForType);
+          //   logger.info("addChoices addListChoice " + type + "=" + selectionForType);
           addListChoice(type, choices, selectionForType);
         } else {
           choices.add(getSelectedAnchor(type, selectionForType));
@@ -721,8 +743,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void addVisitor(String type, Panel choices, int userListID) {
-    logger.info("addVisitor " + type + " : " + userListID);
-
+    //logger.info("addVisitor " + type + " : " + userListID);
     controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -739,6 +760,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     });
   }
 
+  /**
+   * @param typeToValues
+   * @param type
+   * @param choices
+   * @param keys
+   * @see #addChoices
+   */
   private void addChoicesForType(Map<String, Set<MatchInfo>> typeToValues,
                                  String type,
                                  Panel choices,
@@ -749,16 +777,24 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     int toShow = TOTAL / size;
     int diff = keys.size() - toShow;
 
-/*
-    logger.info("addChoices type " +type + " : "+ size  +// "(" +types+
-        ")  vs " + toShow + " keys " + keys.size());
-
-        */
-
     boolean hasMore = keys.size() > toShow && diff > CLOSE_TO_END;
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
+
+/*
+    logger.info("addChoices" +
+        "\n\ttype    " + type +
+        "\n\tsize    " + size +// "(" +types+
+        "\n\tto show " + toShow +
+        "\n\tkeys    " + keys.size() +
+        "\n\thasMore " + hasMore +
+        "\n\tshowAll " + showAll
+    );
+    */
+
     for (MatchInfo key : keys) {
       addLIChoice(choices, getAnchor(type, key, key.getUserListID(), key.isItalic()));
+
+      // add final "View all" link if we're not supposed to show all
       if (hasMore && !showAll && ++j == toShow) {
         addLIChoice(choices, getShowMoreAnchor(typeToValues, type));
         break;
@@ -997,15 +1033,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           }
 
           /**
-           * TODO : fix downstream selections that no longer make sense.
+           * fixes downstream selections that no longer make sense.
            * @param response
            */
           @Override
           public void onSuccess(FilterResponse response) {
             //Map<String, Set<MatchInfo>> result = response.getTypeToValues();
             //   logger.info("getTypeToValues for " + pairs + " got " + result.size());
-            //if (response.getUserListID() != -1) {
-            //}
+
             changeSelection(response.getTypesToInclude(), typeToSelection);
             setTypeToSelection(typeToSelection);
             addFacetsForReal(response.getTypeToValues(), typeOrderContainer);
@@ -1058,9 +1093,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-   // logger.info("restoreListBoxState " + selectionState);
+    // logger.info("restoreListBoxState " + selectionState);
     super.restoreListBoxState(selectionState);
-//    showSelectionState(selectionState);
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
   }
 
@@ -1232,7 +1266,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void askServerForExercises(int itemID, Collection<Integer> visibleIDs) {
-   // logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
+    // logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
       //   logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();
@@ -1262,12 +1296,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     hidePrevNextWidgets();
     progressBar.setVisible(false);
     //logger.info("hidePrevNext ------- ");
-    //  clearExerciseContainer();
   }
 
   private void hidePrevNextWidgets() {
 //    logger.info("hidePrevNextWidgets ------- ");
-
 /*    prev.setVisible(false);
     next.setVisible(false);*/
     pageSizeContainer.setVisible(false);
@@ -1481,10 +1513,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     String text =
         num == 0 ? "None practiced yet." :
             allDone ? "All practiced!" : (num +
-                //" out of " + denom +
                 " practiced.");
 
-    progressBar.setText(text);//"" + Math.round(score));//(score));
+    progressBar.setText(text);
     progressBar.setColor(
         allDone ? ProgressBarBase.Color.SUCCESS :
             percent > SECOND_STEP ?
@@ -1494,7 +1525,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                     ProgressBarBase.Color.WARNING);
 
     progressBar.setVisible(true);
-
  /*   if (progressTooltip == null) {
       progressTooltip = new TooltipHelper().addTooltip(progressBar, text);
     } else {

@@ -38,10 +38,6 @@ import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -68,6 +64,9 @@ public class SignInForm extends UserDialog implements SignIn {
    */
   private static final String NO_USER_FOUND = "No user with this id - have you signed up?";
 
+  /**
+   * TODO : for legacy back compatibility = new log ins have to be longer
+   */
   private static final int MIN_LENGTH_USER_ID = 4;
 
   private static final int MIN_PASSWORD = 4;
@@ -75,7 +74,7 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getSignInButton
    */
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
-  private static final String BAD_PASSWORD = "Wrong password, please try again.";// - have you signed up?";
+  private static final String BAD_PASSWORD = "Wrong password, please try again.";
   private static final String PASSWORD = "Password";
   private static final String USERNAME = "Username";
   private static final String SIGN_IN = "Log In";
@@ -103,7 +102,7 @@ public class SignInForm extends UserDialog implements SignIn {
   private final UserPassDialog userPassLogin;
   private final SignUp signUpForm;
   private final UserManager userManager;
-  SendEmail sendEmail;
+  private SendEmail sendEmail;
 
   /**
    * @param props
@@ -166,12 +165,9 @@ public class SignInForm extends UserDialog implements SignIn {
     userField.box.getElement().setId("Username_Box_SignIn");
     userField.box.setWidth(SIGN_UP_WIDTH);
 
-    userField.box.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        userPassLogin.setSignInHasFocus();
-        eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "focus in username field");
-      }
+    userField.box.addFocusHandler(event -> {
+      userPassLogin.setSignInHasFocus();
+      eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "focus in username field");
     });
 
     sendEmail = new SendEmail(eventRegistration, userField);
@@ -185,12 +181,9 @@ public class SignInForm extends UserDialog implements SignIn {
   private FormField addPasswordField(Fieldset fieldset, Panel hp) {
     FormField password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     TextBoxBase box = password.box;
-    box.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        userPassLogin.setSignInHasFocus();
-        eventRegistration.logEvent(userField.box, "PasswordBox", "N/A", "focus in password field");
-      }
+    box.addFocusHandler(event -> {
+      userPassLogin.setSignInHasFocus();
+      eventRegistration.logEvent(userField.box, "PasswordBox", "N/A", "focus in password field");
     });
 
     hp.add(password.getGroup());
@@ -209,12 +202,7 @@ public class SignInForm extends UserDialog implements SignIn {
     signIn.getElement().setId("SignIn");
     eventRegistration.register(signIn);
 
-    signIn.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        tryLogin();
-      }
-    });
+    signIn.addClickHandler(event -> tryLogin());
     signIn.addStyleName("rightFiveMargin");
     signIn.addStyleName("leftFiveMargin");
 
@@ -267,13 +255,10 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getSignInButton
    */
   private void gotLogin(final String user, final String freeTextPassword) {
-    //  final String hashedPass = Md5Hash.getHash(freeTextPassword);
-    logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
-        //    " or '" + hashedPass + "'"
-    );
+//    logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
+//    );
 
     signIn.setEnabled(false);
-
     userManager.getUserService().loginUser(user, freeTextPassword,
         new AsyncCallback<LoginResult>() {
           @Override
@@ -402,33 +387,30 @@ public class SignInForm extends UserDialog implements SignIn {
   @Override
   public Anchor getForgotPassword() {
     final Anchor forgotPassword = new Anchor(FORGOT_PASSWORD);
-    forgotPassword.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        String safeText = userField.getSafeText();
-        if (safeText.isEmpty()) {
-          markErrorBlur(userField, ENTER_A_USER_NAME);
-        } else {
-          service.getUserByID(safeText, new AsyncCallback<User>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              logger.warning("\tgot FAILURE on userExists ");
-            }
+    forgotPassword.addClickHandler(event -> {
+      String safeText = userField.getSafeText();
+      if (safeText.isEmpty()) {
+        markErrorBlur(userField, ENTER_A_USER_NAME);
+      } else {
+        service.getUserByID(safeText, new AsyncCallback<User>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            logger.warning("\tgot FAILURE on userExists ");
+          }
 
-            @Override
-            public void onSuccess(User result) {
-              if (result == null) {
-                markErrorBlur(userField, NO_USER_FOUND);
-              } else {
-                //  if (result.isValid()) {
-                sendEmail.showSendEmail(forgotPassword, safeText, result.isValid());
-                //} else {
-                //copyInfoToSignUp(safeText, result);
-                // }
-              }
+          @Override
+          public void onSuccess(User result) {
+            if (result == null) {
+              markErrorBlur(userField, NO_USER_FOUND);
+            } else {
+              //  if (result.isValid()) {
+              sendEmail.showSendEmail(forgotPassword, safeText, result.isValid());
+              //} else {
+              //copyInfoToSignUp(safeText, result);
+              // }
             }
-          });
-        }
+          }
+        });
       }
     });
     return forgotPassword;
