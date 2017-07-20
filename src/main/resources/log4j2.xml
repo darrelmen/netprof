@@ -51,7 +51,7 @@
 
         <RollingFile name="LogFile"
                      fileName="${sys:catalina.base}/logs/netprof-app.log"
-                     filePattern="{sys:catalina.base}/logs/netprof-app-%d{MM-dd-yyyy}-%i.log.gz">
+                     filePattern="${sys:catalina.base}/logs/netprof-app-%d{MM-dd-yyyy}-%i.log.gz">
 
             <PatternLayout
                     pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
