@@ -41,6 +41,8 @@ import org.apache.logging.log4j.Logger;
 import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -76,8 +78,10 @@ public class ServerInitializationManagerNetProf {
   private static final String DEFAULT_PROPS_FN = appName + ".properties";
   private static final String UNKNOWN1 = "Unknown";
   public static final String UNKNOWN = UNKNOWN1;
+  private static final String BUILT_BY = "Built-By";
+  public static final String BUILT_DATE = "Built-Date";
 
- /**
+  /**
    * @param newContext
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
@@ -220,28 +224,31 @@ public class ServerInitializationManagerNetProf {
         if (DEBUG) log.debug("getServerProperties : Loaded " + props.size() + " properties");
       }
 
-      String releaseVers = UNKNOWN;
-      String buildUser = UNKNOWN;
-      String buildVers = UNKNOWN;
-      String buildDate = UNKNOWN;
 
+      Map<String,String> manifest = new HashMap<>();
       Attributes atts = (ctx != null) ? getManifestAttributes(ctx) : null;
-      if (atts != null) {
-        releaseVers = atts.getValue(Name.SPECIFICATION_VERSION);
-        buildVers = atts.getValue(Name.IMPLEMENTATION_VERSION);
-        buildUser = atts.getValue("Built-By");
-        buildDate = atts.getValue("Built-Date");
-      } else {
-
+      if (atts == null) {
         if (DEBUG) {
           log.warn("getServerProperties Did not load attribute information. Are you running in " +
               "a servlet container? Context:" + ctx);
         }
+
+      } else {
+        grabValue(manifest, atts, Name.SPECIFICATION_TITLE);
+        grabValue(manifest, atts, Name.SPECIFICATION_VERSION);
+        grabValue(manifest, atts, Name.IMPLEMENTATION_VERSION);
+
+        manifest.put(BUILT_BY, atts.getValue(BUILT_BY));
+        manifest.put(BUILT_DATE, atts.getValue(BUILT_DATE));
       }
 
-      return new ServerProperties(props, releaseVers, buildUser, buildVers, buildDate, configDir);
+      return new ServerProperties(props, manifest, configDir);
     }
     return null;
+  }
+
+  private void grabValue(Map<String, String> manifest, Attributes atts, Name specificationTitle) {
+    manifest.put(specificationTitle.toString(), atts.getValue(specificationTitle));
   }
 
   /**

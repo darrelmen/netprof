@@ -78,11 +78,16 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private AudioConversion audioConversion;
   private PathWriter pathWriter;
 
+  /**
+   * Sanity checks on answers and bestAudio dir
+   */
   @Override
   public void init() {
     super.init();
-    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(),serverProps.getMinDynamicRange());
+    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange());
     pathWriter = new PathWriter(serverProps);
+
+    pathWriter.doSanityCheckOnDir(new File(serverProps.getAnswerDir()), " answers dir ");
   }
 
   /**
@@ -278,9 +283,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * @see #ensureAudioForExercises
    * @param exercises
    * @param language
+   * @see #ensureAudioForExercises
    */
   private void ensureCompressedAudio(List<CommonExercise> exercises, String language) {
     long then = System.currentTimeMillis();
@@ -376,7 +381,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see #writeAudioFile
    */
   private boolean ensureMP3(String wavFile, TrackInfo trackInfo) {
-
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
       if (DEBUG) logger.debug("ensureMP3 : trying " + wavFile);
@@ -535,7 +539,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * TODO : pass in language so we can switch on language
-   *
+   * <p>
    * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
    * Also returns the audio file duration -- so we can deal with the difference in length between mp3 and wav
    * versions of the same audio file.  (The browser soundmanager plays mp3 and reports audio offsets into
@@ -587,7 +591,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     String imageOutDir = pathHelper.getImageOutDir(language.toLowerCase());
     File absoluteFile = /*new File(language.toLowerCase(), imageOutDir);*/ getAbsoluteFile(imageOutDir);
 
-    logger.info("getImageForAudioFile imageOutDir " + imageOutDir + " " +absoluteFile + " type " + imageType1);
+    logger.info("getImageForAudioFile imageOutDir " + imageOutDir + " " + absoluteFile + " type " + imageType1);
     String absolutePathToImage = imageWriter.writeImage(
         wavAudioFile,
         absoluteFile.getAbsolutePath(),
@@ -599,7 +603,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           // "(" + width + " x " + height + ")" +
           " (" + reqid + ") type " + imageType +
           "\n\tfor wav" + wavAudioFile +
-          "\n\timage " + absolutePathToImage+
+          "\n\timage " + absolutePathToImage +
           "\n\ttook " + diff + " millis");
     }
     String installPath = pathHelper.getInstallPath();
@@ -616,7 +620,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       relativeImagePath = relativeImagePath.substring(1);
     }
     String imageURL = relativeImagePath;
-    double duration = new AudioCheck(serverProps.shouldTrimAudio(),serverProps.getMinDynamicRange()).getDurationInSeconds(wavAudioFile);
+    double duration = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDurationInSeconds(wavAudioFile);
     if (duration == 0) {
       logger.error("huh? " + wavAudioFile + " has zero duration???");
     }
@@ -668,5 +672,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-  public void recalcRefAudio(int projid) {  db.getProject(projid).recalcRefAudio();  }
+  public void recalcRefAudio(int projid) {
+    db.getProject(projid).recalcRefAudio();
+  }
 }

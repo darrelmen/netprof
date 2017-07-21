@@ -31,10 +31,8 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
-
   private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
   private static final String MAILTO_SUBJECT = "Question%20about%20netprof";
-  //public static final IconType CHECK = IconType.CHECK;
 
   public static final String SHOW = "showStorage";
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";

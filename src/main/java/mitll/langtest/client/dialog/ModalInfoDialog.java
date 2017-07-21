@@ -92,7 +92,9 @@ public class ModalInfoDialog {
 //    return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler, bigger, true);
 //  }
 
-  public Modal getModal(String title, Collection<String> messages, Collection<String> values, Widget widget,
+  public Modal getModal(String title,
+                        Collection<String> messages,
+                        Collection<String> values, Widget widget,
                         HiddenHandler handler, boolean bigger, boolean addEnterKeyBinding) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);

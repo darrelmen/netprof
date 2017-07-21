@@ -107,23 +107,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   /**
    * @param info
    * @return
-   * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable(int, AudioType, CommonExercise, int, AudioAnswer)
+   * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
    */
   @Override
   public AudioAttribute addOrUpdate(AudioInfo info) {
     MiniUser miniUser = userDAO.getMiniUser(info.getUserid());
 
-    int gender = 2;
-    switch (miniUser.getRealGender()) {
-      case Male:
-        gender = 0;
-        break;
-      case Female:
-        gender = 1;
-        break;
-      default:
-        gender = 2;
-    }
     return toAudioAttribute(
         dao.addOrUpdate(
             info.getUserid(),
@@ -136,7 +125,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
             info.getTranscript(),
             info.getDnr(),
             info.getResultID(),
-            gender),
+            miniUser.getRealGenderInt()),
         miniUser);
   }
 
@@ -154,8 +143,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @paramx dnr
    */
   @Override
-  public void addOrUpdateUser(
-      AudioInfo info) {
+  public void addOrUpdateUser(AudioInfo info) {
     dao.addOrUpdateUser(info.getUserid(), info.getExerciseID(), info.getProjid(),
         info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(),
         info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID(),
@@ -322,7 +310,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 //    if (database.getServerProps().shouldCheckAudioTranscript()) {
 //      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
 //    }
-    Map<Integer, Collection<Tuple2<Integer, Integer>>> audioForGender1 = dao.getAudioForGender(audioSpeed, projid,isMale?0:1);
+    Map<Integer, Collection<Tuple2<Integer, Integer>>> audioForGender1 = dao.getAudioForGender(audioSpeed, projid, isMale ? 0 : 1);
     Set<Pair> genderMatch = getGenderMatch(audioForGender1);
     return getExercises(genderMatch);
   }
@@ -359,7 +347,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
     regExids.retainAll(slowExids);
 
-    logger.info("getAudioExercisesForGenderBothSpeeds found " + regExids.size() + " for " + isMale + " " + regSpeed+ " " + slowSpeed + " for " + projid);
+    logger.info("getAudioExercisesForGenderBothSpeeds found " + regExids.size() + " for " + isMale + " " + regSpeed + " " + slowSpeed + " for " + projid);
     return regExids;
   }
 
@@ -496,7 +484,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   private int c = 0;
-  Set<MiniUser> warned = new HashSet<>();
+  private final Set<MiniUser> warned = new HashSet<>();
 
   /**
    * @param orig
@@ -536,11 +524,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       if (gender == 2) {
         //if (!warned.contains(user)) {
-          logger.warn("getSlickAudio user " + user);
-          logger.warn("gender " + realGender);
-          logger.warn("gender " + gender);
-          warned.add(user);
-       // }
+        logger.warn("getSlickAudio user " + user);
+        logger.warn("gender " + realGender);
+        logger.warn("gender " + gender);
+        warned.add(user);
+        // }
       }
 
       return new SlickAudio(
@@ -563,11 +551,17 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
+  /**
+   * @param audioRef
+   * @return
+   * @see #getSlickAudio
+   */
   @NotNull
   private static String removeConfigPrefix(String audioRef) {
     int bestAudio = audioRef.indexOf(BEST_AUDIO);
-    if (bestAudio == -1) logger.error("huh? expecting bestaudio in " + audioRef);
-    else {
+    if (bestAudio == -1) {
+      logger.warn("removeConfigPrefix huh? expecting bestaudio in " + audioRef);
+    } else {
       audioRef = audioRef.substring(bestAudio);
     }
     return audioRef;

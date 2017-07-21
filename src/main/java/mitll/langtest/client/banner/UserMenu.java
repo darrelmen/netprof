@@ -28,9 +28,7 @@ import mitll.langtest.client.user.UserState;
 import mitll.langtest.client.user.UserTable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -39,7 +37,7 @@ import java.util.logging.Logger;
 public class UserMenu {
   private final Logger logger = Logger.getLogger("UserMenu");
 
-  private static final String ABOUT_NET_PRO_F = "About NetProF";
+  private static final String ABOUT_NET_PRO_F = "About Netprof";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
 
   private final UserManager userManager;
@@ -50,7 +48,6 @@ public class UserMenu {
   private final PropertyHandler props;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
- // private final UserServiceAsync userService = GWT.create(UserService.class);
 
   private static final String LOG_OUT = "Sign Out";
   private final UILifecycle uiLifecycle;
@@ -72,24 +69,6 @@ public class UserMenu {
 
     getUserMenuChoices();
   }
-/*
-  List<LinkAndTitle> getCogMenuChoices() {
-    List<LinkAndTitle> choices = new ArrayList<>();
-    choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
-    LinkAndTitle e = new LinkAndTitle("Manage Users", props.getDominoURL(), true);
-    choices.add(e);
-
-    String nameForAnswer = props.getNameForAnswer() + "s";
-    choices.add(new LinkAndTitle(
-        nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), new ResultsClickHandler(), true));
-    //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
-    choices.add(new LinkAndTitle("Events", new EventsClickHandler(), true));
-    choices.add(getChangePassword());
-    choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
-
-    choices.add(getLogOut());
-    return choices;
-  }*/
 
   List<LinkAndTitle> getCogMenuChoices2() {
     List<LinkAndTitle> choices = new ArrayList<>();
@@ -152,7 +131,6 @@ public class UserMenu {
   }
 
   private class ChangePasswordClickHandler implements ClickHandler {
-    //UserState outer = LangTest.this;
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -216,28 +194,38 @@ public class UserMenu {
     about.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
-        List<String> strings = java.util.Arrays.asList(
-            // "Language",
-            "Version       ",
-            "Release Date  ",
-            //  "Model Version",
-            "Recording type");
+        Map<String, String> props = UserMenu.this.props.getProps();
+//        List<String> strings = java.util.Arrays.asList(
+//            "Version       ",
+//            "Release Date  ",
+//            "Recording type");
 
-        List<String> values = null;
+        List<String> strings = new ArrayList<>();
+        List<String> values = new ArrayList<>();
         try {
-          String versionInfo = LangTest.VERSION_INFO;
-          String releaseDate = props.getReleaseDate();
+//          String versionInfo = LangTest.VERSION_INFO;
+//          String releaseDate = UserMenu.this.props.getReleaseDate();
+//          values = java.util.Arrays.asList(
+//              recordingInfo
+//          );
+
           String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
-          values = java.util.Arrays.asList(
-              versionInfo,
-              releaseDate,
-              recordingInfo
-          );
+          props.put("Recording type", recordingInfo);
+          props.remove("domino.url");
+          Optional<String> max = props.keySet().stream().max(Comparator.comparingInt(String::length));
+          if (max.isPresent()) {
+            int maxl = max.get().length();
+            props.keySet().forEach(key -> {
+                  strings.add(key + getLen(maxl - key.length()));
+                  values.add(props.get(key));
+                }
+            );
+          }
         } catch (Exception e) {
           //logger.warning("got " + e);
         }
 
-        new ModalInfoDialog(ABOUT_NET_PRO_F, strings, values, null, null, false, true, 600, 400) {
+        new ModalInfoDialog(ABOUT_NET_PRO_F, strings, props.values(), null, null, false, true, 600, 400) {
           @Override
           protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal, boolean bigger) {
             FlexTable flexTable = super.addContent(messages, values, modal, bigger);
@@ -251,6 +239,12 @@ public class UserMenu {
       }
     });
     return about;
+  }
+
+  private String getLen(int len) {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < len; i++) builder.append(" ");
+    return builder.toString();
   }
 
   @NotNull

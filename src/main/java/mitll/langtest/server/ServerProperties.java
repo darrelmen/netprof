@@ -37,6 +37,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
+import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.user.Affiliation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,10 +88,8 @@ public class ServerProperties {
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
 
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
-   private static final String USE_H_2 = "useH2";
-  private static final String USE_POSTGRE_SQL = "usePostgreSQL";
+  private static final String USE_H_2 = "useH2";
 
-  //private static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   public static final String MODELS_DIR = "MODELS_DIR";
   private static final String DB_CONFIG = "dbConfig";
@@ -99,6 +98,9 @@ public class ServerProperties {
   //public static final String CONFIG = "config";
   //public static final String CONFIG_JSON = "config.json";
 
+  /**
+   * @see #useProperties
+   */
   private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
   private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
@@ -140,7 +142,7 @@ public class ServerProperties {
   private static final String DO_TRIM = "dotrim";
 
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
-  //private static final String ADD_MISSING_INFO = "addMissingInfo";
+
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
@@ -183,10 +185,10 @@ public class ServerProperties {
   /**
    * TODO : Probably put these back in
    */
-  private String releaseVers = "Unknown";
-  private String buildUser = "Unknown";
-  private String buildVers = "Unknown";
-  private String buildDate = "Unknown";
+//  private String releaseVers = "Unknown";
+//  private String buildUser = "Unknown";
+//  private String buildVers = "Unknown";
+//  private String buildDate = "Unknown";
 
   public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
 
@@ -218,46 +220,37 @@ public class ServerProperties {
   public ServerProperties() {
   }
 
+  Map<String,String> manifest = new HashMap<>();
   /**
    * @param props
-   * @param releaseVers
-   * @param buildUser
-   * @param buildVers
-   * @param buildDate
    * @param configDir
+   * @see mitll.langtest.server.property.ServerInitializationManagerNetProf#getServerProperties(InputStream, ServletContext)
    */
   public ServerProperties(Properties props,
-                          String releaseVers,
-                          String buildUser,
-                          String buildVers,
-                          String buildDate,
+                          Map<String,String> manifest,
                           File configDir) {
     this.props = props;
-    this.releaseVers = releaseVers;
-    this.buildUser = buildUser;
-    this.buildVers = buildVers;
-    this.buildDate = buildDate;
+    this.manifest = manifest;
 
     try {
-      useProperties(configDir, buildDate);
+      useProperties(configDir, manifest.getOrDefault(ServerInitializationManagerNetProf.BUILT_DATE,"Unknown"));
       // logger.debug("props " + props);
 
-      putProp(props, "releaseVers", releaseVers);
-      putProp(props, "buildUser", buildUser);
-      putProp(props, "buildVers", buildVers);
-      putProp(props, "buildDate", buildDate);
-
+//      putProp(props, "releaseVers", releaseVers);
+//      putProp(props, "buildUser", buildUser);
+//      putProp(props, "buildVers", buildVers);
+//      putProp(props, "buildDate", buildDate);
 
     } catch (FileNotFoundException e) {
       logger.error("ServerProperties looking in " + configDir + " :" + e, e);
     }
   }
 
-  private void putProp(Properties props, String releaseVers1, String releaseVers) {
-    if (releaseVers != null) {
-      props.put(releaseVers1, releaseVers);
-    }
-  }
+//  private void putProp(Properties props, String releaseVers1, String releaseVers) {
+//    if (releaseVers != null) {
+//      props.put(releaseVers1, releaseVers);
+//    }
+//  }
 
   /**
    * Just for IMPORT.
@@ -327,9 +320,10 @@ public class ServerProperties {
 
     try {
       uiprops = readPropertiesFromFile(configFileFullPath);
-      copyValue(RELEASE_DATE,"unset");
-      copyValue(APP_TITLE,"unset");
-     // logger.info("useProperties ui props has " + uiprops.size());
+//      copyValue(RELEASE_DATE,"unset");
+//      copyValue(APP_TITLE,"unset");
+      uiprops.putAll(manifest);
+      logger.info("useProperties ui props has " + uiprops.size());
     } catch (IOException e) {
       logger.error("got " + e + " reading from " + configFileFullPath, e);
     }
@@ -876,10 +870,6 @@ public class ServerProperties {
     String models_dir = getProperty("MODELS_DIR");
     return models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
-
-/*  public boolean shouldRecalcDNR() {
-    return getDefaultTrue("shouldRecalcDNROnAudio");
-  }*/
 
   public List<Affiliation> getAffiliations() {
     return affliations;

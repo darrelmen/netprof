@@ -49,13 +49,35 @@ import java.io.IOException;
  */
 public class PathWriter {
   private static final Logger logger = LogManager.getLogger(PathWriter.class);
+  private static final String REFERENCE_AUDIO = "reference audio";
   private final File bestDir;
   private final boolean foundBestDir;
 
+  /**
+   * Do some sanity checks...
+   *
+   * @param properties
+   * @see mitll.langtest.server.services.AudioServiceImpl#init
+   */
   public PathWriter(ServerProperties properties) {
     bestDir = new File(properties.getMediaDir());
-    if (!(foundBestDir = bestDir.exists())) {
-      logger.warn("Please make reference audio directory " + bestDir.getAbsolutePath());
+    foundBestDir = bestDir.exists();
+
+    doSanityCheckOnDir(bestDir, REFERENCE_AUDIO);
+  }
+
+  public void doSanityCheckOnDir(File bestDir, String dirTitle) {
+    if (!bestDir.exists()) {
+      logger.warn("If on hydra or hydra2, please make " + dirTitle + " directory " + bestDir.getAbsolutePath());
+    } else {
+      if (!bestDir.canRead()) {
+        logger.error("Please make " + dirTitle + " directory " + bestDir.getAbsolutePath() + " READABLE -" +
+            "\n\tchmod -R a+rw " + bestDir.getAbsolutePath());
+      }
+      if (!bestDir.canWrite()) {
+        logger.error("Please make " + dirTitle + " directory " + bestDir.getAbsolutePath() + " WRITEABLE -" +
+            "\n\tchmod -R a+rw " + bestDir.getAbsolutePath());
+      }
     }
   }
 
@@ -116,7 +138,7 @@ public class PathWriter {
 
   @NotNull
   private AudioConversion getAudioConversion(ServerProperties serverProperties) {
-    return new AudioConversion(serverProperties.shouldTrimAudio(),serverProperties.getMinDynamicRange());
+    return new AudioConversion(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange());
   }
 
   /**

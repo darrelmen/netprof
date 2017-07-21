@@ -182,10 +182,6 @@ public class PropertyHandler {
   private final Map<String, String> props;
   private boolean bkgColorForRef = false;
 
-  /**
-   * @deprecated Not super sure this works anymore
-   */
-//  private String exercise_title;
   private boolean demoMode;
 
   private boolean logClientMessages = false;
@@ -200,7 +196,7 @@ public class PropertyHandler {
   private String splashTitle = null;
   private String appTitle = null;
 
-  private boolean showFlashcardAnswer = true;
+ // private boolean showFlashcardAnswer = true;
   private boolean allowPlusInURL;
 
   private static final String RESPONSE_TYPE = "responseType";
@@ -208,11 +204,10 @@ public class PropertyHandler {
   public static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
-  //private boolean talksToDomino = false;
 
   /**
    * @param props
-   * @see mitll.langtest.client.LangTest#onModuleLoad()
+   * @see mitll.langtest.client.LangTest#onModuleLoad
    */
   public PropertyHandler(Map<String, String> props) {
     this.props = props;
@@ -507,6 +502,10 @@ public class PropertyHandler {
 
   String getSendResetPassToken() {
     return sendResetPassToken;
+  }
+
+  public Map<String, String> getProps() {
+    return props;
   }
 
 /*  public String getAMASHelpMessage() {

@@ -44,6 +44,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Collection;
 import java.util.List;
@@ -393,7 +394,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     SelectionState selectionState = getSelectionState(value);
 
     int project = selectionState.getProject();
-    int currentProject = controller.getProjectStartupInfo().getProjectid();
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+
+    if (projectStartupInfo == null) {
+      logger.warning("onValueChange skipping change event since no project");
+      return;
+    }
+
+    int currentProject = projectStartupInfo.getProjectid();
 
    // logger.info("onValueChange project " + project + " vs " + currentProject);
 

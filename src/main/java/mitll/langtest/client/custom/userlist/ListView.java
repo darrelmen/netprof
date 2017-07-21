@@ -2,6 +2,7 @@ package mitll.langtest.client.custom.userlist;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -10,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.ContentView;
@@ -18,6 +20,7 @@ import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -36,8 +39,8 @@ public class ListView implements ContentView, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final int HEADING_SIZE = 3;
-  private static final int VISITED_PAGE_SIZE = 6;
-  private static final int VISITED_SHORT_SIZE = 6;
+  private static final int VISITED_PAGE_SIZE = 5;
+  private static final int VISITED_SHORT_SIZE = 5;
 
   private static final int BROWSE_PAGE_SIZE = 7;
   private static final int BROWSE_SHORT_PAGE_SIZE = 6;
@@ -47,9 +50,9 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
   private static final int MY_LIST_HEIGHT = 560;
-  private static final int VISITED_HEIGHT = (MY_LIST_HEIGHT / 2) - 35;
-  private static final int BROWSE_HEIGHT  = (MY_LIST_HEIGHT / 2) - 30;
-
+  private static final int    browseBigger = 30;
+  private static final int VISITED_HEIGHT = (MY_LIST_HEIGHT / 2) - 35 - browseBigger;
+  private static final int BROWSE_HEIGHT  = (MY_LIST_HEIGHT / 2) - 30 + browseBigger;
 
   private final ExerciseController controller;
   private ListContainer myLists;
@@ -169,7 +172,8 @@ public class ListView implements ContentView, CreateListComplete {
     buttons.add(getAddButton());
     buttons.add(getRemoveButton());
     buttons.add(getEdit());
-   // buttons.add(getImport());
+    buttons.add(getShare());
+    // buttons.add(getImport());
     buttons.add(getAddItems());
     addDrillAndLearn(buttons, container);
 
@@ -183,12 +187,28 @@ public class ListView implements ContentView, CreateListComplete {
     return successButton;
   }
 
-  private IsWidget getImport() {
+  private IsWidget getShare() {
+    Button successButton = getSuccessButton("Share");
+    successButton.setIcon(IconType.SHARE);
+    successButton.addClickHandler(event -> doShare());
+    return successButton;
+  }
+
+/*
+  private Button getPublic() {
+    Button successButton = getSuccessButton("Make Public");
+    successButton.setIcon(IconType.UNLOCK);
+    successButton.addClickHandler(event -> doPublic());
+    return successButton;
+  }
+*/
+
+/*  private IsWidget getImport() {
     Button successButton = getSuccessButton("");
     successButton.setIcon(IconType.UPLOAD);
     successButton.addClickHandler(event -> doImport());
     return successButton;
-  }
+  }*/
 
   private void doImport() {
     ImportBulk importBulk = new ImportBulk();
@@ -196,7 +216,7 @@ public class ListView implements ContentView, CreateListComplete {
     DivWidget contents = importBulk.showImportItem(controller);
 
 
-    DialogHelper dialogHelper = new DialogHelper(true);
+    DialogHelper dialogHelper = new DialogHelper(false);
     Button closeButton = dialogHelper.show(
         "Import Bulk",
         Collections.emptyList(),
@@ -427,7 +447,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private CreateListDialog editDialog;
 
-  private DialogHelper doEdit() {
+  private void doEdit() {
     DivWidget contents = new DivWidget();
     editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection());
     editDialog.doCreate(contents);
@@ -455,9 +475,31 @@ public class ListView implements ContentView, CreateListComplete {
         }, 550);
 
     closeButton.setType(ButtonType.SUCCESS);
-  //  closeButton.setIcon(IconType.PLUS);
+  }
 
-    return dialogHelper;
+  private void doShare() {
+    UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
+    String mailToList = new UserListSupport(controller).getMailToList(currentSelection);
+
+    DivWidget contents = new DivWidget();
+    String name = currentSelection.getName();
+    logger.info("name " + name);
+    NavLink w = new NavLink("Click here to share " + name + ".", mailToList);
+    w.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
+
+    contents.add(w);
+
+    DialogHelper dialogHelper = new DialogHelper(false);
+    Button closeButton = dialogHelper.show(
+        "Share List",
+        Collections.emptyList(),
+        contents,
+        "OK",
+        "Cancel",
+        null
+        , 250);
+
+    closeButton.setType(ButtonType.SUCCESS);
   }
 
   /**
@@ -468,7 +510,7 @@ public class ListView implements ContentView, CreateListComplete {
   @Override
   public void madeIt(UserList userList) {
     dialogHelper.hide();
-    logger.info("\n\n\ngot made list");
+    //logger.info("\n\n\ngot made list");
     myLists.addExerciseAfter(null, userList);
     myLists.markCurrentExercise(userList.getID());
     names.add(userList.getName());
@@ -476,7 +518,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   @Override
   public void gotEdit() {
-    logger.info("\n\n\ngot edit");
+  //  logger.info("\n\n\ngot edit");
     editDialog.doEdit(myLists.getCurrentSelection(), myLists);
   }
 }

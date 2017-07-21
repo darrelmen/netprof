@@ -31,6 +31,7 @@ import java.util.Set;
  */
 public class UserListSupport {
   //  private final Logger logger = Logger.getLogger("UserListSupport");
+
   private static final String ADD_TO_LIST = "Add to List";
   private static final String REMOVE_FROM_LIST = "Remove from List";
   private static final String NEW_LIST = "New List";
@@ -45,7 +46,7 @@ public class UserListSupport {
   private static final String ITEM_ADDED = "Item Added!";
   private final Set<String> knownNamesForDuplicateCheck = new HashSet<>();
 
-  UserListSupport(ExerciseController controller) {
+  public UserListSupport(ExerciseController controller) {
     this.controller = controller;
   }
 
@@ -81,7 +82,6 @@ public class UserListSupport {
       });
       dropdownContainer.add(widget);
     }
-
   }
 
   /**
@@ -151,7 +151,7 @@ public class UserListSupport {
       widget.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
     }
     addToList.add(widget);
-    widget.setHref(getMailTo(ul.getID(), ul.getName()));
+    widget.setHref(getMailToList(ul));
     widget.addClickHandler(event -> controller.logEvent(addToList, "DropUp", ul.getID(), "sharing_" + ul.getID() + "/" + ul.getName()));
   }
 
@@ -173,6 +173,7 @@ public class UserListSupport {
         getSuffix();
   }
 
+  public String getMailToList(UserList ul) {  return getMailTo(ul.getID(), ul.getName());  }
 
   @NotNull
   private String getMailTo(int listid, String name) {

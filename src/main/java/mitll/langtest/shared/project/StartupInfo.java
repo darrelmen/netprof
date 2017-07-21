@@ -65,7 +65,7 @@ public class StartupInfo implements IsSerializable {
   }
 
   /**
-   * @param properties
+   * @param properties - ui properties only!
    * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo
    */
   public StartupInfo(Map<String, String> properties,
@@ -78,6 +78,10 @@ public class StartupInfo implements IsSerializable {
     this.affiliations = affiliations;
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#rememberStartup(StartupInfo, boolean)
+   * @return
+   */
   public Map<String, String> getProperties() {
     return properties;
   }
