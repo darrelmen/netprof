@@ -74,6 +74,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     setWidth("100%");
     addWidgets();
     List<CorrectAndScore> scores = exercise.getScores();
+//    logger.info("exercise " + exercise.getID() + " has\n\t" + scores + " scores");
+
     showRecordingHistory(scores);
     hasScoreHistory = scores != null && !scores.isEmpty();
     setVisible(hasScoreHistory);
@@ -191,17 +193,13 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     useResult(pretestScore, false, result.getPath());
 
     // Gotta remember the score on the exercise now...
-
-    CorrectAndScore hydecScore = new CorrectAndScore(pretestScore.getHydecScore(),  result.getPath());
-    hydecScore.setScores(pretestScore.getTypeToSegments());
-    hydecScore.setJson(pretestScore.getJson());
-
-    exercise.getScores().add(hydecScore);
+    exercise.getScores().add(new CorrectAndScore(result));
+//    logger.info("exercise " + exercise.getID() + " now has " + exercise.getScores().size() + " scores");
   }
 
   @Override
   public void startRecording() {
-    logger.info("startRecording...");
+    //logger.info("startRecording...");
     setVisible(true);
 
     playAudioPanel.setEnabled(false);
@@ -227,7 +225,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   @Override
   public void stopRecording() {
   //  logger.info("stopRecording...");
-
     playAudioPanel.setEnabled(true);
 
     goodwaveExercisePanel.setBusy(false);
@@ -281,9 +278,9 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @param result
    * @param scoredBefore
    * @param path
+   * @see #scoreAudio
    */
   private void useResult(PretestScore result, boolean scoredBefore, String path) {
-    //  logger.info("useResult path " +path);
     float hydecScore = result.getHydecScore();
     boolean isValid = hydecScore > 0;
     if (!scoredBefore && miniScoreListener != null && isValid) {
@@ -309,7 +306,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       //logger.info("getReadyToPlayAudio startSong ready to play " +path);
       playAudioPanel.startSong(path);
     }
-   // return path;
   }
 
   /**

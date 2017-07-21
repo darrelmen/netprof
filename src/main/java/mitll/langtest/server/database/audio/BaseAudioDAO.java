@@ -290,7 +290,7 @@ public abstract class BaseAudioDAO extends DAO {
     //List<AudioAttribute> defaultAudio = new ArrayList<>();
     // Set<String> audioPaths = new HashSet<>();
     boolean allSucceeded = true;
-    boolean doDebug = firstExercise.getID() == 25921 || firstExercise.getID() == 30219 || DEBUG_ATTACH;
+    boolean doDebug = /*firstExercise.getID() == 25921 || firstExercise.getID() == 30219 ||*/ DEBUG_ATTACH;
     for (AudioAttribute attr : audioAttributes) {
       //MiniUser user = attr.getUser();
       // if (user == null)

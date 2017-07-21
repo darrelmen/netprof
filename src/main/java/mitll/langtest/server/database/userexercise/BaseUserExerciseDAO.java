@@ -73,7 +73,6 @@ public class BaseUserExerciseDAO extends DAO {
 
         if (byID != null) {
           userExercises2.add(new Exercise(byID)); // all predefined references
-
           /// TODO : put this back???
           // if (isEnglish) {
           //    e.setEnglish(exercise.getMeaning());

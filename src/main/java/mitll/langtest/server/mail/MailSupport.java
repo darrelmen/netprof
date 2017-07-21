@@ -69,9 +69,8 @@ public class MailSupport {
    */
   public MailSupport(boolean debugEmail, boolean testEmail) {
     this.debugEmail = debugEmail;
-    //this.testEmail = testEmail;
     this.testEmail = testEmail;
-    //if (testEmail) logger.debug("\n\n\n--->using test email");
+    if (testEmail) logger.warn("\n\n\n--->using test email");
   }
 
   /**
@@ -250,6 +249,7 @@ public class MailSupport {
       Session session = Session.getDefaultInstance(props, null);
   //    logger.debug("session props " + session.getProperties());
       String property = session.getProperty(MAIL_SMTP_PORT);
+
       if (testEmail && property == null) {
         session.getProperties().setProperty(MAIL_SMTP_PORT, ""+MAIL_PORT);
       }

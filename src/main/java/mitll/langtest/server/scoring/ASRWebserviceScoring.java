@@ -176,7 +176,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     if (available) {
       logger.info("ASRWebserviceScoring CAN talk to " + ip + ":" + port);
     } else {
-      logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port);
+      logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port + " : this is only a problem on a hydra machine.");
     }
   }
 
@@ -190,7 +190,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param precalcScores
    * @param usePhoneToDisplay
    * @return PretestScore object
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    */
   public PretestScore scoreRepeat(String testAudioDir,
                                   String testAudioFileNoSuffix,

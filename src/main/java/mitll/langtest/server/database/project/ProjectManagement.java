@@ -435,8 +435,6 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @param id
    * @return
-   * @seex #deleteItem(int, int)
-   * @seex #getCustomOrPredefExercise(int, int)
    * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
    * @see DatabaseImpl#getExercise

@@ -293,9 +293,7 @@ public class Project implements PronunciationLookup {
     return getProject().getProp(webserviceHostIp1);
   }
 
-  public CommonExercise getExerciseByID(int id) {
-    return exerciseDAO.getExercise(id);
-  }
+  public CommonExercise getExerciseByID(int id) {  return exerciseDAO.getExercise(id);  }
 
   /**
    * Only accept an exact match

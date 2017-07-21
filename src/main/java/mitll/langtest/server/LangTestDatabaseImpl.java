@@ -193,7 +193,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       projectInfos = db.getProjectManagement().getNestedProjectInfo();
     }
 
-    return new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
+    StartupInfo startupInfo = new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
+    logger.debug("getStartupInfo sending " +  startupInfo);
+    return startupInfo;
   }
 
   /**
@@ -381,12 +383,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see LangTestDatabaseImpl#init()
    */
   private void setInstallPath(DatabaseServices db) {
-    String installPath = pathHelper.getInstallPath();
-    logger.debug("setInstallPath " + installPath);
+   // logger.debug("setInstallPath " + installPath);
     if (db == null) {
       logger.error("no database services created.");
     } else {
-      db.setInstallPath(installPath, "");
+      db.setInstallPath(pathHelper.getInstallPath(), "");
     }
   }
 }

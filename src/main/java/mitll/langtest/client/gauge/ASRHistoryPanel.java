@@ -131,6 +131,13 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     addScore(hydecScore);
   }
 
+  @Override
+  public void gotScore(CorrectAndScore hydecScore) {
+    showChart(controller.getHost());
+    addPlayer();
+    addScore(hydecScore);
+  }
+
   /**
    * @param hydecScore
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#addScores

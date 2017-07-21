@@ -1097,15 +1097,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-/*  private void showPopup(InlineLabel label, String toShow) {
-    label.addMouseOverHandler(event -> new BasicDialog().showPopover(
-        label,
-        null,
-        toShow,
-        Placement.LEFT));
-  }*/
-
   /**
+   * TODO: do we need this???
    * @param e
    * @return
    * @see #getItemContent
@@ -1118,10 +1111,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       public boolean isBusy() {
         return false;
       }
-
       @Override
-      public void setBusy(boolean v) {
-      }
+      public void setBusy(boolean v) {}
     }, controller, e, listContainer);
   }
 
@@ -1140,7 +1131,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     rowWidget.setWidth("100%");
     return rowWidget;
   }
-
 
   private Widget addAltFL(T e, boolean addTopMargin) {
     String altFL = e.getAltFL().trim();

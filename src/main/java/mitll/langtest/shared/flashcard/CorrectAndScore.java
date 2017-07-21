@@ -34,9 +34,11 @@ package mitll.langtest.shared.flashcard;
 
 import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.server.database.result.ResultDAO;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.List;
 import java.util.Map;
@@ -83,6 +85,13 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
     this.path = path;
   }
 
+  public CorrectAndScore(AudioAnswer result) {
+    this(result.getPretestScore().getHydecScore(),result.getPath());
+
+    setScores(result.getPretestScore().getTypeToSegments());
+    setJson(result.getPretestScore().getJson());
+  }
+
   /**
    * @param uniqueID
    * @param userid
@@ -107,9 +116,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   }
 
   @Override
-  public int compareTo(CorrectAndScore o) {
-    return getTimestamp() < o.getTimestamp() ? -1 : getTimestamp() > o.getTimestamp() ? +1 : 0;
-  }
+  public int compareTo(CorrectAndScore o) { return Long.compare(getTimestamp(), o.getTimestamp()); }
 
   public boolean isCorrect() {
     return correct;

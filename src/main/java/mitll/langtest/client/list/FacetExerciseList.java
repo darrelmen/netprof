@@ -1327,7 +1327,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     next.setEnabled(pagingContainer.hasNextPage());
   }*/
 
-  private Map<Integer, CommonExercise> idToExercise = new HashMap<>();
+ // private Map<Integer, CommonExercise> idToExercise = new HashMap<>();
 
   /**
    * @param visibleIDs
@@ -1374,7 +1374,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                     int id = ex.getID();
                     idToEx.put(id, ex);
                     List<CorrectAndScore> correctAndScores = scoreHistoryPerExercise.get(id);
-                    ex.getMutable().setScores(correctAndScores == null ? Collections.emptyList() : correctAndScores);
+
+                    // make sure we make a real exercise list here even if it's empty since we'll want to add to it later
+                    List<CorrectAndScore> scoreTotal = correctAndScores == null ? new ArrayList<>() : correctAndScores;
+                  //  logger.info("attach score history " + scoreTotal.size() + " to exercise "+ id);
+                    ex.getMutable().setScores(scoreTotal);
                   }
                   for (CommonExercise ex : alreadyFetched) idToEx.put(ex.getID(), ex);
                   for (int id : visibleIDs) toShow.add(idToEx.get(id));

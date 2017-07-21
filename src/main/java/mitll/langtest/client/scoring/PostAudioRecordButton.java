@@ -186,9 +186,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             onPostFailure(then, user);
           }
 
-          public void onSuccess(AudioAnswer result) {
-            onPostSuccess(result, then);
-          }
+          public void onSuccess(AudioAnswer result) {            onPostSuccess(result, then);          }
         });
   }
 
@@ -210,8 +208,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       logger.info("onPostSuccess ignoring old response " + result);
       return;
     }
-    if (result.getValidity() == Validity.OK ||
-        (controller.getProps().isQuietAudioOK() && result.getValidity() == Validity.TOO_QUIET)) {
+    if (result.getValidity() == Validity.OK || doQuietAudioCheck(result)) {
       validAudio = true;
       useResult(result);
       addRT(result, (int) roundtrip);
@@ -222,6 +219,15 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
       logRoundtripTime(result, roundtrip);
     }
+  }
+
+  /**
+   * Just for load testing
+   * @param result
+   * @return
+   */
+  private boolean doQuietAudioCheck(AudioAnswer result) {
+    return controller.getProps().isQuietAudioOK() && result.getValidity() == Validity.TOO_QUIET;
   }
 
   private int getUser() {
