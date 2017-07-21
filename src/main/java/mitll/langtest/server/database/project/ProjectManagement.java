@@ -140,10 +140,9 @@ public class ProjectManagement implements IProjectManagement {
                                 LogAndNotify logAndNotify,
                                 DatabaseImpl db) {
     Collection<SlickProject> all = projectDAO.getAll();
-
-    if (!all.isEmpty()) {
-      logger.info("populateProjects : found " + all.size() + " projects");
-    }
+//    if (!all.isEmpty()) {
+//      logger.info("populateProjects : found " + all.size() + " projects");
+//    }
 
     for (SlickProject slickProject : all) {
       if (!idToProject.containsKey(slickProject.id())) {

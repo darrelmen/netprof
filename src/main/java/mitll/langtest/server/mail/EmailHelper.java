@@ -66,15 +66,11 @@ public class EmailHelper {
   private static final String RESET_PASSWORD = "Reset Password";
   private static final String YOUR_USER_NAME = "Your user name";
  // private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
-
   //private static final String HELP_EMAIL = "<a href='mailto:" + NETPROF_HELP_DLIFLC_EDU + "'>NetProF Help</a>";
 
   private static final String INVALID_PASSWORD_RESET = "Invalid password reset";
 
   private final IUserDAO userDAO;
-  //private static final String HEX_CHARACTERS = "0123456789abcdef";
-  //private static final String HEX_CHARACTERS_UC = HEX_CHARACTERS.toUpperCase();
-
   private final MailSupport mailSupport;
   private final ServerProperties serverProperties;
   private final PathHelper pathHelper;
@@ -161,7 +157,6 @@ public class EmailHelper {
    */
   public boolean resetPassword(String user, String email, String url) {
     logger.debug("resetPassword for " + user + " url " + url);
-
     user = user.trim();
     email = email.trim();
 

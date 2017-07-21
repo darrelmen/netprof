@@ -287,11 +287,11 @@ public abstract class BaseResultDAO extends DAO {
                                CommonExercise o1Ex, CommonExercise o2Ex, final ExerciseSorter sorter) {
     int myI = o1.getDiff();
     int oI = o2.getDiff();
-    int i = myI < oI ? -1 : myI > oI ? +1 : 0;
+    int i = Integer.compare(myI, oI);
     if (i == 0) {
       float myScore = o1.getAvgScore();
       float otherScore = o2.getAvgScore();
-      int comp = new Float(myScore).compareTo(otherScore);
+      int comp = Float.compare(myScore, otherScore);
       return (comp == 0) ? sorter.phoneCompByFirst(o1Ex, o2Ex) : comp;
     } else {
       return i;

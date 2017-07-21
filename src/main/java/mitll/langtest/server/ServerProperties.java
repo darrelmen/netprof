@@ -35,8 +35,10 @@ package mitll.langtest.server;
 import com.typesafe.config.ConfigFactory;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
+import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.user.Affiliation;
 import org.apache.logging.log4j.LogManager;
@@ -175,7 +177,7 @@ public class ServerProperties {
   private boolean quietAudioOK;
 
   /**
-   * @deprecated  - need preferred voices per project...
+   * @deprecated - need preferred voices per project...
    */
   private final Set<Integer> preferredVoices = new HashSet<>();
   private EmailList emailList;
@@ -220,20 +222,21 @@ public class ServerProperties {
   public ServerProperties() {
   }
 
-  Map<String,String> manifest = new HashMap<>();
+  private Map<String, String> manifest = new HashMap<>();
+
   /**
    * @param props
    * @param configDir
-   * @see mitll.langtest.server.property.ServerInitializationManagerNetProf#getServerProperties(InputStream, ServletContext)
+   * @see mitll.langtest.server.property.ServerInitializationManagerNetProf#getServerProperties
    */
   public ServerProperties(Properties props,
-                          Map<String,String> manifest,
+                          Map<String, String> manifest,
                           File configDir) {
     this.props = props;
     this.manifest = manifest;
 
     try {
-      useProperties(configDir, manifest.getOrDefault(ServerInitializationManagerNetProf.BUILT_DATE,"Unknown"));
+      useProperties(configDir, manifest.getOrDefault(ServerInitializationManagerNetProf.BUILT_DATE, "Unknown"));
       // logger.debug("props " + props);
 
 //      putProp(props, "releaseVers", releaseVers);
@@ -320,6 +323,7 @@ public class ServerProperties {
 
     try {
       uiprops = readPropertiesFromFile(configFileFullPath);
+//      logger.info("useProperties ui props has " + uiprops.size() + " after reading from " + configFileFullPath);
 //      copyValue(RELEASE_DATE,"unset");
 //      copyValue(APP_TITLE,"unset");
       uiprops.putAll(manifest);
@@ -329,9 +333,9 @@ public class ServerProperties {
     }
   }
 
-  private void copyValue(String prop, String defaultValue) {
-    uiprops.setProperty(prop, props.getProperty(prop, defaultValue));
-  }
+//  private void copyValue(String prop, String defaultValue) {
+//    uiprops.setProperty(prop, props.getProperty(prop, defaultValue));
+//  }
 
   /**
    * @return
@@ -386,7 +390,9 @@ public class ServerProperties {
    * @return
    * @see LangTestDatabaseImpl#setInstallPath
    */
-  public String getMediaDir() {  return props.getProperty(MEDIA_DIR, getAudioBaseDir() + BEST_AUDIO);  }
+  public String getMediaDir() {
+    return props.getProperty(MEDIA_DIR, getAudioBaseDir() + BEST_AUDIO);
+  }
 
   /**
    * Relative to install location
@@ -690,10 +696,6 @@ public class ServerProperties {
     return getDefaultFalse(USE_PHONE_TO_DISPLAY);
   }
 
-//  public boolean addMissingInfo() {
-//    return getDefaultFalse(ADD_MISSING_INFO);
-//  }
-
   // EMAIL ------------------------
 
   private EmailList getEmailList() {
@@ -701,7 +703,8 @@ public class ServerProperties {
   }
 
   public boolean isDebugEMail() {
-    return getEmailList().isDebugEMail();
+    EmailList emailList = getEmailList();
+    return emailList != null && emailList.isDebugEMail();
   }
 
   public boolean isTestEmail() {
@@ -812,6 +815,7 @@ public class ServerProperties {
 
   /**
    * These point to config entries in application.conf in the resources directory in npdata.
+   *
    * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
    */
   public void setLocalPostgres() {
@@ -838,12 +842,13 @@ public class ServerProperties {
    * @deprecated
    */
   public String getAppURL() {
-    return props.getProperty(APP_URL, "https://" +  getNPServer()+ "/" + "netProf");
+    return props.getProperty(APP_URL, "https://" + getNPServer() + "/" + "netProf");
   }
 
   /**
    * @return
    * @see
+   * @see mitll.langtest.server.mail.EmailHelper#EmailHelper(ServerProperties, IUserDAO, MailSupport, PathHelper)
    * @deprecated
    */
   public String getNPServer() {
@@ -851,8 +856,8 @@ public class ServerProperties {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkForWebservice
    * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkForWebservice
    */
   public String getHydraHost() {
     return props.getProperty(HYDRA_HOST, HYDRA_HOST_URL_DEFAULT);
@@ -875,13 +880,15 @@ public class ServerProperties {
     return affliations;
   }
 
-  public Set<String> getLincolnPeople() { return  lincoln; }
+  public Set<String> getLincolnPeople() {
+    return lincoln;
+  }
 
   /**
-   * @see LangTestDatabaseImpl#getStartupInfo
    * @return
+   * @see LangTestDatabaseImpl#getStartupInfo
    */
   public Map<String, String> getUIProperties() {
-    return  getPropertyMap(uiprops);
+    return getPropertyMap(uiprops);
   }
 }

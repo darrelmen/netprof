@@ -383,6 +383,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.scores = scores;
   }
 
+  /**
+   * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst
+   * @return
+   */
   @Override
   public List<String> getFirstPron() {
     return firstPron;

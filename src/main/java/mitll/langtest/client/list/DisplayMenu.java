@@ -44,7 +44,7 @@ class DisplayMenu {
     view.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
     view.setWidth("60px");
 
-    view.add(/*phoneChoice =*/ getShowSounds());
+    view.add(getShowSounds());
     view.add(getViewMenu());
     view.add(getDownload());
 

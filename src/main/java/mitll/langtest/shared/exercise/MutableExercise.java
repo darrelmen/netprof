@@ -58,6 +58,10 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void setRefSentences(Collection<String> orDefault);
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @param isSafeToDecode
+   */
   void setSafeToDecode(boolean isSafeToDecode);
 
   void addContextExercise(CommonExercise contextExercise);

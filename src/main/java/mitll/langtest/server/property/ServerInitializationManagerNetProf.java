@@ -224,22 +224,23 @@ public class ServerInitializationManagerNetProf {
         if (DEBUG) log.debug("getServerProperties : Loaded " + props.size() + " properties");
       }
 
-
-      Map<String,String> manifest = new HashMap<>();
+      Map<String, String> manifest = new HashMap<>();
       Attributes atts = (ctx != null) ? getManifestAttributes(ctx) : null;
-      if (atts == null) {
-        if (DEBUG) {
-          log.warn("getServerProperties Did not load attribute information. Are you running in " +
-              "a servlet container? Context:" + ctx);
-        }
 
+      if (atts == null) {
+        //if (DEBUG) {
+        log.info("getServerProperties Did not load attribute information. Are you running in " +
+            "a servlet container? Context:" + ctx);
+        //}
       } else {
+        log.info("getServerProperties : found manifest with " + atts.size() + " attributes.");
+
         grabValue(manifest, atts, Name.SPECIFICATION_TITLE);
         grabValue(manifest, atts, Name.SPECIFICATION_VERSION);
         grabValue(manifest, atts, Name.IMPLEMENTATION_VERSION);
 
-        manifest.put(BUILT_BY, atts.getValue(BUILT_BY));
-        manifest.put(BUILT_DATE, atts.getValue(BUILT_DATE));
+        grabFromAttributes(manifest, atts, BUILT_BY);
+        grabFromAttributes(manifest, atts, BUILT_DATE);
       }
 
       return new ServerProperties(props, manifest, configDir);
@@ -247,8 +248,22 @@ public class ServerInitializationManagerNetProf {
     return null;
   }
 
+  private void grabFromAttributes(Map<String, String> manifest, Attributes atts, String builtBy) {
+    String value = atts.getValue(builtBy);
+    if (value == null) {
+      log.warn("grabFromAttributes can't find " + builtBy + " in " + atts.keySet());
+      value = "";
+    }
+    manifest.put(builtBy, value);
+  }
+
   private void grabValue(Map<String, String> manifest, Attributes atts, Name specificationTitle) {
-    manifest.put(specificationTitle.toString(), atts.getValue(specificationTitle));
+    String value = atts.getValue(specificationTitle);
+    if (value == null) {
+      log.warn("grabValue can't find " + specificationTitle + " in " + atts.keySet());
+      value = "";
+    }
+    manifest.put(specificationTitle.toString(), value);
   }
 
   /**
@@ -302,10 +317,11 @@ public class ServerInitializationManagerNetProf {
         Manifest manifest = new Manifest(in);
         return manifest.getMainAttributes();
       } catch (Exception ex) {
-        log.warn("Error while reading manifest", ex);
+        log.warn("getManifestAttributes Error while reading manifest", ex);
       }
     } else {
-      if (DEBUG) log.warn("Could not find manifest!");
+      //if (DEBUG)
+      log.warn("getManifestAttributes : Could not find manifest!");
     }
     return null;
   }

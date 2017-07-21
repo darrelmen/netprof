@@ -80,7 +80,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       // ensure a session is created.
       HttpSession session = createSession();
       logger.info("Login session " + session.getId() + " isNew=" + session.isNew());
-
     /*
     UsernamePasswordToken token = new UsernamePasswordToken(userId, attemptedHashedPassword);
     token.setRememberMe(true);
@@ -309,15 +308,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see ChangePasswordView#changePassword
    */
   public boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) {
-//    currentHashedPassword = rot13(currentHashedPassword);
-//    newHashedPassword = rot13(newHashedPassword);
     int userIDFromSession = getUserIDFromSession();
     User userWhereResetKey = db.getUserDAO().getByID(userIDFromSession);
-    if (userWhereResetKey == null) {
-      return false;
-    }
+    return
+        userWhereResetKey != null &&
+        (db.getUserDAO().changePasswordWithCurrent(userIDFromSession, currentHashedPassword, newHashedPassword, getBaseURL()));
 
-    return (db.getUserDAO().changePasswordWithCurrent(userIDFromSession, currentHashedPassword, newHashedPassword, getBaseURL()));
   }
 
   /**

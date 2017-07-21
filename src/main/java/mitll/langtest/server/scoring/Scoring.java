@@ -453,12 +453,14 @@ public abstract class Scoring {
     return checkLTSHelper.checkLTS(foreignLanguagePhrase, transliteration);
   }
 
+  public boolean isDictEmpty() { return checkLTSHelper.isDictEmpty(); }
+
   /**
    * @param foreignLanguagePhrase
    * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
-  public ASR.PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
+  public PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
     return checkLTSHelper.getBagOfPhones(foreignLanguagePhrase);
   }
 

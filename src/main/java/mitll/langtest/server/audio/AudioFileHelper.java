@@ -100,7 +100,7 @@ public class AudioFileHelper implements AlignDecode {
   private boolean checkedLTS = false;
 
   /**
-   * @deprecated why would we want this?
+   * TODO : why would we want this?
    */
   private Map<String, Integer> phoneToCount;
 
@@ -171,53 +171,65 @@ public class AudioFileHelper implements AlignDecode {
    * @see IProjectManagement#configureProject
    */
   public void checkLTSAndCountPhones(Collection<CommonExercise> exercises) {
-    synchronized (this) {
-      if (!checkedLTS) {
-        checkedLTS = true;
-        int count = 0;
+    if (asrScoring.isDictEmpty()) {
+      logger.info("checkLTSAndCountPhones : not checking lts on exercises since dictionary is empty and this is probably the znetprof instance which has no dictionaries.");
+    } else {
+      synchronized (this) {
+        if (!checkedLTS) {
+          checkedLTS = true;
+          int count = 0;
 
-        long now = System.currentTimeMillis();
-        phoneToCount = new HashMap<>();
-        Set<Integer> safe = new HashSet<>();
-        Set<Integer> unsafe = new HashSet<>();
+          long now = System.currentTimeMillis();
+          phoneToCount = new HashMap<>();
+          Set<Integer> safe = new HashSet<>();
+          Set<Integer> unsafe = new HashSet<>();
 
-        for (CommonExercise exercise : exercises) {
-          boolean validForeignPhrase = isValidForeignPhrase(now, safe, unsafe, exercise);
-          //        boolean validForeignPhrase = isInDictOrLTS(exercise);
-          if (!validForeignPhrase) {
-            if (count < 10) {
-              logger.warn("checkLTSAndCountPhones : huh? for " +
-                  "\n\tex      " + exercise.getID() +
-                  "\n\tenglish " + exercise.getEnglish() +
-                  "\n\tfl      " + exercise.getForeignLanguage());
+          for (CommonExercise exercise : exercises) {
+            boolean validForeignPhrase = isValidForeignPhrase(now, safe, unsafe, exercise);
+            //        boolean validForeignPhrase = isInDictOrLTS(exercise);
+            if (!validForeignPhrase) {
+              if (count < 10) {
+                logger.warn("checkLTSAndCountPhones : huh? for " +
+                    "\n\tex      " + exercise.getID() +
+                    "\n\tenglish " + exercise.getEnglish() +
+                    "\n\tfl      " + exercise.getForeignLanguage());
+              }
+              count++;
+            } else {
+              countPhones(exercise.getMutable());
             }
-            count++;
-          } else {
-            countPhones(exercise.getMutable());
+
+            // check context sentences
+            for (CommonExercise context : exercise.getDirectlyRelated()) {
+              boolean validForeignPhrase2 = isValidForeignPhrase(now, safe, unsafe, context);
+              if (context.isSafeToDecode() != validForeignPhrase2) {
+                context.getMutable().setSafeToDecode(validForeignPhrase2);
+              }
+            }
           }
 
-          // check context sentences
-          for (CommonExercise context : exercise.getDirectlyRelated()) {
-            boolean validForeignPhrase2 = isValidForeignPhrase(now, safe, unsafe, context);
-            if (context.isSafeToDecode() != validForeignPhrase2) {
-              context.getMutable().setSafeToDecode(validForeignPhrase2);
-            }
+          if (!safe.isEmpty() || !unsafe.isEmpty()) {
+            logger.info("checkLTSAndCountPhones marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
           }
-        }
 
-        if (!safe.isEmpty() || !unsafe.isEmpty()) {
-          logger.info("checkLTSAndCountPhones marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
-        }
+          project.getExerciseDAO().markSafeUnsafe(safe, unsafe);
 
-        project.getExerciseDAO().markSafeUnsafe(safe, unsafe);
-
-        if (count > 0) {
-          logger.warn("checkLTSAndCountPhones huh? out of " + exercises.size() + " LTS fails on " + count);
+          if (count > 0) {
+            logger.warn("checkLTSAndCountPhones huh? out of " + exercises.size() + " LTS fails on " + count);
+          }
         }
       }
     }
   }
 
+  /**
+   * @param now
+   * @param safe
+   * @param unsafe
+   * @param exercise
+   * @return
+   * @see #checkLTSAndCountPhones
+   */
   private boolean isValidForeignPhrase(long now, Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise) {
     boolean validForeignPhrase = exercise.isSafeToDecode();
     if (isStale(now, exercise)) {
@@ -244,7 +256,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #checkLTSAndCountPhones
    */
   private <T extends CommonShell & MutableExercise> void countPhones(T exercise) {
-    ASR.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
+    PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
     List<String> firstPron = bagOfPhones.getFirstPron();
     exercise.setFirstPron(firstPron);
     for (String phone : firstPron) {
@@ -1302,8 +1314,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * @return
-   * @deprecated why would we want this?
+   * @return TODO : why would we want this?
    */
   public Map<String, Integer> getPhoneToCount() {
     return phoneToCount;
@@ -1390,7 +1401,8 @@ public class AudioFileHelper implements AlignDecode {
     } else {
       if (hasModel()) {
         if (new File(serverProps.getMediaDir()).exists()) {
-          logger.error("\n----->>>> makeDict : Can't find dict file at " + dictFile);
+          logger.warn("\n----->>>> makeDict : Can't find dict file at " + dictFile);
+          logger.warn("\nThis is an error if you see this on hydra or hydra2 and not a problem on netprof.");
         } else {
           logger.debug("makeDict : NOTE: Can't find dict file at " + dictFile);
         }

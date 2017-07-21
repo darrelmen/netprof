@@ -38,74 +38,54 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.text.Collator;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public interface ASR {
-	Collator getCollator();
-	boolean validLTS(String foreignLanguagePhrase, String transliteration);
-	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
-	SmallVocabDecoder getSmallVocabDecoder();
+  Collator getCollator();
 
-	String createHydraDict(String transcript, String transliteration);
+  boolean isDictEmpty();
 
-	String getUsedTokens(Collection<String> lmSentences, List<String> background);
+  boolean validLTS(String foreignLanguagePhrase, String transliteration);
 
-	/**
-	 * @see AlignDecode#getASRScoreForAudio
-	 * @param testAudioDir
-	 * @param testAudioFileNoSuffix
-	 * @param sentence
-	 * @param lmSentences
-	 * @param imageOutDir
-	 * @param decode
-	 * @param useCache
-	 * @param prefix
-	 * @param precalcScores
-	 * @param usePhoneToDisplay
-	 * @return
-	 */
-	PretestScore scoreRepeat(String testAudioDir,
-													 String testAudioFileNoSuffix,
-													 String sentence,
-													 Collection<String> lmSentences,
+  PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
+
+  SmallVocabDecoder getSmallVocabDecoder();
+
+  String createHydraDict(String transcript, String transliteration);
+
+  String getUsedTokens(Collection<String> lmSentences, List<String> background);
+
+  /**
+   * @param testAudioDir
+   * @param testAudioFileNoSuffix
+   * @param sentence
+   * @param lmSentences
+   * @param imageOutDir
+   * @param decode
+   * @param useCache
+   * @param prefix
+   * @param precalcScores
+   * @param usePhoneToDisplay
+   * @return
+   * @see AlignDecode#getASRScoreForAudio
+   */
+  PretestScore scoreRepeat(String testAudioDir,
+                           String testAudioFileNoSuffix,
+                           String sentence,
+                           Collection<String> lmSentences,
                            String transliteration,
                            String imageOutDir,
                            ImageOptions imageOptions,
-													 boolean decode,
-													 boolean useCache,
+                           boolean decode,
+                           boolean useCache,
                            String prefix,
-													 PrecalcScores precalcScores,
+                           PrecalcScores precalcScores,
                            boolean usePhoneToDisplay);
 
-	boolean isAvailable();
+  boolean isAvailable();
 
-	/**
-	 * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
-	 */
-	class PhoneInfo {
-		private final List<String> firstPron;
-		private final Set<String> phoneSet;
-
-		public PhoneInfo(List<String> firstPron, Set<String> phoneSet) {
-			this.firstPron = firstPron;
-			this.phoneSet = phoneSet;
-		}
-
-		public String toString() {
-			return "Phones " + getPhoneSet() + " " + getFirstPron();
-		}
-
-		public List<String> getFirstPron() {
-			return firstPron;
-		}
-		public Set<String> getPhoneSet() {
-			return phoneSet;
-		}
-	}
 }

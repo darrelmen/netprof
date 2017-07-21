@@ -36,11 +36,14 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.Report;
+import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
+import net.sf.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Collection;
@@ -97,17 +100,9 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   /**
    * @param id
-   * @param passwordHash
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
-   */
- // User getStrictUserWithPass(String id, String passwordHash);
-
-  /**
-   * @param id
-   * @return
-   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
-   * @see mitll.langtest.server.rest.RestUserManagement#gotHasUser
+   * @see mitll.langtest.server.rest.RestUserManagement#tryToLogin
    */
   User getUserByID(String id);
 
@@ -187,7 +182,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @param newHashPassword
    * @param baseURL
    * @return
-   * @see UserServiceImpl#changePassword
+   * @see UserServiceImpl#changePasswordWithCurrent(String, String)
    */
   boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword, String baseURL);
 

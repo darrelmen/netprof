@@ -48,11 +48,15 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   int getDominoID();
 
   /**
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addAltFL
    * @return
    */
   String getAltFL();
 
+  /**
+   * @deprecated - can't guarantee we'll have this on the znetprof instance
+   * @return
+   */
   List<String> getFirstPron();
 
   boolean isPredefined();
@@ -95,7 +99,7 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   CommonAnnotatable getCommonAnnotatable();
 
   /**
-   * @see mitll.langtest.server.services.ProjectServiceImpl#postProcessUnitToValueToGetAttributes(Collection, Map, CommonExercise)
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise
    * @param exerciseAttributes
    */
   void setAttributes(List<ExerciseAttribute> exerciseAttributes);

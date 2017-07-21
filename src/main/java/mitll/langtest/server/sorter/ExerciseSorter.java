@@ -97,6 +97,8 @@ public class ExerciseSorter extends SimpleSorter {
    * @param o2
    * @param phoneToCount
    * @return
+   * @see #phoneCompByFirst(CommonExercise, CommonExercise)
+   * @see #sortedByPronLengthThenPhone(List, Map)
    */
   private int phoneCompFirst(CommonExercise o1, CommonExercise o2, final Map<String, Integer> phoneToCount) {
     List<String> pron1 = o1.getFirstPron();
@@ -104,15 +106,16 @@ public class ExerciseSorter extends SimpleSorter {
 
     // these cases should never happen - really defensive
     if (pron1 == null && pron2 != null) {
-      logger.warn("missing pron?");
+      logger.warn("phoneCompFirst missing pron?");
       return +1;
     }
     if (pron1 != null && pron2 == null) {
-      logger.warn("missing pron?");
+      logger.warn("phoneCompFirst missing pron?");
       return -1;
     }
+
     if (pron1 == null) {
-      logger.warn("missing pron?");
+      //logger.warn("phoneCompFirst missing pron?");
       return o1.getForeignLanguage().toLowerCase().compareTo(o2.getForeignLanguage().toLowerCase());
     }
 

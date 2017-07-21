@@ -91,7 +91,7 @@ class CheckLTS {
    * @return
    * @see Scoring#getBagOfPhones
    */
-  ASR.PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
+  PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
     return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
   }
 
@@ -111,7 +111,7 @@ class CheckLTS {
    */
   private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase, String transliteration) {
     boolean isEmptyLTS = LTSFactory.isEmpty(lts);
-    if (htkDictionary.isEmpty() && isEmptyLTS) {
+    if (isDictEmpty() && isEmptyLTS) {
       if (shown++ < WARN_LTS_COUNT) {
         logger.debug("checkLTS skipping LTS since dict is empty and using the empty LTS : " + lts);
       }
@@ -235,6 +235,10 @@ class CheckLTS {
     return oov;
   }
 
+  public boolean isDictEmpty() {
+    return htkDictionary.isEmpty();
+  }
+
   private boolean isTranslitOk(LTS lts, String transliteration, Collection<String> tokens, Collection<String> translitTokens) {
     boolean isEmptyLTS = LTSFactory.isEmpty(lts);
     boolean translitOk = true;
@@ -274,7 +278,7 @@ class CheckLTS {
    * @param foreignLanguagePhrase
    */
   //this seems to be dead code - it's called by a method that isn't so far as I can tell, called by anything else. Going to not mess with trying to get the transliteration in here
-  private ASR.PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
+  private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
@@ -297,7 +301,7 @@ class CheckLTS {
 
     for (String token : tokens) {
       if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
-        return new ASR.PhoneInfo(firstPron, uphones);
+        return new PhoneInfo(firstPron, uphones);
       // either lts can handle it or the dictionary can...
 
       boolean htkEntry = htkDictionary.contains(token);
@@ -348,6 +352,6 @@ class CheckLTS {
       }
     }
     //if (multiple % 1000 == 0) logger.debug("mult " + multiple);
-    return new ASR.PhoneInfo(firstPron, uphones);
+    return new PhoneInfo(firstPron, uphones);
   }
 }
