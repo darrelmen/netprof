@@ -79,7 +79,7 @@ public class ServerInitializationManagerNetProf {
   private static final String UNKNOWN1 = "Unknown";
   public static final String UNKNOWN = UNKNOWN1;
   private static final String BUILT_BY = "Built-By";
-  public static final String BUILT_DATE = "Built-Date";
+  public static final String BUILT_DATE = "Build-Date";
 
   /**
    * @param newContext
