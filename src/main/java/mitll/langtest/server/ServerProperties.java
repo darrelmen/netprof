@@ -183,15 +183,6 @@ public class ServerProperties {
   private EmailList emailList;
   private final Map<String, String> phoneToDisplay = new HashMap<>();
   private List<Affiliation> affliations = new ArrayList<>();
-
-  /**
-   * TODO : Probably put these back in
-   */
-//  private String releaseVers = "Unknown";
-//  private String buildUser = "Unknown";
-//  private String buildVers = "Unknown";
-//  private String buildDate = "Unknown";
-
   public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
 
   /**
@@ -237,23 +228,10 @@ public class ServerProperties {
 
     try {
       useProperties(configDir, manifest.getOrDefault(ServerInitializationManagerNetProf.BUILT_DATE, "Unknown"));
-      // logger.debug("props " + props);
-
-//      putProp(props, "releaseVers", releaseVers);
-//      putProp(props, "buildUser", buildUser);
-//      putProp(props, "buildVers", buildVers);
-//      putProp(props, "buildDate", buildDate);
-
     } catch (FileNotFoundException e) {
       logger.error("ServerProperties looking in " + configDir + " :" + e, e);
     }
   }
-
-//  private void putProp(Properties props, String releaseVers1, String releaseVers) {
-//    if (releaseVers != null) {
-//      props.put(releaseVers1, releaseVers);
-//    }
-//  }
 
   /**
    * Just for IMPORT.
@@ -295,7 +273,6 @@ public class ServerProperties {
     }
     Properties props = System.getProperties();
     props.setProperty(CONFIG_FILE1, applicationConfPath);
-
 //    logger.info("setting config.file to " + applicationConfPath);
 //    logger.info("setting config.file to " + System.getProperties().get(CONFIG_FILE1));
 
@@ -323,19 +300,11 @@ public class ServerProperties {
 
     try {
       uiprops = readPropertiesFromFile(configFileFullPath);
-//      logger.info("useProperties ui props has " + uiprops.size() + " after reading from " + configFileFullPath);
-//      copyValue(RELEASE_DATE,"unset");
-//      copyValue(APP_TITLE,"unset");
       uiprops.putAll(manifest);
-      logger.info("useProperties ui props has " + uiprops.size());
     } catch (IOException e) {
       logger.error("got " + e + " reading from " + configFileFullPath, e);
     }
   }
-
-//  private void copyValue(String prop, String defaultValue) {
-//    uiprops.setProperty(prop, props.getProperty(prop, defaultValue));
-//  }
 
   /**
    * @return

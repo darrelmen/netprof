@@ -67,6 +67,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   private static final String DIFFICULTY = "Difficulty";
   private static final String ANY = "any";
   private static final String ALL = "all";
+  public static final String LISTS = "Lists";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
@@ -444,14 +445,18 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       typeToMatch.put(type, matches);
       Map<String, MatchInfo> matchesForType = typeToMatchInfo.get(type);
       if (matchesForType == null) {
-        logger.warn("getTypeToMatchPairs no known type " + type);
+        if (!type.equals(LISTS)) {
+          logger.warn("getTypeToMatchPairs no known type " + type);
+        }
       } else {
         matches.putAll(matchesForType);
       }
       iterator.remove();
 
       if (pairs.isEmpty()) {
-        logger.error("getTypeToMatchPairs : huh? pairs is empty for type " + type);
+        if (!type.equals(LISTS)) {
+          logger.error("getTypeToMatchPairs : huh? pairs is empty for type " + type);
+        }
       } else {
         for (SectionNode child : node.getChildren()) {
           Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(pairs, child);

@@ -76,8 +76,6 @@ public class ServerInitializationManagerNetProf {
    * The default properties filename
    */
   private static final String DEFAULT_PROPS_FN = appName + ".properties";
-  private static final String UNKNOWN1 = "Unknown";
-  public static final String UNKNOWN = UNKNOWN1;
   private static final String BUILT_BY = "Built-By";
   public static final String BUILT_DATE = "Build-Date";
 
@@ -233,7 +231,7 @@ public class ServerInitializationManagerNetProf {
             "a servlet container? Context:" + ctx);
         //}
       } else {
-        log.info("getServerProperties : found manifest with " + atts.size() + " attributes.");
+        //log.info("getServerProperties : found manifest with " + atts.size() + " attributes.");
 
         grabValue(manifest, atts, Name.SPECIFICATION_TITLE);
         grabValue(manifest, atts, Name.SPECIFICATION_VERSION);
