@@ -126,10 +126,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     Collection<SlickPerfResult> perfForUser = listid == -1 ?
         resultDAO.getPerfForUser(id, projid) :
         resultDAO.getPerfForUserOnList(id, listid);
-
     long now = System.currentTimeMillis();
 
     logger.info("getBestForUser best for " + id + " in " + projid + " and list " + listid + " were " + perfForUser.size());
+
     long diff = now - then;
     if (diff > WARN_THRESH) {
       logger.warn("getBestForUser best for " + id + " in " + projid + " took " + diff);

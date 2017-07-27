@@ -155,10 +155,7 @@ public class UserInfo implements HasID {
   public List<BestScore> getBestScores() {
     return bestScores;
   }
-//
-//  public void setStart(int start) {
-//    this.start = start;
-//  }
+
 
   public void setCurrent(int current) {
     this.current = current;
@@ -172,11 +169,7 @@ public class UserInfo implements HasID {
     this.userID = userID;
   }
 
-/*  @Deprecated
-  @Override
-  public String getOldID() {
-    return null;
-  }*/
+
 
   @Override
   public int getID() {
@@ -189,16 +182,11 @@ public class UserInfo implements HasID {
 
   @Override
   public int compareTo(@NotNull HasID o) {
-    return Integer.valueOf(id).compareTo(o.getID());
+    return Integer.compare(id, o.getID());
   }
 
   public int getFinalScores() {
     return finalScores;
-  }
-
-  public String toString() {
-    //MiniUser user = getUser();
-    return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent() + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
   }
 
   public void setFirst(String first) {
@@ -215,5 +203,10 @@ public class UserInfo implements HasID {
 
   public String getLast() {
     return last;
+  }
+
+  public String toString() {
+    //MiniUser user = getUser();
+    return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent() + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
   }
 }

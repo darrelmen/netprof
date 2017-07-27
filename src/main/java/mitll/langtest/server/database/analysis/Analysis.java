@@ -59,7 +59,7 @@ import java.util.*;
 public abstract class Analysis extends DAO {
   private static final Logger logger = LogManager.getLogger(Analysis.class);
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   static final String EMPTY_JSON = "{}";
@@ -235,7 +235,7 @@ public abstract class Analysis extends DAO {
       if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + resultsForQuery.size());
       UserPerformance userPerformance = new UserPerformance(id, resultsForQuery, next.getFirst(), next.getLast());
       List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-      logger.debug("getUserPerformance found " + rawBestScores.size() + " scores");
+      logger.debug("getUserPerformance for " +id + " found " + rawBestScores.size() + " scores");
       userPerformance.setGranularityToSessions(
           new PhoneAnalysis().getGranularityToSessions(rawBestScores));
       return userPerformance;
@@ -328,7 +328,9 @@ public abstract class Analysis extends DAO {
    */
   protected Map<Integer, UserInfo> getBestForQuery(int minRecordings, Map<Integer, List<BestScore>> userToBest) {
 //    Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement, sql);
-    if (DEBUG) logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
+    if (DEBUG) {
+      logger.info("getBestForQuery min " +minRecordings+ " got " + userToBest.values().iterator().next().size());
+    }
 
     Map<Integer, List<BestScore>> userToBest2 = new HashMap<>();
     Map<Integer, Long> userToEarliest = new HashMap<>();
@@ -397,7 +399,7 @@ public abstract class Analysis extends DAO {
 
     Map<Integer, UserInfo> userToUserInfo = new HashMap<>();
     int userInitialScores = database.getServerProps().getUserInitialScores();
-    int userFinalScores = database.getServerProps().getUserFinalScores();
+    int userFinalScores   = database.getServerProps().getUserFinalScores();
 
     for (Map.Entry<Integer, List<BestScore>> pair : userToBest2.entrySet()) {
       List<BestScore> value = pair.getValue();
