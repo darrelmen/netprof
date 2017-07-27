@@ -537,13 +537,15 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return dao.perfForUser(userid, projid);
   }
 
+  public Collection<SlickPerfResult> getPerfForUserOnList(int userid, int listid) {
+    Collection<SlickPerfResult> slickPerfResults = dao.perfForUserOnList(userid, listid);
+  //  logger.info("perf for user " + userid + " list " +listid + " : " + slickPerfResults.size());
+    return slickPerfResults;
+  }
+
   public Collection<Integer> getPracticedByUser(int userid, int projid) {
     return dao.practicedByUser(userid, projid);
   }
-
-/*  public boolean isEmpty() {
-    return dao.getNumRows() == 0;
-  }*/
 
   public int getDefaultResult() {
     return defaultResult.id();

@@ -92,7 +92,6 @@ public class NewContentChooser implements INavigation {
           break;
         case LISTS:
           clear();
-//          divWidget.add(listManager.showLists());
           listView.showContent(divWidget, "listView");
           break;
         case ITEMS:
@@ -109,35 +108,32 @@ public class NewContentChooser implements INavigation {
           break;
         case FIX:
           clear();
-          controller.getListService().getReviewList(new AsyncCallback<UserList<CommonShell>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
-
-            @Override
-            public void onSuccess(UserList<CommonShell> result) {
-              List<CommonShell> exercises = result.getExercises();
-              CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
-              Panel review = new ReviewItemHelper(controller).doNPF(result, "review", true, toSelect);
-              divWidget.add(review);
-            }
-          });
-
-          //   listManager.viewReview(divWidget);  // TODO : no more list manager
+          getReviewList();
           break;
         case NONE:
-//          if (hasProjectChoice() && currentSection == NONE) {
-//            showView(LEARN);
-//          }
-//          else {
           logger.info("skipping choice " + view);
-//          }
           break;
         default:
           logger.warning("huh? unknown view " + view);
       }
     }
+  }
+
+  private void getReviewList() {
+    controller.getListService().getReviewList(new AsyncCallback<UserList<CommonShell>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(UserList<CommonShell> result) {
+        List<CommonShell> exercises = result.getExercises();
+        CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
+        Panel review = new ReviewItemHelper(controller).doNPF(result, "review", true, toSelect);
+        divWidget.add(review);
+      }
+    });
   }
 
   private void storeValue(VIEWS view) {
@@ -150,9 +146,7 @@ public class NewContentChooser implements INavigation {
 
     DivWidget w = hasTeacher ?
         new StudentAnalysis(controller, showTab) :
-        new AnalysisTab(controller, showTab, 1, null,
-            controller.getUser(), controller.getUserManager().getUserID()
-        );
+        new AnalysisTab(controller, showTab);
 
     divWidget.add(w);
     currentSection = PROGRESS;
@@ -165,8 +159,14 @@ public class NewContentChooser implements INavigation {
   @NotNull
   private ShowTab getShowTab() {
     return exid -> {
+      boolean wasMade = learnHelper.getReloadable() != null;
+      if (!wasMade) {
+        banner.showLearn();
+      }
       learnHelper.loadExercise(exid);
-      banner.showLearn();
+      if (wasMade) {
+        banner.showLearn();
+      }
     };
   }
 

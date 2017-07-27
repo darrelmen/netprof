@@ -342,6 +342,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private DivWidget addSortBox(String language) {
     DivWidget w = new DivWidget();
     w.addStyleName("floatRight");
+
     HTML w1 = new HTML("Sort");
     w1.addStyleName("topFiveMargin");
     w1.addStyleName("rightFiveMargin");

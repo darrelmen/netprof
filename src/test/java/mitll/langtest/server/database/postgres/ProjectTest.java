@@ -291,7 +291,7 @@ public class ProjectTest extends BaseTest {
     IAnalysis analysis = database.getAnalysis(projectid);
     List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
 
-    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(6, 5);
+    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(6, 5, -1);
 
     for (WordScore wordScore : wordScoresForUser) logger.info("ws " + wordScore);
 

@@ -56,6 +56,7 @@ class PhonePlot extends TimeSeriesPlot {
   private static final int CHART_HEIGHT = 315;
   private static final int NARROW_WIDTH = 330;
   private static final int NARROW_WIDTH_REALLY = 320;
+  public static final String NO_RECORDINGS_YET = "No Recordings yet to analyze. Please record yourself.";
 
   /**
    * @see AnalysisTab#getPhoneReport
@@ -72,7 +73,7 @@ class PhonePlot extends TimeSeriesPlot {
   void showErrorBarData(List<PhoneSession> rawBestScores, String userChosenID) {
     clear();
     if (rawBestScores.isEmpty()) {
-      add(new Label("No Recordings yet to analyze. Please record yourself."));
+      add(new Label(NO_RECORDINGS_YET));
     } else {
       Chart chart = getErrorBarChart(
           "<b>" + userChosenID + "</b>" + PRONUNCIATION_SCORE,

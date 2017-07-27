@@ -58,24 +58,27 @@ public interface AnalysisService extends RemoteService {
   /**
    * @param id
    * @param minRecordings
+   * @param listid
    * @return
    * @see mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
    */
-  UserPerformance getPerformanceForUser(int id, int minRecordings);
+  UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
 
   /**
    * @param id
    * @param minRecordings
+   * @param listid
    * @return
    * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    */
-  List<WordScore> getWordScores(int id, int minRecordings);
+  List<WordScore> getWordScores(int id, int minRecordings, int listid);
 
   /**
    * @param id
    * @param minRecordings
+   * @param listid
    * @return
    * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
    */
-  PhoneReport getPhoneScores(int id, int minRecordings);
+  PhoneReport getPhoneScores(int id, int minRecordings, int listid);
 }

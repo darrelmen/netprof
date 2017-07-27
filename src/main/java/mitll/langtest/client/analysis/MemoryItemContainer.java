@@ -50,6 +50,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -74,13 +75,16 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private static final int MAX_LENGTH_ID = 13;
 
   private static final int PAGE_SIZE = 11;
+
+  /**
+   *
+   */
   private final Long selectedUser;
   private final String selectedUserKey;
   private final String header;
 
-//  private static final int SIGNED_UP = 95;
   private static final String SIGNED_UP1 = "Started";
-  private static final int STUDENT_WIDTH = 300;
+  // private static final int STUDENT_WIDTH = 300;
   static final String SELECTED_USER = "selectedUser";
   static final int ID_WIDTH = 130;
   private int idWidth = ID_WIDTH;
@@ -115,7 +119,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - 2);
     this.pageSize = pageSize;
-    this.shortPageSize =shortPageSize;
+    this.shortPageSize = shortPageSize;
   }
 
   /**
@@ -135,25 +139,39 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   DivWidget getTable(Collection<T> users, String title, String subtitle) {
-    return getStudentContainer(getTableWithPager(users), title, subtitle);
-  }
-
-  private DivWidget getStudentContainer(Panel tableWithPager, String title, String subtitle) {
-    Heading students = subtitle.isEmpty() ?
-        new Heading(3, title) :
-        new Heading(3, title, subtitle);
-
-    students.setWidth(STUDENT_WIDTH + "px");
-    students.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
+    Heading students = getStudentsHeader(title, subtitle);
 
     DivWidget leftSide = new DivWidget();
     leftSide.getElement().setId("studentDiv");
     leftSide.addStyleName("floatLeft");
+    DivWidget headerRow = new DivWidget();
     if (!title.isEmpty()) {
-      leftSide.add(students);
+      headerRow.add(students);
     }
-    leftSide.add(tableWithPager);
+    leftSide.add(headerRow);
+    IsWidget rightOfHeader = getRightOfHeader();
+    if (rightOfHeader != null) {
+      headerRow.add(rightOfHeader);
+    }
+
+    leftSide.add(getTableWithPager(users));
     return leftSide;
+  }
+
+  @NotNull
+  private Heading getStudentsHeader(String title, String subtitle) {
+    Heading students = subtitle.isEmpty() ?
+        new Heading(3, title) :
+        new Heading(3, title, subtitle);
+
+    //students.setWidth(STUDENT_WIDTH + "px");
+    students.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
+    students.addStyleName("floatLeft");
+    return students;
+  }
+
+  protected IsWidget getRightOfHeader() {
+    return null;
   }
 
   private String getSelectedUserKey(ExerciseController controller, String appTitle) {
@@ -178,10 +196,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @return
    * @see SimplePagingContainer#makeCellTable
    */
-  protected int getPageSize() {    return isOnLaptop() ? shortPageSize : pageSize;  }
+  protected int getPageSize() {
+    return isOnLaptop() ? shortPageSize : pageSize;
+  }
 
   /**
-   *
    * @return
    */
   private boolean isOnLaptop() {
@@ -253,39 +272,25 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       scrollIntoView(index, false);
     }
 
-    makeInitialSelection(users, userToSelect);
+    if (!users.isEmpty()) {
+      makeInitialSelection(users.iterator().next(), userToSelect);
+    }
     return tableWithPager;
   }
 
   /**
-   * @param users
    * @param userToSelect
+   * @paramx users
    * @see #getTableWithPager
    */
-  private void makeInitialSelection(Collection<T> users, T userToSelect) {
-    if (users.isEmpty()) {
-      return;
-    }
-    final T finalUser = userToSelect;
+  private void makeInitialSelection(T firstUser, T userToSelect) {
+    //logger.info("makeInitialSelection make initial selection : select " + userToSelect);
+    Scheduler.get().scheduleDeferred(() -> selectAndClick((userToSelect == null) ? firstUser : userToSelect));
+  }
 
-    logger.info("makeInitialSelection make initial selection from " + users.size() + " to select " + userToSelect);
-
-    Scheduler.get().scheduleDeferred(() -> {
-          if (selectedUser == null || finalUser == null) {
-            T next = users.iterator().next();
-            //        logger.info("\t makeInitialSelection make initial selection " + next);
-            table.getSelectionModel().setSelected(next, true);
-            gotClickOnItem(next);
-          } else {
-//            if (finalUser != null) {
-            table.getSelectionModel().setSelected(finalUser, true);
-            gotClickOnItem(finalUser);
-            //          } else {
-            //          logger.warning("makeInitialSelection no initial user?");
-            //      }
-          }
-        }
-    );
+  private void selectAndClick(T firstUser) {
+    table.getSelectionModel().setSelected(firstUser, true);
+    gotClickOnItem(firstUser);
   }
 
   /**
@@ -392,9 +397,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
         }
       }
     }
-    // else {
     return null;
-    // }
   }
 
   /**
@@ -476,9 +479,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     if (isClick(event)) {
       gotClickOnItem(object);
     }
-    if (isDoubleClick(event)) {
-      logger.info("got double!");
-    }
+//    if (isDoubleClick(event)) {
+//      logger.info("got double!");
+//    }
   }
 
   private boolean isClick(NativeEvent event) {

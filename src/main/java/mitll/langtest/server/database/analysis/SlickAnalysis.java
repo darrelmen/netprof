@@ -47,13 +47,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
   private static final int WARN_THRESH = 100;
-  public static final String ANSWERS = "answers";
+  private static final String ANSWERS = "answers";
   private SlickResultDAO resultDAO;
   private static final boolean DEBUG = true;
   private String language;
@@ -82,28 +81,54 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   /**
    * @param userid
    * @param minRecordings
+   * @param listid
    * @return
    * @see AnalysisServiceImpl#getPerformanceForUser
    */
   @Override
-  public UserPerformance getPerformanceForUser(long userid, int minRecordings) {
-    return getUserPerformance(userid, getBestForUser((int) userid, minRecordings));
+  public UserPerformance getPerformanceForUser(int userid, int minRecordings, int listid) {
+    return getUserPerformance(userid, getBestForUser(userid, minRecordings, listid));
+  }
+
+  /**
+   * Wasetful? why call getBestForUser again?
+   * @param userid
+   * @param minRecordings
+   * @param listid
+   * @return
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getWordScores
+   */
+  @Override
+  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid) {
+    long then = System.currentTimeMillis();
+
+    Map<Integer, UserInfo> best = getBestForUser(userid, minRecordings, listid);
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    if (diff > WARN_THRESH) {
+      logger.warn("getWordScoresForUser for " + userid + " in " + projid + " took " + diff);
+    }
+    return getWordScores(best);
   }
 
   /**
    * @param id
    * @param minRecordings
+   * @param listid
    * @return
-   * @see #getPerformanceForUser(long, int)
-   * @see #getPhonesForUser(int, int)
-   * @see #getWordScoresForUser(long, int)
+   * @see Analysis#getPerformanceForUser(int, int, int)
+   * @see IAnalysis#getPhonesForUser(int, int, int)
+   * @see IAnalysis#getWordScoresForUser(int, int, int)
    */
-  private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings) {
+  private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings, int listid) {
     long then = System.currentTimeMillis();
-    Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForUser(id, projid);
+    Collection<SlickPerfResult> perfForUser = listid == -1 ?
+        resultDAO.getPerfForUser(id, projid) :
+        resultDAO.getPerfForUserOnList(id, listid);
+
     long now = System.currentTimeMillis();
 
-    logger.info("getBestForUser best for " + id + " in " + projid + " were " + perfForUser.size());
+    logger.info("getBestForUser best for " + id + " in " + projid + " and list " + listid + " were " + perfForUser.size());
     long diff = now - then;
     if (diff > WARN_THRESH) {
       logger.warn("getBestForUser best for " + id + " in " + projid + " took " + diff);
@@ -115,33 +140,15 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   /**
    * @param id
    * @param minRecordings
-   * @return
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getWordScores
-   */
-  @Override
-  public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
-    long then = System.currentTimeMillis();
-
-    Map<Integer, UserInfo> best = getBestForUser((int) id, minRecordings);
-    long now = System.currentTimeMillis();
-    long diff = now - then;
-    if (diff > WARN_THRESH) {
-      logger.warn("getWordScoresForUser for " + id + " in " + projid + " took " + diff);
-    }
-    return getWordScores(best);
-  }
-
-  /**
-   * @param id
-   * @param minRecordings
+   * @param listid
    * @return
    * @paramx projid
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores
    * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
    */
   @Override
-  public PhoneReport getPhonesForUser(int id, int minRecordings) {
-    return getPhoneReport(id, getBestForUser(id, minRecordings), language, project);
+  public PhoneReport getPhonesForUser(int id, int minRecordings, int listid) {
+    return getPhoneReport(id, getBestForUser(id, minRecordings, listid), language, project);
   }
 
   /**
@@ -175,7 +182,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   private Map<Integer, UserInfo> getBest(Collection<SlickPerfResult> perfForUser, int minRecordings, boolean addNativeAudio) {
-    return getBestForQuery(minRecordings, getUserToResults(perfForUser, addNativeAudio));
+    Map<Integer, List<BestScore>> userToResults = getUserToResults(perfForUser, addNativeAudio);
+
+    logger.info("getBest got " + userToResults.size() + " user to results");
+    return getBestForQuery(minRecordings, userToResults);
   }
 
   /**
@@ -203,14 +213,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     for (SlickPerfResult perf : perfs) {
       count++;
       int exid = perf.exid();
-      Timestamp timestamp = perf.modified();
+      long time = perf.modified().getTime();
       float pronScore = perf.pronscore();
       int id = perf.id();
       int userid = perf.userid();
       String type = perf.audiotype();
 
-      List<BestScore> results = userToBest.get(userid);
-      if (results == null) userToBest.put(userid, results = new ArrayList<>());
+      List<BestScore> results = userToBest.computeIfAbsent(userid, k -> new ArrayList<>());
 
       if (pronScore < 0) logger.warn("huh? got " + pronScore + " for " + exid + " and " + id);
 
@@ -229,9 +238,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         if (isFlashcard) flashcard++;
         else learn++;
       }
-      long time = timestamp.getTime();
 
-      String nativeAudio =null;
+      String nativeAudio = null;
       if (addNativeAudio) {
         nativeAudio = database.getNativeAudio(userToGender, perf.userid(), exid, project);
         if (nativeAudio == null) {

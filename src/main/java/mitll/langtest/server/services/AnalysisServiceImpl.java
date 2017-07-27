@@ -87,49 +87,59 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   /**
    * @param id
    * @param minRecordings
+   * @param listid
    * @return
    * @see mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
    */
   @Override
-  public UserPerformance getPerformanceForUser(int id, int minRecordings) {
-    //logger.info("getPerformanceForUser " +id);
+  public UserPerformance getPerformanceForUser(int id, int minRecordings, int listid) {
+    // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
     int projectID = getProjectID();
-    if (projectID == -1) return new UserPerformance();
+    if (projectID == -1) {
+      return new UserPerformance();
+    } else {
+      SlickAnalysis slickAnalysis =
+          new SlickAnalysis(
+              db.getDatabase(),
+              db.getPhoneDAO(),
+              (SlickResultDAO) db.getResultDAO(),
+              db.getProject(projectID).getLanguage(),
+              projectID
+          );
 
-    SlickAnalysis slickAnalysis =
-        new SlickAnalysis(
-            db.getDatabase(),
-            db.getPhoneDAO(),
-            (SlickResultDAO) db.getResultDAO(),
-            db.getProject(projectID).getLanguage(),
-            projectID
-        );
-
-    return slickAnalysis.getPerformanceForUser(id, minRecordings);
+      return slickAnalysis.getPerformanceForUser(id, minRecordings, listid);
+    }
   }
 
   /**
    * @param id
    * @param minRecordings
+   * @param listid
    * @return
    * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    */
   @Override
-  public List<WordScore> getWordScores(int id, int minRecordings) {
+  public List<WordScore> getWordScores(int id, int minRecordings, int listid) {
     int projectID = getProjectID();
     if (projectID == -1) return new ArrayList<>();
 
     IAnalysis analysis = db.getAnalysis(projectID);
-    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, minRecordings);
-    logger.info("getWordScores for user " +id + " project is "+ projectID + " and " + analysis + " yielded " + wordScoresForUser.size());
+    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, minRecordings, listid);
+
+    /*
+    logger.info("getWordScores for" +
+        "\n\tuser       " +id +
+        "\n\tproject is "+ projectID + " and " + analysis +
+        "\n\tyielded " + wordScoresForUser.size());*/
+
 //    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getID() + " " + ws.getNativeAudio());
     return wordScoresForUser;
   }
 
   @Override
-  public PhoneReport getPhoneScores(int id, int minRecordings) {
+  public PhoneReport getPhoneScores(int id, int minRecordings, int listid) {
     int projectID = getProjectID();
     if (projectID == -1) return new PhoneReport();
-    return db.getAnalysis(projectID).getPhonesForUser(id, minRecordings);
+    return db.getAnalysis(projectID).getPhonesForUser(id, minRecordings, listid);
   }
 }

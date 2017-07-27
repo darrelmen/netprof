@@ -55,7 +55,6 @@ import org.jetbrains.annotations.NotNull;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEventHandler;
-import org.moxieapps.gwt.highcharts.client.events.SeriesClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
@@ -71,8 +70,14 @@ import java.util.logging.Logger;
  * @since 10/19/15.
  */
 public class AnalysisPlot extends TimeSeriesPlot {
-  private static final int MIN_SESSION_COUNT = 50;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
+
+  private static final int MIN_SESSION_COUNT = 50;
+
+  private static final String NO_RECORDINGS_YET = "No recordings yet to analyze. Please record yourself.";
+  private static final String NO_RECORDINGS_YET_FOR_STUDENT = "No recordings yet made by student to analyze.";
+  private static final String NO_RECORDINGS_YET_ON_LIST = "No recordings yet for this list. Choose another list or don't filter on lists.";
+  private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this list by this student. Choose another list or student or don't filter on lists.";
 
   private static final int X_OFFSET_LEGEND = 65;
 
@@ -91,7 +96,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private static final String VOCAB_PRACTICE = "Vocab Practice";
   private static final String LEARN = "Learn";
   /**
-   * @see #addChart(UserPerformance, String)
+   * @see #addChart
    */
   private static final String CUMULATIVE_AVERAGE = "Average";
   private final Set<String> toShowExercise = new HashSet<>(Arrays.asList(I_PAD_I_PHONE, VOCAB_PRACTICE, LEARN, CUMULATIVE_AVERAGE));
@@ -134,13 +139,17 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @param userid
    * @param userChosenID
    * @param minRecordings
+   * @param listid
+   * @param isTeacherView
    * @see AnalysisTab#AnalysisTab
    */
   public AnalysisPlot(ExerciseServiceAsync service,
                       int userid,
                       final String userChosenID,
                       final int minRecordings,
-                      SoundManagerAPI soundManagerAPI, Icon playFeedback) {
+                      SoundManagerAPI soundManagerAPI,
+                      Icon playFeedback,
+                      int listid, boolean isTeacherView) {
     getElement().setId("AnalysisPlot");
     int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
 
@@ -148,17 +157,15 @@ public class AnalysisPlot extends TimeSeriesPlot {
     getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
     getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-    // getElement().getStyle().setMarginRight(10, Style.Unit.PX);
     addStyleName("cardBorderShadow");
 
-    // setWidth("100%");
     this.service = GWT.create(AnalysisService.class);
     this.userid = userid;
     populateGranToLabel();
 
     this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback);
 
-    getPerformanceForUser(this.service, userid, userChosenID, minRecordings);
+    getPerformanceForUser(this.service, userid, userChosenID, minRecordings, listid, isTeacherView);
 
     Scheduler.get().scheduleDeferred(() -> populateExerciseMap(service, userid));
   }
@@ -174,13 +181,24 @@ public class AnalysisPlot extends TimeSeriesPlot {
     granToLabel.put(FIVEMIN, "Minute");
   }
 
+  /**
+   * @param service
+   * @param userid
+   * @param userChosenID
+   * @param minRecordings
+   * @param listid
+   * @param isTeacherView
+   * @see #AnalysisPlot
+   */
   private void getPerformanceForUser(AnalysisServiceAsync service,
                                      int userid,
                                      final String userChosenID,
-                                     int minRecordings) {
+                                     int minRecordings,
+                                     int listid,
+                                     boolean isTeacherView) {
 //    logger.info("getPerformanceForUser " + userid + " : " + userChosenID);
 
-    service.getPerformanceForUser(userid, minRecordings, new AsyncCallback<UserPerformance>() {
+    service.getPerformanceForUser(userid, minRecordings, listid, new AsyncCallback<UserPerformance>() {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("\n\n\n-> getPerformanceForUser " + throwable);
@@ -198,7 +216,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
           months.addAll(getPeriods(phoneSessions1, MONTH, last));
         }
-        addChart(userPerformance, userChosenID);
+        addChart(userPerformance, userChosenID,listid != -1, isTeacherView);
       }
     });
   }
@@ -245,15 +263,20 @@ public class AnalysisPlot extends TimeSeriesPlot {
   /**
    * @param userPerformance
    * @param userChosenID
-   * @see #getPerformanceForUser(AnalysisServiceAsync, int, String, int)
+   * @param isTeacherView
+   * @see #getPerformanceForUser(AnalysisServiceAsync, int, String, int, int, boolean)
    */
-  private void addChart(UserPerformance userPerformance, String userChosenID) {
+  private void addChart(UserPerformance userPerformance, String userChosenID, boolean filterOnList, boolean isTeacherView) {
     clear();
 
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
 
     if (rawBestScores.isEmpty()) {
-      add(new Label("No Recordings yet to analyze. Please record yourself."));
+      String text = filterOnList ?
+          (isTeacherView ? NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST : NO_RECORDINGS_YET_ON_LIST) :
+          (isTeacherView ? NO_RECORDINGS_YET_FOR_STUDENT : NO_RECORDINGS_YET);
+
+      add(new Label(text));
     } else {
       float percentAvg = userPerformance.getRawAverage() * 100;
       int rawTotal = rawBestScores.size();

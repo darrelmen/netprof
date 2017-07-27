@@ -65,10 +65,11 @@ class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param id
    * @param minRecordings  @return
+   * @param listid
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  public UserPerformance getPerformanceForUser(long id, int minRecordings) {
+  public UserPerformance getPerformanceForUser(int id, int minRecordings, int listid) {
     try {
       Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
 
@@ -148,7 +149,7 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @return
    * @throws SQLException
-   * @see Analysis#getPerformanceForUser(long, int)
+   * @see Analysis#getPerformanceForUser(int, int, int)
    * @see IAnalysis#getPhonesForUser
    * @seex Analysis#getWordScoresForUser
    */
@@ -167,11 +168,12 @@ class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param id
    * @param minRecordings
+   * @param listid
    * @paramx projid
    * @return
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
-  public PhoneReport getPhonesForUser(int id, int minRecordings) {
+  public PhoneReport getPhonesForUser(int id, int minRecordings, int listid) {
     try {
       String sql = getPerfSQL(id);
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);
@@ -182,14 +184,15 @@ class H2Analysis extends Analysis implements IAnalysis {
     return null;
   }
   /**
-   * @param id
+   * @param userid
+   * @param listid
    * @paramx projid
    * @return
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
-  public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
+  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid) {
     try {
-      Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
+      Map<Integer, UserInfo> best = getBest(getPerfSQL(userid), minRecordings);
 
       return getWordScores(best);
     } catch (Exception ee) {

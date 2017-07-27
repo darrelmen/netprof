@@ -62,22 +62,11 @@ public abstract class Analysis extends DAO {
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
-  //private static final float MIN_SCORE_TO_SHOW = 0.20f;
   static final String EMPTY_JSON = "{}";
   private final ParseResultJson parseResultJson;
   private final IPhoneDAO phoneDAO;
 
-  /**
-   * ex to ref can get stale, etc.
-   * why do we need to do all this work when they may never click on the reference audio?
-   * can't we get them for the visible set?
-   * or ask exercise service?
-   *
-   * @deprecated let's not use this map - super expensive to make, every time
-   */
-  // final Map<Integer, String> exToRef;
-
-  /**
+   /**
    * @param database
    * @param phoneDAO
    * @see DatabaseImpl#getAnalysis(int)
@@ -87,7 +76,6 @@ public abstract class Analysis extends DAO {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
     this.phoneDAO = phoneDAO;
-    //   this.exToRef = exToRef;
     //logger.info("Analysis : exToRef has " + exToRef.size());
   }
 
@@ -220,17 +208,18 @@ public abstract class Analysis extends DAO {
   /**
    * @param id
    * @param minRecordings
+   * @param listid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  abstract public UserPerformance getPerformanceForUser(long id, int minRecordings);
+  abstract public UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
 
   /**
    * @param id
    * @param best
    * @return
-   * @see Analysis#getPerformanceForUser(long, int)
+   * @see Analysis#getPerformanceForUser(int, int, int)
    */
   UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
@@ -256,34 +245,26 @@ public abstract class Analysis extends DAO {
   /**
    * @param best
    * @return
-   * @see SlickAnalysis#getWordScoresForUser(long, int)
+   * @see IAnalysis#getWordScoresForUser(int, int, int)
    */
   List<WordScore> getWordScores(Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
+    logger.info("getWordScores " + values.size() + " users.");
     if (values.isEmpty()) {
       //logger.warn("no best values for " + id);
       return getWordScore(Collections.emptyList());
     } else {
       List<BestScore> resultsForQuery = values.iterator().next().getBestScores();
-      //  if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
+      if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
 
       List<WordScore> wordScore = getWordScore(resultsForQuery);
-      // if (DEBUG || true) logger.warn("getWordScoresForUser for # " +id +" min " +minRecordings + " wordScore " + wordScore.size());
+      if (DEBUG) {
+        logger.warn("getWordScoresForUser wordScore " + wordScore.size());
+      }
 
       return wordScore;
     }
   }
-
-  /**
-   * TODO : still used???
-   * @param id
-   * @param minRecordings
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
-   */
-/*
-  public abstract PhoneReport getPhonesForUser(long id, int minRecordings, int projid);
-*/
 
   /**
    * @param userid
@@ -299,7 +280,7 @@ public abstract class Analysis extends DAO {
     long now = then;
 
     if (DEBUG)
-      logger.debug(" getPhonesForUser " + userid + " took " + (now - then) + " millis to get " + best.size());
+      logger.debug(" getPhonesForUser " + userid +  " got " + best.size());
 
     if (best.isEmpty()) return new PhoneReport();
 
@@ -343,7 +324,7 @@ public abstract class Analysis extends DAO {
    * @param userToBest
    * @return
    * @paramx sql
-   * @see SlickAnalysis#getBest(Collection, int)
+   * @see SlickAnalysis#getBest
    */
   protected Map<Integer, UserInfo> getBestForQuery(int minRecordings, Map<Integer, List<BestScore>> userToBest) {
 //    Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement, sql);
@@ -353,8 +334,7 @@ public abstract class Analysis extends DAO {
     Map<Integer, Long> userToEarliest = new HashMap<>();
 
     for (Integer key : userToBest.keySet()) {
-      List<BestScore> value = new ArrayList<>();
-      userToBest2.put(key, value);
+      userToBest2.put(key, new ArrayList<>());
     }
 
     for (Map.Entry<Integer, List<BestScore>> pair : userToBest.entrySet()) {
@@ -450,6 +430,8 @@ public abstract class Analysis extends DAO {
    * @see #getWordScores
    */
   private List<WordScore> getWordScore(List<BestScore> bestScores) {
+   // logger.warn("getWordScore got " + bestScores.size());
+
     List<WordScore> results = new ArrayList<>();
 
     long then = System.currentTimeMillis();
@@ -484,7 +466,7 @@ public abstract class Analysis extends DAO {
     if (now - then > 50) {
       logger.debug(getDatabase().getLanguage() + " took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
     }
-    logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
+ //   logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
 
     return results;
   }

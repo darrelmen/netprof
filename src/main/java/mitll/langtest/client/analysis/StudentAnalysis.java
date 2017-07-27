@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -63,13 +64,19 @@ public class StudentAnalysis extends DivWidget {
   private static final String OR_MORE_RECORDINGS = "5 or more recordings";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
+  /**
+   * @see NewContentChooser#showProgress
+   * @param controller
+   * @param showTab
+   */
   public StudentAnalysis(final ExerciseController controller, final ShowTab showTab) {
     //logger.info("StudentAnalysis got here " + appTitle);
     getElement().setId("StudentAnalysis");
 
+    add(new HTML("Please wait..."));
+
     final String selectedUserKey = getRememberedSelectedUser(controller);
 
-    add(new HTML("Please wait..."));
     analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -115,6 +122,12 @@ public class StudentAnalysis extends DivWidget {
     return rightSide;
   }
 
+  /**
+   *
+   * @param leftSide
+   * @param rightSide
+   * @return
+   */
   private DivWidget getTop(DivWidget leftSide, DivWidget rightSide) {
     DivWidget top = new DivWidget();
     top.addStyleName("inlineFlex");

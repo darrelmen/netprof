@@ -198,7 +198,7 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(connection, "spanish", path);
     int id = 71;
     //int id = 535;   // tiffany
-    UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1);
+    UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1,-1);
 
     logger.info("perf " + performanceForUser);
     Map<Long, List<PhoneSession>> granularityToSessions = performanceForUser.getGranularityToSessions();
@@ -209,7 +209,7 @@ public class PerformanceTest extends BaseTest {
     }
     // List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
 
-    PhoneReport report = database.getAnalysis(-1).getPhonesForUser(id, 1);
+    PhoneReport report = database.getAnalysis(-1).getPhonesForUser(id, 1, -1);
 
     Map<String, PhoneStats> phoneToAvgSorted = report.getPhoneToAvgSorted();
     if (phoneToAvgSorted == null) {
@@ -462,7 +462,7 @@ public class PerformanceTest extends BaseTest {
     //int id = 41; // big mandarin classroom user
     int id = 1;
     DatabaseImpl database = getSpanishDatabase();
-    PhoneReport phoneReport = database.getAnalysis(-1).getPhonesForUser(id, 1);
+    PhoneReport phoneReport = database.getAnalysis(-1).getPhonesForUser(id, 1, -1);
 
     Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
     long now = System.currentTimeMillis();

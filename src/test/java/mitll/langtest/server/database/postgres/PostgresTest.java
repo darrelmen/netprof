@@ -39,7 +39,6 @@ import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -532,7 +531,7 @@ public class PostgresTest extends BaseTest {
       String language = project.language();
       logger.info("lang " + language);
       int id = project.id();
-      List<WordScore> wordScoresForUser = database.getAnalysis(id).getWordScoresForUser(4, 1);
+      List<WordScore> wordScoresForUser = database.getAnalysis(id).getWordScoresForUser(4, 1, -1);
       for (WordScore ws : wordScoresForUser) {
         logger.info("testWords got " + ws);
       }

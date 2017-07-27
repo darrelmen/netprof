@@ -15,7 +15,6 @@ import mitll.langtest.client.custom.exercise.NewListButton;
 import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -102,47 +101,51 @@ public class UserListSupport {
                                    final DropdownBase emailList,
                                    Dropdown container
   ) {
-    ListServiceAsync listService = controller.getListService();
-
     //  logger.info("asking for " + id );
-    listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    controller.getListService().getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        addToList.clear();
-        removeFromList.clear();
-        emailList.clear();
-
-        boolean anyAdded = false;
-        boolean anyToRemove = false;
-        int user = controller.getUser();
-        for (final UserList ul : result) {
-          boolean isMyList = ul.getUserID() == user;
-          if (isMyList) {
-            knownNamesForDuplicateCheck.add(ul.getName().trim().toLowerCase());
-            if (!ul.containsByID(id)) {
-              anyAdded = true;
-              getAddListLink(ul, addToList, id, container);
-            } else {
-              anyToRemove = true;
-              getRemoveListLink(ul, removeFromList, id, container);
-            }
-          }
-
-          addSendLink(ul, emailList, isMyList);
-        }
-        if (!anyAdded) {
-          addToList.add(new NavLink(ITEM_ALREADY_ADDED));
-        }
-        if (!anyToRemove) {
-          removeFromList.add(new NavLink(NOT_ON_ANY_LISTS));
-        }
+        useLists(result, addToList, removeFromList, emailList, id, container);
         //   addSendLinkWhatYouSee(container);
       }
     });
+  }
+
+  private void useLists(Collection<UserList<CommonShell>> result,
+                        DropdownBase addToList,
+                        DropdownBase removeFromList, DropdownBase emailList, int id, Dropdown container) {
+    addToList.clear();
+    removeFromList.clear();
+    emailList.clear();
+
+    boolean anyAdded = false;
+    boolean anyToRemove = false;
+    int user = controller.getUser();
+    for (final UserList ul : result) {
+      boolean isMyList = ul.getUserID() == user;
+      if (isMyList) {
+        knownNamesForDuplicateCheck.add(ul.getName().trim().toLowerCase());
+        if (!ul.containsByID(id)) {
+          anyAdded = true;
+          getAddListLink(ul, addToList, id, container);
+        } else {
+          anyToRemove = true;
+          getRemoveListLink(ul, removeFromList, id, container);
+        }
+      }
+
+      addSendLink(ul, emailList, isMyList);
+    }
+    if (!anyAdded) {
+      addToList.add(new NavLink(ITEM_ALREADY_ADDED));
+    }
+    if (!anyToRemove) {
+      removeFromList.add(new NavLink(NOT_ON_ANY_LISTS));
+    }
   }
 
   private void addSendLink(UserList ul, DropdownBase addToList, boolean isMyList) {

@@ -308,6 +308,7 @@ public class ServerInitializationManagerNetProf {
     return in;
   }
 
+  boolean warned = false;
   private Attributes getManifestAttributes(ServletContext ctx) {
     InputStream in = ctx.getResourceAsStream("/META-INF/MANIFEST.MF");
     if (in != null) {
@@ -319,7 +320,10 @@ public class ServerInitializationManagerNetProf {
       }
     } else {
       //if (DEBUG)
-      log.warn("getManifestAttributes : Could not find manifest!");
+      if (!warned) {
+        log.warn("getManifestAttributes : Could not find manifest!");
+      warned =true;
+      }
     }
     return null;
   }

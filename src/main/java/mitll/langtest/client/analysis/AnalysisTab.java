@@ -51,6 +51,7 @@ import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -80,9 +81,17 @@ public class AnalysisTab extends DivWidget {
   private TimeWidgets timeWidgets;
   private final Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
 
+  public AnalysisTab(ExerciseController controller, final ShowTab showTab) {
+    this(controller, showTab, 1, null,
+        controller.getUser(), controller.getUserManager().getUserID(),
+        -1);
+  }
+
   /**
    * @param controller
    * @param userid
+   * @param listid
+   * @paramx listid
    * @see NewContentChooser#showProgress
    * @see UserContainer#gotClickOnItem
    */
@@ -91,41 +100,67 @@ public class AnalysisTab extends DivWidget {
                      int minRecordings,
                      DivWidget overallBottom,
                      int userid,
-                     String userChosenID) {
+                     String userChosenID,
+                     int listid) {
     getElement().setId("AnalysisTab");
 
     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
     this.controller = controller;
-    Icon playFeedback = new Icon(IconType.PLAY);
+
+    Icon playFeedback = getPlayFeedback();
+
+    boolean isTeacherView = overallBottom != null;
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid, userChosenID, minRecordings,
-        controller.getSoundManager(), playFeedback);
+        controller.getSoundManager(), playFeedback, listid, isTeacherView);
 
-    Panel timeControls = new HorizontalPanel();
-    timeControls.add(getTimeGroup());
-    timeControls.add(getTimeWindowStepper());
+    Panel timeControls = getTimeControls(playFeedback);
     analysisPlot.setTimeWidgets(timeWidgets);
-
-    playFeedback.addStyleName("leftFiveMargin");
-    playFeedback.setVisible(false);
 
     add(timeControls);
     add(analysisPlot);
 
-    DivWidget bottom = new DivWidget();
-    bottom.addStyleName("inlineFlex");
-    bottom.getElement().setId("bottom");
-    //bottom.addStyleName("floatLeftAndClear");
-    bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
-    if (overallBottom != null) { // are we in student or teacher view
+    DivWidget bottom = getBottom(isTeacherView);
+    if (isTeacherView) { // are we in student or teacher view
       overallBottom.clear();
       overallBottom.add(bottom); // teacher
-      //  isNarrow = true;
     } else {
       add(bottom); // student
     }
 
-    getWordScores(this.analysisServiceAsync, controller, userid, showTab, analysisPlot, bottom, minRecordings);
+    getWordScores(this.analysisServiceAsync, controller, userid, showTab, analysisPlot, bottom, minRecordings, listid);
+  }
+
+  @NotNull
+  private Icon getPlayFeedback() {
+    Icon playFeedback = new Icon(IconType.VOLUME_UP);
+    playFeedback.addStyleName("leftFiveMargin");
+    playFeedback.setVisible(false);
+    return playFeedback;
+  }
+
+  /**
+   * Why want a nine pixel left margin?
+   *
+   * @return
+   */
+  @NotNull
+  private DivWidget getBottom(boolean isTeacherView) {
+    DivWidget bottom = new DivWidget();
+    bottom.addStyleName("inlineFlex");
+    bottom.getElement().setId("bottom");
+    //bottom.addStyleName("floatLeftAndClear");
+    if (!isTeacherView) bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
+    return bottom;
+  }
+
+  @NotNull
+  private Panel getTimeControls(Widget playFeedback) {
+    Panel timeControls = new HorizontalPanel();
+    timeControls.add(getTimeGroup());
+    timeControls.add(getTimeWindowStepper());
+    timeControls.add(playFeedback);
+    return timeControls;
   }
 
   /**
@@ -248,6 +283,7 @@ public class AnalysisTab extends DivWidget {
    * @param analysisPlot
    * @param lowerHalf
    * @param minRecordings
+   * @param listid
    */
   private void getWordScores(final AnalysisServiceAsync service,
                              final ExerciseController controller,
@@ -255,8 +291,9 @@ public class AnalysisTab extends DivWidget {
                              final ShowTab showTab,
                              final AnalysisPlot analysisPlot,
                              final Panel lowerHalf,
-                             final int minRecordings) {
-    service.getWordScores(userid, minRecordings, new AsyncCallback<List<WordScore>>() {
+                             final int minRecordings,
+                             final int listid) {
+    service.getWordScores(userid, minRecordings, listid, new AsyncCallback<List<WordScore>>() {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("Got " + throwable);
@@ -264,8 +301,8 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(List<WordScore> wordScores) {
-        logger.info("getWordScores : got " + wordScores.size() + " for user #" + userid);
-        showWordScores(wordScores, controller, analysisPlot, showTab, lowerHalf, userid, minRecordings);
+        //logger.info("getWordScores : got " + wordScores.size() + " for user #" + userid);
+        showWordScores(wordScores, controller, analysisPlot, showTab, lowerHalf, userid, minRecordings, listid);
       }
     });
   }
@@ -276,7 +313,7 @@ public class AnalysisTab extends DivWidget {
                               ShowTab showTab,
                               Panel lowerHalf,
                               int userid,
-                              int minRecordings) {
+                              int minRecordings, int listid) {
     {
       logger.info("showWordScores " + wordScores.size());
       Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab,
@@ -291,7 +328,7 @@ public class AnalysisTab extends DivWidget {
     DivWidget soundsDiv = getSoundsDiv();
 
     lowerHalf.add(soundsDiv);
-    getPhoneReport(analysisServiceAsync, controller, userid, soundsDiv, analysisPlot, showTab, minRecordings);
+    getPhoneReport(analysisServiceAsync, controller, userid, soundsDiv, analysisPlot, showTab, minRecordings, listid);
   }
 
   private Panel getWordContainer(List<WordScore> wordScores,
@@ -324,7 +361,6 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @see #showWordScores
    * @param service
    * @param controller
    * @param userid
@@ -332,6 +368,8 @@ public class AnalysisTab extends DivWidget {
    * @param analysisPlot
    * @param showTab
    * @param minRecordings
+   * @param listid
+   * @see #showWordScores
    */
   private void getPhoneReport(AnalysisServiceAsync service,
                               final ExerciseController controller,
@@ -339,7 +377,8 @@ public class AnalysisTab extends DivWidget {
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot,
                               final ShowTab showTab,
-                              final int minRecordings) {
+                              final int minRecordings,
+                              int listid) {
     final PhoneExampleContainer exampleContainer =
         new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
 
@@ -347,7 +386,7 @@ public class AnalysisTab extends DivWidget {
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot);
     analysisPlot.addListener(phoneContainer);
 
-    service.getPhoneScores(userid, minRecordings, new AsyncCallback<PhoneReport>() {
+    service.getPhoneScores(userid, minRecordings, listid, new AsyncCallback<PhoneReport>() {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("Got " + throwable);

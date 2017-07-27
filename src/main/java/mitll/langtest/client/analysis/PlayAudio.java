@@ -136,13 +136,13 @@ class PlayAudio {
       @Override
       public void songStarted() {
         playFeedback.setVisible(true);
-        logger.info("\t songStarted song " + path1 + " -------  " + System.currentTimeMillis());
+        //logger.info("\t songStarted song " + path1 + " -------  " + System.currentTimeMillis());
       }
 
       @Override
       public void songEnded() {
         playFeedback.setVisible(false);
-        logger.info("\t songEnded song " + path1 + " -------  " + System.currentTimeMillis());
+        //logger.info("\t songEnded song " + path1 + " -------  " + System.currentTimeMillis());
         t = new Timer() {
           @Override
           public void run() {
@@ -171,12 +171,12 @@ class PlayAudio {
       @Override
       public void songStarted() {
         playFeedback.setVisible(true);
-        logger.info("playUserAudio songStarted song " + path1 + " -------  " + System.currentTimeMillis());
+        //logger.info("playUserAudio songStarted song " + path1 + " -------  " + System.currentTimeMillis());
       }
 
       @Override
       public void songEnded() {
-        logger.info("playUserAudio songEnded song " + path1 + " -------  " + System.currentTimeMillis());
+        //logger.info("playUserAudio songEnded song " + path1 + " -------  " + System.currentTimeMillis());
         playFeedback.setVisible(false);
       }
     });

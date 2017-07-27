@@ -45,11 +45,11 @@ import java.util.List;
 public interface AnalysisServiceAsync {
   void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
 
-  void getPerformanceForUser(int id, int minRecordings, AsyncCallback<UserPerformance> async);
+  void getPerformanceForUser(int id, int minRecordings, int listid, AsyncCallback<UserPerformance> async);
 
-  void getWordScores(int id, int minRecordings, AsyncCallback<List<WordScore>> async);
+  void getWordScores(int id, int minRecordings, int listid, AsyncCallback<List<WordScore>> async);
 
-  void getPhoneScores(int id, int minRecordings, AsyncCallback<PhoneReport> async);
+  void getPhoneScores(int id, int minRecordings, int listid, AsyncCallback<PhoneReport> async);
 
   /**
    * TODO : not sure why this is ever needed

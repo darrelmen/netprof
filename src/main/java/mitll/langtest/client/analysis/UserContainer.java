@@ -32,19 +32,31 @@
 
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.IsWidget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.list.ListSorting;
 import mitll.langtest.shared.analysis.UserInfo;
+import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonShell;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -56,8 +68,8 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
+  private final Logger logger = Logger.getLogger("UserContainer");
   //private final Logger logger = Logger.getLogger("UserContainer");
-
   private static final String CURRENT = "Avg";
   private static final int CURRENT_WIDTH = 60;
   private static final int DIFF_WIDTH = 55;
@@ -84,8 +96,69 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     super(controller, selectedUserKey, STUDENT);
     this.rightSide = rightSide;
     this.learnTab = learnTab;
-   // logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
+    // logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
     this.overallBottom = overallBottom;
+  }
+
+  @Override
+  protected IsWidget getRightOfHeader() {
+    DivWidget filterContainer = new DivWidget();
+
+    filterContainer.addStyleName("floatRight");
+    filterContainer.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    HTML w1 = new HTML("Filter by");
+    w1.addStyleName("leftFiveMargin");
+    w1.addStyleName("bottomFiveMargin");
+    w1.getElement().getStyle().setFontSize(14, Style.Unit.PX);
+    w1.getElement().getStyle().setColor("#999");
+    filterContainer.add(w1);
+
+    ListBox listBox = new ListBox();
+    filterContainer.add(listBox);
+    filterContainer.addStyleName("leftFiveMargin");
+
+    listBox.setWidth("150px");
+    listBox.addStyleName("floatLeft");
+    listBox.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
+
+    controller.getListService().getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Collection<UserList<CommonShell>> result) {
+        useLists(result, listBox);
+      }
+    });
+
+    return filterContainer;
+  }
+
+  private List<Integer> rememberedLists;
+  private int listid = -1;
+
+  private void useLists(Collection<UserList<CommonShell>> result, ListBox listBox) {
+    this.rememberedLists = new ArrayList<>();
+    result.forEach(ul -> rememberedLists.add(ul.getID()));
+
+    logger.info("There are " + result.size() + " lists");
+    listBox.addItem("(No List)");
+    result.forEach(ul -> listBox.addItem(ul.getName()));
+    listBox.addChangeHandler(event -> {
+      int selectedIndex = listBox.getSelectedIndex();
+
+      if (selectedIndex == 0) {
+        listid = -1;
+      }
+      else {
+        Integer listID = rememberedLists.get(selectedIndex - 1);
+        logger.info("selected index " + selectedIndex + " " + listID);
+        listid = listID;
+      }
+
+      gotClickOnItem(getSelected());
+    });
   }
 
   /**
@@ -171,21 +244,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
                                                                List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<UserInfo>() {
-          public int compare(UserInfo o1, UserInfo o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return Integer.valueOf(o1.getFinalScores()).compareTo(o2.getFinalScores());
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              return Integer.valueOf(o1.getFinalScores()).compareTo(o2.getFinalScores());
+            }
+          }
+          return -1;
         });
     return columnSortHandler;
   }
@@ -194,21 +265,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
                                                                  List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<UserInfo>() {
-          public int compare(UserInfo o1, UserInfo o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return Integer.valueOf(o1.getCurrent()).compareTo(o2.getCurrent());
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              return Integer.valueOf(o1.getCurrent()).compareTo(o2.getCurrent());
+            }
+          }
+          return -1;
         });
     return columnSortHandler;
   }
@@ -295,6 +364,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     };
   }
 
+  /**
+   * @param user
+   */
   public void gotClickOnItem(final UserInfo user) {
 //    logger.info("gotClickOnItem " + user.getUserID());
     super.gotClickOnItem(user);
@@ -309,6 +381,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     }*/
 
     rightSide.clear();
-    rightSide.add(new AnalysisTab(controller, learnTab, MIN_RECORDINGS, overallBottom, user.getID(), user.getUserID()));
+    rightSide.add(new AnalysisTab(controller, learnTab, listid == -1 ? MIN_RECORDINGS : 0, overallBottom, user.getID(), user.getUserID(), listid));
   }
 }
