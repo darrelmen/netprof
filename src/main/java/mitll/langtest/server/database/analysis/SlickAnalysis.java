@@ -54,10 +54,11 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final int WARN_THRESH = 100;
   private static final String ANSWERS = "answers";
   private SlickResultDAO resultDAO;
-  private static final boolean DEBUG = true;
   private String language;
   private int projid;
   private Project project;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param database
@@ -207,7 +208,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
 
-    logger.info("getUserToResults for " + perfs.size() + " results");
+   // logger.info("getUserToResults for " + perfs.size() + " results");
 
     int emptyCount = 0;
     for (SlickPerfResult perf : perfs) {

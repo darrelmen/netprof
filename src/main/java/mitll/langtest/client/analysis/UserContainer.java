@@ -69,7 +69,8 @@ import java.util.logging.Logger;
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
   private final Logger logger = Logger.getLogger("UserContainer");
-  //private final Logger logger = Logger.getLogger("UserContainer");
+
+  private static final int FILTER_BY = 19;
   private static final String CURRENT = "Avg";
   private static final int CURRENT_WIDTH = 60;
   private static final int DIFF_WIDTH = 55;
@@ -105,12 +106,17 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     DivWidget filterContainer = new DivWidget();
 
     filterContainer.addStyleName("floatRight");
-    filterContainer.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    filterContainer.getElement().getStyle().setMarginTop(FILTER_BY, Style.Unit.PX);
+
     HTML w1 = new HTML("Filter by");
-    w1.addStyleName("leftFiveMargin");
-    w1.addStyleName("bottomFiveMargin");
+
+    w1.addStyleName("floatLeft");
+    w1.addStyleName("rightFiveMargin");
+    w1.addStyleName("topFiveMargin");
+
     w1.getElement().getStyle().setFontSize(14, Style.Unit.PX);
     w1.getElement().getStyle().setColor("#999");
+
     filterContainer.add(w1);
 
     ListBox listBox = new ListBox();
