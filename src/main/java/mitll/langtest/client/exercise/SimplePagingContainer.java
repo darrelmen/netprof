@@ -74,7 +74,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   protected SingleSelectionModel<T> selectionModel;
   int verticalUnaccountedFor = 100;
   private SimplePager pager;
-
   //  private static final boolean debug = false;
 
   protected SimplePagingContainer(ExerciseController controller) {
@@ -88,6 +87,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
    */
   public Panel getTableWithPager(ListOptions listOptions) {
+    logger.info("getTableWithPager " +listOptions);
+
     makeCellTable(listOptions.isSort());
 
     // Connect the table to the data provider.
@@ -97,13 +98,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     // Create a SimplePager.
     final SimplePager pager =
         new SimplePager(SimplePager.TextLocation.CENTER, true, true);
-    /*{
-          @Override
-          protected void onRangeOrRowCountChanged() {
-            super.onRangeOrRowCountChanged();
-          }
-        };
-*/
+
     this.pager = pager;
     // Set the cellList as the display.
     pager.setDisplay(table);
@@ -153,6 +148,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @see #getTableWithPager
    */
   private void makeCellTable(boolean sortEnglish) {
+    logger.info("simplePaging : makeCellTable -------- ");
     this.table = makeCellTable(chooseResources());
     configureTable(sortEnglish);
   }
@@ -166,16 +162,15 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   protected CellTable.Resources chooseResources() {
-
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     boolean isRTL = projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
 
     CellTable.Resources o;
     if (isRTL) {   // so when we truncate long entries, the ... appears on the correct end
-      //logger.info("simplePaging : chooseResources RTL - content");
+    //  logger.info("simplePaging : chooseResources RTL - content");
       o = GWT.create(RTLTableResources.class);
     } else {
-      // logger.info("simplePaging : chooseResources LTR - content");
+    //  logger.info("simplePaging : chooseResources LTR - content");
       o = GWT.create(TableResources.class);
     }
     return o;

@@ -84,8 +84,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final String header;
 
   private static final String SIGNED_UP1 = "Started";
-  // private static final int STUDENT_WIDTH = 300;
+
   static final String SELECTED_USER = "selectedUser";
+
   static final int ID_WIDTH = 130;
   private int idWidth = ID_WIDTH;
   private int pageSize = PAGE_SIZE;
@@ -339,12 +340,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     table.setSelectionModel(selectionModel);
   }
 
-  @Override
+/*  @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
     o = GWT.create(UserContainer.LocalTableResources.class);
     return o;
-  }
+  }*/
 
   private ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
                                                        List<T> dataList) {
@@ -499,12 +500,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   /**
    * MUST BE PUBLIC
    */
-  public interface LocalTableResources extends CellTable.Resources {
-    /**
+/*  public interface LocalTableResources extends CellTable.Resources {
+    *//**
      * The styles applied to the table.
-     */
+     *//*
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();
-  }
+  }*/
 }

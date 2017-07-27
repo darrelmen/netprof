@@ -313,9 +313,10 @@ public class AnalysisTab extends DivWidget {
                               ShowTab showTab,
                               Panel lowerHalf,
                               int userid,
-                              int minRecordings, int listid) {
+                              int minRecordings,
+                              int listid) {
     {
-      logger.info("showWordScores " + wordScores.size());
+     // logger.info("showWordScores " + wordScores.size());
       Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab,
           new Heading(3, WORDS, SUBTITLE));
 

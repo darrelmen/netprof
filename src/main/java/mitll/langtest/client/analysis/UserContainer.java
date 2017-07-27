@@ -68,6 +68,7 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
+  public static final String NO_LIST = "(No List)";
   private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int FILTER_BY = 19;
@@ -148,8 +149,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     this.rememberedLists = new ArrayList<>();
     result.forEach(ul -> rememberedLists.add(ul.getID()));
 
-    logger.info("There are " + result.size() + " lists");
-    listBox.addItem("(No List)");
+   // logger.info("There are " + result.size() + " lists");
+    listBox.addItem(NO_LIST);
     result.forEach(ul -> listBox.addItem(ul.getName()));
     listBox.addChangeHandler(event -> {
       int selectedIndex = listBox.getSelectedIndex();
@@ -159,7 +160,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       }
       else {
         Integer listID = rememberedLists.get(selectedIndex - 1);
-        logger.info("selected index " + selectedIndex + " " + listID);
+    //    logger.info("selected index " + selectedIndex + " " + listID);
         listid = listID;
       }
 
