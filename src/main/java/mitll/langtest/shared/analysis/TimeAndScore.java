@@ -45,7 +45,7 @@ import java.util.List;
 
 public class TimeAndScore extends SimpleTimeAndScore implements Comparable<SimpleTimeAndScore> {
   private int exid;
-  private float cumulativeAverage;
+  private int cumulativeAverage;
 
   /**
    * @param bs
@@ -66,7 +66,7 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
   public TimeAndScore(int exid, long timestamp, float score, float cumulativeAverage, WordAndScore wordAndScore) {
     super(timestamp, score, wordAndScore);
     this.exid = exid;
-    this.cumulativeAverage = cumulativeAverage;
+    this.cumulativeAverage = toInt(cumulativeAverage);
   }
 
   public TimeAndScore() {
@@ -74,21 +74,10 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
 
   @Override
   public int compareTo(SimpleTimeAndScore o) {
-    return Long.valueOf(getTimestamp()).compareTo(o.getTimestamp());
+    return Long.compare(getTimestamp(), o.getTimestamp());
   }
 
-  private String getTimeString() {
-    return "" + getTimestamp();
-  }
-
-  public String toCSV() {
-    return getTimeString() +
-        "," + getScore() + "," + getCumulativeAverage();
-  }
-
-  public float getCumulativeAverage() {
-    return cumulativeAverage;
-  }
+  public float getCumulativeAverage() {   return fromInt(cumulativeAverage);  }
 
   /**
    * @return

@@ -130,7 +130,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
     return ((float)pronScore)/ SCALE;
   }
 
-  public int getIntPronScore() {
+  int getIntPronScore() {
     return pronScore;
   }
 
@@ -169,7 +169,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   }
 
   public String toString() {
-    return "WordScore exid " + exid + "/" + resultID + " score " + pronScore + "  : " + transcript +
+    return "WordScore exid " + exid + "/" + resultID + " score " + getPronScore() + "  : " + transcript +
         " native " + refAudio + " fileRef " + answerAudio;
   }
 }

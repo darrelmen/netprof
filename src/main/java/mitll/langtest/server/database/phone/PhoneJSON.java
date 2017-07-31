@@ -93,6 +93,8 @@ public class PhoneJSON {
   }
 
   /**
+   * for iPhone/iPad
+   *
    * LIMITED TO 30 examples!
    * {@link #MAX_EXAMPLES}
    *

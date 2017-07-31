@@ -314,7 +314,7 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
     if (o1 != null) {
       if (o2 == null) return 1;
       else {
-        return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
+        return Long.compare(o1.getTimestamp(), o2.getTimestamp());
       }
     }
     return -1;
@@ -397,12 +397,12 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
       addItems(sortedHistory);
     } else {
       // logger.info("Starting from " +from + " : " +to);
-      logger.info("timeChanged : from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
+  //    logger.info("timeChanged : from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
       heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " + yearShortFormat.format(new Date(to)));
 
       SortedSet<WordScore> wordScores = byTime.subSet(new WordScore(from+1), new WordScore(to+1));
 
-      logger.info("timeChanged : wordScores " + wordScores.size());
+//      logger.info("timeChanged : wordScores " + wordScores.size());
 
       List<WordScore> filtered = new ArrayList<>(wordScores);
       filtered.sort((o1, o2) -> -1*Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));

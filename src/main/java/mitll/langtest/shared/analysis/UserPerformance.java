@@ -65,7 +65,7 @@ public class UserPerformance implements Serializable {
 
   /**
    * @param userID
-   * @see Analysis#getPerformanceForUser
+   * @see mitll.langtest.server.database.analysis.H2Analysis#getPerformanceForUser
    */
   public UserPerformance(long userID) {
     this.userID = userID;
@@ -174,7 +174,7 @@ public class UserPerformance implements Serializable {
 
   /**
    * @param granularityToSessions
-   * @see Analysis#getPerformanceForUser
+   * @see Analysis#getUserPerformance(long, Map)
    */
   public void setGranularityToSessions(Map<Long, List<PhoneSession>> granularityToSessions) {
     this.granularityToSessions = granularityToSessions;

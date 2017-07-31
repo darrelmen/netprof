@@ -103,7 +103,7 @@ public class BasePhoneDAO extends DAO {
    * @return
    * @see SlickPhoneDAO#getPhoneReport
    */
-  WordAndScore getAndRememberWordAndScore(//Map<Integer, String> idToRef,
+  WordAndScore getAndRememberWordAndScore(
                                           String refAudioForExercise,
                                           Map<String, List<PhoneAndScore>> phoneToScores,
                                           Map<String, List<WordAndScore>> phoneToWordAndScore,

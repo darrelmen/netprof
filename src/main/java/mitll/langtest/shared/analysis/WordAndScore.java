@@ -35,6 +35,7 @@ package mitll.langtest.shared.analysis;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.server.database.phone.PhoneDAO;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,9 +47,9 @@ import java.util.Map;
  */
 public class WordAndScore extends WordScore {
   private int wseq;
-  private int seq;
+  private transient int seq;
   private String word;
-  private String scoreJson;
+  private transient String scoreJson;
 
   /**
    * @param word
@@ -101,6 +102,10 @@ public class WordAndScore extends WordScore {
     return wseq;
   }
 
+  /**
+   * @see mitll.langtest.server.database.phone.PhoneJSON#getJsonForWord
+   * @return
+   */
   public int getSeq() {
     return seq;
   }
@@ -109,6 +114,10 @@ public class WordAndScore extends WordScore {
     return word;
   }
 
+  /**
+   * @see mitll.langtest.server.database.phone.PhoneJSON#getWordsJsonArray(Map, Map, Map, List)
+   * @return
+   */
   public String getScoreJson() {
     return scoreJson;
   }

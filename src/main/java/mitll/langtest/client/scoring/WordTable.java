@@ -128,27 +128,34 @@ public class WordTable {
   public String makeColoredTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     StringBuilder builder = new StringBuilder();
     List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+
 //    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : getWordToPhones(netPronImageTypeToEndTime).entrySet()) {
 //      builder.append(getColoredSpanForSegment(pair));
 //    }
-    words.forEach(word -> builder.append(getColoredSpanForWord(word)));
+
+    words
+        .stream()
+        .filter(segment -> !shouldSkipPhone(segment.getEvent()))
+        .forEach(word -> builder.append(getColoredSpanForWord(word)));
 
     return builder.toString();
   }
 
   /**
    * Somehow unknown model is getting out.
-   * @param pair
+   * @paramx pair
    * @return
    */
-  private String getColoredSpanForSegment(Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
-    return getColoredSpanForWord(pair.getKey());
-  }
+//  private String getColoredSpanForSegment(Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
+//    return getColoredSpanForWord(pair.getKey());
+//  }
 
   private String getColoredSpanForWord(TranscriptSegment word) {
     String event = word.getEvent();
     if (event.equals("UNKNOWNMODEL")) event = "Low score";
-    return getColoredSpan(event, word.getScore());
+    String coloredSpan = getColoredSpan(event, word.getScore());
+  //  logger.info("span '" + word.getEvent() + "' " + word.getScore() + " ");
+    return coloredSpan;
   }
 
   public String getColoredSpan(String event, float score) {

@@ -46,15 +46,17 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private static final int TOTAL_THRESHOLD = 200;
   private static final int TOO_MANY_SESSIONS = 15;
 
-  private double mean;
-  private double stdev;
-  private double meanTime;
+  private int mean;
+  private int stdev;
+  private long meanTime;
   private long count = 0;
   private long bin;
   private long start;
   private long end;
   private String phone;
   private List<WordAndScore> examples;
+
+  private static final int SCALE = 1000;
 
   /**
    * @param phone
@@ -67,17 +69,26 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
    * @param end
    * @see mitll.langtest.server.database.analysis.PhoneAnalysis#getPhoneSessions(String, List, boolean)
    */
-  public PhoneSession(String phone, long bin, long count, double mean, double stdev, double meanTime, long start, long end,
+  public PhoneSession(String phone, long bin, long count, double mean, double stdev, long meanTime, long start, long end,
                       List<WordAndScore> examples) {
     this.phone = phone;
     this.bin = bin;
     this.count = count;
-    this.mean = mean;
-    this.stdev = stdev;
+    this.mean = toInt(mean);
+    this.stdev = toInt(stdev);
     this.meanTime = meanTime;
     this.start = start;
     this.end = end;
     this.examples = examples;
+  }
+
+
+  protected int toInt(double value) {
+    return (int)(value* SCALE);
+  }
+
+  protected double fromInt(int value) {
+    return ((double)value)/ SCALE;
   }
 
   /**
@@ -93,14 +104,14 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   }
 
   public double getMean() {
-    return mean;
+    return fromInt(mean);
   }
 
   public double getStdev() {
-    return stdev;
+    return fromInt(stdev);
   }
 
-  private double getMeanTime() {
+  private long getMeanTime() {
     return meanTime;
   }
 
@@ -122,9 +133,14 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
             total > TOTAL_THRESHOLD;
   }
 
+  /**
+   * sort by time -
+   * @param o
+   * @return
+   */
   @Override
   public int compareTo(PhoneSession o) {
-    return Double.valueOf(meanTime).compareTo(o.getMeanTime());
+    return Long.compare(meanTime, o.getMeanTime());
   }
 
   public long getCount() {

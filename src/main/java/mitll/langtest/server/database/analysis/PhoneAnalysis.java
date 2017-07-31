@@ -159,14 +159,19 @@ public class PhoneAnalysis {
         internal.remember();
         double mean = internal.getMean();
         double stdev1 = internal.getStdev();
-        double meanTime = internal.getMeanTime();
+        long meanTime = internal.getMeanTime();
         if (!prune || (internal.getCount() > REAL_MIN_SESSION_SIZE || size == 1)) {
           if (internal.getEnd() == 0) {
             logger.error("getPhoneSessions got 0 end time " + internal);
           }
           List<WordAndScore> examples = new ArrayList<>();
           examples.addAll(internal.getQueue());
-          sessions2.add(new PhoneSession(key, internal.getBin(), internal.getCount(), mean, stdev1, meanTime,
+          sessions2.add(new PhoneSession(key,
+              internal.getBin(),
+              internal.getCount(),
+              mean,
+              stdev1,
+              meanTime,
               internal.getStart(), internal.getEnd(), examples));
         }
       }

@@ -43,8 +43,9 @@ import java.io.Serializable;
  * @see mitll.langtest.client.analysis.AnalysisPlot#addSeries
  */
 public class SimpleTimeAndScore implements Serializable {
+  private static final int SCALE = 1000;
   private long timestamp;
-  private float score;
+  private int score;
   private transient WordAndScore wordAndScore;
 
   /**
@@ -54,7 +55,7 @@ public class SimpleTimeAndScore implements Serializable {
    */
   SimpleTimeAndScore(long timestamp, float score, WordAndScore wordAndScore) {
     this.timestamp = timestamp;
-    this.score = score;
+    this.score = toInt(score);
     this.wordAndScore = wordAndScore;
   }
 
@@ -65,7 +66,7 @@ public class SimpleTimeAndScore implements Serializable {
    */
   SimpleTimeAndScore( long timestamp, float score) {
     this.timestamp = timestamp;
-    this.score = score;
+    this.score = toInt(score);
     this.wordAndScore = null;
   }
 
@@ -86,18 +87,25 @@ public class SimpleTimeAndScore implements Serializable {
    * @return
    */
   public float getScore() {
-    return score;
+    return fromInt(score);
+  }
+
+  protected int toInt(float value) {
+    return (int)(value* SCALE);
+  }
+
+  protected float fromInt(int value) {
+    return ((float)value)/ SCALE;
+  }
+
+  protected String getTimeString() {
+    return "" + getTimestamp();
   }
 
   public String toString() {
-    String format = getTimeString();
-    return "at\t" + format + " avg score for " +
+    return "at\t" + getTimeString() + " avg score for " +
         //childCount + "\t" +
         "=\t" + score;
-  }
-
-  private String getTimeString() {
-    return "" + getTimestamp();
   }
 
 }

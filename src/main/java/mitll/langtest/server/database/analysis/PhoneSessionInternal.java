@@ -60,7 +60,7 @@ public class PhoneSessionInternal {
 
   /**
    * @param bin
-   * @see PhoneAnalysis#partition(List, List, Map, Map)
+   * @see PhoneAnalysis#partition
    */
   PhoneSessionInternal(long bin) {
     this.bin = bin;
@@ -99,8 +99,8 @@ public class PhoneSessionInternal {
     return stdev;
   }
 
-  double getMeanTime() {
-    return meanTime;
+  long getMeanTime() {
+    return (long)meanTime;
   }
 
   public long getCount() {

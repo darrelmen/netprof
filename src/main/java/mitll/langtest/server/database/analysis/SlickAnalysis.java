@@ -62,7 +62,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private Project project;
 
   private static final boolean DEBUG = false;
-  IAudioDAO audioDAO;
+  private IAudioDAO audioDAO;
 
   /**
    * @param database
