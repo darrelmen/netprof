@@ -513,7 +513,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @param id
    * @return
-   * @seex #deleteItem(int, int)
    * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
    * @see #getCustomOrPredefExercise(int, int)
@@ -1419,7 +1418,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     CommonExercise toRet = getExercise(projid, id);
     if (toRet == null) {
       // if (warns++ < 50)
-      logger.error("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
+      logger.error("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
+          " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }
 

@@ -133,11 +133,15 @@ public class WordTable {
 //      builder.append(getColoredSpanForSegment(pair));
 //    }
 
-    words
-        .stream()
-        .filter(segment -> !shouldSkipPhone(segment.getEvent()))
-        .forEach(word -> builder.append(getColoredSpanForWord(word)));
-
+    if (words == null) {
+      logger.warning("no transcript?");
+    }
+    else {
+      words
+          .stream()
+          .filter(segment -> !shouldSkipPhone(segment.getEvent()))
+          .forEach(word -> builder.append(getColoredSpanForWord(word)));
+    }
     return builder.toString();
   }
 

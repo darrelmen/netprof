@@ -165,9 +165,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
     populateGranToLabel();
 
     this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback);
-
-   // getPerformanceForUser(this.service, userid, userChosenID, minRecordings, listid, isTeacherView);
-
   }
 
   private void populateGranToLabel() {

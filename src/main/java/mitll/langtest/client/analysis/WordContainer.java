@@ -55,6 +55,8 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 import org.jetbrains.annotations.NotNull;
 
@@ -345,7 +347,14 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
 
       @Override
       public SafeHtml getValue(WordScore shell) {
-        String columnText = new WordTable().makeColoredTable(shell.getTranscript());
+        Map<NetPronImageType, List<TranscriptSegment>> transcript = shell.getTranscript();
+
+        if (transcript == null) logger.warning("getItemColumn no transcript for " + shell);
+        else if (transcript.get(NetPronImageType.WORD_TRANSCRIPT) == null) {
+          logger.warning("getItemColumn no word transcript for " + shell);
+        }
+
+        String columnText = new WordTable().makeColoredTable(transcript);
         if (columnText.isEmpty()) {
           CommonShell exercise = getShell(shell.getExid());
           // logger.info("getItemColumn : column text empty for id " + shell.getExID() + " and found ex " + exercise);

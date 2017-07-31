@@ -61,6 +61,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final String MISSING_ENGLISH = "missing english";
   private static final boolean DEBUG = false;
   private static final String SEMI = ";";
+  private static final int MAX_WARNS = Integer.MAX_VALUE;
 
   private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
 
@@ -385,7 +386,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     synchronized (this) {
       CommonExercise commonExercise = idToExercise.get(id);
       if (commonExercise == null) {
-        if (warns++ < 50)
+        if (warns++ < MAX_WARNS)
           logger.warn(this + " couldn't find exercise " + id + " in " + idToExercise.size() + " exercises (" + warns + " warned)");
       }
       return commonExercise;

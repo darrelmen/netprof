@@ -90,7 +90,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final String UID_F = "userId";
   private static final String PASS_F = "pass";
   private static final String LOCALHOST = "127.0.0.1";
-  private static final boolean ALWAYS_USE_DOMINO_CACHE = true;
+  private static final boolean USE_DOMINO_IGNITE = true;
+  private static final boolean USE_DOMINO_CACHE = false;
 
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
@@ -134,7 +135,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       serializer = Mongo.makeSerializer();
 //      logger.info("OK made serializer " + serializer);
       Mailer mailer = new Mailer(new MailerProperties(props));
-      props.setProperty(CACHE_ENABLED_PROP,"true");
+      props.setProperty(CACHE_ENABLED_PROP,""+ USE_DOMINO_CACHE);
       ServerProperties dominoProps =
           new ServerProperties(props, "1.0", "demo", "0", "now");
 
@@ -143,7 +144,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       //     logger.info("DominoUserDAOImpl app name is " + appName);
 
       ignite = null;
-      if (/*dominoProps.isCacheEnabled() ||*/ ALWAYS_USE_DOMINO_CACHE) {
+      if (/*dominoProps.isCacheEnabled() ||*/ USE_DOMINO_IGNITE) {
         ignite = getIgnite();
         if (ignite != null) {
           ignite.configuration().setGridLogger(new Slf4jLogger());
@@ -155,9 +156,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         logger.debug("DominoUserDAOImpl no cache");
       }
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
-//      logger.debug("DominoUserDAOImpl made delegate " + delegate.getClass());
-//      logger.debug("Got " + ignite);
-//      logger.debug("Got " +  dominoProps.isCacheEnabled());
+      logger.debug("DominoUserDAOImpl made delegate " + delegate.getClass());
+      logger.debug("DominoUserDAOImpl ignite = " + ignite);
+      logger.debug("DominoUserDAOImpl isCacheEnabled = " +  dominoProps.isCacheEnabled());
       myDelegate = makeMyServiceDelegate();//dominoProps.getUserServiceProperties(), mailer, pool, serializer);
 
       dominoAdminUser = delegate.getAdminUser();

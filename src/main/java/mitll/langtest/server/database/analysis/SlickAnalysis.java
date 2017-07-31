@@ -107,7 +107,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         getPhoneReport(userid, bestForUser, language, project));
 
     long now = System.currentTimeMillis();
-    logger.info("Return (took " + (now - then) +        ") " + analysisReport);
+    logger.info("Return (took " + (now - then) +        ") analysis report");// + analysisReport);
     return analysisReport;
   }
 
@@ -312,9 +312,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   private void getNativeAudio(Collection<SlickPerfResult> perfs) {
     List<CommonExercise> exercises = new ArrayList<>();
+
+    logger.info("getNativeAudio getting exercises for " + perfs.size());
+
     perfs.forEach(perf -> exercises.add(database.getCustomOrPredefExercise(projid, perf.exid())));
 
     // Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
+    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size());
 
     audioDAO.attachAudioToExercises(exercises, language);
   }
