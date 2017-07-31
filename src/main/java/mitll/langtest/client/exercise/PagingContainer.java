@@ -66,7 +66,7 @@ import java.util.logging.Logger;
 public abstract class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
   private final Logger logger = Logger.getLogger("PagingContainer");
 
-  public static final double FIFTY = 50.0;
+  private static final double FIFTY = 50.0;
   private static final int MAX_LENGTH_ID = 17;
   private static final int JAPANESE_LENGTH = 9;
   private static final String TRUNCATED = "...";
@@ -77,7 +77,6 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   private final boolean english;
   private final boolean showExerciseState;
   private int FLLength = MAX_LENGTH_ID;
-  // boolean showCompleted;
 
   /**
    * @param controller
@@ -159,23 +158,21 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     ColumnSortEvent.ListHandler<T> columnSortHandler2 = new ColumnSortEvent.ListHandler<>(dataList);
 
     columnSortHandler2.setComparator(flColumn,
-        new Comparator<T>() {
-          public int compare(T o1, T o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                String id1 = o1.getForeignLanguage();
-                String id2 = o2.getForeignLanguage();
-                return id1.toLowerCase().compareTo(id2.toLowerCase());
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              String id1 = o1.getForeignLanguage();
+              String id2 = o2.getForeignLanguage();
+              return id1.toLowerCase().compareTo(id2.toLowerCase());
+            }
+          }
+          return -1;
         });
     return columnSortHandler2;
   }
@@ -213,7 +210,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
+        if (isClick(event)) {
           gotClickOnItem(object);
         }
       }
@@ -275,6 +272,10 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     };
   }
 
+  private boolean isClick(NativeEvent event) {
+    return BrowserEvents.CLICK.equals(event.getType());
+  }
+
   private String truncate(String columnText) {
     int lengthToUse = MAX_LENGTH_ID;
     if (columnText.length() > lengthToUse) columnText = columnText.substring(0, lengthToUse - 3) + TRUNCATED;
@@ -295,7 +296,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
+        if (isClick(event)) {
           gotClickOnItem(object);
         }
       }

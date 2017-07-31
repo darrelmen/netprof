@@ -152,10 +152,18 @@ public class MiniUser implements HasID, Comparable<HasID> {
     return isAdmin;
   }
 
+  /**
+   * First name
+   * @return
+   */
   public String getFirst() {
     return first;
   }
 
+  /**
+   * Last name
+   * @return
+   */
   public String getLast() {
     return last;
   }

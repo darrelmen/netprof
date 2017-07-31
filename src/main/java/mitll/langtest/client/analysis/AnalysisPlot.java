@@ -70,6 +70,7 @@ import java.util.logging.Logger;
  * @since 10/19/15.
  */
 public class AnalysisPlot extends TimeSeriesPlot {
+  public static final String SCORE_SUFFIX = " pronunciation score (Drag to zoom in, click to hear)";
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int MIN_SESSION_COUNT = 50;
@@ -216,7 +217,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
           months.addAll(getPeriods(phoneSessions1, MONTH, last));
         }
-        addChart(userPerformance, userChosenID,listid != -1, isTeacherView);
+        addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
       }
     });
   }
@@ -278,20 +279,28 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
       add(new Label(text));
     } else {
-      float percentAvg = userPerformance.getRawAverage() * 100;
-      int rawTotal = rawBestScores.size();
-      String subtitle = "Score and average :" + rawTotal + " items, avg " + (int) percentAvg + " %";
-      String first = userPerformance.getFirst();
-      String last = userPerformance.getLast();
-      String name = (first == null || first.isEmpty()) && (last == null || last.isEmpty()) ? "" : " (" +
-          first + " " + last +
-          ")";
-      String title = "<b>" + userChosenID + " " + name + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
-      chart = getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance);
+      chart = getChart("<b>" + userChosenID + " " + getUserName(userPerformance) + "</b>" + SCORE_SUFFIX,
+          getSubtitle(userPerformance, rawBestScores), CUMULATIVE_AVERAGE, userPerformance);
       add(chart);
     }
     setRawBestScores(rawBestScores);
     showSeriesByVisible();
+  }
+
+  @NotNull
+  private String getSubtitle(UserPerformance userPerformance, List<TimeAndScore> rawBestScores) {
+    float percentAvg = userPerformance.getRawAverage() * 100;
+    int rawTotal = rawBestScores.size();
+    return "Score and average : " + rawTotal + " items, avg " + (int) percentAvg + " %";
+  }
+
+  @NotNull
+  private String getUserName(UserPerformance userPerformance) {
+    String first = userPerformance.getFirst();
+    String last = userPerformance.getLast();
+    return (first == null || first.isEmpty()) && (last == null || last.isEmpty()) ? "" : " (" +
+        first + " " + last +
+        ")";
   }
 
   private void showSeriesByVisible() {
@@ -363,6 +372,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @param title
    * @param subtitle
    * @param seriesName
+   * @param userPerformance
    * @return
    * @see AnalysisPlot#AnalysisPlot
    */

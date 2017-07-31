@@ -130,9 +130,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     pager.previousPage();
   }
 
-/*  protected void gotRangeChange() {
-  }*/
-
   /**
    * @param sortEnglish
    * @see #configureTable

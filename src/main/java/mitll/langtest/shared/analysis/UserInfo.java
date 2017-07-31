@@ -65,22 +65,16 @@ public class UserInfo implements HasID {
 
   /**
    * @param bestScores
-   * @param initialSamples
    * @param finalSamples
    * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    */
-  public UserInfo(List<BestScore> bestScores, long startTime, int initialSamples, int finalSamples) {
+  public UserInfo(List<BestScore> bestScores, long startTime, int finalSamples) {
     this.bestScores = bestScores;
     this.num = bestScores.size();
     this.startTime = startTime;
 
     // done on server
-    Collections.sort(bestScores, new Comparator<BestScore>() {
-      @Override
-      public int compare(BestScore o1, BestScore o2) {
-        return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
-      }
-    });
+    bestScores.sort(Comparator.comparingLong(SimpleTimeAndScore::getTimestamp));
 
 //    List<BestScore> initialScores = bestScores.subList(0, Math.min(initialSamples, bestScores.size()));
     List<BestScore> finalScores = bestScores.subList(num - Math.min(finalSamples, num), num);

@@ -66,7 +66,7 @@ public abstract class Analysis extends DAO {
   private final ParseResultJson parseResultJson;
   private final IPhoneDAO phoneDAO;
 
-   /**
+  /**
    * @param database
    * @param phoneDAO
    * @see DatabaseImpl#getAnalysis(int)
@@ -128,12 +128,10 @@ public abstract class Analysis extends DAO {
     for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
       Integer userid = pair.getKey();
 
-      //String userChosenID = userDAO.getUserChosenID(userid);
       MiniUser miniUser = userDAO.getMiniUser(userid);
       if (miniUser == null) {
         logger.error("getUserInfos huh? no user for " + userid);
       } else {
-        //   String userID = user.getUserID();
         String userChosenID = miniUser.getUserID();
         boolean isLL = database.getServerProps().getLincolnPeople().contains(userChosenID);
         if (!isLL) {
@@ -230,12 +228,10 @@ public abstract class Analysis extends DAO {
       if (values.size() > 1) logger.error("getUserPerformance only expecting one user for " + id);
       UserInfo next = values.iterator().next();
       if (DEBUG) logger.debug("getUserPerformance results for " + values.size() + "  first  " + next);
-      List<BestScore> resultsForQuery = next.getBestScores();
-
-      if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + resultsForQuery.size());
-      UserPerformance userPerformance = new UserPerformance(id, resultsForQuery, next.getFirst(), next.getLast());
+      if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + next.getBestScores().size());
+      UserPerformance userPerformance = new UserPerformance(id, next.getBestScores(), next.getFirst(), next.getLast());
       List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-      logger.debug("getUserPerformance for " +id + " found " + rawBestScores.size() + " scores");
+      logger.debug("getUserPerformance for " + id + " found " + rawBestScores.size() + " scores");
       userPerformance.setGranularityToSessions(
           new PhoneAnalysis().getGranularityToSessions(rawBestScores));
       return userPerformance;
@@ -277,10 +273,10 @@ public abstract class Analysis extends DAO {
   PhoneReport getPhoneReport(int userid, Map<Integer, UserInfo> best, String language, Project project) {
     long then = System.currentTimeMillis();
     long start = then;
-    long now = then;
+    long now;
 
     if (DEBUG)
-      logger.debug(" getPhonesForUser " + userid +  " got " + best.size());
+      logger.debug(" getPhonesForUser " + userid + " got " + best.size());
 
     if (best.isEmpty()) return new PhoneReport();
 
@@ -320,16 +316,19 @@ public abstract class Analysis extends DAO {
   }
 
   /**
+   * remember the last best attempt we have in a sequence for an item, but if they come back to practice it more than 5 minutes later
+   * consider it a new score
+   *
    * @param minRecordings
    * @param userToBest
    * @return
-   * @paramx sql
    * @see SlickAnalysis#getBest
    */
   protected Map<Integer, UserInfo> getBestForQuery(int minRecordings, Map<Integer, List<BestScore>> userToBest) {
-//    Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement, sql);
     if (DEBUG) {
-      logger.info("getBestForQuery min " +minRecordings+ " got " + userToBest.values().iterator().next().size());
+      Collection<List<BestScore>> values = userToBest.values();
+      int size = values.isEmpty() ? 0 : values.iterator().next().size();
+      logger.info("getBestForQuery min " + minRecordings + " got " + size);
     }
 
     Map<Integer, List<BestScore>> userToBest2 = new HashMap<>();
@@ -346,40 +345,45 @@ public abstract class Analysis extends DAO {
       int last = -1;
 
       long lastTimestamp = 0;
-      // int childCount = 0;
       BestScore lastBest = null;
       Set<Integer> seen = new HashSet<>();
 
-      for (BestScore bs : pair.getValue()) {
+      List<BestScore> bestScores1 = pair.getValue();
+      if (DEBUG) logger.info("getBestForQuery examining " + bestScores1.size() + " best scores for " + userID);
+
+      // remember the last best attempt we have in a sequence, but if they come back to practice it more than 5 minutes later
+      // consider it a new score
+      for (BestScore bs : bestScores1) {
         int id = bs.getResultID();
         int exid = bs.getExId();
         long time = bs.getTimestamp();
 
-        Long aLong = userToEarliest.get(userID);
-        if (aLong == null || time < aLong) userToEarliest.put(userID, time);
+        {
+          Long aLong = userToEarliest.get(userID);
+          if (aLong == null || time < aLong) userToEarliest.put(userID, time);
+        }
 
+        // So the purpose here is to skip over multiple tries for an item within a sort session (5 minutes)
         if ((last != -1 && last != exid) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
           if (seen.contains(id)) {
-//            logger.warn("skipping " + id);
+            logger.warn("getBestForQuery skipping " + id); // surprising if this were true
           } else {
             bestScores.add(lastBest);
-            if (DEBUG) logger.info("getBestForQuery Adding " + lastBest);
-            seen.add(id);
+            seen.add(lastBest.getResultID());
+            if (DEBUG)
+              logger.info("getBestForQuery Adding " + lastBest + " now " + seen.size() + " vs " + bestScores.size());
           }
-          //        lastBest.setCount(childCount);
           lastTimestamp = time;
-          //   childCount = 0;
         }
         if (lastTimestamp == 0) lastTimestamp = time;
         last = exid;
         lastBest = bs;
-//        lastBest = new BestScore(exid, pronScore, time, id, json, isiPad, path);
-        // childCount++;
       }
 
       if (lastBest != null) {
-        if (seen.contains(lastBest.getResultID())) {
-//          logger.warn("getBestForQuery skipping " + lastBest.getResultID());
+        if (seen.contains(lastBest.getResultID())) { // how could this happen?
+          logger.warn("getBestForQuery skipping result id " + lastBest.getResultID() + " b/c already added to (" + seen.size() +
+              ") " + seen + "\n\tvs " + bestScores.size());
         } else {
           if (DEBUG) logger.debug("getBestForQuery bestScores now " + bestScores.size());
           bestScores.add(lastBest);
@@ -387,33 +391,35 @@ public abstract class Analysis extends DAO {
       }
     }
 
-    /*if (!lastResults.isEmpty()) {
-      if (lastBest != null && lastBest != lastResults.get(lastResults.size() - 1)) {
-        if (seen.contains(lastBest.getResultID())) {
-          logger.warn("skipping " + lastBest.getResultID());
-        } else {
-          lastResults.add(lastBest);
-        }
-      }
-    }*/
+    return getUserIDToInfo(minRecordings, userToBest2, userToEarliest);
+  }
 
+  /**
+   * Filter out users who don't make at least the minimum number of recordings.
+   *
+   * @param minRecordings  skip users who really didn't make any recordings
+   * @param userToBest2
+   * @param userToEarliest
+   * @return
+   */
+  @NotNull
+  private Map<Integer, UserInfo> getUserIDToInfo(int minRecordings,
+                                                 Map<Integer, List<BestScore>> userToBest2,
+                                                 Map<Integer, Long> userToEarliest) {
     Map<Integer, UserInfo> userToUserInfo = new HashMap<>();
-    int userInitialScores = database.getServerProps().getUserInitialScores();
-    int userFinalScores   = database.getServerProps().getUserFinalScores();
+    int userFinalScores = database.getServerProps().getUserFinalScores();
 
     for (Map.Entry<Integer, List<BestScore>> pair : userToBest2.entrySet()) {
       List<BestScore> value = pair.getValue();
       Integer userID = pair.getKey();
       if (value.size() >= minRecordings) {
-        Long aLong = userToEarliest.get(userID);
-        userToUserInfo.put(userID, new UserInfo(value, aLong, userInitialScores, userFinalScores));
+        userToUserInfo.put(userID, new UserInfo(value, userToEarliest.get(userID), userFinalScores));
       } else {
-        if (DEBUG) logger.debug("getBestForQuery skipping user " + userID + " with just " + value.size() + " scores");
+        if (DEBUG) logger.debug("getUserIDToInfo skipping user " + userID + " with just " + value.size() + " scores");
       }
     }
 
-    if (DEBUG) logger.info("Return " + userToUserInfo);
-
+    if (DEBUG) logger.info("getUserIDToInfo Return " + userToUserInfo);
     return userToUserInfo;
   }
 
@@ -432,7 +438,7 @@ public abstract class Analysis extends DAO {
    * @see #getWordScores
    */
   private List<WordScore> getWordScore(List<BestScore> bestScores) {
-   // logger.warn("getWordScore got " + bestScores.size());
+    // logger.warn("getWordScore got " + bestScores.size());
 
     List<WordScore> results = new ArrayList<>();
 
@@ -468,7 +474,7 @@ public abstract class Analysis extends DAO {
     if (now - then > 50) {
       logger.debug(getDatabase().getLanguage() + " took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
     }
- //   logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
+    //   logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
 
     return results;
   }

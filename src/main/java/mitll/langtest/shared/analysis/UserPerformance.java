@@ -47,6 +47,9 @@ import java.util.*;
 public class UserPerformance implements Serializable {
   //  private transient final Logger logger = LogManager.getLogger("UserPerformance");
   private static final int TOSHOW = 2;
+  /**
+   * CAN'T be final
+   */
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> learnTimeAndScores = new ArrayList<>();
@@ -109,12 +112,12 @@ public class UserPerformance implements Serializable {
     return userID;
   }
 
-  public String toRawCSV() {
+/*  public String toRawCSV() {
     StringBuilder builder = new StringBuilder();
     builder.append(",,,," + userID + "," + getRawTotal() + "," + getRawAverage());
     for (TimeAndScore ts : getRawBestScores()) builder.append("\n").append(ts.toCSV());
     return builder.toString();
-  }
+  }*/
 
   /**
    * @param rawBestScores
@@ -122,12 +125,7 @@ public class UserPerformance implements Serializable {
    */
   private void setRawBestScores(List<BestScore> rawBestScores) {
     // TODO : necessary to sort????
-    Collections.sort(rawBestScores, new Comparator<BestScore>() {
-      @Override
-      public int compare(BestScore o1, BestScore o2) {
-        return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
-      }
-    });
+    rawBestScores.sort(Comparator.comparingLong(SimpleTimeAndScore::getTimestamp));
 
     float total = 0;
     float count = 0;
@@ -170,17 +168,6 @@ public class UserPerformance implements Serializable {
     return avpTimeAndScores;
   }
 
-  public String toString() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("User " + getUserID() + " " + getRawTotal() + " items, avg score " + getRawAverage());
-    int count = 0;
-    for (TimeAndScore ts : getRawBestScores()) {
-      builder.append("\n").append(ts);
-      if (count++ > TOSHOW) break;
-    }
-    return builder.toString();
-  }
-
   public Map<Long, List<PhoneSession>> getGranularityToSessions() {
     return granularityToSessions;
   }
@@ -193,11 +180,30 @@ public class UserPerformance implements Serializable {
     this.granularityToSessions = granularityToSessions;
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisPlot#addChart
+   * @return
+   */
   public String getFirst() {
     return first;
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisPlot#addChart
+   * @return
+   */
   public String getLast() {
     return last;
+  }
+
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("User " + getUserID() + " " + getRawTotal() + " items, avg score " + getRawAverage());
+    int count = 0;
+    for (TimeAndScore ts : getRawBestScores()) {
+      builder.append("\n").append(ts);
+      if (count++ > TOSHOW) break;
+    }
+    return builder.toString();
   }
 }

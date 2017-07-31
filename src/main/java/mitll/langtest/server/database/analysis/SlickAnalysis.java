@@ -128,7 +128,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         resultDAO.getPerfForUserOnList(id, listid);
     long now = System.currentTimeMillis();
 
-    logger.info("getBestForUser best for " + id + " in " + projid + " and list " + listid + " were " + perfForUser.size());
+    logger.info("getBestForUser best for user " + id + " in project " + projid + " and list " + listid + " were " + perfForUser.size());
 
     long diff = now - then;
     if (diff > WARN_THRESH) {
@@ -167,6 +167,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long now = System.currentTimeMillis();
     if (now - then > 100)
       logger.info("getUserInfo took " + (now - then) + " to get " + perfForUser.size() + " perf infos for project #" + projid);
+
     then = now;
     Map<Integer, UserInfo> best = getBest(perfForUser, minRecordings, false);
     now = System.currentTimeMillis();
@@ -182,14 +183,22 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return userInfos;
   }
 
+  /**
+   *
+   * @param perfForUser
+   * @param minRecordings
+   * @param addNativeAudio
+   * @return
+   */
   private Map<Integer, UserInfo> getBest(Collection<SlickPerfResult> perfForUser, int minRecordings, boolean addNativeAudio) {
     Map<Integer, List<BestScore>> userToResults = getUserToResults(perfForUser, addNativeAudio);
-
-    logger.info("getBest got " + userToResults.size() + " user to results");
+    if (DEBUG) logger.info("getBest got " + userToResults.size() + " user to results");
     return getBestForQuery(minRecordings, userToResults);
   }
 
   /**
+   * @param perfs
+   * @param addNativeAudio
    * @return
    * @throws SQLException
    * @see #getBest
@@ -205,9 +214,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     int count = 0;
     int missing = 0;
     //Set<String> missingAudio = new TreeSet<>();
-
     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
-
    // logger.info("getUserToResults for " + perfs.size() + " results");
 
     int emptyCount = 0;
@@ -258,9 +265,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           trimPathForWebPage(path);
 
       //   logger.info("isLegacy " + isLegacy + " " + path + " : " + filePath);
-
       BestScore e = new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard,
-          //trimPathForWebPage(path),
           filePath,
           nativeAudio);
       results.add(e);

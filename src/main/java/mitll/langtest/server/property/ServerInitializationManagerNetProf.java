@@ -321,7 +321,7 @@ public class ServerInitializationManagerNetProf {
     } else {
       //if (DEBUG)
       if (!warned) {
-        log.warn("getManifestAttributes : Could not find manifest!");
+        log.info("getManifestAttributes : Could not find manifest.");
       warned =true;
       }
     }

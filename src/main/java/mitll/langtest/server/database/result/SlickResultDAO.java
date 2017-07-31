@@ -369,7 +369,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         .map(HasID::getID)
         .collect(Collectors.toList());
     Map<Integer, SlickExerciseScore> correctAndScoresForReal = dao.exidAndScoreWhere(userid, collect);
-    logger.info("getScores : for " + userid + " checking " + exercises.size() + " found " + correctAndScoresForReal.size() + " scores");
+    logger.info("getScores : for user " + userid + " checking " + exercises.size() + " exercises, found " + correctAndScoresForReal.size() + " scores");
 //    setScores(exercises, correctAndScoresForReal);
     return getScores(exercises, correctAndScoresForReal);
   }
@@ -394,8 +394,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    *
    * @param exercises
    * @param correctAndScoresForReal
-   * @see #getScores
    * @seex #addScoresForAll
+   * @see #getScores
    */
   private <T extends CommonShell> void setScores(Collection<T> exercises,
                                                  Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
@@ -419,7 +419,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   private <T extends HasID> Map<Integer, Float> getScores(Collection<T> exercises,
-                                        Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
+                                                          Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
     Map<Integer, Float> idToScore = new HashMap<>();
 
     long then = System.currentTimeMillis();
@@ -539,7 +539,19 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   public Collection<SlickPerfResult> getPerfForUserOnList(int userid, int listid) {
     Collection<SlickPerfResult> slickPerfResults = dao.perfForUserOnList(userid, listid);
-  //  logger.info("perf for user " + userid + " list " +listid + " : " + slickPerfResults.size());
+    List<Integer> unique = new ArrayList<>();
+    slickPerfResults.forEach(p -> unique.add(p.id()));
+
+    List<Integer> uniqueex = new ArrayList<>();
+    slickPerfResults.forEach(p -> uniqueex.add(p.exid()));
+
+    logger.info("getPerfForUserOnList perf for" +
+        "\n\tuser   " + userid +
+        "\n\tlist   " + listid + " : got " + slickPerfResults.size() +
+        "\n\tids    " + unique +
+        "\n\tex ids " + uniqueex
+    );
+
     return slickPerfResults;
   }
 
