@@ -44,7 +44,6 @@ import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
@@ -73,6 +72,7 @@ import java.util.*;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
+import static mitll.hlt.domino.server.util.ServerProperties.CACHE_ENABLED_PROP;
 import static mitll.langtest.shared.user.User.Kind.*;
 
 /**
@@ -90,6 +90,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final String UID_F = "userId";
   private static final String PASS_F = "pass";
   private static final String LOCALHOST = "127.0.0.1";
+  private static final boolean ALWAYS_USE_DOMINO_CACHE = true;
 
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
@@ -131,9 +132,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     if (pool != null) {
       serializer = Mongo.makeSerializer();
-
-      logger.info("OK made serializer " + serializer);
+//      logger.info("OK made serializer " + serializer);
       Mailer mailer = new Mailer(new MailerProperties(props));
+      props.setProperty(CACHE_ENABLED_PROP,"true");
       ServerProperties dominoProps =
           new ServerProperties(props, "1.0", "demo", "0", "now");
 
@@ -142,7 +143,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       //     logger.info("DominoUserDAOImpl app name is " + appName);
 
       ignite = null;
-      if (/*dominoProps.isCacheEnabled() ||*/ true) {
+      if (/*dominoProps.isCacheEnabled() ||*/ ALWAYS_USE_DOMINO_CACHE) {
         ignite = getIgnite();
         if (ignite != null) {
           ignite.configuration().setGridLogger(new Slf4jLogger());
@@ -154,7 +155,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         logger.debug("DominoUserDAOImpl no cache");
       }
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
-      //logger.debug("DominoUserDAOImpl made delegate");
+//      logger.debug("DominoUserDAOImpl made delegate " + delegate.getClass());
+//      logger.debug("Got " + ignite);
+//      logger.debug("Got " +  dominoProps.isCacheEnabled());
       myDelegate = makeMyServiceDelegate();//dominoProps.getUserServiceProperties(), mailer, pool, serializer);
 
       dominoAdminUser = delegate.getAdminUser();

@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -132,6 +133,7 @@ public class AnalysisTab extends DivWidget {
       add(bottom); // student
     }
 
+    final long then = System.currentTimeMillis();
 
     analysisServiceAsync.getPerformanceReportForUser(userid, minRecordings, listid, new AsyncCallback<AnalysisReport>() {
       @Override
@@ -141,14 +143,35 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(AnalysisReport result) {
-        analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView);
-        showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom, userid, minRecordings, listid,
-            result.getPhoneReport());
+        useReport(result, then, userChosenID, listid, isTeacherView, showTab, bottom, userid, minRecordings);
+
       }
     });
-    // getWordScores(this.analysisServiceAsync, controller, userid, showTab, analysisPlot, bottom, minRecordings, listid);
+  }
 
+  private void useReport(AnalysisReport result, long then, String userChosenID, int listid, boolean isTeacherView,
+                         ShowTab showTab, DivWidget bottom, int userid, int minRecordings) {
+    long now = System.currentTimeMillis();
 
+    logger.info("took " + (now - then) + " to get report");
+
+    long then2 = now;
+    Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));
+
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then2) + " to show plot");
+    long then3 = now;
+
+    Scheduler.get().scheduleDeferred(() ->
+        showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom, userid, minRecordings, listid,
+            result.getPhoneReport()));
+
+//    showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom, userid, minRecordings, listid,
+//        result.getPhoneReport());
+
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then3) + " to show word scores");
+    Scheduler.get().scheduleDeferred(() -> analysisPlot.populateExerciseMap(controller.getExerciseService(), userid));
   }
 
   @NotNull
@@ -295,40 +318,6 @@ public class AnalysisTab extends DivWidget {
     return all;
   }
 
-  /**
-   * @paramx service
-   * @param controller
-   * @param userid
-   * @param showTab
-   * @param analysisPlot
-   * @param lowerHalf
-   * @param minRecordings
-   * @param listid
-   * @see #AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int)
-   */
-/*
-  private void getWordScores(final AnalysisServiceAsync service,
-                             final ExerciseController controller,
-                             final int userid,
-                             final ShowTab showTab,
-                             final AnalysisPlot analysisPlot,
-                             final Panel lowerHalf,
-                             final int minRecordings,
-                             final int listid) {
-    service.getWordScores(userid, minRecordings, listid, new AsyncCallback<List<WordScore>>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-        logger.warning("Got " + throwable);
-      }
-
-      @Override
-      public void onSuccess(List<WordScore> wordScores) {
-        //logger.info("getWordScores : got " + wordScores.size() + " for user #" + userid);
-        showWordScores(wordScores, controller, analysisPlot, showTab, lowerHalf, userid, minRecordings, listid);
-      }
-    });
-  }
-*/
   private void showWordScores(List<WordScore> wordScores,
                               ExerciseController controller,
                               AnalysisPlot analysisPlot,
@@ -353,10 +342,8 @@ public class AnalysisTab extends DivWidget {
 
     lowerHalf.add(soundsDiv);
     getPhoneReport(phoneReport,
-        //analysisServiceAsync,
         controller,
-        //userid,
-        soundsDiv, analysisPlot, showTab);//, minRecordings, listid);
+        soundsDiv, analysisPlot, showTab);
   }
 
   private Panel getWordContainer(List<WordScore> wordScores,
@@ -389,24 +376,17 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @paramx service
    * @param controller
-   * @paramx userid
    * @param lowerHalf
    * @param analysisPlot
    * @param showTab
-   * @paramx minRecordings
-   * @paramx listid
    * @see #showWordScores
    */
-  private void getPhoneReport(PhoneReport phoneReport,//AnalysisServiceAsync service,
+  private void getPhoneReport(PhoneReport phoneReport,
                               final ExerciseController controller,
-                              //int userid,
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot,
                               final ShowTab showTab//,
-                              //final int minRecordings,
-                              //                            int listid
   ) {
     final PhoneExampleContainer exampleContainer =
         new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
@@ -414,19 +394,7 @@ public class AnalysisTab extends DivWidget {
     final PhonePlot phonePlot = new PhonePlot();
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot);
     analysisPlot.addListener(phoneContainer);
-
-//    service.getPhoneScores(userid, minRecordings, listid, new AsyncCallback<PhoneReport>() {
-//      @Override
-//      public void onFailure(Throwable throwable) {
-//        logger.warning("Got " + throwable);
-//      }
-//
-//      @Override
-//      public void onSuccess(PhoneReport phoneReport) {
     showPhoneReport(phoneReport, phoneContainer, lowerHalf, exampleContainer, phonePlot);
-
-//      }
-//    });
   }
 
   private void showPhoneReport(PhoneReport phoneReport, PhoneContainer phoneContainer, Panel lowerHalf, PhoneExampleContainer exampleContainer, PhonePlot phonePlot) {

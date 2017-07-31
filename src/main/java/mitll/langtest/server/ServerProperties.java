@@ -565,7 +565,7 @@ public class ServerProperties {
     return Boolean.parseBoolean(props.getProperty("oldSchoolService", FALSE));// || props.getProperty("webserviceHostPort") == null;
   }
 
-  private String getDateFromManifest(ServletContext servletContext) {
+/*  private String getDateFromManifest(ServletContext servletContext) {
     try {
       InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
       Manifest manifest = new Manifest(inputStream);
@@ -574,7 +574,7 @@ public class ServerProperties {
     } catch (Exception ex) {
     }
     return "";
-  }
+  }*/
 
   /**
    * @return
