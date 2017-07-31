@@ -271,6 +271,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     ensureAudioForExercises(collect);
   }*/
 
+  /**
+   * @see #ensureAudio(int)
+   * @param exercises
+   * @param language
+   */
   private void ensureAudioForExercises(List<CommonExercise> exercises, String language) {
     long then = System.currentTimeMillis();
     db.getAudioDAO().attachAudioToExercises(exercises, language);

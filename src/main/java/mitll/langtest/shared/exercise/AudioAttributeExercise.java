@@ -32,8 +32,10 @@
 
 package mitll.langtest.shared.exercise;
 
+import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.user.MiniUser;
+import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
@@ -47,6 +49,11 @@ import java.util.Map;
  * @since 1/5/16.
  */
 public interface AudioAttributeExercise extends AudioRefExercise {
+  /**
+   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
+   * @param preferredVoices
+   * @return
+   */
   String getRefAudioWithPrefs(Collection<Integer> preferredVoices);
 
   /**
@@ -74,7 +81,7 @@ public interface AudioAttributeExercise extends AudioRefExercise {
   Collection<AudioAttribute> getByGender(boolean isMale);
 
   /**
-   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
+   * @see mitll.langtest.server.decoder.RefResultDecoder#ensure(String, Collection)
    * @return
    */
   Collection<AudioAttribute> getDefaultUserAudio();
@@ -82,7 +89,7 @@ public interface AudioAttributeExercise extends AudioRefExercise {
   Map<String, AudioAttribute> getAudioRefToAttr();
 
   /**
-   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
+   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices(SplitDropdownButton, boolean)
    * @param isMale
    * @param preferredUsers
    *@param includeContext  @return

@@ -94,7 +94,9 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
       String key = audioAttribute.getKey();
       logger.warn("markAudioDefect huh? couldn't remove key '" + key +
           "' : " + audioAttribute + " from ex #" + exid +
-          "\n\tkeys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
+          "\n\tkeys were " + byID.getAudioRefToAttr().keySet()
+      //    + " contains " + byID.getAudioRefToAttr().containsKey(key)
+      );
     }
     /*   int afterNumAudio = byID.getAudioAttributes().size();
     if (afterNumAudio != beforeNumAudio - 1) {

@@ -166,7 +166,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
     this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback);
 
-    getPerformanceForUser(this.service, userid, userChosenID, minRecordings, listid, isTeacherView);
+   // getPerformanceForUser(this.service, userid, userChosenID, minRecordings, listid, isTeacherView);
 
     Scheduler.get().scheduleDeferred(() -> populateExerciseMap(service, userid));
   }
@@ -183,22 +183,21 @@ public class AnalysisPlot extends TimeSeriesPlot {
   }
 
   /**
-   * @param service
-   * @param userid
+   * @paramx service
+   * @paramx userid
    * @param userChosenID
-   * @param minRecordings
+   * @paramx minRecordings
    * @param listid
    * @param isTeacherView
    * @see #AnalysisPlot
    */
-  private void getPerformanceForUser(AnalysisServiceAsync service,
+/*  private void getPerformanceForUser(AnalysisServiceAsync service,
                                      int userid,
                                      final String userChosenID,
                                      int minRecordings,
                                      int listid,
                                      boolean isTeacherView) {
 //    logger.info("getPerformanceForUser " + userid + " : " + userChosenID);
-
     service.getPerformanceForUser(userid, minRecordings, listid, new AsyncCallback<UserPerformance>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -207,19 +206,23 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
       @Override
       public void onSuccess(UserPerformance userPerformance) {
-        List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-        if (!rawBestScores.isEmpty()) {
-          long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
-
-          List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
-          weeks.addAll(getPeriods(phoneSessions, WEEK, last));
-
-          List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
-          months.addAll(getPeriods(phoneSessions1, MONTH, last));
-        }
-        addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
+        showUserPerformance(userPerformance, userChosenID, listid, isTeacherView);
       }
     });
+  }*/
+
+  public void showUserPerformance(UserPerformance userPerformance, String userChosenID, int listid, boolean isTeacherView) {
+    List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
+    if (!rawBestScores.isEmpty()) {
+      long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
+
+      List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
+      weeks.addAll(getPeriods(phoneSessions, WEEK, last));
+
+      List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
+      months.addAll(getPeriods(phoneSessions1, MONTH, last));
+    }
+    addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
   }
 
   private SortedSet<Long> getPeriods(List<PhoneSession> phoneSessions, long granularity, final long lastTime) {

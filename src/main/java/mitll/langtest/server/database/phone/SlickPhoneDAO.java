@@ -49,10 +49,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
@@ -84,7 +81,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   public Phone fromSlick(SlickPhone slick) {
     return new Phone(
-//        (long)slick.id(),
         (long) slick.rid(),
         slick.wid(),
         slick.phone(),
@@ -160,6 +156,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * TODO : huh? doesn't seem to add last item to total score or total items?
    * TODO : don't use idToRef map
    *
+   * Why get native audio here?
+   *
    * @param addTranscript       true if going to analysis tab
    * @param sortByLatestExample
    * @param language
@@ -178,16 +176,18 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                      Project project) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
 
-    int currentExercise = -1;
+ //   int currentExercise = -1;
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
 
     float totalScore = 0;
-    float totalItems = 0;
+   // float totalItems = 0;
 
     Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap = new HashMap<>();
     int c = 0;
 
     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
+
+    Set<Integer> exids = new HashSet<>();
 
     for (SlickPhoneReport report : phoneReportByResult) {
       int i = 1;
@@ -199,12 +199,16 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       String scoreJson = report.scorejson();
       float pronScore = report.pronScore();
 
-      if (exid != currentExercise) {
+      boolean add = exids.add(exid);
+      if (add) {
+        totalScore += pronScore;
+      }
+ /*     if (exid != currentExercise) {
         currentExercise = exid;
         //  logger.debug("#" +c+  " adding " + exid + " score " + pronScore);
         totalScore += pronScore;
         totalItems++;
-      }
+      }*/
 
       String refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project);
 
@@ -222,7 +226,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       //  }
     }
 
-    return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
+    return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample);
   }
 
   public void removeForResult(int resultid) {

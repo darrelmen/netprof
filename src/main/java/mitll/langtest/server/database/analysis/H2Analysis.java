@@ -64,9 +64,10 @@ class H2Analysis extends Analysis implements IAnalysis {
 
   /**
    * @param id
-   * @param minRecordings  @return
+   * @param minRecordings
+   * @return
    * @param listid
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
+   * @seex mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
   public UserPerformance getPerformanceForUser(int id, int minRecordings, int listid) {
@@ -78,6 +79,11 @@ class H2Analysis extends Analysis implements IAnalysis {
       logException(ee);
     }
     return new UserPerformance(id);
+  }
+
+  @Override
+  public AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid) {
+    return null;
   }
 
   /**

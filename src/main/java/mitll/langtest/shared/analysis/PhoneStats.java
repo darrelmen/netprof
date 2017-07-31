@@ -57,7 +57,7 @@ public class PhoneStats implements Serializable {
 
   /**
    * @param count
-   * @see PhoneDAO#getPhoneReport(Map, Map, float, float)
+   * @see PhoneDAO#getPhoneReport
    */
   public PhoneStats(int count, List<TimeAndScore> timeSeries) {
     this.count = count;
@@ -77,7 +77,7 @@ public class PhoneStats implements Serializable {
     return toHundred(mean);
   }
 
-  public int toHundred(double mean) {
+  private int toHundred(double mean) {
     return (int) Math.round(100 * mean);
   }
 
@@ -109,16 +109,16 @@ public class PhoneStats implements Serializable {
     return timeSeries;
   }
 
-  public String toString() {
-    return "childCount " + count + " initial " + getInitial() + " current " + getCurrent() +
-        (getSessions() != null ? " num sessions " + getSessions().size() + " : " + getSessions() : "");
-  }
-
   public void setSessions(List<PhoneSession> sessions) {
     this.sessions = sessions;
   }
 
   public List<PhoneSession> getSessions() {
     return sessions;
+  }
+
+  public String toString() {
+    return "childCount " + count + " initial " + getInitial() + " current " + getCurrent() +
+        (getSessions() != null ? " num sessions " + getSessions().size() + " : " + getSessions() : "");
   }
 }

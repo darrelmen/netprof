@@ -66,6 +66,11 @@ public interface IAudioDAO extends IDAO {
    */
   int attachAudioToExercise(CommonExercise firstExercise, String language);
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
+   * @param exercises
+   * @param language
+   */
   void attachAudioToExercises(Collection<CommonExercise> exercises, String language);
 
   /**
@@ -113,11 +118,12 @@ public interface IAudioDAO extends IDAO {
                                         Map<String, ExerciseAnnotation> fieldToAnnotation);
 
   /**
-   * @see mitll.langtest.server.services.AudioServiceImpl#reallyCreateNewItem
-   * @param uniqueID
-   * @param exerciseID
+   * TURNED THIS OFF FOR NOW - we don't allow creating new items
+   * @seex mitll.langtest.server.services.AudioServiceImpl#reallyCreateNewItem
+   * @paramx uniqueID
+   * @paramx exerciseID
    */
-  void updateExerciseID(int uniqueID, int exerciseID, String actualPath);
+ // void updateExerciseID(int uniqueID, int exerciseID, String actualPath);
 
   void updateDNR(int uniqueID, float dnr);
 
@@ -125,6 +131,14 @@ public interface IAudioDAO extends IDAO {
 
   void makeSureAudioIsThere(int projectID, String language, boolean validateAll);
 
+  /**
+   *
+   * @param userToGender
+   * @param userid
+   * @param exercise
+   * @param language
+   * @return
+   */
   String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language);
 
   Map<String,Integer> getPairs(int projid);

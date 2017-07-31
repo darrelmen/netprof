@@ -155,10 +155,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param exerciseID
    * @param actualPath
    */
-  @Override
+/*  @Override
   public void updateExerciseID(int uniqueID, int exerciseID, String actualPath) {
     dao.updateExerciseID(uniqueID, exerciseID, actualPath);
-  }
+  }*/
 
   /**
    * @param projid
@@ -200,7 +200,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   /**
    * @param exids
    * @return
-   * @see BaseAudioDAO#attachAudioToExercises(Collection, String)
+   * @see BaseAudioDAO#attachAudioToExercises
    */
   Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids) {
     long then = System.currentTimeMillis();
@@ -651,8 +651,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language) {
     //String nativeAudio = null;
     if (exercise != null) {
-      MiniUser.Gender orDefault = getGender(userToGender, userid);
-      if (orDefault == null) {
+      MiniUser.Gender genderOfUser = getGender(userToGender, userid);
+      if (genderOfUser == null) {
 //        logger.error("getNativeAudio can't find user " + userid);
         return null; // no user with this id?
       }
@@ -662,7 +662,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         attachAudioToExercise(exercise, language);
       }
 
-      AudioAttribute audioAttributePrefGender = exercise.getAudioAttributePrefGender(orDefault == Male, true);
+      AudioAttribute audioAttributePrefGender = exercise.getAudioAttributePrefGender(genderOfUser == Male, true);
 
       if (audioAttributePrefGender == null) {
 //        logger.warn("no audio for " + exercise.getID());
@@ -672,11 +672,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
 
 /*
-      Map<MiniUser, List<AudioAttribute>> userMap = exercise.getUserMap(orDefault == MiniUser.Gender.Male,false);
+      Map<MiniUser, List<AudioAttribute>> userMap = exercise.getUserMap(genderOfUser == MiniUser.Gender.Male,false);
       Collection<List<AudioAttribute>> audioByMatchingGender = userMap.values();
 
       if (audioByMatchingGender.isEmpty()) { // ok, no audio with matching gender, fall back to other audio
-        userMap = exercise.getUserMap(orDefault != MiniUser.Gender.Male,false);
+        userMap = exercise.getUserMap(genderOfUser != MiniUser.Gender.Male,false);
         audioByMatchingGender = userMap.values();
       }
 

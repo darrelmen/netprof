@@ -198,7 +198,8 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(connection, "spanish", path);
     int id = 71;
     //int id = 535;   // tiffany
-    UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1,-1);
+    AnalysisReport performanceReportForUser = database.getAnalysis(-1).getPerformanceReportForUser(id, 1, -1);
+    UserPerformance performanceForUser = performanceReportForUser.getUserPerformance();
 
     logger.info("perf " + performanceForUser);
     Map<Long, List<PhoneSession>> granularityToSessions = performanceForUser.getGranularityToSessions();
@@ -209,7 +210,7 @@ public class PerformanceTest extends BaseTest {
     }
     // List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
 
-    PhoneReport report = database.getAnalysis(-1).getPhonesForUser(id, 1, -1);
+    PhoneReport report =performanceReportForUser.getPhoneReport();// database.getAnalysis(-1).getPhonesForUser(id, 1, -1);
 
     Map<String, PhoneStats> phoneToAvgSorted = report.getPhoneToAvgSorted();
     if (phoneToAvgSorted == null) {
@@ -455,7 +456,7 @@ public class PerformanceTest extends BaseTest {
     return getDatabase(getH2Connection(path), "spanish", path);
   }
 
-  @Test
+/*  @Test
   public void testPhones() {
     long then = System.currentTimeMillis();
     //   int id = 71; // psanish
@@ -478,7 +479,7 @@ public class PerformanceTest extends BaseTest {
       }
     }
 //    for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
-  }
+  }*/
 
   @Test
   public void testUsers() {

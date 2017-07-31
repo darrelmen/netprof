@@ -177,15 +177,15 @@ public class NewContentChooser implements INavigation {
     //  learnHelper.showList(listid);
   }
 
-  private void setHistoryWithList(int listid) {
-    History.newItem(FacetExerciseList.LISTS + "=" + listid);
-  }
-
   @Override
   public void showDrillList(int listid) {
     setHistoryWithList(listid);
     banner.showDrill();
     // practiceHelper.showList(listid);
+  }
+
+  private void setHistoryWithList(int listid) {
+    History.newItem(FacetExerciseList.LISTS + "=" + listid);
   }
 
   @Override

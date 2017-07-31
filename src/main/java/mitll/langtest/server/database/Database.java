@@ -79,5 +79,17 @@ public interface Database extends AutoCloseable {
 
   CommonExercise getCustomOrPredefExercise(int projid, int id);
 
+  /**
+   *
+   * TODO : Why called from phone report too?
+   *
+   * @param userToGender
+   * @param userid
+   * @param exid
+   * @param project
+   * @return
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserToResults
+   * @see mitll.langtest.server.database.phone.SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
+   */
   String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project);
 }

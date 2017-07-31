@@ -49,6 +49,7 @@ import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
 import org.jetbrains.annotations.NotNull;
@@ -81,6 +82,10 @@ public class AnalysisTab extends DivWidget {
   private TimeWidgets timeWidgets;
   private final Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
 
+  /**
+   * @param controller
+   * @param showTab
+   */
   public AnalysisTab(ExerciseController controller, final ShowTab showTab) {
     this(controller, showTab, 1, null,
         controller.getUser(), controller.getUserManager().getUserID(),
@@ -91,8 +96,7 @@ public class AnalysisTab extends DivWidget {
    * @param controller
    * @param userid
    * @param listid
-   * @paramx listid
-   * @see NewContentChooser#showProgress
+   * @see AnalysisTab#AnalysisTab(ExerciseController, ShowTab)
    * @see UserContainer#gotClickOnItem
    */
   public AnalysisTab(final ExerciseController controller,
@@ -128,7 +132,23 @@ public class AnalysisTab extends DivWidget {
       add(bottom); // student
     }
 
-    getWordScores(this.analysisServiceAsync, controller, userid, showTab, analysisPlot, bottom, minRecordings, listid);
+
+    analysisServiceAsync.getPerformanceReportForUser(userid, minRecordings, listid, new AsyncCallback<AnalysisReport>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(AnalysisReport result) {
+        analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView);
+        showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom, userid, minRecordings, listid,
+            result.getPhoneReport());
+      }
+    });
+    // getWordScores(this.analysisServiceAsync, controller, userid, showTab, analysisPlot, bottom, minRecordings, listid);
+
+
   }
 
   @NotNull
@@ -276,7 +296,7 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @param service
+   * @paramx service
    * @param controller
    * @param userid
    * @param showTab
@@ -284,7 +304,9 @@ public class AnalysisTab extends DivWidget {
    * @param lowerHalf
    * @param minRecordings
    * @param listid
+   * @see #AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int)
    */
+/*
   private void getWordScores(final AnalysisServiceAsync service,
                              final ExerciseController controller,
                              final int userid,
@@ -306,7 +328,7 @@ public class AnalysisTab extends DivWidget {
       }
     });
   }
-
+*/
   private void showWordScores(List<WordScore> wordScores,
                               ExerciseController controller,
                               AnalysisPlot analysisPlot,
@@ -314,9 +336,10 @@ public class AnalysisTab extends DivWidget {
                               Panel lowerHalf,
                               int userid,
                               int minRecordings,
-                              int listid) {
+                              int listid,
+                              PhoneReport phoneReport) {
     {
-     // logger.info("showWordScores " + wordScores.size());
+      // logger.info("showWordScores " + wordScores.size());
       Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab,
           new Heading(3, WORDS, SUBTITLE));
 
@@ -329,7 +352,11 @@ public class AnalysisTab extends DivWidget {
     DivWidget soundsDiv = getSoundsDiv();
 
     lowerHalf.add(soundsDiv);
-    getPhoneReport(analysisServiceAsync, controller, userid, soundsDiv, analysisPlot, showTab, minRecordings, listid);
+    getPhoneReport(phoneReport,
+        //analysisServiceAsync,
+        controller,
+        //userid,
+        soundsDiv, analysisPlot, showTab);//, minRecordings, listid);
   }
 
   private Panel getWordContainer(List<WordScore> wordScores,
@@ -362,24 +389,25 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @param service
+   * @paramx service
    * @param controller
-   * @param userid
+   * @paramx userid
    * @param lowerHalf
    * @param analysisPlot
    * @param showTab
-   * @param minRecordings
-   * @param listid
+   * @paramx minRecordings
+   * @paramx listid
    * @see #showWordScores
    */
-  private void getPhoneReport(AnalysisServiceAsync service,
+  private void getPhoneReport(PhoneReport phoneReport,//AnalysisServiceAsync service,
                               final ExerciseController controller,
-                              int userid,
+                              //int userid,
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot,
-                              final ShowTab showTab,
-                              final int minRecordings,
-                              int listid) {
+                              final ShowTab showTab//,
+                              //final int minRecordings,
+                              //                            int listid
+  ) {
     final PhoneExampleContainer exampleContainer =
         new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
 
@@ -387,29 +415,34 @@ public class AnalysisTab extends DivWidget {
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot);
     analysisPlot.addListener(phoneContainer);
 
-    service.getPhoneScores(userid, minRecordings, listid, new AsyncCallback<PhoneReport>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-        logger.warning("Got " + throwable);
-      }
+//    service.getPhoneScores(userid, minRecordings, listid, new AsyncCallback<PhoneReport>() {
+//      @Override
+//      public void onFailure(Throwable throwable) {
+//        logger.warning("Got " + throwable);
+//      }
+//
+//      @Override
+//      public void onSuccess(PhoneReport phoneReport) {
+    showPhoneReport(phoneReport, phoneContainer, lowerHalf, exampleContainer, phonePlot);
 
-      @Override
-      public void onSuccess(PhoneReport phoneReport) {
-        // #1 - phones
-        Panel phones = phoneContainer.getTableWithPager(phoneReport);
-        lowerHalf.add(getSoundsContainer(phones));
+//      }
+//    });
+  }
 
-        // #2 - word examples
-        lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));
+  private void showPhoneReport(PhoneReport phoneReport, PhoneContainer phoneContainer, Panel lowerHalf, PhoneExampleContainer exampleContainer, PhonePlot phonePlot) {
+    // #1 - phones
+    Panel phones = phoneContainer.getTableWithPager(phoneReport);
+    lowerHalf.add(getSoundsContainer(phones));
 
-        // #3 - phone plot
-        phonePlot.addStyleName("topMargin");
-        phonePlot.addStyleName("floatLeftAndClear");
-        lowerHalf.add(phonePlot);
+    // #2 - word examples
+    lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));
 
-        phoneContainer.showExamplesForSelectedSound();
-      }
-    });
+    // #3 - phone plot
+    phonePlot.addStyleName("topMargin");
+    phonePlot.addStyleName("floatLeftAndClear");
+    lowerHalf.add(phonePlot);
+
+    phoneContainer.showExamplesForSelectedSound();
   }
 
   private DivWidget getSoundsContainer(Panel phones) {

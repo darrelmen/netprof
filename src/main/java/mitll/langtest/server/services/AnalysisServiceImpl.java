@@ -36,10 +36,7 @@ import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.result.SlickResultDAO;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
@@ -89,25 +86,26 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @param minRecordings
    * @param listid
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
+   * @seex mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
    */
   @Override
-  public UserPerformance getPerformanceForUser(int id, int minRecordings, int listid) {
+  public AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid) {
     // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
     int projectID = getProjectID();
     if (projectID == -1) {
-      return new UserPerformance();
+      return new AnalysisReport();
     } else {
       SlickAnalysis slickAnalysis =
           new SlickAnalysis(
               db.getDatabase(),
               db.getPhoneDAO(),
+              db.getAudioDAO(),
               (SlickResultDAO) db.getResultDAO(),
               db.getProject(projectID).getLanguage(),
               projectID
           );
 
-      return slickAnalysis.getPerformanceForUser(id, minRecordings, listid);
+      return slickAnalysis.getPerformanceReportForUser(id, minRecordings, listid);
     }
   }
 
@@ -118,27 +116,27 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @return
    * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    */
-  @Override
+/*  @Override
   public List<WordScore> getWordScores(int id, int minRecordings, int listid) {
     int projectID = getProjectID();
     if (projectID == -1) return new ArrayList<>();
 
     List<WordScore> wordScoresForUser = db.getAnalysis(projectID).getWordScoresForUser(id, minRecordings, listid);
 
-    /*
+    *//*
     logger.info("getWordScores for" +
         "\n\tuser       " +id +
         "\n\tproject is "+ projectID + " and " + analysis +
-        "\n\tyielded " + wordScoresForUser.size());*/
+        "\n\tyielded " + wordScoresForUser.size());*//*
 
 //    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getID() + " " + ws.getNativeAudio());
     return wordScoresForUser;
-  }
+  }*/
 
-  @Override
+/*  @Override
   public PhoneReport getPhoneScores(int id, int minRecordings, int listid) {
     int projectID = getProjectID();
     if (projectID == -1) return new PhoneReport();
     return db.getAnalysis(projectID).getPhonesForUser(id, minRecordings, listid);
-  }
+  }*/
 }

@@ -803,6 +803,12 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return null;
   }
 
+  /**
+   * TURNED THIS OFF FOR NOW.
+   * @param uniqueID
+   * @param dnr
+   */
+/*
   @Override
   public void updateExerciseID(int uniqueID, int exerciseID, String path) {
     try {
@@ -831,6 +837,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.error("got " + e, e);
     }
   }
+*/
 
   public void updateDNR(int uniqueID, float dnr) {
     try {

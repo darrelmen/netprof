@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.client.analysis.PhoneExampleContainer;
+import mitll.langtest.client.analysis.WordContainer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
@@ -48,12 +50,14 @@ import java.util.Map;
  */
 public class WordScore implements Serializable, Comparable<WordScore> {
   private int exid;
-  private float pronScore;
+  private int pronScore;
   private int resultID;
   private long timestamp;
 
   private String answerAudio;
   private String refAudio;
+
+  private static final int SCALE = 1000;
 
   private Map<NetPronImageType, List<TranscriptSegment>> transcript;
 
@@ -92,7 +96,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
                       String refAudio,
                       Map<NetPronImageType, List<TranscriptSegment>> transcript) {
     this.exid = exid;
-    this.pronScore = (pronScore < 0) ? 0 : pronScore;
+    this.pronScore = (pronScore < 0) ? 0 : (int)(pronScore* SCALE);
     this.timestamp = timestamp;
     this.resultID = resultID;
     this.answerAudio = answerAudio;
@@ -102,9 +106,10 @@ public class WordScore implements Serializable, Comparable<WordScore> {
 
   @Override
   public int compareTo(WordScore o) {
-    int i = Float.valueOf(getPronScore()).compareTo(o.getPronScore());
+    int i = Integer.compare(pronScore,o.pronScore);
+   // int i = Float.valueOf(getPronScore()).compareTo(o.getPronScore());
     if (i == 0) {
-      i = Long.valueOf(timestamp).compareTo(o.timestamp);
+      i = Long.compare(timestamp, o.timestamp);
     }
     return i;
   }
@@ -122,13 +127,27 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   }
 
   public float getPronScore() {
+    return ((float)pronScore)/ SCALE;
+  }
+
+  public int getIntPronScore() {
     return pronScore;
   }
 
+  /**
+   * @see PhoneExampleContainer#getItemColumn
+   * @see WordContainer#getItemColumn
+   * @return
+   */
   public Map<NetPronImageType, List<TranscriptSegment>> getTranscript() {
     return transcript;
   }
 
+
+  /**
+   * @see mitll.langtest.server.database.phone.BasePhoneDAO#setTranscript(WordAndScore, Map)
+   * @param transcript
+   */
   public void setTranscript(Map<NetPronImageType, List<TranscriptSegment>> transcript) {
     this.transcript = transcript;
   }

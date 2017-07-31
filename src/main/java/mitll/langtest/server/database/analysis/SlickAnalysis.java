@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.project.ProjectServices;
@@ -40,10 +41,12 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickPerfResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import scala.tools.cmd.gen.AnyVals;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -59,6 +62,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private Project project;
 
   private static final boolean DEBUG = false;
+  IAudioDAO audioDAO;
 
   /**
    * @param database
@@ -69,6 +73,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    */
   public SlickAnalysis(Database database,
                        IPhoneDAO phoneDAO,
+                       IAudioDAO audioDAO,
                        SlickResultDAO resultDAO,
                        String language,
                        int projid) {
@@ -76,6 +81,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     this.resultDAO = resultDAO;
     this.language = language;
     this.projid = projid;
+    this.audioDAO = audioDAO;
     project = database.getProject(projid);
   }
 
@@ -86,19 +92,35 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @return
    * @see AnalysisServiceImpl#getPerformanceForUser
    */
-  @Override
+/*  @Override
   public UserPerformance getPerformanceForUser(int userid, int minRecordings, int listid) {
     return getUserPerformance(userid, getBestForUser(userid, minRecordings, listid));
+  }*/
+  @Override
+  public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
+
+    long then = System.currentTimeMillis();
+    AnalysisReport analysisReport = new AnalysisReport(
+        getUserPerformance(userid, bestForUser),
+        getWordScores(bestForUser),
+        getPhoneReport(userid, bestForUser, language, project));
+
+    long now = System.currentTimeMillis();
+    logger.info("Return (took " + (now - then) +        ") " + analysisReport);
+    return analysisReport;
   }
 
   /**
    * Wasetful? why call getBestForUser again?
+   *
    * @param userid
    * @param minRecordings
    * @param listid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getWordScores
    */
+/*
   @Override
   public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid) {
     long then = System.currentTimeMillis();
@@ -111,15 +133,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
     return getWordScores(best);
   }
+*/
 
   /**
    * @param id
    * @param minRecordings
    * @param listid
    * @return
+   * @seex IAnalysis#getPhonesForUser(int, int, int)
+   * @seex IAnalysis#getWordScoresForUser(int, int, int)
    * @see Analysis#getPerformanceForUser(int, int, int)
-   * @see IAnalysis#getPhonesForUser(int, int, int)
-   * @see IAnalysis#getWordScoresForUser(int, int, int)
    */
   private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings, int listid) {
     long then = System.currentTimeMillis();
@@ -147,10 +170,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores
    * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
    */
-  @Override
+/*  @Override
   public PhoneReport getPhonesForUser(int id, int minRecordings, int listid) {
     return getPhoneReport(id, getBestForUser(id, minRecordings, listid), language, project);
-  }
+  }*/
 
   /**
    * For the current project id.
@@ -184,7 +207,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   /**
-   *
    * @param perfForUser
    * @param minRecordings
    * @param addNativeAudio
@@ -215,9 +237,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     int missing = 0;
     //Set<String> missingAudio = new TreeSet<>();
     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
-   // logger.info("getUserToResults for " + perfs.size() + " results");
+    // logger.info("getUserToResults for " + perfs.size() + " results");
 
     int emptyCount = 0;
+
+    if (addNativeAudio) {
+      getNativeAudio(perfs);
+    }
+
     for (SlickPerfResult perf : perfs) {
       count++;
       int exid = perf.exid();
@@ -281,6 +308,15 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
 
     return userToBest;
+  }
+
+  private void getNativeAudio(Collection<SlickPerfResult> perfs) {
+    List<CommonExercise> exercises = new ArrayList<>();
+    perfs.forEach(perf -> exercises.add(database.getCustomOrPredefExercise(projid, perf.exid())));
+
+    // Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
+
+    audioDAO.attachAudioToExercises(exercises, language);
   }
 
   /**

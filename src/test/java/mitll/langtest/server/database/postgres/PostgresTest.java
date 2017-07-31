@@ -522,6 +522,7 @@ public class PostgresTest extends BaseTest {
   }
 
 
+/*
   @Test
   public void testAnalysisWordsForUser() {
     DatabaseImpl database = getDatabaseLight("netProf", false);
@@ -537,6 +538,7 @@ public class PostgresTest extends BaseTest {
       }
     }
   }
+*/
 
   @Test
   public void testAddUserProject() {

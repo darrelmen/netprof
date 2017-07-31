@@ -290,12 +290,12 @@ public class ProjectTest extends BaseTest {
     int projectid = 3;
     IAnalysis analysis = database.getAnalysis(projectid);
     List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
-
-    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(6, 5, -1);
-
-    for (WordScore wordScore : wordScoresForUser) logger.info("ws " + wordScore);
-
-    for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
+//
+//    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(6, 5, -1);
+//
+//    for (WordScore wordScore : wordScoresForUser) logger.info("ws " + wordScore);
+//
+//    for (UserInfo userInfo1 : userInfo) logger.info(userInfo1);
   }
 
 

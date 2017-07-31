@@ -127,10 +127,11 @@ public class WordTable {
    */
   public String makeColoredTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     StringBuilder builder = new StringBuilder();
-
-    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : getWordToPhones(netPronImageTypeToEndTime).entrySet()) {
-      builder.append(getColoredSpanForSegment(pair));
-    }
+    List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+//    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : getWordToPhones(netPronImageTypeToEndTime).entrySet()) {
+//      builder.append(getColoredSpanForSegment(pair));
+//    }
+    words.forEach(word -> builder.append(getColoredSpanForWord(word)));
 
     return builder.toString();
   }
@@ -141,8 +142,10 @@ public class WordTable {
    * @return
    */
   private String getColoredSpanForSegment(Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
-    TranscriptSegment word = pair.getKey();
+    return getColoredSpanForWord(pair.getKey());
+  }
 
+  private String getColoredSpanForWord(TranscriptSegment word) {
     String event = word.getEvent();
     if (event.equals("UNKNOWNMODEL")) event = "Low score";
     return getColoredSpan(event, word.getScore());

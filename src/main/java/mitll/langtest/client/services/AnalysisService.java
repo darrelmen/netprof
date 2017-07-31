@@ -34,10 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -62,8 +59,9 @@ public interface AnalysisService extends RemoteService {
    * @return
    * @see mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
    */
-  UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
+ // UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
 
+  AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid);
   /**
    * @param id
    * @param minRecordings
@@ -71,7 +69,7 @@ public interface AnalysisService extends RemoteService {
    * @return
    * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    */
-  List<WordScore> getWordScores(int id, int minRecordings, int listid);
+ // List<WordScore> getWordScores(int id, int minRecordings, int listid);
 
   /**
    * @param id
@@ -80,5 +78,5 @@ public interface AnalysisService extends RemoteService {
    * @return
    * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
    */
-  PhoneReport getPhoneScores(int id, int minRecordings, int listid);
+//  PhoneReport getPhoneScores(int id, int minRecordings, int listid);
 }

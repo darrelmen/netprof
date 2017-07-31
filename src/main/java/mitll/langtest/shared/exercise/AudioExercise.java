@@ -60,7 +60,7 @@ public class AudioExercise extends ExerciseShell {
   private static final String CONTEXT = "context";
   String altfl = "";
 
-  private Map<String, AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
+  private Map<String, AudioAttribute> audioAttributes = new HashMap<>();
   private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
   protected int projectid;
 
@@ -315,7 +315,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   private void sortByAge(List<AudioAttribute> males) {
-    Collections.sort(males, (o1, o2) -> Integer.valueOf(o1.getUser().getAge()).compareTo(o2.getUser().getAge()));
+    males.sort((o1, o2) -> Integer.compare(o1.getUser().getAge(), o2.getUser().getAge()));
   }
 
   /**
@@ -383,12 +383,7 @@ public class AudioExercise extends ExerciseShell {
 
   private void sortRegBeforeSlow(Map<MiniUser, List<AudioAttribute>> userToAudio) {
     for (List<AudioAttribute> lists : userToAudio.values()) {
-      Collections.sort(lists, new Comparator<AudioAttribute>() {
-        @Override
-        public int compare(AudioAttribute o1, AudioAttribute o2) {
-          return o1.isRegularSpeed() && o2.isSlow() ? -1 : o1.isSlow() && o2.isRegularSpeed() ? +1 : 0;
-        }
-      });
+      lists.sort((o1, o2) -> o1.isRegularSpeed() && o2.isSlow() ? -1 : o1.isSlow() && o2.isRegularSpeed() ? +1 : 0);
     }
   }
 
@@ -520,17 +515,14 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
+   * TODO : Sort by age - why would that be a good idea?
    * @param malesMap
    * @return
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
    */
   public List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
     List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
-    Collections.sort(maleUsers, new Comparator<MiniUser>() {
-      public int compare(MiniUser o1, MiniUser o2) {
-        return o1.getAge() < o2.getAge() ? -1 : o1.getAge() > o2.getAge() ? +1 : 0;
-      }
-    });
+    maleUsers.sort((o1, o2) -> Integer.compare(o1.getAge(), o2.getAge()));
     return maleUsers;
   }
 

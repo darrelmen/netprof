@@ -248,6 +248,7 @@ public class ProjectManagement implements IProjectManagement {
       project.setAnalysis(
           new SlickAnalysis(db,
               db.getPhoneDAO(),
+              db.getAudioDAO(),
               (SlickResultDAO) db.getResultDAO(),
               project.getLanguage(),
               id

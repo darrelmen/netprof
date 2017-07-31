@@ -164,7 +164,7 @@ public abstract class BaseAudioDAO extends DAO {
       int id = exercise.getID();
 
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(id);
-      boolean doDEBUG = id == 25921 || DEBUG_ATTACH;
+      boolean doDEBUG = /*id == 25921 ||*/ DEBUG_ATTACH;
 
       if (audioAttributes != null) {
         boolean attachedAll = attachAudio(exercise, audioAttributes, language);
@@ -268,7 +268,7 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * TODO : deal with possibility of audio being in either bestAudio or in answers...
    * <p>
-   * TODO : rewrite this so it's not insane -adding and removing attributes??
+   * TODOx : rewrite this so it's not insane -adding and removing attributes??
    * <p>
    * Complicated, but separates old school "Default Speaker" audio into a second pile.
    * If we've already added an audio attribute with the path for a default speaker, then we remove it.

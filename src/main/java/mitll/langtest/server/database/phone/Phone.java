@@ -9,7 +9,6 @@ import java.util.Map;
  */
 public class Phone {
   private int duration;
-  // private Long id;
 
   private long wid;
   private long rid;
@@ -19,7 +18,7 @@ public class Phone {
   public Phone() {}
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#recordWordAndPhoneInfo(long, Map)
+   * @see mitll.langtest.server.database.DatabaseImpl#recordWordAndPhoneInfo
    * @see SlickPhoneDAO#fromSlick(SlickPhone)
    * @param rid
    * @param wid
@@ -37,12 +36,6 @@ public class Phone {
     this.duration = duration;
   }
 
-//  public Long getId() {
-//    return id;
-//  }
-////  private void setId(Long id) {
-////    this.id = id;
-////  }
 
   public long getWid() {
     return wid;

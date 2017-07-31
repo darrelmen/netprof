@@ -35,6 +35,7 @@ package mitll.langtest.server.database.phone;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -45,6 +46,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +65,12 @@ public class BasePhoneDAO extends DAO {
     parseResultJson = new ParseResultJson(database.getServerProps());
   }
 
+  /**
+   * @see SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
+   * @param stringToMap
+   * @param scoreJson
+   * @param wordAndScore
+   */
    void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap, String scoreJson,
                       WordAndScore wordAndScore) {
      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
@@ -140,6 +148,11 @@ public class BasePhoneDAO extends DAO {
     return phoneAndScore;
   }
 
+  /**
+   * @see #addTranscript(Map, String, WordAndScore)
+   * @param wordAndScore
+   * @param netPronImageTypeListMap
+   */
   private void setTranscript(WordAndScore wordAndScore, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     wordAndScore.setTranscript(netPronImageTypeListMap);
     wordAndScore.clearJSON();

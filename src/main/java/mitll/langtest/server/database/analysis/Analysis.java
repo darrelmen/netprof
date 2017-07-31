@@ -59,7 +59,7 @@ import java.util.*;
 public abstract class Analysis extends DAO {
   private static final Logger logger = LogManager.getLogger(Analysis.class);
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   static final String EMPTY_JSON = "{}";
@@ -211,7 +211,7 @@ public abstract class Analysis extends DAO {
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  abstract public UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
+ // abstract public UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
 
   /**
    * @param id
@@ -268,7 +268,7 @@ public abstract class Analysis extends DAO {
    * @param language
    * @param project
    * @return
-   * @see IAnalysis#getPhonesForUser
+   * @see SlickAnalysis#getPerformanceReportForUser(int, int, int)
    */
   PhoneReport getPhoneReport(int userid, Map<Integer, UserInfo> best, String language, Project project) {
     long then = System.currentTimeMillis();
@@ -439,7 +439,6 @@ public abstract class Analysis extends DAO {
    */
   private List<WordScore> getWordScore(List<BestScore> bestScores) {
     // logger.warn("getWordScore got " + bestScores.size());
-
     List<WordScore> results = new ArrayList<>();
 
     long then = System.currentTimeMillis();
@@ -455,6 +454,7 @@ public abstract class Analysis extends DAO {
       } else if (bs.getScore() > database.getServerProps().getMinAnalysisScore()) {
         if (json.isEmpty()) logger.warn("no json for " + bs);
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.readFromJSON(json);
+        netPronImageTypeListMap.remove(NetPronImageType.PHONE_TRANSCRIPT);
         WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);
         results.add(wordScore);
       } else {

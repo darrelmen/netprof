@@ -68,9 +68,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
-  public static final String NO_LIST = "(No List)";
   private final Logger logger = Logger.getLogger("UserContainer");
 
+  private static final String NO_LIST = "(No List)";
   private static final int FILTER_BY = 19;
   private static final String CURRENT = "Avg";
   private static final int CURRENT_WIDTH = 60;

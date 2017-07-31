@@ -33,10 +33,11 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.analysis.WordScore;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.analysis.AnalysisPlot;
+import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -45,11 +46,18 @@ import java.util.List;
 public interface AnalysisServiceAsync {
   void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
 
-  void getPerformanceForUser(int id, int minRecordings, int listid, AsyncCallback<UserPerformance> async);
+  //void getPerformanceForUser(int id, int minRecordings, int listid, AsyncCallback<UserPerformance> async);
 
-  void getWordScores(int id, int minRecordings, int listid, AsyncCallback<List<WordScore>> async);
+  //void getWordScores(int id, int minRecordings, int listid, AsyncCallback<List<WordScore>> async);
 
-  void getPhoneScores(int id, int minRecordings, int listid, AsyncCallback<PhoneReport> async);
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
+   * @param id
+   * @param minRecordings
+   * @param listid
+   * @param async
+   */
+//  void getPhoneScores(int id, int minRecordings, int listid, AsyncCallback<PhoneReport> async);
 
   /**
    * TODO : not sure why this is ever needed
@@ -57,4 +65,15 @@ public interface AnalysisServiceAsync {
    * @param async
    */
   void getShells(List<Integer> ids, AsyncCallback<List<CommonShell>> async);
+
+  /**
+   * @param id
+   * @param minRecordings
+   * @param listid
+   * @return
+   * @see AnalysisPlot#AnalysisPlot
+   */
+  // UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
+
+  void getPerformanceReportForUser(int id, int minRecordings, int listid, AsyncCallback<AnalysisReport> async);
 }

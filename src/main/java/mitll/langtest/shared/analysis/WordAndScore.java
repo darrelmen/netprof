@@ -82,17 +82,17 @@ public class WordAndScore extends WordScore {
    */
   @Override
   public int compareTo(WordScore o) {
-    int i = getPronScore() < o.getPronScore() ? -1 : getPronScore() > o.getPronScore() ? +1 : 0;
+    int i = Integer.compare(getIntPronScore(), o.getIntPronScore());
 
     WordAndScore realOther = (WordAndScore) o;
     if (i == 0) {
       i = word.compareTo(realOther.word);
     }
     if (i == 0) {
-      i = Long.valueOf(getResultID()).compareTo(realOther.getResultID());
+      i = Long.compare(getResultID(), realOther.getResultID());
     }
     if (i == 0) {
-      i = Integer.valueOf(wseq).compareTo(realOther.wseq);
+      i = Integer.compare(wseq, realOther.wseq);
     }
     return i;
   }

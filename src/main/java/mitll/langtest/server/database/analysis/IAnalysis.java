@@ -33,19 +33,17 @@
 package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.analysis.*;
 
 import java.util.List;
 
 public interface IAnalysis {
-  UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
+ // UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
+  AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid);
 
-  List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid);
+ // List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid);
 
-  PhoneReport getPhonesForUser(int id, int minRecordings, int listid);
+ // PhoneReport getPhonesForUser(int id, int minRecordings, int listid);
 
   List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings);
 }

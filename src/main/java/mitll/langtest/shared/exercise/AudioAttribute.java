@@ -281,6 +281,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return attributes.keySet();
   }
 
+  /**
+   * Why use this as a key??
+   * @return
+   */
   public String getKey() {
     return "user=" + userid + ", " + getAttributes().toString();
   }

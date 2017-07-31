@@ -1343,7 +1343,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 */
 
-    if (!toAddAudioTo.isEmpty()) {
+//    if (!toAddAudioTo.isEmpty()) {
       then = System.currentTimeMillis();
       db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
       now = System.currentTimeMillis();
@@ -1357,9 +1357,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       if (now - then > 50)
         logger.info("getFullExercises took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
 
-    } else {
-      // logger.info("getFullExercises all " + ids.size() + " exercises have audio");
-    }
+//    } else {
+//      // logger.info("getFullExercises all " + ids.size() + " exercises have audio");
+//    }
 
     then = System.currentTimeMillis();
 
@@ -1577,10 +1577,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
       addAnnotations(byID); // todo do this in a better way
-      if (true || byID.getAudioAttributes().isEmpty()) {
+      //if (true || byID.getAudioAttributes().isEmpty()) {
         toAddAudioTo.add(byID);
-        logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
-      }
+      //  logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
+      //}
       exercises.add(byID);
     }
     return toAddAudioTo;

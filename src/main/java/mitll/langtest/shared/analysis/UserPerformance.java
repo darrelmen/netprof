@@ -200,7 +200,11 @@ public class UserPerformance implements Serializable {
     StringBuilder builder = new StringBuilder();
     builder.append("User " + getUserID() + " " + getRawTotal() + " items, avg score " + getRawAverage());
     int count = 0;
-    for (TimeAndScore ts : getRawBestScores()) {
+    List<TimeAndScore> rawBestScores = getRawBestScores();
+
+    builder.append("\n\tscores = " + rawBestScores.size());
+
+    for (TimeAndScore ts : rawBestScores) {
       builder.append("\n").append(ts);
       if (count++ > TOSHOW) break;
     }
