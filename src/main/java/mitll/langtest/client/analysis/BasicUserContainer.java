@@ -46,7 +46,12 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
     super(controller, header, ID_WIDTH);
   }
 
-  protected int getNameCompare(T o1, T o2) {
+  /**
+   * @param o1
+   * @param o2
+   * @return
+   */
+  protected int getIDCompare(T o1, T o2) {
     if (o1 == o2) {
       return 0;
     }
@@ -56,6 +61,39 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
       if (o2 == null) return 1;
       else {
         return o1.getUserID().compareTo(o2.getUserID());
+      }
+    }
+    return -1;
+  }
+
+  protected int getFirstCompare(T o1, T o2) {
+    if (o1 == o2) {
+      return 0;
+    }
+
+    // Compare the name columns.
+    if (o1 != null) {
+      if (o2 == null) return 1;
+      else {
+        int i = o1.getFirst().compareTo(o2.getFirst());
+
+        return i == 0 ? getDateCompare(o1, o2) : i;
+      }
+    }
+    return -1;
+  }
+
+  protected int getLastCompare(T o1, T o2) {
+    if (o1 == o2) {
+      return 0;
+    }
+
+    // Compare the name columns.
+    if (o1 != null) {
+      if (o2 == null) return 1;
+      else {
+        int i = o1.getLast().compareTo(o2.getLast());
+        return i == 0 ? getDateCompare(o1, o2) : i;
       }
     }
     return -1;
@@ -74,7 +112,7 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
     if (o1 != null) {
       if (o2 == null) return 1;
       else {
-        return Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+        return Long.compare(o1.getTimestampMillis(), o2.getTimestampMillis());
       }
     }
     return -1;

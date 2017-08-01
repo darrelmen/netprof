@@ -116,6 +116,9 @@ public class UserCopy {
   /**
    * Checks the password for the import user to see if it's the same as the current one in mongo.
    *
+   * Two people with the same user id but different passwords are in a race - first guy gets the password,
+   *  second guy needs to get a new account.
+   *
    * @param projid        only for debugging
    * @param optName       of the project, if not the language
    * @param dominoUserDAO to use to add to or query for existing users
@@ -149,11 +152,11 @@ public class UserCopy {
       if (DEBUG) logger.info("copyUsers found existing user " + importUserID + " : " + dominoUser);
 
       // User "adam" already exists with a different password - what to do?
-      // give the person a new id in the name space of the language
-
       if (MAKE_COLLISION_ACCOUNT) {
+        // give the person a new id in the name space of the language
         makeCollisionAccount(optName, dominoUserDAO, oldToNew, added, toImport, importUserID);
       } else {
+        // second person is out of luck - they need to make a new account
         if (WARN_ON_COLLISION) {
           logger.info("COLLISION : copyUsers found existing user with password difference " + importUserID + " : " + dominoUser + "\n");
         }

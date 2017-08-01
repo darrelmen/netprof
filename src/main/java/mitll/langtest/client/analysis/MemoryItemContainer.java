@@ -35,7 +35,6 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
@@ -45,7 +44,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.storage.client.Storage;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
@@ -63,7 +61,6 @@ import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -215,21 +212,24 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    */
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
-    {
-      Column<T, SafeHtml> userCol = getItemColumn();
-      userCol.setSortable(true);
-      table.setColumnWidth(userCol, getIdWidth() + "px");
-      addColumn(userCol, new TextHeader(header));
-      table.addColumnSortHandler(getUserSorter(userCol, getList()));
-    }
+    addItemID();
+    addDateCol();
+  }
 
-    {
-      dateCol = getDateColumn();
-      dateCol.setSortable(true);
-      addColumn(dateCol, new TextHeader(getDateColHeader()));
-      table.setColumnWidth(dateCol, 100 + "px");
-      table.addColumnSortHandler(getDateSorter(dateCol, getList()));
-    }
+  protected void addItemID() {
+    Column<T, SafeHtml> userCol = getItemColumn();
+    userCol.setSortable(true);
+    table.setColumnWidth(userCol, getIdWidth() + "px");
+    addColumn(userCol, new TextHeader(header));
+    table.addColumnSortHandler(getUserSorter(userCol, getList()));
+  }
+
+  protected void addDateCol() {
+    dateCol = getDateColumn();
+    dateCol.setSortable(true);
+    addColumn(dateCol, new TextHeader(getDateColHeader()));
+    table.setColumnWidth(dateCol, 100 + "px");
+    table.addColumnSortHandler(getDateSorter(dateCol, getList()));
   }
 
   protected int getIdWidth() {
@@ -343,26 +343,16 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
                                                        List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        new Comparator<T>() {
-          public int compare(T o1, T o2) {
-            return getNameCompare(o1, o2);
-          }
-        });
+    columnSortHandler.setComparator(englishCol, this::getIDCompare);
     return columnSortHandler;
   }
 
-  protected abstract int getNameCompare(T o1, T o2);
+  protected abstract int getIDCompare(T o1, T o2);
 
   private ColumnSortEvent.ListHandler<T> getDateSorter(Column<T, SafeHtml> englishCol,
                                                        List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        new Comparator<T>() {
-          public int compare(T o1, T o2) {
-            return getDateCompare(o1, o2);
-          }
-        });
+    columnSortHandler.setComparator(englishCol, this::getDateCompare);
     return columnSortHandler;
   }
 
@@ -414,15 +404,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
+        checkGotClick(object, event);
       }
-
-//      @Override
-//      public String getCellStyleNames(Cell.Context context, T object) {
-//        return shouldHighlight(object) ? "tableRowUserCurrentColor" : "";
-//      }
 
       @Override
       public SafeHtml getValue(T shell) {
@@ -437,12 +420,16 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   protected abstract String getItemLabel(T shell);
 
+  /**
+   * @see #addDateCol
+   * @return
+   */
   private Column<T, SafeHtml> getDateColumn() {
     return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (isClick(event)) gotClickOnItem(object);
+        checkGotClick(object, event);
       }
 
       @Override
@@ -495,8 +482,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    */
 /*  public interface LocalTableResources extends CellTable.Resources {
     *//**
-     * The styles applied to the table.
-     *//*
+   * The styles applied to the table.
+   *//*
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();

@@ -68,7 +68,12 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
+  public static final String FILTER_BY1 = "Filter by";
   private final Logger logger = Logger.getLogger("UserContainer");
+
+  private static final int LIST_BOX_WIDTH = 150;
+  private static final int FIRST_WIDTH = 100;
+  private static final int LAST_WIDTH = 110;
 
   private static final String NO_LIST = "(No List)";
   private static final int FILTER_BY = 19;
@@ -109,12 +114,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     filterContainer.addStyleName("floatRight");
     filterContainer.getElement().getStyle().setMarginTop(FILTER_BY, Style.Unit.PX);
 
-    HTML w1 = new HTML("Filter by");
+    HTML w1 = new HTML(FILTER_BY1);
 
     w1.addStyleName("floatLeft");
     w1.addStyleName("rightFiveMargin");
     w1.addStyleName("topFiveMargin");
 
+    // mimic style of subtext on headers
     w1.getElement().getStyle().setFontSize(14, Style.Unit.PX);
     w1.getElement().getStyle().setColor("#999");
 
@@ -124,7 +130,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     filterContainer.add(listBox);
     filterContainer.addStyleName("leftFiveMargin");
 
-    listBox.setWidth("150px");
+    listBox.setWidth(LIST_BOX_WIDTH + "px");
     listBox.addStyleName("floatLeft");
     listBox.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
 
@@ -149,7 +155,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     this.rememberedLists = new ArrayList<>();
     result.forEach(ul -> rememberedLists.add(ul.getID()));
 
-   // logger.info("There are " + result.size() + " lists");
+    // logger.info("There are " + result.size() + " lists");
     listBox.addItem(NO_LIST);
     result.forEach(ul -> listBox.addItem(ul.getName()));
     listBox.addChangeHandler(event -> {
@@ -157,10 +163,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
       if (selectedIndex == 0) {
         listid = -1;
-      }
-      else {
+      } else {
         Integer listID = rememberedLists.get(selectedIndex - 1);
-    //    logger.info("selected index " + selectedIndex + " " + listID);
+        //    logger.info("selected index " + selectedIndex + " " + listID);
         listid = listID;
       }
 
@@ -174,17 +179,74 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    */
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
-    super.addColumnsToTable(sortEnglish);
+    addItemID();
+    addFirstName();
+    addLastName();
+    addDateCol();
 
     addNumber();
     addCurrent();
-    addFinalScore();
-    addDate();
+    //addFinalScore();
+    //addDate();
 
     table.getColumnSortList().push(dateCol);
     table.setWidth("100%", true);
 
     addTooltip();
+  }
+
+
+  private void addFirstName() {
+    Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml(shell.getFirst());
+      }
+    };
+    userCol.setSortable(true);
+    table.setColumnWidth(userCol, FIRST_WIDTH + "px");
+    addColumn(userCol, new TextHeader("First"));
+    table.addColumnSortHandler(getFirstSorter(userCol, getList()));
+  }
+
+
+  private ColumnSortEvent.ListHandler<UserInfo> getFirstSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                               List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getFirstCompare);
+    return columnSortHandler;
+  }
+
+  private void addLastName() {
+    Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml(shell.getLast());
+      }
+    };
+    userCol.setSortable(true);
+    table.setColumnWidth(userCol, LAST_WIDTH + "px");
+    addColumn(userCol, new TextHeader("Last"));
+    table.addColumnSortHandler(getLastSorter(userCol, getList()));
+  }
+
+  private ColumnSortEvent.ListHandler<UserInfo> getLastSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                              List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getLastCompare);
+    return columnSortHandler;
   }
 
   private void addDate() {
@@ -238,7 +300,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              return Integer.valueOf(o1.getNum()).compareTo(o2.getNum());
+              int compare = Integer.compare(o1.getNum(), o2.getNum());
+              return compare == 0 ? getDateCompare(o1, o2) : compare;
             }
           }
           return -1;
@@ -260,7 +323,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              return Integer.valueOf(o1.getFinalScores()).compareTo(o2.getFinalScores());
+              int compare = Integer.compare(o1.getFinalScores(), o2.getFinalScores());
+              return compare == 0 ? getDateCompare(o1, o2) : compare;
             }
           }
           return -1;
@@ -303,7 +367,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              return Integer.valueOf(o1.getDiff()).compareTo(o2.getDiff());
+              int compare = Integer.compare(o1.getDiff(), o2.getDiff());
+              return compare;
             }
           }
           return -1;

@@ -653,9 +653,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * Convert a netprof user into a domino user.
    *
-   * @param user
-   * @param projectName
-   * @return
+   * @param user to import
+   * @param projectName so we can make a secondary group for this language/project
+   * @return the domino user
    * @see mitll.langtest.server.database.copy.UserCopy#addUser
    */
   public ClientUserDetail toClientUserDetail(User user, String projectName) {

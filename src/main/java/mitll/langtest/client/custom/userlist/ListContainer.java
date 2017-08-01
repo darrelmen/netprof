@@ -75,7 +75,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   @Override
-  protected int getNameCompare(UserList<CommonShell> o1, UserList<CommonShell> o2) {
+  protected int getIDCompare(UserList<CommonShell> o1, UserList<CommonShell> o2) {
     return o1.getName().compareTo(o2.getName());
   }
 
