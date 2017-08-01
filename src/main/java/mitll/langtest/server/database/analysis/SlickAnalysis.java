@@ -46,7 +46,6 @@ import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickPerfResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import scala.tools.cmd.gen.AnyVals;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -243,7 +242,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     if (addNativeAudio) {
       getNativeAudio(perfs);
+      logger.info("getUserToResults took "+(System.currentTimeMillis()-then) + " millis to get native audio for " +perfs.size());
     }
+
+    then = System.currentTimeMillis();
+
+    Map<Integer, MiniUser> idToMini = new HashMap<>();
 
     for (SlickPerfResult perf : perfs) {
       count++;
@@ -276,7 +280,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       String nativeAudio = null;
       if (addNativeAudio) {
-        nativeAudio = database.getNativeAudio(userToGender, perf.userid(), exid, project);
+        nativeAudio = database.getNativeAudio(userToGender, perf.userid(), exid, project, idToMini);
         if (nativeAudio == null) {
 //        if (exid.startsWith("Custom")) {
 ////          logger.debug("missing audio for " + exid);
@@ -301,8 +305,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     if (DEBUG || true) {
       long now = System.currentTimeMillis();
 
-      logger.info("getUserToResults total " + count + " missing audio " + missing +
-          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " took " + (now - then) + " millis");//+ " exToRef " + exToRef.size());
+      logger.info("getUserToResults" +
+          "\n\ttotal         " + count +
+          "\n\tmissing audio " + missing +
+          "\n\tiPad      " + iPad +
+          "\n\tflashcard " + flashcard +
+          "\n\tlearn     " + learn +
+          "\n\ttook      " + (now - then) + " millis");//+ " exToRef " + exToRef.size());
       //   if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
       if (emptyCount > 0) logger.info("missing score json childCount " + emptyCount + "/" + count);
     }

@@ -242,10 +242,10 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * @param db
+   * @param db to read from
    * @param cc      country code
-   * @param optName null OK
-   * @param isDev
+   * @param optName non-default name (not language) - null OK
+   * @param isDev i.e. not production
    * @seex PostgresTest#testCopy
    * @see #copyOneConfigCommand
    */
@@ -253,9 +253,9 @@ public class CopyToPostgres<T extends CommonShell> {
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
     logger.info("copyOneConfig" +
-        "\n\tproject is " + optName +
-        "\n\tcc is      " + cc +
-        "\n\ttype order is " + typeOrder +
+        "\n\tproject is            " + optName +
+        "\n\tcc is                 " + cc +
+        "\n\ttype order is         " + typeOrder +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev, typeOrder);  // TODO : course?

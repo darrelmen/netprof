@@ -36,14 +36,11 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.Report;
-import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
-import net.sf.json.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Collection;
@@ -146,7 +143,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @see UserServiceImpl#getKindToUser
    * @deprecated - try to do something better - not all users or not all regardless of project
    */
-  Map<User.Kind, Collection<MiniUser>> getMiniByKind();
+ // Map<User.Kind, Collection<MiniUser>> getMiniByKind();
 
   /**
    * @param userid

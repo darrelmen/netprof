@@ -50,8 +50,8 @@ import mitll.langtest.shared.user.User;
 import java.util.Collection;
 import java.util.Map;
 
-public class DLIClassOps implements RequiresResize {
-  public static final String CLASSES = "Classes";
+public class DLIClassOps/* implements RequiresResize */{
+  /*public static final String CLASSES = "Classes";
 
   // private final Logger logger = Logger.getLogger("UserOps");
   private final UserManager userManager;
@@ -61,18 +61,18 @@ public class DLIClassOps implements RequiresResize {
 //  private final Map<String, Label> inviteToLabel = new HashMap<>();
 //  private final Map<User.Kind, IconType> kindToIcon = new HashMap<>();
 
-  /**
+  *//**
    * @param controller
    * @param userManager
    * @see Navigation#addUserMaintenance
-   */
+   *//*
   public DLIClassOps(ExerciseController controller, UserManager userManager) {
   //  setKindToIcon();
     this.controller = controller;
     this.userManager = userManager;
   }
 
-/*  private void setKindToIcon() {
+*//*  private void setKindToIcon() {
     kindToIcon.put(User.Kind.STUDENT, IconType.USER);
     kindToIcon.put(User.Kind.TEACHER, IconType.GROUP);
     kindToIcon.put(User.Kind.CONTENT_DEVELOPER, IconType.PENCIL);
@@ -80,14 +80,14 @@ public class DLIClassOps implements RequiresResize {
     kindToIcon.put(User.Kind.PROJECT_ADMIN, IconType.BOLT);
     kindToIcon.put(User.Kind.ADMIN, IconType.ANDROID);
     kindToIcon.put(User.Kind.TEST, IconType.COGS);
-  }*/
+  }*//*
 
-  /**
+  *//**
    * @param classes
    * @see Navigation#addUserMaintenance()
    * @see Navigation#selectPreviousTab
-   */
- /* public void showClasses(TabAndContent classes) {
+   *//*
+ *//* public void showClasses(TabAndContent classes) {
     DivWidget content = classes.getContent();
     content.clear();
 
@@ -102,7 +102,7 @@ public class DLIClassOps implements RequiresResize {
 //    logger.info("Loaded everything...");
 
     showInitialState(right, detail, first);
-  }*/
+  }*//*
 
   private NavLink lastClicked = null;
 
@@ -120,14 +120,14 @@ public class DLIClassOps implements RequiresResize {
     });
   }
 
-  /**
+  *//**
    * @paramx left
    * @paramx xright
    * @paramx detail
    * @return
    * @see #showUsers
-   */
-/*  private NavLink getKinds(DivWidget left, DivWidget right, DivWidget detail) {
+   *//*
+*//*  private NavLink getKinds(DivWidget left, DivWidget right, DivWidget detail) {
     NavList kindsLinks = new NavList();
     kindsLinks.setWidth("180px");
     left.add(kindsLinks);
@@ -142,9 +142,9 @@ public class DLIClassOps implements RequiresResize {
     //kindsLinks.add(new NavHeader("Invitations"));
     //kindsLinks.add(getInviteLink(right, detail));
     return first;
-  }*/
+  }*//*
 
-/*
+*//*
   private NavLink addClassesLinks(DivWidget right, DivWidget detail, NavList kindsLinks, User current) {
     NavLink first = null;
 
@@ -153,7 +153,7 @@ public class DLIClassOps implements RequiresResize {
         if (first == null) first = userLink;
     return first;
   }
-*/
+*//*
 
   private DivWidget addDiv(DivWidget content) {
     DivWidget left = new DivWidget();
@@ -162,12 +162,12 @@ public class DLIClassOps implements RequiresResize {
     return left;
   }
 
-  /**
+  *//**
    * @param kind
    * @param content
    * @param userForm
    * @return
-   */
+   *//*
   private NavLink getUserLink(String name, IconType iconType, DivWidget content, DivWidget userForm) {
     NavLink students = new NavLink(name);
     students.setIcon(iconType);
@@ -188,7 +188,7 @@ public class DLIClassOps implements RequiresResize {
     return students;
   }
 
-  /*private NavLink getInviteLink(DivWidget content, DivWidget pendingInvites) {
+  *//*private NavLink getInviteLink(DivWidget content, DivWidget pendingInvites) {
     NavLink students = new NavLink("Pending");
     students.setIcon(IconType.ENVELOPE);
     students.getElement().setId("link_" + "pending");
@@ -208,28 +208,28 @@ public class DLIClassOps implements RequiresResize {
     });
     return students;
   }
-*/
+*//*
 
   private User.Kind currentKind;
   private DivWidget currentContent;
   private DivWidget currentUserForm;
-/*
+*//*
   public void reload() {
     MiniUser currentSelection = opsUserContainer.getNext();
     if (currentSelection != null) {
       opsUserContainer.storeSelectedUser(currentSelection.getID());
     }
     showUsers(currentKind, currentContent, currentUserForm);
-  }*/
+  }*//*
 
-  /**
+  *//**
    * Talk to the service.
    *
    * @param kind
    * @param content
    * @param userForm
    * @see
-   */
+   *//*
   private void showUsers(final User.Kind kind, final DivWidget content, DivWidget userForm) {
     userManager.getUserService().getKindToUser(new AsyncCallback<Map<User.Kind, Collection<MiniUser>>>() {
       @Override
@@ -243,7 +243,7 @@ public class DLIClassOps implements RequiresResize {
         currentContent = content;
         currentUserForm = userForm;
 
-/*        userManager.getCounts(kindToLabel);
+*//*        userManager.getCounts(kindToLabel);
 
         requiresResize = showUserList(kind, content, kindCollectionMap, userForm);
 
@@ -252,7 +252,7 @@ public class DLIClassOps implements RequiresResize {
           public void execute() {
             onResize();
           }
-        });*/
+        });*//*
       }
     });
   }
@@ -260,7 +260,7 @@ public class DLIClassOps implements RequiresResize {
   private final RequiresResize requiresResize = null;
   //private OpsUserContainer opsUserContainer;
 
-  /**
+  *//**
    * Show users of this kind.
    *
    * @paramx kind
@@ -268,8 +268,8 @@ public class DLIClassOps implements RequiresResize {
    * @paramx kindCollectionMap
    * @paramx userForm
    * @return
-   */
-/*
+   *//*
+*//*
   private RequiresResize showUserList(User.Kind kind,
                                       DivWidget content,
                                       Map<User.Kind, Collection<MiniUser>> kindCollectionMap,
@@ -291,12 +291,12 @@ public class DLIClassOps implements RequiresResize {
         this
     );
   }
-  */
+  *//*
 
   @Override
   public void onResize() {
     if (requiresResize != null) {
       requiresResize.onResize();
     }
-  }
+  }*/
 }

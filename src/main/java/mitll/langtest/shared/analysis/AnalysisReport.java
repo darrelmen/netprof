@@ -32,8 +32,9 @@ public class AnalysisReport implements Serializable {
   public String toString() {
     return "UserPerf:"+userPerformance+
         "\n\tword scores"  + wordScores +
-        "\n\tphone scores "+phoneReport +
-        "\n\tphone to word " + phoneReport.getPhoneToWordAndScoreSorted().size();
+        "\n\tphone scores "+phoneReport;
+    //+
+     //   "\n\tphone to word " + phoneReport.getPhoneToWordAndScoreSorted().size();
 
   }
 }

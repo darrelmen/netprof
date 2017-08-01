@@ -188,6 +188,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
 
     Set<Integer> exids = new HashSet<>();
+    Map<Integer, MiniUser> idToMini = new HashMap<>();
 
     for (SlickPhoneReport report : phoneReportByResult) {
       int i = 1;
@@ -210,7 +211,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         totalItems++;
       }*/
 
-      String refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project);
+      String refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
 
       WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise, phoneToScores, phoneToWordAndScore,
           exid, report.answer(), scoreJson, report.modified(),

@@ -259,6 +259,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * Confusing...
+   *
    * @param relativeConfigDir
    * @param dbName
    * @param serverProps
@@ -1431,12 +1432,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param userid
    * @param exid
    * @param project
+   * @param idToMini
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserToResults
    * @see SlickPhoneDAO#getPhoneReport
    */
   @Nullable
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project) {
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project, Map<Integer, MiniUser> idToMini) {
     CommonExercise exercise = project.getExerciseByID(exid);
 
     if (exercise == null) {
@@ -1448,7 +1450,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       exercise = getUserExerciseByExID(exid);
     }
 
-    return audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguage());
+    return audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguage(), idToMini);
   }
 
   /**
@@ -1563,9 +1565,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
       for (CommonShell ex : userListByID.getExercises()) {
         copyAsExercises.add(getCustomOrPredefExercise(projectid, ex.getID()));
       }
+      Map<Integer, MiniUser> idToMini = new HashMap<>();
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
-        getAudioDAO().attachAudioToExercise(ex, language);
+        getAudioDAO().attachAudioToExercise(ex, language, idToMini);
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");

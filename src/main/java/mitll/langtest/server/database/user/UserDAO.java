@@ -438,7 +438,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     statement.close();
   }
 
-  private void dropDefaultColumn(Connection connection, String column, String type) throws SQLException {
+/*  private void dropDefaultColumn(Connection connection, String column, String type) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ALTER COLUMN " + column +
             " DROP DEFAULT"
         //    " SET DEFAULT NULL"
@@ -461,7 +461,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     } catch (SQLException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
   /**
    * Pulls the list of users out of the database.
@@ -491,11 +491,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     for (User user : getUsers()) mini.put(user.getID(), new MiniUser(user));
     return mini;
   }
-
-  @Override
-  public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
-    return null;
-  }
+//
+//  @Override
+//  public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
+//    return null;
+//  }
 
   /**
    * @param userid

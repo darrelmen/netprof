@@ -87,9 +87,10 @@ public interface Database extends AutoCloseable {
    * @param userid
    * @param exid
    * @param project
+   * @param idToMini
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserToResults
    * @see mitll.langtest.server.database.phone.SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
    */
-  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project);
+  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project, Map<Integer, MiniUser> idToMini);
 }

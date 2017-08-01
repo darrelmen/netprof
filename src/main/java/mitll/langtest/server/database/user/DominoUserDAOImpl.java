@@ -304,12 +304,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                                                    String url,
                                                    boolean sendEmail) {
 //    logger.info("adding user " + user);
-    SResult<ClientUserDetail> clientUserDetailSResult = delegate.addUser(
+    return delegate.addUser(
         sendEmail ? user : adminUser,
         user,
         url);
-
-    return clientUserDetailSResult;
   }
 
   /**
@@ -783,16 +781,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 //    logger.info("\ttoUser return " + user);
     return user;
   }
-//
-//  @NotNull
-//  private MiniUser.Gender getRealGender(mitll.hlt.domino.shared.model.user.User.Gender gender) {
-//    return MiniUser.Gender.valueOf(gender.name());
-//  }
-
-/*
-  private boolean isValidEmailGrammar(String text) {
-    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
-  }*/
 
   /**
    * checks roles
@@ -990,7 +978,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see UserServiceImpl#getKindToUser
    * @deprecated
    */
-  public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
+/*  public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
     Map<User.Kind, Collection<MiniUser>> kindToUsers = new HashMap<>();
     for (DBUser s : getAll()) {
       User.Kind key = getRole(s);//User.Kind.valueOf(s.kind());
@@ -1004,7 +992,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
 
     return kindToUsers;
-  }
+  }*/
 
   /**
    * gets ROLE from DBUser
@@ -1012,13 +1000,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param s
    * @return
    */
+/*
   private User.Kind getRole(DBUser s) {
     return getUserKind(s, new HashSet<>());
   }
+*/
 
   @Override
   public MiniUser getMiniUser(int userid) {
     DBUser byID = lookupUser(userid);
+    logger.info("getMiniUser " + userid);
     return byID == null ? null : getMini(byID);
   }
 

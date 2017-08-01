@@ -237,7 +237,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids) {
+  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids, Map<Integer,MiniUser> map) {
     return null;
   }
 
@@ -248,7 +248,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    * @see #attachAudioToExercise
    */
-  protected Collection<AudioAttribute> getAudioAttributesForExercise(int exid) {
+  protected Collection<AudioAttribute> getAudioAttributesForExercise(int exid,Map<Integer, MiniUser> idToMini) {
     try {
       String sql = SELECT_ALL + " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
       Collection<AudioAttribute> resultsSQL = getResultsSQL(sql);
@@ -877,7 +877,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language) {
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language, Map<Integer, MiniUser> idToMini) {
     return null;
   }
 

@@ -32,7 +32,9 @@
 
 package mitll.langtest.server.database.audio;
 
+import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -64,7 +66,7 @@ public interface IAudioDAO extends IDAO {
    * @param language
    * @return
    */
-  int attachAudioToExercise(CommonExercise firstExercise, String language);
+  int attachAudioToExercise(CommonExercise firstExercise, String language,Map<Integer, MiniUser> idToMini);
 
   /**
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
@@ -137,9 +139,11 @@ public interface IAudioDAO extends IDAO {
    * @param userid
    * @param exercise
    * @param language
+   * @param idToMini
    * @return
+   * @see Database#getNativeAudio(Map, int, int, Project, Map)
    */
-  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language);
+  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language, Map<Integer, MiniUser> idToMini);
 
   Map<String,Integer> getPairs(int projid);
 

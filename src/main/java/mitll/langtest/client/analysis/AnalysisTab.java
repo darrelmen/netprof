@@ -65,6 +65,8 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
+  public static final int MIN_HEIGHT = 325;
+  public static final int WORD_WIDTH = 500;
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
   private static final String WORDS = "Vocabulary";
@@ -332,6 +334,8 @@ public class AnalysisTab extends DivWidget {
       Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab,
           new Heading(3, WORDS, SUBTITLE));
 
+      tableWithPager.setWidth(WORD_WIDTH + "px");
+
       DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer",
           new Heading(3, WORDS, SUBTITLE));
       wordsContainer.addStyleName("cardBorderShadow");
@@ -357,7 +361,7 @@ public class AnalysisTab extends DivWidget {
   private DivWidget getSoundsDiv() {
     DivWidget soundsDiv = new DivWidget();
     soundsDiv.getElement().setId("soundsDiv");
-    soundsDiv.getElement().getStyle().setProperty("minHeight", 325, Style.Unit.PX);
+    soundsDiv.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
     soundsDiv.addStyleName("cardBorderShadow");
     soundsDiv.addStyleName("floatRight");
     //  soundsDiv.addStyleName("inlineFlex");

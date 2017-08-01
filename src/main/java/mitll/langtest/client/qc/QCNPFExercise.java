@@ -116,7 +116,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   // private static final String ATTENTION_LL = "Attention LL";
 //  private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
 
-  public static final String REVIEW = "review";
+  private static final String REVIEW = "review";
   //public static final String COMMENT = "comment";
 
   private static final int DEFAULT_MALE_ID = -2;

@@ -119,7 +119,7 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
 
   //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
-  private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
+//  private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
 
   protected int getPageSize() {
     return ROWS_TO_SHOW;
@@ -128,7 +128,7 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
   /**
    * @param sortedHistory
    * @return
-   * @see AnalysisTab#getWordScores
+   * @see AnalysisTab#getWordContainer(List, ExerciseController, AnalysisPlot, ShowTab, Heading)
    */
   public Panel getTableWithPager(List<WordScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager(new ListOptions());
@@ -153,16 +153,16 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
   @NotNull
   private Comparator<WordScore> getWordScoreTimeComparator() {
     return (o1, o2) -> {
-      int i = new Long(o1.getTimestamp()).compareTo(o2.getTimestamp());
-      return i == 0 ? Integer.valueOf(o1.getExid()).compareTo(o2.getExid()) : i;
+      int i = Long.compare(o1.getTimestamp(), o2.getTimestamp());
+      return i == 0 ? Integer.compare(o1.getExid(), o2.getExid()) : i;
     };
   }
 
   @NotNull
   private Comparator<WordScore> getWordScoreTimeComparatorDesc() {
     return (o1, o2) -> {
-      int i = -1 * Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
-      return i == 0 ? Integer.valueOf(o1.getExid()).compareTo(o2.getExid()) : i;
+      int i = -1 * Long.compare(o1.getTimestamp(), o2.getTimestamp());
+      return i == 0 ? Integer.compare(o1.getExid(), o2.getExid()) : i;
     };
   }
 

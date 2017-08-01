@@ -233,10 +233,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @return
    * @see mitll.langtest.client.dliclass.DLIClassOps#showUsers
    */
+/*
   @Override
   public Map<User.Kind, Collection<MiniUser>> getKindToUser() {
     return db.getUserDAO().getMiniByKind();
   }
+*/
 
   /**
    * @param user

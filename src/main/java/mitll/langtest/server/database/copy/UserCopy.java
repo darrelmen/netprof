@@ -28,7 +28,6 @@ public class UserCopy {
   private static final boolean DEBUG = true;
   private static final boolean MAKE_COLLISION_ACCOUNT = false;
   private static final boolean WARN_ON_COLLISION = true;
-  //public static final String UNSET_USER_ID = "unsetUserID";
 
   /**
    * What can happen:
@@ -48,7 +47,9 @@ public class UserCopy {
    * Also, going forward, we must store emails, since we need to be able to send the sign up message?
    *
    * @param db
-   * @param projid
+   * @param projid to import into
+   * @param oldResultDAO - so we can check if the user ever recorded anything - if not we skip them on import
+   * @param optName if you want to name the project something other than the language
    * @see CopyToPostgres#copyOneConfig
    */
   Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO, String optName) throws Exception {
@@ -87,57 +88,16 @@ public class UserCopy {
         } else {
           if (DEBUG) logger.info("copyUsers #" + c + "/" + importUsers.size() + " : import " + toImport);
 
-          User userByID1 = dominoUserDAO.getUserByID(importUserID);
-          if (userByID1 != null) { // user exists
-            String passwordHash = toImport.getPasswordHash();
-            if (passwordHash == null) passwordHash = "";
-
-            User strictUserWithPass = dominoUserDAO.getUserIfMatchPass(userByID1, importUserID, passwordHash);
-            if (strictUserWithPass != null) { // existing user with same password
-              // do nothing, but remember id mapping
-              oldToNew.put(importID, strictUserWithPass.getID());
-            } else {
-              if (DEBUG) logger.info("copyUsers found existing user " + importUserID + " : " + userByID1);
-
-              // User "adam" already exists with a different password - what to do?
-              // give the person a new id in the name space of the language
-
-              if (MAKE_COLLISION_ACCOUNT) {
-                String compoundID = importUserID + "#" + optName;
-                User userByCompound = dominoUserDAO.getUserByID(compoundID);
-
-                if (userByCompound != null) {
-                  logger.warn("copyUsers already added " + compoundID + " : " +
-                      userByCompound +
-                      " so moving on...");
-                } else {
-                  logger.warn("copyUsers no user for '" + compoundID + "'");
-
-                  toImport.setUserID(compoundID);
-                  added.add(addUser(dominoUserDAO, oldToNew, toImport, optName));
-                }
-//              String passwordHash1 = userByID1.getPasswordHash();
-//              if (!passwordHash1.isEmpty()) {
-//                logger.info("Found existing user " + existingID + " : " + userByID1.getUserID() + " with password hash " + passwordHash1);
-//                //dominoUserDAO.changePassword(existingID, "");
-//                dominoUserDAO.forgetPassword(existingID);
-//              }
-//
-//              oldToNew.put(importID, existingID);
-              } else {
-                if (WARN_ON_COLLISION) {
-                  logger.info("COLLISION : copyUsers found existing user with password difference " + importUserID + " : " + userByID1 + "\n");
-                }
-
-                oldToNew.put(importID, userByID1.getID());
-              }
-              collisions++;
-              logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + userByID1.getID() +
-                  " : " + userByID1);
-            }
-          } else {
+          User dominoUser = dominoUserDAO.getUserByID(importUserID);
+          if (dominoUser == null) { // new user
             logger.info("copyUsers no existing user id '" + importUserID + "'");
             added.add(addUser(dominoUserDAO, oldToNew, toImport, optName));
+          } else { // user exists
+            if (foundExistingUser(projid, optName,
+                dominoUserDAO, oldToNew,
+                added, toImport, dominoUser)) {
+              collisions++;
+            }
           }
         }
       }
@@ -151,6 +111,98 @@ public class UserCopy {
         " lurker " + lurker
     );
     return oldToNew;
+  }
+
+  /**
+   * Checks the password for the import user to see if it's the same as the current one in mongo.
+   *
+   * @param projid        only for debugging
+   * @param optName       of the project, if not the language
+   * @param dominoUserDAO to use to add to or query for existing users
+   * @param oldToNew      remember the mapping of old h2 userid to new mongo/domino user id
+   * @param added         only used if we make collision accounts
+   * @param toImport      old user from h2
+   * @param dominoUser    user found in mongo with same user id
+   * @return true if a collision - same user id but different password
+   * @throws Exception
+   */
+  private boolean foundExistingUser(int projid,
+                                    String optName,
+                                    DominoUserDAOImpl dominoUserDAO,
+                                    Map<Integer, Integer> oldToNew,
+                                    List<ClientUserDetail> added,
+                                    User toImport,
+                                    User dominoUser) throws Exception {
+    String passwordHash = toImport.getPasswordHash();
+    if (passwordHash == null) passwordHash = "";
+
+
+    int importID = toImport.getID();
+    String importUserID = toImport.getUserID();
+
+    User strictUserWithPass = dominoUserDAO.getUserIfMatchPass(dominoUser, importUserID, passwordHash);
+    if (strictUserWithPass != null) { // existing user with same password
+      // do nothing, but remember id mapping
+      oldToNew.put(importID, strictUserWithPass.getID());
+      return false;
+    } else {
+      if (DEBUG) logger.info("copyUsers found existing user " + importUserID + " : " + dominoUser);
+
+      // User "adam" already exists with a different password - what to do?
+      // give the person a new id in the name space of the language
+
+      if (MAKE_COLLISION_ACCOUNT) {
+        makeCollisionAccount(optName, dominoUserDAO, oldToNew, added, toImport, importUserID);
+      } else {
+        if (WARN_ON_COLLISION) {
+          logger.info("COLLISION : copyUsers found existing user with password difference " + importUserID + " : " + dominoUser + "\n");
+        }
+
+        oldToNew.put(importID, dominoUser.getID());
+      }
+
+      logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + dominoUser.getID() +
+          " : " + dominoUser);
+      return true;
+    }
+  }
+
+  /**
+   * For the moment this is never done.
+   *
+   * @param optName
+   * @param dominoUserDAO
+   * @param oldToNew
+   * @param added
+   * @param toImport
+   * @param importUserID
+   * @throws Exception
+   */
+  private void makeCollisionAccount(String optName, DominoUserDAOImpl dominoUserDAO,
+                                    Map<Integer, Integer> oldToNew,
+                                    List<ClientUserDetail> added,
+                                    User toImport, String importUserID) throws Exception {
+    String compoundID = importUserID + "#" + optName;
+    User userByCompound = dominoUserDAO.getUserByID(compoundID);
+
+    if (userByCompound != null) {
+      logger.warn("copyUsers already added " + compoundID + " : " +
+          userByCompound +
+          " so moving on...");
+    } else {
+      logger.warn("copyUsers no user for '" + compoundID + "'");
+
+      toImport.setUserID(compoundID);
+      added.add(addUser(dominoUserDAO, oldToNew, toImport, optName));
+    }
+//              String passwordHash1 = userByID1.getPasswordHash();
+//              if (!passwordHash1.isEmpty()) {
+//                logger.info("Found existing user " + existingID + " : " + userByID1.getUserID() + " with password hash " + passwordHash1);
+//                //dominoUserDAO.changePassword(existingID, "");
+//                dominoUserDAO.forgetPassword(existingID);
+//              }
+//
+//              oldToNew.put(importID, existingID);
   }
 
   /**

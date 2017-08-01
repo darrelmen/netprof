@@ -35,7 +35,6 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -188,13 +187,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see #attachAudioToExercise
    */
   @Override
-  Collection<AudioAttribute> getAudioAttributesForExercise(int exid) {
+  Collection<AudioAttribute> getAudioAttributesForExercise(int exid, Map<Integer, MiniUser> idToMini) {
     long then = System.currentTimeMillis();
     List<SlickAudio> byExerciseID = dao.getByExerciseID(exid);
     long now = System.currentTimeMillis();
     if (now - then > 20)
       logger.warn("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() + " attr for " + exid);
-    return toAudioAttributes(byExerciseID);
+    return toAudioAttributes(byExerciseID, idToMini);
   }
 
   /**
@@ -202,18 +201,18 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    * @see BaseAudioDAO#attachAudioToExercises
    */
-  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids) {
+  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids, Map<Integer, MiniUser> idToMini) {
     long then = System.currentTimeMillis();
     Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDs(exids);
     long now = System.currentTimeMillis();
 
     if (now - then > 30) {
-      logger.warn("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() + " attr for " + exids.size());
+      logger.info("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() + " attr for " + exids.size());
     }
 
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
     for (Map.Entry<Integer, List<SlickAudio>> pair : byExerciseID.entrySet()) {
-      copy.put(pair.getKey(), toAudioAttributes(pair.getValue()));
+      copy.put(pair.getKey(), toAudioAttributes(pair.getValue(), idToMini));
     }
     if (copy.size() != exids.size()) {
       logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " + copy.size());
@@ -436,9 +435,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param all
    * @return
    */
-  private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all) {
+  private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all, Map<Integer, MiniUser> idToMini) {
     List<AudioAttribute> copy = new ArrayList<>();
-    Map<Integer, MiniUser> idToMini = new HashMap<>();
 
     for (SlickAudio s : all) {
       copy.add(getAudioAttribute(s, idToMini));
@@ -578,6 +576,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     if (all.isEmpty()) {
       logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows but no audio?");
     }
+    logger.info("toAudioAttribute " + all.size());
     Map<Integer, MiniUser> idToMini = new HashMap<>();
     for (SlickAudio s : all) {
       copy.add(getAudioAttribute(s, idToMini));
@@ -586,7 +585,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   private AudioAttribute getAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini) {
-    MiniUser miniUser = idToMini.computeIfAbsent(s.userid(), k -> userDAO.getMiniUser(s.userid()));
+    int userid = s.userid();
+
+    //  int before =idToMini.size();
+    MiniUser miniUser = idToMini.computeIfAbsent(userid, k -> userDAO.getMiniUser(userid));
+    //  int after =idToMini.size();
+    //  if (after>before) logger.info("getAudioAttribute id->mini now "+ after);
     //      logger.info("got " + s);
     return toAudioAttribute(s, miniUser);
   }
@@ -644,22 +648,23 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param userToGender
    * @param userid
    * @param exercise
+   * @param idToMini
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getNativeAudio
+   * @see Database#getNativeAudio
    */
   @Nullable
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language) {
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language, Map<Integer, MiniUser> idToMini) {
     //String nativeAudio = null;
     if (exercise != null) {
       MiniUser.Gender genderOfUser = getGender(userToGender, userid);
       if (genderOfUser == null) {
-//        logger.error("getNativeAudio can't find user " + userid);
+        logger.error("getNativeAudio can't find user " + userid);
         return null; // no user with this id?
       }
 
       if (!exercise.hasRefAudio()) {
         //      logger.info("Attach audio to " + exercise.getID());
-        attachAudioToExercise(exercise, language);
+        attachAudioToExercise(exercise, language, idToMini);
       }
 
       AudioAttribute audioAttributePrefGender = exercise.getAudioAttributePrefGender(genderOfUser == Male, true);
@@ -697,16 +702,17 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Nullable
   private MiniUser.Gender getGender(Map<Integer, MiniUser.Gender> userToGender, int userid) {
-    MiniUser.Gender orDefault = userToGender.get(userid);
-    if (orDefault == null) {
+    MiniUser.Gender genderForUser = userToGender.get(userid);
+    if (genderForUser == null) {
       User byID = userDAO.getByID(userid);
       if (byID == null) {
-        // logger.warn("getNativeAudio huh? can't find " + userid);
+        logger.error("getGender huh? can't find " + userid);
       } else {
-        userToGender.put(userid, byID.getRealGender());
+        userToGender.put(userid, genderForUser = byID.getRealGender());
+
       }
     }
-    return orDefault;
+    return genderForUser;
   }
 
   public AudioAttribute getByID(int audioID) {

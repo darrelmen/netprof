@@ -340,13 +340,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     table.setSelectionModel(selectionModel);
   }
 
-/*  @Override
-  protected CellTable.Resources chooseResources() {
-    CellTable.Resources o;
-    o = GWT.create(UserContainer.LocalTableResources.class);
-    return o;
-  }*/
-
   private ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
                                                        List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);

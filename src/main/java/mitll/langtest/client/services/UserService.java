@@ -133,5 +133,5 @@ public interface UserService extends RemoteService {
    */
   void forgetProject();
 
-  Map<User.Kind, Collection<MiniUser>> getKindToUser();
+ // Map<User.Kind, Collection<MiniUser>> getKindToUser();
 }
