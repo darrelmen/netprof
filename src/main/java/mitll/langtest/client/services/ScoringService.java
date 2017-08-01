@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
@@ -43,6 +44,7 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,8 +60,12 @@ public interface ScoringService extends RemoteService {
    */
   PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions);
 
-  void getAllAlignments();
+//  void getAllAlignments();
 
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#recalcProject
+   * @param projid
+   */
   void recalcAlignments(int projid);
 
   Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs);

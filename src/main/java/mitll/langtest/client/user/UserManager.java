@@ -95,7 +95,7 @@ public class UserManager {
     this.userFeedback = userFeedback;
   }
 
-  public UserServiceAsync getUserService() {
+  UserServiceAsync getUserService() {
     return userServiceAsync;
   }
 
@@ -120,7 +120,6 @@ public class UserManager {
    * instead have call to get permissions for a user.
    *
    * @see #checkLogin
-   * @see #storeUser
    */
   private void getPermissionsAndSetUser() {
     if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser " +

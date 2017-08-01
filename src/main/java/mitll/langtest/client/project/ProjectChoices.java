@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -686,7 +687,7 @@ public class ProjectChoices {
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable throwable) {
-
+        Window.alert("Can't contact server.");
       }
 
       @Override

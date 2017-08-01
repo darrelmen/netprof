@@ -32,13 +32,12 @@
 
 package mitll.langtest.client.services;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.initial.InitialUI;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.client.user.UserPassLogin;
-import mitll.langtest.client.user.UserTable;
+import mitll.langtest.client.user.*;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
@@ -60,13 +59,12 @@ public interface UserService extends RemoteService {
    * @param userId
    * @param attemptedFreeTextPassword
    * @return
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
+   * @see SignInForm#gotLogin
    */
   LoginResult loginUser(String userId, String attemptedFreeTextPassword);
 
   void logout(String login);
-
-  LoginResult restoreUserSession();
+ // LoginResult restoreUserSession();
 
   /**
    * @param currentHashedPassword
@@ -90,7 +88,7 @@ public interface UserService extends RemoteService {
    * @paramx url
    * @paramx emailForLegacy
    * @return
-   * @see mitll.langtest.client.user.SignInForm#onSendReset
+   * @see mitll.langtest.client.user.SendResetPassword#onChangePassword
    */
   boolean resetPassword(String userid);
 
@@ -98,10 +96,9 @@ public interface UserService extends RemoteService {
    * @param emailH
    * @param email
    * @return
-   * @see UserPassLogin#getForgotUser()
+   * @see UserPassLogin#getForgotUser
    */
   boolean forgotUsername(String emailH, String email);
-
 
   /**
    * @param user
@@ -113,12 +110,15 @@ public interface UserService extends RemoteService {
 
   /**
    * @return
-   * @see UserTable#showDialog
+   * @see UserTable#showUsers
    */
   List<User> getUsers();
 
-  User getUser(int id);
-
+  /**
+   * @see SignInForm#tryLogin
+   * @param id
+   * @return
+   */
   User getUserByID(String id);
 
   /**
@@ -132,6 +132,4 @@ public interface UserService extends RemoteService {
    * @see InitialUI#chooseProjectAgain
    */
   void forgetProject();
-
- // Map<User.Kind, Collection<MiniUser>> getKindToUser();
 }

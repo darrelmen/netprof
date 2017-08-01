@@ -77,7 +77,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int MIN_WARN_DURATION = 1000;
   private static final String LISTS = "Lists";
 
-  private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
+ // private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
   private static final boolean DEBUG = false;
 

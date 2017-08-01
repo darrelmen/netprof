@@ -55,7 +55,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
    * @param right
    * @param instanceName
    * @param list
-   * @paramx includeAddItem
    * @see EditItem#makeExerciseList
    */
   EditableExerciseList(ExerciseController controller,

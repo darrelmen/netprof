@@ -612,13 +612,13 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       this.noMatch += matchInfo.noMatch;
     }
 
-    public int getMatch() {
+/*    public int getMatch() {
       return match;
     }
 
     public int getNoMatch() {
       return noMatch;
-    }
+    }*/
 
     public String toString() {
       return match + "/" + noMatch;

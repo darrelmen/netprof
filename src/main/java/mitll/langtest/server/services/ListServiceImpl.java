@@ -35,7 +35,6 @@ package mitll.langtest.server.services;
 import com.github.gwtbootstrap.client.ui.Button;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;

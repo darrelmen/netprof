@@ -36,13 +36,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public interface UserServiceAsync {
   /**
@@ -52,8 +49,7 @@ public interface UserServiceAsync {
    * @seex UserManager#getPermissionsAndSetUser
    * @seex mitll.langtest.client.user.SignInForm#getPermissionsAndSetUser
    */
-  void loginUser(String userId, String attemptedFreeTextPassword,
-                 AsyncCallback<LoginResult> async);
+  void loginUser(String userId, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
 
   /**
    * @param currentHashedPassword
@@ -71,7 +67,7 @@ public interface UserServiceAsync {
 
   void getUsers(AsyncCallback<List<User>> async);
 
-  void getUser(int id, AsyncCallback<User> async);
+  // void getUser(int id, AsyncCallback<User> async);
 
   /**
    * No real need to pass this in
@@ -92,7 +88,7 @@ public interface UserServiceAsync {
 
   void forgetProject(AsyncCallback<Void> async);
 
-  void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
+  //void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
 
   void getUserByID(String id, AsyncCallback<User> async);
 
@@ -102,5 +98,5 @@ public interface UserServiceAsync {
    */
   void getUserFromSession(AsyncCallback<User> async);
 
-  void restoreUserSession(AsyncCallback<LoginResult> async);
+  // void restoreUserSession(AsyncCallback<LoginResult> async);
 }

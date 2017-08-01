@@ -171,8 +171,9 @@ public class ListView implements ContentView, CreateListComplete {
     buttons.addStyleName("topFiveMargin");
     buttons.add(getAddButton());
     buttons.add(getRemoveButton());
-    buttons.add(getEdit());
     buttons.add(getShare());
+
+    buttons.add(getEdit());
     // buttons.add(getImport());
     buttons.add(getAddItems());
     addDrillAndLearn(buttons, container);

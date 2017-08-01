@@ -140,7 +140,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return asrScoreForAudio;
   }
 
-  @Override
+/*  @Override
   public void getAllAlignments() {
     final int userIDFromSession = getUserIDFromSession();
 
@@ -151,7 +151,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           recalcAlignments(userIDFromSession, project)
       );
     }).start();
-  }
+  }*/
 
   @Override
   public void recalcAlignments(int projid) {
@@ -191,7 +191,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   /**
    * @param projectID
    * @return
-   * @see #getAllAlignments
+   * @see #recalcAlignments(int, Project)
    */
   @NotNull
   private List<Integer> getAllAudioIDs(int projectID) {

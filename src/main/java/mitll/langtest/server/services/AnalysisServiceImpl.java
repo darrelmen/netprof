@@ -33,7 +33,6 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.AnalysisService;
-import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.analysis.*;

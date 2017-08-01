@@ -51,12 +51,9 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
-import static mitll.langtest.shared.user.LoginResult.ResultType.SessionNotRestored;
 
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
@@ -138,7 +135,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         (success ? ", user: " + loggedInUser.getID() : ""));
   }*/
 
-  @Override
+/*  @Override
   public LoginResult restoreUserSession() {
     try {
       User dbUser = getSessionUser();
@@ -158,7 +155,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       logger.info("got " + e, e);
       return new LoginResult(LoginResult.ResultType.SessionExpired);
     }
-  }
+  }*/
 
   public User getUserByID(String id) {
     return db.getUserDAO().getUserByID(id);
@@ -284,7 +281,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see UserServiceImpl#changePasswordWithToken(String, String, String)
    * @see UserServiceImpl#loginUser
    */
-  protected HttpSession createSession() {
+  private HttpSession createSession() {
     return getThreadLocalRequest().getSession(true);
   }
 
@@ -293,7 +290,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    *
    * @return
    */
-  protected HttpSession getCurrentSession() {
+  private HttpSession getCurrentSession() {
     return getThreadLocalRequest().getSession(false);
   }
 
@@ -363,8 +360,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
-  @Override
+/*  @Override
   public User getUser(int id) {
     return db.getUserDAO().getByID(id);
-  }
+  }*/
 }

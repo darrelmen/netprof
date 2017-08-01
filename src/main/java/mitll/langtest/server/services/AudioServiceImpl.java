@@ -39,7 +39,6 @@ import mitll.langtest.client.services.AudioService;
 import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.audio.AudioInfo;
-import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -374,7 +373,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return b;
   }
 
-  private Set<String> checkedExists = new HashSet<>();
+  private final Set<String> checkedExists = new HashSet<>();
 
   /**
    * for both audio in answers and best audio -- could be more efficient...
@@ -430,7 +429,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return db.getUserDAO().getUserWhere(id);
   }
 
-  public void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device) {
+  private void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device) {
     try {
       db.logEvent(id, widgetType, exid, context, userid, device);
     } catch (Exception e) {
