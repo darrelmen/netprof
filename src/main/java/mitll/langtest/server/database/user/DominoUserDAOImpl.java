@@ -1009,7 +1009,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public MiniUser getMiniUser(int userid) {
     DBUser byID = lookupUser(userid);
-    logger.info("getMiniUser " + userid);
+//    logger.info("getMiniUser " + userid);
     return byID == null ? null : getMini(byID);
   }
 
@@ -1111,22 +1111,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * We don't support this UI anymore.
-   *
-   * @return
-   */
-/*  @Deprecated
-  public Map<User.Kind, Integer> getCounts() {
-    // Map<String, Integer> counts = dao.getCounts();
-    Map<User.Kind, Integer> ret = new HashMap<>();
- *//*   for (Map.Entry<String, Integer> pair : counts.entrySet()) {
-      ret.put(User.Kind.valueOf(pair.getKey()), pair.getValue());
-    }
- *//*
-    return ret;
-  }*/
-
-  /**
    * user updates happen in domino UI...
    *
    * @param toUpdate
@@ -1193,8 +1177,4 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       return clientUserDetail1 != null;
     }
   }
-
-//  public int getImportUser() {
-//    return dominoImportUser.getDocumentDBID();
-//  }
 }

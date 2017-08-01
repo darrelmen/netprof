@@ -358,6 +358,7 @@ public class RestUserManagement {
    * @param token
    * @return
    * @see #doGet
+   * @deprecated
    */
   private long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWithResetKey(token);

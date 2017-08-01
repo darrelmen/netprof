@@ -34,6 +34,7 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.Project;
@@ -121,6 +122,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     return getProjectDAO().exists(projectid);
   }
 
+  /**
+   * @see ProjectEditForm#checkNameOnBlur
+   * @param name
+   * @return
+   */
   @Override
   public boolean existsByName(String name) {
     return getProjectDAO().getByName(name) != -1;

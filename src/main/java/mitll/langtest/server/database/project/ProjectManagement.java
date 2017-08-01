@@ -143,7 +143,6 @@ public class ProjectManagement implements IProjectManagement {
 //    if (!all.isEmpty()) {
 //      logger.info("populateProjects : found " + all.size() + " projects");
 //    }
-
     for (SlickProject slickProject : all) {
       if (!idToProject.containsKey(slickProject.id())) {
         if (DEBUG_ONE_PROJECT) {
@@ -657,14 +656,6 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * TODO : consider moving this into user service?
-   * what if later an admin changes it while someone else is looking at it...
-   * <p>
-   * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
-   * on the exercise indicating it needs to be inspected again (we've added new audio).
-   * <p>
-   * Don't return a path to the normalized audio, since this doesn't let the recorder have feedback about how soft
-   * or loud they are : https://gh.ll.mit.edu/DLI-LTEA/Development/issues/601
    *
    * @return
    * @see LangTestDatabaseImpl#getStartupInfo
@@ -672,18 +663,10 @@ public class ProjectManagement implements IProjectManagement {
   public List<SlimProject> getNestedProjectInfo() {
     List<SlimProject> projectInfos = new ArrayList<>();
 
-    Map<String, List<SlickProject>> langToProject = new TreeMap<>();
-    Collection<SlickProject> all = db.getProjectDAO().getAll();
-
-    // logger.info("getNestedProjectInfo : found " + all.size() + " projects");
-    for (SlickProject project : all) {
-      List<SlickProject> slimProjects = langToProject.get(project.language());
-      if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());
-      slimProjects.add(project);
-    }
-//    logger.info("lang->project is " + langToProject);
-    for (String lang : langToProject.keySet()) {
-      List<SlickProject> slickProjects = langToProject.get(lang);
+    Map<String, List<SlickProject>> langToProject = getLangToProjects();
+    logger.info("getNestedProjectInfo lang->project is " + langToProject);
+    for (Map.Entry<String, List<SlickProject>> lang : langToProject.entrySet()) {
+      List<SlickProject> slickProjects = lang.getValue();//langToProject.get(lang);
       SlickProject firstProject = slickProjects.get(0);
       SlimProject parent = getProjectInfo(firstProject);
       projectInfos.add(parent);
@@ -697,6 +680,19 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     return projectInfos;
+  }
+
+  @NotNull
+  private Map<String, List<SlickProject>> getLangToProjects() {
+    Map<String, List<SlickProject>> langToProject = new TreeMap<>();
+    Collection<SlickProject> all = db.getProjectDAO().getAll();
+
+    logger.info("getNestedProjectInfo : found " + all.size() + " projects");
+    for (SlickProject project : all) {
+      List<SlickProject> slimProjects = langToProject.computeIfAbsent(project.language(), k -> new ArrayList<>());
+      slimProjects.add(project);
+    }
+    return langToProject;
   }
 
   /**

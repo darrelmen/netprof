@@ -188,7 +188,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   public StartupInfo getStartupInfo() {
     List<SlimProject> projectInfos = new ArrayList<>();
     if (db == null) {
-      logger.info("no db yet...");
+      logger.info("getStartupInfo no db yet...");
     } else {
       projectInfos = db.getProjectManagement().getNestedProjectInfo();
     }

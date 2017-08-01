@@ -60,14 +60,14 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   static final String TOPIC = "Topic";
   static final String SUB_TOPIC = "Sub-topic";
-  public static final String SUBTOPIC = "subtopic";
-  public static final Set<String> SUBTOPICS = new HashSet<>(Arrays.asList(SUB_TOPIC, SUBTOPIC));
+  static final String SUBTOPIC = "subtopic";
+  static final Set<String> SUBTOPICS = new HashSet<>(Arrays.asList(SUB_TOPIC, SUBTOPIC));
   private static final String GRAMMAR = "Grammar";
   private static final String DIALECT = "Dialect";
   private static final String DIFFICULTY = "Difficulty";
   private static final String ANY = "any";
   private static final String ALL = "all";
-  public static final String LISTS = "Lists";
+  private static final String LISTS = "Lists";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
@@ -113,15 +113,21 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
 
       if (!typeToCount.isEmpty()) {
-        Collections.sort(types, new Comparator<String>() {
-          @Override
-          public int compare(String o1, String o2) {
-            int first = typeToCount.get(o1).size();
-            int second = typeToCount.get(o2).size();
-            int i = Integer.compare(first, second);
-            return i == 0 ? o1.compareTo(o2) : i;
-          }
+        types.sort((o1, o2) -> {
+          int first = typeToCount.get(o1).size();
+          int second = typeToCount.get(o2).size();
+          int i = Integer.compare(first, second);
+          return i == 0 ? o1.compareTo(o2) : i;
         });
+        if (DEBUG) logger.info("getTypeOrder after sort now " + types);
+      } else {
+        types.sort((o1, o2) -> {
+          int first = typeToUnitToLesson.get(o1).size();
+          int second = typeToUnitToLesson.get(o2).size();
+          int i = Integer.compare(first, second);
+          return i == 0 ? o1.compareTo(o2) : i;
+        });
+        if (DEBUG) logger.info("getTypeOrder 2 after sort now " + types);
       }
 
       // TODO : I feel like I did this before...?
@@ -878,7 +884,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   private Map<String, Set<String>> typeToCount = new HashMap<>();
   private Map<String, Map<String, MatchInfo>> typeToMatchInfo = new HashMap<>();
-  private Map<String, Set<MatchInfo>> typeToDistinct = new HashMap();
+  private Map<String, Set<MatchInfo>> typeToDistinct = new HashMap<>();
 
   /**
    * @param predefinedTypeOrder
@@ -891,10 +897,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     //if (seen.isEmpty()) logger.error("huh? no types to remember?");
 
     if (DEBUG) {
-      logger.info("rememberTypesInOrder type order " + predefinedTypeOrder +
-          " root " + root.getName() +
-          " children  " + root.getChildren().size() +
-          " num seen " + seen.size());
+      logger.info("rememberTypesInOrder" +
+          "\n\ttype order " + predefinedTypeOrder +
+          "\n\troot " + root.getName() +
+          "\n\tchildren  " + root.getChildren().size() +
+          "\n\tnum seen " + seen.size());
     }
 
     for (List<Pair> pairs : seen) {
