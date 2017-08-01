@@ -154,7 +154,7 @@ public abstract class Analysis extends DAO {
   }
 
   private void sortUsersByTime(List<UserInfo> userInfos) {
-    userInfos.sort((o1, o2) -> -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis()));
+    userInfos.sort((o1, o2) -> -1 * Long.compare(o1.getTimestampMillis(), o2.getTimestampMillis()));
   }
 
 /*  private List<PhoneSession> chooseGran(Map<Long, List<PhoneSession>> granularityToSessions) {

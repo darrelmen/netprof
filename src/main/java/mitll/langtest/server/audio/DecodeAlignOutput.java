@@ -47,11 +47,11 @@ import java.util.Map;
  * @since 10/21/15.
  */
 public class DecodeAlignOutput {
-  private float score;
-  private String json;
-  private int numPhones;
-  private long processDurInMillis;
-  private boolean isCorrect;
+  private final float score;
+  private final String json;
+  private final int numPhones;
+  private final long processDurInMillis;
+  private final boolean isCorrect;
 
   /**
    * @param alignmentScore

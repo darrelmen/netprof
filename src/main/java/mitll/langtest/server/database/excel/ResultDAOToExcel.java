@@ -79,13 +79,9 @@ public class ResultDAOToExcel {
     //DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
     Row headerRow = sheet.createRow(rownum++);
 
-    List<String> columns = new ArrayList<String>(Arrays.asList(
-        ResultDAO.USERID, "Exercise", "Text"));
+    List<String> columns = new ArrayList<String>(Arrays.asList(ResultDAO.USERID, "Exercise", "Text"));
 
-
-    for (final String type : typeOrder) {
-      columns.add(type);
-    }
+    columns.addAll(typeOrder);
 
     List<String> columns2 = Arrays.asList(
         "Recording",

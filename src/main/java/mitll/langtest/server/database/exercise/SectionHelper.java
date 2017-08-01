@@ -118,7 +118,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
           public int compare(String o1, String o2) {
             int first = typeToCount.get(o1).size();
             int second = typeToCount.get(o2).size();
-            int i = first > second ? +1 : first < second ? -1 : 0;
+            int i = Integer.compare(first, second);
             return i == 0 ? o1.compareTo(o2) : i;
           }
         });
@@ -937,7 +937,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         if (i > 0 && anotherInteger == -1) return -1;
         else if (i == -1 && anotherInteger > 0) return +1;
         else if (i == -1 && anotherInteger == -1) return o1.getProperty().compareTo(o2.getProperty());
-        else return Integer.valueOf(i).compareTo(anotherInteger);
+        else return Integer.compare(i, anotherInteger);
       }
     });
 

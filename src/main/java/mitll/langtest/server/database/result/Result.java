@@ -43,30 +43,30 @@ import java.util.Date;
  * Only server side.
  */
 public class Result extends SlimResult implements UserAndTime {
-  protected int uniqueID;
+  protected final int uniqueID;
   private int userid;
 
   private int exid;
   @Deprecated  private String oldExID;
-  private int qid;
-  private String answer;
-  private long timestamp;
+  private final int qid;
+  private final String answer;
+  private final long timestamp;
 
   private AudioType audioType = AudioType.UNSET;
-  private long durationInMillis;
-  private boolean correct;
+  private final long durationInMillis;
+  private final boolean correct;
 
   private String deviceType;
   private String device;
 
   private long processDur;
-  private long roundTrip;
-  private boolean withFlash;
-  private float dynamicRange;
+  private final long roundTrip;
+  private final boolean withFlash;
+  private final float dynamicRange;
   private String validity;
   private boolean isMale;
 
-  private String model;
+  private final String model;
 
   private DecodeAlignOutput alignOutput;
   private DecodeAlignOutput decodeOutput;

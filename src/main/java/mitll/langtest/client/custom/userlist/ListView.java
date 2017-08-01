@@ -7,11 +7,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.ContentView;
@@ -50,9 +47,9 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
   private static final int MY_LIST_HEIGHT = 560;
-  private static final int    browseBigger = 30;
+  private static final int browseBigger = 30;
   private static final int VISITED_HEIGHT = (MY_LIST_HEIGHT / 2) - 35 - browseBigger;
-  private static final int BROWSE_HEIGHT  = (MY_LIST_HEIGHT / 2) - 30 + browseBigger;
+  private static final int BROWSE_HEIGHT = (MY_LIST_HEIGHT / 2) - 30 + browseBigger;
 
   private final ExerciseController controller;
   private ListContainer myLists;
@@ -103,8 +100,7 @@ public class ListView implements ContentView, CreateListComplete {
           }
         });
         addPagerAndHeader(tableWithPager, "Your Lists", left);
-        tableWithPager.setHeight(MY_LIST_HEIGHT +
-            "px");
+        tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
 
         left.add(getButtons(myLists));
       }
@@ -123,8 +119,7 @@ public class ListView implements ContentView, CreateListComplete {
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, "Visited", top);
 
-        tableWithPager.setHeight(VISITED_HEIGHT +
-            "px");
+        tableWithPager.setHeight(VISITED_HEIGHT + "px");
 
         DivWidget ldButtons = getLDButtons(listContainer);
         ldButtons.add(getRemoveVisitorButton(listContainer));
@@ -211,7 +206,7 @@ public class ListView implements ContentView, CreateListComplete {
     return successButton;
   }*/
 
-  private void doImport() {
+/*  private void doImport() {
     ImportBulk importBulk = new ImportBulk();
     UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
     DivWidget contents = importBulk.showImportItem(controller);
@@ -243,7 +238,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     closeButton.setType(ButtonType.SUCCESS);
     //  closeButton.setIcon(IconType.PLUS);
-  }
+  }*/
 
   private IsWidget getAddItems() {
     Button successButton = getSuccessButton("Items");
@@ -253,12 +248,11 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void editList() {
-    Panel contents = new EditItem(controller).editItem(getCurrentSelection(myLists));
     DialogHelper dialogHelper = new DialogHelper(true);
     Button closeButton = dialogHelper.show(
         ADD_EDIT_ITEMS,
         Collections.emptyList(),
-        contents,
+        new EditItem(controller).editItem(getCurrentSelection(myLists)),
         "OK",
         null,
         null, 660, true);
@@ -281,8 +275,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   @NotNull
   private Button getLearnButton(ListContainer container) {
-    String learn1 = "Learn";
-    Button learn = getSuccessButton(learn1);
+    Button learn = getSuccessButton("Learn");
     learn.addClickHandler(event -> {
           if (!container.isEmpty()) {
             controller.showLearnList(getCurrentSelection(container).getID());
@@ -519,7 +512,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   @Override
   public void gotEdit() {
-  //  logger.info("\n\n\ngot edit");
+    //  logger.info("\n\n\ngot edit");
     editDialog.doEdit(myLists.getCurrentSelection(), myLists);
   }
 }

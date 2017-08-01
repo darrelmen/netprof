@@ -357,12 +357,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       if (hasSearch1 && !hasSearch2) return -1;
       else if (hasSearch2 && !hasSearch1) return +1;
       else if (hasSearch1 && hasSearch2) {
-        int i = Integer.valueOf(foreignLanguage.length()).compareTo(foreignLanguage1.length());
+        int i = Integer.compare(foreignLanguage.length(), foreignLanguage1.length());
         return i == 0 ? foreignLanguage.compareTo(foreignLanguage1) : i;
       } else {
         String cforeignLanguage = o1.getContext();
         String cforeignLanguage1 = o2.getContext();
-        int i = Integer.valueOf(cforeignLanguage.length()).compareTo(cforeignLanguage1.length());
+        int i = Integer.compare(cforeignLanguage.length(), cforeignLanguage1.length());
         return i == 0 ? cforeignLanguage.compareTo(cforeignLanguage1) : i;
       }
     });

@@ -55,20 +55,20 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
   private static final int WARN_THRESH = 100;
   private static final String ANSWERS = "answers";
-  private SlickResultDAO resultDAO;
-  private String language;
-  private int projid;
-  private Project project;
+  private final SlickResultDAO resultDAO;
+  private final String language;
+  private final int projid;
+  private final Project project;
 
   private static final boolean DEBUG = false;
-  private IAudioDAO audioDAO;
+  private final IAudioDAO audioDAO;
 
   /**
    * @param database
    * @param phoneDAO
    * @param projid
    * @see ProjectServices#configureProject
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser(int, int, int)
    */
   public SlickAnalysis(Database database,
                        IPhoneDAO phoneDAO,
@@ -89,12 +89,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @param listid
    * @return
-   * @see AnalysisServiceImpl#getPerformanceForUser
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser(int, int, int)
    */
-/*  @Override
-  public UserPerformance getPerformanceForUser(int userid, int minRecordings, int listid) {
-    return getUserPerformance(userid, getBestForUser(userid, minRecordings, listid));
-  }*/
   @Override
   public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
@@ -109,30 +105,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     logger.info("Return (took " + (now - then) +        ") analysis report");// + analysisReport);
     return analysisReport;
   }
-
-  /**
-   * Wasetful? why call getBestForUser again?
-   *
-   * @param userid
-   * @param minRecordings
-   * @param listid
-   * @return
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getWordScores
-   */
-/*
-  @Override
-  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid) {
-    long then = System.currentTimeMillis();
-
-    Map<Integer, UserInfo> best = getBestForUser(userid, minRecordings, listid);
-    long now = System.currentTimeMillis();
-    long diff = now - then;
-    if (diff > WARN_THRESH) {
-      logger.warn("getWordScoresForUser for " + userid + " in " + projid + " took " + diff);
-    }
-    return getWordScores(best);
-  }
-*/
 
   /**
    * @param id
@@ -159,20 +131,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     return getBest(perfForUser, minRecordings, true);
   }
-
-  /**
-   * @param id
-   * @param minRecordings
-   * @param listid
-   * @return
-   * @paramx projid
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores
-   * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
-   */
-/*  @Override
-  public PhoneReport getPhonesForUser(int id, int minRecordings, int listid) {
-    return getPhoneReport(id, getBestForUser(id, minRecordings, listid), language, project);
-  }*/
 
   /**
    * For the current project id.

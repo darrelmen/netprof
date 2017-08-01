@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -36,12 +37,12 @@ import java.util.logging.Logger;
 class EditableExerciseList extends NPExerciseList implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
 
-  private static final String ADD = "Add";
+//  private static final String ADD = "Add";
 
   /**
    * @see #makeDeleteButton
    */
-  private static final String REMOVE_FROM_LIST = "Remove from list";
+//  private static final String REMOVE_FROM_LIST = "Remove";// from list";
 
   private final EditItem editItem;
   private final UserList<CommonShell> list;
@@ -75,16 +76,23 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     pagingContainer.setPageSize(8);
   }
 
+  /**
+   * @see #addTableWithPager
+   * @return
+   */
   protected DivWidget getOptionalWidget() {
     DivWidget widgets = new DivWidget();
+    widgets.getElement().setId("northSouth");
+//    widgets.addStyleName("inlineFlex");
     widgets.addStyleName("bottomFiveMargin");
-
+//
     widgets.add(getAddButtonContainer());
-    widgets.add(getRemoveButtonContainer());
+    widgets.add( message = getFeedback());
 
     addListChangedListener((items, selectionID) -> enableRemove(!isEmpty()));
 
     return widgets;
+   // return getAddButtonContainer();
   }
 
   @Override
@@ -99,25 +107,75 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   @NotNull
   private DivWidget getAddButtonContainer() {
     DivWidget addW = new DivWidget();
-    addW.addStyleName("floatLeft");
+    addW.getElement().setId("buttonContainer");
+    //addW.addStyleName("floatLeft");
+    addW.addStyleName("topMargin");
+    addW.addStyleName("inlineFlex");
+
     Button add = getAddButton();
+
     addW.add(getTypeahead(add));
     {
-      add.addStyleName("leftFiveMargin");
-      addW.add(add);
+
+      DivWidget ac = new DivWidget();
+      ac.addStyleName("leftFiveMargin");
+      ac.add(add);
+      addW.add(ac);
     }
-    addW.add(message = getFeedback());
+    message = getFeedback();
+//    addW.add(message = getFeedback());
+     addW.add(getRemoveButtonContainer());
     return addW;
   }
 
+  /**
+   * @see #getOptionalWidget
+   * @return
+   */
   @NotNull
   private DivWidget getRemoveButtonContainer() {
     DivWidget delW = new DivWidget();
-    delW.addStyleName("floatLeft");
+    //delW.addStyleName("floatLeft");
     delW.addStyleName("leftFiveMargin");
-    delW.getElement().getStyle().setClear(Style.Clear.LEFT);
+    //delW.getElement().getStyle().setClear(Style.Clear.LEFT);
     delW.add(makeDeleteButton());
     return delW;
+  }
+
+  private Button delete;
+
+  private Button makeDeleteButton() {
+    EditableExerciseList widgets = this;
+
+    delete = makeDeleteButtonItself();
+    delete.addClickHandler(event -> {
+      CommonShell currentSelection = pagingContainer.getCurrentSelection();
+      if (currentSelection != null) {
+        deleteItem(currentSelection.getID(), widgets, widgets, delete);
+      }
+    });
+    return delete;
+  }
+
+  /**
+   * TODO : why is this here?
+   *
+   * @return
+   * @see #makeDeleteButton
+   */
+  private Button makeDeleteButtonItself() {
+    Button delete = new Button("");//REMOVE_FROM_LIST);
+    delete.setIcon(IconType.MINUS);
+    delete.getElement().setId("Remove_from_list");
+    // delete.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+    delete.setType(ButtonType.WARNING);
+    //   delete.addStyleName("floatRight");
+    if (controller == null) {
+//      logger.warning("no controller??");
+    } else {
+      controller.register(delete, "", "");//"Remove from list " + ul.getID() + "/" + ul.getName());
+    }
+    return delete;
   }
 
   /**
@@ -148,8 +206,10 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
   @NotNull
   private Button getAddButton() {
-    Button add = new Button(ADD, IconType.PLUS);
+    Button add = new Button("", IconType.PLUS);
     add.setType(ButtonType.SUCCESS);
+
+    add.setEnabled(false);
     add.addClickHandler(event -> onClickAdd(add));
     return add;
   }
@@ -271,20 +331,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
-  private Button delete;
 
-  private Button makeDeleteButton() {
-    EditableExerciseList widgets = this;
-
-    delete = makeDeleteButtonItself();
-    delete.addClickHandler(event -> {
-      CommonShell currentSelection = pagingContainer.getCurrentSelection();
-      if (currentSelection != null) {
-        deleteItem(currentSelection.getID(), widgets, widgets, delete);
-      }
-    });
-    return delete;
-  }
 
   protected int getNumTableRowsGivenScreenHeight() { return 12; }
 
@@ -335,25 +382,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     });
   }
 
-  /**
-   * TODO : why is this here?
-   *
-   * @return
-   * @see #makeDeleteButton
-   */
-  private Button makeDeleteButtonItself() {
-    Button delete = new Button(REMOVE_FROM_LIST);
-    delete.getElement().setId("Remove_from_list");
-    // delete.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
-    delete.setType(ButtonType.WARNING);
-    //   delete.addStyleName("floatRight");
-    if (controller == null) {
-//      logger.warning("no controller??");
-    } else {
-      controller.register(delete, "", "");//"Remove from list " + ul.getID() + "/" + ul.getName());
-    }
-    return delete;
-  }
 
   @Override
   protected void onLastItem() {

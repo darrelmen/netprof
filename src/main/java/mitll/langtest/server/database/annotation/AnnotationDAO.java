@@ -289,7 +289,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-    return new HashSet<Integer>();
+    return new HashSet<>();
   }
 
   /**
@@ -392,11 +392,11 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     try {
       PreparedStatement statement = connection.prepareStatement(sql2);
       ResultSet rs = statement.executeQuery();
-      exToCreator = new HashMap<Integer, Long>();
+      exToCreator = new HashMap<>();
       String prevExid = "";
       long prevCreatorid = -1;
 
-      Map<String, String> fieldToStatus = new HashMap<String, String>();
+      Map<String, String> fieldToStatus = new HashMap<>();
       while (rs.next()) {
         String exid = rs.getString(1);
         String field = rs.getString(2);

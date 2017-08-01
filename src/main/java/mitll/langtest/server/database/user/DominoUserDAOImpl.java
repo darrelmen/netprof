@@ -279,13 +279,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
     boolean b = !clientUserDetailSResult1.isError();
     if (!b) {
-      logger.error("\n\n\naddUserToMongo didn't set password for " + user.getUserId() + " : " +
+      logger.error("\n\n\naddAndGet didn't set password for " + user.getUserId() + " : " +
           clientUserDetailSResult1.getResponseMessage());
       return null;
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult1.get();
       if (clientUserDetail.getGender() == UNSPECIFIED) {
-        logger.info("huh? " + clientUserDetail.getUserId() + " is " + clientUserDetail.getGender());
+        logger.info("addAndGet note : " + clientUserDetail.getUserId() + " gender is " + clientUserDetail.getGender());
       }
       return clientUserDetail;
     }

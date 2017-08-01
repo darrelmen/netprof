@@ -97,8 +97,8 @@ public class Export {
     List<AmasExerciseImpl> exercises = getExercises();
     logger.debug("getExport : got " + exercises.size() + " exercises");
 
-    List<ExerciseExport> allExports = new ArrayList<ExerciseExport>();
-    List<ExerciseExport> predefExports = new ArrayList<ExerciseExport>();
+    List<ExerciseExport> allExports = new ArrayList<>();
+    List<ExerciseExport> predefExports = new ArrayList<>();
     // int c = 0;
     for (AmasExerciseImpl e : exercises) {
       ExportPair exports = getExports(idToGrade, getResultsForExercise(exerciseToResult, e), e, true, max);
@@ -168,7 +168,7 @@ public class Export {
 
     for (Result r : results) {
       List<Result> res = exerciseToResult.get(r.getExerciseID());
-      if (res == null) exerciseToResult.put(r.getExerciseID(), res = new ArrayList<Result>());
+      if (res == null) exerciseToResult.put(r.getExerciseID(), res = new ArrayList<>());
       res.add(r);
     }
     return exerciseToResult;
@@ -209,16 +209,16 @@ public class Export {
       logger.debug("exercise " + exercise.getOldID() + "/" + exercise.getAltID() + " got qid->export " + qidToExport.size() + " items, got " + resultsForExercise.size() + " resultsForExercise, predef " + predefinedAnswers.size());
     }*/
 
-    List<ExerciseExport> ret = new ArrayList<ExerciseExport>();
-    Set<ExerciseExport> valid = new HashSet<ExerciseExport>();
+    List<ExerciseExport> ret = new ArrayList<>();
+    Set<ExerciseExport> valid = new HashSet<>();
 
     if (resultsForExercise.isEmpty() && predefinedAnswers.size() > 0) {
-      Set<ExerciseExport> toExport = new HashSet<ExerciseExport>(qidToExport.values());
+      Set<ExerciseExport> toExport = new HashSet<>(qidToExport.values());
       ret.addAll(toExport);
     }
 
     // find results, after join with schedule, add join with the grade
-    Set<String> distinctAnswers = new HashSet<String>(predefinedAnswers);
+    Set<String> distinctAnswers = new HashSet<>(predefinedAnswers);
     for (Result r : resultsForExercise) {
       ExerciseExport exerciseExport = qidToExport.get(r.getQid());
       if (exerciseExport == null) {
@@ -272,7 +272,7 @@ public class Export {
       // }
     }
     if (ret.isEmpty()) {
-      Set<ExerciseExport> toExport = new HashSet<ExerciseExport>(qidToExport.values());
+      Set<ExerciseExport> toExport = new HashSet<>(qidToExport.values());
       logger.warn("Adding " + toExport.size() + " predef answers for " + exercise.getOldID());
       ret.addAll(toExport);
     }
@@ -347,7 +347,7 @@ public class Export {
    * @see #getExports
    */
   private Map<Integer, ExerciseExport> populateIdToExportMap(AmasExerciseImpl exercise) {
-    Map<Integer, ExerciseExport> qidToExport = new HashMap<Integer, ExerciseExport>();
+    Map<Integer, ExerciseExport> qidToExport = new HashMap<>();
     int qid = 0;
     for (QAPair qaPair : exercise.getQuestions()) {
 //      String answer = qaPair.getAnswer();
@@ -412,7 +412,7 @@ public class Export {
     List<QAPair> qaPairs = useFLQ ? exercise.getForeignLanguageQuestions() : exercise.getEnglishQuestions();
     qid = 1;
     //  int childCount = 0;
-    Set<String> answers = new HashSet<String>();
+    Set<String> answers = new HashSet<>();
     for (QAPair q : qaPairs) {
       ExerciseExport exerciseExport = qidToExport.get(qid);
       ExerciseExport preDef = preDefqidToExport.get(qid);
@@ -508,11 +508,11 @@ public class Export {
    * @see #getExport
    */
   private Map<Integer, List<Grade>> getIdToGrade(Collection<Grade> grades) {
-    Map<Integer, List<Grade>> idToGrade = new HashMap<Integer, List<Grade>>();
+    Map<Integer, List<Grade>> idToGrade = new HashMap<>();
     for (Grade g : grades) {
       List<Grade> gradesForResult = idToGrade.get(g.resultID);
       if (gradesForResult == null) {
-        idToGrade.put(g.resultID, gradesForResult = new ArrayList<Grade>());
+        idToGrade.put(g.resultID, gradesForResult = new ArrayList<>());
         gradesForResult.add(g);
       } else {
         Grade grade = gradesForResult.get(0);

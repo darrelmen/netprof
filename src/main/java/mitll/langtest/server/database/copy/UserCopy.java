@@ -90,7 +90,7 @@ public class UserCopy {
 
           User dominoUser = dominoUserDAO.getUserByID(importUserID);
           if (dominoUser == null) { // new user
-            logger.info("copyUsers no existing user id '" + importUserID + "'");
+            //logger.info("copyUsers no existing user id '" + importUserID + "'");
             added.add(addUser(dominoUserDAO, oldToNew, toImport, optName));
           } else { // user exists
             if (foundExistingUser(projid, optName,

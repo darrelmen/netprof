@@ -97,7 +97,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    */
   private static final String WEEK = "week";
 
-  private final List<String> errors = new ArrayList<String>();
+  private final List<String> errors = new ArrayList<>();
   private final String file;
 
   private boolean shouldHaveRefAudio = false;
@@ -240,7 +240,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    */
   public List<CommonExercise> readExercises(InputStream inp) {
     log();
-    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
+    List<CommonExercise> exercises = new ArrayList<>();
     String language = serverProps.getLanguage();
     try {
       long then = System.currentTimeMillis();
@@ -302,7 +302,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @see #readExercises(java.io.InputStream)
    */
   private Collection<CommonExercise> readFromSheet(Sheet sheet) {
-    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
+    List<CommonExercise> exercises = new ArrayList<>();
     int id = 0;
     boolean gotHeader = false;
 
@@ -318,8 +318,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     int audioIndex = -1;
 //    boolean hasAudioIndex = false;
 
-    List<String> lastRowValues = new ArrayList<String>();
-    Set<String> knownIds = new HashSet<String>();
+    List<String> lastRowValues = new ArrayList<>();
+    Set<String> knownIds = new HashSet<>();
 
     int semis = 0;
     int logging = 0;
@@ -608,7 +608,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   private List<String> getHeader(Row next) {
-    List<String> columns = new ArrayList<String>();
+    List<String> columns = new ArrayList<>();
 
     Iterator<Cell> cellIterator = next.cellIterator();
     while (cellIterator.hasNext()) {
@@ -626,7 +626,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   private Collection<CommonExercise> readFromSheetSkips(Sheet sheet, int id) {
-    List<CommonExercise> exercises = new ArrayList<CommonExercise>();
+    List<CommonExercise> exercises = new ArrayList<>();
     boolean gotHeader = false;
 
     int colIndexOffset = -1;
@@ -811,7 +811,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   private Map<Integer, CellRangeAddress> getRowToRange(Sheet sheet) {
-    Map<Integer, CellRangeAddress> rowToRange = new HashMap<Integer, CellRangeAddress>();
+    Map<Integer, CellRangeAddress> rowToRange = new HashMap<>();
     for (int r = 0; r < sheet.getNumMergedRegions(); r++) {
       CellRangeAddress mergedRegion = sheet.getMergedRegion(r);
       for (int rr = mergedRegion.getFirstRow(); rr <= mergedRegion.getLastRow(); rr++) {
@@ -871,7 +871,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
       imported.setTransliteration(translit);
     }
 
-    List<String> translations = new ArrayList<String>();
+    List<String> translations = new ArrayList<>();
     if (foreignLanguagePhrase.length() > 0) {
       translations.add(foreignLanguagePhrase);
     }

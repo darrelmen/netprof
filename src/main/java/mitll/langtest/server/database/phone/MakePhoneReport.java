@@ -13,12 +13,6 @@ import java.util.*;
 public class MakePhoneReport {
   private static final Logger logger = LogManager.getLogger(MakePhoneReport.class);
 
-//  private static final String PHONE = "phone";
-//  private static final String RID = "rid";
-//  private static final String WID = "wid";
-//  private static final String SEQ = "seq";
-//  private static final String SCORE = "score";
-
   private static final boolean DEBUG = false;
 
   /**
@@ -93,7 +87,7 @@ public class MakePhoneReport {
         //} else {
         // logger.info("\tgot " + current + " for " + o1 + " and " + current1 + " for "+ o2);
         //}
-        int i = Integer.valueOf(current).compareTo(current1);
+        int i = Integer.compare(current, current1);
         return i == 0 ? o1.compareTo(o2) : i;
       }
     });
@@ -156,12 +150,7 @@ public class MakePhoneReport {
     for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToScores.entrySet()) {
       String phone = pair.getKey();
       List<PhoneAndScore> value = pair.getValue();
-      Collections.sort(value, new Comparator<PhoneAndScore>() {
-        @Override
-        public int compare(PhoneAndScore o1, PhoneAndScore o2) {
-          return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
-        }
-      });
+      value.sort(Comparator.comparingLong(PhoneAndScore::getTimestamp));
 
       List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(value);
       phoneToAvg.put(phone, new PhoneStats(phoneTimeSeries.size(), phoneTimeSeries));

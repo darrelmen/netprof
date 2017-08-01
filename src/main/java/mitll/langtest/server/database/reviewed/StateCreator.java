@@ -83,10 +83,10 @@ public class StateCreator implements Comparable<StateCreator> {
 
   @Override
   public int compareTo(StateCreator o) {
-    int i = Integer.valueOf(exerciseID).compareTo(o.exerciseID);
-    if (i == 0) i = Long.valueOf(creatorID).compareTo(o.creatorID);
+    int i = Integer.compare(exerciseID, o.exerciseID);
+    if (i == 0) i = Long.compare(creatorID, o.creatorID);
     if (i == 0) i = state.compareTo(o.state);
-    if (i == 0) i = Long.valueOf(when).compareTo(o.when);
+    if (i == 0) i = Long.compare(when, o.when);
     return i;
   }
 

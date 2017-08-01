@@ -4,10 +4,10 @@ package mitll.langtest.server.database.result;
  * Created by go22670 on 4/13/17.
  */
 public class SlimResult implements ISlimResult {
-  protected boolean valid;
-  protected float pronScore;
+  protected final boolean valid;
+  protected final float pronScore;
   private transient String jsonScore;
-  private int audioID;
+  private final int audioID;
 
   /**
    * @param audioID

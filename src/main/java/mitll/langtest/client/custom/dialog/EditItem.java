@@ -79,15 +79,11 @@ public class EditItem {
 
   /**
    * @param controller
-   * @see ListManager#ListManager
+   * @see ListView#editList()
    */
   public EditItem(ExerciseController controller) {
     this.controller = controller;
     this.instanceName = "EditItem";
-  }
-
-  public void reload() {
-    exerciseList.getExercises();
   }
 
   /**
@@ -100,12 +96,13 @@ public class EditItem {
   public Panel editItem(UserList<CommonShell> originalList) {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("EditItem_for_" + originalList.getName());
+
     Panel pagerOnLeft = new SimplePanel();
     hp.add(pagerOnLeft);
     pagerOnLeft.addStyleName("rightFiveMargin");
+
     final Panel contentOnRight = new SimplePanel();
     contentOnRight.getElement().setId("EditItem_content");
-
     hp.add(contentOnRight);
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, originalList);
@@ -166,7 +163,7 @@ public class EditItem {
     return exercise;
   }
 
-  public void addContext(int userid, MutableExercise exercise) {
+  private void addContext(int userid, MutableExercise exercise) {
     Exercise context = new Exercise(-1,
         userid,
         "",

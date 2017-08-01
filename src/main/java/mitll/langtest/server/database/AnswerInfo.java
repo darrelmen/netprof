@@ -45,26 +45,26 @@ import mitll.langtest.shared.scoring.AudioContext;
 public class AnswerInfo {
 //  private static final Logger logger = LogManager.getLogger(AnswerInfo.class);
 
-  private int userid;
-  private int id;
-  private int projid;
-  private int questionID;
-  private String answer;
-  private String audioFile;
-  private boolean valid;
-  private AudioType audioType;
-  private long durationInMillis;
+  private final int userid;
+  private final int id;
+  private final int projid;
+  private final int questionID;
+  private final String answer;
+  private final String audioFile;
+  private final boolean valid;
+  private final AudioType audioType;
+  private final long durationInMillis;
   private boolean correct;
   private float pronScore;
-  private String deviceType;
-  private String device;
+  private final String deviceType;
+  private final String device;
   private String scoreJson;
-  private boolean withFlash;
+  private final boolean withFlash;
   private int processDur;
-  private int roundTripDur;
-  private String validity;
+  private final int roundTripDur;
+  private final String validity;
   private String transcript = "";
-  private double snr;
+  private final double snr;
   private String model = "";
 
   public int getProjid() {
@@ -76,11 +76,11 @@ public class AnswerInfo {
   }
 
   public static class RecordingInfo {
-    String answer;
-    String audioFile;
-    String deviceType;
-    String device;
-    boolean withFlash;
+    final String answer;
+    final String audioFile;
+    final String deviceType;
+    final String device;
+    final boolean withFlash;
     private String transcript = "";
 
     public RecordingInfo(RecordingInfo other, String audioFile) {
@@ -121,10 +121,10 @@ public class AnswerInfo {
   }
 
   public static class ScoreInfo {
-    boolean correct;
-    float pronScore;
-    String scoreJson;
-    int processDur;
+    final boolean correct;
+    final float pronScore;
+    final String scoreJson;
+    final int processDur;
 
     public ScoreInfo(boolean correct,
                      float pronScore,

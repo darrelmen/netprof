@@ -109,16 +109,22 @@ public class SearchTypeahead {
       exercises = exercises.subList(0, limit);
     }
 
-    int numberTruncated = Math.max(0, size - limit);
-    //  logger.info("trunc " + numberTruncated);
-    SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), exercises));
-    response.setMoreSuggestionsCount(numberTruncated);
+    SuggestOracle.Response response = getResponse(request, exercises, size, limit);
 
     try {
       callback.onSuggestionsReady(request, response);
     } catch (Exception e) {
       logger.warning("got " + e);
     }
+  }
+
+  @NotNull
+  private SuggestOracle.Response getResponse(SuggestOracle.Request request, List<? extends CommonShell> exercises, int size, int limit) {
+    int numberTruncated = Math.max(0, size - limit);
+    //  logger.info("trunc " + numberTruncated);
+    SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), exercises));
+    response.setMoreSuggestionsCount(numberTruncated);
+    return response;
   }
 
   void clearCurrentExercise() {
@@ -132,16 +138,28 @@ public class SearchTypeahead {
     feedbackExerciseList.clearMessage();
     String[] searchWords = normalizeSearch(query).split(WHITESPACE_STRING);
 
-    for (CommonShell resp : exercises) {
-      suggestions.add(getSuggestion(query, searchWords, resp));
-    }
+    exercises.forEach(resp -> suggestions.add(getSuggestion(query, searchWords, resp)));
+
     return suggestions;
   }
 
+  /**
+   * What to show for each trie search result - if match in vocab item, show it, if in context sentence, show that.
+   *
+   * @param query
+   * @param searchWords
+   * @param resp
+   * @return
+   */
   private ExerciseSuggestion getSuggestion(String query, String[] searchWords, CommonShell resp) {
     String foreignLanguage = resp.getForeignLanguage();
-    boolean found = foreignLanguage.toLowerCase().contains(query.toLowerCase());
-    String formattedSuggestion = found ? (foreignLanguage + " - " + resp.getEnglish()) : (resp.getCforeignLanguage() + " - " + resp.getCenglish() + " (Context)");
+    String lcQ = query.toLowerCase();
+    boolean found = foreignLanguage.toLowerCase().contains(lcQ) || resp.getEnglish().toLowerCase().contains(lcQ);
+
+    String formattedSuggestion = found ?
+        (foreignLanguage + " - " + resp.getEnglish()) :
+        (resp.getCforeignLanguage() + (resp.getCenglish().isEmpty() ? "" : (" - " + resp.getCenglish())) + " (Context)");
+
     String lowerCaseSuggestion = normalizeSuggestion(formattedSuggestion);
     String displayString = highlighter.getHighlightedString(searchWords, formattedSuggestion, lowerCaseSuggestion);
     // logger.info(resp.getID() + " displayString " + displayString);

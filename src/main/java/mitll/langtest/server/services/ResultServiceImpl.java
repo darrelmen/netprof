@@ -298,7 +298,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
     // must be asking for text
     if (!flText.isEmpty()) {
-      trie = new Trie<MonitorResult>();
+      trie = new Trie<>();
       trie.startMakingNodes();
       logger.debug("text searching over " + results.size());
       for (MonitorResult result : results) {
@@ -339,7 +339,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
   @NotNull
   private Collection<String> getIntSorted(Collection<String> matches) {
-    List<String> sorted = new ArrayList<String>(matches);
+    List<String> sorted = new ArrayList<>(matches);
     Collections.sort(sorted, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
@@ -351,7 +351,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
   private Collection<String> getLimitedSizeList(Collection<String> matches) {
     if (matches.size() > MAX) {
-      List<String> matches2 = new ArrayList<String>();
+      List<String> matches2 = new ArrayList<>();
       int nn = 0;
       for (String match : matches) {
         if (nn++ < MAX) {
