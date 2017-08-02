@@ -230,8 +230,6 @@ public class LangTest implements
 
   public static final String VERSION_INFO = "2.0.7";
 
-//  private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
-
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String DIVIDER = "|";
@@ -242,17 +240,13 @@ public class LangTest implements
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
+  // services
   private final AudioServiceAsync defaultAudioService = GWT.create(AudioService.class);
-
   private final ScoringServiceAsync defaultScoringServiceAsync = GWT.create(ScoringService.class);
 
-  // services
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-
   private final UserServiceAsync userService = GWT.create(UserService.class);
-
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
-
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
 
@@ -276,6 +270,8 @@ public class LangTest implements
 
   private Map<Integer, AudioServiceAsync> projectToAudioService;
   private Map<Integer, ScoringServiceAsync> projectToScoringService;
+  private final long then = 0;
+
 
   /**
    * This gets called first.
@@ -344,7 +340,6 @@ public class LangTest implements
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
-
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo, reloadWindow);
       }
@@ -371,15 +366,20 @@ public class LangTest implements
     return startupInfo.getAllProjects();
   }
 
+  /**
+   * We need to make host-specific services. The client needs to route the service request to right back-end
+   * service. For instance, currently korean, levantine, msa, and russian are on hydra2 (h2).
+   *
+   * @param projects
+   * @return
+   */
   private Map<Integer, AudioServiceAsync> createHostSpecificServices(List<SlimProject> projects) {
-
     Map<Integer, AudioServiceAsync> projectToAudioService = new HashMap<>();
     Map<String, AudioServiceAsync> hostToService = new HashMap<>();
 
     // first figure out unique set of services...
-    projects.forEach(slimProject -> {
-      hostToService.computeIfAbsent(slimProject.getHost(), this::getAudioServiceAsyncForHost);
-    });
+    projects.forEach(slimProject ->
+        hostToService.computeIfAbsent(slimProject.getHost(), this::getAudioServiceAsyncForHost));
 
 //    logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
 
@@ -406,15 +406,19 @@ public class LangTest implements
     return audioService;
   }
 
+  /**
+   * Create host specific scoring services -- i.e. scoring for russian, korean, msa, levantine are on h2.
+   * @param projects
+   * @return
+   */
   private Map<Integer, ScoringServiceAsync> createHostSpecificServicesScoring(List<SlimProject> projects) {
     Map<Integer, ScoringServiceAsync> projectToAudioService = new HashMap<>();
     Map<String, ScoringServiceAsync> hostToService = new HashMap<>();
 
     // first figure out unique set of services...
 //    List<SlimProject> projects = startupInfo.getAllProjects();
-    projects.forEach(slimProject -> {
-      hostToService.computeIfAbsent(slimProject.getHost(), this::getScoringServiceAsyncForHost);
-    });
+    projects.forEach(slimProject ->
+        hostToService.computeIfAbsent(slimProject.getHost(), this::getScoringServiceAsyncForHost));
 
     //  logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
     // then map project to service
@@ -460,17 +464,7 @@ public class LangTest implements
    * @see #onModuleLoad()
    */
   private void dealWithExceptions() {
-    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-      public void onUncaughtException(Throwable throwable) {
-        /*String exceptionAsString =*/
-        logException(throwable);
- /*       if (SHOW_EXCEPTION_TO_USER) {
-          if (exceptionAsString.length() > 0) {
-            new ExceptionHandlerDialog().showExceptionInDialog(browserCheck, exceptionAsString);
-          }
-        }*/
-      }
-    });
+    GWT.setUncaughtExceptionHandler(this::logException);
   }
 
   private boolean lastWasStackOverflow = false;
@@ -671,23 +665,6 @@ public class LangTest implements
     return this;
   }
 
-/*
-  @Override
-  public String getInfoLine() {
-    String releaseDate1 = props.getReleaseDate();
-    String releaseDate = VERSION + (releaseDate1 != null ? " " + releaseDate1 : "");
-    return "<span><font size=-2>" +
-        browserCheck.ver + "&nbsp;" +
-        releaseDate + (usingWebRTC() ? " Flashless recording" : "") +
-        "</font></span>";
-  }
-*/
-/*
-  private boolean usingWebRTC() {
-    return FlashRecordPanelHeadless.usingWebRTC();
-  }
-*/
-
   private void setupSoundManager() {
     soundManager = new SoundManagerStatic();
   }
@@ -695,15 +672,6 @@ public class LangTest implements
   public int getHeightOfTopRows() {
     return initialUI.getHeightOfTopRows();
   }
-
-  /**
-   * @return
-   * @see #populateRootPanel()
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel
-   */
- /* public boolean showOnlyOneExercise() {
-    return props.getExercise_title() != null;
-  }*/
 
   /**
    * Check the URL parameters for special modes.
@@ -1107,8 +1075,6 @@ public class LangTest implements
   public Widget getFlashRecordPanel() {
     return flashRecordPanel;
   }
-
-  private final long then = 0;
 
   /**
    * Recording interface

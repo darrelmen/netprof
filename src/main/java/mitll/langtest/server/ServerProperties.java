@@ -68,6 +68,30 @@ import java.util.jar.Manifest;
 public class ServerProperties {
   private static final Logger logger = LogManager.getLogger(ServerProperties.class);
 
+  /**
+   * As of 8/2/17 we have these languages on the hydra2 server:
+   * korean, levantine, msa, and russian
+   * By default, we set the hydra host to point to h2 for these.
+   * This is consistent with the routing in the httpd.conf file on the netprof server, e.g.:
+   * <p>
+   * # h2 services
+   * JkMount /netprof/downloadAudio/h2 h2
+   * JkMount /netprof/scoreServlet/h2 h2
+   * JkMount /netprof/langtest/audio-manager/h2 h2
+   * JkMount /netprof/langtest/scoring-manager/h2 h2
+   * <p>
+   * # for every language on h2
+   * JkMount /netprof/bestAudio/korean/* h2
+   * JkMount /netprof/answers/korean/* h2
+   * JkMount /netprof/audioimages/korean/* h2
+   */
+  public static final Set<String> H2_LANGAUGES = new HashSet<>(Arrays.asList("korean", "levantine", "msa", "russian"));
+
+  /**
+   * Going forward we might have more hydra hosts to handle more load, or a different partition of languages.
+   */
+  public static final String H2_HOST = "h2";
+
   private static final String APP_TITLE = "appTitle";
   private static final String APP_URL = "app.url";
 
@@ -558,23 +582,12 @@ public class ServerProperties {
   /**
    * if true, use old school (hydec)
    * OR if there is no webservice port specified
-   *
+   *@deprecated
    * @return true if only use old school hydec decoder
    */
   public boolean getOldSchoolService() {
     return Boolean.parseBoolean(props.getProperty("oldSchoolService", FALSE));// || props.getProperty("webserviceHostPort") == null;
   }
-
-/*  private String getDateFromManifest(ServletContext servletContext) {
-    try {
-      InputStream inputStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
-      Manifest manifest = new Manifest(inputStream);
-      Attributes attributes = manifest.getMainAttributes();
-      return attributes.getValue("Built-Date");
-    } catch (Exception ex) {
-    }
-    return "";
-  }*/
 
   /**
    * @return
@@ -618,6 +631,7 @@ public class ServerProperties {
   /**
    * @return
    * @see DatabaseImpl#getContextPractice()
+   * @deprecated
    */
   public String getDialogFile() {
     return props.getProperty("dialog");

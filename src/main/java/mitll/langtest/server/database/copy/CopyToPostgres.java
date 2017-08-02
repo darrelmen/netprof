@@ -343,7 +343,8 @@ public class CopyToPostgres<T extends CommonShell> {
                                        int displayOrder,
                                        boolean isDev,
                                        Collection<String> typeOrder) {
-    return new CreateProject().createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev, typeOrder);
+    return new CreateProject()
+        .createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev, typeOrder);
   }
 
   /**

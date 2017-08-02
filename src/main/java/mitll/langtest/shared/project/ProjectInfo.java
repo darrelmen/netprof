@@ -33,11 +33,14 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.google.gwt.user.client.ui.HTML;
+import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ProjectInfo implements HasID, IsSerializable, MutableProject {
@@ -64,7 +67,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   } // for serialization
 
   /**
-   * @see ProjectServiceImpl#getAll
+   * @see mitll.langtest.server.database.project.ProjectManagement#getProjectInfo
    */
   public ProjectInfo(int projectid,
                      String name,
@@ -193,18 +196,6 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.course = course;
   }
 
-/*
-  public void setCountryCode(String countryCode) {
-    this.countryCode = countryCode;
-  }
-*/
-
-/*
-  public void setDisplayOrder(int displayOrder) {
-    this.displayOrder = displayOrder;
-  }
-*/
-
   public void setLanguage(String language) {
     this.language = language;
   }
@@ -217,10 +208,19 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.secondType = secondType;
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#createHostSpecificServices
+   * @see mitll.langtest.client.project.ProjectChoices#checkAudio
+   * @return
+   */
   public String getHost() {
     return host;
   }
 
+  /**
+   * @see ProjectEditForm#updateProject
+   * @param host
+   */
   public void setHost(String host) {
     this.host = host;
   }

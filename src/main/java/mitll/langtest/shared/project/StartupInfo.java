@@ -33,6 +33,7 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.user.Affiliation;
 
@@ -90,6 +91,10 @@ public class StartupInfo implements IsSerializable {
     return projects;
   }
 
+  /**
+   * OK to modify the returned list.
+   * @return mutable copy of the current project list
+   */
   public List<SlimProject> getAllProjects() {
     List<SlimProject> all = new ArrayList<>();
     projects.forEach(slimProject -> {
@@ -104,11 +109,16 @@ public class StartupInfo implements IsSerializable {
 
   /**
    * Not sure when these could be out of sync but...
+   * @see LangTest#getHost
    * @param id
    * @return
    */
   public String getHost(int id) {
-    List<SlimProject> withThisID = getAllProjects().stream().filter(slimProject -> slimProject.getID() == id).collect(Collectors.toList());
+    List<SlimProject> withThisID =
+        getAllProjects()
+            .stream()
+            .filter(slimProject -> slimProject.getID() == id)
+            .collect(Collectors.toList());
 
     if (withThisID.isEmpty()) return "";
     else {

@@ -3,6 +3,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -10,6 +11,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+
+import static mitll.langtest.server.ServerProperties.H2_HOST;
 
 /**
  * Created by go22670 on 10/26/16.
@@ -19,6 +22,8 @@ public class CreateProject {
   public static final String MODEL_PROPERTY_TYPE = "model";
 
   /**
+   * JUST FOR IMPORT FROM LEGACY h2 database language.
+   *
    * @param db
    * @param countryCode
    * @param course
@@ -53,6 +58,8 @@ public class CreateProject {
   }
 
   /**
+   * JUST FOR IMPORT FROM LEGACY h2 database language.
+   * <p>
    * Ask the database for what the type order should be, e.g. [Unit, Chapter] or [Week, Unit] (from Dari)
    *
    * @param db
@@ -93,6 +100,13 @@ public class CreateProject {
             firstType,
             secondType);
 
+    addProjectProperties(db, projectDAO, projectID);
+    addDefaultHostProperty(language, projectDAO, projectID);
+    logger.info("createProject : created project " + projectID);
+    return projectID;
+  }
+
+  private void addProjectProperties(DatabaseImpl db, IProjectDAO projectDAO, int projectID) {
     Properties props = db.getServerProps().getProps();
     for (String prop : ServerProperties.CORE_PROPERTIES) {
       String property = props.getProperty(prop);
@@ -100,12 +114,11 @@ public class CreateProject {
         projectDAO.addProperty(projectID, prop, property, MODEL_PROPERTY_TYPE, "");
       }
     }
-
-    logger.info("createProject : created project " + projectID);
-    return projectID;
   }
 
   /**
+   * Let's by default put all new projects on
+   *
    * @param daoContainer
    * @param projectServices
    * @param info
@@ -118,7 +131,7 @@ public class CreateProject {
     IProjectDAO projectDAO = daoContainer.getProjectDAO();
     int byName = projectDAO.getByName(info.getName());
 
-    logger.info("Create new " +info);
+    logger.info("createProject : Create new " + info);
 
     if (byName == -1) {
       int projectID = addProject(projectDAO,
@@ -136,6 +149,12 @@ public class CreateProject {
       projectDAO.addProperty(projectID, ServerProperties.WEBSERVICE_HOST_PORT,
           "" + info.getPort(), MODEL_PROPERTY_TYPE, "");
 
+//      addHostProperty(info, projectDAO, projectID);
+      projectDAO.addProperty(projectID, Project.WEBSERVICE_HOST, info.getHost(), MODEL_PROPERTY_TYPE, "");
+
+      projectDAO.addProperty(projectID, ServerProperties.WEBSERVICE_HOST_PORT,
+          "" + info.getPort(), MODEL_PROPERTY_TYPE, "");
+
       projectDAO.addProperty(projectID, ServerProperties.MODELS_DIR,
           "" + info.getModelsDir(), MODEL_PROPERTY_TYPE, "");
 
@@ -146,6 +165,14 @@ public class CreateProject {
       return true;
     } else {
       return false;
+    }
+  }
+
+  private void addDefaultHostProperty(String language, IProjectDAO projectDAO, int projectID) {
+    if (ServerProperties.H2_LANGAUGES.contains(language.toLowerCase())) {
+      String h2Host = H2_HOST;
+      logger.info("createProject: setting hydra host to " + h2Host);
+      projectDAO.addProperty(projectID, Project.WEBSERVICE_HOST, h2Host, MODEL_PROPERTY_TYPE, "");
     }
   }
 

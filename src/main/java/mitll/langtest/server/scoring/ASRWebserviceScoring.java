@@ -146,9 +146,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    *
    * @return
    */
-  private String getWebserviceIP() {
-    return WEBSERVICE_HOST_DEFAULT;//project.getWebserviceHost();
-  }
+  private String getWebserviceIP() {    return WEBSERVICE_HOST_DEFAULT;  }
 
   public void setAvailable() {
     new Thread(() -> {

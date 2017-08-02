@@ -78,6 +78,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
   private final boolean DEBUG = false;
+  private final boolean DEBUG_TYPE_ORDER = false;
 
   public SectionHelper() {
     makeRoot();
@@ -105,8 +106,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       List<String> types = new ArrayList<>();
 
       types.addAll(typeToUnitToLesson.keySet());
-      if (DEBUG) logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
-      if (DEBUG) logger.info("getTypeOrder typeToCount = " + typeToCount);
+      if (DEBUG_TYPE_ORDER) logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
+      if (DEBUG_TYPE_ORDER) logger.info("getTypeOrder typeToCount = " + typeToCount);
 
       if (types.isEmpty()) {
         types.addAll(typeToCount.keySet());
@@ -119,7 +120,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
           int i = Integer.compare(first, second);
           return i == 0 ? o1.compareTo(o2) : i;
         });
-        if (DEBUG) logger.info("getTypeOrder after sort now " + types);
+        if (DEBUG_TYPE_ORDER) logger.info("getTypeOrder after sort now " + types);
       } else {
         types.sort((o1, o2) -> {
           int first = typeToUnitToLesson.get(o1).size();
@@ -127,7 +128,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
           int i = Integer.compare(first, second);
           return i == 0 ? o1.compareTo(o2) : i;
         });
-        if (DEBUG) logger.info("getTypeOrder 2 after sort now " + types);
+        if (DEBUG_TYPE_ORDER) logger.info("getTypeOrder 2 after sort now " + types);
       }
 
       // TODO : I feel like I did this before...?
@@ -140,7 +141,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-      if (DEBUG) logger.info("getTypeOrder validTypes " + validTypes);
+      if (DEBUG_TYPE_ORDER) logger.info("getTypeOrder validTypes " + validTypes);
 
       List<String> valid = new ArrayList<>(predefinedTypeOrder);
       valid.retainAll(validTypes);
@@ -248,79 +249,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return null;
   }
 
-  /**
-   * @param typeOrder
-   * @return
-   * @see #getSectionNodesForTypes
-   */
-/*
-  private List<SectionNode> getChildren(List<String> typeOrder) {
-    if (typeOrder.isEmpty()) return Collections.emptyList();
-    String root = typeOrder.iterator().next();
-    List<SectionNode> firstSet = new ArrayList<>();
-
-    Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(root);
-    if (sectionToTypeToSections != null) {
-      for (Map.Entry<String, Map<String, Collection<String>>> rootSection : sectionToTypeToSections.entrySet()) {
-        SectionNode parent = new SectionNode(rootSection.getKey());
-        firstSet.add(parent);
-
-        Map<String, Collection<String>> typeToSections = rootSection.getValue();
-
-        if (!typeOrder.isEmpty()) {
-          List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
-          addChildren(remainingTypes, parent, typeToSections);
-        }
-      }
-    } else {
-      Map<String, Lesson<T>> stringLessonMap = typeToUnitToLesson.get(root);
-      if (stringLessonMap == null) {
-        logger.warn("getChildren no entry for " + root + " in " + typeToUnitToLesson.keySet());
-      } else {
-        //logger.debug("for " + root + " got " + stringLessonMap);
-        for (Map.Entry<String, Lesson<T>> rootSection : stringLessonMap.entrySet()) {
-          SectionNode parent = new SectionNode(rootSection.getKey());
-          firstSet.add(parent);
-        }
-      }
-    }
-
-    return firstSet;
-  }
-*/
-
-  /**
-   * @param typeOrder
-   * @param parent
-   * @param typeToSections
-   * @see #getChildren(java.util.List)
-   */
-/*
-  private void addChildren(List<String> typeOrder,
-                           SectionNode parent,
-                           Map<String, Collection<String>> typeToSections) {
-    List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
-    String nextType = typeOrder.iterator().next();
-
-    Collection<String> children = typeToSections.get(nextType);
-    if (children == null) {
-      logger.warn("addChildren huh? can't find " + nextType + " in " + typeToSections);
-      //   report();
-    } else {
-      for (String childSection : children) {
-        SectionNode child = new SectionNode(childSection);
-        parent.addChild(child);
-
-        Map<String, Map<String, Collection<String>>> sectionToTypeToSections = typeToSectionToTypeToSections.get(nextType);
-        Map<String, Collection<String>> typeToSections2 = sectionToTypeToSections.get(childSection);
-
-        if (!remainingTypes.isEmpty()) {
-          addChildren(remainingTypes, child, typeToSections2);
-        }
-      }
-    }
-  }
-*/
 
   /**
    * JUST FOR TESTING

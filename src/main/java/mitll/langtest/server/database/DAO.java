@@ -365,48 +365,6 @@ public class DAO {
     return "";
   }
 
-  /**
-   * Does not seem to work with h2
-   * @param connection
-   * @param table
-   * @return
-   * @throws SQLException
-   */
-/*  protected int getNewNumColumns(Connection connection, String table) throws SQLException {
-    Statement stmt = connection.createStatement();
-    ResultSet rs = stmt.executeQuery("SELECT * FROM " + table);
-
-    // Get result set meta data
-    DatabaseMetaData md = connection.getMetaData();
-    ResultSet columns = md.getColumns(null, null, table, null);
-    System.out.println("Got " + md + " and " + columns);
-    int numColumns = 0;
-    while (columns.next()) numColumns++;
-    System.out.println("Got " + numColumns);
-
-    return numColumns;
-  }*/
-
-  /**
-   * Does not seem to work with h2
-   *
-   * @return
-   * @throws SQLException
-   * @paramx connection
-   * @paramx table
-   * @paramx column
-   */
-/*  protected boolean columnExists(Connection connection, String table, String column) throws SQLException {
-    DatabaseMetaData md = connection.getMetaData();
-    ResultSet columns = md.getColumns(null, null, table, column);
-    System.out.println("Got " + md + " and " + columns);
-
-    int numColumns = 0;
-    while (columns.next()) numColumns++;
-    System.out.println("Got " + numColumns);
-
-    return numColumns == 1;
-  }*/
   public String toString() {
     return super.toString() + " : " + database.getServerProps().getH2Database();
   }

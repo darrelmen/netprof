@@ -147,6 +147,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     return update;
   }
 
+  /**
+   * @see ProjectEditForm#newProject
+   * @param newProject
+   * @return
+   */
   @Override
   public boolean create(ProjectInfo newProject) {
     if (newProject.getModelsDir().isEmpty()) {

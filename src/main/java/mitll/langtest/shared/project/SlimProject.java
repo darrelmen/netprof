@@ -121,12 +121,12 @@ public class SlimProject extends ProjectInfo {
     return isRTL;
   }
 
+  public TreeMap<String, String> getProps() {
+    return props;
+  }
+
   public String toString() {
     return "Project #" + getID() + " " + getName() + " " + getLanguage() + " " + getStatus() +
         " num children " + children.size() + " " + getFirstType() + " " + getSecondType();
-  }
-
-  public TreeMap<String, String> getProps() {
-    return props;
   }
 }

@@ -64,7 +64,9 @@ public class Project implements PronunciationLookup {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
   /**
-   * @see mitll.langtest.server.services.ProjectServiceImpl#getHydraHost(SlickProject)
+   * @see #getWebserviceHost
+   * @see mitll.langtest.server.database.project.ProjectDAO#update
+   * @see ProjectManagement#getProjectInfo
    */
   public static final String WEBSERVICE_HOST = "webserviceHost";
   /**
@@ -275,8 +277,9 @@ public class Project implements PronunciationLookup {
     String prop = getProp(WEBSERVICE_HOST_PORT);
     if (prop == null) prop = "-1";
     int ip = Integer.parseInt(prop);
-    if (ip == 1)
+    if (ip == 1) {
       logger.error("No webservice host port found.");
+    }
     return ip;
   }
 
