@@ -49,6 +49,9 @@ public class UserMenu {
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
+  /**
+   * @see #getLogOut
+   */
   private static final String LOG_OUT = "Sign Out";
   private final UILifecycle uiLifecycle;
 
@@ -195,11 +198,6 @@ public class UserMenu {
       @Override
       public void onClick(ClickEvent clickEvent) {
         Map<String, String> props = UserMenu.this.props.getProps();
-//        List<String> strings = java.util.Arrays.asList(
-//            "Version       ",
-//            "Release Date  ",
-//            "Recording type");
-
         List<String> strings = new ArrayList<>();
         List<String> values = new ArrayList<>();
         try {

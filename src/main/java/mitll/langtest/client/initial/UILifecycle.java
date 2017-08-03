@@ -68,7 +68,6 @@ public interface UILifecycle {
    */
   @NotNull
   NavLink makeBreadcrumb(String name);
- // void removeLastCrumb();
 
   void clickOnParentCrumb(SlimProject parent);
 

@@ -69,6 +69,7 @@ import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.recorder.WebAudioRecorder;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.services.*;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -678,17 +679,12 @@ public class LangTest implements
    * <p>
    * If in goodwave (pronunciation scoring) mode or auto crt mode, skip the user login.
    *
-   * @seex #resetState()
+   * @see InitialUI#resetState
    * @see #onModuleLoad2()
    */
   @Override
   public void recordingModeSelect() {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        //logger.info("check init flash");
-        checkInitFlash();
-      }
-    });
+    Scheduler.get().scheduleDeferred(this::checkInitFlash);
   }
 
   private boolean showingPlugInNotice = false;
@@ -712,7 +708,7 @@ public class LangTest implements
       }
 
       /**
-       * @see FlashRecordPanelHeadless#noMicrophoneFound()
+       * @see FlashRecordPanelHeadless#noMicrophoneFound
        */
       public void noMicAvailable() {
         if (!showingPlugInNotice) {
@@ -721,15 +717,11 @@ public class LangTest implements
               "plug in or enable your mic and reload the page.");
           new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList(),
               null,
-              new HiddenHandler() {
-                @Override
-                public void onHidden(HiddenEvent hiddenEvent) {
-                  hideFlash();
-                  checkLogin();
-
-                  initialUI.setSplash();
-                  isMicConnected = false;
-                }
+              hiddenEvent -> {
+                hideFlash();
+                checkLogin();
+                initialUI.setSplash();
+                isMicConnected = false;
               }, false, true, 600, 400);
         }
       }
@@ -852,9 +844,9 @@ public class LangTest implements
     } else {
       if (DEBUG) logger.info("checkInitFlash : initFlash - no permission yet");
       flashRecordPanel.tryWebAudio();
-/*      if (flashRecordPanel.initFlash()) {
+      if (!WebAudioRecorder.isWebRTCAvailable()) {
         checkLogin();
-      }*/
+      }
     }
   }
 

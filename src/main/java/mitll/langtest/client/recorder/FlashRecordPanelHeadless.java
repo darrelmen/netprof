@@ -40,6 +40,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
 
@@ -163,7 +164,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
   /**
    * @return
-   * @see LangTest#usingWebRTC
+   * @see UserMenu#getAbout
    */
   public static boolean usingWebRTC() {
     return webAudio.isWebAudioMicAvailable();
@@ -188,7 +189,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public native boolean isMicAvailable() *//*-{
       return $wnd.FlashRecorderLocal.isMicrophoneAvailable();
   }-*//*;*/
-
 
   /**
    * @return
@@ -343,7 +343,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   private void stopFlashRecording(final WavCallback wavCallback) {
-    final long then = System.currentTimeMillis();
+   // final long then = System.currentTimeMillis();
 //      logger.info("stopRecording - initial ");
 
     Timer t = new Timer() {

@@ -34,6 +34,8 @@ import java.util.logging.Logger;
  */
 public class ListView implements ContentView, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListView");
+  private static final String STORAGE_ID = "others";
+  private static final String OTHERS_PUBLIC_LISTS = "Public Lists";
 
   private static final int HEADING_SIZE = 3;
   private static final int VISITED_PAGE_SIZE = 5;
@@ -137,9 +139,9 @@ public class ListView implements ContentView, CreateListComplete {
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
         ListContainer listContainer =
-            new ListContainer(controller, BROWSE_PAGE_SIZE, false, "others", BROWSE_SHORT_PAGE_SIZE);
+            new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE);
         Panel tableWithPager = listContainer.getTableWithPager(result);
-        addPagerAndHeader(tableWithPager, "Other's Public Lists", bottom);
+        addPagerAndHeader(tableWithPager, OTHERS_PUBLIC_LISTS, bottom);
         tableWithPager.setHeight(BROWSE_HEIGHT + "px");
 
         bottom.add(getLDButtons(listContainer));

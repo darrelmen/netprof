@@ -65,9 +65,14 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
-  public static final int MIN_HEIGHT = 325;
-  public static final int WORD_WIDTH = 500;
   private final Logger logger = Logger.getLogger("AnalysisTab");
+  private static final int MIN_HEIGHT = 325;
+  /**
+   * Got be the width to fit on a laptop screen for progress view - otherwise the phone plot
+   * will wrap.
+   * @see #showWordScores
+   */
+  private static final int WORD_WIDTH = 450;
 
   private static final String WORDS = "Vocabulary";
   /**

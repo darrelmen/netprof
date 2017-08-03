@@ -713,7 +713,7 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see LangTest#makeFlashContainer()
+   * @see LangTest#makeFlashContainer
    */
   @Override
   public void setSplash() {

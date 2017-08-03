@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 5/27/2014.
  */
-class WebAudioRecorder {
+public class WebAudioRecorder {
   private final Logger logger = Logger.getLogger("WebAudioRecorder");
   private static final int DELAY_MILLIS = 4000;
 
@@ -55,7 +55,7 @@ class WebAudioRecorder {
   private static boolean gotResponse = false;
   private Timer theTimer = null;
 
-  private int attempts = 10*60/DELAY_MILLIS;
+  //private int attempts = 10*60/DELAY_MILLIS;
 
   /**
    *
@@ -67,7 +67,7 @@ class WebAudioRecorder {
   boolean tryWebAudio() {
     if (!tried) {
       tried = true;
-      attempts--;
+      //attempts--;
       //logger.info("webAudioMicAvailable -- tryWebAudio!");
       initWebaudio();
 
@@ -146,6 +146,10 @@ class WebAudioRecorder {
     console("webAudioMicNotAvailable!");
 
     noWebRTC();
+  }
+
+  public static boolean isWebRTCAvailable() {
+    return !gotResponse || webAudioMicAvailable;
   }
 
   static void noWebRTC() {

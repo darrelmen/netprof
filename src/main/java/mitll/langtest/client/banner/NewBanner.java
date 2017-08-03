@@ -39,6 +39,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
   private static final String DOCUMENTATION = "User Manual";
+  /**
+   * @see #setSubtitle
+   */
   private static final String RECORDING_DISABLED = "RECORDING DISABLED";
 
   private final UILifecycle lifecycle;
@@ -340,14 +343,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setRecNavVisible(false);
     setDefectNavVisible(false);
   }
-
-/*  @Override
-  public void setBrowserInfo(String v) {
-  }
-
-  @Override
-  public void setVisibleAdmin(boolean visibleAdmin) {
-  }*/
 
   @Override
   public void setUserName(String name) {
