@@ -55,6 +55,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -832,19 +833,26 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     try {
       String resultsStr;
       try {
-        // synchronized (this) {
-        //    resultsStr = httpClient.sendAndReceiveAndClose(hydraInput);
         resultsStr = httpClient.sendAndReceive(hydraInput);
-        // }
       } catch (IOException e) {
         logger.error("Error closing http connection " + e, e);
-        langTestDatabase.logAndNotifyServerException(e, "running hydra with " + hydraInput);
+        langTestDatabase.logAndNotifyServerException(e, "running hydra on" +
+            "\n\thost  " + getHostName()+
+            "\n\tinput " + hydraInput);
         resultsStr = "";
       }
       return resultsStr;
     } catch (Exception e) {
       logger.error("runHydra : running on port " + getWebservicePort() + " sent " + hydraInput + " got " + e, e);
       return "";
+    }
+  }
+
+  private String getHostName() {
+    try {
+      return java.net.InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      return "unknown host?";
     }
   }
 

@@ -57,6 +57,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
@@ -262,14 +263,24 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
     if (!message1.contains("Broken Pipe")) {
       String prefix = additionalMessage.isEmpty() ? "" : additionalMessage + "\n";
-      String prefixedMessage = prefix + "for " + pathHelper.getInstallPath() +
+      String installPath = pathHelper.getInstallPath();
+      String prefixedMessage = prefix + "for " + installPath +
           (e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
-      String subject = "Server Exception on " + pathHelper.getInstallPath();
+
+      String subject = "Server Exception on " + getHostName() + " at " +installPath;
       sendEmail(subject, getInfo(prefixedMessage));
 
       logger.error(getInfo(prefixedMessage));
     } else {
       logger.error("got " + e, e);
+    }
+  }
+
+  private String getHostName() {
+    try {
+      return java.net.InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      return "unknown host?";
     }
   }
 
@@ -451,13 +462,12 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
       String strongName = getPermutationStrongName();
       String serverName = getThreadLocalRequest().getServerName();
-      String msgStr = message +
+
+      return message +
           "\nremoteAddr : " + remoteAddr +
           "\nuser agent : " + userAgent +
           "\ngwt        : " + strongName +
           "\nserver     : " + serverName;
-
-      return msgStr;
     } else {
       return message;
     }

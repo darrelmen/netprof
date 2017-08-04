@@ -58,8 +58,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-//
-
 /**
  * closes and reopens the connection after every call to sendAndReceive()
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -70,20 +68,17 @@ public class HTTPClient {
   private static final Logger logger = LogManager.getLogger(HTTPClient.class);
   private static final int CONNECT_TIMEOUT = 5000;
   private static final int READ_TIMEOUT = 20000;
-  public static final String GET = "GET";
-  public static final String POST = "POST";
+  private static final String GET = "GET";
+  private static final String POST = "POST";
 
   private HttpURLConnection httpConn;
 
   static {
     //for localhost testing only
     javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-        new javax.net.ssl.HostnameVerifier() {
-          public boolean verify(String hostname,
-                                javax.net.ssl.SSLSession sslSession) {
-            logger.warn("verify " + hostname);
-            return true;
-          }
+        (hostname, sslSession) -> {
+          logger.warn("verify " + hostname);
+          return true;
         });
   }
 
@@ -161,19 +156,13 @@ public class HTTPClient {
   /**
    * @param url
    * @return
-   * @see mitll.langtest.server.database.exercise.DominoReader#readProjectInfo(ServerProperties)
+   * @see #isAvailable
    */
-  public String readFromGET(String url) throws IOException {
-    //try {
-//    logger.info("Reading from " + url);
+  private String readFromGET(String url) throws IOException {
     HttpURLConnection httpConn = setupGetHttpConn(url);
     String receive = receive(httpConn);
     httpConn.disconnect();
     return receive;
-//    } catch (IOException e) {
-//      e.printStackTrace();
-//      return "";
-//    }
   }
 
   private HttpURLConnection setupGetHttpConn(String url) throws IOException {
@@ -256,12 +245,7 @@ public class HTTPClient {
   }
 
   private String receive(HttpURLConnection httpConn) throws IOException {
-    // try {
     return receive(httpConn, getReader(httpConn));
-    // } catch (IOException e) {
-    //   logger.error("Got " + e, e);
-    //   return "";
-    // }
   }
 
   private BufferedReader getReader(HttpURLConnection httpConn) throws IOException {
@@ -296,10 +280,8 @@ public class HTTPClient {
       send(input);
       //logger.info("sending END   " + input.length());
     } catch (ConnectException ce) {
-      logger.error("sendAndReceive sending" +
-          "\n\tmessage " + input +
-          "\n\tcouldn't connect to server " + httpConn.getURL() +
-          "\n\tgot     " + ce);
+      String sending = "sending";
+      logError(input, ce, sending);
       return "";
     } catch (IOException e) {
       logger.error("sendAndReceive sending " + input + " got " + e, e);
@@ -312,15 +294,19 @@ public class HTTPClient {
       //logger.info("receive END   " + input.length());
       return receive;
     } catch (ConnectException ce) {
-      logger.error("sendAndReceive receiving" +
-          "\n\tmessage " + input +
-          "\n\tcouldn't connect to server " + httpConn.getURL() +
-          "\n\tgot     " + ce);
+      logError(input,ce,"receiving");
       return "";
     } catch (IOException e) {
       logger.error("sendAndReceive receiving from " + input + " got " + e, e);
       throw e;
     }
+  }
+
+  private void logError(String input, ConnectException ce, String sending) {
+    logger.error("sendAndReceive " + sending +
+        "\n\tmessage " + input +
+        "\n\tcouldn't connect to server " + httpConn.getURL() +
+        "\n\tgot     " + ce);
   }
 
   /**

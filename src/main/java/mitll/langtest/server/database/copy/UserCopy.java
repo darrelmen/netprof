@@ -70,6 +70,7 @@ public class UserCopy {
     Map<Integer, Integer> idToCount = userToNumAnswers.getIdToCount();
     if (DEBUG) logger.info("copyUsers id->childCount " + idToCount.size() + " values " + idToCount.values().size());
 
+    boolean debug =false;
     int collisions = 0;
     int lurker = 0;
     List<ClientUserDetail> added = new ArrayList<>();
@@ -79,6 +80,10 @@ public class UserCopy {
 
       int importID = toImport.getID();
       String importUserID = toImport.getUserID();
+
+      if (DEBUG) logger.info("copying " + importID + " : " + importUserID);
+
+
       if (importUserID.isEmpty()) importUserID = "unknown";
       if (importID != defectDetector && !dominoUserDAO.isDefaultUser(importUserID)) {
 
@@ -89,10 +94,16 @@ public class UserCopy {
           if (DEBUG) logger.info("copyUsers #" + c + "/" + importUsers.size() + " : import " + toImport);
 
           User dominoUser = dominoUserDAO.getUserByID(importUserID);
+
+
           if (dominoUser == null) { // new user
             //logger.info("copyUsers no existing user id '" + importUserID + "'");
             added.add(addUser(dominoUserDAO, oldToNew, toImport, optName));
           } else { // user exists
+            if (dominoUser.getUserID().equals("d.admin")) {
+              logger.warn("found d.admin " + dominoUser);
+            }
+
             if (foundExistingUser(projid, optName,
                 dominoUserDAO, oldToNew,
                 added, toImport, dominoUser)) {

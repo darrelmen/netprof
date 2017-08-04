@@ -109,9 +109,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private DBUser dominoAdminUser;
   private Ignite ignite = null;
 
+  private JSONSerializer serializer;
+
   /**
    * @param database
-   * @paramx dbConnection
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public DominoUserDAOImpl(Database database) {
@@ -126,8 +127,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
   }
 
-  private JSONSerializer serializer;
-
   private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
     pool = Mongo.createPool(new DBProperties(props));
 
@@ -135,7 +134,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       serializer = Mongo.makeSerializer();
 //      logger.info("OK made serializer " + serializer);
       Mailer mailer = new Mailer(new MailerProperties(props));
-      props.setProperty(CACHE_ENABLED_PROP,""+ USE_DOMINO_CACHE);
+      props.setProperty(CACHE_ENABLED_PROP, "" + USE_DOMINO_CACHE);
       ServerProperties dominoProps =
           new ServerProperties(props, "1.0", "demo", "0", "now");
 
@@ -158,7 +157,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
       logger.debug("DominoUserDAOImpl made delegate " + delegate.getClass());
       logger.debug("DominoUserDAOImpl ignite = " + ignite);
-      logger.debug("DominoUserDAOImpl isCacheEnabled = " +  dominoProps.isCacheEnabled());
+      logger.debug("DominoUserDAOImpl isCacheEnabled = " + dominoProps.isCacheEnabled());
       myDelegate = makeMyServiceDelegate();//dominoProps.getUserServiceProperties(), mailer, pool, serializer);
 
       dominoAdminUser = delegate.getAdminUser();
@@ -201,7 +200,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     try {
       return Ignition.start(cfg);
     } catch (IgniteException e) {
-      logger.error("getIgnite : Couldn't start ignite - got " + e,e);
+      logger.error("getIgnite : Couldn't start ignite - got " + e, e);
       return null;
     }
   }
@@ -217,8 +216,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public void ensureDefaultUsers() {
     if (delegate == null) {
       logger.error("no delegate - couldn't connect to Mongo!");
-    }
-    else {
+    } else {
       ensureDefaultUsersLocal();
       String userId = dominoAdminUser.getUserId();
       adminUser = delegate.getUser(userId);//BEFORE_LOGIN_USER);
@@ -404,21 +402,25 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     Group group = groups.isEmpty() ? null : groups.iterator().next();
 
     if (group == null) { //defensive
-      logger.warn("getGroupOrMake making a new group " + name);
-      //  group = getPrimaryGroup(name);
+      group = makeAGroup(name);
+    }
+    return group;
+  }
 
-      IGroupDAO groupDAO = delegate.getGroupDAO();
+  private Group makeAGroup(String name) {
+    logger.warn("getGroupOrMake making a new group " + name);
+    MongoGroupDAO groupDAO1 = (MongoGroupDAO) delegate.getGroupDAO();
 
-      MongoGroupDAO groupDAO1 = (MongoGroupDAO) groupDAO;
+    LocalDateTime thirtyYearsFromNow = LocalDateTime.now().plusYears(30);
+    Date out = Date.from(thirtyYearsFromNow.atZone(ZoneId.systemDefault()).toInstant());
 
-      LocalDateTime f = LocalDateTime.now().plusYears(30);
-      Date out = Date.from(f.atZone(ZoneId.systemDefault()).toInstant());
+    SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser, new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser));
 
-      SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser, new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser));
-
-      if (name1.isError()) {
-        logger.error("couldn't make " + name1);
-      } else group = name1.get();
+    Group group = null;
+    if (name1.isError()) {
+      logger.error("couldn't make " + name1);
+    } else {
+      group = name1.get();
     }
     return group;
   }
@@ -455,8 +457,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public String isValidEmail(String email) {
-    Set<FilterDetail<UserColumn>> filterDetails = getEmailFilter(email);
-    List<DBUser> users = getDbUsers(filterDetails);
+    List<DBUser> users = getDbUsers(getEmailFilter(email));
     return users.isEmpty() ? null : users.get(0).getUserId();
   }
 
@@ -653,7 +654,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * Convert a netprof user into a domino user.
    *
-   * @param user to import
+   * @param user        to import
    * @param projectName so we can make a secondary group for this language/project
    * @return the domino user
    * @see mitll.langtest.server.database.copy.UserCopy#addUser
@@ -1005,7 +1006,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return getUserKind(s, new HashSet<>());
   }
 */
-
   @Override
   public MiniUser getMiniUser(int userid) {
     DBUser byID = lookupUser(userid);
