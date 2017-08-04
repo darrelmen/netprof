@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# go get all the netprof languages from artifactory
+# fill in the curl user below with your user id
+
+files=(cm croatianeval dari egyptian english farsi files french german hindieval iraqi japanese korean levantine msa pashto1 pashto2 pashto3 portuguese russian serbian soranieval spanish sudanese tagalog turkisheval urdu)
+for file in ${files[@]}
+do
+echo $file
+cd config
+curl -ugvidaver -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$file/$file.tar.gz"
+tar xvfz $file.tar.gz
+cd ..
+
+done

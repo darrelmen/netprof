@@ -576,7 +576,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     if (all.isEmpty()) {
       logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows but no audio?");
     }
-    logger.info("toAudioAttribute " + all.size());
+//    logger.info("toAudioAttribute " + all.size());
     Map<Integer, MiniUser> idToMini = new HashMap<>();
     for (SlickAudio s : all) {
       copy.add(getAudioAttribute(s, idToMini));
