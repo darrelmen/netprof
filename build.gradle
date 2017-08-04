@@ -186,15 +186,15 @@ distributions {
             from('war/config/netProfDLI') {
                 into 'configProduction'
             }
-            from('scripts/copy.sh') {
+            from('scripts/*.sh') {
                 into 'bin'
             }
             from('docs/*') {
                 into 'docs'
             }
-            from('scripts/drop.sh') {
-                into 'bin'
-            }
+//            from('scripts/drop.sh') {
+//                into 'bin'
+//            }
 
             from('build/libs') {
                 include '**/*.jar'
