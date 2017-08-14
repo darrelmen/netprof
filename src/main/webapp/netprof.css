@@ -1201,6 +1201,14 @@ body .btn-toolbar > .btn-group > .btn.active {
     text-shadow: none;
 }
 
+div .btn.active {
+    background-color: #737373;
+    background-image: linear-gradient(to bottom, #737373, #a0a0a0);
+    color: white;
+    background-position: center;
+    text-shadow: none;
+}
+
 .login-label {
     font-weight: bold;
     font-size: 1.2em;

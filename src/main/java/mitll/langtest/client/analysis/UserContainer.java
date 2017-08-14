@@ -39,6 +39,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
@@ -113,31 +114,55 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     // logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
     this.overallBottom = overallBottom;
     mine = new HashSet<>();
-
-    controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-
-      }
-
-      @Override
-      public void onSuccess(Set<Integer> result) {
-        mine = result;
-        logger.info("got " + result);
-        //   enableButtons();
-      }
-    });
   }
 
   protected int getMaxLengthId() {
     return 11;
   }
 
-  DivWidget getTable(Collection<UserInfo> users, String title, String subtitle) {
-    DivWidget table = super.getTable(users, title, subtitle);
-    table.add(getButtons());
-    // enableButtons();
-    return table;
+  @Override
+  protected void addTable(Collection<UserInfo> users, DivWidget leftSide) {
+    boolean mineOnly1 = showOnlyMine();
+
+    if (mineOnly1) {
+      controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Set<Integer> result) {
+          mine = result;
+
+          remembered = new ArrayList<>(users);
+          List<UserInfo> filtered = new ArrayList<>();
+          remembered.forEach(userInfo -> {
+            if (mine.contains(userInfo.getID())) filtered.add(userInfo);
+          });
+          Panel tableWithPager = getTableWithPager(filtered);
+          leftSide.add(tableWithPager);
+          ((Panel) tableWithPager.getParent()).add(getButtons());
+        }
+      });
+    } else {
+      controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Set<Integer> result) {
+          mine = result;
+
+          Panel tableWithPager = getTableWithPager(users);
+          leftSide.add(tableWithPager);
+          ((Panel) tableWithPager.getParent()).add(getButtons());
+
+        }
+      });
+    }
   }
 
   @Override
@@ -145,6 +170,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     Panel tableWithPager = super.getTableWithPager(users);
     tableWithPager.getElement().getStyle().setProperty("minHeight", "317px");
     return tableWithPager;
+  }
+
+  private boolean showOnlyMine() {
+    return controller.getStorage().isTrue("mineOnly");
   }
 
   /**
@@ -204,7 +233,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     add.setEnabled(!onMyList);
     remove.setEnabled(onMyList);
   }
-
 
   @NotNull
   private Button getRemoveButton() {
@@ -274,18 +302,26 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     mineOnly.addStyleName("leftFiveMargin");
     mineOnly.addStyleName("topFiveMargin");
 
+    boolean mineOnly1 = showOnlyMine();
+    mineOnly.setActive(mineOnly1);
+    // if (mineOnly1) rememberAndFilter();
+
     mineOnly.addClickHandler(event -> {
       if (mineOnly.isToggled()) {
+        controller.getStorage().setBoolean("mineOnly", false);
         populateTable(remembered);
-
       } else {
-        remembered = new ArrayList<>(getList());
-
-        filterUsers();
+        controller.getStorage().setBoolean("mineOnly", true);
+        rememberAndFilter();
       }
     });
 
     return mineOnly;
+  }
+
+  private void rememberAndFilter() {
+    remembered = new ArrayList<>(getList());
+    filterUsers();
   }
 
   private void filterUsers() {
@@ -350,13 +386,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    */
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
-    addItemID();
-    addFirstName();
-    addLastName();
-    addDateCol();
+    List<UserInfo> list = getList();
+    addItemID(list);
+    addFirstName(list);
+    addLastName(list);
+    addDateCol(list);
 
-    addNumber();
-    addCurrent();
+    addNumber(list);
+    addCurrent(list);
     //addFinalScore();
     //addDate();
 
@@ -366,7 +403,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     addTooltip();
   }
 
-  private void addFirstName() {
+  private void addFirstName(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
@@ -382,7 +419,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     userCol.setSortable(true);
     table.setColumnWidth(userCol, FIRST_WIDTH + "px");
     addColumn(userCol, new TextHeader("First"));
-    table.addColumnSortHandler(getFirstSorter(userCol, getList()));
+    table.addColumnSortHandler(getFirstSorter(userCol, list));
   }
 
   private ColumnSortEvent.ListHandler<UserInfo> getFirstSorter(Column<UserInfo, SafeHtml> englishCol,
@@ -392,7 +429,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return columnSortHandler;
   }
 
-  private void addLastName() {
+  private void addLastName(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
@@ -408,7 +445,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     userCol.setSortable(true);
     table.setColumnWidth(userCol, LAST_WIDTH + "px");
     addColumn(userCol, new TextHeader("Last"));
-    table.addColumnSortHandler(getLastSorter(userCol, getList()));
+    table.addColumnSortHandler(getLastSorter(userCol, list));
   }
 
   private ColumnSortEvent.ListHandler<UserInfo> getLastSorter(Column<UserInfo, SafeHtml> englishCol,
@@ -426,20 +463,20 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     table.setColumnWidth(diff, DIFF_WIDTH + "px");
   }*/
 
-  private void addCurrent() {
+  private void addCurrent(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getCurrent();
     current.setSortable(true);
     addColumn(current, new TextHeader(CURRENT));
     table.setColumnWidth(current, CURRENT_WIDTH + "px");
 
-    table.addColumnSortHandler(getCurrentSorter(current, getList()));
+    table.addColumnSortHandler(getCurrentSorter(current, list));
   }
 
-  private void addNumber() {
+  private void addNumber(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> num = getNum();
     num.setSortable(true);
     addColumn(num, new TextHeader("#"));
-    table.addColumnSortHandler(getNumSorter(num, getList()));
+    table.addColumnSortHandler(getNumSorter(num, list));
     table.setColumnWidth(num, 50 + "px");
   }
 
@@ -461,6 +498,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private ColumnSortEvent.ListHandler<UserInfo> getNumSorter(Column<UserInfo, SafeHtml> englishCol,
                                                              List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+
+
     columnSortHandler.setComparator(englishCol,
         (o1, o2) -> {
           if (o1 == o2) {
@@ -611,24 +650,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    * @param user
    */
   public void gotClickOnItem(final UserInfo user) {
-    logger.info("gotClickOnItem " + user.getUserID());
+//    logger.info("gotClickOnItem " + user.getUserID());
     super.gotClickOnItem(user);
-
-/*    boolean onMyList = mine.contains(user.getID());
-    add.setEnabled(!onMyList);
-    remove.setEnabled(onMyList);*/
-
     enableButtons();
-    //MiniUser user1 = user.getUser();
-    // int id = user.getID();
-//    logger.warning("gotClickOnItem " +overallBottom.getElement().getId());
-/*    if (overallBottom != null) {
-      overallBottom.clear();
-    }
-    else {
-      logger.warning("\n\n\n no bottom div for " );
-    }*/
-
     rightSide.clear();
     rightSide.add(new AnalysisTab(controller, learnTab, listid == -1 ? MIN_RECORDINGS : 0, overallBottom, user.getID(), user.getUserID(), listid));
   }

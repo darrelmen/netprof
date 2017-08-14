@@ -155,8 +155,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       headerRow.add(rightOfHeader);
     }
 
-    leftSide.add(getTableWithPager(users));
+    addTable(users, leftSide);
     return leftSide;
+  }
+
+  protected void addTable(Collection<T> users, DivWidget leftSide) {
+    leftSide.add(getTableWithPager(users));
   }
 
   @NotNull
@@ -215,24 +219,25 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    */
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
-    addItemID();
-    addDateCol();
+    List<T> list  = getList();
+    addItemID(list);
+    addDateCol(list);
   }
 
-  protected void addItemID() {
+  void addItemID(List<T> list) {
     Column<T, SafeHtml> userCol = getItemColumn();
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, new TextHeader(header));
-    table.addColumnSortHandler(getUserSorter(userCol, getList()));
+    table.addColumnSortHandler(getUserSorter(userCol, list));
   }
 
-  protected void addDateCol() {
+  void addDateCol( List<T> list) {
     dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader(getDateColHeader()));
     table.setColumnWidth(dateCol, 100 + "px");
-    table.addColumnSortHandler(getDateSorter(dateCol, getList()));
+    table.addColumnSortHandler(getDateSorter(dateCol, list));
   }
 
   protected int getIdWidth() {
