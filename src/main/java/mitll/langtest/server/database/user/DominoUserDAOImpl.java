@@ -270,9 +270,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass) {
     invalidateCache();
-    if (user.getGender() != UNSPECIFIED) {
+
+/*    if (user.getGender() != UNSPECIFIED) {
       logger.info("addAndGet going in " + user.getGender() + " for user '" + user.getUserId() + "'");
-    }
+    }*/
 
     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
     boolean b = !clientUserDetailSResult1.isError();

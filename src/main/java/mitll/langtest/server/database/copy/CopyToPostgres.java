@@ -72,6 +72,11 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.COPY;
+import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.DROP;
+import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.UNKNOWN;
 
 public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
@@ -81,8 +86,17 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
 
-  private static final String DROP = "drop";
-  private static final String COPY = "copy";
+//  private static final String DROP = "drop";
+//  private static final String COPY = "copy";
+
+  enum ACTION {
+    COPY, DROP, UNKNOWN;
+
+    public String toLower() {
+      return name().toLowerCase();
+    }
+  }
+
   private static final String NETPROF_PROPERTIES_FULL = "/opt/netprof/config/netprof.properties";
   private static final String OPT_NETPROF = "/opt/netprof/import";
 
@@ -99,7 +113,7 @@ public class CopyToPostgres<T extends CommonShell> {
       databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
       String language = databaseLight.getLanguage();
       boolean hasModel = databaseLight.getServerProps().hasModel();
-      logger.info("copyOneConfigCommand : loading " + language + " " + hasModel);
+      logger.info("copyOneConfigCommand : loading " + language + " " + hasModel + " : " + databaseLight.getServerProps().getCurrentModel());
       String nameToUse = optionalName.isEmpty() ? language : optionalName;
       new CopyToPostgres().copyOneConfig(databaseLight, new CreateProject().getCC(language), nameToUse, displayOrder, !hasModel);
     } catch (Exception e) {
@@ -242,10 +256,10 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * @param db to read from
+   * @param db      to read from
    * @param cc      country code
    * @param optName non-default name (not language) - null OK
-   * @param isDev i.e. not production
+   * @param isDev   i.e. not production
    * @seex PostgresTest#testCopy
    * @see #copyOneConfigCommand
    */
@@ -260,7 +274,9 @@ public class CopyToPostgres<T extends CommonShell> {
 
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev, typeOrder);  // TODO : course?
 
-    logger.info("copyOneConfig project is " + projectID + " type order is " + typeOrder + " for import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
+    logger.info("copyOneConfig" +
+        "\n\tproject #" + projectID +
+        "\n\ttype order is " + typeOrder + " for import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     // first add the user table
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
@@ -291,7 +307,7 @@ public class CopyToPostgres<T extends CommonShell> {
       copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
 
       // add event table - why events on an old UI?
-     // copyEvents(db, projectID, oldToNewUser, exToID);
+      // copyEvents(db, projectID, oldToNewUser, exToID);
 
       // copy results, words, and phones
       {
@@ -441,12 +457,12 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * @see #copyAudio(DatabaseImpl, Map, Map, Map, int)
    * @param exToID
    * @param parentExToChild
    * @param att
    * @param oldexid
    * @return
+   * @see #copyAudio(DatabaseImpl, Map, Map, Map, int)
    */
   private Integer getModernIDForExercise(Map<String, Integer> exToID, Map<String, Integer> parentExToChild, AudioAttribute att, String oldexid) {
     Integer id = exToID.get(oldexid);
@@ -873,7 +889,22 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.error("Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary");
       return;
     }
-    String action = arg[0];
+
+    ACTION action = ACTION.UNKNOWN;
+
+    try {
+      action = ACTION.valueOf(arg[0].toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.info("expecting an action: \n{}",
+          () -> Arrays.stream(ACTION.values())
+              .filter(p -> p != UNKNOWN)
+              .map(ACTION::toLower)
+              .collect(Collectors.joining(" or ")));
+
+//      logger.error("expecting an action " + );
+      return;
+    }
+
     String config = arg[1];
     String optconfig = arg.length > 2 ? arg[2] : null;
     String optDisplayOrder = arg.length > 3 ? arg[3] : null;

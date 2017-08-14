@@ -45,13 +45,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import javax.servlet.ServletContext;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * This has a lot of overlap with the PropertyHandler set of properties.
@@ -848,10 +845,11 @@ public class ServerProperties {
 
   /**
    * @return
-   * @deprecated
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfigCommand
    */
   public boolean hasModel() {
-    return getCurrentModel() != null;
+    String currentModel = getCurrentModel();
+    return currentModel != null && !currentModel.isEmpty();
   }
 
   public String getCurrentModel() {
@@ -859,7 +857,7 @@ public class ServerProperties {
     return models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
 
-  public List<Affiliation> getAffiliations() {
+  List<Affiliation> getAffiliations() {
     return affliations;
   }
 
@@ -871,7 +869,7 @@ public class ServerProperties {
    * @return
    * @see LangTestDatabaseImpl#getStartupInfo
    */
-  public Map<String, String> getUIProperties() {
+  Map<String, String> getUIProperties() {
     return getPropertyMap(uiprops);
   }
 }

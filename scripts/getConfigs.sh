@@ -3,7 +3,7 @@
 # go get all the netprof languages from artifactory
 # fill in the curl user below with your user id
 
-files=(cm croatianeval dari egyptian english farsi files french german hindieval iraqi japanese korean levantine msa pashto1 pashto2 pashto3 portuguese russian serbian soranieval spanish sudanese tagalog turkisheval urdu)
+files=(cm croatianeval dari egyptian english farsi french german hindieval iraqi japanese korean levantine msa pashto1 pashto2 pashto3 portuguese russian serbian soranieval spanish sudanese tagalog turkisheval urdu)
 for file in ${files[@]}
 do
 echo $file

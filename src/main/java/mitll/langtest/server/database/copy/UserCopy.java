@@ -25,7 +25,7 @@ import java.util.Map;
 public class UserCopy {
   private static final Logger logger = LogManager.getLogger(UserCopy.class);
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean MAKE_COLLISION_ACCOUNT = false;
   private static final boolean WARN_ON_COLLISION = true;
 

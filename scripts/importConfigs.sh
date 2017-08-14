@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# it's OK if we try to do it again - it's smart enough to check if it's already there
-#config=("dari" "egyptian" "english" "farsi" "french" "german" "iraqi" "japanese" "korean" "levantine" "mandarin" "msa" "portuguese" "russian" "spanish" "sudanese" "tagalog" "urdu" "croatian" "hindi" "sorani")
-config=(cm croatianeval dari egyptian english farsi files french german hindieval iraqi japanese korean levantine msa pashto1 pashto2 pashto3 portuguese russian serbian soranieval spanish sudanese tagalog turkisheval urdu)
+# it's OK if we try to do it again - it's smart enough to check if it's already there                                                                                                                                                                                                                                             
+#config=("dari" "egyptian" "english" "farsi" "french" "german" "iraqi" "japanese" "korean" "levantine" "mandarin" "msa" "portuguese" "russian" "spanish" "sudanese" "tagalog" "urdu" "croatian" "hindi" "sorani")                                                                                                                 
+config=(cm croatianeval dari egyptian english farsi french german hindieval iraqi japanese korean levantine msa portuguese russian serbian soranieval spanish sudanese tagalog turkisheval urdu)
 for file in ${config[@]}
 do
     echo $file
