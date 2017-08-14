@@ -358,7 +358,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
             String colNormalized = col.toLowerCase();
             int i = columns.indexOf(col);
 
-            logger.info("readFromSheet col " + i + " '" + colNormalized + "'");
+//            logger.info("readFromSheet col " + i + " '" + colNormalized + "'");
             if (isMatchForEnglish(colNormalized)) {
               gotHeader = true;
               colIndexOffset = i;
@@ -560,7 +560,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (lcCol.contains(s) || toSkip.contains(lcCol)) {
       logger.debug("addColToHeaderForProperty skipping col " + col);
     } else if (!col.isEmpty()) {
-      logger.debug("addColToHeaderForProperty adding col '" + col + "' at  " + i + " vs '" + language + "'");
+      if (DEBUG) logger.debug("addColToHeaderForProperty adding col '" + col + "' at  " + i + " vs '" + language + "'");
       colToHeader.put(i, col);
     }
   }

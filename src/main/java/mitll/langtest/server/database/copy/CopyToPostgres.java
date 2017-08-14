@@ -86,9 +86,6 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
 
-//  private static final String DROP = "drop";
-//  private static final String COPY = "copy";
-
   enum ACTION {
     COPY, DROP, UNKNOWN;
 
@@ -113,7 +110,12 @@ public class CopyToPostgres<T extends CommonShell> {
       databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
       String language = databaseLight.getLanguage();
       boolean hasModel = databaseLight.getServerProps().hasModel();
-      logger.info("copyOneConfigCommand : loading " + language + " " + hasModel + " : " + databaseLight.getServerProps().getCurrentModel());
+
+      logger.info("copyOneConfigCommand :" +
+          "\n\tloading  " + language +
+          "\n\thasModel " + hasModel +
+          "\n\tmodel" + databaseLight.getServerProps().getCurrentModel());
+
       String nameToUse = optionalName.isEmpty() ? language : optionalName;
       new CopyToPostgres().copyOneConfig(databaseLight, new CreateProject().getCC(language), nameToUse, displayOrder, !hasModel);
     } catch (Exception e) {
