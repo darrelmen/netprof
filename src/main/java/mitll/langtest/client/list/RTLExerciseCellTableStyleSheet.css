@@ -50,20 +50,23 @@
     font-family: sans-serif;
 }*/
 
-.cellTableFirstColumn {
+/**
+ * So in general english comes after, if at all.
+ */
+.cellTableLastColumn {
     padding: 2px 5px;
     overflow: hidden;
-    cursor:pointer;
+    cursor: pointer;
     font-size: larger;
     font-family: sans-serif;
 }
 
-.cellTableLastColumn {
+/**
+ * FL column comes first.
+ */
+.cellTableFirstColumn {
     padding: 2px 5px;
-    /*
-    overflow: hidden;
-    */
-    cursor:pointer;
+    cursor: pointer;
     font-size: larger;
     direction: rtl;
     font-family: sans-serif;

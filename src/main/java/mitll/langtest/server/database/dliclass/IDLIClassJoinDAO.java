@@ -34,6 +34,13 @@ package mitll.langtest.server.database.dliclass;
 
 import mitll.langtest.server.database.IDAO;
 
+import java.util.Set;
+
 public interface IDLIClassJoinDAO extends IDAO {
 
+  Set<Integer> getStudents(int teacherid);
+
+  void insert(int teacherid, int studentid);
+
+  void remove(int teacherid, int studentid);
 }

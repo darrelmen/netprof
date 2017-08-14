@@ -69,13 +69,13 @@ class StickyState {
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   void storeCurrent(Shell e) {
-    logger.info("StickyState.storeCurrent store current " + e.getID());
+   // logger.info("StickyState.storeCurrent store current " + e.getID());
     storage.storeValue(CURRENT_EXERCISE, "" + e.getID());
   }
 
   int getCurrentExerciseID() {
     String value = storage.getValue(CURRENT_EXERCISE);
-    logger.info("StickyState.getCurrentExerciseID '" + value + "'");
+   // logger.info("StickyState.getCurrentExerciseID '" + value + "'");
     return value.isEmpty() ? -1 : Integer.parseInt(value);
   }
 

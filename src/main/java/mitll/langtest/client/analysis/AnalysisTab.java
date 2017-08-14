@@ -70,6 +70,7 @@ public class AnalysisTab extends DivWidget {
   /**
    * Got be the width to fit on a laptop screen for progress view - otherwise the phone plot
    * will wrap.
+   *
    * @see #showWordScores
    */
   private static final int WORD_WIDTH = 450;
@@ -160,13 +161,17 @@ public class AnalysisTab extends DivWidget {
                          ShowTab showTab, DivWidget bottom, int userid, int minRecordings) {
     long now = System.currentTimeMillis();
 
-    logger.info("took " + (now - then) + " to get report");
+    if (now - then > 200) {
+      logger.info("took " + (now - then) + " to get report");
+    }
 
     long then2 = now;
     Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));
 
     now = System.currentTimeMillis();
-    logger.info("took " + (now - then2) + " to show plot");
+    if (now - then2 > 200) {
+      logger.info("took " + (now - then2) + " to show plot");
+    }
     long then3 = now;
 
     Scheduler.get().scheduleDeferred(() ->
@@ -177,7 +182,9 @@ public class AnalysisTab extends DivWidget {
 //        result.getPhoneReport());
 
     now = System.currentTimeMillis();
-    logger.info("took " + (now - then3) + " to show word scores");
+    if (now - then3 > 200) {
+      logger.info("took " + (now - then3) + " to show word scores");
+    }
     Scheduler.get().scheduleDeferred(() -> analysisPlot.populateExerciseMap(controller.getExerciseService(), userid));
   }
 

@@ -33,17 +33,21 @@
 package mitll.langtest.server.database.dliclass;
 
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickDLIClassJoin;
 import mitll.npdata.dao.dliclass.DLIClassJoinWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.sql.Timestamp;
+import java.util.Set;
 
 public class DLIClassJoinDAO implements IDLIClassJoinDAO {
   private static final Logger logger = LogManager.getLogger(DLIClassJoinDAO.class);
   private final DLIClassJoinWrapper dao;
 
   /**
-   * @paramx database
    * @param dbConnection
+   * @paramx database
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public DLIClassJoinDAO(DBConnection dbConnection) {
@@ -58,5 +62,19 @@ public class DLIClassJoinDAO implements IDLIClassJoinDAO {
   @Override
   public String getName() {
     return dao.dao().name();
+  }
+
+  @Override
+  public Set<Integer> getStudents(int teacherid) {
+    return dao.getStudents(teacherid);
+  }
+
+  @Override
+  public void insert(int teacherid, int studentid) {
+    dao.insert(new SlickDLIClassJoin(-1, new Timestamp(System.currentTimeMillis()), -1, studentid, teacherid));
+  }
+  @Override
+  public void remove(int teacherid, int studentid) {
+    dao.remove(teacherid,studentid);
   }
 }

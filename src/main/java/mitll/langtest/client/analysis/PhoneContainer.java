@@ -297,7 +297,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   /**
-   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
+   * @see AnalysisTab#getPhoneReport
    */
   public void showExamplesForSelectedSound() {
     List<PhoneAndStats> list = getList();
@@ -534,8 +534,14 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     /**
      * The styles applied to the table.
      */
+    interface TableStyle extends CellTable.Style {
+    }
+
+    /**
+     * The styles applied to the table.
+     */
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "PhoneScoresCellTableStyleSheet.css"})
-    TableResources.TableStyle cellTableStyle();
+    PhoneContainer.LocalTableResources.TableStyle cellTableStyle();
   }
 }

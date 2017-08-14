@@ -333,9 +333,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param newState
    */
   private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+/*
     logger.info("loadFromSelectionState" +
         " old state " + selectionState.getInfo() +
         " new state " + newState.getInfo());
+    */
+
     loadExercisesUsingPrefix(
         newState.getTypeToSection(),
         selectionState.getSearch(),
@@ -403,11 +406,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
     int currentProject = projectStartupInfo.getProjectid();
 
-   // logger.info("onValueChange project " + project + " vs " + currentProject);
+    // logger.info("onValueChange project " + project + " vs " + currentProject);
 
     if (project != currentProject) {
       if (project != 0) {
-     //   logger.info("onValueChange project from state " + project + " != " + currentProject);
+        //   logger.info("onValueChange project from state " + project + " != " + currentProject);
         projectChangedTo(project);
       }
     }

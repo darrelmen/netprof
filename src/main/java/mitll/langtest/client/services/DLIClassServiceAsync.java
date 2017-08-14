@@ -32,5 +32,14 @@
 
 package mitll.langtest.client.services;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import java.util.Set;
+
 public interface DLIClassServiceAsync {
+  void getStudents(AsyncCallback<Set<Integer>> async);
+
+  void add(int student, AsyncCallback<Void> async);
+
+  void remove(int student, AsyncCallback<Void> async);
 }

@@ -389,15 +389,21 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
-    PagingContainer.TableResources.TableStyle cellTableStyle();
+    ScoreHistoryContainer.LocalTableResources.TableStyle cellTableStyle();
   }
 
   public interface RTLLocalTableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
      */
+    interface TableStyle extends CellTable.Style {
+    }
+
+    /**
+     * The styles applied to the table.
+     */
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "RTLScoresCellTableStyleSheet.css"})
-    PagingContainer.TableResources.TableStyle cellTableStyle();
+    ScoreHistoryContainer.RTLLocalTableResources.TableStyle cellTableStyle();
   }
 }

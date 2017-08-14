@@ -37,6 +37,7 @@ import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.contextPractice.ContextServices;
 import mitll.langtest.server.database.custom.IStateManager;
+import mitll.langtest.server.database.dliclass.IDLIClassJoinDAO;
 import mitll.langtest.server.database.exercise.ExerciseServices;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -72,6 +73,8 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   Database getDatabase();
 
   IAnalysis getAnalysis(int projectid);
+
+  IDLIClassJoinDAO getDliClassJoinDAO();
 
   mitll.langtest.server.database.user.UserManagement getUserManagement();
 

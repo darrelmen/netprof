@@ -30,9 +30,10 @@
  *
  */
 
-package mitll.langtest.client.list;
+package mitll.langtest.client.amas;
 
 import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.client.list.*;
 
 import java.util.*;
 import java.util.logging.Logger;

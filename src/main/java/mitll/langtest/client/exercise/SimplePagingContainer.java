@@ -87,8 +87,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
    */
   public Panel getTableWithPager(ListOptions listOptions) {
-    logger.info("getTableWithPager " +listOptions);
-
+    // logger.info("getTableWithPager " +listOptions);
     makeCellTable(listOptions.isSort());
 
     // Connect the table to the data provider.
@@ -145,32 +144,26 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @see #getTableWithPager
    */
   private void makeCellTable(boolean sortEnglish) {
-    logger.info("simplePaging : makeCellTable -------- ");
-    this.table = makeCellTable(chooseResources());
+    //  logger.info("simplePaging : makeCellTable -------- ");
+    CellTable.Resources o = chooseResources();
+    this.table = makeCellTable(o);
     configureTable(sortEnglish);
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
-    return new CellTable<>(getPageSize(), o);
+    return o == null ? new CellTable<>(getPageSize()) : new CellTable<>(getPageSize(), o);
   }
 
   protected int getPageSize() {
     return PAGE_SIZE;
   }
 
+  /**
+   * Most tables don't want to worry about text direction.
+   * @return non-null if you want to style the table columns
+   */
   protected CellTable.Resources chooseResources() {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    boolean isRTL = projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
-
-    CellTable.Resources o;
-    if (isRTL) {   // so when we truncate long entries, the ... appears on the correct end
-    //  logger.info("simplePaging : chooseResources RTL - content");
-      o = GWT.create(RTLTableResources.class);
-    } else {
-    //  logger.info("simplePaging : chooseResources LTR - content");
-      o = GWT.create(TableResources.class);
-    }
-    return o;
+    return null;
   }
 
   /**
@@ -243,7 +236,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   /**
-   * @seex #selectItem(int)
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    */
   public void onResize() {
@@ -348,7 +340,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   public void sortBy(Comparator<T> comp) {
     this.comp = comp;
     long then = System.currentTimeMillis();
-    logger.info("sortBy about to sort ------- ");
+//    logger.info("sortBy about to sort ------- ");
     Collections.sort(getList(), comp);
     long now = System.currentTimeMillis();
     logger.info("sortBy finished sort in " + (now - then) + " ----- ");
@@ -366,27 +358,4 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return getList().size();
   }
 
-  public interface TableResources extends CellTable.Resources {
-    /**
-     * The styles applied to the table.
-     */
-    interface TableStyle extends CellTable.Style {
-    }
-
-    @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "ExerciseCellTableStyleSheet.css"})
-    PagingContainer.TableResources.TableStyle cellTableStyle();
-  }
-
-  public interface RTLTableResources extends CellTable.Resources {
-    /**
-     * The styles applied to the table.
-     */
-    interface TableStyle extends CellTable.Style {
-    }
-
-    @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
-    PagingContainer.RTLTableResources.TableStyle cellTableStyle();
-  }
 }

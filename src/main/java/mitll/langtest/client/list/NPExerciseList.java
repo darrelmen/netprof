@@ -35,7 +35,6 @@ package mitll.langtest.client.list;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -103,26 +102,11 @@ public abstract class NPExerciseList extends HistoryExerciseList<CommonShell, Co
     boolean isRecorder = getActivityType() == ActivityType.RECORDER;
 
     pagingContainer =
-        new PagingContainer<CommonShell>(
-            controller,
-            getVerticalUnaccountedFor(),
-            isRecorder,
-            showFirstNotCompleted
-        ) {
-          @Override
-          protected int getNumTableRowsGivenScreenHeight() {
-            if (pageSize == -1) {
-              return super.getNumTableRowsGivenScreenHeight();
-            } else {
-              return pageSize;
-            }
-          }
-
-          @Override
-          public void gotClickOnItem(CommonShell e) {
-            outer.gotClickOnItem(e);
-          }
-        };
+        new NPExerciseListContainer(this, isRecorder, showFirstNotCompleted, outer);
     return pagingContainer;
+  }
+
+  public int getPageSize() {
+    return pageSize;
   }
 }

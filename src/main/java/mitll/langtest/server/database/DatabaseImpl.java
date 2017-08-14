@@ -1865,6 +1865,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return phoneDAO;
   }
 
+  @Override
+  public IDLIClassJoinDAO getDliClassJoinDAO() {
+    return dliClassJoinDAO;
+  }
 
   @Override
   public IUserListManager getUserListManager() {

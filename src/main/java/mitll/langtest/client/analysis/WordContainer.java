@@ -35,6 +35,7 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -56,6 +57,7 @@ import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 import org.jetbrains.annotations.NotNull;
@@ -76,7 +78,7 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
 
   private static final int ROWS_TO_SHOW = 8;
 
-  private static final int ITEM_COL_WIDTH = 250;
+  private static final int ITEM_COL_WIDTH = 210;//250;
   private static final int ITEM_COL_WIDTH_NARROW = 190;
 
   private static final String SCORE = "Score";
@@ -117,9 +119,7 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
     todayYear = todaysDate.substring(todaysDate.length() - 2);
   }
 
-  //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
-//  private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
 
   protected int getPageSize() {
     return ROWS_TO_SHOW;
@@ -133,8 +133,6 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
   public Panel getTableWithPager(List<WordScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager(new ListOptions());
     tableWithPager.getElement().setId("WordContainerScoreHistory");
-    //int tableHistoryWidth = isNarrow() ? TABLE_HISTORY_WIDTH_NARROW : TABLE_HISTORY_WIDTH;
-   // tableWithPager.setWidth(tableHistoryWidth + "px");
     tableWithPager.addStyleName("floatLeftAndClear");
 
     this.sortedHistory = sortedHistory;
@@ -168,16 +166,10 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
 
   private void addItems(Collection<WordScore> sortedHistory) {
     clear();
-    for (WordScore wordScore : sortedHistory) {
-      addItem(wordScore);
-    }
+    sortedHistory.forEach(this::addItem);
     flush();
   }
 
-
-  private boolean isNarrow() {
-    return Window.getClientWidth() < NARROW_THRESHOLD;
-  }
 
   private ColumnSortEvent.ListHandler<WordScore> getEnglishSorter(Column<WordScore, SafeHtml> englishCol,
                                                                   List<WordScore> dataList) {
@@ -337,6 +329,10 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
     table.addColumnSortHandler(getEnglishSorter(itemCol, getList()));
   }
 
+  private boolean isNarrow() {
+    return Window.getClientWidth() < NARROW_THRESHOLD;
+  }
+
   private Column<WordScore, SafeHtml> getItemColumn() {
     return new Column<WordScore, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -412,20 +408,10 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
       SortedSet<WordScore> wordScores = byTime.subSet(new WordScore(from+1), new WordScore(to+1));
 
 //      logger.info("timeChanged : wordScores " + wordScores.size());
-
       List<WordScore> filtered = new ArrayList<>(wordScores);
       filtered.sort((o1, o2) -> -1*Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
       //Collections.sort(filtered); // put sort back to by score first
       addItems(filtered);
     }
-  }
-
-  public interface LocalTableResources extends CellTable.Resources {
-    /**
-     * The styles applied to the table.
-     */
-    @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
-    TableResources.TableStyle cellTableStyle();
   }
 }

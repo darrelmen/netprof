@@ -10,17 +10,23 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 1/20/17.
  */
 public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T> {
-  static final int PLAY_WIDTH = 42;
+  private final Logger logger = Logger.getLogger("AudioExampleContainer");
+
+  private static final int PLAY_WIDTH = 42;
   private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
   private static final String PLAY = "Play";
@@ -28,9 +34,9 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   protected final AnalysisPlot plot;
 
   /**
-   * @see PhoneExampleContainer#PhoneExampleContainer
    * @param controller
    * @param plot
+   * @see PhoneExampleContainer#PhoneExampleContainer
    */
   AudioExampleContainer(ExerciseController controller, AnalysisPlot plot) {
     super(controller);
@@ -38,9 +44,9 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   /**
-   * @see #getPlayAudio
    * @param id
    * @return
+   * @see #getPlayAudio
    */
   protected CommonShell getShell(int id) {
     return plot.getIdToEx().get(id);
@@ -63,14 +69,14 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   /**
    * @return
-   * @see SimplePagingContainer#addColumnsToTable(int)
+   * @see SimplePagingContainer#addColumnsToTable
    */
   private Column<T, SafeHtml> getPlayAudio() {
     return new Column<T, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(T shell) {
         CommonShell exercise = getShell(shell.getExid());
-       // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + shell.getFileRef());
+        // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + shell.getFileRef());
         return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), getTitle(exercise));
       }
     };
@@ -82,15 +88,15 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   /**
-   * @see #addColumnsToTable
    * @return
+   * @see #addColumnsToTable
    */
   private Column<T, SafeHtml> getPlayNativeAudio() {
     return new Column<T, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(T shell) {
         CommonShell exercise = getShell(shell.getExid());
-     //   logger.info("getPlayNativeAudio : Got " +  shell.getId() + "  : " + shell.getNativeAudio());
+        //   logger.info("getPlayNativeAudio : Got " +  shell.getId() + "  : " + shell.getNativeAudio());
         if (shell.getRefAudio() != null) {
           return PlayAudioWidget.getAudioTagHTML(shell.getRefAudio(), getTitle(exercise));
         } else {
@@ -101,18 +107,52 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     };
   }
 
+  void addPlayer() {
+    Scheduler.get().scheduleDeferred(PlayAudioWidget::addPlayer);
+  }
+
+  /**
+   * Choose different direction depending on language
+   *
+   * @return
+   */
   @Override
   protected CellTable.Resources chooseResources() {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    boolean isRTL = projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
+
     CellTable.Resources o;
-    o = GWT.create(WordContainer.LocalTableResources.class);
+    if (isRTL) {   // so when we truncate long entries, the ... appears on the correct end
+      // logger.info("simplePaging : chooseResources RTL - content");
+      o = GWT.create(RTLTableResources.class);
+    } else {
+      // logger.info("simplePaging : chooseResources LTR - content");
+      o = GWT.create(TableResources.class);
+    }
     return o;
   }
 
-  void addPlayer() {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        PlayAudioWidget.addPlayer();
-      }
-    });
+  public interface TableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {
+    }
+
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "ExerciseCellTableStyleSheet.css"})
+    AudioExampleContainer.TableResources.TableStyle cellTableStyle();
+  }
+
+  public interface RTLTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {
+    }
+
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
+    AudioExampleContainer.RTLTableResources.TableStyle cellTableStyle();
   }
 }

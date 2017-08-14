@@ -36,8 +36,24 @@ import mitll.langtest.client.services.DLIClassService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Set;
+
 @SuppressWarnings("serial")
 public class DLIClassServiceImpl extends MyRemoteServiceServlet implements DLIClassService {
   private static final Logger logger = LogManager.getLogger(DLIClassServiceImpl.class);
 
+  @Override
+  public Set<Integer> getStudents() {
+    return db.getDliClassJoinDAO().getStudents(getUserIDFromSession());
+  }
+
+  @Override
+  public void add(int student) {
+    db.getDliClassJoinDAO().insert(getUserIDFromSession(), student);
+  }
+
+  @Override
+  public void remove(int student) {
+    db.getDliClassJoinDAO().remove(getUserIDFromSession(), student);
+  }
 }

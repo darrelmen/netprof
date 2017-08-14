@@ -27,22 +27,48 @@
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  *
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since
  */
 
-package mitll.langtest.client.services;
+.cellTableKeyboardSelectedRow {
+    background: #628cd5;
+}
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+.cellTableKeyboardSelectedRowCell {
+    border: 2px solid #628cd5;
+}
 
-import java.util.Set;
+/*.cellTableCell {
+    padding: 2px 15px;
+    overflow: hidden;
+    cursor:pointer;
+    font-size: larger;
+    direction: rtl;
+    font-family: sans-serif;
+}*/
 
 /**
- * Place holder for future support for class-teacher-student associations.
+ * So in general english comes after, if at all.
  */
-@RemoteServiceRelativePath("dliclass-manager")
-public interface DLIClassService extends RemoteService {
-  Set<Integer> getStudents();
-  void add(int student);
-  void remove(int student);
+.cellTableLastColumn {
+    padding: 2px 5px;
+    overflow: hidden;
+    cursor:pointer;
+    font-size: larger;
+    font-family: sans-serif;
+}
+
+.cellTableFirstColumn {
+    padding: 2px 5px;
+    /*
+    overflow: hidden;
+    */
+    cursor:pointer;
+    font-size: larger;
+    direction: rtl;
+    font-family: sans-serif;
+    text-align: right;
 }
