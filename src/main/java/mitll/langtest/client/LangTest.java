@@ -251,6 +251,8 @@ public class LangTest implements
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
 
+  private final DLIClassServiceAsync dliClassServiceAsync = GWT.create(DLIClassService.class);
+
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
@@ -1056,6 +1058,11 @@ public class LangTest implements
 
   public ListServiceAsync getListService() {
     return listServiceAsync;
+  }
+
+  @Override
+  public DLIClassServiceAsync getDLIClassService() {
+    return dliClassServiceAsync;
   }
 
   public UserFeedback getFeedback() {

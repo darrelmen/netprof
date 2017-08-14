@@ -39,12 +39,15 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
   BasicUserContainer(ExerciseController controller,
                      String selectedUserKey,
                      String header) {
-    super(controller, selectedUserKey, header);
+    super(controller, selectedUserKey, header, 10, 8);
   }
 
+
+/*
   public BasicUserContainer(ExerciseController controller, String header) {
     super(controller, header, ID_WIDTH);
   }
+*/
 
   /**
    * @param o1
@@ -83,7 +86,7 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
     return -1;
   }
 
-  protected int getLastCompare(T o1, T o2) {
+  int getLastCompare(T o1, T o2) {
     if (o1 == o2) {
       return 0;
     }

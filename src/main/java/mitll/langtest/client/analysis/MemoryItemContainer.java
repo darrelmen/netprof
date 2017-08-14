@@ -71,12 +71,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
 
-  private static final int PAGE_SIZE = 11;
 
   /**
    *
    */
-  private final Long selectedUser;
+ // private final Long selectedUser;
   private final String selectedUserKey;
   private final String header;
 
@@ -86,6 +85,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   static final int ID_WIDTH = 130;
   private int idWidth = ID_WIDTH;
+  private static final int PAGE_SIZE = 11;
   private int pageSize = PAGE_SIZE;
   private final String todayYear;
   private final String todaysDate;
@@ -109,32 +109,35 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   protected MemoryItemContainer(ExerciseController controller,
                                 String selectedUserKey,
                                 String header,
-                                int pageSize, int shortPageSize) {
+                                int pageSize,
+                                int shortPageSize) {
     super(controller);
     this.selectedUserKey = selectedUserKey;
-    this.selectedUser = getSelectedUser(selectedUserKey);
+     //getSelectedUser(selectedUserKey);
     this.header = header;
     todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - 2);
+
     this.pageSize = pageSize;
     this.shortPageSize = shortPageSize;
   }
 
   /**
-   * @param controller
-   * @param header
-   * @param idWidth
+   * @paramx controller
+   * @paramx header
+   * @paramx idWidth
    * @see mitll.langtest.client.analysis.BasicUserContainer#BasicUserContainer
    */
-  MemoryItemContainer(ExerciseController controller, String header, int idWidth) {
+/*  private MemoryItemContainer(ExerciseController controller, String header, int idWidth) {
     super(controller);
     this.selectedUserKey = getSelectedUserKey(controller, header);
     this.selectedUser = getSelectedUser(selectedUserKey);
     this.header = header;
-    this.idWidth = idWidth;
     todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - 2);
-  }
+
+    this.idWidth = idWidth;
+  }*/
 
   DivWidget getTable(Collection<T> users, String title, String subtitle) {
     Heading students = getStudentsHeader(title, subtitle);
@@ -254,15 +257,25 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
 
+    populateTable(users);
+    return tableWithPager;
+  }
+
+  void populateTable(Collection<T> users) {
     int i = 0;
     int index = 0;
     T userToSelect = null;
+    getList().clear();
+
+    Long selectedUser = getSelectedUser(selectedUserKey);
+
     for (T user : users) {
       addItem(user);
 
       if (selectedUser != null && user.getID() == selectedUser) {
         index = i;
         userToSelect = user;
+        logger.info("Selected user found  "+ selectedUser + " at " +index);
       }
       i++;
     }
@@ -276,7 +289,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     if (!users.isEmpty()) {
       makeInitialSelection(users.iterator().next(), userToSelect);
     }
-    return tableWithPager;
   }
 
   /**
@@ -365,7 +377,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   /**
    * @param selectedUserKey
    * @return
-   * @see #MemoryItemContainer(ExerciseController, String, int)
+   * @see #MemoryItemContainer
    */
   private Long getSelectedUser(String selectedUserKey) {
     if (selectedUserKey == null) return null;
@@ -389,9 +401,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedUser(long selectedUser) {
+    logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
+    }
+    if (selectedUser != getSelectedUser(selectedUserKey)) {
+      logger.warning("huh? stored " + selectedUserKey + " but got " + getSelectedUser(selectedUserKey));
     }
   }
 

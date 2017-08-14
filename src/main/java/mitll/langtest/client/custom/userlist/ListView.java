@@ -308,6 +308,10 @@ public class ListView implements ContentView, CreateListComplete {
 
   private DialogHelper dialogHelper;
 
+  /**
+   * @see #getButtons(ListContainer)
+   * @return
+   */
   @NotNull
   private Button getAddButton() {
     final Button add = new Button("", IconType.PLUS);

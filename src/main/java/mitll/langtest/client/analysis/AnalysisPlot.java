@@ -849,7 +849,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           @Override
           public void onSuccess(List<CommonShell> commonShells) {
             for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
-            logger.info("setRawBestScores getShells got " + commonShells.size());
+//            logger.info("setRawBestScores getShells got " + commonShells.size());
           }
         });
       }

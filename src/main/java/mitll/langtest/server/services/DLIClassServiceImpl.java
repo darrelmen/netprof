@@ -36,6 +36,7 @@ import mitll.langtest.client.services.DLIClassService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("serial")
@@ -44,7 +45,7 @@ public class DLIClassServiceImpl extends MyRemoteServiceServlet implements DLICl
 
   @Override
   public Set<Integer> getStudents() {
-    return db.getDliClassJoinDAO().getStudents(getUserIDFromSession());
+    return new HashSet<>(db.getDliClassJoinDAO().getStudents(getUserIDFromSession()));
   }
 
   @Override

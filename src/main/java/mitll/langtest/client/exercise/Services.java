@@ -12,6 +12,9 @@ import java.util.List;
 public interface Services extends EventRegistration {
   List<SlimProject> getAllProjects();
 
+  String getHost();
+
+
   AudioServiceAsync getAudioServiceAsyncForHost(String host);
 
   ScoringServiceAsync getScoringServiceAsyncForHost(String host);
@@ -25,8 +28,6 @@ public interface Services extends EventRegistration {
   ScoringServiceAsync getScoringService();
 
 
-  String getHost();
-
   LangTestDatabaseAsync getService();
 
   QCServiceAsync getQCService();
@@ -36,4 +37,6 @@ public interface Services extends EventRegistration {
   ExerciseServiceAsync getExerciseService();
 
   ListServiceAsync getListService();
+
+  DLIClassServiceAsync getDLIClassService();
 }

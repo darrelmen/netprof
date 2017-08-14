@@ -642,14 +642,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     autoPlay.setIcon(IconType.PLAY);
 
     // logger.info("getAutoPlayButton auto play state " + controlState.isAutoPlay());
-    autoPlay.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        boolean autoOn = !autoPlay.isToggled();
-        //   logger.info("\tgetAutoPlayButton auto play state " + autoOn);
-        controlState.setAutoPlayOn(autoOn);
-        gotAutoPlay(autoOn);
-      }
+    autoPlay.addClickHandler(event -> {
+      boolean autoOn = !autoPlay.isToggled();
+      //   logger.info("\tgetAutoPlayButton auto play state " + autoOn);
+      controlState.setAutoPlayOn(autoOn);
+      gotAutoPlay(autoOn);
     });
     autoPlay.setActive(controlState.isAutoPlay());
     // logger.info("auto play active " + autoPlay.isActive());
