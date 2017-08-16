@@ -67,6 +67,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private static final Logger logger = LogManager.getLogger(ScoringServiceImpl.class);
 
   private static final boolean DEBUG = true;
+  private static final String AUDIO_RECORDING = "audioRecording";
+  private static final String WRITE_AUDIO_FILE = "writeAudioFile";
 
   /**
    * NOTE NOTE NOTE : doesn't make sure we have mp3 or ogg file equivalents...
@@ -140,19 +142,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return asrScoreForAudio;
   }
 
-/*  @Override
-  public void getAllAlignments() {
-    final int userIDFromSession = getUserIDFromSession();
-
-    new Thread(() -> {
-      Collection<Project> projects = db.getProjects();
-      logger.info("getAllAlignments Doing " + projects.size() + " projects...");
-      projects.forEach(project ->
-          recalcAlignments(userIDFromSession, project)
-      );
-    }).start();
-  }*/
-
   @Override
   public void recalcAlignments(int projid) {
     recalcAlignments(getUserIDFromSession(), db.getProject(projid));
@@ -223,14 +212,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    */
   @Override
   public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) {
-    //Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
 //    logger.info("getAlignmentsFromDB asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
     //logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
-    boolean hasModel = db.getProject(projid).getWebservicePort() > 0;
-    return recalcAlignments(projid, audioIDs, getUserIDFromSession(), audioIDMap, hasModel);
+    return recalcAlignments(projid, audioIDs, getUserIDFromSession(), audioIDMap, db.getProject(projid).hasModel());
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
-    //return idToAlignment;
   }
 
   private Map<Integer, AlignmentOutput> recalcAlignments(int projid,
@@ -249,7 +235,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
 
     if (hasModel) {
-      logger.info("recalcAlignments recalc " +audioIDs.size() + " audio ids");
+      logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids");
 
       if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
 
@@ -403,16 +389,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         sentence, transliteration, imageOptions,
         exerciseID, usePhonemeMap, precalcScores);
   }
-/*
-  public AlignmentOutput getAlignment(int audioID) {
-    ISlimResult cachedResult =  db.getRefResultDAO().getResult(audioID);
-    if (cachedResult == null) {
-
-    }
-    else {
-      return cachedResult;
-    }
-  }*/
 
   /**
    * Be careful - we lookup audio file by .wav extension
@@ -512,7 +488,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
   }
 
-
   /**
    * A low overhead way of doing alignment.
    * <p>
@@ -531,13 +506,14 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                   String textToAlign,
                                   String transliteration,
                                   String identifier,
-                                  int reqid, String device) {
+                                  int reqid,
+                                  String device) {
     AudioAnswer audioAnswer = getAudioFileHelper().getAlignment(base64EncodedString, textToAlign, transliteration, identifier, reqid,
         serverProps.usePhoneToDisplay());
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
-      logger.warn("huh? got zero length recording " + identifier);
-      logEvent("audioRecording", "writeAudioFile", identifier, "Writing audio - got zero duration!", -1, device);
+      logger.warn("getAlignment : huh? got zero length recording for " + identifier + " from " +device);
+      logEvent(identifier, device);
     }
     return audioAnswer;
   }
@@ -572,10 +548,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
-  private void logEvent(String id, String widgetType, String exid, String context, int userid,
-                        String device) {
+  private void logEvent(String exid, String device) {
     try {
-      db.logEvent(id, widgetType, exid, context, userid, device);
+      db.logEvent(AUDIO_RECORDING, WRITE_AUDIO_FILE, exid, "Writing audio - got zero duration!", -1, device);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }

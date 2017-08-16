@@ -39,6 +39,7 @@ import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -894,6 +895,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public void addBulk(List<SlickAudio> copies) {
 
+  }
+
+  @Override
+  public Collection<UserTimeBase> getAudioForReport(int projid) {
+    return null;
   }
 
   /**

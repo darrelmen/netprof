@@ -82,8 +82,8 @@ public class MailSupport {
    * @param subject
    * @param message
    */
-  public void sendEmail(String serverName, String to, String replyTo, String subject, String message) {
-    sendEmail(serverName, null, to, replyTo, subject, message, null, Collections.emptyList());
+  public boolean sendEmail(String serverName, String to, String replyTo, String subject, String message) {
+   return sendEmail(serverName, null, to, replyTo, subject, message, null, Collections.emptyList());
   }
 
   /**
@@ -97,7 +97,7 @@ public class MailSupport {
    * @param ccEmails
    * @see EmailHelper#sendEmail
    */
-  void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message,
+  boolean sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message,
                         String linkText, Collection<String> ccEmails) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<>();
     if (toAddresses.isEmpty()) {
@@ -107,7 +107,7 @@ public class MailSupport {
     String body = getHTMLEmail(linkText, message, baseURL);
 
     String fromEmail = "admin@" + serverName;
-    normalFullEmail(fromEmail, fromEmail, replyTo, ccEmails, toAddresses, subject, body);
+    return normalFullEmail(fromEmail, fromEmail, replyTo, ccEmails, toAddresses, subject, body);
   }
 
   private String getHTMLEmail(String linkText, String message, String link2) {
@@ -230,7 +230,7 @@ public class MailSupport {
    * @param message
    * @see #sendEmail(String, String, String, String, String, String, String, Collection)
    */
-  private void normalFullEmail(String senderName,
+  private boolean normalFullEmail(String senderName,
                                String senderEmail,
                                String replyToEmail,
                                Collection<String> ccEmails,
@@ -258,12 +258,14 @@ public class MailSupport {
           senderName, senderEmail, replyToEmail, recipientEmails,
           ccEmails, subject, message);
       Transport.send(msg);
+      return true;
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
         logger.warn("couldn't send email - no mail daemon? subj " + subject + " : " + e.getMessage());
       } else {
         logger.error("Couldn't send email to " + recipientEmails + ". Got " + e, e);
       }
+      return false;
     }
   }
 

@@ -38,9 +38,8 @@ package mitll.langtest.shared;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 9/17/15.
  */
-public interface UserAndTime {
-  int getUserid();
-  long getTimestamp();
+public interface UserAndTime extends UserTimeBase {
+
   int getExid();
   String getID();
 }

@@ -83,8 +83,8 @@ public class UserMenu {
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new LinkAndTitle("Events", new EventsClickHandler(), true));
     choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
-    choices.add(new LinkAndTitle("Show Report", "report", true));
-    choices.add(new LinkAndTitle("Send Report", "sendReport", true));
+    choices.add(new LinkAndTitle("Show Report", "scoreServlet?report", true));
+    choices.add(new LinkAndTitle("Send Report", "scoreServlet?sendReport", true));
 
     return choices;
   }
@@ -202,14 +202,7 @@ public class UserMenu {
       public void onClick(ClickEvent clickEvent) {
         Map<String, String> props = UserMenu.this.props.getProps();
         List<String> strings = new ArrayList<>();
-        List<String> values = new ArrayList<>();
         try {
-//          String versionInfo = LangTest.VERSION_INFO;
-//          String releaseDate = UserMenu.this.props.getReleaseDate();
-//          values = java.util.Arrays.asList(
-//              recordingInfo
-//          );
-
           String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
           props.put("Recording type", recordingInfo);
           props.remove("domino.url");
@@ -218,7 +211,6 @@ public class UserMenu {
             int maxl = max.get().length();
             props.keySet().forEach(key -> {
                   strings.add(key + getLen(maxl - key.length()));
-                  values.add(props.get(key));
                 }
             );
           }

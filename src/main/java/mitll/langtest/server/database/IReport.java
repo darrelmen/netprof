@@ -15,7 +15,7 @@ public interface IReport {
                    String site,
                    ServerProperties serverProps,
                    MailSupport mailSupport,
-                   PathHelper pathHelper);
+                   PathHelper pathHelper, boolean forceSend);
 
 //  boolean isTodayAGoodDay();
   JSONObject writeReportToFile(int projid, PathHelper pathHelper, String language, int year, String name) throws IOException;

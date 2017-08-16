@@ -35,6 +35,7 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -101,6 +102,32 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   public List<SlickAudio> getAll(int projid) {
     return dao.getAll(projid);
+  }
+
+  public Collection<UserTimeBase> getAudioForReport(int projid) {
+    List<UserTimeBase> report = new ArrayList<>();
+    dao.getAllNoCheck(projid).forEach(slickAudio -> report.add(new UserTimeBaseImpl(slickAudio.userid(), slickAudio.modified().getTime())));
+    return report;
+  }
+
+  private static class UserTimeBaseImpl implements UserTimeBase {
+    int userid;
+    long timestamp;
+
+    UserTimeBaseImpl(int userid, long timestamp) {
+      this.userid = userid;
+      this.timestamp = timestamp;
+    }
+
+    @Override
+    public int getUserid() {
+      return userid;
+    }
+
+    @Override
+    public long getTimestamp() {
+      return timestamp;
+    }
   }
 
   /**

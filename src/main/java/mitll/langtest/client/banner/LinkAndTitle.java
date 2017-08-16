@@ -40,6 +40,7 @@ public class LinkAndTitle {
     NavLink monitoringC = new NavLink(title);
     if (linkURL != null) {
       monitoringC.setHref(linkURL);
+      monitoringC.setTarget("_blank");
     } else {
       monitoringC.addClickHandler(clickHandler);
     }

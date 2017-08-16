@@ -35,6 +35,7 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -150,4 +151,6 @@ public interface IAudioDAO extends IDAO {
   AudioAttribute getByID(int audioID);
 
   void addBulk(List<SlickAudio> copies);
+
+  Collection<UserTimeBase> getAudioForReport(int projid);
 }

@@ -1661,7 +1661,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public void doReport() {
     if (isTodayAGoodDay()) {
-      sendReports(getReport());
+      sendReports(getReport(), false);
     } else {
       logger.debug("not sending email report since this is not monday...");
     }
@@ -1689,14 +1689,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   @Override
   public void sendReport() {
-    sendReports(getReport());
+    sendReports(getReport(), true);
   }
 
-  private void sendReports(IReport report) {
+  private void sendReports(IReport report, boolean forceSend) {
     MailSupport mailSupport = getMailSupport();
     getProjects().forEach(project -> {
       report
-          .doReport(project.getID(), project.getLanguage(), project.getProject().name(), serverProps, mailSupport, pathHelper);
+          .doReport(project.getID(), project.getLanguage(), project.getProject().name(), serverProps, mailSupport, pathHelper, forceSend);
     });
   }
 
