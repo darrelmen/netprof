@@ -106,7 +106,7 @@ public class MiniUser implements HasID, Comparable<HasID> {
 
   @Override
   public int compareTo(HasID o) {
-    return id < o.getID() ? -1 : id > o.getID() ? +1 : 0;
+    return Integer.compare(id, o.getID());
   }
 
   @Override
@@ -120,6 +120,7 @@ public class MiniUser implements HasID, Comparable<HasID> {
   }
 
 
+  @Override
   public int getID() {
     return id;
   }

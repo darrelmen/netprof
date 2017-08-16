@@ -829,7 +829,7 @@ public class ServerProperties {
    * @return
    * @see
    * @see mitll.langtest.server.mail.EmailHelper#EmailHelper(ServerProperties, IUserDAO, MailSupport, PathHelper)
-   * @deprecated
+   * @deprecatedx
    */
   public String getNPServer() {
     return props.getProperty("SERVER_NAME", NP_SERVER);

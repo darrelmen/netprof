@@ -34,7 +34,9 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
+import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.ReportUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -104,7 +106,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public int addUser(int age, MiniUser.Gender gender, int experience, String userAgent,
                      String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions,
-                     User.Kind kind,
+                     Kind kind,
                      //String freeTextPassword,
                      //String passwordH,
                      String emailH, String email, String device, String first, String last, String url, String aff) {
@@ -183,7 +185,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param email
    * @see BaseUserDAO#addUser
    */
-  protected void updateUser(int id, User.Kind kind, String emailH, String email) {
+  protected void updateUser(int id, Kind kind, String emailH, String email) {
     try {
 /*      if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
@@ -203,7 +205,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       statement.setString(i++, kind.toString());
       statement.setString(i++, "");//passwordH);
       statement.setString(i++, emailH);
-      String kind1 = kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString();
+      String kind1 = kind == Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString();
       statement.setString(i++, kind1);
       statement.setInt(i++, id);
 
@@ -473,12 +475,20 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return getUsers("SELECT * from users order by " + ID + " ASC");
   }
 
+
+//  @Override
+//  public List<ReportUser> getUsersDevices() {
+//    List<User> users = getUsers("SELECT * from users" +
+//        " where device like 'i%'" +
+//        " order by " + ID + " ASC"
+//    );
+//
+//    return new ArrayList<>(users);
+//  }
+
   @Override
-  public List<User> getUsersDevices() {
-    return getUsers("SELECT * from users" +
-        " where device like 'i%'" +
-        " order by " + ID + " ASC"
-    );
+  public ReportUsers getReportUsers() {
+    return null;
   }
 
   /**
@@ -632,9 +642,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       }
       // if the user kind is unmarked, we'll make them a student, we can always change it later.
 
-      User.Kind userKind1 = getKind(userKind);
+      Kind userKind1 = getKind(userKind);
 
-      if (admins.contains(userID)) userKind1 = User.Kind.ADMIN;
+      if (admins.contains(userID)) userKind1 = Kind.ADMIN;
       String resetKey = rs.getString(RESET_PASSWORD_KEY);
       int anInt = rs.getInt(GENDER);
       MiniUser.Gender realGender = anInt == 0 ? MiniUser.Gender.Male : MiniUser.Gender.Female;
@@ -672,12 +682,12 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @NotNull
-  private User.Kind getKind(String userKind) {
-    User.Kind userKind1;
+  private Kind getKind(String userKind) {
+    Kind userKind1;
     try {
-      userKind1 = userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind);
+      userKind1 = userKind == null ? Kind.UNSET : Kind.valueOf(userKind);
     } catch (IllegalArgumentException e) {
-      userKind1 = User.Kind.UNSET;
+      userKind1 = Kind.UNSET;
     }
     return userKind1;
   }
@@ -903,23 +913,13 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
   */
 
-  /**
-   * @param id
-   * @return
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
-   *//*
-  @Override
-  public boolean enableUser(int id) {
-    return changeEnabled(id, true);
+/*  public static void main(String[] arg) {
+    Kind kind = Kind.valueOf("STUDENT");
+    logger.info("got " + kind);
+
+    kind = Kind.valueOf("TEACHER");
+    logger.info("got " + kind);
+    kind = Kind.valueOf("CONTENT_DEVELOPER");
+    logger.info("got " + kind);
   }*/
-
-  public static void main(String[] arg) {
-    User.Kind kind = User.Kind.valueOf("STUDENT");
-    logger.info("got " + kind);
-
-    kind = User.Kind.valueOf("TEACHER");
-    logger.info("got " + kind);
-    kind = User.Kind.valueOf("CONTENT_DEVELOPER");
-    logger.info("got " + kind);
-  }
 }

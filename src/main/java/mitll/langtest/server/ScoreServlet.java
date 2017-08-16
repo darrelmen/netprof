@@ -98,6 +98,9 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
 
   private static final String YEAR = "year";
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   */
   private static final String JSON_REPORT = "jsonReport";
   private static final String REPORT = "report";
   private static final String VERSION_NOW = "1.0";
@@ -237,7 +240,7 @@ public class ScoreServlet extends DatabaseServlet {
       } else if (matchesRequest(queryString, JSON_REPORT)) {
         queryString = removePrefix(queryString, JSON_REPORT);
         int year = getYear(queryString);
-        getReport(toReturn, year);
+        db.getReport(year, toReturn);
       } else if (matchesRequest(queryString, EXPORT)) {
         toReturn = getJSONForExercises(projid);
       } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
@@ -710,8 +713,7 @@ public class ScoreServlet extends DatabaseServlet {
     String language = "";
     String fileName = year == -1 ? "reportFor" + language : ("reportFor" + language + "_forYear" + year);
 
-    response.setHeader("Content-disposition", "attachment; filename=" +
-        fileName + ".html");
+   // response.setHeader("Content-disposition", "attachment; filename=" + fileName + ".html");
   }
 
   /**

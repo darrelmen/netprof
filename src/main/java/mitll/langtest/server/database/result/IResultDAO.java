@@ -51,7 +51,7 @@ import java.util.Map;
 public interface IResultDAO extends IDAO {
   List<Result> getResults();
 
-  Collection<Result> getResultsDevices();
+  Collection<MonitorResult> getResultsDevices(int projid);
 
   Result getResultByID(int id);
 
@@ -101,6 +101,4 @@ public interface IResultDAO extends IDAO {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises(int, Collection)
    */
   <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises);
-
- // <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises);
 }

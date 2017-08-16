@@ -39,7 +39,7 @@ public class SignUpUser implements IsSerializable {
 
   private String emailH;
   private String email;
-  private User.Kind kind;
+  private Kind kind;
   private boolean isMale;
   private MiniUser.Gender realGender;
   private int age;
@@ -73,7 +73,7 @@ public class SignUpUser implements IsSerializable {
   public SignUpUser(String userID,
                     String emailH,
                     String email,
-                    User.Kind kind,
+                    Kind kind,
 
                     boolean isMale,
                     MiniUser.Gender realGender,
@@ -124,7 +124,7 @@ public class SignUpUser implements IsSerializable {
     return email;
   }
 
-  public User.Kind getKind() {
+  public Kind getKind() {
     return kind;
   }
 
@@ -161,7 +161,7 @@ public class SignUpUser implements IsSerializable {
     return this;
   }
 
-  public SignUpUser setKind(User.Kind kind) {
+  public SignUpUser setKind(Kind kind) {
     this.kind = kind;
     return this;
   }

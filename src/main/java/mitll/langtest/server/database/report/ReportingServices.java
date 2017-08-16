@@ -12,5 +12,5 @@ import java.util.Map;
 public interface ReportingServices {
   Map<String, Float> getMaleFemaleProgress(int projectid);
 
-  void doReport(ServerProperties serverProps, String site, MailSupport mailSupport, PathHelper pathHelper);
+  void doReport(ServerProperties serverProps, MailSupport mailSupport, PathHelper pathHelper);
 }

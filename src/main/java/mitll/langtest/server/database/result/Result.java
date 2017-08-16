@@ -185,18 +185,9 @@ public class Result extends SlimResult implements UserAndTime {
     return exid;
   }
 
-  public long getDurationInMillis() {
-    return durationInMillis;
-  }
+  public long getDurationInMillis() {    return durationInMillis;  }
 
-  @Override
-  public String toString() {
-    return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getExid() + " " +
-        " at " + new Date(getTimestamp()) +
-        "  ans " + getAnswer() +
-        " audioType : " + getAudioType() + " device " + device +
-        " valid " + isValid() + " " + (isCorrect() ? "correct" : "incorrect") + " score " + getPronScore();
-  }
+
 
   public void setUserID(Integer userID) {
     this.userid = userID;
@@ -284,5 +275,15 @@ public class Result extends SlimResult implements UserAndTime {
 
   public String getModel() {
     return model;
+  }
+
+
+  @Override
+  public String toString() {
+    return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getExid() + " " +
+        " at " + new Date(getTimestamp()) +
+        "  ans " + getAnswer() +
+        " audioType : " + getAudioType() + " device " + device +
+        " valid " + isValid() + " " + (isCorrect() ? "correct" : "incorrect") + " score " + getPronScore();
   }
 }

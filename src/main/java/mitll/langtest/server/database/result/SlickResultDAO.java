@@ -249,8 +249,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public Collection<Result> getResultsDevices() {
-    return getResults(dao.allDevices());
+  public Collection<MonitorResult> getResultsDevices(int projid) {
+    return getMonitorResults(dao.allDevices(projid));
   }
 
   @Override

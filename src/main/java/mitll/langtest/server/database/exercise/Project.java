@@ -96,6 +96,7 @@ public class Project implements PronunciationLookup {
   private ServerProperties serverProps;
   private boolean isRTL;
   private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
+
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
 

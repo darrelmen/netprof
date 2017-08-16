@@ -35,6 +35,7 @@ package mitll.langtest.shared.result;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.result.ResultDAO;
+import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 
 import java.sql.Connection;
@@ -44,7 +45,7 @@ import java.util.*;
 /**
  * @see mitll.langtest.client.result.ResultManager
  */
-public class MonitorResult implements IsSerializable {
+public class MonitorResult implements IsSerializable,UserAndTime {
   private static final String ASC = "ASC";
   public static final String USERID = "userid";
   public static final String ID = "oldExID";
@@ -167,6 +168,17 @@ public class MonitorResult implements IsSerializable {
 
   public long getTimestamp() {
     return timestamp;
+  }
+
+  @Override
+  public int getExid() {
+    return exid;
+  }
+
+  @Deprecated
+  @Override
+  public String getID() {
+    return oldExID;
   }
 
   public AudioType getAudioType() { return audioType;  }

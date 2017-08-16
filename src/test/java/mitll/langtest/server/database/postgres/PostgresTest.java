@@ -576,7 +576,6 @@ public class PostgresTest extends BaseTest {
   }
 */
 
-
   @Test
   public void testProjects() {
     DatabaseImpl spanish = getDatabaseLight("spanish", false);

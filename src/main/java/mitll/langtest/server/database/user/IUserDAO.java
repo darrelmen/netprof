@@ -39,6 +39,7 @@ import mitll.langtest.server.database.Report;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
+import mitll.langtest.shared.user.ReportUser;
 import mitll.langtest.shared.user.User;
 
 import java.sql.Connection;
@@ -125,11 +126,12 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   List<User> getUsers();
 
+  ReportUsers getReportUsers();
   /**
    * @return
    * @see Report#getReport
    */
-  List<User> getUsersDevices();
+  //List<ReportUser> getUsersDevices(List<User> users);
 
   /**
    * @return
@@ -218,4 +220,21 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   void update(User toUpdate);
 
   void close() throws Exception;
+
+  class ReportUsers {
+    private List<ReportUser> allUsers;
+    private List<ReportUser> deviceUsers;
+    public ReportUsers(List<ReportUser> allUsers, List<ReportUser> deviceUsers) {
+      this.allUsers =allUsers;
+      this.deviceUsers =deviceUsers;
+    }
+
+    public List<ReportUser> getAllUsers() {
+      return allUsers;
+    }
+
+    public List<ReportUser> getDeviceUsers() {
+      return deviceUsers;
+    }
+  }
 }

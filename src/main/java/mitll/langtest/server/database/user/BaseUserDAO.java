@@ -36,6 +36,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
@@ -244,7 +245,7 @@ public abstract class BaseUserDAO extends DAO {
     return defaultUsers.contains(userid);
   }
 
-  protected int getOrAdd(String beforeLoginUser, String first, String last, User.Kind kind) {
+  protected int getOrAdd(String beforeLoginUser, String first, String last, Kind kind) {
     int beforeLoginUserID = getIdForUserID(beforeLoginUser);
     if (beforeLoginUserID == -1) {
       beforeLoginUserID = addShellUser(beforeLoginUser, first, last, kind);
@@ -260,7 +261,7 @@ public abstract class BaseUserDAO extends DAO {
    * @return
    * @see #getOrAdd
    */
-  private int addShellUser(String defectDetector, String first, String last, User.Kind kind) {
+  private int addShellUser(String defectDetector, String first, String last, Kind kind) {
     return addUser(89,
         MiniUser.Gender.Unspecified,
         0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
@@ -308,7 +309,7 @@ public abstract class BaseUserDAO extends DAO {
                        String userID,
                        boolean enabled,
                        Collection<User.Permission> permissions,
-                       User.Kind kind,
+                       Kind kind,
 
 
                        String emailH,

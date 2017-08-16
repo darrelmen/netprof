@@ -44,10 +44,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import static mitll.langtest.shared.user.User.Kind.STUDENT;
+import static mitll.langtest.shared.user.Kind.STUDENT;
 import static mitll.langtest.shared.user.User.Permission.*;
 
-public class User extends MiniUser {
+public class User extends MiniUser implements ReportUser {
   public static final String NOT_SET = "NOT_SET";
   @Deprecated
   private int experience;
@@ -80,53 +80,13 @@ public class User extends MiniUser {
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
 
-  public enum Kind implements IsSerializable {
-    UNSET("Unset", "UST", false),
-    INTERNAL("INTERNAL", "INT", false),  // for users we keep to maintain referencial integrity, for instance an importUser
-
-    STUDENT("Student", "STU", true),
-    TEACHER("Teacher", "TCHR", true),
-    QAQC("QAQC", "QAQC", true), // someone who can edit content
-    CONTENT_DEVELOPER("Content Developer", "CDEV", true), // someone who can edit content and record audio
-    AUDIO_RECORDER("Audio Recorder", "AREC", true),       // someone who is just an audio recorder
-    TEST("Test Account", "TST", true),                   // e.g. for developers at Lincoln or DLI, demo accounts
-    SPAM("Spam Account", "SPM", true),                   // for marking nuisance accounts
-    PROJECT_ADMIN("Project Admin", "PrAdmin", true),         // invite new users, admin accounts below
-    ADMIN("System Admin", "UM", true);                  // invite project admins, closed set determined by server properties
-
-    String name;
-    String role;
-    boolean show;
-
-    Kind() {
-    }
-
-    Kind(String name, String role, boolean show) {
-      this.name = name;
-      this.role = role;
-      this.show = show;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public String getRole() {
-      return role;
-    }
-
-    public boolean shouldShow() {
-      return show;
-    }
-  }
-
   /**
    * For right now,  you can only choose to be a student initially.
    *
    * @return
    * @see SignUpForm#getRoles
    */
-  public static Collection<User.Kind> getSelfChoiceRoles() {
+  public static Collection<Kind> getSelfChoiceRoles() {
     return Arrays.asList(STUDENT);
   }
 
@@ -463,6 +423,7 @@ public class User extends MiniUser {
     return experience;
   }
 
+  @Override
   public String getIpaddr() {
     return ipaddr;
   }
@@ -476,6 +437,7 @@ public class User extends MiniUser {
     return passwordHash;
   }
 
+  @Override
   public Kind getUserKind() {
     return userKind;
   }
@@ -507,6 +469,7 @@ public class User extends MiniUser {
     return dialect;
   }
 
+  @Override
   public String getDevice() {
     return device;
   }
@@ -522,10 +485,6 @@ public class User extends MiniUser {
   public void setEmail(String email) {
     this.email = email;
   }
-
-//  public void setUserKind(Kind userKind) {
-//    this.userKind = userKind;
-//  }
 
   public void setDialect(String dialect) {
     this.dialect = dialect;

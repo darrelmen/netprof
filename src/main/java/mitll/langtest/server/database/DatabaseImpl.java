@@ -1663,17 +1663,32 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * TODO : fix this to do all projects
+   * TODOx : fix this to do all projects
    *
    * @param serverProps
-   * @param site
    * @param mailSupport
    * @param pathHelper
-   * @see mitll.langtest.server.LangTestDatabaseImpl#init
+   * @see LangTestDatabaseImpl#optionalInit
    */
   @Override
-  public void doReport(ServerProperties serverProps, String site, MailSupport mailSupport, PathHelper pathHelper) {
-    getReport("").doReport(serverProps, site, mailSupport, pathHelper);
+  public void doReport(ServerProperties serverProps, MailSupport mailSupport, PathHelper pathHelper) {
+    IReport report = getReport("");
+
+    if (report.isTodayAGoodDay()) {
+      getProjects().forEach(project ->
+          report
+              .doReport(project.getID(), project.getLanguage(), project.getProject().name(), serverProps, mailSupport, pathHelper));
+    } else {
+      logger.debug("not sending email report since this is not monday...");
+      new Thread(() -> {
+        try {
+          Thread.sleep(24 * 60 * 60 * 1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        doReport(serverProps, mailSupport, pathHelper);
+      }).start();
+    }
   }
 
   /**
@@ -1687,14 +1702,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return getReport("").getAllReports(getProjectDAO().getAll(), jsonObject, year);
   }
 
-  private Report reportCache;
+  //private Report reportCache;
 
-  private Report getReport(String prefix) {
-    if (reportCache == null) {
-      Report report = new Report(userDAO, resultDAO, eventDAO, audioDAO, getOldLanguage(serverProps), prefix);
-      this.reportCache = report;
-    }
-    return reportCache;
+  private IReport getReport(String prefix) {
+    //if (reportCache == null) {
+    IUserDAO.ReportUsers reportUsers = userDAO.getReportUsers();
+    Report report = new Report(resultDAO, eventDAO, audioDAO, prefix, reportUsers.getAllUsers(), reportUsers.getDeviceUsers(), serverProps.getNPServer());
+    //this.reportCache = report;
+    //}
+    //return reportCache;
+    return report;
   }
 
   /**
@@ -1704,7 +1721,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @deprecated
    */
-  public JSONObject doReport(PathHelper pathHelper) {
+  public List<JSONObject> doReport(PathHelper pathHelper) {
     return doReport(pathHelper, "", -1);
   }
 
@@ -1715,14 +1732,21 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param prefix
    * @deprecated JUST FOR TESTING
    */
-  public JSONObject doReport(PathHelper pathHelper, String prefix, int year) {
-    try {
-      Report report = getReport(prefix);
-      return report.writeReportToFile(pathHelper, getOldLanguage(serverProps), year);
-    } catch (IOException e) {
-      logger.error("got " + e);
-      return null;
-    }
+  public List<JSONObject> doReport(PathHelper pathHelper, String prefix, int year) {
+    List<JSONObject> jsons = new ArrayList<>();
+    IReport report = getReport(prefix);
+
+    getProjects().forEach(project -> {
+          try {
+            jsons.add(report.writeReportToFile(project.getID(), pathHelper, project.getLanguage(), year, project.getProject().name()));
+          } catch (IOException e) {
+            logger.error("got " + e);
+          }
+        }
+    );
+
+    return jsons;
+
   }
 
   /**

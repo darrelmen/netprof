@@ -49,6 +49,7 @@ import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.table.PagerTable;
+import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.User;
 
 import java.util.Comparator;
@@ -266,7 +267,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> kind = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return (contact.getUserKind() == User.Kind.CONTENT_DEVELOPER ? C_DEVELOPER : contact.getUserKind().toString());
+        return (contact.getUserKind() == Kind.CONTENT_DEVELOPER ? C_DEVELOPER : contact.getUserKind().toString());
       }
     };
     table.addColumn(kind, "Type");

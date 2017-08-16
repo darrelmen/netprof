@@ -34,10 +34,7 @@ package mitll.langtest.server.database.user;
 
 import com.mongodb.MongoTimeoutException;
 import com.mongodb.client.MongoCollection;
-import mitll.hlt.domino.server.user.IGroupDAO;
-import mitll.hlt.domino.server.user.IUserServiceDelegate;
-import mitll.hlt.domino.server.user.MongoGroupDAO;
-import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
+import mitll.hlt.domino.server.user.*;
 import mitll.hlt.domino.server.util.*;
 import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
@@ -48,7 +45,9 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.services.UserServiceImpl;
+import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.ReportUser;
 import mitll.langtest.shared.user.User;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -68,12 +67,13 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
 import static mitll.hlt.domino.server.util.ServerProperties.CACHE_ENABLED_PROP;
-import static mitll.langtest.shared.user.User.Kind.*;
+import static mitll.langtest.shared.user.Kind.*;
 
 /**
  * Store user info in domino tables.
@@ -98,7 +98,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   private Mongo pool;
 
-  private final Map<String, User.Kind> roleToKind = new HashMap<>();
+  private final Map<String, Kind> roleToKind = new HashMap<>();
   /**
    * get the admin user.
    *
@@ -166,12 +166,32 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
   }
 
+  public static final IUserServiceDelegate makeServiceDelegate(ServerProperties props,
+                                                               Mailer mailer, Mongo mongoCP, JSONSerializer serializer, Ignite ignite) {
+    MongoUserServiceDelegate d = null;
+    //UserServiceProperties props, boolean isAdminPWChangeEnabled,
+    //Mailer mailer, MongoConnectionPool mongoPool
+    switch (props.getUserServiceProperties().serviceType) {
+      case LDAP:
+        d = new LDAPUserServiceDelegate(props.getUserServiceProperties(), mailer, props.getAcctTypeName(), mongoCP);
+        break;
+      case Mongo:
+        d = (ignite != null && props.isCacheEnabled()) ?
+            new CachingMongoUserService(props.getUserServiceProperties(), mailer, props.getAcctTypeName(), mongoCP, ignite) :
+            new MongoUserServiceDelegate(props.getUserServiceProperties(), mailer, props.getAcctTypeName(), mongoCP);
+        break;
+    }
+    d.initializeDAOs(serializer);
+    logger.info("Initialized user service of type {}", d.getClass().getSimpleName());
+    return d;
+  }
+
   public JSONSerializer getSerializer() {
     return serializer;
   }
 
   private void populateRoles() {
-    for (User.Kind kind : User.Kind.values()) {
+    for (Kind kind : Kind.values()) {
       roleToKind.put(kind.getRole(), kind);
     }
   }
@@ -238,12 +258,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   private void ensureDefaultUsersLocal() {
-    this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", User.Kind.QAQC);
-    this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", User.Kind.STUDENT);
-    this.importUser = getOrAdd(IMPORT_USER, "Import", "User", User.Kind.CONTENT_DEVELOPER);
-    this.defaultUser = getOrAdd(DEFAULT_USER1, "Default", "User", User.Kind.AUDIO_RECORDER);
-    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, "Default", "Male", User.Kind.AUDIO_RECORDER);
-    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, "Default", "Female", User.Kind.AUDIO_RECORDER);
+    this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", Kind.QAQC);
+    this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", Kind.STUDENT);
+    this.importUser = getOrAdd(IMPORT_USER, "Import", "User", Kind.CONTENT_DEVELOPER);
+    this.defaultUser = getOrAdd(DEFAULT_USER1, "Default", "User", Kind.AUDIO_RECORDER);
+    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, "Default", "Male", Kind.AUDIO_RECORDER);
+    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, "Default", "Female", Kind.AUDIO_RECORDER);
 
     this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
   }
@@ -343,7 +363,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      String userID,
                      boolean enabled,
                      Collection<User.Permission> permissions,
-                     User.Kind kind,
+                     Kind kind,
 
                      String emailH,
                      String email,
@@ -638,6 +658,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return toUsers(getAll());
   }
 
+  @Override
+  public ReportUsers getReportUsers() {
+    List<ReportUser> copy = new ArrayList<>();
+    getAll().forEach(u-> copy.add(toUser(u)));
+    return new ReportUsers(copy, getUsersDevices(copy));
+  }
+
   /**
    * adds permissions
    *
@@ -674,7 +701,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 //      email = user.getEmailHash();
 //    }
 
-    User.Kind userKind = user.getUserKind();
+    Kind userKind = user.getUserKind();
 
     Set<String> roleAbbreviations = Collections.singleton(userKind.getRole());
     // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
@@ -804,28 +831,28 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    * @see
    */
-  private User.Kind getUserKind(mitll.hlt.domino.shared.model.user.User dominoUser, Set<User.Permission> permissionSet) {
+  private Kind getUserKind(mitll.hlt.domino.shared.model.user.User dominoUser, Set<User.Permission> permissionSet) {
     Set<String> roleAbbreviations = dominoUser.getRoleAbbreviations();
 
-    User.Kind kindToUse = User.Kind.STUDENT;
-    Set<User.Kind> seen = setPermissions(permissionSet, roleAbbreviations);
+    Kind kindToUse = Kind.STUDENT;
+    Set<Kind> seen = setPermissions(permissionSet, roleAbbreviations);
 
     // teacher trumps others... for the moment
     // need to have ordering over roles...?
-    if (seen.contains(User.Kind.TEACHER)) {
-      kindToUse = User.Kind.TEACHER;
+    if (seen.contains(Kind.TEACHER)) {
+      kindToUse = Kind.TEACHER;
     }
 
     return kindToUse;
   }
 
   @NotNull
-  private Set<User.Kind> setPermissions(Set<User.Permission> permissionSet, Set<String> roleAbbreviations) {
-    Set<User.Kind> seen = new HashSet<>();
+  private Set<Kind> setPermissions(Set<User.Permission> permissionSet, Set<String> roleAbbreviations) {
+    Set<Kind> seen = new HashSet<>();
 
     //    logger.warn("getUserKind user " + userId + " has multiple roles - choosing first one... " + roleAbbreviations.size());
     for (String role : roleAbbreviations) {
-      User.Kind kind = getKindForRole(role);
+      Kind kind = getKindForRole(role);
       seen.add(kind);
       permissionSet.addAll(User.getInitialPermsForRole(kind));
       //    logger.info(userId + " has " + role);
@@ -836,16 +863,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private final Set<String> unknownRoles = new HashSet<>();
 
   @NotNull
-  private User.Kind getKindForRole(String firstRole) {
-    if (firstRole.equals("PoM")) firstRole = User.Kind.PROJECT_ADMIN.getRole();
-    User.Kind kind = roleToKind.get(firstRole);
+  private Kind getKindForRole(String firstRole) {
+    if (firstRole.equals("PoM")) firstRole = Kind.PROJECT_ADMIN.getRole();
+    Kind kind = roleToKind.get(firstRole);
     if (kind == null) {
       try {
-        kind = User.Kind.valueOf(firstRole.toUpperCase());
+        kind = Kind.valueOf(firstRole.toUpperCase());
         // shouldn't need this
         logger.debug("getUserKind lookup by NetProF user role " + firstRole);
       } catch (IllegalArgumentException e) {
-        User.Kind kindByName = getKindByName(firstRole);
+        Kind kindByName = getKindByName(firstRole);
         if (kindByName == null) {
           if (!firstRole.startsWith("ILR")) {
             if (unknownRoles.contains(firstRole)) {
@@ -855,7 +882,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
               unknownRoles.add(firstRole);
             }
           }
-          kind = User.Kind.STUDENT;
+          kind = Kind.STUDENT;
         } else {
           kind = kindByName;
         }
@@ -865,8 +892,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Nullable
-  private User.Kind getKindByName(String firstRole) {
-    for (User.Kind testKind : User.Kind.values()) {
+  private Kind getKindByName(String firstRole) {
+    for (Kind testKind : Kind.values()) {
       if (testKind.getName().equalsIgnoreCase(firstRole)) {
         return testKind;
       }
@@ -875,17 +902,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * TODO : get device info from domino user
+   * TODOx : get device info from domino user
    * <p>
    * For Reporting.
    *
    * @return
    * @see Report#getReport
    */
-  @Override
-  public List<User> getUsersDevices() {
+//  public List<ReportUser> getUsersDevices() {
+//    return getUsersDevices(getUsers());
+//  }
 
-    return Collections.emptyList();//dao.getUsersFromDevices());
+ private List<ReportUser> getUsersDevices(List<ReportUser> users) {
+    return users
+        .stream()
+        .filter(user -> user.getDevice() != null && user.getDevice().startsWith("i"))
+        .collect(Collectors.toList());
   }
 
   private Map<Integer, MiniUser> miniUserCache = null;

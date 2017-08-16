@@ -76,12 +76,14 @@ public class DecodeTest extends BaseTest {
     getDatabase("spanish");
   }
 
+/*
   @Test
   public void testSpanishReport() {
     DatabaseImpl spanish = getDatabase("spanish");
     JSONObject jsonObject = spanish.doReport(new PathHelper("war", spanish.getServerProps()), "", 2016);
     logger.info("got\n" + jsonObject);
   }
+*/
 
   @Test
   public void testMSA() {
@@ -144,14 +146,14 @@ public class DecodeTest extends BaseTest {
   }
 */
 
-  @Test
+/*  @Test
   public void testMandarin() {
     DatabaseImpl russian = getDatabase("mandarin");
     JSONObject war = russian.doReport(new PathHelper("war", null));
     logger.info("json:\n" + war);
-  }
+  }*/
 
-  @Test
+/*  @Test
   public void testMSAReports() {
     DatabaseImpl russian = getDatabase("msa");
     long then = System.currentTimeMillis();
@@ -171,7 +173,7 @@ public class DecodeTest extends BaseTest {
   public void testFullMandarin() {
     JSONObject war = getDatabase("mandarin").doReport(new PathHelper("war", null));
     logger.info("json:\n" + war);
-  }
+  }*/
 
   @Test
   public void testRussian() {

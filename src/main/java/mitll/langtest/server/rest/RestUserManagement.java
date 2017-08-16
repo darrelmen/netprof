@@ -41,10 +41,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -568,7 +565,7 @@ public class RestUserManagement {
             SignUpUser user2 = new SignUpUser(user,
                 emailH,
                 email,
-                User.Kind.CONTENT_DEVELOPER,
+                Kind.CONTENT_DEVELOPER,
                 male,
                 male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
                 age1,
@@ -626,7 +623,7 @@ public class RestUserManagement {
     boolean isMale = gender == null ? false : gender.equalsIgnoreCase("male");
     SignUpUser user2 = new SignUpUser(user,
         emailH, email,
-        User.Kind.STUDENT,
+        Kind.STUDENT,
         isMale,
         isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, "", deviceType, device, first, last, appURL, affiliation);
     user1 = getUserManagement().addUser(user2);

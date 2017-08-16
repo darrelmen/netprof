@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.database.user.UserManagement;
+import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -213,7 +214,7 @@ public class UserDAOToExcel {
       }
       cell.setCellStyle(cellStyle);
 
-      User.Kind userKind = user.getUserKind();
+      Kind userKind = user.getUserKind();
       row.createCell(j++).setCellValue(userKind.toString());
       String passwordHash = user.getPasswordHash();
       row.createCell(j++).setCellValue(passwordHash == null || passwordHash.isEmpty() ? "NO_PASSWORD" : "HAS_PASSWORD");

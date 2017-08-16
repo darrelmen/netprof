@@ -96,7 +96,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private FormField signUpEmail;
 
   private RegistrationInfo registrationInfo;
-  private final User.Kind selectedRole = User.Kind.STUDENT;
+  private final Kind selectedRole = Kind.STUDENT;
 
   private final EventRegistration eventRegistration;
 
@@ -296,7 +296,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         permissions.contains(User.Permission.QUALITY_CONTROL);
   }
 
-  protected Collection<User.Kind> getRoles() {
+  protected Collection<Kind> getRoles() {
     return User.getSelfChoiceRoles();
   }
 

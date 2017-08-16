@@ -36,13 +36,14 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.result.Result;
-import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.result.MonitorResult;
+import mitll.langtest.shared.user.Kind;
+import mitll.langtest.shared.user.ReportUser;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickSlimEvent;
 import net.sf.json.JSONArray;
@@ -70,10 +71,9 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/16/14.
  */
-public class Report {
+public class Report implements IReport {
   private static final Logger logger = LogManager.getLogger(Report.class);
 
-  private static final String NP_SERVER = "np.ll.mit.edu";
   private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
 
   private static final int MIN_MILLIS = (1000 * 60);
@@ -116,17 +116,19 @@ public class Report {
   private static final String ACTIVE_I_PAD = "Active iPad/iPhone Users";
   private static final int EVIL_LAST_WEEK = 54;
   private static final String SKIP_USER = "gvidaver";
-  public static final int DAY_TO_SEND_REPORT = Calendar.SUNDAY;
+  private static final int DAY_TO_SEND_REPORT = Calendar.SUNDAY;
+  public static final int MIN_DURATION = 250;
 
-  private final IUserDAO userDAO;
+  /**
+   * @see #getReportForProject(String, JSONObject, int, StringBuilder, int)
+   */
   private final IResultDAO resultDAO;
   private final IEventDAO eventDAO;
   private final IAudioDAO audioDAO;
 
   private final String prefix;
-  private final String language;
   private BufferedWriter csv;
-  private final Map<Long, Long> userToStart = new HashMap<>();
+  private final Map<Integer, Long> userToStart = new HashMap<>();
   private static final boolean DEBUG = true;
 
   private final Map<Long, String> idToUser = new HashMap<>();
@@ -140,38 +142,67 @@ public class Report {
       "tamas01",
       "teacher", "newteacher"));
 
-  Report(IUserDAO userDAO, IResultDAO resultDAO, IEventDAO eventDAO, IAudioDAO audioDAO, String language,
-         String prefix) {
-    this.userDAO = userDAO;
+  private final List<ReportUser> users;
+  private final List<ReportUser> deviceUsers;
+  private String hostname;
+
+  /**
+   * @param resultDAO
+   * @param eventDAO
+   * @param audioDAO
+   * @param prefix
+   * @see DatabaseImpl#getReport(String)
+   */
+  Report(IResultDAO resultDAO,
+         IEventDAO eventDAO,
+         IAudioDAO audioDAO,
+         String prefix,
+         List<ReportUser> users,
+         List<ReportUser> deviceUsers,
+         String hostname) {
     this.resultDAO = resultDAO;
     this.eventDAO = eventDAO;
     this.audioDAO = audioDAO;
-    this.language = language;
+    // this.language = language;
     this.prefix = prefix;
+    this.users = users;
+    this.deviceUsers = deviceUsers;
+    this.hostname = hostname;
   }
 
   /**
    * TODO : do in reference to projects
-   *
+   * <p>
    * Sends a usage report to the email list at property {@link mitll.langtest.server.ServerProperties#getReportEmails()}.
    * Sends it out first thing every monday.
    * Subject disambiguates between multiple sites for the same language.
    * Also writes the report out to the report directory... TODO : necessary?
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#doReport
+   * @see ReportingServices#doReport
    */
-  void doReport(ServerProperties serverProps, String site, MailSupport mailSupport,
-                PathHelper pathHelper) {
+  @Override
+  public boolean doReport(int projid,
+                          String language,
+                          String site,
+                          ServerProperties serverProps,
+                          MailSupport mailSupport,
+                          PathHelper pathHelper) {
     List<String> reportEmails = serverProps.getReportEmails();
 
     // check if it's a monday
     if (!getShouldSkip() &&
-        Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT &&
+        // isTodayAGoodDay() &&
         !reportEmails.isEmpty()) {
-      writeAndSendReport(serverProps.getLanguage(), site, mailSupport, pathHelper, reportEmails, getThisYear());
+      writeAndSendReport(projid, language, site, mailSupport, pathHelper, reportEmails, getThisYear());
+      return true;
     } else {
-//      logger.debug("not sending email report since this is not monday");
+      return false;
     }
+  }
+
+  @Override
+  public boolean isTodayAGoodDay() {
+    return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;
   }
 
   private boolean getShouldSkip() {
@@ -181,31 +212,33 @@ public class Report {
       skipReport = ip.getHostName().contains("MITLL");
       if (skipReport) {
         logger.info("skip writing report while testing.... " + ip.getHostName());
-      }
-      else {
+      } else {
         logger.info("will write report");
       }
     } catch (UnknownHostException e) {
-      logger.error("Got " + e,e);
+      logger.error("Got " + e, e);
       e.printStackTrace();
     }
     return skipReport;
   }
 
   /**
+   * @param projid
    * @param language
    * @param site
    * @param mailSupport
    * @param pathHelper
    * @param reportEmails who to send to
    * @param year         which year you want data for
-   * @see #doReport(ServerProperties, String, MailSupport, PathHelper)
+   * @see #doReport(int, String, String, ServerProperties, MailSupport, PathHelper)
    */
-  private void writeAndSendReport(String language,
+  private void writeAndSendReport(int projid,
+                                  String language,
                                   String site,
                                   MailSupport mailSupport,
                                   PathHelper pathHelper,
-                                  List<String> reportEmails, int year) {
+                                  List<String> reportEmails,
+                                  int year) {
     String today = new SimpleDateFormat("MM_dd_yy").format(new Date());
     File file = getReportFile(pathHelper, today, language);
     if (file.exists()) {
@@ -213,8 +246,9 @@ public class Report {
     } else {
       logger.debug("writeAndSendReport Site real path " + site);
       try {
-        String message = writeReportToFile(file, pathHelper, language, new JSONObject(), year);
-        sendEmails(language, site, mailSupport, reportEmails, message);
+        sendEmails(language, site, mailSupport, reportEmails,
+            writeReportToFile(file, pathHelper, language, new JSONObject(), year, projid, site)
+        );
       } catch (Exception e) {
         logger.error("got " + e, e);
       }
@@ -222,16 +256,19 @@ public class Report {
   }
 
   /**
+   * @param projid
    * @param pathHelper
    * @param language
+   * @param name
    * @throws IOException
-   * @see DatabaseImpl#doReport
+   * @see ReportingServices#doReport
    * @deprecated
    */
-  JSONObject writeReportToFile(PathHelper pathHelper, String language, int year) throws IOException {
+  @Override
+  public JSONObject writeReportToFile(int projid, PathHelper pathHelper, String language, int year, String name) throws IOException {
     File file = getReportPath(pathHelper, language);
     JSONObject jsonObject = new JSONObject();
-    writeReportToFile(file, pathHelper, language, jsonObject, year);
+    writeReportToFile(file, pathHelper, language, jsonObject, year, projid, name);
     logger.debug("writeReportToFile wrote to " + file.getAbsolutePath());
     //logger.debug("\n" + jsonObject.toString());
     return jsonObject;
@@ -253,29 +290,24 @@ public class Report {
    * @param message
    */
   private void sendEmails(String language, String site, MailSupport mailSupport, List<String> reportEmails, String message) {
-    String suffix = "";
-    if (site != null && site.contains("npfClassroom")) {
-      site = site.substring(site.indexOf("npfClassroom"));
-      suffix = " at " + site + " on " + getHostInfo();
-    }
-
+    String suffix = " at " + site + " on " + getHostInfo();
     String subject = "Weekly Usage Report for " + language + suffix;
-    for (String dest : reportEmails) {
-      mailSupport.sendEmail(NP_SERVER, dest, MY_EMAIL, subject, message);
-    }
+    reportEmails.forEach(dest -> mailSupport.sendEmail(hostname, dest, MY_EMAIL, subject, message));
   }
 
   /**
    * @param file       write html to a file
    * @param pathHelper
    * @param language
+   * @param projid
+   * @param name
    * @return html of report
    * @throws IOException
-   * @see
+   * @see #writeAndSendReport(int, String, String, MailSupport, PathHelper, List, int)
    */
   private String writeReportToFile(File file, PathHelper pathHelper, String language, JSONObject jsonObject,
-                                   int year) throws IOException {
-    String message = doReport(pathHelper, language, jsonObject, year);
+                                   int year, int projid, String name) throws IOException {
+    String message = doReport(pathHelper, projid, language, name, jsonObject, year);
 
     BufferedWriter writer = new BufferedWriter(new FileWriter(file));
     writer.write(message);
@@ -299,78 +331,62 @@ public class Report {
 
   /**
    * @return html of report
-   * @see #writeReportToFile
+   * @see #writeReportToFile(File, PathHelper, String, JSONObject, int, int, String)
    */
-  private String doReport(PathHelper pathHelper, String language, JSONObject jsonObject, int year) {
+  private String doReport(PathHelper pathHelper, int projid, String language, String name, JSONObject jsonObject, int year) {
     logger.info(language + " doReport for " + year);
     openCSVWriter(pathHelper, language);
-    return getReport(language, jsonObject, year);
+    return getReport(projid, name, language, jsonObject, year);
   }
 
+  /**
+   * @param projects
+   * @param jsonObject
+   * @param year
+   * @return
+   * @see DatabaseImpl#getReport(int, JSONObject)
+   */
+  @Override
   public String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year) {
     StringBuilder builder = new StringBuilder();
-    builder.append(getHeader(this.language));
+    builder.append(getHeader("", "All Projects"));
 
-    for (SlickProject project:projects) {
-      getReportForProject(language, jsonObject, year, builder, project.id());
-/*    builder.append(getHeader());
-    jsonObject.put("host", getHostInfo());
-    JSONArray dataArray = new JSONArray();
-    List<SlimEvent> allSlim = eventDAO.getAllSlim();
-    List<SlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim();
-    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
-    Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
-    List<Result> results = resultDAO.getResults();
-    logger.info("getReport : got " + results.size() + " results");
-    List<Result> resultsDevices = resultDAO.getResultsDevices();
-    logger.info("getReport : got " + resultsDevices.size() + " device results");
-
-    if (year == -1) {
-      SlimEvent firstSlim = eventDAO.getFirstSlim();
-      long timestamp = firstSlim.getTimestamp();
-      Calendar instance = Calendar.getInstance();
-      instance.clear();
-      instance.setTimeInMillis(timestamp);
-      int firstYear = instance.get(Calendar.YEAR);
-      int thisYear = Calendar.getInstance().get(Calendar.YEAR);
-      logger.info(language + " doReport for " + firstYear + "->" + thisYear);
-
-      for (int i = firstYear; i <= thisYear; i++) {
-        addYear(dataArray, builder, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);
-      }
-    } else {
-      addYear(dataArray, builder, year, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);*/
-    }
+    projects.forEach(project -> getReportForProject(project.language(), jsonObject, year, builder, project.id()));
 
     builder.append(getFooter());
     return builder.toString();
   }
+
   /**
-   *
+   * @param name
    * @param language
    * @param jsonObject
    * @param year
    * @return
    */
-  String getReport(String language, JSONObject jsonObject, int year) {
+  private String getReport(int projid, String name, String language, JSONObject jsonObject, int year) {
     StringBuilder builder = new StringBuilder();
-    builder.append(getHeader(this.language));
-
-    int projid = 0;
-
+    builder.append(getHeader(language, name));
     getReportForProject(language, jsonObject, year, builder, projid);
-
     builder.append(getFooter());
     return builder.toString();
   }
 
+  /**
+   * @param language
+   * @param jsonObject
+   * @param year
+   * @param builder
+   * @param projid
+   * @see #getAllReports
+   */
   private void getReportForProject(String language, JSONObject jsonObject, int year, StringBuilder builder, int projid) {
     List<SlickSlimEvent> allSlim = eventDAO.getAllSlim(projid);
     List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim(projid);
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projid);
-    Collection<AudioAttribute> audioAttributes   = audioDAO.getAudioAttributesByProjectThatHaveBeenChecked(projid);
-    List<Result> results = resultDAO.getResults();
-    Collection<Result> resultsDevices = resultDAO.getResultsDevices();
+    Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributesByProjectThatHaveBeenChecked(projid);
+    List<MonitorResult> results = resultDAO.getMonitorResults(projid);
+    Collection<MonitorResult> resultsDevices = resultDAO.getResultsDevices(projid);
 
     {
       jsonObject.put("host", getHostInfo());
@@ -378,22 +394,28 @@ public class Report {
       JSONArray dataArray = new JSONArray();
       if (year == -1) {
         SlickSlimEvent firstSlim = eventDAO.getFirstSlim(projid);
-        long timestamp = firstSlim.modified();
-        Calendar instance = Calendar.getInstance();
-        instance.clear();
-        instance.setTimeInMillis(timestamp);
-        int firstYear = instance.get(Calendar.YEAR);
+
+        long timestamp = (firstSlim != null) ? firstSlim.modified() : System.currentTimeMillis();
+
+        int firstYear = getFirstYear(timestamp);
         int thisYear = Calendar.getInstance().get(Calendar.YEAR);
         logger.info(language + " doReport for " + firstYear + "->" + thisYear);
 
         for (int i = firstYear; i <= thisYear; i++) {
-          addYear(dataArray, builder, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);
+          addYear(dataArray, builder, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices, language);
         }
       } else {
-        addYear(dataArray, builder, year, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);
+        addYear(dataArray, builder, year, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices, language);
       }
       jsonObject.put("data", dataArray);
     }
+  }
+
+  private int getFirstYear(long timestamp) {
+    Calendar instance = Calendar.getInstance();
+    instance.clear();
+    instance.setTimeInMillis(timestamp);
+    return instance.get(Calendar.YEAR);
   }
 
   private void addYear(JSONArray dataArray, StringBuilder builder, int i,
@@ -401,28 +423,32 @@ public class Report {
                        List<SlickSlimEvent> allDevicesSlim,
                        Map<Integer, List<AudioAttribute>> exToAudio,
                        Collection<AudioAttribute> audioAttributes,
-                       Collection<Result> results,
-                       Collection<Result> resultsDevices) {
+                       Collection<MonitorResult> results,
+                       Collection<MonitorResult> resultsDevices,
+                       String language) {
     JSONObject forYear = new JSONObject();
     builder.append("<h1>").append(i).append("</h1>");
-    builder.append(getReport(forYear, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices));
+    builder.append(getReport(forYear, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices, language));
     dataArray.add(forYear);
   }
 
   /**
    * @param jsonObject
    * @param year
+   * @param language
    * @return
    * @see #addYear
    * @see DatabaseImpl#getReport(int, JSONObject)
    */
-  private String getReport(JSONObject jsonObject, int year,
+  private String getReport(JSONObject jsonObject,
+                           int year,
                            List<SlickSlimEvent> allSlim,
                            List<SlickSlimEvent> allDevicesSlim,
                            Map<Integer, List<AudioAttribute>> exToAudio,
                            Collection<AudioAttribute> audioAttributes,
-                           Collection<Result> results,
-                           Collection<Result> resultsDevices) {
+                           Collection<MonitorResult> results,
+                           Collection<MonitorResult> resultsDevices,
+                           String language) {
     jsonObject.put("forYear", year);
 
     long then = System.currentTimeMillis();
@@ -439,7 +465,7 @@ public class Report {
 
     // ipad users
     JSONObject iPadUsers = new JSONObject();
-    getUsers(builder, userDAO.getUsersDevices(), NEW_I_PAD_I_PHONE_USERS, iPadUsers, year, false);
+    getUsers(builder, deviceUsers, NEW_I_PAD_I_PHONE_USERS, iPadUsers, year, false);
     jsonObject.put(I_PAD_USERS, iPadUsers);
 
     JSONObject timeOnTaskJSON = new JSONObject();
@@ -484,16 +510,20 @@ public class Report {
     return builder.toString();
   }
 
-  private String getFooter() {
-    return "</body></head></html>";
-  }
-
-  private String getHeader(String language) {
+  private String getHeader(String language, String projectName) {
     String hostInfo = getHostInfo();
     //String language = this.language;
     return "<html><head>" +
         "<title>Report for " + language + " on " + hostInfo + "</title>" +
-        "<body><h2>Host : " + hostInfo + "</h2>\n";
+        "<body>" +
+        "<h2>Host     : " + hostInfo + "</h2>\n" +
+        "<h2>Language : " + language + "</h2>\n" +
+        "<h2>Project  : " + projectName + "</h2>\n"
+        ;
+  }
+
+  private String getFooter() {
+    return "</body></head></html>";
   }
 
   private final Map<String, ReadableUserAgent> userAgentToReadable = new HashMap<>();
@@ -505,8 +535,8 @@ public class Report {
    * @param document
    * @see #getReport
    */
-  private void getBrowserReport(List<User> fusers, int year, JSONObject section, StringBuilder document) {
-    List<User> usersByYear = filterUsersByYear(fusers, year);
+  private void getBrowserReport(List<ReportUser> fusers, int year, JSONObject section, StringBuilder document) {
+    List<ReportUser> usersByYear = filterUsersByYear(fusers, year);
 
     UserAgentStringParser parser = UADetectorServiceFactory.getResourceModuleParser();
 
@@ -516,7 +546,7 @@ public class Report {
     Map<String, Integer> browserToCount = new HashMap<>();
     Map<String, Integer> browserVerToCount = new HashMap<>();
     int miss = 0;
-    for (User f : usersByYear) {
+    for (ReportUser f : usersByYear) {
       String ipaddr = f.getIpaddr();
 
       if (ipaddr != null) {
@@ -579,14 +609,14 @@ public class Report {
     section.put(BROWSER_VERSION, browserVerArray);
 
     if (miss > 0)
-      logger.info("getBrowserReport " + language + " for " + year + " users by year " + userAgentToReadable.size() + " miss " + miss);
+      logger.info("getBrowserReport for " + year + " users by year " + userAgentToReadable.size() + " miss " + miss);
   }
 
-  private List<User> filterUsersByYear(List<User> fusers, int year) {
+  private List<ReportUser> filterUsersByYear(List<ReportUser> fusers, int year) {
     Calendar calendar = getCalendarForYear(year);
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
-    List<User> forYear = new ArrayList<>();
-    for (User t : fusers) if (yearTimeRange.inYear(t.getTimestampMillis())) forYear.add(t);
+    List<ReportUser> forYear = new ArrayList<>();
+    for (ReportUser t : fusers) if (yearTimeRange.inYear(t.getTimestampMillis())) forYear.add(t);
     return forYear;
   }
 
@@ -642,25 +672,29 @@ public class Report {
   /**
    * setUserStart must be called first
    *
+   * @param forThisProject
    * @return
    * @see #setUserStart(Collection)
    */
-  private List<User> fixUserStarts() {
-    List<User> users = userDAO.getUsers();
-    for (User user : users) {
-      Long aLong = userToStart.get(user.getID());
-      if (aLong != null) user.setTimestampMillis(aLong);
-      idToUser.put((long)user.getID(), user.getUserID());
+  private List<ReportUser> fixUserStarts(Collection<Integer> forThisProject) {
+    List<ReportUser> forProject = new ArrayList<>();
+    users.forEach(reportUser -> {
+      if (forThisProject.contains(reportUser.getID())) forProject.add(reportUser);
+    });
+    for (ReportUser user : forProject) {
+//      Long aLong = userToStart.get(user.getID());
+//      if (aLong != null) user.setTimestampMillis(aLong);
+      idToUser.put((long) user.getID(), user.getUserID());
       //else {
       //  logger.error("no events for " + user.getExID());
       //  }
     }
-    return users;
+    return forProject;
   }
 
-  private List<User> getValidUsers(List<User> all) {
-    List<User> valid = new ArrayList<>();
-    for (User u : all) if (!shouldSkipUser(u)) valid.add(u);
+  private List<ReportUser> getValidUsers(List<ReportUser> all) {
+    List<ReportUser> valid = new ArrayList<>();
+    for (ReportUser u : all) if (!shouldSkipUser(u)) valid.add(u);
     return valid;
   }
 
@@ -672,7 +706,7 @@ public class Report {
    * @see #doReport
    * @see #getUsers
    */
-  private Set<Integer> getUsers(StringBuilder builder, Collection<User> users, String users1, JSONObject jsonObject,
+  private Set<Integer> getUsers(StringBuilder builder, Collection<ReportUser> users, String users1, JSONObject jsonObject,
                                 int year,
                                 boolean reportTeachers) {
     Calendar calendar = getCalendarForYear(year);
@@ -690,14 +724,14 @@ public class Report {
     Map<Integer, Integer> tmonthToCount = tcounts.getMonthToCount();
     Map<Integer, Integer> tweekToCount = tcounts.getWeekToCount();
 
-    for (User user : users) {
+    for (ReportUser user : users) {
       boolean isStudent =
-          (user.getAge() == 89 &&
-              user.getUserID().isEmpty()) ||
-              user.getAge() == 0 ||
-              user.getUserKind() == User.Kind.STUDENT;
+//          (user.getAge() == 89 &&
+//              user.getUserID().isEmpty()) ||
+//              user.getAge() == 0 ||
+          user.getUserKind() == Kind.STUDENT;
 
-      boolean isTeacher = user.getUserKind() == User.Kind.TEACHER;
+      boolean isTeacher = user.getUserKind() == Kind.TEACHER;
 
       if (isTeacher) isStudent = false;
 
@@ -823,7 +857,7 @@ public class Report {
     }
   }
 
-  private boolean shouldSkipUser(User user) {
+  private boolean shouldSkipUser(ReportUser user) {
     return user.getID() == 3 || user.getID() == 1 ||
         lincoln.contains(user.getUserID()) || user.getUserID().startsWith(SKIP_USER);
   }
@@ -1095,20 +1129,20 @@ public class Report {
                           JSONObject jsonObject,
                           int year,
                           Map<Integer, List<AudioAttribute>> exToAudio,
-                          Collection<Result> results) {
+                          Collection<MonitorResult> results) {
     getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, exToAudio);
   }
 
   private void getResultsDevices(StringBuilder builder, Set<Integer> students,
                                  JSONObject jsonObject, int year,
                                  Map<Integer, List<AudioAttribute>> exToAudio,
-                                 Collection<Result> results) {
+                                 Collection<MonitorResult> results) {
     getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, exToAudio);
   }
 
   private void getResultsForSet(StringBuilder builder,
                                 Set<Integer> students,
-                                Collection<Result> results,
+                                Collection<MonitorResult> results,
                                 String recordings,
                                 JSONObject jsonObject, int year,
                                 Map<Integer, List<AudioAttribute>> exToAudio) {
@@ -1137,7 +1171,7 @@ public class Report {
       Calendar calendar = getCalendarForYear(year);
 
       Set<String> seen = new HashSet<>();
-      for (Result result : results) {
+      for (MonitorResult result : results) {
         long timestamp = result.getTimestamp();
 
         if (yearTimeRange.inYear(timestamp)) {
@@ -1211,9 +1245,9 @@ public class Report {
    * @param seen
    * @return
    */
-  private boolean isResultReallyValid(Result result, Set<String> seen) {
+  private boolean isResultReallyValid(MonitorResult result, Set<String> seen) {
     return
-        result.getDurationInMillis() > 250 &&
+        result.getDurationInMillis() > MIN_DURATION &&
             !seen.contains(result.getAnswer());
   }
 
@@ -1352,9 +1386,9 @@ public class Report {
    * @return
    * @see #getResults
    */
-  private boolean isRefAudioResult(Map<Integer, List<AudioAttribute>> exToAudio, Result result) {
+  private boolean isRefAudioResult(Map<Integer, List<AudioAttribute>> exToAudio, MonitorResult result) {
     boolean skip = false;
-    List<AudioAttribute> audioAttributes = exToAudio.get(result.getExerciseID());
+    List<AudioAttribute> audioAttributes = exToAudio.get(result.getExID());
     if (audioAttributes != null) {
       for (AudioAttribute audioAttribute : audioAttributes) {
         if (getFile(audioAttribute).equals(getFile(result))) {
@@ -1373,7 +1407,7 @@ public class Report {
     return getFile(attribute.getAudioRef());
   }
 
-  private String getFile(Result result) {
+  private String getFile(MonitorResult result) {
     return getFile(result.getAnswer());
   }
 
@@ -1432,7 +1466,7 @@ public class Report {
    */
   private void setUserStart(Collection<SlickSlimEvent> all) {
     for (SlickSlimEvent event : all) {
-      long creatorID = event.userid();
+      int creatorID = event.userid();
       long timestamp = event.modified();
       if (!userToStart.containsKey(creatorID) || timestamp < userToStart.get(creatorID)) {
         userToStart.put(creatorID, timestamp);

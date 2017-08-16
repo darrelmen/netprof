@@ -146,10 +146,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public Collection<Result> getResultsDevices() {
+  public Collection<MonitorResult> getResultsDevices(int projid) {
     try {
       String sql = "SELECT * FROM " + RESULTS + " where " + DEVICETYPE + " like 'i%'";
-      return getResultsSQL(sql);
+      return Collections.emptyList();
+    //  return getResultsSQL(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       logException(ee);
