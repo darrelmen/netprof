@@ -65,8 +65,8 @@ public class ReportTest {
 
   @Test
   public void testReport() {
-    //database.doReport(new PathHelper("war"), "", 2016);
-   // database.doReport(new PathHelper("war"));
+    //database.doReportForYear(new PathHelper("war"), "", 2016);
+   // database.doReportForYear(new PathHelper("war"));
 
     JSONObject jsonObject = new JSONObject();
     database.getReport(-1, jsonObject);
@@ -97,7 +97,7 @@ public class ReportTest {
 
   @Test
   public void doReport() {
-    String x = "";//database.getReport().doReport();
+    String x = "";//database.getReport().doReportForYear();
     System.out.println(x);
     try {
       //FileOutputStream fileOutputStream = new FileOutputStream("test2.html");

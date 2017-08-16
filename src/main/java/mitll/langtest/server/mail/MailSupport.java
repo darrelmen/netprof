@@ -74,7 +74,7 @@ public class MailSupport {
   }
 
   /**
-   * @see EmailHelper#enableCDUser
+   *
    * @see Report#sendEmails
    * @param serverName
    * @param to

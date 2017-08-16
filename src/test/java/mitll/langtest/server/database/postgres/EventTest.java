@@ -65,7 +65,7 @@ public class EventTest extends BaseTest {
     eventDAO.addPlayedMarkings(1, spanish.getExercises(-1).iterator().next());
 
    // logger.info("Got " + eventDAO.getFirstSlim("spanish"));
-    //  spanish.doReport(new PathHelper("war"));
+    //  spanish.doReportForYear(new PathHelper("war"));
   }
 
   int getMin(List<?> all) {

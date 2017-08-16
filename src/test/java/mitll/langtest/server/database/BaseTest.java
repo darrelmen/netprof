@@ -75,7 +75,7 @@ public class BaseTest {
                                                  boolean useH2,
                                                  boolean useLocal,
                                                  String optPropsFile) {
-    return CopyToPostgres.getDatabaseLight(config,useH2,useLocal,optPropsFile,"war");
+    return CopyToPostgres.getDatabaseLight(config, useH2, useLocal, optPropsFile, "war");
   }
 
   private static ServerProperties getServerProperties(String config, String propsFile) {
@@ -114,12 +114,12 @@ public class BaseTest {
     return new ServerProperties(parent, name);
   }
 
-  protected void finish(Statement statement, ResultSet rs) throws SQLException {
+  void finish(Statement statement, ResultSet rs) throws SQLException {
     rs.close();
     statement.close();
   }
 
-  protected BufferedWriter getWriter(String prefix) throws IOException {
+  BufferedWriter getWriter(String prefix) throws IOException {
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy_HH_mm_ss");
     String today = simpleDateFormat2.format(new Date());
     File file = getReportFile(new PathHelper("war", null), today, prefix);
@@ -171,7 +171,7 @@ public class BaseTest {
         ".properties");
   }
 
-  protected H2Connection getH2Connection(String path) {
+  H2Connection getH2Connection(String path) {
     return new H2Connection(".", path, true, null, false);
   }
 

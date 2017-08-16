@@ -17,9 +17,7 @@ public interface IReport {
                    MailSupport mailSupport,
                    PathHelper pathHelper);
 
-  boolean isTodayAGoodDay();
-
+//  boolean isTodayAGoodDay();
   JSONObject writeReportToFile(int projid, PathHelper pathHelper, String language, int year, String name) throws IOException;
-
   String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year);
 }

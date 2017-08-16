@@ -61,7 +61,7 @@ public class EmailList {
   private static final String DEFAULT_EMAIL = GORDON_VIDAVER;
   private static final String ADMINS = "admins";
 
-  private static final List<String> DLI_APPROVERS = Arrays.asList(
+/*  private static final List<String> DLI_APPROVERS = Arrays.asList(
       "Tamas",
       "Tamas",
       "Michael",
@@ -73,7 +73,7 @@ public class EmailList {
       TAMAS_2,
       GRIMMER,
       SANDY,
-      GORDON_VIDAVER);
+      GORDON_VIDAVER);*/
 
   private static final Set<String> ADMINLIST = new HashSet<>(Arrays.asList(
       "gvidaver",

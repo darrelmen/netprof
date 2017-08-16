@@ -68,7 +68,14 @@ public class EasyReportTest extends BaseTest {
   @Test
   public void testReport() {
     DatabaseImpl andPopulate = getAndPopulate();
-    andPopulate.doReport(new PathHelper(".",new ServerProperties()));
+    andPopulate.doReport();
+    andPopulate.close();
+  }
+
+  @Test
+  public void testReportWrite() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    andPopulate.doReportForYear(-1);
     andPopulate.close();
   }
 

@@ -44,7 +44,7 @@ public class AMASReaderTest {
 
   @Test
   public void testReport() {
-    database.doReport(new PathHelper("war", null), "", 2016);
+    database.doReportForYear(new PathHelper("war", null), "", 2016);
   }
 
   @Test

@@ -41,6 +41,7 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
@@ -297,7 +298,7 @@ public class UserListManager implements IUserListManager {
    * @param userid
    * @param projid
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject(int, int)
+   * @see ProjectServices#rememberUsersCurrentProject(int, int)
    */
   @Override
   public UserList createFavorites(int userid, int projid) {

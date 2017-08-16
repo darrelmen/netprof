@@ -500,7 +500,7 @@ public class CopyToPostgres<T extends CommonShell> {
       Integer userID = oldToNewUser.get((int) creatorID);
       if (userID == null) {
         boolean add = missingUsers.add(creatorID);
-        if (add) logger.error("copyAnno no user " + creatorID);
+        if (add) logger.warn("copyAnno no user " + creatorID);
       } else {
         annotation.setCreatorID(userID);
         Integer realID = exToID.get(annotation.getOldExID());
@@ -604,7 +604,7 @@ public class CopyToPostgres<T extends CommonShell> {
         Integer id = exToInt.get(exerciseID);
 //        CommonExercise customOrPredefExercise = null;
         if (id == null)
-          logger.error("copyUserExerciseListJoin Can't find exercise " + exerciseID + " in " + exToInt.size() + " ex->int map");
+          logger.warn("copyUserExerciseListJoin Can't find exercise " + exerciseID + " in " + exToInt.size() + " ex->int map");
         else {
           //customOrPredefExercise = db.getCustomOrPredefExercise(projectid, id);
           slickUserListExerciseJoinDAO.addPair(userListID, id);
@@ -654,7 +654,7 @@ public class CopyToPostgres<T extends CommonShell> {
       int oldID = list.getUserID();
       Integer newUserID = oldToNewUser.get(oldID);
       if (newUserID == null) {
-        logger.error("UserListManager can't find user " + oldID + " in " + oldToNewUser.size());
+        logger.warn("UserListManager can't find user " + oldID + " in " + oldToNewUser.size());
       } else {
         SlickUserExerciseList user = slickUserListDAO.toSlick2(list, newUserID, projid, -1);
         bulk.add(user);
@@ -803,7 +803,7 @@ public class CopyToPostgres<T extends CommonShell> {
       Integer userID = oldToNewUser.get(creatorID);
       if (userID == null) {
         boolean add = missingUsers.add(creatorID);
-        if (add) logger.error("copyReviewed no user " + creatorID);
+        if (add) logger.warn("copyReviewed no user " + creatorID);
       } else {
         Integer exid = exToID.get(stateCreator.getOldExID());
         if (exid != null) {

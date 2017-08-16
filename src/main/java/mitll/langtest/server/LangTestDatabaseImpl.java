@@ -38,7 +38,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.security.UserSecurityManager;
-import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.shared.ContextPractice;
@@ -111,7 +110,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     try {
       db.preloadContextPractice();
       db.getStateManager().setStateOnExercises();
-      db.doReport(serverProps, getMailSupport(), pathHelper);
+      db.doReport();
     } catch (Exception e) {
       logger.error("optionalInit couldn't load database " + e, e);
     }
@@ -306,9 +305,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
   }
 
-  private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
-  }
 
   @Override
   public void destroy() {

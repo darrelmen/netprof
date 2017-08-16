@@ -105,6 +105,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -112,6 +114,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.CollationKey;
 import java.util.*;
+
+import static mitll.langtest.server.database.Report.DAY_TO_SEND_REPORT;
 
 /**
  * Note with H2 that :  <br></br>
@@ -135,6 +139,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private static final String UNKNOWN = "unknown";
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
+  public static final int DAY = 24 * 60 * 60 * 1000;
 
   /**
    * @see #getContextPractice
@@ -575,7 +580,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     projectManagement.rememberProject(projectid);
   }
 
-
   /**
    * Make sure there's a favorites list per user per project
    *
@@ -584,7 +588,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.server.services.UserServiceImpl#setProject
    */
   @Override
-  public void rememberProject(int userid, int projectid) {
+  public void rememberUsersCurrentProject(int userid, int projectid) {
     //  logger.info("rememberProject user " + userid + " -> " + projectid);
     getUserProjectDAO().add(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
@@ -982,7 +986,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
                                               Map<Integer, CollationKey> idToKey,
                                               String language) {
     return new UserSessionHistory().getUserHistoryForList(userid,
-        userDAO.getByID(userid),
         ids,
         latestResultID,
         allIDs,
@@ -1586,16 +1589,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * JUST FOR TESTING
-   *
-   * @param ex
-   * @return
-   */
-/*  public int attachAudio(CommonExercise ex) {
-    return getAudioDAO().attachAudioToExercise(ex, getLanguage(ex));
-  }*/
-
-  /**
    * Expensive ?
    *
    * @param projectid
@@ -1663,51 +1656,68 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * TODOx : fix this to do all projects
-   *
-   * @param serverProps
-   * @param mailSupport
-   * @param pathHelper
    * @see LangTestDatabaseImpl#optionalInit
    */
   @Override
-  public void doReport(ServerProperties serverProps, MailSupport mailSupport, PathHelper pathHelper) {
-    IReport report = getReport("");
-
-    if (report.isTodayAGoodDay()) {
-      getProjects().forEach(project ->
-          report
-              .doReport(project.getID(), project.getLanguage(), project.getProject().name(), serverProps, mailSupport, pathHelper));
+  public void doReport() {
+    if (isTodayAGoodDay()) {
+      sendReports(getReport());
     } else {
       logger.debug("not sending email report since this is not monday...");
-      new Thread(() -> {
-        try {
-          Thread.sleep(24 * 60 * 60 * 1000);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-        doReport(serverProps, mailSupport, pathHelper);
-      }).start();
     }
+    tryTomorrow();
+  }
+
+  private void tryTomorrow() {
+    new Thread(() -> {
+      try {
+        Thread.sleep(DAY);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      doReport(); // try again later
+    }).start();
+  }
+
+  private boolean isTodayAGoodDay() {
+    return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;
+  }
+
+  private MailSupport getMailSupport() {
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
+  }
+
+  @Override
+  public void sendReport() {
+    sendReports(getReport());
+  }
+
+  private void sendReports(IReport report) {
+    MailSupport mailSupport = getMailSupport();
+    getProjects().forEach(project -> {
+      report
+          .doReport(project.getID(), project.getLanguage(), project.getProject().name(), serverProps, mailSupport, pathHelper);
+    });
   }
 
   /**
    * @param year
    * @param jsonObject
    * @return
-   * @see mitll.langtest.server.ScoreServlet#getReport(JSONObject, int)
+   * @see mitll.langtest.server.ScoreServlet#doGet(HttpServletRequest, HttpServletResponse)
    */
+  @Override
   public String getReport(int year, JSONObject jsonObject) {
-    //  return getReport("").getReport(serverProps.getLanguage(), jsonObject, year);
-    return getReport("").getAllReports(getProjectDAO().getAll(), jsonObject, year);
+    return getReport().getAllReports(getProjectDAO().getAll(), jsonObject, year);
   }
-
   //private Report reportCache;
 
-  private IReport getReport(String prefix) {
+  private IReport getReport() {
     //if (reportCache == null) {
     IUserDAO.ReportUsers reportUsers = userDAO.getReportUsers();
-    Report report = new Report(resultDAO, eventDAO, audioDAO, prefix, reportUsers.getAllUsers(), reportUsers.getDeviceUsers(), serverProps.getNPServer());
+    ;
+    Report report = new Report(resultDAO, eventDAO, audioDAO, "",
+        reportUsers.getAllUsers(), reportUsers.getDeviceUsers(), userProjectDAO.getUserToProject(), serverProps.getNPServer());
     //this.reportCache = report;
     //}
     //return reportCache;
@@ -1717,24 +1727,21 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * FOR TESTING
    *
-   * @param pathHelper
    * @return
    * @deprecated
    */
-  public List<JSONObject> doReport(PathHelper pathHelper) {
-    return doReport(pathHelper, "", -1);
+  public List<JSONObject> doReportAllYears() {
+    return doReportForYear(-1);
   }
 
   /**
    * JUST FOR TESTING
    *
-   * @param pathHelper
-   * @param prefix
    * @deprecated JUST FOR TESTING
    */
-  public List<JSONObject> doReport(PathHelper pathHelper, String prefix, int year) {
+  public List<JSONObject> doReportForYear(int year) {
     List<JSONObject> jsons = new ArrayList<>();
-    IReport report = getReport(prefix);
+    IReport report = getReport();
 
     getProjects().forEach(project -> {
           try {
@@ -1822,16 +1829,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     return recordedReport;
   }
-
-/*  @Override
-  public <T extends CommonShell> void getScores(int userid, Collection<T> exercises) {
-    resultDAO.getScores(userid, exercises);
-  }*/
-//
-//  @Override
-//  public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
-//    resultDAO.addScoresForAll(userid, exercises);
-//  }
 
   @Override
   public LogAndNotify getLogAndNotify() {

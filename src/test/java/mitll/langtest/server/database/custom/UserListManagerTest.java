@@ -71,7 +71,7 @@ public class UserListManagerTest {
   public void testReport() {
     // Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
     //  typeToValues.put("Lesson", Arrays.asList("1-1"));
-    database.doReport(new PathHelper("war", ), "", 2016);
+    database.doReportForYear(new PathHelper("war", ), "", 2016);
   }*/
 
 /*  @Test
@@ -99,7 +99,7 @@ public class UserListManagerTest {
 
   @Test
   public void doReport() {
-    String x = "";//database.getReport().doReport();
+    String x = "";//database.getReport().doReportForYear();
     System.out.println(x);
     try {
       //FileOutputStream fileOutputStream = new FileOutputStream("test2.html");

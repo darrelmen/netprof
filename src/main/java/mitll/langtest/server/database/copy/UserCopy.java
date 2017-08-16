@@ -14,10 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by go22670 on 10/26/16.
@@ -28,6 +25,7 @@ public class UserCopy {
   private static final boolean DEBUG = false;
   private static final boolean MAKE_COLLISION_ACCOUNT = false;
   private static final boolean WARN_ON_COLLISION = true;
+  public static final String D_ADMIN = "d.admin";
 
   /**
    * What can happen:
@@ -47,9 +45,9 @@ public class UserCopy {
    * Also, going forward, we must store emails, since we need to be able to send the sign up message?
    *
    * @param db
-   * @param projid to import into
+   * @param projid       to import into
    * @param oldResultDAO - so we can check if the user ever recorded anything - if not we skip them on import
-   * @param optName if you want to name the project something other than the language
+   * @param optName      if you want to name the project something other than the language
    * @see CopyToPostgres#copyOneConfig
    */
   Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO, String optName) throws Exception {
@@ -70,11 +68,13 @@ public class UserCopy {
     Map<Integer, Integer> idToCount = userToNumAnswers.getIdToCount();
     if (DEBUG) logger.info("copyUsers id->childCount " + idToCount.size() + " values " + idToCount.values().size());
 
-    boolean debug =false;
+    boolean debug = false;
     int collisions = 0;
     int lurker = 0;
     List<ClientUserDetail> added = new ArrayList<>();
     int c = 0;
+    Map<Integer, Long> userToCreation = new HashMap<>();
+
     for (User toImport : importUsers) {
       c++;
 
@@ -82,7 +82,6 @@ public class UserCopy {
       String importUserID = toImport.getUserID();
 
       if (DEBUG) logger.info("copying " + importID + " : " + importUserID);
-
 
       if (importUserID.isEmpty()) importUserID = "unknown";
       if (importID != defectDetector && !dominoUserDAO.isDefaultUser(importUserID)) {
@@ -98,10 +97,15 @@ public class UserCopy {
 
           if (dominoUser == null) { // new user
             //logger.info("copyUsers no existing user id '" + importUserID + "'");
-            added.add(addUser(dominoUserDAO, oldToNew, toImport, optName));
+            ClientUserDetail e = addUser(dominoUserDAO, oldToNew, toImport, optName);
+            userToCreation.put(e.getDocumentDBID(), e.getAcctDetail().getCrTime().getTime());
+            added.add(e);
+            ;
           } else { // user exists
-            if (dominoUser.getUserID().equals("d.admin")) {
+            if (dominoUser.getUserID().equals(D_ADMIN)) {
               logger.warn("found d.admin " + dominoUser);
+            } else {
+              userToCreation.put(dominoUser.getID(), dominoUser.getTimestampMillis());
             }
 
             if (foundExistingUser(projid, optName,
@@ -114,7 +118,7 @@ public class UserCopy {
       }
     }
 
-    addUserProjectBinding(projid, slickUserProjectDAO, added);
+    addUserProjectBinding(projid, slickUserProjectDAO, userToCreation);
     logger.info("copyUsers after, postgres importUsers " +
         //"num = " + dominoUserDAO.getUsers().size() +
         " added " + added.size() +
@@ -126,9 +130,9 @@ public class UserCopy {
 
   /**
    * Checks the password for the import user to see if it's the same as the current one in mongo.
-   *
+   * <p>
    * Two people with the same user id but different passwords are in a race - first guy gets the password,
-   *  second guy needs to get a new account.
+   * second guy needs to get a new account.
    *
    * @param projid        only for debugging
    * @param optName       of the project, if not the language
@@ -262,17 +266,12 @@ public class UserCopy {
    * @param added
    * @see #copyUsers
    */
-  private void addUserProjectBinding(int projid, IUserProjectDAO slickUserProjectDAO, List<ClientUserDetail> added) {
+  private void addUserProjectBinding(int projid, IUserProjectDAO slickUserProjectDAO, Map<Integer, Long> added) {
     logger.info("addUserProjectBinding adding user->project for " + projid);
+    // Timestamp modified = new Timestamp(System.currentTimeMillis());
+
     List<SlickUserProject> toAdd = new ArrayList<>();
-    Timestamp modified = new Timestamp(System.currentTimeMillis());
-    for (ClientUserDetail user : added) {
-      if (user == null) {
-        logger.warn("skipping invalid user...");
-      } else {
-        toAdd.add(new SlickUserProject(-1, user.getDocumentDBID(), projid, modified));
-      }
-    }
+    added.forEach((userID, modified) -> toAdd.add(new SlickUserProject(-1, userID, projid, new Timestamp(modified))));
     slickUserProjectDAO.addBulk(toAdd);
   }
 }

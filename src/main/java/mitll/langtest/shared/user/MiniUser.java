@@ -33,6 +33,7 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.exercise.HasID;
 
@@ -145,6 +146,10 @@ public class MiniUser implements HasID, Comparable<HasID> {
     return timestamp;
   }
 
+  /**
+   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#getMini
+   * @param startTime
+   */
   public void setTimestampMillis(long startTime) {
     this.timestamp = startTime;
   }

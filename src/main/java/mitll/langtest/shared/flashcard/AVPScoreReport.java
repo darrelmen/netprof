@@ -34,7 +34,6 @@ package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,7 +52,7 @@ public class AVPScoreReport implements IsSerializable {
   public AVPScoreReport() {}
 
   /**
-   * @see mitll.langtest.server.database.result.UserSessionHistory#getUserHistoryForList(int, User, Collection, int, Collection, Map, IResultDAO, String)
+   * @see mitll.langtest.server.database.result.UserSessionHistory#getUserHistoryForList(int, Collection, int, Collection, Map, IResultDAO, String)
    * @paramx historyForLists
    * @param sortedHistory
    */

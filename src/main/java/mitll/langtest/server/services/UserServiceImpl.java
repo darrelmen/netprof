@@ -338,7 +338,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       if (sessionUser != null) { // when could this be null?
         logger.info("setProject set project (" + projectid + ") for " + sessionUser);
         db.getProjectManagement().configureProjectByID(projectid);
-        db.rememberProject(sessionUser.getID(), projectid);
+        db.rememberUsersCurrentProject(sessionUser.getID(), projectid);
         db.setStartupInfo(sessionUser, projectid);
       }
       return sessionUser;

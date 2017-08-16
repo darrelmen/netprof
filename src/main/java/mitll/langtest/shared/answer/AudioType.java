@@ -90,6 +90,10 @@ public enum AudioType implements IsSerializable {
     return speed.equals("slow");
   }
 
+  public boolean isRef() {
+    return this==REGULAR || this==SLOW || isContext();
+  }
+
   public boolean isContext() {
     return this == CONTEXT_REGULAR || this == CONTEXT_SLOW;
   }

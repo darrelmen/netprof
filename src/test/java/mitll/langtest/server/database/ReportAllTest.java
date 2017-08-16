@@ -34,7 +34,6 @@ public class ReportAllTest extends BaseTest {
 */
 
 
-
   @Test
   public void testMaleFemaleRefCoverageSudanese() {
     int i = 0;
@@ -105,7 +104,7 @@ public class ReportAllTest extends BaseTest {
       H2Connection connection = getH2Connection("war/config/english/" + db);
 
       DatabaseImpl database = getDatabase(connection, config, db);
-      database.doReport(war, config, 2015);
+      database.doReportForYear(2015);
 
       try {
         Thread.sleep(1000);
@@ -153,7 +152,7 @@ public class ReportAllTest extends BaseTest {
       H2Connection connection = getH2(db);
 
       DatabaseImpl database = getDatabase(connection, config, db);
-      database.doReport(war, config, 2016);
+      database.doReportForYear(2016);
 
       try {
         Thread.sleep(1000);

@@ -10,7 +10,7 @@ import java.util.Collection;
 public interface ProjectServices {
   void rememberProject(int projectid);
 
-  void rememberProject(int userid, int projectid);
+  void rememberUsersCurrentProject(int userid, int projectid);
 
   void forgetProject(int userid);
 

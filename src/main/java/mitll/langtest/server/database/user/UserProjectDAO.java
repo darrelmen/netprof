@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.langtest.server.database.project.ProjectServices;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserProject;
 import mitll.npdata.dao.word.UserProjectDAOWrapper;
@@ -41,6 +42,7 @@ import org.apache.logging.log4j.Logger;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class UserProjectDAO implements IUserProjectDAO {
   private static final Logger logger = LogManager.getLogger(UserProjectDAO.class);
@@ -64,7 +66,7 @@ public class UserProjectDAO implements IUserProjectDAO {
    * @param userid
    * @param projid
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#userExists
+   * @see ProjectServices#rememberUsersCurrentProject(int, int)
    */
   @Override
   public void add(int userid, int projid) {
@@ -94,5 +96,10 @@ public class UserProjectDAO implements IUserProjectDAO {
       SlickUserProject next = slickUserProjects.iterator().next();
       return next.projid();
      }
+  }
+
+  @Override
+  public Map<Integer, Integer> getUserToProject() {
+    return dao.getUserToProject();
   }
 }

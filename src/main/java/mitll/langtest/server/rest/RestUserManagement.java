@@ -320,7 +320,7 @@ public class RestUserManagement {
       toReturn.put("loginResult", loginResult.getResultType().name());
 
       if (loginResult.getResultType() == Success) {
-        db.rememberProject(userid, projid);
+        db.rememberUsersCurrentProject(userid, projid);
         toReturn.put(PASSWORD_CORRECT, "TRUE");
       } else {
         toReturn.put(PASSWORD_CORRECT, FALSE);

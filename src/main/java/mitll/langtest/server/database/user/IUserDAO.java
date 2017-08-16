@@ -127,11 +127,6 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   List<User> getUsers();
 
   ReportUsers getReportUsers();
-  /**
-   * @return
-   * @see Report#getReport
-   */
-  //List<ReportUser> getUsersDevices(List<User> users);
 
   /**
    * @return
@@ -139,13 +134,6 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @deprecated - don't get all the users
    */
   Map<Integer, MiniUser> getMiniUsers();
-
-  /**
-   * @return
-   * @see UserServiceImpl#getKindToUser
-   * @deprecated - try to do something better - not all users or not all regardless of project
-   */
- // Map<User.Kind, Collection<MiniUser>> getMiniByKind();
 
   /**
    * @param userid
@@ -213,6 +201,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   int getDefaultUser();
 
   int getImportUser();
+
   /**
    * @param toUpdate
    * @see UserServiceImpl#addUser
@@ -224,9 +213,10 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   class ReportUsers {
     private List<ReportUser> allUsers;
     private List<ReportUser> deviceUsers;
+
     public ReportUsers(List<ReportUser> allUsers, List<ReportUser> deviceUsers) {
-      this.allUsers =allUsers;
-      this.deviceUsers =deviceUsers;
+      this.allUsers = allUsers;
+      this.deviceUsers = deviceUsers;
     }
 
     public List<ReportUser> getAllUsers() {

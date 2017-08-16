@@ -137,7 +137,7 @@ public class UserTest extends BaseTest {
 //        ":\n" + dao.clearKey(bogusID, false) +
 //        " :\n" + dao.getUserWithEnabledKey("enabled")
 //    );
-    //  spanish.doReport(new PathHelper("war"));
+    //  spanish.doReportForYear(new PathHelper("war"));
   }
 
 

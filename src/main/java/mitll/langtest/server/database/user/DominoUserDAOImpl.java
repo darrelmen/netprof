@@ -743,7 +743,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * Convert domino user into a netprof user.
    * <p>
-   * adds gender -
+   * adds gender - only binary (for now?)
    *
    * @param dominoUser
    * @return
@@ -774,11 +774,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     Set<User.Permission> permissionSet = new HashSet<>();
 //    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
     mitll.hlt.domino.shared.model.user.User.Gender gender = dominoUser.getGender();
+    boolean isMale = gender.equals(mitll.hlt.domino.shared.model.user.User.Gender.Male);
     User user = new User(
         dominoUser.getDocumentDBID(),
         99,//dominoUser.age(),
-        gender.equals(mitll.hlt.domino.shared.model.user.User.Gender.Male) ? 0 : 1,
-        gender.equals(mitll.hlt.domino.shared.model.user.User.Gender.Male) ? MiniUser.Gender.Male : MiniUser.Gender.Female,
+        isMale ? 0 : 1,
+        isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female,
         0,
         "",
         "",

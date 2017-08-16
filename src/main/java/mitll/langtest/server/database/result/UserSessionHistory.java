@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.result;
 
 import mitll.langtest.shared.flashcard.AVPScoreReport;
-import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,7 +52,6 @@ public class UserSessionHistory {
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
   public AVPScoreReport getUserHistoryForList(int userid,
-                                              User byID,
                                               Collection<Integer> ids,
                                               int latestResultID,
                                               Collection<Integer> allIDs,
