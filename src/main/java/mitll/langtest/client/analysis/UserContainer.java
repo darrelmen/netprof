@@ -218,6 +218,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
         public void onSuccess(Void result) {
           mine.add(id);
           remove.setEnabled(true);
+          table.redraw();
+
           // update the list if filter selected
         }
       });
@@ -253,7 +255,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
           // update the list if filter selected
           mine.remove(id);
           add.setEnabled(true);
-          filterUsers();
+          if (showOnlyMine()) filterUsers();
+          else table.redraw();
         }
       });
     });
@@ -308,15 +311,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
     mineOnly.addClickHandler(event -> {
       if (mineOnly.isToggled()) {
-        controller.getStorage().setBoolean("mineOnly", false);
+        setStorageMineOnly(false);
         populateTable(remembered);
       } else {
-        controller.getStorage().setBoolean("mineOnly", true);
+        setStorageMineOnly(true);
         rememberAndFilter();
       }
     });
 
     return mineOnly;
+  }
+
+  private void setStorageMineOnly(boolean val) {
+    controller.getStorage().setBoolean("mineOnly", val);
   }
 
   private void rememberAndFilter() {
@@ -394,6 +401,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
     addNumber(list);
     addCurrent(list);
+    addMine(list);
     //addFinalScore();
     //addDate();
 
@@ -470,6 +478,15 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     table.setColumnWidth(current, CURRENT_WIDTH + "px");
 
     table.addColumnSortHandler(getCurrentSorter(current, list));
+  }
+
+  private void addMine(List<UserInfo> list) {
+    Column<UserInfo, SafeHtml> current = getMineCol();
+    current.setSortable(true);
+    addColumn(current, new TextHeader("Mine"));
+    table.setColumnWidth(current, 65 + "px");
+
+    table.addColumnSortHandler(getMineSorter(current, list));
   }
 
   private void addNumber(List<UserInfo> list) {
@@ -555,7 +572,29 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              return Integer.valueOf(o1.getCurrent()).compareTo(o2.getCurrent());
+              return Integer.compare(o1.getCurrent(), o2.getCurrent());
+            }
+          }
+          return -1;
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<UserInfo> getMineSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                              List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
+          }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              return Boolean.compare(mine.contains(o1.getID()), mine.contains(o2.getID()));
+              //        return Integer.valueOf(o1.getCurrent()).compareTo(o2.getCurrent());
             }
           }
           return -1;
@@ -597,6 +636,21 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       @Override
       public SafeHtml getValue(UserInfo shell) {
         return getSafeHtml("" + shell.getCurrent());
+      }
+    };
+  }
+
+  private Column<UserInfo, SafeHtml> getMineCol() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml((mine.contains(shell.getID()) ? "Y" : "N"));
       }
     };
   }
