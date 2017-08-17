@@ -302,7 +302,7 @@ public class LangTest implements
 
         if (isLogClientMessages() && (now - then > 500)) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
-          logMessageOnServer(message);
+          logMessageOnServer(message,false);
         }
       }
     });
@@ -327,7 +327,7 @@ public class LangTest implements
       if (!caught.getMessage().trim().equals("0")) {
         logger.info("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
         Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
-        logMessageOnServer(message);
+        logMessageOnServer(message,true);
       }
     }
   }
@@ -343,6 +343,7 @@ public class LangTest implements
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
+
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo, reloadWindow);
       }
@@ -411,6 +412,7 @@ public class LangTest implements
 
   /**
    * Create host specific scoring services -- i.e. scoring for russian, korean, msa, levantine are on h2.
+   *
    * @param projects
    * @return
    */
@@ -480,15 +482,15 @@ public class LangTest implements
     } else {
       lastWasStackOverflow = isStackOverflow;
     }
-    logMessageOnServer(exceptionAsString, "got browser exception : ");
+    logMessageOnServer(exceptionAsString, "got browser exception : ", true);
     return exceptionAsString;
   }
 
-  public void logMessageOnServer(String message, String prefix) {
+  public void logMessageOnServer(String message, String prefix, boolean sendEmail) {
     int user = userManager != null ? userManager.getUser() : -1;
     String exerciseID = "Unknown";
     String suffix = " browser " + browserCheck.getBrowserAndVersion() + " : " + message;
-    logMessageOnServer(prefix + "user #" + user + " exercise " + exerciseID + suffix);
+    logMessageOnServer(prefix + "user #" + user + " exercise " + exerciseID + suffix, sendEmail);
 
     String toSend = prefix + suffix;
     if (toSend.length() > MAX_EXCEPTION_STRING) {
@@ -497,8 +499,8 @@ public class LangTest implements
     getButtonFactory().logEvent(UNKNOWN, UNKNOWN, new EventContext(exerciseID, toSend, user));
   }
 
-  private void logMessageOnServer(String message) {
-    service.logMessage(message,
+  private void logMessageOnServer(String message, boolean sendEmail) {
+    service.logMessage(message, sendEmail,
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -791,6 +793,7 @@ public class LangTest implements
 
   /**
    * So if during history changes we see the project has changed, we have to react to it here.
+   *
    * @param projectid
    * @see mitll.langtest.client.list.FacetExerciseList#projectChangedTo
    */
@@ -811,7 +814,7 @@ public class LangTest implements
           logger.warning("huh? no current user? ");
         } else {
           setProjectStartupInfo(aUser);
-       //   logger.info("setProjectForUser set project for " + aUser + " show initial state ");
+          //   logger.info("setProjectForUser set project for " + aUser + " show initial state ");
           initialUI.showInitialState();
           initialUI.addBreadcrumbs();
         }
@@ -1108,7 +1111,7 @@ public class LangTest implements
   public void showErrorMessage(String title, String msg) {
     DialogHelper dialogHelper = new DialogHelper(false);
     dialogHelper.showErrorMessage(title, msg);
-    logMessageOnServer("Showing error message", title + " : " + msg);
+    logMessageOnServer("Showing error message", title + " : " + msg, true);
   }
 
   /**

@@ -99,7 +99,7 @@ public interface ExerciseController extends Services {
 
   String logException(Throwable throwable);
 
-  void logMessageOnServer(String message, String prefix);
+  void logMessageOnServer(String message, String prefix, boolean sendEmail);
 
   ProjectStartupInfo getProjectStartupInfo();
 

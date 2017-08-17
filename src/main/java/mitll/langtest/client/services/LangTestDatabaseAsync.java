@@ -50,10 +50,9 @@ import java.util.Map;
 public interface LangTestDatabaseAsync {
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
-  void logMessage(String message, AsyncCallback<Void> async);
+  void logMessage(String message, boolean sendEmail, AsyncCallback<Void> async);
 
-  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device,
-                AsyncCallback<Void> async);
+  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device, AsyncCallback<Void> async);
 
   void getEvents(AsyncCallback<Collection<Event>> async);
 

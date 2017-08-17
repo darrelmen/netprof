@@ -40,5 +40,5 @@ package mitll.langtest.server;
  */
 public interface LogAndNotify {
   void logAndNotifyServerException(Exception e);
-  void logAndNotifyServerException(Exception e, String additionalMessage);
+  void logAndNotifyServerException(Throwable e, String additionalMessage);
 }

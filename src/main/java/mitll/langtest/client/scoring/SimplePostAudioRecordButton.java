@@ -91,7 +91,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param textToAlign to align the audio to
    */
   protected SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                     String textToAlign, String transliteration) {
+                                        String textToAlign, String transliteration) {
     this(controller, service, textToAlign, transliteration, "item");
   }
 
@@ -162,7 +162,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         long now = System.currentTimeMillis();
         logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
-        logMessage("failed to post audio for " + controller.getUser());// + " exercise " + exercise.getOldID());
+        logMessage("failed to post audio for " + controller.getUser(), true);// + " exercise " + exercise.getOldID());
         showPopup(Validity.INVALID.getPrompt());
       }
 
@@ -209,11 +209,11 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         " post audio took " + roundtrip + " millis, audio dur " +
         result.getDurationInMillis() + " millis, " +
         " " + ((float) roundtrip / (float) result.getDurationInMillis()) + " roundtrip/audio duration ratio.";
-    logMessage(message);
+    logMessage(message, false);
   }
 
-  private void logMessage(String message) {
-    service.logMessage(message, new AsyncCallback<Void>() {
+  private void logMessage(String message, boolean sendEmail) {
+    service.logMessage(message, sendEmail, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }

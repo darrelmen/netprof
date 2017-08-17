@@ -33,7 +33,6 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -49,7 +48,6 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -409,7 +407,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param caught
    * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onFailure(Throwable)
    */
-  protected void dealWithRPCError(Throwable caught) {
+  void dealWithRPCError(Throwable caught) {
     String message = caught.getMessage();
     if (message != null && message.length() > MAX_MSG_LEN) message = message.substring(0, MAX_MSG_LEN);
     if (message != null && !message.trim().equals("0")) {
@@ -419,8 +417,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
     if (DEBUG) logger.info("ExerciseList.SetExercisesCallbackWithID Got exception '" + message + "' " + caught);
 
-    caught.printStackTrace();
-    controller.logMessageOnServer("got exception " + caught.getMessage(), " RPCerror?");
+  //  caught.printStackTrace();
+    controller.logMessageOnServer("got exception " + caught.getMessage(), " RPCerror?", true);
   }
 
   /**

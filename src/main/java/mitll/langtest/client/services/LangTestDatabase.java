@@ -85,7 +85,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param message
    * @see LangTest#logMessageOnServer(String)
    */
-  void logMessage(String message);
+  void logMessage(String message, boolean sendEmail);
 
   /**
    * @param id

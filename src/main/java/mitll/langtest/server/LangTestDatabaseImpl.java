@@ -129,8 +129,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @param response
    * @throws ServletException
    * @throws IOException
-   * @seex mitll.langtest.client.DataCollectAdmin#makeDataCollectNewSiteForm2
-   * @seex SiteDeployer
    */
   @Override
   protected void service(HttpServletRequest request,
@@ -194,7 +192,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     StartupInfo startupInfo =
         new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
-    logger.debug("getStartupInfo sending " +  startupInfo);
+    logger.debug("getStartupInfo sending " + startupInfo);
     return startupInfo;
   }
 
@@ -295,12 +293,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     idToKey.put(exercise.getID(), collationKey);
   }
 
-  public void logMessage(String message) {
+  public void logMessage(String message, boolean sendEmail) {
     if (message.length() > 10000) message = message.substring(0, 10000);
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client : " + message;
     logger.debug(prefixedMessage);
 
-    if (message.startsWith("got browser exception")) {
+    if (message.startsWith("got browser exception") || sendEmail) {
       sendEmail("Javascript Exception", getInfo(prefixedMessage));
     }
   }
@@ -344,16 +342,16 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     try {
       db = makeDatabaseImpl(serverProps);
-     // logger.info("readProperties made database " + db);
+      // logger.info("readProperties made database " + db);
       securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
-    //  logger.info("readProperties made securityManager " + securityManager);
+      //  logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
     } catch (Exception e) {
       logger.error("readProperties got " + e, e);
     }
 
     shareDB(servletContext, db);
-   // logger.info("readProperties shareDB ");
+    // logger.info("readProperties shareDB ");
 //    shareLoadTesting(servletContext);
 
     return serverProps;
@@ -380,7 +378,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see LangTestDatabaseImpl#init()
    */
   private void setInstallPath(DatabaseServices db) {
-   // logger.debug("setInstallPath " + installPath);
+    // logger.debug("setInstallPath " + installPath);
     if (db == null) {
       logger.error("no database services created.");
     } else {

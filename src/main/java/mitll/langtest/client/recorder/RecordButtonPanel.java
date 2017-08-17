@@ -47,9 +47,11 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
 
 /**
@@ -166,8 +168,8 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    * This is used to make the audio playback widget.
    *
    * @param duration
-   * @see #RecordButtonPanel
    * @return true if valid duration
+   * @see #RecordButtonPanel
    */
   public boolean stopRecording(long duration) {
     recordImage1.setVisible(false);
@@ -235,8 +237,9 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
             } else {
               recordButton.setEnabled(true);
               // receivedAudioFailure();
-              logMessage("failed to post " + getLog(then));
-              Window.alert("writeAudioFile : stopRecording : Couldn't post answers for exercise.");
+              String stackTrace = getExceptionAsString(caught);
+              logMessage("postAudioFile : failed to post " + getLog(then) + "\n"+stackTrace,true);
+              Window.alert("postAudioFile : Couldn't post audio for exercise.");
               new ExceptionHandlerDialog(caught);
             }
           }
@@ -263,7 +266,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
             receivedAudioAnswer(result, outer);
 
             if (diff > 1000) {
-              logMessage("posted " + getLog(then));
+              logMessage("posted " + getLog(then),false);
             }
           }
 
@@ -276,8 +279,8 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
         });
   }
 
-  private void logMessage(String message) {
-    controller.getService().logMessage(message, new AsyncCallback<Void>() {
+  private void logMessage(String message, boolean sendEmail) {
+    controller.getService().logMessage(message, sendEmail, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -302,12 +305,6 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    * @see mitll.langtest.client.amas.PressAndHoldExercisePanel#getAnswerWidget
    */
   protected abstract void receivedAudioAnswer(AudioAnswer result, final Panel outer);
-
-/*
-  protected void hideRecordButton() {
-    recordButton.setVisible(false);
-  }
-*/
 
   public void setAllowAlternates(boolean allowAlternates) {
     this.allowAlternates = allowAlternates;

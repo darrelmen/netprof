@@ -49,6 +49,8 @@ import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
+
 /**
  * This binds a record button with the act of posting recorded audio to the server.
  * <p>
@@ -183,18 +185,21 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
-            onPostFailure(then, user);
+
+
+            String exceptionAsString = getExceptionAsString(caught);
+
+            onPostFailure(then, user,exceptionAsString);
           }
 
           public void onSuccess(AudioAnswer result) {            onPostSuccess(result, then);          }
         });
   }
 
-  private void onPostFailure(long then, int user) {
+  private void onPostFailure(long then, int user,String exception) {
     long now = System.currentTimeMillis();
-    logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
-
-    logMessage("failed to post audio for " + user + " exercise " + getExerciseID());
+    logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis :\n"+exception);
+    logMessage("failed to post audio for " + user + " exercise " + getExerciseID(), true);
     showPopup(Validity.INVALID.getPrompt());
   }
 
@@ -265,11 +270,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         " post audio took " + roundtrip + " millis, audio dur " +
         result.getDurationInMillis() + " millis, " +
         " " + ((float) roundtrip / (float) result.getDurationInMillis()) + " roundtrip/audio duration ratio.";
-    logMessage(message);
+    logMessage(message, false);
   }
 
-  private void logMessage(String message) {
-    controller.getService().logMessage(message, new AsyncCallback<Void>() {
+  private void logMessage(String message, boolean sendEmail) {
+    controller.getService().logMessage(message, sendEmail, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }

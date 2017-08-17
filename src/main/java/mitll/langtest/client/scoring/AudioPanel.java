@@ -105,7 +105,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
   protected final SoundManagerAPI soundManager;
   protected PlayAudioPanel playAudio;
-  @Deprecated  private float screenPortion = 1.0f;
+  @Deprecated
+  private float screenPortion = 1.0f;
   private final boolean logMessages;
   protected final ExerciseController controller;
   private boolean showSpectrogram = false;
@@ -177,7 +178,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 //    this.gaugePanel = gaugePanel;
 //    if (DEBUG) logger.info("AudioPanel : gauge panel " + gaugePanel);
 //
-  this.showSpectrogram = showSpectrogram;
+    this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
     this.exercise = exercise;
@@ -260,13 +261,13 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Image wordsImage = words.getImage();
     imageContainer.add(wordsImage);
     wordsImage.getElement().setId("Transcript_Words");
- //   wordsImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
+    //   wordsImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
 
     phones = new ImageAndCheck();
     Image phonesImage = phones.getImage();
     imageContainer.add(phonesImage);
     // for some reason this totally screws up max width for transcript images ????
-   // phonesImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
+    // phonesImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
     phonesImage.getElement().setId("Transcript_Phones");
 
     // hp.setWidth("100%");
@@ -327,7 +328,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     audioPositionPopup.reinitialize();
   }
 
-  @Deprecated void setScreenPortion(float screenPortion) {
+  @Deprecated
+  void setScreenPortion(float screenPortion) {
     //  if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
@@ -505,11 +507,10 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   }
 
   /**
-   *
    * @param leftColumnWidth1
    * @param leftColumnWidth
-   * @paramx rightSide
    * @return
+   * @paramx rightSide
    */
   int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth) {
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth);// - rightSide;
@@ -518,9 +519,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     width -= 4;
     if (DEBUG_GET_IMAGES) {
       logger.info("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" + leftColumnWidth1 +
-          ") width " + width +
-          " (screen portion = " + screenPortion +
-          ") vs window width " + Window.getClientWidth()
+              ") width " + width +
+              " (screen portion = " + screenPortion +
+              ") vs window width " + Window.getClientWidth()
           //+ " right side " + rightSide
       );
     }
@@ -534,7 +535,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #getImages()
    */
   protected void getEachImage(int width) {
-  //  logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
+    //  logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
@@ -557,7 +558,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     if (path != null && !path.equals(FILE_MISSING)) {
       final long then = System.currentTimeMillis();
 
- //     logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+      //     logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
 
       final int toUse = Math.max(MIN_WIDTH, width);
       int height = getScaledImageHeight(type);
@@ -568,7 +569,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
           logger.info("getImageURLForAudio : (failure) took " + (now - then) + " millis");
           if (!caught.getMessage().trim().equals("0")) {
             // Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
-            controller.logMessageOnServer("getImageFailed for " + path + " " + type + " width" + toUse, "onFailure");
+            controller.logMessageOnServer("getImageFailed for " + path + " " + type + " width" + toUse, "onFailure", true);
           }
           logger.info("message " + caught.getMessage() + " " + caught);
         }
@@ -613,7 +614,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     String message = "getImageURLForAudio : (success) " + result + " took " + roundtrip + " millis, audio dur " +
         (result.durationInSeconds * 1000f) + " millis, " +
         " " + ((float) roundtrip / (float) (result.durationInSeconds * 1000f)) + " roundtrip/audio duration ratio.";
-    controller.getService().logMessage(message, new AsyncCallback<Void>() {
+    controller.getService().logMessage(message, false, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }

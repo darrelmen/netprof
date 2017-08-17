@@ -50,13 +50,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
   private static final boolean DEBUG = false;
 
-/*  @Deprecated
-  @Override
-  public int getNumLists() {
-    int userIDFromSession = getUserIDFromSession();
-    return getUserListManager().getNumLists(userIDFromSession, getProjectID(userIDFromSession));
-  }*/
-
   @Override
   public Collection<UserList<CommonShell>> getLists() {
     int userIDFromSession = getUserIDFromSession();

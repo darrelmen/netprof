@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.exercise;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
@@ -43,7 +42,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -215,10 +213,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     if (list == null) {
       String suffix = this.getClass() + " for " + " user " + controller.getUserState().getUser();
       if (table == null) {
-        controller.logMessageOnServer("no table for " + suffix, controller.getLanguage());
+        controller.logMessageOnServer("no table for " + suffix, controller.getLanguage(), false);
       } else {
         table.setRowCount(0);
-        controller.logMessageOnServer("no list for " + suffix, controller.getLanguage());
+        controller.logMessageOnServer("no list for " + suffix, controller.getLanguage(), false);
       }
     } else {
       list.clear();

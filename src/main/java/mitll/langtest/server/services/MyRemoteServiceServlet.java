@@ -259,12 +259,12 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @param additionalMessage
    */
   @Override
-  public void logAndNotifyServerException(Exception e, String additionalMessage) {
+  public void logAndNotifyServerException(Throwable e, String additionalMessage) {
     String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
     if (!message1.contains("Broken Pipe")) {
       String prefix = additionalMessage.isEmpty() ? "" : additionalMessage + "\n";
       String installPath = pathHelper.getInstallPath();
-      String prefixedMessage = prefix + "for " + installPath +
+      String prefixedMessage = prefix + "\nfor webapp at " + installPath +
           (e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
 
       String subject = "Server Exception on " + getHostName() + " at " +installPath;
@@ -272,7 +272,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
       logger.error(getInfo(prefixedMessage));
     } else {
-      logger.error("got " + e, e);
+      logger.error("\n\nlogAndNotifyServerException : got " + e, e);
     }
   }
 
@@ -474,24 +474,44 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   }
 
   /**
-   * @param request
-   * @param response
+   * @paramx request
+   * @paramx response
    * @throws ServletException
    * @throws IOException
    */
-  @Override
+/*  @Override
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
     try {
       super.service(request, response);
     } catch (ServletException | IOException e) {
+      logger.info("got servlet or io exception ");
       logAndNotifyServerException(e);
       throw e;
     } catch (Exception eee) {
+      logger.info("got exception ");
       logAndNotifyServerException(eee);
       throw new ServletException("rethrow exception", eee);
     }
+  }*/
+
+  @Override protected void doUnexpectedFailure(Throwable ex) {
+    logger.info("Look at exception {}", ex.getClass().getCanonicalName());
+    if (ex.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
+      logger.info("User reload during request.", ex);
+    } else {
+    //  logger.error("Got service Exception!", ex);
+      logAndNotifyServerException(ex,"Got service exception in " +this.getClass().getCanonicalName()+ "!");
+
+      // This may not be necessary in production, but some exceptions
+      // traces did not include full cause details when running in dev mode.
+      if (ex.getCause() != null) {
+        logger.warn("Tracing exception cause!", ex.getCause());
+      }
+    }
+    super.doUnexpectedFailure(ex);
   }
+
 
   protected ISection<CommonExercise> getSectionHelper() {
     return db.getSectionHelper(getProjectID());
