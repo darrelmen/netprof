@@ -1245,49 +1245,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * Seems pretty expensive - why do it?
-   *
-   * @param projectid
-   * @return
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
-   * @see IProjectManagement#configureProject
-   */
-/*  public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
-    Collection<CommonExercise> exercises = getExercises(projectid);
-    logger.info("getExerciseIDToRefAudio for project #" + projectid + " exercises " + exercises.size());
-
-    Map<Integer, String> join = new HashMap<>();
-    populateIDToRefAudio(join, exercises);
-
-    Collection<CommonExercise> all = userExerciseDAO.getAllUserExercises(projectid);
-    getExerciseDAO(projectid).attachAudio(all);
-    populateIDToRefAudio(join, all);
-    return join;
-  }*/
-
-  /**
-   * @paramx join
-   * @paramx all
-   * @paramx <T>
-   */
-/*  private <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<Integer, String> join,
-                                                                               Collection<CommonExercise> all) {
-    for (CommonExercise exercise : all) {
-      String refAudio = exercise.getRefAudio();
-      if (refAudio == null) {
-        //   logger.warn("getExerciseIDToRefAudio huh? user exercise : no ref audio for " +id);
-      } else {
-        int id = exercise.getID();
-        join.put(id, refAudio);
-      }
-    }
-    if (join.isEmpty()) {
-      logger.warn("populateIDToRefAudio huh? no ref audio on " + all.size() + " exercises???");
-    }
-  }*/
-
-
-  /**
    * @param userID
    * @param projid
    * @param exerciseID
@@ -1336,72 +1293,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-
   /**
-   * @param exercise
-   * @return
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
+   * Nuclear option.
+   *
+   * Use with extreme caution.
+   *
    */
-/*  @Override
-  public CommonExercise duplicateExercise(CommonExercise exercise) {
-    logger.debug("to duplicate  " + exercise);
-
-    //logger.debug("anno before " + exercise.getFieldToAnnotation());
-    CommonExercise duplicate = getUserListManager().duplicate(exercise);
-
-    if (!exercise.isPredefined()) {
-      logger.warn("huh? got non-predef " + exercise);
-    }
-
-    ISection sectionHelper = getSectionHelper(exercise.getProjectID());
-
-    List<Pair> pairs = new ArrayList<>();
-    for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
-      pairs.add(sectionHelper.addExerciseToLesson(duplicate, pair.getKey(), pair.getValue()));
-    }
-    //  sectionHelper.addAssociations(pairs);
-    sectionHelper.rememberTypesFor(Collections.singletonList(pairs));
-    AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
-    if (addRemoveDAO != null) {
-      logger.warn("call domino to add the new item");
-      //addRemoveDAO.add(duplicate.getOldID(), AddRemoveDAO.ADD);
-    } else {
-      logger.warn("add remove not implemented yet!");
-    }
-    getExerciseDAO(exercise.getProjectID()).add(duplicate);
-
-    logger.debug("exercise state " + exercise.getState());
-
-    userListManager.setState(duplicate, exercise.getState(), exercise.getCreator());
-
-    logger.debug("duplicate after " + duplicate);
-
-    return duplicate;
-  }*/
-
-  /**
-   * @param exid
-   * @param projectid
-   * @return
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#deleteItem
-   * @seex mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
-   */
-/*
-  @Override
-  @Deprecated
-  public boolean deleteItem(int exid, int projectid) {
-    AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
-    if (addRemoveDAO != null) {
-      // addRemoveDAO.add(exid, AddRemoveDAO.REMOVE);
-    } else {
-      logger.warn("add remove not implemented yet!");
-    }
-    getUserListManager().removeReviewed(exid);
-    getSectionHelper(projectid).removeExercise(getExercise(projectid, exid));
-    return getExerciseDAO(projectid).remove(exid);
-  }
-*/
+  public void dropAll() { dbConnection.dropAll(); }
 
   private int warns = 0;
 

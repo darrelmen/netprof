@@ -5,6 +5,7 @@
 config=(cm croatianeval dari egyptian english farsi french german hindieval iraqi japanese korean levantine msa portuguese russian serbian soranieval spanish sudanese tagalog turkisheval urdu)
 for file in ${config[@]}
 do
+    date
     echo $file
     ./copy.sh $file > $file.log
 done
@@ -17,3 +18,5 @@ echo pashto2
 
 echo pashto3
 ./copy.sh pashto3 quizlet.properties 2 Pasho Advanced
+
+date

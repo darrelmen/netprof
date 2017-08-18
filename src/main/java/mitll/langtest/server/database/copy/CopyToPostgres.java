@@ -87,7 +87,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String NETPROF_PROPERTIES = "netprof.properties";
 
   enum ACTION {
-    COPY, DROP, UNKNOWN;
+    COPY, DROP, DROPALL, UNKNOWN;
 
     public String toLower() {
       return name().toLowerCase();
@@ -882,35 +882,102 @@ public class CopyToPostgres<T extends CommonShell> {
    * Expects something like:
    * copy english
    * copy pashto pashto1
+   * drop pashto
+   * dropAll destroy
    *
    * @param arg
    */
   public static void main(String[] arg) {
     if (arg.length < 2) {
-      logger.error("Usage : expecting either copy or drop followed by config, e.g. copy spanish");
-      logger.error("Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary");
+      usage();
       return;
     }
 
-    ACTION action = ACTION.UNKNOWN;
+    String firstArg = arg[0];
+    ACTION action = getAction(firstArg);
 
+    String config = arg[1];
+    String optconfig = arg.length > 2 ? arg[2] : null;
+    String optDisplayOrder = arg.length > 3 ? arg[3] : null;
+
+    String optName = getOptionalName(arg, optconfig, optDisplayOrder);
+    int displayOrder = getDisplayOrder(optDisplayOrder);
+
+    CopyToPostgres copyToPostgres = new CopyToPostgres();
+
+    switch (action) {
+      case UNKNOWN:
+        logger.warn("not sure what to do with action " + firstArg);
+        break;
+      case DROP:
+        logger.info("drop " + config);
+        try {
+          copyToPostgres.dropOneConfig(config);
+        } catch (Exception e) {
+          logger.error("couldn't drop config " + config, e);
+        }
+        break;
+      case COPY:
+        logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
+        try {
+          copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder);
+        } catch (Exception e) {
+          logger.error("couldn't copy config " + config, e);
+        }
+        break;
+      case DROPALL:
+        logger.warn("really be sure that this is only during development and not during production!");
+        if (arg.length == 2) {
+          String s = arg[1];
+          if (s.equals("destroy")){
+            try {
+              logger.warn("OK hope this is what you want.");
+              DatabaseImpl database = getDatabase();
+              database.dropAll();
+              database.close();
+            } catch (Exception e) {
+              logger.error("couldn't drop all tables", e);
+            }
+          }
+          else {
+            logger.info("please check with Gordon or Ray or somebody like that before doing this.");
+          }
+        }
+        break;
+      default:
+        usage();
+    }
+  }
+
+  @NotNull
+  private static ACTION getAction(String firstArg) {
+    ACTION action = ACTION.UNKNOWN;
     try {
-      action = ACTION.valueOf(arg[0].toUpperCase());
+      action = ACTION.valueOf(firstArg.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.info("expecting an action: \n{}",
           () -> Arrays.stream(ACTION.values())
               .filter(p -> p != UNKNOWN)
               .map(ACTION::toLower)
               .collect(Collectors.joining(" or ")));
-
 //      logger.error("expecting an action " + );
-      return;
+//      return;
     }
+    return action;
+  }
 
-    String config = arg[1];
-    String optconfig = arg.length > 2 ? arg[2] : null;
-    String optDisplayOrder = arg.length > 3 ? arg[3] : null;
+  private static int getDisplayOrder(String optDisplayOrder) {
+    int displayOrder = 0;
+    try {
+      displayOrder = optDisplayOrder == null ? 0 : Integer.parseInt(optDisplayOrder);
+    } catch (NumberFormatException e) {
+      logger.error("couldn't parse display order " + optDisplayOrder);
+    }
+    return displayOrder;
+  }
 
+  @NotNull
+  private static String getOptionalName(String[] arg, String optconfig, String optDisplayOrder) {
     StringBuilder builder = new StringBuilder();
     List<String> name = Collections.emptyList();
 
@@ -920,31 +987,11 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     for (String n : name) builder.append(n).append(" ");
-    String optName = builder.toString().trim();
+    return builder.toString().trim();
+  }
 
-    int displayOrder = 0;
-    try {
-      displayOrder = optDisplayOrder == null ? 0 : Integer.parseInt(optDisplayOrder);
-    } catch (NumberFormatException e) {
-      logger.error("couldn't parse display order " + optDisplayOrder);
-    }
-
-    CopyToPostgres copyToPostgres = new CopyToPostgres();
-
-    if (action.equals(DROP)) {
-      logger.info("drop " + config);
-      try {
-        copyToPostgres.dropOneConfig(config);
-      } catch (Exception e) {
-        logger.error("couldn't drop config " + config, e);
-      }
-    } else if (action.equals(COPY)) {
-      logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
-      try {
-        copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder);
-      } catch (Exception e) {
-        logger.error("couldn't copy config " + config, e);
-      }
-    }
+  private static void usage() {
+    logger.error("Usage : expecting either copy or drop followed by config, e.g. copy spanish");
+    logger.error("Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary");
   }
 }

@@ -65,15 +65,21 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testListTables() {
-    DBConnection spanish = getConnection();
-    listAndClose(spanish);
+    listAndClose(getConnection());
   }
 
   @Test
-  public void testDropNetProf() {
-    DBConnection spanish = getConnection();
-    spanish.dropAll();
-    listAndClose(spanish);
+  public void testCreateAllTables() {
+    DBConnection connection = getConnection();
+    connection.createAll();
+    listAndClose(connection);
+  }
+
+  @Test
+  public void testDropAllTables() {
+    DBConnection connection = getConnection();
+    connection.dropAll();
+    listAndClose(connection);
   }
 
   private void listAndClose(DBConnection spanish) {
