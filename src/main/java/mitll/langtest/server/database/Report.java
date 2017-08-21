@@ -130,7 +130,7 @@ public class Report implements IReport {
   private final IEventDAO eventDAO;
   private final IAudioDAO audioDAO;
 
-  private final String prefix;
+//  private final String prefix;
   private BufferedWriter csv;
   private final Map<Integer, Long> userToStart = new HashMap<>();
   private static final boolean DEBUG = true;
@@ -170,7 +170,7 @@ public class Report implements IReport {
     this.resultDAO = resultDAO;
     this.eventDAO = eventDAO;
     this.audioDAO = audioDAO;
-    this.prefix = prefix;
+  //  this.prefix = prefix;
     this.users = users;
     this.deviceUsers = deviceUsers;
     this.hostname = hostname;
@@ -785,6 +785,7 @@ public class Report implements IReport {
     Map<Integer, Integer> tmonthToCount = tcounts.getMonthToCount();
     Map<Integer, Integer> tweekToCount = tcounts.getWeekToCount();
 
+    int numTeachers = 0;
     for (ReportUser user : users) {
       boolean isStudent =
 //          (user.getAge() == 89 &&
@@ -838,9 +839,9 @@ public class Report implements IReport {
       for (Integer count : weekToCount.values()) weekTotal += count;
 
       if (monthTotal != weekTotal) {
-        logger.info("users month total " + monthTotal + " week total " + weekTotal);
-        logger.info("weeks\n" + weekToCount);
-        logger.info("users " + weekToCount.keySet());
+        logger.info("\nusers month total " + monthTotal + " week total " + weekTotal);
+        logger.info("\nweeks" + weekToCount);
+        logger.info("\nusers " + weekToCount.keySet());
       }
     }
     //logger.info("users " + weekToCount.keySet());

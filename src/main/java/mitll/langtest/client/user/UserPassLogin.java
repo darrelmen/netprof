@@ -54,11 +54,10 @@ import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.StartupInfo;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -68,7 +67,7 @@ import java.util.List;
  */
 public class UserPassLogin extends UserDialog implements UserPassDialog {
 //  private final Logger logger = Logger.getLogger("UserPassLogin");
-  //private static final String USERNAME_BOX_SIGN_IN = "Username_Box_SignIn";
+
   public static final String USER_NAME_BOX = "UserNameBox";
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
@@ -76,7 +75,6 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
   private static final int LEFT_SIDE_WIDTH = 453;
-  //private static final String VALID_EMAIL = "Please enter a valid email address.";
   private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation.";//"Get feedback on your pronunciation";
   private static final String THIRD_BULLET = "Create and share vocab lists for study and review.";//"Make your own lists of words to study later or to share.";
   private static final String CHECK_EMAIL = "Check Email";
@@ -86,9 +84,9 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private static final int BULLET_MARGIN = 25;
   private static final String PLEASE_CHECK = "Please check";
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
-  // private static final String ENTER_YOUR_EMAIL = "Please check your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String HELP = "Help";
+  public static final int FLAG_DIM = 32;
 
   private final KeyPressHelper enterKeyButtonHelper;
 
@@ -97,6 +95,9 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
   private final SignUp signUpForm;
   private final SignIn signInForm;
+
+  private List<String> languages = new ArrayList<>();
+  private List<String> ccs = new ArrayList<>();
 
   /**
    * @param props
@@ -113,18 +114,33 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     signUpForm = new SignUpForm(props, userManager, eventRegistration, this, startupInfo);
     signInForm = new SignInForm(props, userManager, eventRegistration, this, signUpForm);
 
-    boolean willShow = false;// checkWelcome();
-    if (!willShow) {
-      if (BrowserCheck.isIPad()) {
-        showSuggestApp();
-      }
+    if (BrowserCheck.isIPad()) {
+      showSuggestApp();
     }
+
+    getFlags(startupInfo);
 
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = getKeyPressHelper();
     setEnterKeyButtonHelper(enterKeyButtonHelper);
     signInForm.setEnterKeyButtonHelper(enterKeyButtonHelper);
     signUpForm.setEnterKeyButtonHelper(enterKeyButtonHelper);
+  }
+
+  private void getFlags(StartupInfo startupInfo) {
+    Set<String> seen = new HashSet<>();
+
+    startupInfo.getProjects().forEach(slimProject -> {
+
+      String language = slimProject.getLanguage();
+      if (slimProject.getStatus() == ProjectStatus.PRODUCTION) {
+        if (!seen.contains(language)) {
+          languages.add(language);
+          ccs.add(slimProject.getCountryCode());
+          seen.add(language);
+        }
+      }
+    });
   }
 
   private KeyPressHelper getKeyPressHelper() {
@@ -155,9 +171,13 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     signInHasFocus = true;
   }
 
-  public void setSignInPasswordFocus() { signInForm.setFocusPassword();  }
+  public void setSignInPasswordFocus() {
+    signInForm.setFocusPassword();
+  }
 
-  public void tryLogin() { signInForm.tryLogin(); }
+  public void tryLogin() {
+    signInForm.tryLogin();
+  }
 
   /**
    * Don't redirect them to download site just yet.
@@ -170,12 +190,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
         "Install App?",
         messages,
         Collections.emptySet(),
-        null, new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            signInForm.setFocusOnUserID();
-          }
-        },
+        null, hiddenEvent -> signInForm.setFocusOnUserID(),
         true, true);
     modal.setMaxHeigth(600 + "px");
     modal.show();
@@ -236,7 +251,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     styleLink(forgotPassword);
 
     Panel hp2 = new HorizontalPanel();
-hp2.getElement().setId("hp_forgotuser_pass_help_row");
+    hp2.getElement().setId("hp_forgotuser_pass_help_row");
     hp2.add(forgotUser);
     hp2.add(forgotPassword);
     hp2.add(getHelpButton());
@@ -344,7 +359,7 @@ hp2.getElement().setId("hp_forgotuser_pass_help_row");
   private void getLeftIntro(Panel leftAndRight) {
     DivWidget left = new DivWidget();
     left.addStyleName("floatLeftAndClear");
-   // left.addStyleName("rightFiveMargin");
+    // left.addStyleName("rightFiveMargin");
     left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
     int size = 1;
@@ -354,11 +369,46 @@ hp2.getElement().setId("hp_forgotuser_pass_help_row");
     w2.getElement().getStyle().setPaddingBottom(24, Style.Unit.PX);
     w2.getElement().getStyle().setTextAlign(Style.TextAlign.LEFT);
 
-    addBullett(left, props.getFirstBullet(), "NewProF2_48x48.png");
-    if (!props.isAMAS()) {
+    String firstBullet = props.getFirstBullet();
+    if (props.isAMAS()) {
+      addBullett(left, firstBullet, "NewProF2_48x48.png");
+    } else {
       addBullett(left, SECOND_BULLET, "NewProF1_48x48.png");
+      addBullett(left, firstBullet, "NewProF2_48x48.png");
       addBullett(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
     }
+
+    DivWidget langs = new DivWidget();
+
+    Iterator<String> iterator = languages.iterator();
+    ccs.forEach(lang -> {
+      DivWidget both = new DivWidget();
+      both.addStyleName("inlineFlex");
+
+      com.google.gwt.user.client.ui.Image flag = getFlag(lang);
+      flag.addStyleName("rightFiveMargin");
+      flag.setHeight(FLAG_DIM +
+          "px");
+      flag.setWidth(FLAG_DIM +
+          "px");
+      both.add(flag);
+//      langs.add(flag);
+
+      HTML w = new HTML(iterator.next());
+      w.addStyleName("rightTenMargin");
+      w.addStyleName("topFiveMargin");
+      both.add(w);
+      langs.add(both);
+      //    langs.add(w);
+
+    });
+
+    langs.getElement().getStyle().setMarginTop(30, Style.Unit.PX);
+    left.add(langs);
+  }
+
+  private com.google.gwt.user.client.ui.Image getFlag(String cc) {
+    return new com.google.gwt.user.client.ui.Image("langtest/cc/" + cc + ".png");
   }
 
   private void addBullett(DivWidget left, String bulletText, String image) {

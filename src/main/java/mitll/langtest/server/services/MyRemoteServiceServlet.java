@@ -68,6 +68,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    */
   public static final String DATABASE_REFERENCE = "databaseReference";
 
+  /**
+   *
+   */
   protected DatabaseServices db;
   protected ServerProperties serverProps;
   protected IUserSecurityManager securityManager;

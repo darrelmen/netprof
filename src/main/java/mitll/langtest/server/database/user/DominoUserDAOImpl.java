@@ -166,11 +166,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
   }
 
+/*
   public static final IUserServiceDelegate makeServiceDelegate(ServerProperties props,
                                                                Mailer mailer, Mongo mongoCP, JSONSerializer serializer, Ignite ignite) {
     MongoUserServiceDelegate d = null;
-    //UserServiceProperties props, boolean isAdminPWChangeEnabled,
-    //Mailer mailer, MongoConnectionPool mongoPool
     switch (props.getUserServiceProperties().serviceType) {
       case LDAP:
         d = new LDAPUserServiceDelegate(props.getUserServiceProperties(), mailer, props.getAcctTypeName(), mongoCP);
@@ -185,6 +184,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     logger.info("Initialized user service of type {}", d.getClass().getSimpleName());
     return d;
   }
+*/
 
   public JSONSerializer getSerializer() {
     return serializer;
