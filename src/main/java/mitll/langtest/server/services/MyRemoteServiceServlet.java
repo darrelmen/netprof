@@ -53,10 +53,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.net.UnknownHostException;
 
 @SuppressWarnings("serial")
@@ -273,7 +271,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       String subject = "Server Exception on " + getHostName() + " at " +installPath;
       sendEmail(subject, getInfo(prefixedMessage));
 
-      logger.error(getInfo(prefixedMessage));
+      logger.error(getInfo(prefixedMessage), e);
     } else {
       logger.error("\n\nlogAndNotifyServerException : got " + e, e);
     }
@@ -475,28 +473,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       return message;
     }
   }
-
-  /**
-   * @paramx request
-   * @paramx response
-   * @throws ServletException
-   * @throws IOException
-   */
-/*  @Override
-  protected void service(HttpServletRequest request,
-                         HttpServletResponse response) throws ServletException, IOException {
-    try {
-      super.service(request, response);
-    } catch (ServletException | IOException e) {
-      logger.info("got servlet or io exception ");
-      logAndNotifyServerException(e);
-      throw e;
-    } catch (Exception eee) {
-      logger.info("got exception ");
-      logAndNotifyServerException(eee);
-      throw new ServletException("rethrow exception", eee);
-    }
-  }*/
 
   @Override protected void doUnexpectedFailure(Throwable ex) {
     logger.info("Look at exception {}", ex.getClass().getCanonicalName());

@@ -56,6 +56,7 @@ import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.StartupInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -86,7 +87,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String HELP = "Help";
-  public static final int FLAG_DIM = 32;
+  private static final int FLAG_DIM = 32;
 
   private final KeyPressHelper enterKeyButtonHelper;
 
@@ -96,8 +97,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private final SignUp signUpForm;
   private final SignIn signInForm;
 
-  private List<String> languages = new ArrayList<>();
-  private List<String> ccs = new ArrayList<>();
+  // private List<String> languages = new ArrayList<>();
+  private List<Pair> ccs = new ArrayList<>();
 
   /**
    * @param props
@@ -131,16 +132,33 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     Set<String> seen = new HashSet<>();
 
     startupInfo.getProjects().forEach(slimProject -> {
-
       String language = slimProject.getLanguage();
       if (slimProject.getStatus() == ProjectStatus.PRODUCTION) {
         if (!seen.contains(language)) {
-          languages.add(language);
-          ccs.add(slimProject.getCountryCode());
+//          languages.add(language);
+          //        ccs.add(slimProject.getCountryCode());
+
+          ccs.add(new Pair(slimProject.getCountryCode(), language));
           seen.add(language);
         }
       }
     });
+    Collections.sort(ccs);
+  }
+
+
+  private static class Pair implements Comparable<Pair> {
+    String cc, language;
+
+    public Pair(String cc, String language) {
+      this.cc = cc;
+      this.language = language;
+    }
+
+    @Override
+    public int compareTo(@NotNull Pair o) {
+      return language.compareTo(o.language);
+    }
   }
 
   private KeyPressHelper getKeyPressHelper() {
@@ -378,33 +396,39 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
       addBullett(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
     }
 
-    DivWidget langs = new DivWidget();
+    left.add(getFlagsDisplay());
+  }
 
-    Iterator<String> iterator = languages.iterator();
-    ccs.forEach(lang -> {
+  @NotNull
+  private Grid getFlagsDisplay() {
+    int row = (int) Math.ceil((float) ccs.size() / (float) 5);
+    Grid langs = new Grid(row, 5);
+    int r = 0;
+
+    for (Pair pair : ccs) {
       DivWidget both = new DivWidget();
       both.addStyleName("inlineFlex");
 
-      com.google.gwt.user.client.ui.Image flag = getFlag(lang);
-      flag.addStyleName("rightFiveMargin");
-      flag.setHeight(FLAG_DIM +
-          "px");
-      flag.setWidth(FLAG_DIM +
-          "px");
-      both.add(flag);
-//      langs.add(flag);
+      {
+        com.google.gwt.user.client.ui.Image flag = getFlag(pair.cc);
+        flag.addStyleName("rightFiveMargin");
+        flag.setHeight(FLAG_DIM + "px");
+        flag.setWidth(FLAG_DIM + "px");
+        both.add(flag);
+      }
 
-      HTML w = new HTML(iterator.next());
-      w.addStyleName("rightTenMargin");
-      w.addStyleName("topFiveMargin");
-      both.add(w);
-      langs.add(both);
-      //    langs.add(w);
-
-    });
+      {
+        HTML w = new HTML(pair.language);
+        w.addStyleName("rightTenMargin");
+        w.addStyleName("topFiveMargin");
+        both.add(w);
+      }
+      langs.setWidget(r / 5, r % 5, both);
+      r++;
+    }
 
     langs.getElement().getStyle().setMarginTop(30, Style.Unit.PX);
-    left.add(langs);
+    return langs;
   }
 
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {

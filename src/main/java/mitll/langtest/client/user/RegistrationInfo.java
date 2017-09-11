@@ -38,8 +38,6 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 
@@ -54,8 +52,8 @@ class RegistrationInfo extends BasicDialog {
   private static final String GENDER_GROUP = "GenderGroup";
   private static final String CHOOSE_A_GENDER = "Choose male or female.";
   private static final String DIALECT = "Dialect";
-  public static final String PLEASE_ENTER_YOUR_AGE = "Please enter your age.";
-  public static final String PLEASE_ENTER_A_VALID_AGE = "Please enter a valid age.";
+  private static final String PLEASE_ENTER_YOUR_AGE = "Please enter your age.";
+  private static final String PLEASE_ENTER_A_VALID_AGE = "Please enter a valid age.";
 
   private final FormField ageEntryGroup;
   private FormField dialectGroup;
@@ -96,7 +94,7 @@ class RegistrationInfo extends BasicDialog {
     if (dialectGroup != null) dialectGroup.setVisible(visible);
   }
 
-  public void setGenderVisible(boolean visible) {
+  private void setGenderVisible(boolean visible) {
     genders.setVisible(visible);
   }
 
@@ -104,17 +102,15 @@ class RegistrationInfo extends BasicDialog {
     return genders.isVisible();
   }
 
-  void hideAge() {
+/*  void hideAge() {
     ageEntryGroup.setVisible(false);
-  }
+  }*/
 
   private FormField getDialect(Panel dialogBox) {
     final FormField dialectGroup = addControlFormFieldWithPlaceholder(dialogBox, false, 3, 25, DIALECT);
-    dialectGroup.box.addKeyUpHandler(new KeyUpHandler() {
-      public void onKeyUp(KeyUpEvent event) {
-        if (!dialectGroup.getSafeText().isEmpty()) {
-          dialectGroup.group.setType(ControlGroupType.NONE);
-        }
+    dialectGroup.box.addKeyUpHandler(event -> {
+      if (!dialectGroup.getSafeText().isEmpty()) {
+        dialectGroup.group.setType(ControlGroupType.NONE);
       }
     });
     return dialectGroup;
@@ -122,18 +118,19 @@ class RegistrationInfo extends BasicDialog {
 
   /**
    * If it's invisible, it's valid.
-   * @see SignUpForm#isFormValid
+   *
    * @return
+   * @see SignUpForm#isFormValid
    */
-  public boolean checkValid() {
+  boolean checkValid() {
     if (isVisible()) {
       boolean valid = checkValidGender();
-      if (!valid) return valid;
+      if (!valid) return false;
       else return checkMissingAge();
     } else return true;
   }
 
-  public boolean checkValidity() {
+  boolean checkValidity() {
     return checkValidGender() && checkMissingAge();
   }
 
@@ -165,8 +162,7 @@ class RegistrationInfo extends BasicDialog {
           return false;
         }
       }
-    }
-    else return true;
+    } else return true;
   }
 
   public boolean isMale() {

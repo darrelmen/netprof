@@ -92,6 +92,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final String LOCALHOST = "127.0.0.1";
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
+  public static final String NETPROF = "netprof";
+  public static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
 
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
@@ -382,8 +384,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         affiliation,
         gender1,//.equalsIgnoreCase(MALE) ? DMALE : DFEMALE,
         Collections.singleton(kind.getRole()),
-        getGroup()
-    );
+        getGroup(),
+
+        APPLICATION_ABBREVIATIONS
+        );
 
     AccountDetail acctDetail = new AccountDetail();
     updateUser.setAcctDetail(acctDetail);
@@ -714,7 +718,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' " + user.getUserKind() + " gender is unspecified.");
     } else {
       logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' " + user.getUserKind() + " gender is " + gender);
-
     }
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
@@ -725,7 +728,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         DEFAULT_AFFILIATION,
         gender,
         roleAbbreviations,
-        getGroup()
+        getGroup(),
+        APPLICATION_ABBREVIATIONS
     );
 
     if (clientUserDetail.getGender() != gender)
