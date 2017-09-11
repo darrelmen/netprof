@@ -75,7 +75,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   /**
    *
    */
- // private final Long selectedUser;
   private final String selectedUserKey;
   private final String header;
 
@@ -94,9 +93,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
   private int shortPageSize = 8;
 
+  /*
   MemoryItemContainer(ExerciseController controller, String selectedUserKey, String header) {
     this(controller, selectedUserKey, header, PAGE_SIZE, 8);
-  }
+  }*/
 
   /**
    * @param controller
@@ -113,7 +113,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
                                 int shortPageSize) {
     super(controller);
     this.selectedUserKey = selectedUserKey;
-     //getSelectedUser(selectedUserKey);
     this.header = header;
     todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - 2);
@@ -179,13 +178,17 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return null;
   }
 
+/*
   private String getSelectedUserKey(ExerciseController controller, String appTitle) {
     return getStoragePrefix(controller, appTitle) + SELECTED_USER;
   }
+*/
 
+/*
   private String getStoragePrefix(ExerciseController controller, String appTitle) {
     return appTitle + ":" + controller.getUser() + ":";
   }
+*/
 
   protected String truncate(String columnText) {
     int maxLengthId = getMaxLengthId();
@@ -266,6 +269,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return tableWithPager;
   }
 
+  /**
+   * @see #getTableWithPager
+   * @param users
+   */
   void populateTable(Collection<T> users) {
     int i = 0;
     int index = 0;

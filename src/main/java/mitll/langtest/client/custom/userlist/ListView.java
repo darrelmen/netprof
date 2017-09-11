@@ -6,12 +6,15 @@ import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
@@ -34,6 +37,11 @@ import java.util.logging.Logger;
  */
 public class ListView implements ContentView, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListView");
+
+  private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click on a list to learn it.";
+  private static final String YOUR_LISTS = "Your Lists";
+  private static final String LEARN = "Learn";
+  private static final String DRILL = "Drill";
   private static final String STORAGE_ID = "others";
   private static final String OTHERS_PUBLIC_LISTS = "Public Lists";
 
@@ -95,16 +103,20 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        Panel tableWithPager = (myLists = new ListContainer(controller, 20, true, "myLists", 15)).getTableWithPager(result);
+        ListContainer myLists = new MyListContainer();
+        Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
         result.forEach(list -> {
           if (list.getUserID() == controller.getUser()) {
             names.add(list.getName());
           }
         });
-        addPagerAndHeader(tableWithPager, "Your Lists", left);
+
+        new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
+
+        addPagerAndHeader(tableWithPager, YOUR_LISTS, left);
         tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
 
-        left.add(getButtons(myLists));
+        left.add(getButtons(ListView.this.myLists));
       }
     });
 
@@ -117,14 +129,24 @@ public class ListView implements ContentView, CreateListComplete {
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
         ListContainer listContainer =
-            new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE);
+            new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE) {
+              @Override
+              protected void gotDoubleClickOn(UserList<CommonShell> selected) {
+                showLearnList(this);
+              }
+            };
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, "Visited", top);
 
+      new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
         tableWithPager.setHeight(VISITED_HEIGHT + "px");
 
-        DivWidget ldButtons = getLDButtons(listContainer);
-        ldButtons.add(getRemoveVisitorButton(listContainer));
+        DivWidget ldButtons = new DivWidget();
+        {
+          ldButtons.addStyleName("topFiveMargin");
+          ldButtons.add(getRemoveVisitorButton(listContainer));
+          addDrillAndLearn(ldButtons, listContainer);
+        }
         top.add(ldButtons);
       }
     });
@@ -139,10 +161,18 @@ public class ListView implements ContentView, CreateListComplete {
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
         ListContainer listContainer =
-            new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE);
+            new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE) {
+              @Override
+              protected void gotDoubleClickOn(UserList<CommonShell> selected) {
+                showLearnList(this);
+              }
+            };
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, OTHERS_PUBLIC_LISTS, bottom);
         tableWithPager.setHeight(BROWSE_HEIGHT + "px");
+
+        new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
+
 
         bottom.add(getLDButtons(listContainer));
       }
@@ -182,6 +212,7 @@ public class ListView implements ContentView, CreateListComplete {
     Button successButton = getSuccessButton("Title");
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> doEdit());
+    addTooltip(successButton, "Edit the list title or make it public.");
     return successButton;
   }
 
@@ -189,6 +220,8 @@ public class ListView implements ContentView, CreateListComplete {
     Button successButton = getSuccessButton("Share");
     successButton.setIcon(IconType.SHARE);
     successButton.addClickHandler(event -> doShare());
+    addTooltip(successButton, "Share the list with someone.");
+
     return successButton;
   }
 
@@ -246,6 +279,7 @@ public class ListView implements ContentView, CreateListComplete {
     Button successButton = getSuccessButton("Items");
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList());
+    addTooltip(successButton, "Edit the items on list.");
     return successButton;
   }
 
@@ -277,24 +311,32 @@ public class ListView implements ContentView, CreateListComplete {
 
   @NotNull
   private Button getLearnButton(ListContainer container) {
-    Button learn = getSuccessButton("Learn");
-    learn.addClickHandler(event -> {
-          if (!container.isEmpty()) {
-            controller.showLearnList(getCurrentSelection(container).getID());
-          }
-        }
-    );
+    Button learn = getSuccessButton(LEARN);
+    learn.setType(ButtonType.INFO);
+    learn.addClickHandler(event -> showLearnList(container));
+    addTooltip(learn, "Learn the list.");
+
     return learn;
+  }
+
+  private void showLearnList(ListContainer container) {
+    if (!container.isEmpty()) {
+      controller.showLearnList(getCurrentSelection(container).getID());
+    }
   }
 
   @NotNull
   private Button getDrillButton(ListContainer container) {
-    Button drill = getSuccessButton("Drill");
+    Button drill = getSuccessButton(DRILL);
+    drill.setType(ButtonType.INFO);
+
     drill.addClickHandler(event -> {
       if (!container.isEmpty()) {
         controller.showDrillList(getCurrentSelection(container).getID());
       }
     });
+    addTooltip(drill, "Drill the list.");
+
     return drill;
   }
 
@@ -309,14 +351,15 @@ public class ListView implements ContentView, CreateListComplete {
   private DialogHelper dialogHelper;
 
   /**
-   * @see #getButtons(ListContainer)
    * @return
+   * @see #getButtons(ListContainer)
    */
   @NotNull
   private Button getAddButton() {
     final Button add = new Button("", IconType.PLUS);
     add.addClickHandler(event -> dialogHelper = doAdd());
     add.setType(ButtonType.SUCCESS);
+    addTooltip(add, "Make a new list.");
     return add;
   }
 
@@ -326,6 +369,7 @@ public class ListView implements ContentView, CreateListComplete {
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDelete(add, getCurrentSelection(myLists)));
     add.setType(ButtonType.DANGER);
+    addTooltip(add, "Delete list.");
     return add;
   }
 
@@ -335,7 +379,12 @@ public class ListView implements ContentView, CreateListComplete {
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDeleteVisitor(add, getCurrentSelection(visited), visited));
     add.setType(ButtonType.DANGER);
+    addTooltip(add, "Forget visited list.");
     return add;
+  }
+
+  private void addTooltip(Widget add, String tip) {
+    new TooltipHelper().addTooltip(add, tip);
   }
 
   private UserList<CommonShell> getCurrentSelection(ListContainer container) {
@@ -520,5 +569,16 @@ public class ListView implements ContentView, CreateListComplete {
   public void gotEdit() {
     //  logger.info("\n\n\ngot edit");
     editDialog.doEdit(myLists.getCurrentSelection(), myLists);
+  }
+
+  private class MyListContainer extends ListContainer {
+    public MyListContainer() {
+      super(ListView.this.controller, 20, true, "myLists", 15);
+    }
+
+    @Override
+    protected void gotDoubleClickOn(UserList<CommonShell> selected) {
+      showLearnList(this);
+    }
   }
 }

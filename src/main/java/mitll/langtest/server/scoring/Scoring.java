@@ -120,7 +120,8 @@ public abstract class Scoring {
    */
   Scoring(String deployPath,
           ServerProperties props,
-          LogAndNotify langTestDatabase, HTKDictionary htkDictionary,
+          LogAndNotify langTestDatabase,
+          HTKDictionary htkDictionary,
           Project project) {
     this.deployPath = deployPath;
     this.props = props;

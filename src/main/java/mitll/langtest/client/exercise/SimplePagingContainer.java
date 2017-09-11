@@ -32,6 +32,8 @@
 
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
@@ -145,7 +147,20 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     //  logger.info("simplePaging : makeCellTable -------- ");
     CellTable.Resources o = chooseResources();
     this.table = makeCellTable(o);
+
+    table.addDomHandler(event -> {
+          T selected = selectionModel.getSelectedObject();
+          if (selected != null) {
+            gotDoubleClickOn(selected);
+          }
+        },
+        DoubleClickEvent.getType());
+
     configureTable(sortEnglish);
+  }
+
+  protected void gotDoubleClickOn(T selected) {
+//    logger.info("got double click on " + selected);
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
@@ -158,6 +173,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   /**
    * Most tables don't want to worry about text direction.
+   *
    * @return non-null if you want to style the table columns
    */
   protected CellTable.Resources chooseResources() {

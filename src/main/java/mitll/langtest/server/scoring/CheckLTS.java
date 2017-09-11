@@ -128,7 +128,8 @@ class CheckLTS {
 
     if (DEBUG) {
       logger.debug("checkLTS '" + language + "'" +
-          "\n\ttokens : '" + tokens + "' lts " + lts +
+          "\n\ttokens : '" + tokens + "'" +
+          "\n\tlts " + lts +
           "\n\tdict size " + htkDictionary.size() +
           "\n\ttranslit OK " + translitOk);
     }
@@ -171,11 +172,12 @@ class CheckLTS {
           /*    (process == null || process.length == 0 || process[0].length == 0 ||
               process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && (StringUtils.join(process[0], "-")).contains("#")))
           */) {
-            boolean htkEntry = htkDictionary.contains(token);
+            boolean htkEntry = htkDictionary.contains(token) || htkDictionary.contains(token.toLowerCase());
             if (DEBUG) logger.info("checkLTS in dict for " + token + " = " + htkEntry);
 
-            if (htkEntry // && !htkDictionary.isEmpty()
+            if (htkEntry
                 ) {
+ /*
               if (process != null) {
                 //logger.info("2 checkLTS in dict for " + process.length);
                 if (process.length > 0) {
@@ -185,7 +187,8 @@ class CheckLTS {
                   }
                 }
               }
-              // NO : I guess we accept tokens when the dict is empty???
+              */
+              // we don't accept tokens when the dict is empty...
               indict.add(trim);
             } else {
               if (!isEmptyLTS) {

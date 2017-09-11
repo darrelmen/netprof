@@ -147,7 +147,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    *
    * @return
    */
-  private String getWebserviceIP() {    return WEBSERVICE_HOST_DEFAULT;  }
+  private String getWebserviceIP() {
+    return WEBSERVICE_HOST_DEFAULT;
+  }
 
   public void setAvailable() {
     new Thread(() -> {
@@ -524,8 +526,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     int total = 0;
     for (String word : transcriptTokens) {
-      if (htkDictionary.contains(word)) {
-        scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
+      boolean easyMatch;
+      if ((easyMatch = htkDictionary.contains(word)) || (htkDictionary.contains(word.toLowerCase()))) {
+        scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
 
         int numForThisWord = 0;
         for (int i = 0; i < prons.size(); i++) {
@@ -585,8 +588,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         word = trim;
       }
       if (!word.equals(" ") && !word.isEmpty()) {
-        if (htkDictionary.contains(word)) {
-          scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
+        boolean easyMatch;
+
+        if ((easyMatch = htkDictionary.contains(word)) || (htkDictionary.contains(word.toLowerCase()))) {
+          scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
+
           for (int i = 0; i < prons.size(); i++) {
             dict += getPronStringForWord(word, prons.apply(i), justPhones);
           }
@@ -837,7 +843,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       } catch (IOException e) {
         logger.error("Error closing http connection " + e, e);
         langTestDatabase.logAndNotifyServerException(e, "running hydra on" +
-            "\n\thost  " + getHostName()+
+            "\n\thost  " + getHostName() +
             "\n\tinput " + hydraInput);
         resultsStr = "";
       }

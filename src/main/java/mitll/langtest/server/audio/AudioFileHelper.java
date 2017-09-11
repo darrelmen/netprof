@@ -1346,7 +1346,7 @@ public class AudioFileHelper implements AlignDecode {
     if (webserviceScoring == null) {
       String installPath = pathHelper.getInstallPath();
       webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify,
-          readDictionary(project, installPath), project);
+          readDictionary(project), project);
     }
     asrScoring = webserviceScoring;
   }
@@ -1359,12 +1359,12 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   @Nullable
-  private HTKDictionary readDictionary(Project project, String installPath) {
+  private HTKDictionary readDictionary(Project project) {
     HTKDictionary htkDictionary = null;
     try {
       htkDictionary = makeDict(project.getModelsDir());
     } catch (Exception e) {
-      logger.error("for now got " + e, e);
+      logger.error("readDictionary : got " + e, e);
     }
     return htkDictionary;
   }
