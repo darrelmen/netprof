@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.HighlightSegment;
@@ -135,8 +136,7 @@ public class WordTable {
 
     if (words == null) {
       logger.warning("no transcript?");
-    }
-    else {
+    } else {
       words
           .stream()
           .filter(segment -> !shouldSkipPhone(segment.getEvent()))
@@ -147,18 +147,18 @@ public class WordTable {
 
   /**
    * Somehow unknown model is getting out.
-   * @paramx pair
+   *
    * @return
+   * @paramx pair
    */
 //  private String getColoredSpanForSegment(Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
 //    return getColoredSpanForWord(pair.getKey());
 //  }
-
   private String getColoredSpanForWord(TranscriptSegment word) {
     String event = word.getEvent();
     if (event.equals("UNKNOWNMODEL")) event = "Low score";
     String coloredSpan = getColoredSpan(event, word.getScore());
-  //  logger.info("span '" + word.getEvent() + "' " + word.getScore() + " ");
+    //  logger.info("span '" + word.getEvent() + "' " + word.getScore() + " ");
     return coloredSpan;
   }
 
@@ -260,11 +260,31 @@ public class WordTable {
     DivWidget phones = new DivWidget();
     phones.addStyleName("inlineFlex");
     phones.addStyleName("phoneContainer");
-   // phones.addStyleName("topFiveMargin");
+
+    new TooltipHelper().addTooltip(phones,"Click to hear word.");
+
+  /*  Icon playFeedback = getPlayFeedback();
+
+    phones.addDomHandler(event -> playFeedback.setVisible(false), MouseOutEvent.getType());
+    phones.addDomHandler(event -> playFeedback.setVisible(true), MouseOverEvent.getType());*/
+
     addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment, isRTL);
+    //phones.add(playFeedback);
     return phones;
   }
 
+/*  @NotNull
+  private Icon getPlayFeedback() {
+    Icon playFeedback = new Icon(IconType.VOLUME_UP);
+    playFeedback.addStyleName("leftFiveMargin");
+    playFeedback.addStyleName("topFiveMargin");
+    playFeedback.setVisible(false);
+    Style style = playFeedback.getElement().getStyle();
+    //style.setMarginLeft(-20, Style.Unit.PX);
+    style.setMarginTop(-20, Style.Unit.PX);
+    style.setZIndex(100);
+    return playFeedback;
+  }*/
 
   /**
    * @param netPronImageTypeToEndTime
