@@ -169,10 +169,11 @@ war {
     rootSpec.exclude("**/*tests.jar")
     rootSpec.exclude("**/log4j2-test.xml")
 
-//    from('src') {
-//        include '**/log4j2.xml'
-//        into 'WEB-INF/classes'
-//    }
+    // try to make ours mask out others...
+    from('src') {
+        include '**/log4j2.xml'
+        into 'WEB-INF/classes'
+    }
 }
 
 // make standalone jar
