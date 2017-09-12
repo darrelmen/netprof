@@ -87,7 +87,7 @@ public interface IUserListManager   {
 
   UserList<CommonShell> getSimpleUserListByID(int id);
 
-  UserList<CommonExercise> getUserListByIDExercises(long id, int projid, Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonExercise> getUserListByIDExercises(int id, int projid, Collection<String> typeOrder, Set<Integer> ids);
 
   List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
 

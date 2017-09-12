@@ -80,7 +80,7 @@ public class SlickUserExerciseDAO
   private static final String UNKNOWN = "UNKNOWN";
   private static final String ANY = "Any";
   private static final String DEFAULT_FOR_EMPTY = ANY;
-  private static final int DESIRED_RANGES = 10;
+//  private static final int DESIRED_RANGES = 10;
   public static final boolean ADD_SOUNDS = false;
 
   private final long lastModified = System.currentTimeMillis();
@@ -299,7 +299,7 @@ public class SlickUserExerciseDAO
    * @param slick
    * @param lookup
    * @return
-   * @see IUserExerciseDAO#useExToPhones(Map)
+   * @see IUserExerciseDAO#useExToPhones
    * @see #getExercises
    */
   private List<Pair> addExerciseToSectionHelper(SlickExercise slick,
@@ -590,6 +590,7 @@ public class SlickUserExerciseDAO
   }
 
   /**
+   * TODO : All overkill...?  why not just look them back up from exercise dao?
    * @param all
    * @return
    * @see
@@ -735,7 +736,11 @@ public class SlickUserExerciseDAO
    * @return
    */
   public List<CommonExercise> getCommonExercises(int listID) {
-    return getUserExercises(dao.getOnList(listID));
+
+
+
+    List<SlickExercise> onList = dao.getOnList(listID);
+    return getUserExercises(onList);
   }
 
   public int getNumOnList(int listID) {  return dao.getNumOnList(listID);  }

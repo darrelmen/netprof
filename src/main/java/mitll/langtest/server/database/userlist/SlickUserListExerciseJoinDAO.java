@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.userlist;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.IUserListManager;
@@ -39,10 +40,17 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;
 
+import java.util.Collection;
+
 public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerciseJoinDAO {
   //  private static final Logger logger = LogManager.getLogger(SlickUserListExerciseJoinDAO.class);
   private final UserExerciseListJoinDAOWrapper dao;
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   * @param database
+   * @param dbConnection
+   */
   public SlickUserListExerciseJoinDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserExerciseListJoinDAOWrapper(dbConnection);
@@ -89,5 +97,9 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
 
   public boolean isEmpty() {
     return dao.getNumRows() == 0;
+  }
+
+  public Collection<Integer> getExids(int listid) {
+    return dao.realExids(listid);
   }
 }

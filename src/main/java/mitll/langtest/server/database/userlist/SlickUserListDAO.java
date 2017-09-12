@@ -259,11 +259,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   /**
    * Add the exercises to the list.
    *
+   * @see #getWithExercisesEx
    * @param where
    */
   private void populateListEx(UserList<CommonExercise> where) {
-    List<CommonExercise> onList = userExerciseDAO.getCommonExercises(where.getID());
-    where.setExercises(onList);
+    where.setExercises(userExerciseDAO.getCommonExercises(where.getID()));
   }
 
   /**
@@ -331,17 +331,26 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public UserList<CommonExercise> getWithExercisesEx(long unique) {
+  public UserList<CommonExercise> getWithExercisesEx(int unique) {
+     UserList<CommonExercise> list = getList(unique);
+    if (list == null) return null;
+    else {
+      populateListEx(list);
+      return list;
+    }
+  }
+
+  @Override
+  public UserList<CommonExercise> getList(int unique) {
     Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID((int) unique);
     UserList<CommonExercise> exlist;
 
     if (slickUserExerciseListOption.isDefined()) {
       exlist = fromSlickEx(slickUserExerciseListOption.get());
     } else {
-      logger.error("getByExID : huh? no user list with id " + unique);
+      logger.error("getList : huh? no user list with id " + unique);
       return null;
     }
-    populateListEx(exlist);
     return exlist;
   }
 

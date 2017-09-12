@@ -116,6 +116,7 @@ import java.text.CollationKey;
 import java.util.*;
 
 import static mitll.langtest.server.database.Report.DAY_TO_SEND_REPORT;
+import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
 
 /**
  * Note with H2 that :  <br></br>
@@ -1480,7 +1481,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           copyAsExercises,
           language,
           getAudioDAO(),
-          listid == IUserListManager.COMMENT_MAGIC_ID,
+          listid == COMMENT_MAGIC_ID,
           options);
     }
     return language + "_" + userListByID.getName();
@@ -1530,11 +1531,24 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds(ExerciseListRequest)
    */
   @Override
-  public UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid) {
-    return getUserListManager().getUserListByIDExercises(listid,
-        projectid,
-        getSectionHelper(projectid).getTypeOrder(),
-        listid < 0 ? getIDs(projectid) : Collections.emptySet());
+  public UserList<CommonExercise> getUserListByIDExercises(int listid, int projectid) {
+    if (listid != COMMENT_MAGIC_ID) {
+      Collection<Integer> exids = getUserListManager().getUserListExerciseJoinDAO().getExids(listid);
+      UserList<CommonExercise> list = getUserListManager().getUserListDAO().getList(listid);
+      List<CommonExercise> exercises = new ArrayList<>();
+      exids.forEach(exid-> {
+        CommonExercise exercise = getExercise(projectid, exid);
+        if (exercise != null) exercises.add(exercise);
+      });
+      list.setExercises(exercises);
+      return list;
+    }
+    else {
+      return getUserListManager().getUserListByIDExercises(listid,
+          projectid,
+          getSectionHelper(projectid).getTypeOrder(),
+          listid < 0 ? getIDs(projectid) : Collections.emptySet());
+    }
   }
 
   @Override

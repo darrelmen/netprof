@@ -35,9 +35,11 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.custom.UserList;
 
-public interface IUserListExerciseJoinDAO  extends IDAO {
+import java.util.Collection;
+
+public interface IUserListExerciseJoinDAO extends IDAO {
   /**
-   *  @param userList
+   * @param userList
    * @param uniqueID
    * @param exid
    */
@@ -45,9 +47,12 @@ public interface IUserListExerciseJoinDAO  extends IDAO {
 
   /**
    * TODO : remove
+   *
    * @param listid
    */
   void removeListRefs(long listid);
 
   boolean remove(long listid, int exid);
+
+  Collection<Integer> getExids(int listid);
 }

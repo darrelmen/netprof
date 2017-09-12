@@ -48,8 +48,10 @@ import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.trie.ExerciseTrie;
+import mitll.langtest.server.trie.SearchHelper;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.User;
@@ -64,6 +66,7 @@ import java.util.*;
 public class ProjectTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(ProjectTest.class);
   public static final int MAX = 200;
+  public static final int PROJECTID = 9;
 
   @Test
   public void testProject() {
@@ -265,8 +268,8 @@ public class ProjectTest extends BaseTest {
 
     ExerciseTrie<CommonExercise> fullTrie = project.getFullTrie();
 
-    List<String> supuesto = Arrays.asList("definitiva", "en def", "la de", "la def", "ll ", "ll t","ll th","ll thi", "all ","at ","at a","at al","at a ", "all thing","all c", "all co", "thi", "thin", "thing", "things","things ", "things c","things con"," to a", "to allow");
-   // List<String> supuesto = Arrays.asList("at a", "at al");
+    List<String> supuesto = Arrays.asList("definitiva", "en def", "la de", "la def", "ll ", "ll t", "ll th", "ll thi", "all ", "at ", "at a", "at al", "at a ", "all thing", "all c", "all co", "thi", "thin", "thing", "things", "things ", "things c", "things con", " to a", "to allow");
+    // List<String> supuesto = Arrays.asList("at a", "at al");
 
     for (String test : supuesto) {
       try {
@@ -275,10 +278,59 @@ public class ProjectTest extends BaseTest {
 
         if (exercises.isEmpty()) logger.error("no match for " + test);
         for (CommonExercise exercise : exercises) {
-          logger.info(test + " : '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish()+"'");
+          logger.info(test + " : '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish() + "'");
         }
       } catch (Exception e) {
-        logger.error("got " + e,e);
+        logger.error("got " + e, e);
+      }
+    }
+  }
+
+  @Test
+  public void testFrenchSearch() {
+    DatabaseImpl database = getAndPopulate();
+    // IAudioDAO audioDAO = database.getAudioDAO();
+
+    Project project = database.getProject(PROJECTID);
+
+    List<String> supuesto = Arrays.asList("ecrire", "Écrire", "Écrire".toLowerCase());
+    {
+      ExerciseTrie<CommonExercise> fullTrie = project.getFullTrie();
+      for (String test : supuesto) {
+        try {
+          List<CommonExercise> exercises = fullTrie.getExercises(test);
+          // logger.info(test + " : "  + exercises);
+
+          if (exercises.isEmpty()) logger.error("no match for " + test);
+          for (CommonExercise exercise : exercises) {
+            logger.info(test + " : " + exercise.getID() + " '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish() + "'");
+          }
+        } catch (Exception e) {
+          logger.error("got " + e, e);
+        }
+      }
+    }
+
+    {
+      UserList<CommonExercise> userListByID = database.getUserListByIDExercises(3924, PROJECTID);
+      List<CommonExercise> exercises = userListByID.getExercises();
+      for (CommonExercise exercise : exercises) {
+        Collection<CommonExercise> directlyRelated = exercise.getDirectlyRelated();
+
+        logger.info("User list " + userListByID + " : " + exercise.getID() + " '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish() + "'");
+        for (CommonExercise de : directlyRelated) {
+          logger.info("\tUser list " + userListByID + " : " + de.getID() + " '" + de.getForeignLanguage() + "'\t'" + de.getEnglish() + "'");
+        }
+      }
+      for (String test : supuesto) {
+        Collection<CommonExercise> searchMatches = new SearchHelper().getSearchMatches(exercises, test, "french", project.getAudioFileHelper().getSmallVocabDecoder());
+
+        if (searchMatches.isEmpty()) logger.error("2 no match for " + test);
+        else {
+          for (CommonExercise exercise : searchMatches) {
+            logger.info(test + " : " + exercise.getID() + " '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish() + "'");
+          }
+        }
       }
     }
 
@@ -393,8 +445,6 @@ public class ProjectTest extends BaseTest {
 
     andPopulate.close();
   }
-
-
 
 
   AudioFileHelper getAudioFileHelper(DatabaseImpl russian) {

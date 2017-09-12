@@ -132,7 +132,6 @@ public class NPFHelper implements RequiresResize {
       rememberAndLoadFirstFromUserList(ul, toSelect);
     }
   }*/
-
   private void addNPFToContent(UserList<CommonShell> ul,
                                Panel listContent,
                                String instanceName,
@@ -229,7 +228,6 @@ public class NPFHelper implements RequiresResize {
    * @param ul
    * @param toSelect for now just the id?
    * @see #doNPF
-   * @see #showNPF
    */
   private void rememberAndLoadFirstFromUserList(final UserList<CommonShell> ul, HasID toSelect) {
     npfExerciseList.setUserListID(ul.getID());
@@ -250,7 +248,7 @@ public class NPFHelper implements RequiresResize {
    * @return
    * @see #makeNPFExerciseList
    */
-  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
+  private PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
     return new NPExerciseList(right, controller, listOptions, -1) {
       @Override
       protected void onLastItem() {

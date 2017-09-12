@@ -54,6 +54,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -77,7 +78,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int MIN_WARN_DURATION = 1000;
   private static final String LISTS = "Lists";
 
- // private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
+  // private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
 
   private static final boolean DEBUG = false;
 
@@ -517,11 +518,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param exercisesForState
    * @param prefix
    * @return
+   * @see #getExerciseListWrapperForPrefix(ExerciseListRequest, Collection)
    */
   @NotNull
   private Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState, String prefix) {
     Collection<CommonExercise> originalSet = exercisesForState;
-
     // logger.info("original set" +originalSet.size());
     long then = System.currentTimeMillis();
     ExerciseTrie<CommonExercise> trie =
@@ -531,6 +532,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.info("took " + (now - then) + " millis to build trie for " + exercisesForState.size() + " exercises");
     exercisesForState = trie.getExercises(prefix);
 
+    if (exercisesForState.isEmpty()) {
+      String prefix1 = StringUtils.stripAccents(prefix);
+      exercisesForState = trie.getExercises(prefix1);
+      logger.info("getSearchMatches trying " + prefix1 + " instead of " + prefix + " found " + exercisesForState.size());
+    }
+
     Set<Integer> unique = new HashSet<>();
     exercisesForState.forEach(e -> unique.add(e.getID()));
 
@@ -538,9 +545,20 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       then = System.currentTimeMillis();
       trie = new ExerciseTrie<>(originalSet, getLanguage(), getSmallVocabDecoder(), false);
       now = System.currentTimeMillis();
-      if (now - then > 20)
+      if (now - then > 20) {
         logger.info("took " + (now - then) + " millis to build trie for " + originalSet.size() + " context exercises");
-      exercisesForState.addAll(trie.getExercises(prefix).stream().filter(e -> !unique.contains(e.getID())).collect(Collectors.toList()));
+      }
+
+      List<CommonExercise> contextExercises = trie.getExercises(prefix);
+      if (contextExercises.isEmpty()) {
+        contextExercises = trie.getExercises(StringUtils.stripAccents(prefix));
+        logger.info("getSearchMatches context trying " + StringUtils.stripAccents(prefix) + " instead of " + prefix + " found " + contextExercises.size());
+      }
+      exercisesForState.addAll(contextExercises.stream().filter(e -> !unique.contains(e.getID())).collect(Collectors.toList()));
+    }
+    if (exercisesForState.isEmpty()) {
+      logger.info("getSearchMatches neither " + prefix + " nor " + StringUtils.stripAccents(prefix) + " found any matches against " + exercisesForState.size());
+
     }
     return exercisesForState;
   }
@@ -571,7 +589,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises, request.getLimit() > -1);
 
-    logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
+//    logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
     markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
 
     // TODO : do this the right way vis-a-vis type safe collection...
@@ -1345,18 +1363,18 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 */
 
 //    if (!toAddAudioTo.isEmpty()) {
-      then = System.currentTimeMillis();
-      db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
-      now = System.currentTimeMillis();
+    then = System.currentTimeMillis();
+    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
+    now = System.currentTimeMillis();
 
-      if (now - then > 50)
-        logger.info("getFullExercises took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
+    if (now - then > 50)
+      logger.info("getFullExercises took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
 
-      then = System.currentTimeMillis();
-      addAlignmentOutput(projectID, toAddAudioTo);
-      now = System.currentTimeMillis();
-      if (now - then > 50)
-        logger.info("getFullExercises took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
+    then = System.currentTimeMillis();
+    addAlignmentOutput(projectID, toAddAudioTo);
+    now = System.currentTimeMillis();
+    if (now - then > 50)
+      logger.info("getFullExercises took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
 
 //    } else {
 //      // logger.info("getFullExercises all " + ids.size() + " exercises have audio");
@@ -1579,7 +1597,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
       addAnnotations(byID); // todo do this in a better way
       //if (true || byID.getAudioAttributes().isEmpty()) {
-        toAddAudioTo.add(byID);
+      toAddAudioTo.add(byID);
       //  logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
       //}
       exercises.add(byID);
@@ -1607,7 +1625,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       exid1 = Integer.parseInt(exid);
       return getExercise(exid1, isFlashcardReq);
     } catch (NumberFormatException e) {
-      logger.warn("getExercise can't parse '" + exid + "'");
+      logger.warn("getExercise can't parse '" + exid + "' as an exercise id.");
       return null;
     }
   }

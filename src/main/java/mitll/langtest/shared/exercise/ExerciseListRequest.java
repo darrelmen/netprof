@@ -51,7 +51,7 @@ public class ExerciseListRequest implements IsSerializable {
   private int reqID = 1;
   private Map<String, Collection<String>> typeToSelection = new HashMap<>();
   private String prefix = "";
-  private long userListID = -1;
+  private int userListID = -1;
 
   private int userID = -5;
 
@@ -141,11 +141,11 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
-  public long getUserListID() {
+  public int getUserListID() {
     return userListID;
   }
 
-  public ExerciseListRequest setUserListID(long userListID) {
+  public ExerciseListRequest setUserListID(int userListID) {
     this.userListID = userListID;
     return this;
   }

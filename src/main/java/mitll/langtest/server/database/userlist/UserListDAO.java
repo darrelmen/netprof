@@ -325,7 +325,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    *
    * @param unique
    * @return
-   * @see UserListManager#getUserListByID
+   * @seex UserListManager#getUserListByID
    */
   @Override
   public UserList<CommonShell> getWithExercises(int unique) {
@@ -339,7 +339,12 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public UserList<CommonExercise> getWithExercisesEx(long unique) {
+  public UserList<CommonExercise> getWithExercisesEx(int unique) {
+    return null;
+  }
+
+  @Override
+  public UserList<CommonExercise> getList(int unique) {
     return null;
   }
 

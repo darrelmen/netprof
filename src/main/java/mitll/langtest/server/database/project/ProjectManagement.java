@@ -439,13 +439,14 @@ public class ProjectManagement implements IProjectManagement {
    * @see DatabaseImpl#getExercise
    */
   @Override
-  public CommonExercise getExercise(int projectid, int id) {
-    return getProjectOrFirst(projectid).getExerciseByID(id);
+  public CommonExercise getExercise(int projectid, int id) { return getProjectOrFirst(projectid).getExerciseByID(id);
   }
 
+/*
   public CommonExercise getExerciseByID(int id) {
     return getFirstProject().getExerciseByID(id);
   }
+*/
 
   /**
    * exercises are in the context of a project

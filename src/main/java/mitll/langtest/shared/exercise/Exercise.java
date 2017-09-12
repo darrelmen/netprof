@@ -416,6 +416,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   /**
    * @param contextExercise
    * @see #addContext(String, String, String)
+   * @see mitll.langtest.server.database.exercise.DBExerciseDAO#attachContextExercises
    */
   public void addContextExercise(CommonExercise contextExercise) {
     directlyRelated.add(contextExercise);

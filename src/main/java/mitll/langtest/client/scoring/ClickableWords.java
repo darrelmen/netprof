@@ -46,13 +46,13 @@ public class ClickableWords<T extends CommonExercise> {
   private boolean hasClickableAsian = false;
   private static final String MANDARIN = "Mandarin";
   private static final String JAPANESE = "Japanese";
-  //public static final String DEFAULT_SPEAKER = "Default Speaker";
+
   private ListInterface listContainer;
   private final WordBoundsFactory factory = new WordBoundsFactory();
   private int fontSize;
 
   private static final boolean DEBUG = false;
- // private boolean showPhones = true;
+  // private boolean showPhones = true;
 
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
@@ -72,7 +72,7 @@ public class ClickableWords<T extends CommonExercise> {
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
     this.fontSize = fontSize;
-  //  this.showPhones = showPhones;
+    //  this.showPhones = showPhones;
   }
 
   /**
@@ -135,7 +135,6 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   /**
-   *
    * @param isSimple
    * @param tokens
    * @param searchTokens
@@ -287,12 +286,12 @@ public class ClickableWords<T extends CommonExercise> {
       clickables.add(clickable);
       Widget w = clickable.asWidget();
       //if (showPhones) {
-    //  w.addStyleName("rightFiveMargin");
+      //  w.addStyleName("rightFiveMargin");
       //}
       horizontal.add(w);
 
       // add spacer - also required if we want to select text and copy it somewhere.
-     // horizontal.add(new InlineHTML(" "));
+      // horizontal.add(new InlineHTML(" "));
 
       if (isMatch) {
         if (DEBUG) logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "'");
@@ -416,7 +415,7 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   /**
-   * @param dir text direction
+   * @param dir            text direction
    * @param html           a token that can be clicked on to search on it
    * @param isContextMatch
    * @param id
@@ -433,10 +432,6 @@ public class ClickableWords<T extends CommonExercise> {
       int id,
       boolean isSimple,
       TwoColumnExercisePanel.FieldType fieldType) {
-//    final IHighlightSegment highlightSegmentDiv = isSimple ?
-//        new SimpleHighlightSegment(html, id) :
-//        new HighlightSegment(id, html, dir, true);
-
     final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir, !isSimple);
 
     InlineHTML highlightSegment = highlightSegmentDiv.getClickable();
@@ -460,13 +455,15 @@ public class ClickableWords<T extends CommonExercise> {
       showSearchMatch(dir, html, highlightSegment, searchToken);
     }
 
-    boolean empty = removePunct(html).isEmpty();
+    String removePunct = removePunct(html);
+//    logger.info("makeClickableText text = '" + removePunct + "' original = '" + html + "'");
+    boolean empty = removePunct.isEmpty();
     if (empty) {
       //  logger.info("makeClickableText for '" + html + "' not clickable");
       highlightSegmentDiv.setClickable(false);
     } else {
       highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-      highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct(html))));
+      highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
       highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
       highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
     }
@@ -510,12 +507,16 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   private void putTextInSearchBox(String html) {
+   // logger.info("putTextInSearchBox original " + html);
     String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
     String s2 = s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
+   // logger.info("putTextInSearchBox after    " + s2);
     listContainer.searchBoxEntry(s2);
   }
 
   /**
+   * TODO : Not sure why we're doing this...
+   *
    * First is russian accent mark.
    * Chinese punctuation marks, spanish punct marks
    * horizontal ellipsis...
@@ -529,7 +530,7 @@ public class ClickableWords<T extends CommonExercise> {
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
         .replaceAll(GoodwaveExercisePanel.SPACE_REGEX, "")
         .replaceAll("\\u00ED", "i")
-        .replaceAll("\\u00E9", "\\u0435")
+       // .replaceAll("\\u00E9", "\\u0435")
         .replaceAll("[\\u0301\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
   }
 }

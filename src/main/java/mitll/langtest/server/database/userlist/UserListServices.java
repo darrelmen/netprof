@@ -9,5 +9,5 @@ import mitll.langtest.shared.exercise.CommonExercise;
  */
 public interface UserListServices {
   IUserListManager getUserListManager();
-  UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid);
+  UserList<CommonExercise> getUserListByIDExercises(int listid, int projectid);
 }

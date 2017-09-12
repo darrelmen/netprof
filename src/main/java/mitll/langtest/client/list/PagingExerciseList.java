@@ -69,7 +69,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   protected ClickablePagingContainer<T> pagingContainer;
 
   private ITypeAhead typeAhead;
-  long userListID = -1;
+  int userListID = -1;
   private int unaccountedForVertical = 160;
   private boolean onlyExamples;
 
@@ -77,7 +77,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param currentExerciseVPanel
    * @param factory
    * @param controller
-   * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList
+   * @seex mitll.langtest.client.custom.content.AVPHelper#makeExerciseList
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList
    */
   PagingExerciseList(Panel currentExerciseVPanel,
@@ -607,7 +607,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pagingContainer.markCurrentExercise(itemID);
   }
 
-  public void setUserListID(long userListID) {
+  public void setUserListID(int userListID) {
     this.userListID = userListID;
   }
 

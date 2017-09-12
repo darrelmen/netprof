@@ -77,7 +77,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    * @return
    * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
-  public Panel doInternalLayout(long uniqueID, String instanceName, boolean hasTopRow) {
+  public Panel doInternalLayout(int userListID, String instanceName, boolean hasTopRow) {
     Panel twoRows = hasTopRow ? new FlowPanel() : new DivWidget();
     twoRows.getElement().setId("FlexListLayout_twoRows");
 
@@ -119,14 +119,14 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     DivWidget footer = getFooter(bottomRow);
 
     // TODO : only has to be paging b/c it needs to setUserListID
-    PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID,
+    PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, userListID,
         listHeader, footer);
     npfExerciseList = widgets;
 
     addThirdColumn(bottomRow);
 
     if (npfExerciseList == null) {
-      logger.warning("huh? exercise list is null for " + instanceName + " and " + uniqueID);
+      logger.warning("huh? exercise list is null for " + instanceName + " and " + userListID);
     } else {
       exerciseListContainer.add(npfExerciseList.getExerciseListOnLeftSide());
     }
@@ -246,7 +246,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   private PagingExerciseList<T, U> makeNPFExerciseList(final Panel topRow,
                                                        Panel currentExercisePanel,
                                                        String instanceName,
-                                                       long userListID,
+                                                       int userListID,
                                                        DivWidget listHeader,
                                                        DivWidget footer) {
     final PagingExerciseList<T, U> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName,

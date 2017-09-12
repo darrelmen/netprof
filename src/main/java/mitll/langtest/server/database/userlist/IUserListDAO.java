@@ -92,7 +92,9 @@ public interface IUserListDAO extends IDAO {
 
   UserList<CommonShell> getWithExercises(int unique);
 
-  UserList<CommonExercise> getWithExercisesEx(long unique);
+  UserList<CommonExercise> getWithExercisesEx(int unique);
+
+  UserList<CommonExercise> getList(int unique);
 
   UserList<CommonShell> getWhere(int unique, boolean warnIfMissing);
 

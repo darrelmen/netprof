@@ -81,7 +81,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   static final String SELECTED_USER = "selectedUser";
 
-  static final int ID_WIDTH = 130;
+  private static final int ID_WIDTH = 130;
   private int idWidth = ID_WIDTH;
   private static final int PAGE_SIZE = 11;
   private int pageSize = PAGE_SIZE;

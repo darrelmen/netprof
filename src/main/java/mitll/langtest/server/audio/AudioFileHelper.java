@@ -189,7 +189,7 @@ public class AudioFileHelper implements AlignDecode {
             //        boolean validForeignPhrase = isInDictOrLTS(exercise);
             if (!validForeignPhrase) {
               if (count < 10) {
-                logger.warn("checkLTSAndCountPhones : huh? for " +
+                logger.warn("checkLTSAndCountPhones : not a valid foreign phrase for " +
                     "\n\tex      " + exercise.getID() +
                     "\n\tenglish " + exercise.getEnglish() +
                     "\n\tfl      " + exercise.getForeignLanguage());

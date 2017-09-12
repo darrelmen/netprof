@@ -44,10 +44,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
-import mitll.langtest.server.database.userlist.IUserListDAO;
-import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
-import mitll.langtest.server.database.userlist.SlickUserListDAO;
+import mitll.langtest.server.database.userlist.*;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -338,7 +335,7 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * @see #getUserListByIDExercises(long, int, Collection, Set)
+   * @see IUserListManager#getUserListByIDExercises(int, int, Collection, Set)
    * @param typeOrder
    * @param ids
    * @return
@@ -425,7 +422,7 @@ public class UserListManager implements IUserListManager {
   /**
    * @param ids
    * @return
-   * @see #getUserListByIDExercises(long, int, Collection, Set)
+   * @see IUserListManager#getUserListByIDExercises(int, int, Collection, Set)
    */
 
 /*
@@ -878,17 +875,17 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * TODO : OK the review, comment, and attention LL (if needed) lists need to be in context of project.
+   * the review, comment, and attention LL (if needed) lists need to be in context of project?
    *
    * @param id
-   * @param projid
+   * @param projid IGNORED HERE
    * @param typeOrder
    * @param ids
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserListByIDExercises
+   * @see UserListServices#getUserListByIDExercises
    */
   @Override
-  public UserList<CommonExercise> getUserListByIDExercises(long id,
+  public UserList<CommonExercise> getUserListByIDExercises(int id,
                                                            int projid,
                                                            Collection<String> typeOrder,
                                                            Set<Integer> ids) {
@@ -897,9 +894,7 @@ public class UserListManager implements IUserListManager {
       return null;
     }
     return
-       // id == REVIEW_MAGIC_ID ? getDefectListEx(ids) :
             id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder, ids) :
-         //       id == ATTN_LL_MAGIC_ID ? getAttentionListEx(typeOrder, ids) :
                     userListDAO.getWithExercisesEx(id);
 
   }
@@ -1100,7 +1095,7 @@ public class UserListManager implements IUserListManager {
    * @param id
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#deleteList
-   * @see ListManager#deleteList
+   * @seez ListManager#deleteList
    */
   @Override
   public boolean deleteList(int id) {
