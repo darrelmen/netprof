@@ -339,7 +339,7 @@ public class InitialUI implements UILifecycle {
 
       banner.checkProjectSelected();
     } else {
-      logger.warning("addCrumbs no current user");
+     // logger.warning("addCrumbs no current user");
     }
   }
 

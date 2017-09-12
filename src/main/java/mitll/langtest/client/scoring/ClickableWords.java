@@ -456,7 +456,7 @@ public class ClickableWords<T extends CommonExercise> {
     }
 
     String removePunct = removePunct(html);
-//    logger.info("makeClickableText text = '" + removePunct + "' original = '" + html + "'");
+  //  logger.info("makeClickableText text = '" + removePunct + "' original = '" + html + "'");
     boolean empty = removePunct.isEmpty();
     if (empty) {
       //  logger.info("makeClickableText for '" + html + "' not clickable");

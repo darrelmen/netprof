@@ -293,7 +293,7 @@ public class ProjectTest extends BaseTest {
 
     Project project = database.getProject(PROJECTID);
 
-    List<String> supuesto = Arrays.asList("ecrire", "Écrire", "Écrire".toLowerCase());
+    List<String> supuesto = Arrays.asList("ecrire", "Écrire", "Écrire".toLowerCase(), "savez-vous");
     {
       ExerciseTrie<CommonExercise> fullTrie = project.getFullTrie();
       for (String test : supuesto) {

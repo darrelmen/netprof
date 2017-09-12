@@ -85,8 +85,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private static final String MEANING = "Meaning";
 
-  public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
-  public static final String SPACE_REGEX = " ";
+ // public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
+  /**
+   * Removed dashes since broke French.
+   */
+  public static final String PUNCT_REGEX = "[\\?\\.,\\/#!$%\\^&\\*;:{}=_`~()]";
+  static final String SPACE_REGEX = " ";
 
   private final ListInterface listContainer;
 
@@ -105,16 +109,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   protected final T exercise;
   protected final ExerciseController controller;
 
-//  protected final ListServiceAsync listService = GWT.create(ListService.class);
-
-  // private AudioPanel contentAudio, answerAudio;
   private AudioPanel answerAudio;
   protected final NavigationHelper navigationHelper;
-  //  private final float screenPortion;
-//  protected final String instance;
   private boolean hasClickable = false;
   private boolean isJapanese = false;
-  //  private boolean allowRecording = true;
   protected final ExerciseOptions options;
 
   /**
