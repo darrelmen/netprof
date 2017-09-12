@@ -74,6 +74,7 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements LangTestDatabase {
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
+  public static final String NO_POSTGRES = "Can't connect to postgres - please check the database configuration in application.conf or netprof.properties.";
 
   /**
    * @see
@@ -177,6 +178,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * <p>
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    *
+   * Shows a better message if configuration is bad.
    * @return
    * @paramx userID
    * @see mitll.langtest.client.LangTest#onModuleLoad
@@ -190,6 +192,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       projectInfos = db.getProjectManagement().getNestedProjectInfo();
     }
 
+    if (db == null || !db.isHasValidDB()) {
+      startupMessage = NO_POSTGRES;
+    }
     StartupInfo startupInfo =
         new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
     logger.debug("getStartupInfo sending " + startupInfo);

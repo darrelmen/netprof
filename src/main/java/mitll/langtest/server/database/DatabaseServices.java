@@ -139,4 +139,6 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   void setStartupInfo(User userWhere, int projid);
 
   IStateManager getStateManager();
+
+  boolean isHasValidDB();
 }

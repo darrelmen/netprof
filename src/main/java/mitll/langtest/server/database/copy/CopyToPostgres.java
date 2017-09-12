@@ -528,13 +528,13 @@ public class CopyToPostgres<T extends CommonShell> {
       long rid1 = phone.getRid();
       Integer rid = oldToNewResult.get((int) rid1);
       if (rid == null) {
-        if (c++ < 50 && missingrids.add(rid1)) logger.error("phone : no rid " + rid1);
+        if (c++ < 50 && missingrids.add(rid1)) logger.warn("copyPhone phone : no rid " + rid1);
       } else {
         long wid1 = phone.getWid();
         Integer wid = oldToNewWordID.get((int) wid1);
 
         if (wid == null) {
-          if (d++ < 50 && missingwids.add(wid1)) logger.error("phone : no word id " + wid1);
+          if (d++ < 50 && missingwids.add(wid1)) logger.warn("copyPhone phone : no word id " + wid1);
         } else {
           phone.setRID(rid);
           phone.setWID(wid);
@@ -566,7 +566,7 @@ public class CopyToPostgres<T extends CommonShell> {
       if (rid == null) {
         boolean add = missingRIDs.add(word.getRid());
         if (add && missingRIDs.size() < WARN_RID_MISSING_THRESHOLD)
-          logger.error("copyWord word has no rid " + word.getRid());
+          logger.warn("copyWord word has no rid " + word.getRid());
       } else {
         word.setRid(rid);
         bulk.add(slickWordDAO.toSlick(word));
@@ -956,14 +956,18 @@ public class CopyToPostgres<T extends CommonShell> {
       action = ACTION.valueOf(firstArg.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.info("expecting an action: \n{}",
-          () -> Arrays.stream(ACTION.values())
-              .filter(p -> p != UNKNOWN)
-              .map(ACTION::toLower)
-              .collect(Collectors.joining(" or ")));
+          () -> getValues());
 //      logger.error("expecting an action " + );
 //      return;
     }
     return action;
+  }
+
+  private static String getValues() {
+    return Arrays.stream(ACTION.values())
+        .filter(p -> p != UNKNOWN)
+        .map(ACTION::toLower)
+        .collect(Collectors.joining(" or "));
   }
 
   private static int getDisplayOrder(String optDisplayOrder) {
@@ -991,7 +995,9 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static void usage() {
-    logger.error("Usage : expecting either copy or drop followed by config, e.g. copy spanish");
+
+    logger.error("Usage : expecting either " + getValues()+
+        " followed by config, e.g. copy spanish OR if dropAll the special safety word.");
     logger.error("Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary");
   }
 }

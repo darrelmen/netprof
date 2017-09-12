@@ -193,6 +193,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   private IUserSecurityManager userSecurityManager;
   private DominoExerciseDAO dominoExerciseDAO;
+  private boolean hasValidDB = false;
 
   /**
    * JUST FOR TESTING
@@ -256,6 +257,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
 
       this.pathHelper = pathHelper;
+
+      hasValidDB = true;
     }
   }
 
@@ -319,7 +322,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   private void initializeDAOs(PathHelper pathHelper) {
     dbConnection = getDbConnection();
-    // logger.debug("initializeDAOs ---");
+    logger.debug("initializeDAOs --- " + dbConnection);
 
     eventDAO = new SlickEventImpl(dbConnection);
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this);
@@ -371,6 +374,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
     dominoExerciseDAO = new DominoExerciseDAO(dominoUserDAO.getSerializer());
+
+    logger.debug("initializeDAOs : tables = " + dbConnection.getTables());
   }
 
   /**
@@ -1296,11 +1301,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * Nuclear option.
-   *
+   * <p>
    * Use with extreme caution.
-   *
    */
-  public void dropAll() { dbConnection.dropAll(); }
+  public void dropAll() {
+    dbConnection.dropAll();
+  }
 
   private int warns = 0;
 
@@ -1536,14 +1542,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
       Collection<Integer> exids = getUserListManager().getUserListExerciseJoinDAO().getExids(listid);
       UserList<CommonExercise> list = getUserListManager().getUserListDAO().getList(listid);
       List<CommonExercise> exercises = new ArrayList<>();
-      exids.forEach(exid-> {
+      exids.forEach(exid -> {
         CommonExercise exercise = getExercise(projectid, exid);
         if (exercise != null) exercises.add(exercise);
       });
       list.setExercises(exercises);
       return list;
-    }
-    else {
+    } else {
       return getUserListManager().getUserListByIDExercises(listid,
           projectid,
           getSectionHelper(projectid).getTypeOrder(),
@@ -1846,5 +1851,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   public DominoExerciseDAO getDominoExerciseDAO() {
     return dominoExerciseDAO;
+  }
+
+  public boolean isHasValidDB() {
+    return hasValidDB;
   }
 }
