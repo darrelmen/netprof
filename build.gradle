@@ -76,14 +76,12 @@ dependencies {
     testRuntime('com.google.gwt:gwt-codeserver:2.8.1')
 
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-
     runtime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
     // please just include this jar oh gradle gods
  //   providedRuntime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
     testCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-
     testRuntime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
 //    compile 'org.apache.commons:commons-lang3:latest.integration'
@@ -165,13 +163,16 @@ dependencies {
 war {
     archiveName "netprof.war"
     // somehow the domino tests jars are getting in if I don't do this
+
+    rootSpec.exclude("**/*-source.jar")
+    rootSpec.exclude("**/*-tests.jar")
     rootSpec.exclude("**/*tests.jar")
     rootSpec.exclude("**/log4j2-test.xml")
 
-    from('src') {
-        include '**/log4j2.xml'
-        into 'WEB-INF/classes'
-    }
+//    from('src') {
+//        include '**/log4j2.xml'
+//        into 'WEB-INF/classes'
+//    }
 }
 
 // make standalone jar
