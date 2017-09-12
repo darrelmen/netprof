@@ -38,11 +38,8 @@ package mitll.langtest.shared.exercise;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/3/16.
  */
-public interface CommonAnnotatable
-    extends CommonExercise, MutableAnnotationExercise {
-    //extends CommonShell, AudioRefExercise, AnnotationExercise, ScoredExercise, MutableAnnotationExercise {
+public interface CommonAnnotatable extends CommonExercise, MutableAnnotationExercise {
   /**
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#addAltFL
    * @return
    */
   String getAltFL();

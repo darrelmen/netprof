@@ -54,7 +54,6 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.PhoneStats;

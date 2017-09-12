@@ -33,7 +33,6 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
@@ -130,7 +129,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   /**
-   * @param sortEnglish
    * @see #configureTable
    */
   abstract protected void addColumnsToTable(boolean sortEnglish);

@@ -68,6 +68,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
@@ -1356,7 +1357,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
             @Override
             public void onFailure(Throwable caught) {
-              logger.warning("getExercises got " + caught);
+              logger.warning("getFullExercises got exception : " + caught);
+              logger.warning("getFullExercises got " + getExceptionAsString(caught));
               dealWithRPCError(caught);
               hidePrevNext();
             }
@@ -1364,7 +1366,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
             @Override
             public void onSuccess(ExerciseListWrapper<CommonExercise> result) {
               long now = System.currentTimeMillis();
-              logger.info("getExercises took " + (now - then) + " to get " + result.getExercises().size() + " exercises");
+              logger.info("getFullExercises took " + (now - then) + " to get " + result.getExercises().size() + " exercises");
               int reqID = result.getReqID();
               if (isCurrent(reqID)) {
                 List<CommonExercise> toShow = new ArrayList<>();

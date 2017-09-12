@@ -65,23 +65,23 @@ public class CreateListDialog extends BasicDialog {
   private static final String CREATE_LIST = "Create List";
   private static final String TITLE = "Title";
   private static final String DESCRIPTION_OPTIONAL = "Description (optional)";
-  private final CreateListComplete navigation;
+  private final CreateListComplete listView;
   private FormField titleBox;
   private final ExerciseController controller;
   private KeyPressHelper enterKeyButtonHelper;
   private TextArea theDescription;
   private FormField classBox;
   private RadioButton radioButton;
-  UserList current = null;
+  private UserList current = null;
 
-  public CreateListDialog(CreateListComplete navigation, ExerciseController controller) {
-    this.navigation = navigation;
-    this.controller = controller;
+  public CreateListDialog(CreateListComplete listView, ExerciseController controller, UserList current) {
+    this(listView, controller);
+    this.current = current;
   }
 
-  public CreateListDialog(CreateListComplete navigation, ExerciseController controller, UserList current) {
-    this(navigation, controller);
-    this.current = current;
+  public CreateListDialog(CreateListComplete listView, ExerciseController controller) {
+    this.listView = listView;
+    this.controller = controller;
   }
 
   /**
@@ -190,7 +190,7 @@ public class CreateListDialog extends BasicDialog {
       if (current == null) {
         gotCreate(enterKeyButtonHelper, area, classBox, publicRadio);
       } else {
-        navigation.gotEdit();
+        listView.gotEdit();
       }
     });
     enterKeyButtonHelper.addKeyHandler(submit);
@@ -207,11 +207,7 @@ public class CreateListDialog extends BasicDialog {
                          FormField classBox,
                          RadioButton publicRadio) {
     enterKeyButtonHelper.removeKeyHandler();
-    //if (isOKToCreate()) {
     addUserList(titleBox, area, classBox, publicRadio.getValue());
-    //} else {
-    //  logger.warning("nope - not OK");
-    //  }
   }
 
   public boolean isOKToCreate(Set<String> names) {
@@ -247,10 +243,10 @@ public class CreateListDialog extends BasicDialog {
               markError(titleBox, "You already have a list named " + safeText);
 //              Window.alert("You already have a list with that name.");
               logger.info("NOIT SUCCESS " + result);
-              //navigation.madeIt(result);
+              //listView.madeIt(result);
             } else {
               logger.info("Success " + result);
-              navigation.madeIt(result);
+              listView.madeIt(result);
             }
           }
         });

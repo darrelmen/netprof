@@ -1373,7 +1373,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
 
     Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise = getScoreHistoryPerExercise(ids, exercises, userID);
-    logger.info("found " + exercises.size() + " and " + scoreHistoryPerExercise.size() + " scores");
+    logger.info("getFullExercises found " + exercises.size() + " exercises and " + scoreHistoryPerExercise.size() + " scores");
     return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistoryPerExercise);
   }
 

@@ -52,6 +52,8 @@ import mitll.langtest.shared.exercise.*;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
+
 /**
  * Handles left side of NetPron2 -- which exercise is the current one, highlighting, etc.
  * <p>
@@ -416,9 +418,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
           ")");
     }
     if (DEBUG) logger.info("ExerciseList.SetExercisesCallbackWithID Got exception '" + message + "' " + caught);
-
-  //  caught.printStackTrace();
-    controller.logMessageOnServer("got exception " + caught.getMessage(), " RPCerror?", true);
+    String exceptionAsString = getExceptionAsString(caught);
+    //  caught.printStackTrace();
+    controller.logMessageOnServer("got exception " + caught.getMessage() + " : " +exceptionAsString, " RPCerror?", true);
   }
 
   /**

@@ -71,7 +71,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
 
-
   /**
    *
    */
@@ -92,11 +91,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
   private int shortPageSize = 8;
-
-  /*
-  MemoryItemContainer(ExerciseController controller, String selectedUserKey, String header) {
-    this(controller, selectedUserKey, header, PAGE_SIZE, 8);
-  }*/
+  Column<T, SafeHtml> dateCol;
 
   /**
    * @param controller
@@ -168,7 +163,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
         new Heading(3, title) :
         new Heading(3, title, subtitle);
 
-    //students.setWidth(STUDENT_WIDTH + "px");
     students.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
     students.addStyleName("floatLeft");
     return students;
@@ -177,18 +171,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   protected IsWidget getRightOfHeader() {
     return null;
   }
-
-/*
-  private String getSelectedUserKey(ExerciseController controller, String appTitle) {
-    return getStoragePrefix(controller, appTitle) + SELECTED_USER;
-  }
-*/
-
-/*
-  private String getStoragePrefix(ExerciseController controller, String appTitle) {
-    return appTitle + ":" + controller.getUser() + ":";
-  }
-*/
 
   protected String truncate(String columnText) {
     int maxLengthId = getMaxLengthId();
@@ -215,19 +197,17 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return Window.getClientHeight() < 822;
   }
 
-  Column<T, SafeHtml> dateCol;
 
   /**
-   * @param sortEnglish
    */
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
-    List<T> list  = getList();
+    List<T> list = getList();
     addItemID(list);
     addDateCol(list);
   }
 
-  void addItemID(List<T> list) {
+  protected void addItemID(List<T> list) {
     Column<T, SafeHtml> userCol = getItemColumn();
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
@@ -235,7 +215,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     table.addColumnSortHandler(getUserSorter(userCol, list));
   }
 
-  void addDateCol( List<T> list) {
+  protected void addDateCol( List<T> list) {
     dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader(getDateColHeader()));
@@ -488,32 +468,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     if (isClick(event)) {
       gotClickOnItem(object);
     }
-//    if (isDoubleClick(event)) {
-//      logger.info("got double!");
-//    }
   }
 
   private boolean isClick(NativeEvent event) {
     return BrowserEvents.CLICK.equals(event.getType());
   }
 
-  private boolean isDoubleClick(NativeEvent event) {
-    return BrowserEvents.DBLCLICK.equals(event.getType());
-  }
-
   public void gotClickOnItem(final T user) {
     storeSelectedUser(user.getID());
   }
-
-  /**
-   * MUST BE PUBLIC
-   */
-/*  public interface LocalTableResources extends CellTable.Resources {
-    *//**
-   * The styles applied to the table.
-   *//*
-    @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
-    TableResources.TableStyle cellTableStyle();
-  }*/
 }

@@ -138,7 +138,7 @@ public class ListView implements ContentView, CreateListComplete {
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, "Visited", top);
 
-      new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
+        new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
         tableWithPager.setHeight(VISITED_HEIGHT + "px");
 
         DivWidget ldButtons = new DivWidget();
@@ -208,20 +208,21 @@ public class ListView implements ContentView, CreateListComplete {
     return buttons;
   }
 
-  private IsWidget getEdit() {
+  private Button getEdit() {
     Button successButton = getSuccessButton("Title");
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> doEdit());
     addTooltip(successButton, "Edit the list title or make it public.");
+    successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
 
-  private IsWidget getShare() {
+  private Button getShare() {
     Button successButton = getSuccessButton("Share");
     successButton.setIcon(IconType.SHARE);
     successButton.addClickHandler(event -> doShare());
     addTooltip(successButton, "Share the list with someone.");
-
+    successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
 
@@ -280,18 +281,29 @@ public class ListView implements ContentView, CreateListComplete {
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList());
     addTooltip(successButton, "Edit the items on list.");
+    successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
 
   private void editList() {
-    DialogHelper dialogHelper = new DialogHelper(true);
-    Button closeButton = dialogHelper.show(
+    Button closeButton = new DialogHelper(true).show(
         ADD_EDIT_ITEMS,
         Collections.emptyList(),
         new EditItem(controller).editItem(getCurrentSelection(myLists)),
         "OK",
         null,
-        null, 660, true);
+        new DialogHelper.CloseListener() {
+          @Override
+          public boolean gotYes() {
+            myLists.redraw();
+            return true;
+          }
+
+          @Override
+          public void gotNo() {
+
+          }
+        }, 660, true);
 
     closeButton.setType(ButtonType.SUCCESS);
   }
@@ -315,14 +327,15 @@ public class ListView implements ContentView, CreateListComplete {
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
     addTooltip(learn, "Learn the list.");
-
+    learn.setEnabled(!container.isEmpty());
+    container.addButton(learn);
     return learn;
   }
 
   private void showLearnList(ListContainer container) {
-    if (!container.isEmpty()) {
-      controller.showLearnList(getCurrentSelection(container).getID());
-    }
+    //if (!container.isEmpty()) {
+    controller.showLearnList(getCurrentSelection(container).getID());
+    //}
   }
 
   @NotNull
@@ -331,11 +344,13 @@ public class ListView implements ContentView, CreateListComplete {
     drill.setType(ButtonType.INFO);
 
     drill.addClickHandler(event -> {
-      if (!container.isEmpty()) {
-        controller.showDrillList(getCurrentSelection(container).getID());
-      }
+      //   if (!container.isEmpty()) {
+      controller.showDrillList(getCurrentSelection(container).getID());
+      // }
     });
     addTooltip(drill, "Drill the list.");
+    drill.setEnabled(!container.isEmpty());
+    container.addButton(drill);
 
     return drill;
   }
@@ -370,6 +385,8 @@ public class ListView implements ContentView, CreateListComplete {
     add.addClickHandler(event -> gotDelete(add, getCurrentSelection(myLists)));
     add.setType(ButtonType.DANGER);
     addTooltip(add, "Delete list.");
+    add.setEnabled(!myLists.isEmpty());
+    myLists.addButton(add);
     return add;
   }
 
@@ -379,7 +396,9 @@ public class ListView implements ContentView, CreateListComplete {
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDeleteVisitor(add, getCurrentSelection(visited), visited));
     add.setType(ButtonType.DANGER);
+    add.setEnabled(!visited.isEmpty());
     addTooltip(add, "Forget visited list.");
+    visited.addButton(add);
     return add;
   }
 
@@ -388,33 +407,33 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private UserList<CommonShell> getCurrentSelection(ListContainer container) {
-    UserList<CommonShell> currentSelection = container.getCurrentSelection();
-//    logger.info("Current selection is " + currentSelection);
-    return currentSelection;
+    return container.getCurrentSelection();
   }
 
   private void gotDelete(Button delete, UserList<CommonShell> currentSelection) {
-    final int uniqueID = currentSelection.getID();
-    controller.logEvent(delete, "Button", currentSelection.getName(), "Delete");
+    if (currentSelection != null) {
+      final int uniqueID = currentSelection.getID();
+      controller.logEvent(delete, "Button", currentSelection.getName(), "Delete");
 
-    if (currentSelection.isFavorite()) {
-      Window.alert("Can't delete your favorites list.");
-    } else {
-      controller.getListService().deleteList(uniqueID, new AsyncCallback<Boolean>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          logger.warning("delete list call failed?");
-        }
-
-        @Override
-        public void onSuccess(Boolean result) {
-          if (result) {
-            removeFromLists(delete, myLists, currentSelection);
-          } else {
-            logger.warning("deleteList ---> did not do deleteList " + uniqueID);
+      if (currentSelection.isFavorite()) {
+        Window.alert("Can't delete your favorites list.");
+      } else {
+        controller.getListService().deleteList(uniqueID, new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            logger.warning("delete list call failed?");
           }
-        }
-      });
+
+          @Override
+          public void onSuccess(Boolean result) {
+            if (result) {
+              removeFromLists(delete, myLists, currentSelection);
+            } else {
+              logger.warning("deleteList ---> did not do deleteList " + uniqueID);
+            }
+          }
+        });
+      }
     }
   }
 
@@ -448,6 +467,7 @@ public class ListView implements ContentView, CreateListComplete {
     int numItems = listContainer.getNumItems();
     if (numItems == 0) {
       delete.setEnabled(false);
+      listContainer.disableAll();
     } else {
       if (index == numItems) index = numItems - 1;
       UserList<CommonShell> at = listContainer.getAt(index);
@@ -479,6 +499,7 @@ public class ListView implements ContentView, CreateListComplete {
             boolean okToCreate = createListDialog.isOKToCreate(names);
             if (okToCreate) {
               createListDialog.doCreate();
+
             }
             return okToCreate;
           }
@@ -562,6 +583,7 @@ public class ListView implements ContentView, CreateListComplete {
     //logger.info("\n\n\ngot made list");
     myLists.addExerciseAfter(null, userList);
     myLists.markCurrentExercise(userList.getID());
+    myLists.enableAll();
     names.add(userList.getName());
   }
 

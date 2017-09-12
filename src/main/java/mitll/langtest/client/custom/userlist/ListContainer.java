@@ -1,5 +1,6 @@
 package mitll.langtest.client.custom.userlist;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -7,6 +8,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
+
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.MemoryItemContainer;
@@ -16,6 +18,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -23,20 +26,38 @@ import java.util.List;
  * Created by go22670 on 7/6/17.
  */
 public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
+  public static final String DESCRIPTION = "Description";
+  public static final String CLASS = "Class";
+  public static final String CREATOR = "Creator";
+  public static final String PUBLIC = "Public?";
   private boolean slim = false;
 
+  private List<Button> buttons = new ArrayList<>();
+
   /**
-   * @see ListView#showContent(Panel, String)
    * @param controller
    * @param pageSize
    * @param slim
    * @param storageID
    * @param shortPageSize
+   * @see ListView#showContent(Panel, String)
    */
   ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID, int shortPageSize) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + storageID, "List",
         pageSize, shortPageSize);
     this.slim = slim;
+  }
+
+  void addButton(Button button) {
+    buttons.add(button);
+  }
+
+  void enableAll() {
+    buttons.forEach(button -> button.setEnabled(true));
+  }
+
+  void disableAll() {
+    buttons.forEach(button -> button.setEnabled(false));
   }
 
   @NotNull
@@ -64,7 +85,11 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
-    super.addColumnsToTable(sortEnglish);
+    List<UserList<CommonShell>> list = getList();
+    addItemID(list);
+    addNum();
+    addDateCol(list);
+
     addDescrip();
     if (!slim) {
       addClass();
@@ -94,10 +119,18 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     return shell.getModified();
   }
 
+  private void addNum() {
+    Column<UserList<CommonShell>, SafeHtml> diff = getNum();
+    diff.setSortable(true);
+    addColumn(diff, new TextHeader("# Items"));
+    table.addColumnSortHandler(getNumSorter(diff, getList()));
+    table.setColumnWidth(diff, 40 + "px");
+  }
+
   private void addDescrip() {
     Column<UserList<CommonShell>, SafeHtml> diff = getDescription();
     diff.setSortable(true);
-    addColumn(diff, new TextHeader("Description"));
+    addColumn(diff, new TextHeader(DESCRIPTION));
     table.addColumnSortHandler(getDiffSorter(diff, getList()));
     table.setColumnWidth(diff, 200 + "px");
   }
@@ -105,7 +138,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private void addClass() {
     Column<UserList<CommonShell>, SafeHtml> diff = getListClass();
     diff.setSortable(true);
-    addColumn(diff, new TextHeader("Class"));
+    addColumn(diff, new TextHeader(CLASS));
     table.addColumnSortHandler(getClassSorted(diff, getList()));
     table.setColumnWidth(diff, 100 + "px");
   }
@@ -113,7 +146,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private void addOwner() {
     Column<UserList<CommonShell>, SafeHtml> diff = getOwner();
     diff.setSortable(true);
-    addColumn(diff, new TextHeader("Creator"));
+    addColumn(diff, new TextHeader(CREATOR));
     table.addColumnSortHandler(getOwnerSorted(diff, getList()));
     table.setColumnWidth(diff, 100 + "px");
   }
@@ -121,10 +154,26 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private void addIsPublic() {
     Column<UserList<CommonShell>, SafeHtml> diff = getPublic();
     diff.setSortable(true);
-    addColumn(diff, new TextHeader("Public"));
+    addColumn(diff, new TextHeader(PUBLIC));
     table.addColumnSortHandler(getPublicSorted(diff, getList()));
     table.setColumnWidth(diff, 50 + "px");
   }
+
+  private Column<UserList<CommonShell>, SafeHtml> getNum() {
+    return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserList<CommonShell> shell) {
+        return getSafeHtml(""+shell.getNumItems());
+      }
+    };
+  }
+
 
   private Column<UserList<CommonShell>, SafeHtml> getDescription() {
     return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -184,6 +233,13 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
         return getSafeHtml(shell.isPrivate() ? "No" : "Yes");
       }
     };
+  }
+
+  private ColumnSortEvent.ListHandler<UserList<CommonShell>> getNumSorter(Column<UserList<CommonShell>, SafeHtml> englishCol,
+                                                                           List<UserList<CommonShell>> dataList) {
+    ColumnSortEvent.ListHandler<UserList<CommonShell>> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::getNumItems));
+    return columnSortHandler;
   }
 
   private ColumnSortEvent.ListHandler<UserList<CommonShell>> getDiffSorter(Column<UserList<CommonShell>, SafeHtml> englishCol,
