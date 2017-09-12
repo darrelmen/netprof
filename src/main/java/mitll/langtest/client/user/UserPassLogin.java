@@ -40,8 +40,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -88,6 +86,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String HELP = "Help";
   private static final int FLAG_DIM = 32;
+  private static final int COLUMNS = 4;
 
   private final KeyPressHelper enterKeyButtonHelper;
 
@@ -97,7 +96,6 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private final SignUp signUpForm;
   private final SignIn signInForm;
 
-  // private List<String> languages = new ArrayList<>();
   private List<Pair> ccs = new ArrayList<>();
 
   /**
@@ -135,10 +133,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
       String language = slimProject.getLanguage();
       if (slimProject.getStatus() == ProjectStatus.PRODUCTION) {
         if (!seen.contains(language)) {
-//          languages.add(language);
-          //        ccs.add(slimProject.getCountryCode());
 
-          ccs.add(new Pair(slimProject.getCountryCode(), language));
+          ccs.add(new Pair(slimProject.getCountryCode(), language.substring(0, 1).toUpperCase() + language.substring(1)));
           seen.add(language);
         }
       }
@@ -147,6 +143,9 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   }
 
 
+  /**
+   * Sorts by language
+   */
   private static class Pair implements Comparable<Pair> {
     String cc, language;
 
@@ -157,7 +156,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
     @Override
     public int compareTo(@NotNull Pair o) {
-      return language.compareTo(o.language);
+      return language.toLowerCase().compareTo(o.language.toLowerCase());
     }
   }
 
@@ -288,12 +287,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     help.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
     help.setType(ButtonType.PRIMARY);
     help.setIcon(IconType.QUESTION_SIGN);
-    help.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        showWelcome2();
-      }
-    });
+    help.addClickHandler(event -> showWelcome2());
     return help;
   }
 
@@ -401,8 +395,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
   @NotNull
   private Grid getFlagsDisplay() {
-    int row = (int) Math.ceil((float) ccs.size() / (float) 5);
-    Grid langs = new Grid(row, 5);
+    int row = (int) Math.ceil((float) ccs.size() / (float) COLUMNS);
+    Grid langs = new Grid(row, COLUMNS);
     int r = 0;
 
     for (Pair pair : ccs) {
@@ -423,7 +417,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
         w.addStyleName("topFiveMargin");
         both.add(w);
       }
-      langs.setWidget(r / 5, r % 5, both);
+      langs.setWidget(r / COLUMNS, r % COLUMNS, both);
       r++;
     }
 
@@ -443,7 +437,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     configure(h);
 
     left.add(h);
-    w1.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+    w1.getElement().getStyle().setMarginTop(COLUMNS, Style.Unit.PX);
     configure(w1);
   }
 

@@ -77,7 +77,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * @param id
    * @return
-   * @see ListManager#deleteList(Button, UserList, boolean)
+   * @seex ListManager#deleteList
    */
   @Override
   public boolean deleteList(int id) {

@@ -26,10 +26,11 @@ import java.util.List;
  * Created by go22670 on 7/6/17.
  */
 public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
-  public static final String DESCRIPTION = "Description";
-  public static final String CLASS = "Class";
-  public static final String CREATOR = "Creator";
+  private static final String DESCRIPTION = "Description";
+  private static final String CLASS = "Class";
+  private static final String CREATOR = "Creator";
   public static final String PUBLIC = "Public?";
+  public static final String NUM_ITEMS = "#";
   private boolean slim = false;
 
   private List<Button> buttons = new ArrayList<>();
@@ -83,6 +84,11 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     return 45;
   }
 
+  /**
+   *
+   * @param sortEnglish
+   * @see #configureTable
+   */
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
     List<UserList<CommonShell>> list = getList();
@@ -106,7 +112,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
   @Override
   protected int getDateCompare(UserList<CommonShell> o1, UserList<CommonShell> o2) {
-    return Long.valueOf(o1.getModified()).compareTo(o2.getModified());
+    return Long.compare(o1.getModified(), o2.getModified());
   }
 
   @Override
@@ -122,7 +128,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private void addNum() {
     Column<UserList<CommonShell>, SafeHtml> diff = getNum();
     diff.setSortable(true);
-    addColumn(diff, new TextHeader("# Items"));
+    addColumn(diff, new TextHeader(NUM_ITEMS));
     table.addColumnSortHandler(getNumSorter(diff, getList()));
     table.setColumnWidth(diff, 40 + "px");
   }

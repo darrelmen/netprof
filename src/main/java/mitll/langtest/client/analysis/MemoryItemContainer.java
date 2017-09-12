@@ -457,7 +457,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
           signedUp = signedUp.substring(0, signedUp.length() - 4);
         }
 
-        return getSafeHtml(signedUp);
+        return getSafeHtml("<span style='white-space:nowrap;'>"+signedUp+"</span>");
       }
     };
   }

@@ -36,6 +36,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
+  public static final String ITEMS = "Items";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click on a list to learn it.";
@@ -43,6 +44,9 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String LEARN = "Learn";
   private static final String DRILL = "Drill";
   private static final String STORAGE_ID = "others";
+  /**
+   * @see #showContent
+   */
   private static final String OTHERS_PUBLIC_LISTS = "Public Lists";
 
   private static final int HEADING_SIZE = 3;
@@ -277,7 +281,7 @@ public class ListView implements ContentView, CreateListComplete {
   }*/
 
   private IsWidget getAddItems() {
-    Button successButton = getSuccessButton("Items");
+    Button successButton = getSuccessButton(ITEMS);
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList());
     addTooltip(successButton, "Edit the items on list.");

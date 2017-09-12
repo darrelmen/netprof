@@ -365,28 +365,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     }
   }
 
-  /**
-   * Are we going to use this??
-   *
-   * @param userid
-   * @param projid
-   * @return
-   * @paramx start
-   * @paramx length
-   */
-/*
-  @Deprecated
-  @Override
-  public Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, int start, int length) {
-    List<UserList<CommonShell>> ret = new ArrayList<>();
-    getListsForUser(userid, projid).subList(start, start + length).forEach(ue -> ret.add(fromSlick(ue)));
-    return ret;
-  }
-*/
   @Override
   public Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid) {
     List<UserList<CommonShell>> ret = new ArrayList<>();
     getAllListsForUser(userid, projid).forEach(ue -> ret.add(fromSlick(ue)));
+    ret.forEach(this::populateList);
     return ret;
   }
 
@@ -401,9 +384,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   public Collection<UserList<CommonShell>> getVisitedLists(int userid, int projid) {
     List<UserList<CommonShell>> ret = new ArrayList<>();
     getVisitedBy(userid, projid).forEach(ue -> ret.add(fromSlick(ue)));
-    for (UserList<CommonShell> ul : ret) {
-      populateList(ul);
-    }
+    ret.forEach(this::populateList);
     return ret;
   }
 

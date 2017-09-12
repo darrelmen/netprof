@@ -98,8 +98,6 @@ public interface IUserListDAO extends IDAO {
 
   UserList<CommonShell> getWhere(int unique, boolean warnIfMissing);
 
-//  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, int start, int length);
-
   Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid);
 
   /**

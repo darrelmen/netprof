@@ -880,6 +880,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   /**
    * Expects something like:
+   *
    * copy english
    * copy pashto pashto1
    * drop pashto
@@ -955,10 +956,7 @@ public class CopyToPostgres<T extends CommonShell> {
     try {
       action = ACTION.valueOf(firstArg.toUpperCase());
     } catch (IllegalArgumentException e) {
-      logger.info("expecting an action: \n{}",
-          () -> getValues());
-//      logger.error("expecting an action " + );
-//      return;
+      logger.info("expecting an action: \n{}", CopyToPostgres::getValues);
     }
     return action;
   }
@@ -995,9 +993,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static void usage() {
-
-    logger.error("Usage : expecting either " + getValues()+
-        " followed by config, e.g. copy spanish OR if dropAll the special safety word.");
+    logger.error("Usage : expecting either " + getValues()+  " followed by config, e.g. copy spanish OR if dropAll the special safety word.");
     logger.error("Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary");
   }
 }
