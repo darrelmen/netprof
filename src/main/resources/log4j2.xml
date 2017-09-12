@@ -164,21 +164,20 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
-
-  <!--      <logger name="mitll.langtest" level="DEBUG">
+        <logger name="mitll.langtest" level="DEBUG">
             <appender-ref ref="LogFile"/>
-        </logger>-->
+        </logger>
 
         <root level="debug">
             <appender-ref ref="LogFile" level="debug"/>
-<!--
             <appender-ref ref="Mail" level="error"/>
--->
         </root>
 
-        <root level="error">
-            <appender-ref ref="Mail" level="error"/>
-        </root>
+        <!--
+                <root level="error">
+                    <appender-ref ref="Mail" level="error"/>
+                </root>
+        -->
 
     </loggers>
 </configuration>
